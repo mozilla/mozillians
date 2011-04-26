@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/opensource/!svn/ver/1045/django-ldapdb/trunk/ldapdb/backends/ldap
+END
+base.py
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/opensource/!svn/ver/1045/django-ldapdb/trunk/ldapdb/backends/ldap/base.py
+END
+compiler.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/opensource/!svn/ver/1034/django-ldapdb/trunk/ldapdb/backends/ldap/compiler.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/opensource/!svn/ver/1013/django-ldapdb/trunk/ldapdb/backends/ldap/__init__.py
+END

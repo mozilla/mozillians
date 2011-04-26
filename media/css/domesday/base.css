@@ -1,0 +1,18 @@
+.intro strong { 
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: MetaBold, Trebuchet MS, sans-serif;
+}
+
+#main {
+  max-width: none;
+}
+
+/* MetaWebPro font family licensed from fontshop.com. WOFF-FTW! */
+@font-face {
+	font-family: 'MetaBold';
+	src: url('http://www.mozilla.com/img/fonts/MetaWebPro-Bold.eot');
+	src: local('☺'), url('http://www.mozilla.com/img/fonts/MetaWebPro-Bold.woff') format('woff');
+	font-weight: bold;
+}

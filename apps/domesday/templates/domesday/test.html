@@ -1,0 +1,22 @@
+{% extends "domesday/base.html" %}
+
+{% block header %}
+<script>
+$(function() {
+    alert("Bar");
+    $("#test").draggable();
+    alert("Bar");
+    $("#foo").droppable();
+    alert("Bar");
+});
+</script>
+{% endblock %}
+
+{% block content %}
+
+<div id="test">Test</div>
+
+<div id="foo">Foo</div>
+
+{% endblock %}
+

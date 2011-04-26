@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>{% block title %}{% endblock %}</title>
+
+    {{ css('screen-2010') }}
+    {{ css('base') }}
+    {{ css('jquery') }}
+    {{ js('jquery') }}
+
+    {% block header %}{% endblock %}
+</head>
+
+<body>
+
+<ul id="skip">
+    <li><a href="#localnav">Skip to Sub Navigation</a></li>
+    <li><a href="#main">Skip to Content</a></li>
+</ul>
+
+<div id="header">
+    <h1 class="unitPng"><a href="/" title="Back to home page">Phonebook</a></h1>
+
+    <div id="header-contents">
+    </div>
+
+</div><!-- end #header -->
+
+<div id="main">
+
+<div id="main-content">
+
+    <h1>{% block heading %}{% endblock %}</h1>
+
+    {% block content %}{% endblock %}
+
+</div>
+
+</div><!-- end #main -->
+
+<div id="footer-wrap">
+    <div id="footer" class="cols">
+        <div class="six-col">
+	    <a id="logo-footer" href="http://www.mozilla.org/"><img src="../../img/domesday/logo_footer.png"></a>
+            <p id="copyright">
+                Portions of this content are ©1998–2011 by individual 
+mozilla.org contributors. Content available under a Creative Commons <a href="http://www.mozilla.org/foundation/licensing/website-content.html">license</a>.
+            </p>
+            <p id="copyright-links">
+                <a href="http://www.mozilla.org/contact/" class="first">Contact Us</a><br>
+                <a href="http://www.mozilla.org/about/policies/privacy-policy.html">Privacy Policy</a><br>
+		<a href="http://www.mozilla.com/en-US/legal/fraud-report/index.html">Report Trademark Abuse</a>
+            </p>
+        </div>
+    </div><!-- end #footer -->
+</div><!-- end #footer-wrap -->
+
+</body>
+</html>

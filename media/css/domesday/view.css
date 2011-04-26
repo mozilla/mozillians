@@ -1,0 +1,20 @@
+/* Card view */
+.centred {
+	margin: 0 1em 1em;
+	text-align: center;
+}
+
+.vcard {
+	text-align: left;
+	display: inline-block;
+	width: 31em;
+	vertical-align: top;
+	margin: 1em 1em 0 1em;
+}
+
+.vcard {
+	border-width: 0 16px;
+	color: #343434;
+	overflow: auto;
+	padding: 1em 0.5em;
+}

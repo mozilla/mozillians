@@ -1,0 +1,63 @@
+{% extends "domesday/base.html" %}
+
+{% block title %}Community Phonebook{% endblock %}
+
+{% block header %}
+{{ css('view') }}
+{% endblock %}
+
+{% block content %}
+{% if p != None %}
+<div id="results" class="centred">
+  <div class="vcard">
+    <div class="header">
+        <a class="photo" href=
+        "{{ url('domesday.views.photo', pk=p.uid) }}"
+        target="_blank"><img class="photo" 
+        src="{{ url('domesday.views.photo', pk=p.uid) }}"  
+        style="float:right; border: 1px black solid"></a>
+      <h2 class="fn">{{ p.name }}</h2>
+    </div>
+
+      <p class="title">{{ p.title }}</p>
+
+      <ul>
+        {% if p.nickname %}
+          <li>Call Me:  {{ p.nickname }}
+        {% endif %}
+        {% if p.locality %}
+          <li>Location: {{ p.locality }}, {{ p.country }}
+        {% endif %}
+        {% if p.phoneNumber %}
+          <li>Phone: {{ p.phoneNumber }}
+        {% endif %}
+        {% if p.email %}
+          <li>Email: {{ p.email }}
+        {% endif %}
+        {% if p.website %}
+          <li>Website: <a href="{{ p.website }}">{{ p.website }}</a>
+        {% endif %}
+        {% if p.blog %}
+          <li>Blog: <a href="{{ p.blog }}">{{ p.blog }}</a>
+        {% endif %}
+      </ul>
+
+      {% if p.bio %}
+      <div class="note">
+        {{ p.bio }}
+      </div>
+      {% endif %}      
+    </div>
+
+    <div class="footer"></div>
+    <small>
+    (<a href="{{ url('domesday.views.view', pk=p.uid) }}?format=json">json</a> |
+    <a href="{{ url('domesday.views.edit', pk=p.uid) }}">edit</a>)
+    </small>
+  </div>  
+</div>
+{% else %}
+<i>Nothing found</i>
+{% endif %}
+
+{% endblock %}

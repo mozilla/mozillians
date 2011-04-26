@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/opensource/!svn/ver/1049/django-ldapdb/trunk/examples
+END
+admin.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/opensource/!svn/ver/1049/django-ldapdb/trunk/examples/admin.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/opensource/!svn/ver/855/django-ldapdb/trunk/examples/__init__.py
+END
+tests.py
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/opensource/!svn/ver/1049/django-ldapdb/trunk/examples/tests.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/opensource/!svn/ver/1049/django-ldapdb/trunk/examples/models.py
+END

@@ -1,0 +1,17 @@
+django-ldapdb - support for django models over LDAP
+Copyright (C) 2009-2011 Bolloré Telecom
+See AUTHORS file for a full list of contributors.
+
+License
+=======
+
+django-ldapdb is distributed under the BSD license, see the LICENSE
+file for details.
+
+Usage
+=====
+
+For usage notes, please refer to the project homepage:
+
+http://opensource.bolloretelecom.eu/projects/django-ldapdb/
+

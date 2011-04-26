@@ -1,0 +1,22 @@
+{% extends "domesday/base.html" %}
+
+{% block title %}Community Phonebook - Search{% endblock %}
+{% block heading %}Find One Person{% endblock %}
+
+{% block header %}
+{{ css('view') }}
+{% endblock %}
+
+{% block content %}
+
+<div class="centred">
+<form action="" method="GET">
+  <input type="text" name="q" placeholder="unique identifier">
+  <input type="submit" value="Search"/>
+</form>
+<br>
+<br>
+<p>(<a href="{{ url('domesday.views.new') }}">New Entry</a>)
+</div>
+
+{% endblock %}
