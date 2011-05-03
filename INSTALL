@@ -3,7 +3,7 @@ Application to other systems is currently an exercise for the reader :-)
 
 1) Install necessary libraries
 
-    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev
+    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev
 
 2) Get a copy of Domesday
 
