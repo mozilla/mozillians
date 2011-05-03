@@ -1,0 +1,124 @@
+###########
+# Structure
+###########
+
+dn: dc=mozillians,dc=org
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+dc: mozillians
+o: Mozillians
+
+dn: ou=people,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=tags,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: tags
+
+########
+# People
+########
+dn: uid=1,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+uid: 1
+sn: Markham
+givenName: Gervase
+cn: Gervase Markham
+displayName: Gervase Markham
+userPassword: {SSHA}/Psb2o+/+Mke+n5yOQvG3puzFXwAzw6Z
+mail: gerv@mozilla.org
+l: London
+description: I solve community problems for Mozilla.
+jpegPhoto:< file:///home/gerv/docs/hacking/domesday/gerv.jpg
+title: Grease Gun
+postalAddress: 11 Chestbrook Court, 1 Forsyth Place, Enfield
+postalCode: EN1 2EE
+
+dn: uid=2,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+uid: 2
+sn: Boswell
+givenName: David
+cn: David Boswell
+displayName: David Boswell
+userPassword: {SSHA}wyNJo+bKFnsKykkmEI0oCurLy7Vu2eWC
+mail: david@mozillafoundation.org
+l: Berkeley
+description: I work on www.mozilla.org and other stuff.
+jpegPhoto:< file:///home/gerv/docs/hacking/domesday/david.jpg
+title: Tour Guide
+telephoneNumber: +1 510 501 7724
+
+dn: uid=3,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+uid: 3
+sn: Colvig
+givenName: Mary
+cn: Mary Colvig
+displayName: Mary Colvig
+userPassword: {SSHA}C+UrjDrWk77fv0TmcoTXIxhNjrfS+vNy
+mail: mary@mozilla.com
+l: Mountain View
+jpegPhoto:< file:///home/gerv/docs/hacking/domesday/mary.jpg
+title: Director of Contributor Engagement
+telephoneNumber: +1 415-336-5938
+
+dn: uid=4,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+uid: 4
+sn: Duyck
+givenName: William
+cn: William Duyck
+displayName: William Duyck
+userPassword: {SSHA}e5PIx2LQ8ItRI3uhxRx3vKFpix/1BEY4
+mail: fuzzyfox0@gmail.com
+l: Lewes
+description: The complete and utter Mozilla Fan Boy and self proclaimed web enthusiast. What more do I need to say?! 
+jpegPhoto:< file:///home/gerv/docs/hacking/domesday/william.jpg
+
+dn: uid=5,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+uid: 5
+sn: Surman
+givenName: Mark
+cn: Mark Surman
+displayName: Mark Surman
+userPassword: {SSHA}6v9NTMhqMFpUORpqpCynb5E05eme3UrJ
+mail: mark@mozillafoundation.org
+l: Toronto
+description: I work on Mozilla Foundation-y things.
+jpegPhoto:< file:///home/gerv/docs/hacking/domesday/mark.jpg
+title: Mozilla Foundation Executive Director
+postalAddress: 720 Spadina Ave, Suite 218, Toronto, Ontario
+postalCode: M5S 2T9
+
+######
+# Tags
+######
+
+dn: cn=mofo,ou=tags,dc=mozillians,dc=org
+objectClass: groupOfNames
+cn: mofo
+member: uid=1,ou=people,dc=mozillians,dc=org
+member: uid=2,ou=people,dc=mozillians,dc=org
+member: uid=5,ou=people,dc=mozillians,dc=org
+
+dn: cn=moco,ou=tags,dc=mozillians,dc=org
+objectClass: groupOfNames
+cn: moco
+member: uid=3,ou=people,dc=mozillians,dc=org
+
+dn: cn=domesday-team,ou=tags,dc=mozillians,dc=org
+objectClass: groupOfNames
+cn: domesday-team
+member: uid=1,ou=people,dc=mozillians,dc=org
+member: uid=2,ou=people,dc=mozillians,dc=org
+member: uid=3,ou=people,dc=mozillians,dc=org
+
+dn: cn=brit,ou=tags,dc=mozillians,dc=org
+objectClass: groupOfNames
+cn: brit
+member: uid=1,ou=people,dc=mozillians,dc=org
+member: uid=4,ou=people,dc=mozillians,dc=org
