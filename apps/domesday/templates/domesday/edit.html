@@ -126,8 +126,8 @@ var defaultsSets = [
     },
     { 
       'public': [
-        'nickname',
         'tags',
+        'nickname',
         'bio',
         'title',
         'startyear',
@@ -153,8 +153,8 @@ var defaultsSets = [
     },
     { 
       'public': [
-        'nickname',
         'tags',
+        'nickname',
         'website',
         'blog',
         'country',
@@ -201,7 +201,7 @@ function setDefaults(index) {
 #communityteam { background-color: #c5555e; }
 
 .privacy-area {
-  width: 30%;
+  width: 29%;
   float: left;
   padding: 0.5em;
   margin: 0.4em;
@@ -244,6 +244,7 @@ function setDefaults(index) {
 
 .privacy-widget {
   height: 1.5em;
+  white-space: nowrap;
   overflow: hidden;
   padding: 0.2em;
   border: 1px black solid;
@@ -269,10 +270,6 @@ h2 {
 {% block content %}
 <form action="" method="POST">
 {{ csrf() }}
-
-<div>
-<input type="submit" value="Save" style="clear: both"/>
-</div>
 
 <div id="tabs">
    <ul>
@@ -328,7 +325,7 @@ h2 {
 
 <!-- start of drop down country selection list -->
 <!-- generated via http://javascript.about.com/ Script Generator -->
-<select id="country" name="country"> 
+<select id="country" name="country" style="max-width: 60%"> 
 <option value="" selected="selected">Unspecified</option> 
 <option value="Afghanistan">Afghanistan</option> 
 <option value="Albania">Albania</option> 
@@ -576,15 +573,25 @@ h2 {
 
 <p class="field" id="irc.mozilla.org-ctr"><label for="irc.mozilla.org">Mozilla IRC:</label> <input id="irc.mozilla.org" name="irc.mozilla.org" value=""></p>
 
-<p class="field" id="bugzilla.mozilla.org-ctr"><label for="bugzilla.mozilla.org">Mozilla Bugzilla:</label> <input id="bugzilla.mozilla.org" name="bugzilla.mozilla.org" value=""></p>
+<p class="field" id="bugzilla.mozilla.org-ctr"><label for="bugzilla.mozilla.org">Bugzilla:</label> <input id="bugzilla.mozilla.org" name="bugzilla.mozilla.org" value=""></p>
 
 <p class="field" id="wiki.mozilla.org-ctr"><label for="wiki.mozilla.org">Mozilla Wiki:</label> <input id="wiki.mozilla.org" name="wiki.mozilla.org" value=""></p>
 
+<p class="field" id="newid-ctr">
+<label for="newid" id="newid-label">
+<select id="newid-domain" name="newid-domain">
+<option value="www.identi.ca">identi.ca</option>
+<option value="www.wordpress.com">Wordpress</option>
+<option value="hg.mozilla.org">Mozilla Hg</option>
+<option value="other" onclick="$('#newid-domain').hide(); $('#newid-domain-manual').show()">Other...</option>
+</select>
+<input id="newid-domain-manual" name="newid-domain-manual" value="" placeholder="site domain" style="max-width: 95%; display: none">
+</label>
+<input id="newid" name="newid" value=""></p>
 
+<p class="field" id="email-ctr"><label for="email">Email:</label> <input id="email" name="email" value="{{ p.email }}"></p>
 
-<p class="field" id="email-ctr"><label for="email">Primary Email:</label> <input id="email" name="email" value="{{ p.email }}"></p>
-
-<p class="field" id="phone-ctr"><label for="phone">phone:</label> <input id="phone" name="phone" value="{{ p.phone }}"></p>
+<p class="field" id="phone-ctr"><label for="phone">Phone:</label> <input id="phone" name="phone" value="{{ p.phone }}"></p>
 
 {% if p %}
 <p class="field" id="photo-ctr"><label for="photo">Photo:</label> <img src="{{ url('domesday.views.photo', pk=p.uid) }}"/></p>
@@ -653,11 +660,11 @@ h2 {
 
 <div id="irc.mozilla.org-priv" class="privacy-widget"><label>Mozilla IRC:</label> <output id="irc.mozilla.org-out"></output></div>
 
-<div id="bugzilla.mozilla.org-priv" class="privacy-widget"><label>Mozilla Bugzilla:</label> <output id="bugzilla.mozilla.org-out"></output></div>
+<div id="bugzilla.mozilla.org-priv" class="privacy-widget"><label>Bugzilla:</label> <output id="bugzilla.mozilla.org-out"></output></div>
 
 <div id="wiki.mozilla.org-priv" class="privacy-widget"><label>Mozilla Wiki:</label> <output id="wiki.mozilla.org-out"></output></div>
 
-<div id="email-priv" class="privacy-widget"><label>Primary Email:</label> <output id="email-out"></output></div>
+<div id="email-priv" class="privacy-widget"><label>Email:</label> <output id="email-out"></output></div>
 
 <div id="phone-priv" class="privacy-widget"><label>Phone:</label> <output id="phone-out"></output></div>
 
@@ -671,13 +678,13 @@ h2 {
 
 
 <div class="privacy-area" id="trusted">
-<h2>Only Mozillians</h2>
+<h2>Only "Mozillians"</h2>
 
 </div>
 
 
 <div class="privacy-area" id="communityteam">
-<h2>Only Contributor Community Team</h2>
+<h2>Only "Summit and Swag Team"</h2>
 
 </div>
 
@@ -686,6 +693,10 @@ h2 {
 
    </div> <!-- privacy -->
 </div> <!-- tabs -->
+
+<div>
+<input type="submit" value="Save" style="clear: both; padding: 0.5em; margin: 1em;"/>
+</div>
 
 </form>
 

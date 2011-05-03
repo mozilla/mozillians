@@ -3,20 +3,14 @@
 
 from settings import *
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': '',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
-        'OPTIONS': {
-            'init_command': 'SET storage_engine=InnoDB',
-            'charset' : 'utf8',
-            'use_unicode' : True,
-        },
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
     },
@@ -28,5 +22,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-
 DEBUG = TEMPLATE_DEBUG = True
+
+LDAPDB_BIND_DN = "cn=admin,dc=mozillians,dc=org"
+LDAPDB_BIND_PASSWORD = "secret"
+LDAPDB_SERVER_URI = "ldap://localhost/"

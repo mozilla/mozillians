@@ -32,7 +32,7 @@ SITE_ID = 1
 # timezone as the operating system.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = 'Europe/London'
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -165,6 +165,8 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = '%s.urls' % ROOT_PACKAGE
 
 INSTALLED_APPS = (
+    'domesday',
+    
     # Local apps
     'commons',  # Content common to most playdoh-based apps.
     'jingo_minify',
@@ -243,3 +245,17 @@ BROKER_VHOST = 'playdoh'
 BROKER_CONNECTION_TIMEOUT = 0.1
 CELERY_RESULT_BACKEND = 'amqp'
 CELERY_IGNORE_RESULT = True
+
+MINIFY_BUNDLES = {
+    'css': {
+        # Pinched from www.mozilla.org
+        'base':   ['css/domesday/base.css'],
+        'screen-2010': ['css/domesday/screen-2010.css'],
+        'view':   ['css/domesday/view.css'],
+        'jquery': ['css/domesday/ui-lightness/jquery-ui-1.8.7.custom.css'],
+    },
+    'js': {
+        'jquery': ['js/libs/jquery-1.4.4.min.js', 
+                   'js/libs/jquery-ui-1.8.7.custom.min.js'],
+    },
+}
