@@ -172,8 +172,6 @@ INSTALLED_APPS = (
     'jingo_minify',
     'tower',  # for ./manage.py extract (L10n)
 
-    'examples',  # Example code. Can (and should) be removed for actual projects.
-
     # We need this so the jsi18n view will pick up our locale directory.
     ROOT_PACKAGE,
 
@@ -187,17 +185,15 @@ INSTALLED_APPS = (
     'django_sha2',  # Load after auth to monkey-patch it.
 
     'django.contrib.contenttypes',
-    # 'django.contrib.sessions',
+    'django.contrib.sessions',
     # 'django.contrib.sites',
     # 'django.contrib.messages',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
     # L10n
     'product_details',
-
 )
 
 # Tells the extract script what files to look for L10n in and what function
@@ -230,7 +226,7 @@ JAVA_BIN = '/usr/bin/java'
 ## Auth
 PWD_ALGORITHM = 'bcrypt'
 HMAC_KEYS = {
-    #'2011-01-01': 'cheesecake',
+    '2011-01-01': 'cheesecake',
 }
 
 ## Tests
@@ -259,3 +255,6 @@ MINIFY_BUNDLES = {
                    'js/libs/jquery-ui-1.8.7.custom.min.js'],
     },
 }
+
+# Make sure LDAP operations go to the LDAP directory
+DATABASE_ROUTERS = ['ldapdb.router.Router']
