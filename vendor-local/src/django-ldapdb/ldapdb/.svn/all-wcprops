@@ -1,7 +1,7 @@
 K 25
 svn:wc:ra_dav:version-url
 V 52
-/opensource/!svn/ver/1051/django-ldapdb/trunk/ldapdb
+/opensource/!svn/ver/1052/django-ldapdb/trunk/ldapdb
 END
 __init__.py
 K 25
@@ -13,7 +13,7 @@ router.py
 K 25
 svn:wc:ra_dav:version-url
 V 62
-/opensource/!svn/ver/1051/django-ldapdb/trunk/ldapdb/router.py
+/opensource/!svn/ver/1052/django-ldapdb/trunk/ldapdb/router.py
 END
 tests.py
 K 25

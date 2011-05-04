@@ -71,3 +71,9 @@ class Router(object):
         if is_ldap_model(model):
             return self.ldap_alias
         return None
+
+    def allow_syncdb(self, db, model):
+        "Should this model be synced to this DB? Reply for LDAP models"
+        if is_ldap_model(model):
+            return db == self.ldap_alias
+        return None
