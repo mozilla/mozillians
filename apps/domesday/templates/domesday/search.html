@@ -11,7 +11,16 @@
 
 <div class="centred">
 <form action="" method="GET">
-  <input type="text" name="q" placeholder="unique identifier">
+  <input type="text" name="q" placeholder="service identifier">
+  <select id="type" name="type">
+    <optgroup>
+    <option value="">All Services</option>
+    <option value="email">Email</option>
+    </optgroup>
+    {% for sd in sds %}
+    <option value="{{ sd.domain }}">{{ sd.title }}</option>
+    {% endfor %}
+  </select>
   <input type="submit" value="Search"/>
 </form>
 <br>

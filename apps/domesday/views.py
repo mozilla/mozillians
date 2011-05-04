@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.db.models import Q
 
-from domesday.models import Person
+from domesday.models import Person, ServiceDefinition
 
 import jingo
 import re
@@ -103,7 +103,8 @@ def photo(request, pk):
 
 def search(request):
     if len(request.GET) == 0:
-        return jingo.render(request, 'domesday/search.html')
+        sds = ServiceDefinition.objects.all();
+        return jingo.render(request, 'domesday/search.html', {'sds': sds})
     else:
         query = request.GET['q']
         ps = Person.objects.filter(Q(email=query) | Q(nickname=query))

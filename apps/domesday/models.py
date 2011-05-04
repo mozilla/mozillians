@@ -1,5 +1,9 @@
+import ldapdb
 from ldapdb.models.fields import CharField, IntegerField, ImageField, ListField
-import ldapdb.models
+
+import django
+from django.db import models
+
 import re
 import sys
 from commons.helpers import url
@@ -177,3 +181,17 @@ class Person(ldapdb.models.Model):
 
     def __unicode__(self):
         return self.name
+
+class ServiceDefinition(django.db.models.Model):
+    domain = django.db.models.CharField(max_length=128, primary_key=True)
+    title = django.db.models.CharField(max_length=128)
+
+    class Meta:
+        ordering = ["title"]
+
+    def __str__(self):
+        return self.domain
+
+    def __unicode__(self):
+        return self.domain
+
