@@ -60,10 +60,9 @@ def edit(request, pk):
         _fill_in_person(request, p)
         p.save()
         
-    return jingo.render(request, 'domesday/edit.html', {'p': p})
-    #return render_to_response('domesday/edit.html', 
-    #                          {'p': p}, 
-    #                          context_instance=RequestContext(request))
+    sds = ServiceDefinition.objects.all()
+    
+    return jingo.render(request, 'domesday/edit.html', {'p': p, 'sds': sds})
 
 def new(request):
     if request.method == "POST":
@@ -77,10 +76,9 @@ def new(request):
         return HttpResponseRedirect("/en-US/edit/" + str(p.uid))
     else:
         # Form to fill in for a new person
-        return jingo.render(request, 'domesday/edit.html', {'p': None})
-        #return render_to_response('domesday/edit.html', 
-        #                          {'p': None}, 
-        #                          context_instance=RequestContext(request))
+        sds = ServiceDefinition.objects.all()
+        return jingo.render(request, 'domesday/edit.html', 
+                            {'p': None, 'sds': sds})
         
 def view(request, pk):
     p = get_object_or_404(Person, pk=pk)
@@ -103,7 +101,7 @@ def photo(request, pk):
 
 def search(request):
     if len(request.GET) == 0:
-        sds = ServiceDefinition.objects.all();
+        sds = ServiceDefinition.objects.all()
         return jingo.render(request, 'domesday/search.html', {'sds': sds})
     else:
         query = request.GET['q']

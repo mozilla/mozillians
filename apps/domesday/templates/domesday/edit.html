@@ -580,10 +580,10 @@ h2 {
 <p class="field" id="newid-ctr">
 <label for="newid" id="newid-label">
 <select id="newid-domain" name="newid-domain">
-<option value="www.identi.ca">identi.ca</option>
-<option value="www.wordpress.com">Wordpress</option>
-<option value="hg.mozilla.org">Mozilla Hg</option>
-<option value="other" onclick="$('#newid-domain').hide(); $('#newid-domain-manual').show()">Other...</option>
+  {% for sd in sds %}
+  <option value="{{ sd.domain }}">{{ sd.title }}</option>
+  {% endfor %}
+  <option value="other" onclick="$('#newid-domain').hide(); $('#newid-domain-manual').show()">Other...</option>
 </select>
 <input id="newid-domain-manual" name="newid-domain-manual" value="" placeholder="site domain" style="max-width: 95%; display: none">
 </label>

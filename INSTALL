@@ -58,8 +58,13 @@ Fill in the LDAP details if necessary (if your directory is local and you are us
 10) Run syncdb
 
     ./manage.py syncdb
-    
-10) Start the test server
+
+11) Add some service definitions
+
+XXX Copy in a test SQLite database? Or import some sort of dump? These aren't
+required for testing but it makes the UI look and work better...
+
+12) Start the test server
 
     ./manage.py runserver
 
