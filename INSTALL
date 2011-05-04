@@ -3,48 +3,49 @@ Application to other systems is currently an exercise for the reader :-)
 
 1) Install necessary libraries
 
-sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev
+    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev
 
 2) Get a copy of Domesday
 
-git clone --recursive git://github.com/mozilla/domesday.git phonebook
+    git clone --recursive git://github.com/mozilla/domesday.git phonebook
 
 (Apparently things will go wrong if you call the directory you keep it in
 'domesday' as well, so it is called 'phonebook' above.)
 
 3) Install requirements
 
-cd domesday
-sudo pip install -r requirements/compiled.txt
+    cd phonebook
+    sudo pip install -r requirements/compiled.txt
 
 4) Install python-ldap and django-ldapdb
 
-pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' python-ldap
+    pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' python-ldap
 
-sudo pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' -e svn+https://svn.bolloretelecom.eu/opensource/django-ldapdb/trunk/#egg=django-ldapdb
+    sudo pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' -e svn+https://svn.bolloretelecom.eu/opensource/django-ldapdb/trunk/#egg=django-ldapdb
 
 5) Install a directory
+The directory depends on Berkley DB utils, such as db4.2-util in Ubuntu 9.04 or db4.7-util in 10.04. This command should add that dependency automagically.
 
-sudo apt-get install slapd ldap-utils db4.2-util
+    sudo apt-get install slapd ldap-utils 
 
 ps aux | grep slap
 should show the directory running. If not, start it.
 
 6) Install schema files
 
-sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif
-sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif
-sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif
+    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif
+    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif
+    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif
 
-sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/domesday-schema.ldif
+    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/domesday-schema.ldif
 
 7) Set up directory structure and root DN access for Mozillians
 
-sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/mozillians-config.ldif
+    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/mozillians-config.ldif
 
 8) Put test Mozillians data in directory
 
-sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
+    sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
 
 9) Hack settings_local.py
 
@@ -53,7 +54,7 @@ Fill in the LDAP details if necessary (if your directory is local and you are us
 
 10) Start the test server
 
-./manage.py runserver
+    ./manage.py runserver
 
 Open Questions
 --------------
