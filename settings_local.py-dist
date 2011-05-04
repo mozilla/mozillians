@@ -6,13 +6,20 @@ from settings import *
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '',
+        'NAME': '<fill this in with an absolute path>',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
+    },
+    'ldap': {
+        'ENGINE': 'ldapdb.backends.ldap',
+        'NAME': "ldap://localhost/",
+        'USER': 'cn=admin,dc=mozillians,dc=org',
+        'PASSWORD': 'secret',
+        'SUPPORTS_TRANSACTIONS': False
     },
 }
 
@@ -23,7 +30,3 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DEBUG = TEMPLATE_DEBUG = True
-
-LDAPDB_BIND_DN = "cn=admin,dc=mozillians,dc=org"
-LDAPDB_BIND_PASSWORD = "secret"
-LDAPDB_SERVER_URI = "ldap://localhost/"
