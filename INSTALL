@@ -28,7 +28,10 @@ The directory depends on Berkley DB utils, such as db4.2-util in Ubuntu 9.04 or 
 
     sudo apt-get install slapd ldap-utils 
 
-ps aux | grep slap
+The command 
+
+    ps aux | grep slap
+
 should show the directory running. If not, start it.
 
 6) Install schema files
@@ -50,8 +53,12 @@ should show the directory running. If not, start it.
 9) Hack settings_local.py
 
 Copy settings_local.py-dist to settings_local.py
-Fill in the LDAP details if necessary (if your directory is local and you are using the supplied LDIF, it should be the same).
+Fill in the LDAP details if necessary (if your directory is local and you are using the supplied LDIF, it should be the same). Fill in an absolute path to the SQLite file you are going to use.
 
+10) Run syncdb
+
+    ./manage.py syncdb
+    
 10) Start the test server
 
     ./manage.py runserver
