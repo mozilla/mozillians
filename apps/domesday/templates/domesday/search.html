@@ -11,11 +11,14 @@
 
 <div class="centred">
 <form action="" method="GET">
-  <input type="text" name="q" placeholder="service identifier">
-  <select id="type" name="type">
+  Find
+  <input type="text" name="q" placeholder="" autofocus>
+  in
+  <select id="sname" name="sname">
     <optgroup>
-    <option value="">All Services</option>
+    <option value="">All Fields</option>
     <option value="email">Email</option>
+    <option value="nickname">Nickname</option>
     </optgroup>
     {% for sd in sds %}
     <option value="{{ sd.domain }}">{{ sd.title }}</option>

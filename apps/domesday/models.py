@@ -15,8 +15,9 @@ class Tag(ldapdb.models.Model):
     base_dn        = "ou=tags,dc=mozillians,dc=org"
     object_classes = ['groupOfNames']
     
-    name    = CharField(db_column='cn', max_length=32768, primary_key=True)
-    members = ListField(db_column='member')
+    name        = CharField(db_column='cn', max_length=32768, primary_key=True)
+    members     = ListField(db_column='member')
+    description = CharField(db_column='description')
 
     def __str__(self):
         return self.name
@@ -59,7 +60,22 @@ class Person(ldapdb.models.Model):
         pass
 
     tags = property(get_tags, set_tags)
+
+    def get_accounts(self):
+        return Account.scoped("uid=%s,%s" % (self.uid, Account.base_dn))
+
+    def set_accounts(self):
+        pass
+        
+    accounts = property(get_accounts, set_accounts)
     
+    def get_username(self, host):
+        account = self.accounts.objects.filter(host=host)
+        if account:
+            return account[0].uid
+        else:
+            return None
+        
     # Blog and website are stored as labeledURI fields, with the labels 'blog'
     # and 'website'. This means we need some mapping.
     labeledURIs = ListField(db_column='labeledURI')
@@ -96,14 +112,12 @@ class Person(ldapdb.models.Model):
         return self.set_uri("blog", blog)
         
     blog = property(get_blog, set_blog)
-    
+            
     country    = CharField(db_column='co', max_length=32768)
     phone      = CharField(db_column='telephoneNumber', max_length=32768)
     tshirtsize = CharField(db_column='domesdayTShirtSize', max_length=32768)
     startyear  = IntegerField(db_column='domesdayStartYear', max_length=32768)
     
-    # XXX accounts/system IDs
-
     # This returns an object whose layout matches the PortableContacts schema
     # http://portablecontacts.net/draft-spec.html (retrieved 2011-04-19)
     # XXX Need to check doc more carefully and make sure it actually does in 
@@ -182,7 +196,24 @@ class Person(ldapdb.models.Model):
     def __unicode__(self):
         return self.name
 
+class Account(ldapdb.models.Model):
+    """
+    An account on another system.
+    
+    To get the accounts for just a single person, use the scoped() method
+    to add the person's Domesday uid (see get_accounts()). 
+    """
+    base_dn        = "ou=people,dc=mozillians,dc=org"
+    object_classes = ['account']
+
+    host = CharField(db_column='host', max_length=256, 
+                     primary_key=True)
+    uid  = CharField(db_column='uid', max_length=256)
+    
 class ServiceDefinition(django.db.models.Model):
+    """
+    The definition of an account type - hostname and title.
+    """
     domain = django.db.models.CharField(max_length=128, primary_key=True)
     title = django.db.models.CharField(max_length=128)
 

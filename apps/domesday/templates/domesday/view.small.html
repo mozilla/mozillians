@@ -1,0 +1,35 @@
+<html>
+<head>
+  <title>{{ p.name }}</title>
+</head>
+<body style="margin: 0; padding: 0;">
+  <div class="vcard" style="background-color: lightyellow; font-size: 80%; padding: 5px; width: 300px; height: 200px; overflow: hidden">
+    <img class="photo"
+    src="{{ url('domesday.views.photo', pk=p.uid) }}"  
+    style="float:right; border: 1px black solid; width: 64px;">
+    
+    <div style="font-weight: bold" class="fn">{{ p.name }}</div>
+    <div class="title">{{ p.title }}</div>
+
+      <ul style="padding-left: 1em">
+        {% if p.nickname %}
+          <li>Nick:  {{ p.nickname }}
+        {% endif %}
+        {% if p.locality %}
+          <li><span class="locality">{{ p.locality }}</span>, 
+              <span class="region">{{ p.country }}</span>
+        {% endif %}
+        {% if p.email %}
+          <li><a class="email" href="mailto:{{ p.email }}">{{ p.email }}</a>
+        {% endif %}
+      </ul>
+
+      {% if p.bio %}
+      <div class="note">
+        {{ p.bio }} {{ p.get_username("irc.mozilla.org") }}
+      </div>
+      {% endif %}      
+    </div>
+  </div>
+</body>
+<html>

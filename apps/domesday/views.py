@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.db.models import Q
 
-from domesday.models import Person, ServiceDefinition
+from domesday.models import Person, Account, ServiceDefinition
 
 import jingo
 import re
@@ -53,6 +53,19 @@ def _fill_in_person(request, p):
         p.name = p.givenName + " " + p.familyName
         p.cn = p.name
     
+# uid must be specified; host is optional
+def _find_person_for_account(host, uid):
+    p = None
+    accounts = Account.objects.filter(uid=uid)
+    if host:
+        accounts = accounts.filter(host=host)
+    
+    if len(accounts):
+        did = re.search(',uid=(\d+),', accounts[0].dn).group(1)
+        p = Person.objects.filter(pk=did)
+        
+    return p
+
 def edit(request, pk):
     p = get_object_or_404(Person, pk=pk)
     
@@ -93,7 +106,7 @@ def view(request, pk):
         }
         return HttpResponse(json.dumps(jp), mimetype="application/json")
     else:
-        return jingo.render(request, 'domesday/view.html', {'p': p})
+        return jingo.render(request, 'domesday/view.%s' % format, {'p': p})
 
 def photo(request, pk):
     p = get_object_or_404(Person, pk=pk)
@@ -105,12 +118,30 @@ def search(request):
         return jingo.render(request, 'domesday/search.html', {'sds': sds})
     else:
         query = request.GET['q']
-        ps = Person.objects.filter(Q(email=query) | Q(nickname=query))
-        if (len(ps)):
-            p = ps[0]
+        sname = request.GET['sname']
+        ps = None
+        
+        if not sname:
+            # Search everything - email, then other accounts, then nickname
+            ps = Person.objects.filter(email=query)
+            if not ps:
+                ps = _find_person_for_account(None, query)
+            if not ps:
+                ps = Person.objects.filter(nickname=query)
+        elif sname == 'email':
+            ps = Person.objects.filter(email=query)
+        elif sname == "nickname":
+            ps = Person.objects.filter(nickname=query)
         else:
-            p = None
-        return jingo.render(request, 'domesday/view.html', {'p': p})
+            ps = _find_person_for_account(sname, query)
+        
+        # XXX need view URL to support None, then this will be cleaner
+        if ps:
+            p = ps.get()
+            # XXX Need to remove URL dependency
+            return HttpResponseRedirect("/en-US/view/" + str(p.uid))
+        else:
+            return jingo.render(request, 'domesday/view.html', {'p': None})
 
 def test(request):
     p = get_object_or_404(Person, pk=1)
