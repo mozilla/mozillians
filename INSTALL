@@ -1,6 +1,9 @@
 This document contains installation instructions for Domesday on Ubuntu. 
 Application to other systems is currently an exercise for the reader :-)
 
+Domesday currently has no access control, and also these setup instructions are currently designed for a secure, test environment. Do not deploy the 
+resulting system anywhere Internet-facing!
+
 1) Install necessary libraries
 
     sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev
@@ -49,6 +52,8 @@ should show the directory running. If not, start it.
 8) Put test Mozillians data in directory
 
     sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
+
+You will be asked for a password; it's the one in mozillians-config.ldif, which is "secret".
 
 9) Hack settings_local.py
 

@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.db.models import Q
 
-from domesday.models import Person, Account, ServiceDefinition
+from domesday.models import Person, Account, AccountType
 
 import jingo
 import re
@@ -17,52 +17,41 @@ def _fill_in_person(request, p):
         #pp.pprint(request.POST)
         
         # User data from request
-        # Trying to do this the obvious, sensible way results in:
-        # "'Person' object does not support item assignment"
-
-        #for field in (vars(p)):
-        #    if field in request.POST:
-        #        print >> sys.stderr, field
-        #        p.setattr(field, request.POST[field])
-        #        print >> sys.stderr, "Field value: ", p[field]
+        for field in ('name', 'familyName', 'nickname', 'website', 'blog', 
+                      'address', 'locality', 'country', 'phone', 'title',
+                      'bio', 'email', 'phoneNumber', 'startyear', 
+                      'tshirtsize'):
+            # Do any fields need validity checking? Perhaps country and
+            # t-shirt size. Do we need to do email validation?
+            setattr(p, field, request.POST.get(field, ''))
         
-        p.givenName = request.POST["givenname"]
-        p.familyName = request.POST["familyname"] or "X"
-        p.nickname = request.POST["nickname"]
-        p.website = request.POST["website"]
-        p.blog = request.POST["blog"]
-        p.locality = request.POST["locality"]
-        p.country = request.POST["country"]
-        p.phone = request.POST["phone"]
-        p.title = request.POST["title"]
+        p.tags = request.POST.get('tags', '').split(", ")
         
-        # p.tags = request.POST["tags"].split(", ")
+        accounts = dict([(k.split('-', 1)[1], v) 
+                         for k, v in request.POST.items() 
+                         if k.startswith('account-')])
         
-        p.address = request.POST["address"]
+        newdomain = request.POST.get('newaccount-domain-manual', '') \
+                    or request.POST.get('newaccount-domain', '')
+        newid     = request.POST.get('newaccount-userid', '')
         
-        p.bio = request.POST["bio"]
+        if newid and newdomain:
+            accounts[newdomain] = newid
+        
+        p.accounts = accounts
+        
         # p.photo = request.POST["photo"]
-        p.email = request.POST["email"]
+        
 
-        p.nickname = request.POST["nickname"]
-        p.country = request.POST["country"]
-        p.phoneNumber = request.POST["phone"]
-        p.startyear = request.POST["startyear"]
-        p.tshirtsize = request.POST["tshirtsize"]
-
-        p.name = p.givenName + " " + p.familyName
-        p.cn = p.name
-    
 # uid must be specified; host is optional
-def _find_person_for_account(host, uid):
+def _find_person_for_account(domain, userid):
     p = None
-    accounts = Account.objects.filter(uid=uid)
-    if host:
-        accounts = accounts.filter(host=host)
+    accounts = Account.objects.filter(userid=userid)
+    if domain:
+        accounts = accounts.filter(domain=domain)
     
     if len(accounts):
-        did = re.search(',uid=(\d+),', accounts[0].dn).group(1)
-        p = Person.objects.filter(pk=did)
+        p = accounts[0].owner
         
     return p
 
@@ -73,7 +62,7 @@ def edit(request, pk):
         _fill_in_person(request, p)
         p.save()
         
-    sds = ServiceDefinition.objects.all()
+    sds = AccountType.as_dict()
     
     return jingo.render(request, 'domesday/edit.html', {'p': p, 'sds': sds})
 
@@ -89,7 +78,7 @@ def new(request):
         return HttpResponseRedirect("/en-US/edit/" + str(p.uid))
     else:
         # Form to fill in for a new person
-        sds = ServiceDefinition.objects.all()
+        sds = AccountType.objects.all()
         return jingo.render(request, 'domesday/edit.html', 
                             {'p': None, 'sds': sds})
         
@@ -114,7 +103,7 @@ def photo(request, pk):
 
 def search(request):
     if len(request.GET) == 0:
-        sds = ServiceDefinition.objects.all()
+        sds = AccountType.objects.all()
         return jingo.render(request, 'domesday/search.html', {'sds': sds})
     else:
         query = request.GET['q']

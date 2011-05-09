@@ -1,4 +1,4 @@
 from django.contrib import admin
-from domesday.models import ServiceDefinition
+from domesday.models import AccountType
 
-admin.site.register(ServiceDefinition)
+admin.site.register(AccountType)

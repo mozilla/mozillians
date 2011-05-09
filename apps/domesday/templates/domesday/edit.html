@@ -100,7 +100,7 @@ var defaultsSets = [
     { 
       'public': [
         'nickname',
-        'givenname',
+        'name',
         'familyname',
         'tags',
         'bio',
@@ -110,9 +110,6 @@ var defaultsSets = [
         'blog',
         'locality',
         'country',
-        'irc.mozilla.org',
-        'bugzilla.mozilla.org',
-        'wiki.mozilla.org',
         'email'
       ],
       'trusted': [
@@ -137,14 +134,11 @@ var defaultsSets = [
         'country'
       ],
       'trusted': [
-        'givenname',
+        'name',
         'familyname',
         'email',
         'phone',
         'photo',
-        'irc.mozilla.org',
-        'bugzilla.mozilla.org',
-        'wiki.mozilla.org',
       ],
       'communityteam': [
         'tshirtsize',
@@ -160,7 +154,7 @@ var defaultsSets = [
         'country',
       ],
       'trusted': [
-        'givenname',
+        'name',
         'familyname',
         'bio',
         'title',
@@ -168,9 +162,6 @@ var defaultsSets = [
         'email',
         'photo',
         'locality',
-        'irc.mozilla.org',
-        'bugzilla.mozilla.org',
-        'wiki.mozilla.org',
       ],
       'communityteam': [
         'phone',
@@ -190,6 +181,14 @@ function setDefaults(index) {
       container.appendChild(elem);
     }
   }
+
+  // Make accounts always trusted (that is easiest for now)
+  var container = document.getElementById('trusted');
+  var elem;
+  {% for a in p.accounts %}
+  elem = document.getElementById("account-{{ a.domain }}-priv");
+  container.appendChild(elem);
+  {% endfor %}
 }
 
 </script>
@@ -284,7 +283,7 @@ h2 {
 
 <div id="fields">
 
-<p class="field" id="givenname-ctr"><label for="name">Given Name:</label> <input id="givenname" name="givenname" value="{{ p.givenName }}"></p>
+<p class="field" id="name-ctr"><label for="name">Full Name:</label> <input id="name" name="name" value="{{ p.name }}"></p>
 
 <p class="field" id="familyname-ctr"><label for="name">Family Name:</label> <input id="familyname" name="familyname" value="{{ p.familyName }}"></p>
 
@@ -571,23 +570,27 @@ h2 {
 <!-- end of drop down country selection list -->
 </p>
 
-<p class="field" id="irc.mozilla.org-ctr"><label for="irc.mozilla.org">Mozilla IRC:</label> <input id="irc.mozilla.org" name="irc.mozilla.org" value=""></p>
+{% for a in p.accounts %}
+  <p class="field" id="account-{{ a.domain }}-ctr">
+    <label for="account-{{ a.domain }}">
+    {{ sds[a.domain]|default(a.domain) }}:
+    </label> 
+    <input id="account-{{ a.domain }}" name="account-{{ a.domain }}" 
+           value="{{ a.userid }}">
+  </p>
+{% endfor %}
 
-<p class="field" id="bugzilla.mozilla.org-ctr"><label for="bugzilla.mozilla.org">Bugzilla:</label> <input id="bugzilla.mozilla.org" name="bugzilla.mozilla.org" value=""></p>
-
-<p class="field" id="wiki.mozilla.org-ctr"><label for="wiki.mozilla.org">Mozilla Wiki:</label> <input id="wiki.mozilla.org" name="wiki.mozilla.org" value=""></p>
-
-<p class="field" id="newid-ctr">
-<label for="newid" id="newid-label">
-<select id="newid-domain" name="newid-domain">
-  {% for sd in sds %}
-  <option value="{{ sd.domain }}">{{ sd.title }}</option>
+<p class="field" id="newaccount-ctr">
+<label for="newaccount-userid" id="newaccount-label">
+<select id="newaccount-domain" name="newaccount-domain">
+  {% for sd in sds|dictsort(false, 'value') %}
+    <option value="{{ sd[0] }}">{{ sd[1] }}</option>
   {% endfor %}
-  <option value="other" onclick="$('#newid-domain').hide(); $('#newid-domain-manual').show()">Other...</option>
+  <option value="" onclick="$('#newaccount-domain').hide(); $('#newaccount-domain-manual').show()">Other...</option>
 </select>
-<input id="newid-domain-manual" name="newid-domain-manual" value="" placeholder="site domain" style="max-width: 95%; display: none">
+<input id="newaccount-domain-manual" name="newaccount-domain-manual" value="" placeholder="site domain" style="max-width: 95%; display: none">
 </label>
-<input id="newid" name="newid" value=""></p>
+<input id="newaccount-userid" name="newaccount-userid" value=""></p>
 
 <p class="field" id="email-ctr"><label for="email">Email:</label> <input id="email" name="email" value="{{ p.email }}"></p>
 
@@ -636,7 +639,7 @@ h2 {
 <div class="privacy-area" id="public">
 <h2>Whole World</h2>
 
-<div id="givenname-priv" class="privacy-widget"><label>Given Name:</label> <output id="givenname-out"></output></div>
+<div id="name-priv" class="privacy-widget"><label>Full Name:</label> <output id="name-out"></output></div>
 
 <div id="familyname-priv" class="privacy-widget"><label>Family Name:</label> <output id="familyname-out"></output></div>
 
@@ -658,11 +661,11 @@ h2 {
 
 <div id="country-priv" class="privacy-widget"><label>Given Name:</label> <output id="country-out"></output></div>
 
-<div id="irc.mozilla.org-priv" class="privacy-widget"><label>Mozilla IRC:</label> <output id="irc.mozilla.org-out"></output></div>
-
-<div id="bugzilla.mozilla.org-priv" class="privacy-widget"><label>Bugzilla:</label> <output id="bugzilla.mozilla.org-out"></output></div>
-
-<div id="wiki.mozilla.org-priv" class="privacy-widget"><label>Mozilla Wiki:</label> <output id="wiki.mozilla.org-out"></output></div>
+{% for a in p.accounts %}
+  <div id="account-{{ a.domain }}-priv" class="privacy-widget">
+  <label>{{ sds[a.domain]|default(a.domain) }}:</label>
+  <output id="account-{{ a.domain }}-out"></output></div>
+{% endfor %}
 
 <div id="email-priv" class="privacy-widget"><label>Email:</label> <output id="email-out"></output></div>
 
