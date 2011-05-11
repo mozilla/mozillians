@@ -41,6 +41,11 @@ class Person(ldapdb.models.Model):
     uid          = IntegerField(db_column='uid', max_length=256, 
                                 primary_key=True)
 
+    # Other fields to consider include:
+    # timezone
+    # lat/long (with UI to help users specify with an appropriate degree of
+    #           vagueness)
+    
     cn           = CharField(db_column='cn', max_length=32768)
     name         = CharField(db_column='displayName', max_length=32768)    
     familyName   = CharField(db_column='sn', max_length=32768)
@@ -48,14 +53,14 @@ class Person(ldapdb.models.Model):
         
     address      = CharField(db_column='postalAddress', max_length=1024)
     locality     = CharField(db_column='l', max_length=32768)
-    country    = CharField(db_column='co', max_length=32768)
+    country      = CharField(db_column='co', max_length=32768)
     
-    phone      = CharField(db_column='telephoneNumber', max_length=32768)
+    phone        = CharField(db_column='telephoneNumber', max_length=32768)
     title        = CharField(db_column='title', max_length=32768)
     bio          = CharField(db_column='description', max_length=1024)
     email        = CharField(db_column='mail', max_length=256)
-    startyear  = IntegerField(db_column='domesdayStartYear', max_length=32768)
-    tshirtsize = CharField(db_column='domesdayTShirtSize', max_length=32768)
+    startyear = IntegerField(db_column='domesdayStartYear', max_length=32768)
+    tshirtsize   = CharField(db_column='domesdayTShirtSize', max_length=32768)
     
     password     = CharField(db_column='userPassword', max_length=128)
     
