@@ -25,22 +25,23 @@ def _fill_in_person(request, p):
             # t-shirt size. Do we need to do email validation?
             setattr(p, field, request.POST.get(field, ''))
         
-        p.tags = request.POST.get('tags', '').split(", ")
+        p.tags = [t.strip() for t in request.POST.get('tags', '').split(",")]
         
-        accounts = dict([(k.split('-', 1)[1], v) 
+        accounts = [{ 'domain': k.split('-', 1)[1], 'userid': v } 
                          for k, v in request.POST.items() 
-                         if k.startswith('account-')])
+                         if k.startswith('account-')]
         
         newdomain = request.POST.get('newaccount-domain-manual', '') \
                     or request.POST.get('newaccount-domain', '')
         newid     = request.POST.get('newaccount-userid', '')
         
         if newid and newdomain:
-            accounts[newdomain] = newid
+            accounts.append({ 'domain': newdomain, 'userid': newid })
         
         p.accounts = accounts
         
-        # p.photo = request.POST["photo"]
+        if 'photo' in request.FILES:
+            p.photo = request.FILES['photo'].read()
         
 
 # uid must be specified; host is optional

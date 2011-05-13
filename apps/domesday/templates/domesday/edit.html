@@ -267,7 +267,7 @@ h2 {
 {% endblock %}
 
 {% block content %}
-<form action="" method="POST">
+<form action="" method="POST" enctype="multipart/form-data">
 {{ csrf() }}
 
 <div id="tabs">
@@ -628,7 +628,10 @@ h2 {
 <p class="field" id="phone-ctr"><label for="phone">Phone:</label> <input id="phone" name="phone" value="{{ p.phone }}"></p>
 
 {% if p %}
-<p class="field" id="photo-ctr"><label for="photo">Photo:</label> <img src="{{ url('domesday.views.photo', pk=p.uid) }}"/></p>
+<p class="field" id="photo-ctr"><label for="photo">Photo:</label> 
+<img src="{{ url('domesday.views.photo', pk=p.uid) }}"/>
+<input type="file" name="photo" id="photo" size=1>
+</p>
 {% endif %}
 
 <p class="field" id="tshirtsize-ctr"><label for="tshirtsize">T-Shirt Size:</label> <select id="tshirtsize" name="tshirtsize">

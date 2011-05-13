@@ -66,16 +66,32 @@ class Person(ldapdb.models.Model):
     
     photo        = ImageField(db_column='jpegPhoto')
     
-    # Hmm - what is the proper API here? Return dicts, QuerySets or something
-    # else? QuerySets are not iterable... :-(
     def get_tags(self):
         tags = Tag.objects.filter(members__contains=self.dn)
-        return tags.objects.all().values()
+        return [t.name for t in tags]
     
     def set_tags(self, tags):
         # Create Tag objects for each tag in the list (new ones 
         # if necessary) and make sure the user is a member of all of them.
-        pass
+        for tag in tags:
+            try:
+                t = Tag.objects.get(name=tag)
+            except Tag.DoesNotExist:
+                t = Tag(name=tag)
+                
+            if not self.dn in t.members:
+                t.members.append(self.dn)
+                t.save()
+        
+        # Remove user from tags which were not specified
+        current_tags = Tag.objects.filter(members__contains=self.dn)
+
+        for ct in current_tags:
+            if not ct.name in tags:
+                ct.members.remove(self.dn)
+                ct.save()
+            if not len(ct.members):
+                ct.delete()
 
     tags = property(get_tags, set_tags)
 
@@ -84,7 +100,30 @@ class Person(ldapdb.models.Model):
         return accts.objects.all().values()
 
     def set_accounts(self, accounts):
-        pass
+        # Create Account objects for each account in the list (new ones 
+        # if necessary).
+        MyAccount = Account.scoped("uid=%s,%s" % (self.uid, 
+                                                  Account.base_dn))
+        current_accts = MyAccount.objects.all()
+        
+        """
+        XXX FilterExceptions...
+        
+        for a in accounts:
+            try:
+                ca = MyAccount.objects.get(domain=a['domain'])
+                ca.userid = a['userid']
+            except MyAccount.DoesNotExist:
+                ca = MyAccount(domain=a['domain'], userid=a['userid'])
+            ca.save()
+        """
+        
+        # Remove user from accounts which were not specified
+        account_domains = [a['domain'] for a in accounts]
+            
+        for ca in current_accts:
+            if not ca.domain in account_domains:
+                ca.delete()
         
     accounts = property(get_accounts, set_accounts)
     
