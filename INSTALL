@@ -6,7 +6,7 @@ resulting system anywhere Internet-facing!
 
 1) Install necessary libraries
 
-    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev
+    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev mysql-server subversion
 
 2) Get a copy of Domesday
 
@@ -20,13 +20,7 @@ resulting system anywhere Internet-facing!
     cd phonebook
     sudo pip install -r requirements/compiled.txt
 
-4) Install python-ldap and django-ldapdb
-
-    pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' python-ldap
-
-    sudo pip install -I --install-option="--home=`pwd`/vendor-local" --src='vendor-local/src' -e svn+https://svn.bolloretelecom.eu/opensource/django-ldapdb/trunk/#egg=django-ldapdb
-
-5) Install a directory
+4) Install a directory
 The directory depends on Berkley DB utils, such as db4.2-util in Ubuntu 9.04 or db4.7-util in 10.04. This command should add that dependency automagically.
 
     sudo apt-get install slapd ldap-utils 
@@ -37,7 +31,7 @@ The command
 
 should show the directory running. If not, start it.
 
-6) Install schema files
+5) Install schema files
 
     sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif
     sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif
@@ -45,16 +39,35 @@ should show the directory running. If not, start it.
 
     sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/domesday-schema.ldif
 
-7) Set up directory structure and root DN access for Mozillians
+6) Set up directory structure and root DN access for Mozillians
 
     sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/mozillians-config.ldif
 
-8) Put test Mozillians data in directory
+7) Put test Mozillians data in directory
 
     cp directory/images/* /tmp
     sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
 
 You will be asked for a password; it's the one in mozillians-config.ldif, which is "secret".
+
+If this fails part-way through for any reason, you need the "-c" option when you re-run it.
+
+8) Install a directory viewer (Apache Directory Studio)
+
+Visit http://directory.apache.org/studio/download/download-linux.html and download the (100MB!) Apache Directory Studio. Unzip the tarball and run the file (requires Java).
+
+Click "go to the workbench".
+Click "New Connection" in the Connections window in the bottom left
+Name: data
+Hostname: localhost
+<Next>
+Bind DN or user: cn=admin,dc=mozillians,dc=org
+Bind password: secret
+Click "Finish"
+
+Double-click on the resulting connection and you should see the test data.
+
+The refresh button is F5.
 
 9) Hack settings_local.py
 
@@ -65,6 +78,9 @@ Fill in the LDAP details if necessary (if your directory is local and you are us
 
     ./manage.py syncdb
 
+It will ask you for superuser auth details. Enter something sensible (this
+isn't used by us AFAIK).
+
 11) Add some service definitions
 
 XXX Copy in a test SQLite database? Or import some sort of dump? These aren't
@@ -74,7 +90,26 @@ required for testing but it makes the UI look and work better...
 
     ./manage.py runserver
 
+13) See data
+
+Visit http://localhost:8000/ and search for "gerv".
+
+Starting Again
+--------------
+
+If you mess the directory up, you can remove the data (only) as follows:
+
+    sudo /etc/init.d/slapd stop
+    sudo rm -rf /var/lib/ldap/*
+    sudo /etc/init.d/slapd start
+
+Then do the "install test data" step again.
+
+The config is in /etc/ldap/slapd.d/ but I've not looked at whether it's safe 
+to just nuke it.
+
 Open Questions
 --------------
 
 - What about virtualenvs?
+
