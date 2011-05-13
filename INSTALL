@@ -51,6 +51,7 @@ should show the directory running. If not, start it.
 
 8) Put test Mozillians data in directory
 
+    cp directory/images/* /tmp
     sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
 
 You will be asked for a password; it's the one in mozillians-config.ldif, which is "secret".
