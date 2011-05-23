@@ -1,0 +1,26 @@
+Schema Conversion
+-----------------
+
+This is how you convert domesday.schema (in ASN.1 format) to domesday-schema.ldif (in LDIF format) for importation into slapd.
+
+Create a temp directory:
+
+    mkdir /tmp/ldif_output
+
+Convert the schema (yes, schema_convert.conf needs those other schema in it as well as the one you are converting)
+    slaptest -f schema_convert.conf -F /tmp/ldif_output
+
+Make the following changes to "/tmp/ldif_output/cn=config/cn=schema/cn={NNNN}domesday.ldif":
+
+    1) change dn to:
+       dn: cn=domesday,cn=schema,cn=config
+    2) remove bits matching {\d+}
+    3) remove the last few lines (from structuralObjectClass on down)
+
+Add it to the directory:
+
+   sudo ldapadd -Y EXTERNAL -H ldapi:/// -f "/tmp/ldif_output/cn=config/cn=schema/cn={NNNN}domesday.ldif"
+
+
+Useful URL:
+http://www.zarafa.com/wiki/index.php/OpenLdap:_Switch_to_dynamic_config_backend_%28cn%3Dconfig%29#Convert_schema_files_for_import
