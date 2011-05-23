@@ -22,9 +22,9 @@ ou: tags
 ########
 dn: uid=1,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
+objectClass: domesdayPerson
 uid: 1
 sn: Markham
-givenName: Gervase
 cn: Gervase Markham
 displayName: Gervase Markham
 userPassword: {SSHA}/Psb2o+/+Mke+n5yOQvG3puzFXwAzw6Z
@@ -33,14 +33,14 @@ l: London
 description: I solve community problems for Mozilla.
 jpegPhoto:< file:///tmp/gerv.jpg
 title: Grease Gun
-postalAddress: 22 Somewhere Street, Enfield
-postalCode: SW1A 1AA
+postalAddress: 22 Somewhere Street, Enfield, SW1A 1AA
+domesdayNickName: Gerv
 
 dn: uid=2,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
+objectClass: domesdayPerson
 uid: 2
 sn: Boswell
-givenName: David
 cn: David Boswell
 displayName: David Boswell
 userPassword: {SSHA}wyNJo+bKFnsKykkmEI0oCurLy7Vu2eWC
@@ -53,9 +53,9 @@ telephoneNumber: +1 555 543 2100
 
 dn: uid=3,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
+objectClass: domesdayPerson
 uid: 3
 sn: Colvig
-givenName: Mary
 cn: Mary Colvig
 displayName: Mary Colvig
 userPassword: {SSHA}C+UrjDrWk77fv0TmcoTXIxhNjrfS+vNy
@@ -67,9 +67,9 @@ telephoneNumber: +1 555-654-3210
 
 dn: uid=4,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
+objectClass: domesdayPerson
 uid: 4
 sn: Duyck
-givenName: William
 cn: William Duyck
 displayName: William Duyck
 userPassword: {SSHA}e5PIx2LQ8ItRI3uhxRx3vKFpix/1BEY4
@@ -77,12 +77,13 @@ mail: fuzzyfox0@gmail.com
 l: Lewes
 description: The complete and utter Mozilla Fan Boy and self proclaimed web enthusiast. What more do I need to say?! 
 jpegPhoto:< file:///tmp/william.jpg
+domesdayNickName: fuzzyfox
 
 dn: uid=5,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
+objectClass: domesdayPerson
 uid: 5
 sn: Surman
-givenName: Mark
 cn: Mark Surman
 displayName: Mark Surman
 userPassword: {SSHA}6v9NTMhqMFpUORpqpCynb5E05eme3UrJ
@@ -91,8 +92,7 @@ l: Toronto
 description: I work on Mozilla Foundation-y things.
 jpegPhoto:< file:///tmp/mark.jpg
 title: Mozilla Foundation Executive Director
-postalAddress: 720 Spadina Ave, Suite 218, Toronto, Ontario
-postalCode: M5S 2T9
+postalAddress: 720 Spadina Ave, Suite 218, Toronto, Ontario, M5S 2T9
 
 ######
 # Tags
