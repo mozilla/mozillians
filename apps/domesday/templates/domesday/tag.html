@@ -38,27 +38,16 @@
 
 {% extends "domesday/base.html" %}
 
-{% block title %}Community Phonebook{% endblock %}
+{% block title %}{{ t.name }}{% endblock %}
 
 {% block header %}
 {{ css('view') }}
 {% endblock %}
 
 {% block content %}
-{% if p != None %}
-<div id="results" class="centred">
 
+{% for p in t.members_as_people() %}
   {% include 'domesday/person.html' %}
-
-  <div class="footer">
-    <small>
-    (<a href="{{ url('domesday.views.view', pk=p.uid) }}?format=json">json</a> |
-    <a href="{{ url('domesday.views.edit', pk=p.uid) }}">edit</a>)
-    </small>
-  </div>  
-</div>
-{% else %}
-<i>Nothing found</i>
-{% endif %}
+{% endfor %}
 
 {% endblock %}

@@ -45,6 +45,7 @@ urlpatterns = patterns('',
     (r'^edit/(?P<pk>\d+)$' , 'domesday.views.edit'),
     (r'^view/(?P<pk>\d+)$' , 'domesday.views.view'),
     (r'^photo/(?P<pk>\d+)$', 'domesday.views.photo'),
+    (r'^tag/(?P<pk>[^,]+)$', 'domesday.views.tag'),
     
     (r'^test$', 'domesday.views.test'),
 )

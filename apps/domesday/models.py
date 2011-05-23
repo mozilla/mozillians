@@ -60,6 +60,10 @@ class Tag(ldapdb.models.Model):
     
     # Will eventually need a blesstag, and a field describing how to become
     # blessed.
+    
+    def members_as_people(self):
+        # XXX want to say: [Person.objects.get(dn=dn) for dn in self.members]
+        return [Person.objects.get(uid=dn.split(',')[0].split("=")[1]) for dn in self.members]
 
     def __str__(self):
         return self.name

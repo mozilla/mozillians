@@ -41,7 +41,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.db.models import Q
 
-from domesday.models import Person, Account, AccountType
+from domesday.models import Person, Account, AccountType, Tag
 
 import jingo
 import re
@@ -139,6 +139,10 @@ def view(request, pk):
 def photo(request, pk):
     p = get_object_or_404(Person, pk=pk)
     return HttpResponse(p.photo, mimetype="image/jpeg")
+
+def tag(request, pk):
+    t = get_object_or_404(Tag, pk=pk)
+    return jingo.render(request, 'domesday/tag.html', {'t': t})
 
 def search(request):
     if len(request.GET) == 0:
