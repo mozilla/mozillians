@@ -3,6 +3,9 @@ Schema Conversion
 
 This is how you convert domesday.schema (in ASN.1 format) to domesday-schema.ldif (in LDIF format) for importation into slapd.
 
+You don't need to do this as part of a normal installation; you only need to 
+do it if you change the schema.
+
 Create a temp directory:
 
     mkdir /tmp/ldif_output
