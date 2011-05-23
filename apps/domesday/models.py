@@ -62,8 +62,10 @@ class Tag(ldapdb.models.Model):
     # blessed.
     
     def members_as_people(self):
-        # XXX want to say: [Person.objects.get(dn=dn) for dn in self.members]
-        return [Person.objects.get(uid=dn.split(',')[0].split("=")[1]) for dn in self.members]
+        # XXX want to say: 
+        # return [Person.objects.get(dn=dn) for dn in self.members]
+        return [Person.objects.get(uid=dn.split(',')[0].split("=")[1]) 
+                for dn in self.members]
 
     def __str__(self):
         return self.name
@@ -130,10 +132,12 @@ class Person(ldapdb.models.Model):
 
         for ct in current_tags:
             if not ct.name in tags:
+              if len(ct.members) == 1:
+                # They are the only person left with this tag
+                ct.delete()
+              else:
                 ct.members.remove(self.dn)
                 ct.save()
-            if not len(ct.members):
-                ct.delete()
 
     tags = property(get_tags, set_tags)
 

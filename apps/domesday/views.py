@@ -63,7 +63,7 @@ def _fill_in_person(request, p):
             # t-shirt size. Do we need to do email validation?
             setattr(p, field, request.POST.get(field, ''))
         
-        p.tags = [t.strip() for t in request.POST.get('tags', '').split(",")]
+        p.tags = [t.strip()[:15] for t in request.POST.get('tags', '').split(",")]
         
         accounts = [{ 'domain': k.split('-', 1)[1], 'userid': v } 
                          for k, v in request.POST.items() 
