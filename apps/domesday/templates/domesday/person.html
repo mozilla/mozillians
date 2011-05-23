@@ -61,11 +61,12 @@
     {% if p.email %}
       <li>Email: {{ p.email }}
     {% endif %}
-    {% if p.website %}
-      <li>Website: <a href="{{ p.website }}">{{ p.website }}</a>
-    {% endif %}
-    {% if p.blog %}
-      <li>Blog: <a href="{{ p.blog }}">{{ p.blog }}</a>
+    {% if p.urls %}
+      <li>URLs: 
+      {% for u in p.urls %}
+        <a href="{{ u }}"
+        >{{ u }}</a>{% if not loop.last %}, {% endif %}
+      {% endfor %}
     {% endif %}
     {% if p.tags %}
       <li>Tags:

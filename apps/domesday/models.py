@@ -103,6 +103,7 @@ class Person(ldapdb.models.Model):
     title        = CharField(db_column='title', max_length=32768)
     bio          = CharField(db_column='description', max_length=1024)
     email        = CharField(db_column='mail', max_length=256)
+    urls         = ListField(db_column='labeledURI')
     startyear = IntegerField(db_column='domesdayStartYear', max_length=32768)
     tshirtsize   = CharField(db_column='domesdayTShirtSize', max_length=32768)
     
@@ -180,44 +181,7 @@ class Person(ldapdb.models.Model):
             return account[0].userid
         else:
             return None
-        
-    # Blog and website are stored as labeledURI fields, with the labels 'blog'
-    # and 'website'. This means we need some mapping.
-    labeledURIs = ListField(db_column='labeledURI')
-    
-    def _get_uri(self, tag):
-        test = re.compile("^(.*) " + tag + "$")
-        results = filter(test.search, self.labeledURIs)
-        if len(results):
-            return test.match(results[0]).group(1)
-        else:
-            return ""
-        
-    def _set_uri(self, tag, value):
-        # Extract the old version, if present
-        test = re.compile("^(.*) " + tag + "$")
-        results = filter(lambda u: not test.search(u), self.labeledURIs)
-        # Add the new one
-        results.append(value + " " + tag)
-        self.labeledURIs = results
-        return self._get_uri(tag)
-    
-    def _get_website(self):
-        return self._get_uri("website")
-        
-    def _set_website(self, website):
-        return self._set_uri("website", website)
-    
-    website = property(_get_website, _set_website)
-    
-    def _get_blog(self):
-        return self._get_uri("blog")
-        
-    def _set_blog(self, blog):
-        return self._set_uri("blog", blog)
-        
-    blog = property(_get_blog, _set_blog)
-            
+
     # This returns an object whose layout matches the PortableContacts schema
     # http://portablecontacts.net/draft-spec.html (retrieved 2011-04-19)
     # XXX Need to check doc more carefully and make sure it actually does in 
@@ -234,7 +198,7 @@ class Person(ldapdb.models.Model):
         }
         
         if self.tags:
-            json_struct["tags"] = [tag.name for tag in self.tags]
+            json_struct["tags"] = [tag for tag in self.tags]
       
         if self.email:
             json_struct["emails"] = [{
@@ -242,21 +206,12 @@ class Person(ldapdb.models.Model):
                 "primary": "true"
             }]
         
-        if self.blog or self.website:
-            json_struct["urls"] = []
-        
-            if self.blog:
-                json_struct["urls"].append({
-                    "value": self.blog,
-                    "type": "blog"
-                }) 
-            
-            if self.website:
-                json_struct["urls"].append({
-                    "value": self.website,
-                    "type": "home"
-                })
-      
+        if self.urls:
+            json_struct["urls"] = [{ 
+                "value": u,
+                "type": "other"
+            } for u in self.urls]
+              
         if self.phone:
             json_struct["phoneNumbers"] = [{
                 "value": self.phone
@@ -281,7 +236,7 @@ class Person(ldapdb.models.Model):
             json_struct["accounts"] = [{ 
                 "domain": a['domain'], 
                 "userid": a['userid'] 
-        } for a in self.accounts]
+            } for a in self.accounts]
             
         return json_struct
     

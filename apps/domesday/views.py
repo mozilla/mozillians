@@ -55,7 +55,7 @@ def _fill_in_person(request, p):
         #pp.pprint(request.POST)
         
         # User data from request
-        for field in ('name', 'familyName', 'nickname', 'website', 'blog', 
+        for field in ('name', 'familyName', 'nickname',
                       'address', 'locality', 'country', 'phone', 'title',
                       'bio', 'email', 'phoneNumber', 'startyear', 
                       'tshirtsize'):
@@ -63,7 +63,7 @@ def _fill_in_person(request, p):
             # t-shirt size. Do we need to do email validation?
             setattr(p, field, request.POST.get(field, ''))
         
-        p.tags = [t.strip()[:15] for t in request.POST.get('tags', '').split(",")]
+        p.tags = [t.strip()[:20] for t in request.POST.get('tags', '').split(",")]
         
         accounts = [{ 'domain': k.split('-', 1)[1], 'userid': v } 
                          for k, v in request.POST.items() 
@@ -81,6 +81,7 @@ def _fill_in_person(request, p):
         if 'photo' in request.FILES:
             p.photo = request.FILES['photo'].read()
         
+        p.urls = request.POST.get('urls').split()
 
 # uid must be specified; host is optional
 def _find_person_for_account(domain, userid):

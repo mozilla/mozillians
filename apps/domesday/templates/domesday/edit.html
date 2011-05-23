@@ -144,8 +144,7 @@ var defaultsSets = [
         'bio',
         'title',
         'startyear',
-        'website',
-        'blog',
+        'urls',
         'locality',
         'country',
         'email'
@@ -166,8 +165,7 @@ var defaultsSets = [
         'bio',
         'title',
         'startyear',
-        'website',
-        'blog',
+        'urls',
         'locality',
         'country'
       ],
@@ -187,8 +185,7 @@ var defaultsSets = [
       'public': [
         'tags',
         'nickname',
-        'website',
-        'blog',
+        'urls',
         'country',
       ],
       'trusted': [
@@ -352,9 +349,7 @@ h2 {
 </select>
 </p>
 
-<p class="field" id="website-ctr"><label for="website">Website:</label> <input id="website" name="website" value="{{ p.website }}"></p>
-
-<p class="field" id="blog-ctr"><label for="blog">Blog:</label> <input id="blog" name="blog" value="{{ p.blog }}"></p>
+<p class="field" id="urls-ctr"><label for="urls">Websites:</label> <input id="urls" name="urls" value="{{ p.urls|join(' ') }}"></p>
 
 <p class="field" id="locality-ctr"><label for="locality">Locality:</label> <input id="locality" name="locality" value="{{ p.locality }}"></p>
 
@@ -725,9 +720,7 @@ h2 {
 
 <div id="startyear-priv" class="privacy-widget"><label>Year Started:</label> <output id="startyear-out"></output></div>
 
-<div id="website-priv" class="privacy-widget"><label>Website:</label> <output id="website-out"></output></div>
-
-<div id="blog-priv" class="privacy-widget"><label>Blog:</label> <output id="blog-out"></output></div>
+<div id="urls-priv" class="privacy-widget"><label>Websites:</label> <output id="urls-out"></output></div>
 
 <div id="locality-priv" class="privacy-widget"><label>Locality:</label> <output id="locality-out"></output></div>
 
