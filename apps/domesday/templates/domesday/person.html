@@ -42,34 +42,39 @@
       "{{ url('domesday.views.photo', pk=p.uid) }}"
       target="_blank"><img class="photo" 
       src="{{ url('domesday.views.photo', pk=p.uid) }}"  
-      style="float:right; border: 1px black solid"></a>
-    <h2 class="fn">{{ p.name }}</h2>
+      style="float:left; margin-right: 1em; margin-bottom: 1em; border: 1px black solid"></a>
+    <h2 class="fn" style="margin: 0px">{{ p.name }}</h2>
   </div>
 
   <p class="title">{{ p.title }}</p>
 
   <ul>
     {% if p.nickname %}
-      <li>Call Me:  {{ p.nickname }}
+      <li><b>Call Me:</b>  {{ p.nickname }}
     {% endif %}
     {% if p.locality %}
-      <li>Location: {{ p.locality }}, {{ p.country }}
+      <li><b>Location:</b> {{ p.locality }}
+      {%- if p.country -%}, 
+        {{ p.country|upper() }}
+      {% endif %}
     {% endif %}
-    {% if p.phoneNumber %}
-      <li>Phone: {{ p.phoneNumber }}
+    {% if p.phone %}
+      <li><b>Phone:</b> {{ p.phone }}
     {% endif %}
     {% if p.email %}
-      <li>Email: {{ p.email }}
+      <li><b>Email:</b> <a href="mailto:{{ p.email }}">{{ p.email }}</a>
     {% endif %}
+    </ul>
+    <ul style="clear: both; margin-left: 0px">
     {% if p.urls %}
-      <li>URLs: 
+      <li><b>URLs:</b> 
       {% for u in p.urls %}
         <a href="{{ u }}"
         >{{ u }}</a>{% if not loop.last %}, {% endif %}
       {% endfor %}
     {% endif %}
     {% if p.tags %}
-      <li>Tags:
+      <li><b>Tags:</b>
       {% for t in p.tags %}
         <a href="{{ url('domesday.views.tag', pk=t) }}"
         >{{ t }}</a>{% if not loop.last %}, {% endif %}
