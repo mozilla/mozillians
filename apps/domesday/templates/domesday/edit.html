@@ -103,7 +103,7 @@ h2 {
 
 <div id="fields">
 
-<p class="field" id="name-ctr"><label for="name">Full Name:</label> <input id="name" name="name" value="{{ p.name }}"></p>
+<p class="field" id="name-ctr"><label for="name">Full Name:</label> <input id="name" name="name" value="{{ p.name }}" autofocus></p>
 
 <p class="field" id="familyname-ctr"><label for="name">Family Name:</label> <input id="familyname" name="familyname" value="{{ p.familyName }}"></p>
 
@@ -441,7 +441,7 @@ h2 {
 </label>
 <input id="newaccount-userid" name="newaccount-userid" value=""></p>
 
-<p class="field" id="email-ctr"><label for="email">Email:</label> <input id="email" name="email" value="{{ p.email }}"></p>
+<p class="field" id="email-ctr"><label for="email">Email:</label> <input id="email" name="email" type="email" value="{{ p.email }}"></p>
 
 <p class="field" id="phone-ctr"><label for="phone">Phone:</label> <input id="phone" name="phone" value="{{ p.phone }}"></p>
 
