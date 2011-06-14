@@ -1,58 +1,58 @@
-This document contains installation instructions for Domesday on Ubuntu. 
-Application to other systems is currently an exercise for the reader :-)
+This document contains installation instructions for Mozillians.org
 
-Domesday currently has no access control, and also these setup instructions are currently designed for a secure, test environment. Do not deploy the 
-resulting system anywhere Internet-facing!
+1) Install Python 2.6+, MySQL 5+, pip, Python's virtualenv
 
-1) Install necessary libraries
+See INSTALL.your_os.md for Specific packages or steps.
 
-    sudo apt-get install libmysqlclient-dev python-pip python-jinja2 python-mysqldb python-dev libsasl2-dev libldap2-dev libssl-dev mysql-server subversion
+Optional: Python's virtualenv
 
-2) Get a copy of Domesday
+2) Get a copy of Mozillians.org
 
-    git clone --recursive git://github.com/mozilla/domesday.git phonebook
+    git clone --recursive git://github.com/mozilla/mozillians.git mozillians.org
 
-(Apparently things will go wrong if you call the directory you keep it in
-'domesday' as well, so it is called 'phonebook' above.)
+3) Optional - Use virtualenv
+
+Developers may choose to use a virtual enviroment with pip, so that system wide 
+Python libraries aren't tainted. This is useful for compiled python libraries
+and the vendor library can be reused for pure Python dependencies.
+
+    mkvirtualenv --no-site-packages ~/Environments/mozillians.org
+    source ~/Environments/mozillians.org/bin/activate
 
 3) Install requirements
 
-    cd phonebook
+    cd mozillians.org
     sudo pip install -r requirements/compiled.txt
 
-4) Install a directory
-The directory depends on Berkley DB utils, such as db4.2-util in Ubuntu 9.04 or db4.7-util in 10.04. This command should add that dependency automagically.
+4) Confirm the OpenLDAP server is installed (slapd)
 
-    sudo apt-get install slapd ldap-utils 
+See INSTALL.your_os.md for OS specific notes.
 
-The command 
+5) Ensure standard schemas are already loaded
 
-    ps aux | grep slap
+Mozillians.org depends on the following schemas:
+* cosine.ldif
+* nis.ldif
+* inetorgperson.ldif
 
-should show the directory running. If not, start it.
+# see OS specific notes
 
-5) Install schema files
+6) Set up directory structure and root DN access for Mozillians.
 
-    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/cosine.ldif
-    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/nis.ldif
-    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/inetorgperson.ldif
-
-    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/domesday-schema.ldif
-
-6) Set up directory structure and root DN access for Mozillians
-
-    sudo ldapadd -Y EXTERNAL -H ldapi:/// -f directory/mozillians-config.ldif
+    # see OS specific install notes
+    ldapadd -f directory/mozillians-config.ldif
 
 7) Put test Mozillians data in directory
 
+    # see OS specific notes
     cp directory/images/* /tmp
-    sudo ldapadd -x -D cn=admin,dc=mozillians,dc=org -W -f directory/mozillians-data.ldif
+    ldapadd -f directory/mozillians-data.ldif 
 
 You will be asked for a password; it's the one in mozillians-config.ldif, which is "secret".
 
 If this fails part-way through for any reason, you need the "-c" option when you re-run it.
 
-8) Install a directory viewer (Apache Directory Studio)
+8) Optional - Install a directory viewer (Apache Directory Studio)
 
 Visit http://directory.apache.org/studio/download/download-linux.html and download the (100MB!) Apache Directory Studio. Unzip the tarball and run the file (requires Java).
 
@@ -93,23 +93,3 @@ required for testing but it makes the UI look and work better...
 13) See data
 
 Visit http://localhost:8000/ and search for "gerv".
-
-Starting Again
---------------
-
-If you mess the directory up, you can remove the data (only) as follows:
-
-    sudo /etc/init.d/slapd stop
-    sudo rm -rf /var/lib/ldap/*
-    sudo /etc/init.d/slapd start
-
-Then do the "install test data" step again.
-
-The config is in /etc/ldap/slapd.d/ but I've not looked at whether it's safe 
-to just nuke it.
-
-Open Questions
---------------
-
-- What about virtualenvs?
-
