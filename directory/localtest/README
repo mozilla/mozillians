@@ -1,0 +1,44 @@
+Running a local LDAP test server for development purposes
+=========================================================
+
+This should be done as a normal user - NOT root.
+
+Copy the setup.ajf file to a file of your own (e.g. setup).
+Edit it and make sure that the PATH that it builds will contain
+a consistent set of LDAP tools. Many distros spread these around
+in three places, often something like:
+	/usr/bin
+	/usr/lib/openldap
+	/usr/sbin
+
+Create a symlink to the schema directory that is used by those programs
+e.g.:
+	ln -s /etc/openldap/schema .
+
+Now, whenever you need this test environment, you do:
+
+	cd .../localtest
+	. setup
+
+You can then use commands like:
+
+	x-rebuild
+		Clear out and rebuild the test server (and start it)
+	x-start-ldap
+		Start the test server
+	x-stop-ldap
+		Stop the test server
+
+	x-anon-search uid=myusername
+		Search as anon
+	x-root-search sn=some-surname
+		Search with root's power
+
+Note that all these commands will only work while in the directory
+containing the 'vars' and 'slapd.conf' files as they pick up config
+using relative paths. This does allow you to set up several different
+test environments very easily.
+
+Andrew Findlay
+20 June 2011
+

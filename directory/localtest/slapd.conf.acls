@@ -1,0 +1,18 @@
+# slapd.conf.acls
+#
+# See slapd.access(5) for details on ACLs
+#
+# Andrew Findlay
+# andrew.findlay@skills-1st.co.uk
+# 20 June 2011
+
+# Users may change their own passwords
+# Users may read everything except passwords
+# Anon may read everything except passwords
+
+access to attrs="userPassword"
+	by self =w
+	by * auth
+
+access to * by * read
+

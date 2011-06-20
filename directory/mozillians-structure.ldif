@@ -1,0 +1,23 @@
+###########
+# Structure
+###########
+
+dn: dc=mozillians,dc=org
+objectClass: top
+objectClass: dcObject
+objectclass: organization
+dc: mozillians
+o: Mozillians
+
+dn: ou=people,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=tags,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: tags
+
+dn: ou=system,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: system
+
