@@ -1,3 +1,4 @@
 # build the test server and load test data
 
 x-load-ldif -a ../mozillians-structure.ldif
+x-load-ldif -a ../data/names.ldif

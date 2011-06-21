@@ -1,0 +1,40 @@
+# Object classes and attribute types for mozillians.org
+#
+# Andrew Findlay
+# June 2011
+#
+# andrew.findlay@skills-1st.co.uk
+
+# Base OID: 1.3.6.1.4.1.13769.3000
+#
+# Object classes under: 1.3.6.1.4.1.13769.3000.1
+# Attribute types under: 1.3.6.1.4.1.13769.3000.2
+
+########################################################################
+# Attribute types
+########################################################################
+
+attributetype ( 1.3.6.1.4.1.13769.3000.2.1 NAME 'mozilliansVisibility'
+	DESC 'Mozillians attribute used to trigger access-control rules'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{64} )
+
+########################################################################
+# Object classes
+########################################################################
+
+# All objects in the Mozillians LDAP service will have mozilliansObject as one
+# of their classes.
+#
+objectclass ( 1.3.6.1.4.1.13769.3000.1.1 NAME 'mozilliansObject'
+	DESC 'Mozillians objects'
+	SUP top AUXILIARY
+	MAY ( displayName $ mozilliansVisibility $ uniqueIdentifier )
+	)
+
+objectclass ( 1.3.6.1.4.1.13769.3000.1.2 NAME 'mozilliansPerson'
+	DESC 'Mozillians Person'
+	SUP mozilliansObject AUXILIARY
+	)
+

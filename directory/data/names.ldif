@@ -1,0 +1,120 @@
+dn: uniqueIdentifier=7f3a67u000000,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Margaret Lake
+cn: Margaret Lake
+sn: Lake
+uniqueIdentifier: 7f3a67u000000
+uid: u000000
+mail: u000000@mozillians.org
+telephoneNumber: +44 1234 567000
+
+dn: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Shaukat Gumm
+cn: Shaukat Gumm
+sn: Gumm
+uniqueIdentifier: 7f3a67u000001
+uid: u000001
+mail: u000001@mozillians.org
+telephoneNumber: +44 1234 567001
+
+dn: uniqueIdentifier=7f3a67u000002,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Graham Spaul
+cn: Graham Spaul
+sn: Spaul
+uniqueIdentifier: 7f3a67u000002
+uid: u000002
+mail: u000002@mozillians.org
+telephoneNumber: +44 1234 567002
+
+dn: uniqueIdentifier=7f3a67u000003,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Theresa Wright
+cn: Theresa Wright
+sn: Wright
+uniqueIdentifier: 7f3a67u000003
+uid: u000003
+mail: u000003@mozillians.org
+telephoneNumber: +44 1234 567003
+
+dn: uniqueIdentifier=7f3a67u000004,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Yogash Ratnaraj
+cn: Yogash Ratnaraj
+sn: Ratnaraj
+uniqueIdentifier: 7f3a67u000004
+uid: u000004
+mail: u000004@mozillians.org
+telephoneNumber: +44 1234 567004
+
+dn: uniqueIdentifier=7f3a67u000005,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Akin Pressnell
+cn: Akin Pressnell
+sn: Pressnell
+uniqueIdentifier: 7f3a67u000005
+uid: u000005
+mail: u000005@mozillians.org
+telephoneNumber: +44 1234 567005
+
+dn: uniqueIdentifier=7f3a67u000006,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Julian Packman
+cn: Julian Packman
+sn: Packman
+uniqueIdentifier: 7f3a67u000006
+uid: u000006
+mail: u000006@mozillians.org
+telephoneNumber: +44 1234 567006
+
+dn: uniqueIdentifier=7f3a67u000007,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Noelia Davies
+cn: Noelia Davies
+sn: Davies
+uniqueIdentifier: 7f3a67u000007
+uid: u000007
+mail: u000007@mozillians.org
+telephoneNumber: +44 1234 567007
+
+dn: uniqueIdentifier=7f3a67u000008,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Stephen Brandwood
+cn: Stephen Brandwood
+sn: Brandwood
+uniqueIdentifier: 7f3a67u000008
+uid: u000008
+mail: u000008@mozillians.org
+telephoneNumber: +44 1234 567008
+
+dn: uniqueIdentifier=7f3a67u000009,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Alan Naik
+cn: Alan Naik
+sn: Naik
+uniqueIdentifier: 7f3a67u000009
+uid: u000009
+mail: u000009@mozillians.org
+telephoneNumber: +44 1234 567009
+
