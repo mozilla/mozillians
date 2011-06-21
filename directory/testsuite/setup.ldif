@@ -1,0 +1,26 @@
+dn: uniqueIdentifier=test001,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 001
+cn: Test 001
+sn: 001
+uniqueIdentifier: test001
+description: Applicant 001
+uid: test001
+mail: test001@mozillians.org
+telephoneNumber: +44 1234 567001
+
+dn: uniqueIdentifier=test002,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 002
+cn: Test 002
+sn: 002
+uniqueIdentifier: test002
+description: Applicant 002
+uid: test002
+mail: test002@mozillians.org
+telephoneNumber: +44 1234 567002
+
