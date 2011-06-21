@@ -104,6 +104,8 @@ for ($count=0;$count<$howmany;$count++) {
 	print LDIF "sn: ", $surnames[$s], "\n";
 	print LDIF "uniqueIdentifier: $unique\n";
 	print LDIF "uid: $uid\n";
+	# The password is 'secret'
+	print LDIF "userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+\n";
 	print LDIF "mail: $uid\@$MailDomain\n";
 	printf LDIF "telephoneNumber: +44 1234 %06d\n", $count+567000;
 	if ($PosixLDIF) {
