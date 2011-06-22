@@ -1,0 +1,16 @@
+# source this file to set up the environment
+# e.g.:
+#	. setup.ajf
+
+# Adjust this line to make sure that your PATH contains at least:
+#	ldapsearch
+#	slapd
+#	slapcat
+#
+PATH=/home/andrew/test/openldap/bin:/home/andrew/test/openldap/sbin:/home/andrew/test/openldap/libexec:$PATH
+
+# Now we add the x-* helper scripts
+PATH=`/bin/pwd`/bin:$PATH
+
+export PATH
+

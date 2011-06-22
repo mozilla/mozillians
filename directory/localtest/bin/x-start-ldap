@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# x-start-ldap
+#
+# Start the directory server
+
+PROG=`basename "$0"`
+
+if test ! -f slapd.conf -a -f openldap/slapd.conf
+then
+	cd openldap
+fi
+
+if test ! -f slapd.conf
+then
+	echo "$PROG: must be run from the directory containing slapd.conf" 1>&2
+	exit 1
+fi
+
+# Get the config for this example
+. ./vars
+
+# Make the database directory if necessary
+if test ! -d openldap-db
+then
+	mkdir openldap-db
+fi
+
+# Create a DB_CONFIG if necessary
+if test ! -f openldap-db/DB_CONFIG
+then
+cat > openldap-db/DB_CONFIG <<EOF
+# Minimal DB_CONFIG file for development server
+# This is not suitable for production
+
+set_cachesize 0 1000000 1
+set_flags DB_LOG_AUTOREMOVE
+EOF
+fi
+
+# Start the server
+#
+slapd	-f slapd.conf \
+	-h "${serverurl}" \
+	-n `whoami`"-slapd" \
+	"$@"
+

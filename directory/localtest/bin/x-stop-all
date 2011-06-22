@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# x-stop-all
+#
+# Stops all instances of slapd
+
+/usr/bin/killall slapd
+
