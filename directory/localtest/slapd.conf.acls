@@ -6,13 +6,51 @@
 # andrew.findlay@skills-1st.co.uk
 # 20 June 2011
 
+# Permit everyone to read the service entries
+
+access to dn.exact=""
+	by * read
+
+access to dn.exact="cn=Subschema"
+	by * read
+
+# Permit everyone to read the main structural entries
+
+access to dn.exact="dc=mozillians,dc=org"
+	by * read
+
+access to dn.exact="ou=people,dc=mozillians,dc=org"
+	by * read
+
 # Users may change their own passwords
-# Users may read everything except passwords
-# Anon may read everything except passwords
+# Anon may authenticate
 
 access to attrs="userPassword"
 	by self =w
 	by * auth
 
-access to * by * read
+# Anon may read and search just enough to find a DN given a uid
+
+access to attrs="entry"
+	by anonymous read
+	by * break
+
+access to attrs="uid"
+	by anonymous search
+	by * break
+
+access to attrs="uniqueIdentifier"
+	by anonymous read
+	by * break
+
+# Massive simplification for now:
+# all authenticated users can see everything else
+
+access to *
+	by users read
+
+# Default deny
+
+access to *
+	by * none
 

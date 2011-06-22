@@ -36,6 +36,10 @@ ldap_applicant001PW = 'secret'
 ldap_mozillian011DN = 'uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org'
 ldap_mozillian011PW = 'secret'
 
+# DNs of some victims
+ldap_applicant002DN = 'uniqueIdentifier=test002,ou=people,dc=mozillians,dc=org'
+ldap_mozillian012DN = 'uniqueIdentifier=test012,ou=people,dc=mozillians,dc=org'
+
 # The name of the setup file
 setup_ldif = 'setup.ldif'
 
@@ -125,20 +129,25 @@ class LdifLoader(LDIFParser):
 class LdapAclTest(unittest.TestCase):
 
     def setUp(self):
-        self.ldap_anon = ldap.initialize(ldap_url)
+	# Set up the connections, and by doing so implement test_T0005_anon_bind
+	try:
+	    self.ldap_anon = ldap.initialize(ldap_url)
 
-        self.ldap_rootDN = ldap.initialize(ldap_url)
-	self.ldap_rootDN.simple_bind_s(ldap_rootDN,ldap_rootPW)
+	    self.ldap_rootDN = ldap.initialize(ldap_url)
+	    self.ldap_rootDN.simple_bind_s(ldap_rootDN,ldap_rootPW)
 
-	ldifparser = LdifLoader(open(setup_ldif, 'r'), None)
-	ldifparser.ldap_handle = self.ldap_rootDN
-	ldifparser.parse()
+	    ldifparser = LdifLoader(open(setup_ldif, 'r'), None)
+	    ldifparser.ldap_handle = self.ldap_rootDN
+	    ldifparser.parse()
 
-	self.ldap_applicant001 = ldap.initialize(ldap_url)
-	self.ldap_applicant001.simple_bind_s(ldap_applicant001DN,ldap_applicant001PW)
+	    self.ldap_applicant001 = ldap.initialize(ldap_url)
+	    self.ldap_applicant001.simple_bind_s(ldap_applicant001DN,ldap_applicant001PW)
 
-	self.ldap_mozillian011 = ldap.initialize(ldap_url)
-	self.ldap_mozillian011.simple_bind_s(ldap_mozillian011DN,ldap_mozillian011PW)
+	    self.ldap_mozillian011 = ldap.initialize(ldap_url)
+	    self.ldap_mozillian011.simple_bind_s(ldap_mozillian011DN,ldap_mozillian011PW)
+        except ldap.LDAPError:
+	            self.fail( "LDAP connection setup error " + str(sys.exc_info()[0]) )
+
 
     def tearDown(self):
 	global entry_list
@@ -159,7 +168,8 @@ class LdapAclTest(unittest.TestCase):
 
         self.ldap_anon.unbind()
         self.ldap_rootDN.unbind()
-
+        self.ldap_applicant001.unbind()
+	self.ldap_mozillian011.unbind()
 
     # All users including Anon should be able to read the schema
     def read_root_DSE_and_schema(self, user, ldap_conn):
@@ -197,10 +207,37 @@ class LdapAclTest(unittest.TestCase):
 	self.assertTrue( attrValueMatch( res[0], 'attributetypes', 'mozillians' ),
 	                 "Mozillians attribute types must be listed in schema" )
 
+
+    # Changing password
+    def change_and_check_password(self, user, userDN, ldap_conn, old_pw, new_pw):
+        try:
+	    ldap_conn.passwd_s(userDN, old_pw, new_pw)
+        except:
+	    self.fail( user + " cannot change password: " + str(sys.exc_info()[0]) )
+
+        try:
+            ldap_check = ldap.initialize(ldap_url)
+	    ldap_check.simple_bind_s(userDN, new_pw)
+        except:
+	    self.fail( user + " cannot bind with new password: " + str(sys.exc_info()[0]) )
+
+        ldap_check.unbind()
+
+
+
+    #######################################################################################
+    # Actual tests start here
+    #######################################################################################
+
     def test_T0015_anon_read_suffix(self):
         res = self.ldap_anon.search_s(ldap_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
 	self.assertTrue( attrValueMatch( res[0], 'dc', 'mozillians' ),
 	         'suffix entry should have an attribute dc=mozillians')
+
+    def test_T0016_anon_read_people_container(self):
+        res = self.ldap_anon.search_s(people_node,ldap.SCOPE_BASE,'(objectclass=*)')
+	self.assertTrue( attrValueMatch( res[0], 'ou', 'people' ),
+	         'ou=people entry should have an attribute ou=people')
 
     def test_T0010_anon_read_root_DSE_and_schema(self):
 	self.read_root_DSE_and_schema("Anon", self.ldap_anon)
@@ -218,10 +255,10 @@ class LdapAclTest(unittest.TestCase):
 	    res = self.ldap_anon.search_s(
 		    people_node,
 		    ldap.SCOPE_SUBTREE,
-		    filterstr='(uid=test001)' )
+		    filterstr='(uid=test002)' )
 
 	    self.assertEqual( len(res), 1,
-	            "Search for (uid=test001) should return exactly one entry. We got "+str(len(res)) )
+	            "Anon search for (uid=test002) should return exactly one entry. We got "+str(len(res)) )
             # print res[0]
         except ldap.LDAPError:
 	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
@@ -233,19 +270,130 @@ class LdapAclTest(unittest.TestCase):
 		           str(getAttrNames(res[0])) )
 
     def test_T0030_anon_search_multi(self):
-	# Anon trying to find mulitple entries
-	# This should limit at 2 entries returned
+	# Anon trying to find multiple entries
+	# This should limit at 2 entries returned but the search filter matches 3
+	# so we expect to get an exception.
+	# LDAP actually supplies the entries, but Python LDAP does not deliver them to us.
 	try:
-	    res = self.ldap_anon.search_s(
-		    people_node,
-		    ldap.SCOPE_SUBTREE,
-		    filterstr='(uid=*)' )
+	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
+		res = self.ldap_anon.search_s(
+			people_node,
+			ldap.SCOPE_SUBTREE,
+			filterstr='(uid=test00*)' )
 
-	    self.assertEqual( len(res), 2,
-	            "Search for (uid=*) should return exactly 2 entries. We got "+str(len(res)) )
-            # print res[0]
         except ldap.LDAPError:
 	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+    def test_T0020_applicant_search_person(self):
+	# Applicant trying to find a person entry that is not their own
+	# This should work, but not expose any data apart from the DN
+	try:
+	    res = self.ldap_applicant001.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test002)' )
+
+	    self.assertEqual( len(res), 1,
+	            "Applicant search for (uid=test002) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+        # Now test to see if we got any attributes that we should not see
+	for attr in getAttrNames(res[0]):
+	    if attr.lower() != 'uniqueIdentifier'.lower():
+	        self.fail( "Applicant should not be able to read attributes from user entries. Got: " +
+		           str(getAttrNames(res[0])) )
+
+    def test_T0030_applicant_search_multi(self):
+	# Applicant trying to find multiple entries
+	# The filter matches 3 in this case
+	# This should limit at 2 entries returned
+	try:
+	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
+		res = self.ldap_applicant001.search_s(
+			people_node,
+			ldap.SCOPE_SUBTREE,
+			filterstr='(uid=test00*)' )
+
+        except ldap.LDAPError:
+	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+    def test_T6030_mozillian_search_person(self):
+	# Mozillian trying to find a person entry
+	# This should work, but not expose any data apart from the DN
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test002)' )
+
+	    self.assertEqual( len(res), 1,
+	            "Mozillian search for (uid=test002) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'cn'):
+	    self.fail( "Mozillian should see the cn value" )
+	if not getAttrValue(res[0],'sn'):
+	    self.fail( "Mozillian should see the sn value" )
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "Mozillian should see the uid value" )
+	if not getAttrValue(res[0],'uniqueIdentifier'):
+	    self.fail( "Mozillian should see the uniqueIdentifier value" )
+
+        # Now test to see if we got any attributes that we should not see
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "Mozillian should not be able to read passwords" )
+
+    def test_T0030_mozillian_search_multi(self):
+	# Mozillian trying to find multiple entries
+	# This should limit at rather more than 2 entries returned
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test*)' )
+
+	    self.assertGreater( len(res), 2,
+	            "Mozillian search for (uid=test*) should return more than 2 entries. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+
+    def test_T1010_applicant_change_password(self):
+        self.change_and_check_password(
+	        'Applicant',
+                ldap_applicant001DN,
+		self.ldap_applicant001,
+		None,
+		'evenmoresecret' )
+
+    def test_T1010_mozillian_change_password(self):
+        self.change_and_check_password(
+	        'Mozillian',
+                ldap_mozillian011DN,
+		self.ldap_mozillian011,
+		None,
+		'evenmoresecret' )
+
+    def test_T1020_change_others_password(self):
+	# Try to change other people's passwords
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.passwd_s(ldap_applicant002DN, None, 'owned!')
+
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.passwd_s(ldap_mozillian012DN, None, 'owned!')
+
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.passwd_s(ldap_applicant002DN, None, 'owned!')
+
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.passwd_s(ldap_mozillian012DN, None, 'owned!')
+
 
 ########################################################################
 # Main program
