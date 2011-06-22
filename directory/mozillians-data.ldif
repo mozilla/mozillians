@@ -1,6 +1,9 @@
-########
-# People
-########
+###############
+# Sample People
+###############
+#
+# Be aware that this file contains non-ASCII characters encoded in UTF-8
+#
 dn: uniqueIdentifier=1,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
 objectClass: mozilliansPerson
@@ -1439,3 +1442,14 @@ title: Mozilla Foundation Executive Director
 postalAddress: 720 Spadina Ave, Suite 218, Toronto, Ontario, M5S 2T9
 uid: mark@mozillafoundation.org
 
+dn: uniqueIdentifier=6,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+objectClass: mozilliansPerson
+uniqueIdentifier: 6
+mozilliansVouchedBy: uniqueIdentifier=1,ou=people,dc=mozillians,dc=org
+sn: Wadensjöö
+cn: Åke Wadensjöö
+displayName: Åke Wadensjöö
+userPassword: {SSHA}6v9NTMhqMFpUORpqpCynb5E05eme3UrJ
+description: Ne révèle pas le dénouement SVP. $ Se upp för nationella tecken $ Uważaj na znaki narodowe $ احترس من الشخصيات الوطنية
+uid: Åke
