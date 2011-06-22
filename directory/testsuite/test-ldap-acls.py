@@ -51,10 +51,19 @@ entry_list = []
 # Utility functions
 ########################################################################
 
+# Get list of attributes in result
+#
+def getAttrNames ( ldap_result ):
+    # ldap_result has the form:
+    # (dn, dict)
+    # where dict has a list of values for each named attribute
+
+    return ldap_result[1].keys()
+
 # Get list of values for attribute
 # If there is no such attribute then we return an empty list
 #
-def getAttrList( ldap_result, attrname ):
+def getAttrValueList( ldap_result, attrname ):
     # ldap_result has the form:
     # (dn, dict)
     # where dict has a list of values for each named attribute
@@ -74,7 +83,7 @@ def getAttrValue( ldap_result, attrname ):
     # ldap_result has the form:
     # (dn, dict)
     # where dict has a list of values for each named attribute
-    attr_list = getAttrList( ldap_result, attrname )
+    attr_list = getAttrValueList( ldap_result, attrname )
     if not attr_list:
 	return None
     else:
@@ -83,7 +92,7 @@ def getAttrValue( ldap_result, attrname ):
 # Check for a value of an attribute that matches a given pattern
 #
 def attrValueMatch( ldap_result, attrname, pattern ):
-    attr_list = getAttrList( ldap_result, attrname )
+    attr_list = getAttrValueList( ldap_result, attrname )
     if not attr_list:
 	return None
     else:
@@ -188,19 +197,55 @@ class LdapAclTest(unittest.TestCase):
 	self.assertTrue( attrValueMatch( res[0], 'attributetypes', 'mozillians' ),
 	                 "Mozillians attribute types must be listed in schema" )
 
-    def test_anon_read_suffix(self):
+    def test_T0015_anon_read_suffix(self):
         res = self.ldap_anon.search_s(ldap_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
 	self.assertTrue( attrValueMatch( res[0], 'dc', 'mozillians' ),
 	         'suffix entry should have an attribute dc=mozillians')
 
-    def test_anon_read_root_DSE_and_schema(self):
+    def test_T0010_anon_read_root_DSE_and_schema(self):
 	self.read_root_DSE_and_schema("Anon", self.ldap_anon)
 
-    def test_applicant_read_root_DSE_and_schema(self):
+    def test_T0010_applicant_read_root_DSE_and_schema(self):
 	self.read_root_DSE_and_schema("Applicant 001", self.ldap_applicant001)
 
-    def test_mozillian_read_root_DSE_and_schema(self):
+    def test_T0010_mozillian_read_root_DSE_and_schema(self):
 	self.read_root_DSE_and_schema("Mozillian 011", self.ldap_mozillian011)
+
+    def test_T0020_anon_search_person(self):
+	# Anon trying to find a person entry
+	# This should work, but not expose any data apart from the DN
+	try:
+	    res = self.ldap_anon.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test001)' )
+
+	    self.assertEqual( len(res), 1,
+	            "Search for (uid=test001) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+        # Now test to see if we got any attributes that we should not see
+	for attr in getAttrNames(res[0]):
+	    if attr.lower() != 'uniqueIdentifier'.lower():
+	        self.fail( "Anon should not be able to read attributes from user entries. Got: " +
+		           str(getAttrNames(res[0])) )
+
+    def test_T0030_anon_search_multi(self):
+	# Anon trying to find mulitple entries
+	# This should limit at 2 entries returned
+	try:
+	    res = self.ldap_anon.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=*)' )
+
+	    self.assertEqual( len(res), 2,
+	            "Search for (uid=*) should return exactly 2 entries. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
 ########################################################################
 # Main program
