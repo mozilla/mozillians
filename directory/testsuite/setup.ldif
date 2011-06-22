@@ -1,3 +1,5 @@
+# All the passwords are 'secret'
+#
 dn: uniqueIdentifier=test001,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
 objectclass: person
@@ -8,6 +10,7 @@ sn: 001
 uniqueIdentifier: test001
 description: Applicant 001
 uid: test001
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 mail: test001@mozillians.org
 telephoneNumber: +44 1234 567001
 
@@ -21,6 +24,66 @@ sn: 002
 uniqueIdentifier: test002
 description: Applicant 002
 uid: test002
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 mail: test002@mozillians.org
 telephoneNumber: +44 1234 567002
+
+dn: uniqueIdentifier=test003,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 003
+cn: Test 003
+sn: 003
+uniqueIdentifier: test003
+description: Applicant 003
+uid: test003
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
+mail: test003@mozillians.org
+telephoneNumber: +44 1234 567003
+
+dn: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 011
+cn: Test Mozillian 011
+sn: 011
+uniqueIdentifier: test011
+description: Mozillian 011
+uid: test011
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
+mail: test011@mozillians.org
+telephoneNumber: +44 1234 567011
+mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
+
+dn: uniqueIdentifier=test012,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 012
+cn: Test Mozillian 012
+sn: 012
+uniqueIdentifier: test012
+description: Mozillian 012
+uid: test012
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
+mail: test012@mozillians.org
+telephoneNumber: +44 1234 567012
+mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
+
+dn: uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org
+objectclass: inetOrgPerson
+objectclass: person
+objectclass: mozilliansPerson
+displayName: Test 013
+cn: Test Mozillian 013
+sn: 013
+uniqueIdentifier: test013
+description: Mozillian 013
+uid: test013
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
+mail: test013@mozillians.org
+telephoneNumber: +44 1234 567013
+mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
 
