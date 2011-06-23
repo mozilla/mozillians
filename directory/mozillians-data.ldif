@@ -1450,6 +1450,18 @@ mozilliansVouchedBy: uniqueIdentifier=1,ou=people,dc=mozillians,dc=org
 sn: Wadensjöö
 cn: Åke Wadensjöö
 displayName: Åke Wadensjöö
-userPassword: {SSHA}6v9NTMhqMFpUORpqpCynb5E05eme3UrJ
+userPassword: secret
 description: Ne révèle pas le dénouement SVP. $ Se upp för nationella tecken $ Uważaj na znaki narodowe $ احترس من الشخصيات الوطنية
 uid: Åke
+
+dn: uniqueIdentifier=7,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+objectClass: mozilliansPerson
+uniqueIdentifier: 7
+sn: Applicant
+cn: An Applicant
+displayName: An Applicant
+userPassword: secret
+description: An Applicant
+uid: 7
+

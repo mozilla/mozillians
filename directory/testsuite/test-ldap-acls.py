@@ -224,6 +224,26 @@ class LdapAclTest(unittest.TestCase):
         ldap_check.unbind()
 
 
+    # Changing own user attributes
+    def change_user_attributes(self, user, userDN, ldap_conn):
+        try:
+	    ldap_conn.modify_s(
+	        userDN,
+		    [
+		        (ldap.MOD_REPLACE,'cn','modified CN'),
+		        (ldap.MOD_REPLACE,'sn','modified SN'),
+		        (ldap.MOD_REPLACE,'displayName','modified displayName'),
+		        (ldap.MOD_REPLACE,'mail',['new@mail.one','new@mail.two']),
+		        (ldap.MOD_REPLACE,'uid','modified UID'),
+		        (ldap.MOD_REPLACE,'telephoneNumber',['+1 234','+5-678-90']),
+		        (ldap.MOD_REPLACE,'description','modified description'),
+		        (ldap.MOD_REPLACE,'jpegPhoto','modified jpegPhoto'),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( user + " cannot modify their own user atttributes " + str(sys.exc_info()[0]) )
+
+
 
     #######################################################################################
     # Actual tests start here
@@ -284,7 +304,7 @@ class LdapAclTest(unittest.TestCase):
         except ldap.LDAPError:
 	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
-    def test_T0020_applicant_search_person(self):
+    def test_T6040_applicant_search_person(self):
 	# Applicant trying to find a person entry that is not their own
 	# This should work, but not expose any data apart from the DN
 	try:
@@ -305,19 +325,23 @@ class LdapAclTest(unittest.TestCase):
 	        self.fail( "Applicant should not be able to read attributes from user entries. Got: " +
 		           str(getAttrNames(res[0])) )
 
-    def test_T0030_applicant_search_multi(self):
-	# Applicant trying to find multiple entries
-	# The filter matches 3 in this case
-	# This should limit at 2 entries returned
-	try:
-	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
-		res = self.ldap_applicant001.search_s(
-			people_node,
-			ldap.SCOPE_SUBTREE,
-			filterstr='(uid=test00*)' )
-
-        except ldap.LDAPError:
-	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+# It is not practical to enforce different limits on Applicants and Mozillians
+# with the current implementation because the limits statement in OpenLDAP does not accept
+# set specifications
+#
+#    def test_T6050_applicant_search_multi(self):
+#	# Applicant trying to find multiple entries
+#	# The filter matches 3 in this case
+#	# This should limit at 2 entries returned
+#	try:
+#	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
+#		res = self.ldap_applicant001.search_s(
+#			people_node,
+#			ldap.SCOPE_SUBTREE,
+#			filterstr='(uid=test00*)' )
+#
+#        except ldap.LDAPError:
+#	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
     def test_T6030_mozillian_search_person(self):
 	# Mozillian trying to find a person entry
@@ -393,6 +417,117 @@ class LdapAclTest(unittest.TestCase):
 
 	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
 	    self.ldap_applicant001.passwd_s(ldap_mozillian012DN, None, 'owned!')
+
+    def test_T6010_applicant_change_user_attributes(self):
+        self.change_user_attributes(
+	        'Applicant',
+                ldap_applicant001DN,
+		self.ldap_applicant001 )
+
+    def test_T6010_mozillian_change_user_attributes(self):
+        self.change_user_attributes(
+	        'Mozillian',
+                ldap_mozillian011DN,
+		self.ldap_mozillian011 )
+
+    def test_T6010_mozillian_delete_uid(self):
+	# Users should not be able to delete uid as then it will be
+	# impossible for them to log in again
+	# The error here is OBJECT_CLASS_VIOLATION because this is enforced
+	# by a DIT content rule rather than an ACL
+        with self.assertRaises(ldap.OBJECT_CLASS_VIOLATION):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_mozillian011DN,
+		    [
+		        (ldap.MOD_DELETE,'uid',None),
+		    ]
+		)
+
+
+    def test_T6020_mozillian_read_obscure_attrs(self):
+	# Mozillian reading more obscure attributes in their own entry
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_mozillian011DN,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['mozilliansVouchedBy','modifiersName','modifyTimestamp','userPassword'] )
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search own entry " + str(sys.exc_info()[0]) )
+
+	if not getAttrValue(res[0],'modifiersName'):
+	    self.fail( "Mozillian should see their own modifiersName value" )
+	if not getAttrValue(res[0],'modifyTimestamp'):
+	    self.fail( "Mozillian should see their own modifyTimestamp value" )
+	if not getAttrValue(res[0],'mozilliansVouchedBy'):
+	    self.fail( "Mozillian should see their own mozilliansVouchedBy value" )
+	# Should NOT see own password
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "Mozillian should not see their own userPassword value" )
+
+
+    def test_T5010_mozillian_vouch_for_applicant(self):
+        try:
+	    self.ldap_mozillian011.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_mozillian011DN) ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot vouch for applicant " + str(sys.exc_info()[0]) )
+
+    def test_T5010_mozillian_fake_vouch_for_applicant(self):
+	# Mozillian should not be able to put someone else's DN into
+	# an applicant's mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
+
+    def test_T5010_mozillian_unvouch_applicant(self):
+	# Mozillian should not be able to remove any value from
+	# an applicant's mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
+		)
+
+    def test_T5020_mozillian_fake_vouch_for_self(self):
+	# Mozillian should not be able to modify
+	# their own mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_mozillian011DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
+
+    def test_T5020_applicant_fake_vouch_for_self(self):
+	# Applicant should not be able to modify
+	# their own mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
+
+    def test_T5020_mozillian_fake_unvouch_self(self):
+	# Mozillian should not be able to modify
+	# their own mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_mozillian011DN,
+		    [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
+		)
+
+    def test_T5030_applicant_fake_vouch_for_another(self):
+	# Applicant should not be able to modify
+	# another applicant's mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.modify_s(
+		    ldap_applicant002DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
 
 
 ########################################################################
