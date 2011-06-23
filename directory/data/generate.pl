@@ -115,6 +115,10 @@ for ($count=0;$count<$howmany;$count++) {
 		print LDIF "homeDirectory: /home/$uid\n";
 		print LDIF "gecos: $gecos\n";
 	}
+	# Vouch for some of the test users
+	if ($count%3) {
+		print LDIF "mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org\n";
+	}
 	print LDIF "\n";
 
 	################################################

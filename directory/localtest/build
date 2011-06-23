@@ -2,4 +2,4 @@
 
 x-load-ldif -a ../mozillians-structure.ldif
 x-load-ldif -a ../mozillians-data.ldif
-x-load-ldif -a ../data/names.ldif
+x-load-ldif -a ../mozillians-bulk-test-data.ldif

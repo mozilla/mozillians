@@ -1,5 +1,7 @@
 # All the passwords are 'secret'
 #
+
+# three Applicants
 dn: uniqueIdentifier=test001,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
 objectclass: person
@@ -42,6 +44,7 @@ userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 mail: test003@mozillians.org
 telephoneNumber: +44 1234 567003
 
+# three Mozillians
 dn: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
 objectclass: person
@@ -86,4 +89,12 @@ userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 mail: test013@mozillians.org
 telephoneNumber: +44 1234 567013
 mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
+
+# Temporary system accounts for testing
+dn: uid=test999,ou=accounts,ou=system,dc=mozillians,dc=org
+objectClass: account
+objectClass: simpleSecurityObject
+uid: test999
+description: Testing a system agent
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 

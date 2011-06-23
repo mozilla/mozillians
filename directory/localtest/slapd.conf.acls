@@ -41,6 +41,12 @@ objectclass ( 1.3.6.1.4.1.13769.3000.3.1
         MAY ( cn $ sn $ displayname $ mail $ uid $ telephoneNumber $ jpegPhoto $ description )
         )
 
+# Replicators have overriding read-only access to everything
+
+access to *
+	by group="cn=replicators,ou=groups,ou=system,dc=mozillians,dc=org" read
+	by * break
+
 # Permit everyone to read the service entries
 
 access to dn.exact=""
@@ -71,19 +77,19 @@ access to attrs="@attrsetSelfModifiable"
 	by self write
 	by * break
 
-# Massive simplification for now:
-# treat all authenticated users as Mozillians
-# even if they have not been vouched for
-
 # User may read their own voucher but not modify it
 access to attrs="mozilliansVouchedBy"
 	by self read
 	by * break
 
 # Mozillians may add their own DN to another user's voucher attribute
-access to attrs="mozilliansVouchedBy" val.regex="^(.*)$"
-	by dn.exact,expand="${v1}" set="user/mozilliansVouchedBy" add
+access to attrs="mozilliansVouchedBy"
+	by set="user/mozilliansVouchedBy" selfadd
 	by * break
+
+#access to attrs="mozilliansVouchedBy" val.regex="^(.*)$"
+#	by dn.exact,expand="${v1}" set="user/mozilliansVouchedBy" add
+#	by * break
 
 # Mozillians may read/search everyone's voucher attribute
 access to attrs="mozilliansVouchedBy"
@@ -104,12 +110,26 @@ access to attrs="entry"
 
 access to attrs="uid"
 	by anonymous search
+	by self read
 	by users search
 	by * break
 
 access to attrs="uniqueIdentifier"
 	by anonymous read
+	by users read
+	by * break
+
+# We have to allow anon search on objectclass as clients often include
+# it in the filter when looking for the user entry in order to authenticate
+access to attrs="objectClass"
+	by anonymous search
+	by self read
 	by users search
+	by * break
+
+# Allow all users to see everything in their own entry that is not restricted above
+access to *
+	by self read
 	by * break
 
 # Default deny
