@@ -25,7 +25,7 @@ from ldif import LDIFParser
 ldap_url = 'ldap://localhost:1389/'
 ldap_suffix = 'dc=mozillians,dc=org'
 
-people_node = 'ou=People,' + ldap_suffix
+people_node = 'ou=people,dc=mozillians,dc=org'
 
 # Credentials for the all-powerful user
 # (Don't put the password for your production server here!)
@@ -47,6 +47,11 @@ ldap_sys999PW = 'secret'
 # DNs of some victims
 ldap_applicant002DN = 'uniqueIdentifier=test002,ou=people,dc=mozillians,dc=org'
 ldap_mozillian012DN = 'uniqueIdentifier=test012,ou=people,dc=mozillians,dc=org'
+ldap_newuserDN = 'uniqueIdentifier=testnew,ou=people,dc=mozillians,dc=org'
+ldap_sys900DN = 'uid=test900,ou=accounts,ou=system,dc=mozillians,dc=org'
+
+# The root of the system part of the DIT
+system_suffix = 'ou=system,dc=mozillians,dc=org'
 
 # Where the LDAP server keeps its monitoring stats
 monitor_suffix = 'cn=Monitor'
@@ -55,6 +60,9 @@ monitor_group = 'cn=monitors,ou=groups,ou=system,dc=mozillians,dc=org'
 
 # Group of accounts that may replicate the entire DIT
 replicator_group = 'cn=replicators,ou=groups,ou=system,dc=mozillians,dc=org'
+
+# Group of accounts that can manage user and group entries
+admin_group = 'cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org'
 
 # The name of the setup file
 setup_ldif = 'setup.ldif'
@@ -191,6 +199,22 @@ def tearDownCommon(self):
     self.ldap_mozillian011.unbind()
     self.ldap_sys999.unbind()
 
+
+# Changing password
+def change_and_check_password(self, user, userDN, ldap_conn, old_pw, new_pw):
+    try:
+	ldap_conn.passwd_s(userDN, old_pw, new_pw)
+    except:
+	self.fail( user + " cannot change password: " + str(sys.exc_info()[0]) )
+
+    try:
+	ldap_check = ldap.initialize(ldap_url)
+	ldap_check.simple_bind_s(userDN, new_pw)
+    except:
+	self.fail( user + " cannot bind with new password: " + str(sys.exc_info()[0]) )
+
+    ldap_check.unbind()
+
 ########################################################################
 # Tests
 ########################################################################
@@ -238,22 +262,6 @@ class LdapUserTests(unittest.TestCase):
         # Did we get any Mozillians attributes?
 	self.assertTrue( attrValueMatch( res[0], 'attributetypes', 'mozillians' ),
 	                 "Mozillians attribute types must be listed in schema" )
-
-
-    # Changing password
-    def change_and_check_password(self, user, userDN, ldap_conn, old_pw, new_pw):
-        try:
-	    ldap_conn.passwd_s(userDN, old_pw, new_pw)
-        except:
-	    self.fail( user + " cannot change password: " + str(sys.exc_info()[0]) )
-
-        try:
-            ldap_check = ldap.initialize(ldap_url)
-	    ldap_check.simple_bind_s(userDN, new_pw)
-        except:
-	    self.fail( user + " cannot bind with new password: " + str(sys.exc_info()[0]) )
-
-        ldap_check.unbind()
 
 
     # Changing own user attributes
@@ -336,6 +344,24 @@ class LdapUserTests(unittest.TestCase):
         except ldap.LDAPError:
 	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
+    def test_T0040_anon_fake_vouch_for_applicant(self):
+	# Anon should not be able to put a DN into
+	# an applicant's mozilliansVouchedBy attribute
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_anon.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
+
+    def test_T0040_anon_fake_cn(self):
+	# Anon should not be able to put a value into
+	# an applicant's cn attribute
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_anon.modify_s(
+		    ldap_applicant001DN,
+		    [ (ldap.MOD_REPLACE,'cn','modified CN') ]
+		)
+
     def test_T6040_applicant_search_person(self):
 	# Applicant trying to find a person entry that is not their own
 	# This should work, but not expose any data apart from the DN
@@ -374,9 +400,41 @@ class LdapUserTests(unittest.TestCase):
 #        except ldap.LDAPError:
 #	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
-    def test_T6030_mozillian_search_person(self):
-	# Mozillian trying to find a person entry
-	# This should work, but not expose any data apart from the DN
+    def test_T6030_mozillian_search_mozillian(self):
+	# Mozillian searching for a person entry (another Mozillian in this case)
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test012)' )
+
+	    self.assertEqual( len(res), 1,
+	            "Mozillian search for (uid=test012) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "Mozillian should see the objectClass value" )
+	if not getAttrValue(res[0],'cn'):
+	    self.fail( "Mozillian should see the cn value" )
+	if not getAttrValue(res[0],'sn'):
+	    self.fail( "Mozillian should see the sn value" )
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "Mozillian should see the uid value" )
+	if not getAttrValue(res[0],'uniqueIdentifier'):
+	    self.fail( "Mozillian should see the uniqueIdentifier value" )
+	if not getAttrValue(res[0],'mozilliansVouchedBy'):
+	    self.fail( "Mozillian should see the mozilliansVouchedBy value" )
+
+        # Now test to see if we got any attributes that we should not see (T1050)
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "Mozillian should not be able to read passwords" )
+
+
+    def test_T6030_mozillian_search_applicant(self):
+	# Mozillian searching for a person entry (an applicant in this case)
 	try:
 	    res = self.ldap_mozillian011.search_s(
 		    people_node,
@@ -401,9 +459,22 @@ class LdapUserTests(unittest.TestCase):
 	if not getAttrValue(res[0],'uniqueIdentifier'):
 	    self.fail( "Mozillian should see the uniqueIdentifier value" )
 
-        # Now test to see if we got any attributes that we should not see
+        # Now test to see if we got any attributes that we should not see (T1050)
 	if getAttrValue(res[0],'userPassword'):
 	    self.fail( "Mozillian should not be able to read passwords" )
+
+	# There should not be a vouched entry in an applicant
+	if getAttrValue(res[0],'mozilliansVouchedBy'):
+	    self.fail( "Mozillian should see the mozilliansVouchedBy value" )
+
+    def test_T6060_mozillian_delete_applicant(self):
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_mozillian011.delete_s(ldap_applicant002DN)
+
+    def test_T6060_mozillian_delete_self(self):
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_mozillian011.delete_s(ldap_mozillian011DN)
+
 
     def test_T0030_mozillian_search_multi(self):
 	# Mozillian trying to find multiple entries
@@ -422,7 +493,8 @@ class LdapUserTests(unittest.TestCase):
 
 
     def test_T1010_applicant_change_password(self):
-        self.change_and_check_password(
+        change_and_check_password(
+		self,
 	        'Applicant',
                 ldap_applicant001DN,
 		self.ldap_applicant001,
@@ -430,7 +502,8 @@ class LdapUserTests(unittest.TestCase):
 		'evenmoresecret' )
 
     def test_T1010_mozillian_change_password(self):
-        self.change_and_check_password(
+        change_and_check_password(
+		self,
 	        'Mozillian',
                 ldap_mozillian011DN,
 		self.ldap_mozillian011,
@@ -494,7 +567,7 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Mozillian should see their own modifyTimestamp value" )
 	if not getAttrValue(res[0],'mozilliansVouchedBy'):
 	    self.fail( "Mozillian should see their own mozilliansVouchedBy value" )
-	# Should NOT see own password
+	# Should NOT see own password (T1050)
 	if getAttrValue(res[0],'userPassword'):
 	    self.fail( "Mozillian should not see their own userPassword value" )
 
@@ -536,8 +609,8 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Applicant should see their own modifyTimestamp value" )
 	# There should not be a mozilliansVouchedBy value in an applicant entry!
 	if getAttrValue(res[0],'mozilliansVouchedBy'):
-	    self.fail( "Applicant should see their own mozilliansVouchedBy value" )
-	# Should NOT see own password
+	    self.fail( "Applicant should not have a mozilliansVouchedBy value" )
+	# Should NOT see own password (T1050)
 	if getAttrValue(res[0],'userPassword'):
 	    self.fail( "Applicant should not see their own userPassword value" )
 
@@ -606,6 +679,77 @@ class LdapUserTests(unittest.TestCase):
 		)
 
 
+    def test_T7030_mozillian_add_entry(self):
+	# Should not be able to add entries
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
+
+    def test_T7030_applicant_add_entry(self):
+	# Should not be able to add entries
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
+
+    def test_T8010_mozillian_hack_people_node(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+	        people_node,
+		    [
+		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
+		    ]
+		)
+
+    def test_T8010_applicant_hack_people_node(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_applicant001.modify_s(
+	        people_node,
+		    [
+		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
+		    ]
+		)
+
+    def test_T8030_applicant_snooping_on_system_tree(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_applicant001.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+
+    def test_T8030_mozillian_snooping_on_system_tree(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_mozillian011.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+
+
     def test_T9010_uid_must_be_unique(self):
 	# There is already an entry with uid=test002 in the test data
 	# so we should not be able to change our own UID to clash
@@ -643,19 +787,19 @@ class LdapMonitorUserTests(unittest.TestCase):
 	# Now clear out test entries and close connections
     	tearDownCommon(self)
 
-    def test_T8050_mozillian_snooping_on_stats(self):
+    def test_T7050_mozillian_snooping_on_stats(self):
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
 
-    def test_T8050_anon_snooping_on_stats(self):
+    def test_T7050_anon_snooping_on_stats(self):
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
 
-    def test_T8050_monitor_read_suffix(self):
+    def test_T7050_monitor_read_suffix(self):
         try:
 	    res = self.ldap_sys999.search_s(
 	            monitor_suffix,
@@ -671,7 +815,7 @@ class LdapMonitorUserTests(unittest.TestCase):
 	if not getAttrValue(res[0],'monitoredInfo'):
 	    self.fail( "Monitor account should be able to see monitoredInfo in cn=monitor" )
 
-    def test_T8050_monitor_read_stats(self):
+    def test_T7050_monitor_read_stats(self):
         try:
 	    res = self.ldap_sys999.search_s(
 	            'cn=Total,cn=Connections,'+monitor_suffix,
@@ -688,6 +832,44 @@ class LdapMonitorUserTests(unittest.TestCase):
 	if not getAttrValue(res[0],'modifyTimestamp'):
 	    self.fail( "Monitor account should be able to see modifyTimestamp" )
 
+    def test_T8040_monitor_change_own_password(self):
+        change_and_check_password(
+		self,
+	        'LDAPAdmin',
+                ldap_sys999DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+    def test_T8030_monitor_snooping_on_system_tree(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+
+    def test_T6060_monitor_delete_applicant(self):
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+
+    def test_T7030_monitor_add_entry(self):
+	# Should not be able to add entries
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
 
 class LdapReplicatorsUserTests(unittest.TestCase):
 
@@ -759,6 +941,288 @@ class LdapReplicatorsUserTests(unittest.TestCase):
 	            str(sys.exc_info()[0]) )
 
         # print "Got", len(res), "entries"
+
+
+    def test_T7020_replicator_read_system_tree(self):
+        try:
+	    res = self.ldap_sys999.search_s(
+	            system_suffix,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)'
+		    )
+        except ldap.LDAPError:
+	    self.fail( "Replicator user cannot read the system data at "+system_suffix+" " +
+	            str(sys.exc_info()[0]) )
+
+        try:
+	    res = self.ldap_sys999.search_s(
+	            monitor_group,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)'
+		    )
+        except ldap.LDAPError:
+	    self.fail( "Replicator user cannot read the system data at "+monitor_group+" " +
+	            str(sys.exc_info()[0]) )
+	if not getAttrValue(res[0],'member'):
+	    self.fail( "Replicator account should be able to see members in system groups" )
+
+    def test_T6060_replicator_delete_applicant(self):
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+
+    def test_T7030_replicator_add_entry(self):
+	# Should not be able to add entries
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
+
+    def test_T8010_replicator_hack_people_node(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.modify_s(
+	        people_node,
+		    [
+		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
+		    ]
+		)
+
+class LdapAdminsUserTests(unittest.TestCase):
+
+    # These tests require a system user in the Admins group
+
+    def setUp(self):
+    	setUpCommon(self)
+	# Add test user to group
+	self.ldap_rootDN.modify_s(
+		admin_group,
+		[ (ldap.MOD_ADD,'member',ldap_sys999DN) ]
+	    )
+
+    def tearDown(self):
+	# Remove test user from group
+	self.ldap_rootDN.modify_s(
+		admin_group,
+		[ (ldap.MOD_DELETE,'member',ldap_sys999DN) ]
+	    )
+	# Now clear out test entries and close connections
+    	tearDownCommon(self)
+
+    def test_T7010_admin_read_suffix(self):
+        try:
+	    res = self.ldap_sys999.search_s(
+	            ldap_suffix,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['*','+']
+		)
+        except ldap.LDAPError:
+	    self.fail( "Admin user cannot read "+ldap_suffix+" " + str(sys.exc_info()[0]) )
+
+	if not getAttrValue(res[0],'objectclass'):
+	    self.fail( "Admin account should be able to see objectclass in suffix entry" )
+
+    def test_T1050_admin_read_password(self):
+	# Although this account can change passwords it should not be able to read them
+        try:
+	    res = self.ldap_sys999.search_s(
+	            ldap_applicant002DN,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['uid','userPassword']
+		)
+        except ldap.LDAPError:
+	    self.fail( "Admin user cannot read "+ldap_applicant002DN+" " + str(sys.exc_info()[0]) )
+
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "Admin account should be able to see uid in user entry" )
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "Admin account should not be able to see userPassword in user entry" )
+
+    def test_T1030_admin_change_mozillian_password(self):
+        change_and_check_password(
+		self,
+	        'LDAPAdmin',
+                ldap_mozillian011DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+    def test_T1030_admin_change_applicant_password(self):
+        change_and_check_password(
+		self,
+	        'LDAPAdmin',
+                ldap_applicant002DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+    def test_T8040_admin_change_own_password(self):
+        change_and_check_password(
+		self,
+	        'LDAPAdmin',
+                ldap_sys999DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+
+    def test_T2010_admin_search_mozillian(self):
+	# LDAP Admin searching for a person entry
+	try:
+	    res = self.ldap_sys999.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test012)' )
+
+	    self.assertEqual( len(res), 1,
+	            "LDAP Admin search for (uid=test012) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "LDAP Admin should see the objectClass value" )
+	if not getAttrValue(res[0],'cn'):
+	    self.fail( "LDAP Admin should see the cn value" )
+	if not getAttrValue(res[0],'sn'):
+	    self.fail( "LDAP Admin should see the sn value" )
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "LDAP Admin should see the uid value" )
+	if not getAttrValue(res[0],'uniqueIdentifier'):
+	    self.fail( "LDAP Admin should see the uniqueIdentifier value" )
+	if not getAttrValue(res[0],'mozilliansVouchedBy'):
+	    self.fail( "LDAP Admin should see the mozilliansVouchedBy value" )
+
+        # Now test to see if we got any attributes that we should not see (T1050)
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "LDAP Admin should not be able to read passwords" )
+
+
+    def test_T2020_admin_change_user_attributes(self):
+        try:
+	    self.ldap_sys999.modify_s(
+	        ldap_mozillian012DN,
+		    [
+		        (ldap.MOD_REPLACE,'cn','modified CN'),
+		        (ldap.MOD_REPLACE,'sn','modified SN'),
+		        (ldap.MOD_REPLACE,'displayName','modified displayName'),
+		        (ldap.MOD_REPLACE,'mail',['new@mail.one','new@mail.two']),
+		        (ldap.MOD_REPLACE,'uid','modified UID'),
+		        (ldap.MOD_REPLACE,'telephoneNumber',['+1 234','+5-678-90']),
+		        (ldap.MOD_REPLACE,'description','modified description'),
+		        (ldap.MOD_REPLACE,'jpegPhoto','modified jpegPhoto'),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot modify Mozillian's user atttributes " + str(sys.exc_info()[0]) )
+
+
+    def test_T2030_admin_unvouch_user(self):
+        try:
+	    self.ldap_sys999.modify_s(
+	        ldap_mozillian012DN,
+		    [
+		        (ldap.MOD_DELETE,'mozilliansVouchedBy',None),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot un-vouch a user " + str(sys.exc_info()[0]) )
+
+    # LDAP Admin is allowed to put any value into the voucher attribute
+    def test_T2035_admin_revouch_user(self):
+        try:
+	    self.ldap_sys999.modify_s(
+	        ldap_mozillian012DN,
+		    [
+		        (ldap.MOD_REPLACE,'mozilliansVouchedBy',ldap_mozillian012DN),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot un-vouch a user " + str(sys.exc_info()[0]) )
+
+    # LDAP Admin is allowed to delete user entries completely
+    def test_T2040_admin_delete_user(self):
+        try:
+	    self.ldap_sys999.delete_s(ldap_mozillian012DN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot delete a user " + str(sys.exc_info()[0]) )
+
+    # LDAP Admin is allowed to add new user entries
+    def test_T2060_admin_add_user(self):
+	global entry_list
+
+        try:
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_newuserDN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot add a user " + str(sys.exc_info()[0]) )
+
+    def test_T2060_admin_add_bad_user_entry(self):
+	# Should not be able to add entries with the wrong objectclass
+	# (mozilliansObject in place of mozilliansPerson in this case)
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansObject']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
+
+
+    def test_T2050_admin_hack_sys_password(self):
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!')
+
+
+    def test_T8010_admin_hack_people_node(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.modify_s(
+	        people_node,
+		    [
+		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
+		    ]
+		)
+
+    def test_T8030_ldapadmin_snooping_on_system_tree(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+	# Should not even see its own entry
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
 
 ########################################################################
 # Main program

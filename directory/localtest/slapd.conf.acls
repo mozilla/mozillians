@@ -56,49 +56,71 @@ access to dn.exact="cn=Subschema"
 	by * read
 
 # Permit everyone to read the main structural entries
+# Also allow LDAP Admins to add and delete user entries
 
 access to dn.exact="dc=mozillians,dc=org"
+	by * read
+
+access to dn.exact="ou=people,dc=mozillians,dc=org" attrs="children"
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
 	by * read
 
 access to dn.exact="ou=people,dc=mozillians,dc=org"
 	by * read
 
+# Block access to the system tree
+# (but leave just enough for system users to authenticate and change their own passwords)
+
+access to dn.children="ou=accounts,ou=system,dc=mozillians,dc=org" attrs="userPassword"
+	by self =w
+	by * auth
+
+access to dn.subtree="ou=system,dc=mozillians,dc=org"
+	by * none
+
 # Users may change their own passwords
+# LDAP Admins may change passwords for other people
 # Anon may authenticate
 
 access to attrs="userPassword"
 	by self =w
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" =w
 	by * auth
 
 # We allow all authenticated users to view and modify the basic
-# informational attributes in their entry
-
+# informational attributes in their own entry
+# LDAP Admins can change these attributes in any user entry
 access to attrs="@attrsetSelfModifiable"
 	by self write
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by * break
+
+# LDAP Admins can modify a few more attributes than normal users can
+access to attrs="objectclass,uniqueidentifier"
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
 	by * break
 
 # User may read their own voucher but not modify it
+# Mozillians may add their own DN to another user's voucher attribute
+# Mozillians may read/search everyone's voucher attribute
+# LDAP Admins may change the voucher attribute in any way
 access to attrs="mozilliansVouchedBy"
 	by self read
-	by * break
-
-# Mozillians may add their own DN to another user's voucher attribute
-access to attrs="mozilliansVouchedBy"
 	by set="user/mozilliansVouchedBy" selfadd
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
 	by * break
 
-#access to attrs="mozilliansVouchedBy" val.regex="^(.*)$"
-#	by dn.exact,expand="${v1}" set="user/mozilliansVouchedBy" add
-#	by * break
-
-# Mozillians may read/search everyone's voucher attribute
-access to attrs="mozilliansVouchedBy"
-	by set="user/mozilliansVouchedBy" read
+# LDAP Admins may add and delete user entries
+# but only if they have the correct objectClass
+access to dn.onelevel="ou=people,dc=mozillians,dc=org" filter="(&(objectClass=inetOrgPerson)(objectClass=mozilliansPerson))" attrs="entry"
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
 	by * break
 
 # Mozillians may read/search everything that is not restricted above
+# LDAP Admins may do the same
 access to *
 	by set="user/mozilliansVouchedBy" read
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" read
 	by * break
 
 # Anon may read and search just enough to find a DN given a uid

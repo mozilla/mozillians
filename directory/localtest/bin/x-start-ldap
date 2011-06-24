@@ -35,6 +35,9 @@ cat > openldap-db/DB_CONFIG <<EOF
 
 set_cachesize 0 1000000 1
 set_flags DB_LOG_AUTOREMOVE
+
+# This flag is extremely dangerous to the health of your data
+set_flags DB_TXN_NOSYNC
 EOF
 fi
 

@@ -98,3 +98,10 @@ uid: test999
 description: Testing a system agent
 userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 
+dn: uid=test900,ou=accounts,ou=system,dc=mozillians,dc=org
+objectClass: account
+objectClass: simpleSecurityObject
+uid: test900
+description: Testing a system agent
+userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
+
