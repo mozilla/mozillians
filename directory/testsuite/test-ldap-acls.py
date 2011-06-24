@@ -64,6 +64,9 @@ replicator_group = 'cn=replicators,ou=groups,ou=system,dc=mozillians,dc=org'
 # Group of accounts that can manage user and group entries
 admin_group = 'cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org'
 
+# Group of accounts that can register new users
+regAgent_group = 'cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org'
+
 # The name of the setup file
 setup_ldif = 'setup.ldif'
 
@@ -761,6 +764,17 @@ class LdapUserTests(unittest.TestCase):
 		    ]
 		)
 
+    def test_T9010_uid_must_be_unique_even_when_forced(self):
+	# There is already an entry with uid=test002 in the test data
+	# so even rootDN should not be able to change a UID to clash
+        with self.assertRaises(ldap.CONSTRAINT_VIOLATION):
+	    self.ldap_rootDN.modify_s(
+	        ldap_mozillian011DN,
+		    [
+		        (ldap.MOD_REPLACE,'uid','test002'),
+		    ]
+		)
+
 
 class LdapMonitorUserTests(unittest.TestCase):
 
@@ -1223,6 +1237,242 @@ class LdapAdminsUserTests(unittest.TestCase):
 	# Should not even see its own entry
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
+
+
+class RegistrationAgentTests(unittest.TestCase):
+
+    # These tests require a system user in the RegistrationAgent group
+
+    def setUp(self):
+    	setUpCommon(self)
+	# Add test user to group
+	self.ldap_rootDN.modify_s(
+		regAgent_group,
+		[ (ldap.MOD_ADD,'member',ldap_sys999DN) ]
+	    )
+
+    def tearDown(self):
+	# Remove test user from group
+	self.ldap_rootDN.modify_s(
+		regAgent_group,
+		[ (ldap.MOD_DELETE,'member',ldap_sys999DN) ]
+	    )
+	# Now clear out test entries and close connections
+    	tearDownCommon(self)
+
+    def test_T7010_regAgent_read_suffix(self):
+        try:
+	    res = self.ldap_sys999.search_s(
+	            ldap_suffix,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['*','+']
+		)
+        except ldap.LDAPError:
+	    self.fail( "regAgent user cannot read "+ldap_suffix+" " + str(sys.exc_info()[0]) )
+
+	if not getAttrValue(res[0],'objectclass'):
+	    self.fail( "regAgent account should be able to see objectclass in suffix entry" )
+
+    def test_T1050_regAgent_read_password(self):
+	# Although this account can change passwords it should not be able to read them
+        try:
+	    res = self.ldap_sys999.search_s(
+	            ldap_applicant002DN,
+		    ldap.SCOPE_BASE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['uid','userPassword']
+		)
+        except ldap.LDAPError:
+	    self.fail( "regAgent user cannot read "+ldap_applicant002DN+" " + str(sys.exc_info()[0]) )
+
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "regAgent account should be able to see uid in user entry" )
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "regAgent account should not be able to see userPassword in user entry" )
+
+    def test_T1030_regAgent_change_mozillian_password(self):
+        change_and_check_password(
+		self,
+	        'regAgent',
+                ldap_mozillian011DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+    def test_T1030_regAgent_change_applicant_password(self):
+        change_and_check_password(
+		self,
+	        'regAgent',
+                ldap_applicant002DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+    def test_T8040_regAgent_change_own_password(self):
+        change_and_check_password(
+		self,
+	        'LDAPregAgent',
+                ldap_sys999DN,
+		self.ldap_sys999,
+		None,
+		'evenmoresecret' )
+
+
+    def test_T3060_regAgent_search_mozillian(self):
+	# regAgent searching for a person entry
+	try:
+	    res = self.ldap_sys999.search_s(
+		    people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(uid=test012)' )
+
+	    self.assertEqual( len(res), 1,
+	            "regAgent search for (uid=test012) should return exactly one entry. We got "+str(len(res)) )
+            # print res[0]
+        except ldap.LDAPError:
+	    self.fail( "regAgent cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "regAgent should see the objectClass value" )
+	if not getAttrValue(res[0],'cn'):
+	    self.fail( "regAgent should see the cn value" )
+	if not getAttrValue(res[0],'sn'):
+	    self.fail( "regAgent should see the sn value" )
+	if not getAttrValue(res[0],'uid'):
+	    self.fail( "regAgent should see the uid value" )
+	if not getAttrValue(res[0],'uniqueIdentifier'):
+	    self.fail( "regAgent should see the uniqueIdentifier value" )
+	if not getAttrValue(res[0],'mozilliansVouchedBy'):
+	    self.fail( "regAgent should see the mozilliansVouchedBy value" )
+
+        # Now test to see if we got any attributes that we should not see (T1050)
+	if getAttrValue(res[0],'userPassword'):
+	    self.fail( "regAgent should not be able to read passwords" )
+
+
+    def test_T3040_regAgent_change_user_attributes(self):
+	# This should fail because it involves deleting a value as well as adding a new one
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.modify_s(
+	        ldap_mozillian012DN,
+		    [
+		        (ldap.MOD_REPLACE,'cn','modified CN'),
+		    ]
+		)
+
+
+    def test_T2030_regAgent_unvouch_user(self):
+	# We may permit the regAgent to vouch for users
+	# but we do not allow it to un-vouch
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.modify_s(
+	        ldap_mozillian012DN,
+		    [
+		        (ldap.MOD_DELETE,'mozilliansVouchedBy',None),
+		    ]
+		)
+
+    def test_T6060_replicator_delete_applicant(self):
+	# LDAP regAgent is not allowed to delete user entries
+        with self.assertRaises(ldap.LDAPError):
+	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+
+    # regAgent is allowed to add new user entries
+    def test_T3010_regAgent_add_user(self):
+	global entry_list
+
+        try:
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_newuserDN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP regAgent cannot add a user " + str(sys.exc_info()[0]) )
+
+    # regAgent is allowed to add new user entries that are pre-vouched
+    # It may set the password as well, but we would not normally do that by
+    # writing direct to the userPassword attribute like this test does
+    def test_T3020_regAgent_add_prevouched_user(self):
+	global entry_list
+
+        try:
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test'),
+			('mozilliansVouchedBy', ldap_mozillian012DN),
+			('userPassword','notverysecret')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_newuserDN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP regAgent cannot add a user " + str(sys.exc_info()[0]) )
+
+    def test_T3010_regAgent_add_bad_user_entry(self):
+	# Should not be able to add entries with the wrong objectclass
+	# (mozilliansObject in place of mozilliansPerson in this case)
+	global entry_list
+
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.add_s(
+	            ldap_newuserDN,
+                    [
+		        ('objectClass', ['inetOrgPerson','mozilliansObject']),
+			('uniqueIdentifier', 'testnew'),
+			('uid', 'testnew'),
+			('cn', 'Test new user'),
+			('sn', 'Test')
+		    ]
+		)
+	# Make sure that we clear this entry up afterwards
+        entry_list.append(ldap_newuserDN)
+
+
+    def test_T3050_regAgent_delete_applicant(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+
+    def test_T2050_regAgent_hack_sys_password(self):
+	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!')
+
+
+    def test_T8010_regAgent_hack_people_node(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_sys999.modify_s(
+	        people_node,
+		    [
+		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
+		    ]
+		)
+
+    def test_T8030_regAgent_snooping_on_system_tree(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+	# Should not even see its own entry
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+            self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
+
+
 
 ########################################################################
 # Main program

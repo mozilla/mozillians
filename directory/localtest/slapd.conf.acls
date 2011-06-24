@@ -18,7 +18,7 @@ add_content_acl on
 # and LDAP admins can change the objectClass attribute
 #
 # We also make both uid and uniqueIdentifier mandatory:
-#    uid is the username, so it is essential
+#    uid is the username, so it is essential for the user to locate their entry
 #    uniqueIdentifier is the naming attribute
 #
 # Note that because this is part of the schema, even the rootDN cannot break the rules
@@ -56,13 +56,14 @@ access to dn.exact="cn=Subschema"
 	by * read
 
 # Permit everyone to read the main structural entries
-# Also allow LDAP Admins to add and delete user entries
+# Also allow Registration Agents and LDAP Admins to add and delete user entries
 
 access to dn.exact="dc=mozillians,dc=org"
 	by * read
 
 access to dn.exact="ou=people,dc=mozillians,dc=org" attrs="children"
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" add
 	by * read
 
 access to dn.exact="ou=people,dc=mozillians,dc=org"
@@ -79,25 +80,30 @@ access to dn.subtree="ou=system,dc=mozillians,dc=org"
 	by * none
 
 # Users may change their own passwords
-# LDAP Admins may change passwords for other people
+# Registration Agents and LDAP Admins may change passwords for other people
 # Anon may authenticate
 
 access to attrs="userPassword"
 	by self =w
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" =w
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" =w
 	by * auth
 
 # We allow all authenticated users to view and modify the basic
 # informational attributes in their own entry
 # LDAP Admins can change these attributes in any user entry
+# Registration Agents can create and add to these attributes
+# but may not delete existing values
 access to attrs="@attrsetSelfModifiable"
 	by self write
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" add
 	by * break
 
 # LDAP Admins can modify a few more attributes than normal users can
 access to attrs="objectclass,uniqueidentifier"
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" add
 	by * break
 
 # User may read their own voucher but not modify it
@@ -108,12 +114,14 @@ access to attrs="mozilliansVouchedBy"
 	by self read
 	by set="user/mozilliansVouchedBy" selfadd
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" add
 	by * break
 
 # LDAP Admins may add and delete user entries
 # but only if they have the correct objectClass
 access to dn.onelevel="ou=people,dc=mozillians,dc=org" filter="(&(objectClass=inetOrgPerson)(objectClass=mozilliansPerson))" attrs="entry"
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" add
 	by * break
 
 # Mozillians may read/search everything that is not restricted above
