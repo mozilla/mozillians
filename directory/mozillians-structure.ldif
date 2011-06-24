@@ -104,3 +104,16 @@ cn: registrationAgents
 description: Group of accounts with the power to create new user entries
 member: uid=regAgent,ou=accounts,ou=system,dc=mozillians,dc=org
 
+# System policies
+#
+dn: ou=policies,ou=system,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: policies
+
+dn: cn=Default Password Policy,ou=policies,ou=system,dc=mozillians,dc=org
+objectClass: organizationalRole
+objectClass: pwdPolicy
+cn: Password Policy
+description: The default password policy
+pwdAttribute: userPassword
+
