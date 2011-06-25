@@ -22,7 +22,7 @@ and the vendor library can be reused for pure Python dependencies.
 3) Install requirements
 
     cd mozillians.org
-    sudo pip install -r requirements/compiled.txt
+    pip install -r requirements/compiled.txt
 
 4) Confirm the OpenLDAP server is installed (slapd)
 
