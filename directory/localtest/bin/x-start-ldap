@@ -6,11 +6,6 @@
 
 PROG=`basename "$0"`
 
-if test ! -f slapd.conf -a -f openldap/slapd.conf
-then
-	cd openldap
-fi
-
 if test ! -f slapd.conf
 then
 	echo "$PROG: must be run from the directory containing slapd.conf" 1>&2
