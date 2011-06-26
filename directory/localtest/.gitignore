@@ -1,0 +1,5 @@
+openldap-db/*
+schema
+slapd.args
+slapd.pid
+setup.sh
