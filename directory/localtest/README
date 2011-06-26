@@ -3,7 +3,7 @@ Running a local LDAP test server for development purposes
 
 This should be done as a normal user - NOT root.
 
-Copy the setup.ajf file to a file of your own (e.g. setup).
+Copy the setup.sh-dist file to a file of your own (e.g. setup.sh).
 Edit it and make sure that the PATH that it builds will contain
 a consistent set of LDAP tools. Many distros spread these around
 in three places, often something like:
@@ -18,7 +18,7 @@ e.g.:
 Now, whenever you need this test environment, you do:
 
 	cd .../localtest
-	. setup
+	. setup.sh
 
 You can then use commands like:
 
@@ -38,6 +38,11 @@ Note that all these commands will only work while in the directory
 containing the 'vars' and 'slapd.conf' files as they pick up config
 using relative paths. This does allow you to set up several different
 test environments very easily.
+
+The test server listens on port 1389 so if you want to access it with normal
+command-line tools you need to do something like this:
+
+ldapsearch -x -H ldap://:1389/ -b dc=mozillians,dc=org '(uid=gerv)'
 
 Andrew Findlay
 20 June 2011
