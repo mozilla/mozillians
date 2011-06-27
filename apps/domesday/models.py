@@ -80,7 +80,7 @@ class Person(ldapdb.models.Model):
     A Domesday person.
     """
     base_dn        = "ou=people,dc=mozillians,dc=org"
-    object_classes = ['inetOrgPerson', 'domesdayPerson']
+    object_classes = ['inetOrgPerson', 'mozilliansPerson']
 
     uid          = IntegerField(db_column='uid', max_length=256, 
                                 primary_key=True)
