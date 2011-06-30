@@ -18,7 +18,7 @@ fi
 #
 x-stop-ldap
 sleep 1
-rm openldap-db/* > /dev/null 2>&1
+rm ${openldap_db_path}/* > /dev/null 2>&1
 x-start-ldap
 sleep 1
 

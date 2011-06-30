@@ -16,15 +16,15 @@ fi
 . ./vars
 
 # Make the database directory if necessary
-if test ! -d openldap-db
+if test ! -d $openldap_db_path 
 then
-	mkdir openldap-db
+	mkdir $openldap_db_path
 fi
 
 # Create a DB_CONFIG if necessary
-if test ! -f openldap-db/DB_CONFIG
+if test ! -f ${openldap_db_path}/DB_CONFIG
 then
-cat > openldap-db/DB_CONFIG <<EOF
+cat > $openldap_db_path/DB_CONFIG <<EOF
 # Minimal DB_CONFIG file for development server
 # This is not suitable for production
 
