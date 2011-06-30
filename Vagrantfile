@@ -8,7 +8,7 @@ Vagrant::Config.run do |config|
     config.ssh.max_tries = 50
     config.ssh.timeout   = 300
 
-    config.vm.share_folder("v-root", "/vagrant", ".", :nfs => true)
+    config.vm.share_folder("v-root", "/vagrant", ".")
 
     # Add to /etc/hosts: 33.33.33.23 dev.playdoh.mozilla.org
     config.vm.network "33.33.33.23"
