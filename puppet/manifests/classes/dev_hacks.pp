@@ -31,10 +31,10 @@ class dev_hacks {
                 source => "/vagrant/puppet/files/etc/selinux/config",
                 owner => "root", group => "root", mode => 0644;
             }
-            exec { "disable_selinux_enforcement":
-                command => "/usr/sbin/setenforce 0",
-                unless => "/usr/sbin/getenforce | grep -q 'Disabled'";
-            }
+            #exec { "disable_selinux_enforcement":
+            #    command => "/usr/sbin/setenforce 0",
+            #    unless => "/usr/sbin/getenforce | grep -q 'Disabled'";
+            #}
 
         }
 

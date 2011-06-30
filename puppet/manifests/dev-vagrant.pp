@@ -5,9 +5,9 @@ import "classes/*.pp"
 
 $PROJ_DIR = "/vagrant"
 
-$DB_NAME = "playdoh"
-$DB_USER = "playdoh"
-$DB_PASS = "playdoh"
+$DB_NAME = "mozillians"
+$DB_USER = "mozillians"
+$DB_PASS = "mozillians"
 
 $USE_YUM_CACHE_ON_HOST = 0
 $USE_SOUTH = 0
