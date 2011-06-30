@@ -263,6 +263,24 @@ Some attributes will be required to have unique values, e.g. *uid* and *uniqueId
 All text attributes are in the UTF-8 character set
 (except for a few more restrictive ones like mail)
 
+.......................................
+Duplication of data in user entries
+.......................................
+
+Identical values may appear in multiple attributes.
+This may seem to be wasteful and against the principle of normalisation,
+but the reason is that each attribute serves a different purpose and thus in
+some cases may need a different value.
+
+An example of this is *cn* and *displayName* which will contain identical data
+in most entries. *cn* is used for searching, so it may have multiple values
+whereas *displayName* is used only for display and must have a single value.
+
+Another example is the mail address, which may appear in *mail* (as an informational
+attribute) and also in *uid* where it is being used as a username.
+Keeping the two concepts separate allows for a user to change their username
+without changing their e-mail address and vice-versa.
+
 =================================
 Access Control Rules
 =================================
