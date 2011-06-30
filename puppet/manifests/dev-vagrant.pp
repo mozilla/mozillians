@@ -16,7 +16,10 @@ class dev {
     class {
         dev_hacks: before => Class[repos];
         repos: before => Class[dev_tools];
-        dev_tools: before => Class[mysql];
+        dev_tools: before => Class[slapd];
+        #compilers: before => Class[bdb];
+        #bdb: before => Class[slapd];
+        slapd: before => Class[mysql];
         mysql: before => Class[python];
         python: before => Class[apache];
         apache: before => Class[playdoh_site];

@@ -1,7 +1,7 @@
 Vagrant::Config.run do |config|
 
-    config.vm.box = "centos-56-32"
-    config.vm.box_url = "http://people.mozilla.com/~lorchard/centos-56-32.box"
+    config.vm.box = "centos-56-32-openldap"
+    config.vm.box_url = "http://people.mozilla.com/~aking/mozillians/centos-56-32-openldap.box"
 
     # Increase vagrant's patience during hang-y CentOS bootup
     # see: https://github.com/jedi4ever/veewee/issues/14
