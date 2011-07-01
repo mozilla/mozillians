@@ -1,8 +1,11 @@
 # Get mysql up and running
 class mysql {
     package { "mysql-server": ensure => installed; }
-    package { "mysql-devel": ensure => installed; }
-    service { "mysqld": 
+    case $operatingsystem {
+        centos: { package { "mysql-devel": ensure => installed; }}
+        ubuntu: { package { "libmysqld-dev": ensure => installed; }}
+    }
+    service { "mysql": 
         ensure => running, 
         enable => true, 
         require => Package['mysql-server']

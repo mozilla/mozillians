@@ -1,7 +1,21 @@
 # Ensure some handy dev tools are available.
 class dev_tools {
-    package { 
-        [ "git", "vim-enhanced" ]:
-            ensure => installed;
+    case $operatingsystem {
+        centos: {
+            package { 
+                [ "git", "vim-enhanced" ]:
+                ensure => installed;
+            }
+        }
+
+        ubuntu: {
+            package { 
+                [ "git-core", "vim", "emacs" ]:
+                ensure => installed;
+            }
+        }
+
+
     }
+    
 }
