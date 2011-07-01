@@ -1405,6 +1405,22 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.fail( "LDAP Admin cannot add table entry "+ldap_table_new_entry_DN+" " + str(sys.exc_info()[0]) )
 
 
+    def test_T2070_ldapadmin_read_all_accounts(self):
+
+	# WARNING: this will take a long time if run on a server with a lot of entries
+	#          It may also cause memory exhaustion.
+        try:
+	    res = self.ldap_sys999.search_s(
+	            people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['*','+']
+		    )
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot enumerate the whole set of users " +
+	            str(sys.exc_info()[0]) )
+
+
 class RegistrationAgentTests(unittest.TestCase):
 
     # These tests require a system user in the RegistrationAgent group
