@@ -39,6 +39,8 @@ ldap_applicant001PW = 'secret'
 # Credentials for an existing vouched Mozillian
 ldap_mozillian011DN = 'uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org'
 ldap_mozillian011PW = 'secret'
+# A sample link entry DN for that user
+ldap_link011aDN = 'uniqueIdentifier=a,uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org'
 
 # Credentials for a system account
 ldap_sys999DN = 'uid=test999,ou=accounts,ou=system,dc=mozillians,dc=org'
@@ -479,6 +481,25 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Mozillian should not be able to read passwords" )
 
 
+    def test_T6085_mozillian_search_links(self):
+	# Mozillian searching for a link entry
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_mozillian013DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(mozilliansServiceURI=*)' )
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search for link entries under "+ldap_mozillian013DN+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "Mozillian should see the objectClass value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceURI'):
+	    self.fail( "Mozillian should see the mozilliansServiceURI value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceID'):
+	    self.fail( "Mozillian should see the mozilliansServiceID value in a link entry" )
+
+
     def test_T6030_mozillian_search_applicant(self):
 	# Mozillian searching for a person entry (an applicant in this case)
 	try:
@@ -739,6 +760,47 @@ class LdapUserTests(unittest.TestCase):
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_applicant001.modify_s(ldap_applicant002DN, modlist))
                            
+
+    def test_T6080_mozillian_manage_links(self):
+	try:
+	    self.ldap_mozillian011.add_s(
+		    ldap_link011aDN,
+		    [
+			('objectClass', 'mozilliansLink'),
+			('uniqueIdentifier', 'a'),
+			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceID', 'testeleven')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot add link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+        try:
+	    self.ldap_mozillian011.modify_s(
+		    ldap_link011aDN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','test-11')
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot modify link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+        try:
+	    self.ldap_mozillian011.delete_s(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot delete own link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+
+    def test_T6086_mozillian_hack_links(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_link013DN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','owned!')
+		    ]
+		)
 
 
     def test_T7030_mozillian_add_entry(self):
@@ -1157,6 +1219,25 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.fail( "LDAP Admin should not be able to read passwords" )
 
 
+    def test_T2025_admin_search_links(self):
+	# LDAP Admin searching for a link entry
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_mozillian013DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(mozilliansServiceURI=*)' )
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot search for link entries under "+ldap_mozillian013DN+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "LDAP Admin should see the objectClass value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceURI'):
+	    self.fail( "LDAP Admin should see the mozilliansServiceURI value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceID'):
+	    self.fail( "LDAP Admin should see the mozilliansServiceID value in a link entry" )
+
+
     def test_T2020_admin_change_user_attributes(self):
         try:
 	    self.ldap_sys999.modify_s(
@@ -1202,6 +1283,41 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.ldap_sys999.delete_s(ldap_mozillian012DN)
         except ldap.LDAPError:
 	    self.fail( "LDAP Admin cannot delete a user " + str(sys.exc_info()[0]) )
+
+    # LDAP Admin is allowed to delete link entries completely
+    def test_T2025_admin_delete_linkentry(self):
+        try:
+	    self.ldap_sys999.delete_s(ldap_link013DN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot delete a link entry " + str(sys.exc_info()[0]) )
+
+    def test_T2025_admin_add_links(self):
+	try:
+	    self.ldap_sys999.add_s(
+		    ldap_link011aDN,
+		    [
+			('objectClass', 'mozilliansLink'),
+			('uniqueIdentifier', 'a'),
+			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceID', 'testeleven')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot add link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+    def test_T2025_admin_manage_links(self):
+        try:
+	    self.ldap_sys999.modify_s(
+		    ldap_link013DN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','test-new-thirteen')
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot modify link entry "+ldap_link013DN+" " + str(sys.exc_info()[0]) )
+
 
     # LDAP Admin is allowed to add new user entries
     def test_T2060_admin_add_user(self):

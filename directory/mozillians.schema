@@ -25,6 +25,20 @@ attributetype ( 1.3.6.1.4.1.13769.3000.2.2 NAME 'mozilliansVouchedBy'
 	DESC 'DN of the user who vouched for this user'
 	SUP distinguishedName )
 
+attributetype ( 1.3.6.1.4.1.13769.3000.2.3 NAME 'mozilliansServiceURI'
+	DESC 'The URI of a service on which a Mozillian may have an account'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
+attributetype ( 1.3.6.1.4.1.13769.3000.2.4 NAME 'mozilliansServiceID'
+	DESC 'The ID used by a Mozillian on a remote service. Note that this is the public-visible ID, which may not be the same as the ID used to authenticate to that service.'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+	SINGLE-VALUE )
+
 ########################################################################
 # Object classes
 ########################################################################

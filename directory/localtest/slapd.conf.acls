@@ -21,13 +21,22 @@ add_content_acl on
 #    uid is the username, so it is essential for the user to locate their entry
 #    uniqueIdentifier is the naming attribute
 #
-# Note that because this is part of the schema, even the rootDN cannot break the rules
+# Note that because this is part of the schema, even the rootDN cannot easily break the rules
 
 ditcontentrule ( 2.16.840.1.113730.3.2.2
 	NAME 'dcrInetOrgPerson'
 	DESC 'Control content of inetOrgPerson entries'
 	AUX ( mozilliansObject $ mozilliansPerson )
 	MUST ( uid $ uniqueIdentifier )
+	)
+
+# Prevent unwanted objectclasses on link entries
+#
+# In this case the rule simply prevents the addition of other object classes
+
+ditcontentrule ( 1.3.6.1.4.1.13769.3000.1.3
+	NAME 'dcrMozilliansLink'
+	DESC 'Control content of mozilliansLink entries'
 	)
 
 # We define some attribute sets as objectclasses for convenience.
@@ -115,6 +124,27 @@ access to attrs="userPassword"
 	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" =w
 	by group/groupOfNames/member="cn=registrationAgents,ou=groups,ou=system,dc=mozillians,dc=org" =w
 	by * auth
+
+# User entries have link entries beneath them.
+# These may be created and modified by the user and by LDAP Admins.
+# They should be searchable by all Mozillians
+
+# First give access to the child entries of the user entry
+access to dn.onelevel="ou=people,dc=mozillians,dc=org" filter="(objectClass=inetOrgPerson)" attrs="children"
+	by self write
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by set="user/mozilliansVouchedBy" read
+	by * none
+
+# Now we match the entries using a regex pattern so that we can also work out
+# who owns them (captured into $1).
+# The filter makes sure that users cannot add any other sort of entry under their own entry.
+
+access to dn.regex="^[^,]+,(uniqueIdentifier=[^,]+,ou=people,dc=mozillians,dc=org)$" filter="(objectclass=mozilliansLink)"
+	by dn.regex="^$1$$" write
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by set="user/mozilliansVouchedBy" read
+	by * none
 
 # We allow all authenticated users to view and modify the basic
 # informational attributes in their own entry
