@@ -398,6 +398,7 @@ The 'T' codes are cross-references to the ACL test suite
  * T2040 ??? LDAPAdmin may remove user entries entirely ???
  * T2050 LDAPAdmin cannot see or modify any entries in the system tree
  * T2060 ??? LDAPAdmin may add new user entries
+ * T2070 LDAPAdmin is not subject to size or time limits on searches
 
  * T3010 regAgent may create new entries directly under ou=People - these must be inetOrgPerson/mozilliansPerson entries.
  * T3020 regAgent may populate certain attributes when creating entries: all user-modifiable attributes plus uniqueIdentifier, userPassword and objectClass
