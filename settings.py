@@ -1,4 +1,5 @@
-# Django settings file for a project based on the playdoh template.
+# -*- coding: utf-8 -*-
+# Django settings for the mozillians project.
 
 import os
 
@@ -162,10 +163,34 @@ MIDDLEWARE_CLASSES = (
     'commonware.middleware.FrameOptionsHeader',
 )
 
+# OpenLDAP
+import logging
+logger = logging.getLogger('django_auth_ldap')
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
+import ldap
+from django_auth_ldap.config import _LDAPConfig, LDAPSearch
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    #'django.contrib.auth.backends.ModelBackend', # Optional TODO use or not?
+)
+AUTH_LDAP_SERVER_URI = "ldap://localhost:1389"
+AUTH_LDAP_BIND_DN = ""
+AUTH_LDAP_BIND_PASSWORD = ""
+AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=people,dc=mozillians,dc=org",
+    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+
+AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn", "email": "mail"}
+AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory", "unique_id": "uniqueIdentifier", "phone": "telephoneNumber:", "voucher": "mozilliansVouchedBy"}
+
+
 ROOT_URLCONF = '%s.urls' % ROOT_PACKAGE
 
 INSTALLED_APPS = (
     'domesday',
+    'landing',
+    'phonebook',
+    'users',
     
     # Local apps
     'commons',  # Content common to most playdoh-based apps.
@@ -182,7 +207,7 @@ INSTALLED_APPS = (
 
     # Django contrib apps
     'django.contrib.auth',
-    'django_sha2',  # Load after auth to monkey-patch it.
+    'django_sha2',  # Load after auth to monkey-patch it. TODO - not needed?
 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -256,5 +281,7 @@ MINIFY_BUNDLES = {
     },
 }
 
+
 # Make sure LDAP operations go to the LDAP directory
-DATABASE_ROUTERS = ['ldapdb.router.Router']
+DATABASE_ROUTERS = ('ldapdb.router.Router',)
+

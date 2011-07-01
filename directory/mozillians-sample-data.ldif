@@ -345,7 +345,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2lu
  MTyfMcZPJwDgDJ9AAB6AYoor5zEbR+X/AKSj6WPw/wDby/OJ/9kK
 title: Grease Gun
 postalAddress: 22 Somewhere Street, Enfield, SW1A 1AA
-uid: gerv
+uid: 0
 
 dn: uniqueIdentifier=2,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -722,7 +722,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2lu
  G8vyzsxzjgnBIzXe5NTl2utP+3YnkQw7rptS5WmlZtLqm9/XzP/ZCg==
 title: Tour Guide
 telephoneNumber: +1 555 543 2100
-uid: davidb
+uid: 101
 
 dn: uniqueIdentifier=3,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -982,7 +982,7 @@ jpegPhoto::
  +t4rCwxMIxlGL5ZqesU9Vfv6nymEx9fJp+3w05Qk4Oj7rcbQlKE5LS2jlBP1V9z/2Qo=
 title: Director of Contributor Engagement
 telephoneNumber: +1 555-654-3210
-uid: mary@mozilla.com
+uid: 102
 
 dn: uniqueIdentifier=4,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -1133,7 +1133,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2lu
  EttrGmRR2ltdwTiPYLn+zmhkUlbqRiIxu+DtQ8PDUvD3ibxd4iktrTUYXXw1o13d3EGpa9r07Ro1
  5Igup9J0vQ5dQnea6uxNcRyG2stNjGpXSX97qX0/a6/8MdDksfid4S8Jx+CNXSwgGr6/4Jv7rSEu
  JZrOzkm8S6yJzf3kb307XGp6/axsumR/bVu7S20zTorigD//2Q==
-uid: fuzzyfox
+uid: 103
 
 dn: uniqueIdentifier=5,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -1440,7 +1440,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2lu
  HcGIBO0tsyNIGAVgAEjGCpb+Be4B6dCM9QaAP//ZCg==
 title: Mozilla Foundation Executive Director
 postalAddress: 720 Spadina Ave, Suite 218, Toronto, Ontario, M5S 2T9
-uid: mark@mozillafoundation.org
+uid: 104
 
 dn: uniqueIdentifier=6,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -1452,7 +1452,7 @@ cn: Åke Wadensjöö
 displayName: Åke Wadensjöö
 userPassword: secret
 description: Ne révèle pas le dénouement SVP. $ Se upp för nationella tecken $ Uważaj na znaki narodowe $ احترس من الشخصيات الوطنية
-uid: Åke
+uid: 105
 
 dn: uniqueIdentifier=7,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -1463,5 +1463,5 @@ cn: An Applicant
 displayName: An Applicant
 userPassword: secret
 description: An Applicant
-uid: 7
+uid: 106
 

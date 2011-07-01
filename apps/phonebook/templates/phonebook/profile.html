@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+Your profile
+{{ csrf() }}
+Current User: {{ user }}
+
+Person={{ person }}
+
+<a href="/user/edit/1">Edit Profile</a>
+
+{% endblock %}

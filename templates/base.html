@@ -1,0 +1,34 @@
+<html>
+<body>
+  {% block header %}
+username={{user.username}}
+auth={{user.is_authenticated() }}
+anon={{user.is_anonymous() }}
+
+    <a href="/">Mozillians</a>
+    {# if user.is_authenticated user.username #}
+    {% if user.is_anonymous %}
+      <p><a href="/login">Log In</a> or <a href="/register">Join Us</a></p>
+    {% else %}
+      <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
+      <a href="/u/1">My Profile</a>
+      <a href="/invite">Invite</a>
+      <form action="/search">
+        <input name='q' />
+        <button>Search</button>
+      </form>
+    {% endif %}
+
+    
+  {% endblock %}
+
+  {% block main_content %}
+
+  {% endblock %}
+
+  {% block footer %}
+Footer Jazz
+    <a href="/about">About</a>
+  {% endblock %}
+</body>
+</html>
