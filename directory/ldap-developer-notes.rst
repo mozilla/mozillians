@@ -296,7 +296,7 @@ scope
     onelevel (preferred) or subtree
 
 filter
-    (&(objectclass=inetOrgPerson)(<search criteria>))
+    (&(objectclass=inetOrgPerson)(mozilliansVouchedBy=*)(<search criteria>))
 
     Where <search criteria> is built from the request made by the end-user.
     Search strings should be encoded following the
@@ -310,6 +310,11 @@ filter
     Terms in search strings are combined using Polish notation, where the operator
     preceeds the operands. Each term must be enclosed in parentheses, and the whole
     search should also be enclosed in parentheses.
+
+    The filter here uses (objectclass=inetOrgPerson) to make sure that we
+    only get person entries, and (mozilliansVouchedBy=*) to limit the search
+    to Mozillians and leave out un-vouched Applicants. Obviously if you want to
+    see Applicants as well you can leave that bit out.
 
 attributelist
     It is good practice to supply a list of the attributes that you actually
