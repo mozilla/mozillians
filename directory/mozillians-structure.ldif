@@ -34,6 +34,35 @@ dn: ou=tags,dc=mozillians,dc=org
 objectClass: organizationalUnit
 ou: tags
 
+# Subtree for storing lookup tables
+#
+dn: ou=tables,dc=mozillians,dc=org
+objectClass: organizationalUnit
+ou: tables
+
+# Table of linked services
+#
+dn: cn=linked services,ou=tables,dc=mozillians,dc=org
+objectClass: mozilliansTable
+cn: linked services
+description: Table mapping URIs to human-friendly service names. Source of values for mozilliansServiceURI attributes.
+manager: cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org
+
+dn: textTableKey=irc://moznet/,cn=linked services,ou=tables,dc=mozillians,dc=org
+objectclass: textTableEntry
+textTableKey: irc://moznet/
+textTableValue: Moznet IRC nick
+
+dn: textTableKey=https://bugzilla.mozilla.org/,cn=linked services,ou=tables,dc=mozillians,dc=org
+objectclass: textTableEntry
+textTableKey: https://bugzilla.mozilla.org/
+textTableValue: Bugzilla ID
+
+dn: textTableKey=https://github.com/,cn=linked services,ou=tables,dc=mozillians,dc=org
+objectclass: textTableEntry
+textTableKey: https://github.com/
+textTableValue: GitHub ID
+
 # This is for system stuff that normal users do not need to see
 #
 dn: ou=system,dc=mozillians,dc=org
