@@ -1,67 +1,40 @@
 This document contains installation instructions for Mozillians.org
 
-1) Install Python 2.6+, MySQL 5+, pip, Python's virtualenv
-
-See INSTALL.your_os.md for Specific packages or steps.
-
-Optional: Python's virtualenv
+1) Install vagrant, virtualbox
 
 2) Get a copy of Mozillians.org
 
     git clone --recursive git://github.com/mozilla/mozillians.git mozillians.org
 
-3) Optional - Use virtualenv
+3) Run a virual dev environment...
+    vagrant up
+    # from 1 or more terminals:
+    vagrant ssh
 
-Developers may choose to use a virtual enviroment with pip, so that system wide 
-Python libraries aren't tainted. This is useful for compiled python libraries
-and the vendor library can be reused for pure Python dependencies.
+You can edit your files locally and they will automatically 
+show up under /vagrant in the virtualbox.
 
-    mkvirtualenv --no-site-packages ~/Environments/mozillians.org
-    source ~/Environments/mozillians.org/bin/activate
+4) Start your engines
 
-3) Install requirements
+    vagrant@lucid32$ cd /vagrant/directory/localtest
+    vagrant@lucid32:/vagrant/directory/localtest$ x-rebuild
+    vagrant@lucid32:/vagrant/directory/localtest$ cd ../..
+    vagrant@lucid32:/vagrant/$ ./manage.py runserver 0.0.0.0:8001
 
-    cd mozillians.org
-    pip install -r requirements/compiled.txt
+5) Point your Firefox to http://localhost:8001
 
-4) Confirm the OpenLDAP server is installed (slapd)
-
-See INSTALL.your_os.md for OS specific notes.
-
-5) Ensure standard schemas are already loaded
-
-Mozillians.org depends on the following schemas:
-* cosine.ldif
-* nis.ldif
-* inetorgperson.ldif
-
-# see OS specific notes
-
-6) Set up directory structure and root DN access for Mozillians.
-
-    # see OS specific install notes
-    ldapadd -f directory/mozillians-config.ldif
-
-7) Put test Mozillians data in directory
-
-    # see OS specific notes
-    cp directory/images/* /tmp
-    ldapadd -f directory/mozillians-data.ldif 
-
-You will be asked for a password; it's the one in mozillians-config.ldif, which is "secret".
-
-If this fails part-way through for any reason, you need the "-c" option when you re-run it.
-
-8) Optional - Install a directory viewer (Apache Directory Studio)
+6) Optional - Install a directory viewer (Apache Directory Studio)
 
 Visit http://directory.apache.org/studio/download/download-linux.html and download the (100MB!) Apache Directory Studio. Unzip the tarball and run the file (requires Java).
+
+Note: your on port 1389
 
 Click "go to the workbench".
 Click "New Connection" in the Connections window in the bottom left
 Name: data
 Hostname: localhost
 <Next>
-Bind DN or user: cn=admin,dc=mozillians,dc=org
+Bind DN or user: cn=root,dc=mozillians,dc=org
 Bind password: secret
 Click "Finish"
 
@@ -69,27 +42,9 @@ Double-click on the resulting connection and you should see the test data.
 
 The refresh button is F5.
 
-9) Hack settings_local.py
+7) Stay up to date
 
-Copy settings_local.py-dist to settings_local.py
-Fill in the LDAP details if necessary (if your directory is local and you are using the supplied LDIF, it should be the same). Fill in an absolute path to the SQLite file you are going to use.
+On your local desktop do
 
-10) Run syncdb
+    ./bin/update_site -e dev -v
 
-    ./manage.py syncdb
-
-It will ask you for superuser auth details. Enter something sensible (this
-isn't used by us AFAIK).
-
-11) Add some service definitions
-
-XXX Copy in a test SQLite database? Or import some sort of dump? These aren't
-required for testing but it makes the UI look and work better...
-
-12) Start the test server
-
-    ./manage.py runserver
-
-13) See data
-
-Visit http://localhost:8000/ and search for "gerv".

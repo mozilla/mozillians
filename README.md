@@ -23,11 +23,3 @@ Software Stack
 |------------------|
 | Playdoh | vendor |
 \------------------/
-
-License
--------
-This software is licensed under the [Mozilla tri-license][mpl-tri]. For more
-information, read the file ``LICENSE``.
-
-[mpl-tri]: http://www.mozilla.org/MPL/
-
