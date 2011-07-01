@@ -44,3 +44,16 @@ objectclass ( 1.3.6.1.4.1.13769.3000.1.2 NAME 'mozilliansPerson'
 	MAY ( mozilliansVouchedBy )
 	)
 
+objectclass ( 1.3.6.1.4.1.13769.3000.1.3 NAME 'mozilliansLink'
+	DESC 'Mozillians Link: a servicename:ID tuple that links a Mozillian to an account on a remote service'
+	SUP top STRUCTURAL
+	MUST uniqueIdentifier
+	MAY ( displayName $ mozilliansVisibility $ mozilliansServiceURI $ mozilliansServiceID )
+	)
+
+objectclass ( 1.3.6.1.4.1.13769.3000.1.4 NAME 'mozilliansTable'
+	DESC 'A mapping table'
+	SUP table STRUCTURAL
+	MAY ( displayName $ description $ mozilliansVisibility )
+	)
+

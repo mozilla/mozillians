@@ -205,12 +205,13 @@ The DIT (Directory Information Tree)
 * dc=mozillians,dc=org        - This is the LDAP suffix. It may be different if other people deploy the code
 
  * ou=people                  - Container for user account
- * ou=tags                      - (future) container for tag data
+ * ou=tags                    - (future) container for tag data
+ * ou=tables                  - Container for lookup tables
  * ou=system                  - Container for system data (may not be visible to normal users)
 
-   * ou=accounts          - Container for system accounts
-   * ou=groups             - Container for system groups
-   * ou=policies            - Container for password policies etc
+   * ou=accounts              - Container for system accounts
+   * ou=groups                - Container for system groups
+   * ou=policies              - Container for password policies etc
 
 ===============================================
 Attributes and Object Classes
@@ -280,6 +281,52 @@ Another example is the mail address, which may appear in *mail* (as an informati
 attribute) and also in *uid* where it is being used as a username.
 Keeping the two concepts separate allows for a user to change their username
 without changing their e-mail address and vice-versa.
+
+=================================
+Link entries
+=================================
+
+Mozillians.org allows people to record links to their IDs on other services.
+For each link there is a servicename:ID tuple, which is represented as *mozilliansLink*
+entry immediately beneath the user's main entry.
+
+Each link entry contains two important attributes:
+
+mozilliansServiceURI
+    This is a URI representing the remote service
+
+mozilliansServiceID
+    This is the person's visible identifier on the remote service.
+    Note that it may not be the same as the username that they use to login with.
+
+A *displayName* attribute is also allowed, in case the user wants to label the
+accountin some way (e.g. "My admin account" vs "My test account").
+
+Link entries are named with the *uniqueIdentifier* attribute.
+The value of this has no specific meaning.
+A convenient value would be the precise time of creation of the entry
+(e.g. 'date +%s.%N' output)
+
+
+=================================
+Lookup Tables
+=================================
+
+Most applications need lookup tables.
+An example in the mozillians.org project is the list of linked services.
+Although there is no intention to restrict the services that can be linked to,
+it will be convenient for users if a list of common services is provided,
+perhaps as a drop-down menu.
+
+In LDAP, tabular data is represented as a one-level tree of entries
+as described in RFC2293.
+For text tables, the mapping is between the attributes *textTableKey* and *textTableValue*
+The *textTableKey* attribute is conventionally used as the naming attribute.
+
+One table has been provided in the initial data:
+cn=linked services,ou=tables,dc=mozillians,dc=org
+It is modifiable by any member of the LDAP Managers group,
+and can be searched by anyone.
 
 =================================
 Access Control Rules
