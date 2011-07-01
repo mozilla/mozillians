@@ -5,6 +5,7 @@ This document contains installation instructions for Mozillians.org
 2) Get a copy of Mozillians.org
 
     git clone --recursive git://github.com/mozilla/mozillians.git mozillians.org
+    cd mozillians.org
 
 3) Run a virual dev environment...
     vagrant up
@@ -23,16 +24,22 @@ show up under /vagrant in the virtualbox.
 
 5) Point your Firefox to http://localhost:8001
 
+If you don't want to use 8001, edit the Vagrant script which 
+maps your virtualbox port. Then restart vagrant
+
+    vargrant halt && vagrant up
+
 6) Optional - Install a directory viewer (Apache Directory Studio)
 
 Visit http://directory.apache.org/studio/download/download-linux.html and download the (100MB!) Apache Directory Studio. Unzip the tarball and run the file (requires Java).
 
-Note: your on port 1389
+
 
 Click "go to the workbench".
 Click "New Connection" in the Connections window in the bottom left
-Name: data
+Name: Mozillians Vagrant Director
 Hostname: localhost
+Port: 1389
 <Next>
 Bind DN or user: cn=root,dc=mozillians,dc=org
 Bind password: secret
@@ -47,4 +54,5 @@ The refresh button is F5.
 On your local desktop do
 
     ./bin/update_site -e dev -v
+    vagrant destroy && vagrant up
 
