@@ -121,10 +121,6 @@ Vouching
 User accounts are expected to follow this lifecycle:
 
 #. Anonymous web user requests an account, giving an e-mail address.
-#. A verification token is mailed to that address (this provides some
-   measure of accountability and limits account-spam)
-#. User presents the token to validate the account.
-   This makes it eligible for vouching and visible to existing Mozillians.
 #. User requests an existing Mozillian to vouch for them.
 #. Mozillian inspects the new user entry and (if they approve)
    writes their own entry DN into the *mozilliansVouchedBy* attribute.
@@ -259,7 +255,7 @@ Attributes for user accounts
 * mozilliansVouchedBy
 
 
-Some attributes will be required to have unique values, e.g. *uid* and *uniqueIdentifier*
+Some attributes will be required to have unique values, e.g. *uid*
 
 All text attributes are in the UTF-8 character set
 (except for a few more restrictive ones like mail)
@@ -396,6 +392,7 @@ The 'T' codes are cross-references to the ACL test suite
 
  * T2010 LDAPAdmin may read everything in all user and tag entries (except passwords)
  * T2020 ??? LDAPAdmin may change all user-modifiable attributes in user entries ???
+ * T2025 LDAPAdmin may search, edit, create and remove mozilliansLink entries under any user
  * T2030 LDAPAdmin may delete the value of the mozilliansVouchedFor attribute of any user
  * T2035 ??? LDAPAdmin may write any value into the mozilliansVouchedFor attribute of any user ???
  * T2040 ??? LDAPAdmin may remove user entries entirely ???
@@ -421,6 +418,9 @@ The 'T' codes are cross-references to the ACL test suite
  * T6050 Applicants may search to the same extent that Anon can (though they can recieve as many entries as a Mozillian would get, there are no attributes disclosed)
  * T6060 Mozillians and Applicants cannot delete any user entries (not even their own)
  * T6070 Mozillians and Applicants cannot create new user entries
+ * T6080 Mozillians can create, edit, and delete mozilliansLink entries under their own entry
+ * T6085 Mozillians can search and view mozilliansLink entries under other users' entries
+ * T6086 Mozillians cannot modify others' link entries
 
  * T7010 Replicator may read the entire content of all entries (including passwords) in the entire tree under dc=mozillians,dc=org
  * T7020 Replicator is not subject to size or time limits on searches

@@ -96,6 +96,12 @@ mail: test013@mozillians.org
 telephoneNumber: +44 1234 567013
 mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
 
+dn: uniqueIdentifier=1309526546.511499282,uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org
+objectClass: mozilliansLink
+uniqueIdentifier: 1309526546.511499282
+mozilliansServiceURI: irc://moznet/
+mozilliansServiceID: testthirteen
+
 # Temporary system accounts for testing
 dn: uid=test999,ou=accounts,ou=system,dc=mozillians,dc=org
 objectClass: account
