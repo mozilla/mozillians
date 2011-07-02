@@ -6,18 +6,21 @@ auth={{user.is_authenticated() }}
 anon={{user.is_anonymous() }}
 
     <a href="/">Mozillians</a>
-    {# if user.is_authenticated user.username #}
-    {% if user.is_anonymous %}
+    <div>META - This is the Anonymous case</div>
+    {# if user.is_anonymous #}
       <p><a href="/login">Log In</a> or <a href="/register">Join Us</a></p>
-    {% else %}
+    {# else #}
+    <div>META - This is the Authenticated case</div>
       <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
       <a href="/u/1">My Profile</a>
       <a href="/invite">Invite</a>
-      <form action="/search">
-        <input name='q' />
-        <button>Search</button>
-      </form>
-    {% endif %}
+      {% block search %}
+        <form action="" method="GET">  
+          <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
+          <input type="submit" value="{{ _('Search') }}"/>
+        </form>
+      {% endblock %}
+    {# endif #}
 
     
   {% endblock %}

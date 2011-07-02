@@ -8,6 +8,7 @@ from . import views
 
 urlpatterns = patterns('',
     url('^u/(?P<userid>.*)$', views.profile_uid, name='phonebook.profile_uid'),
+    url('^user/photo/(?P<stable_id>.*)$', views.photo, name='phonebook.profile_uid'),
 
     #url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'), # Post 1.0?
     url('^user/edit/(?P<userid>.*)$', views.edit_profile, name='phonebook.edit_profile'),
@@ -19,9 +20,6 @@ urlpatterns = patterns('',
     #url('^login$', views.login, name='phonebook.login'),
     #url('^registration(/(?P<invitetoken>.*))?$', views.registration, name='phonebook.registration'),
 
-    url('^opensearch.xml$', 'api.views.render_xml',
-                            {'template': 'amo/opensearch.xml'},
-                            name='amo.opensearch'),
 )
 
 ## In DEBUG mode, serve media files through Django.

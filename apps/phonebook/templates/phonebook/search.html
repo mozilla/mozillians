@@ -1,5 +1,17 @@
 {% extends "base.html" %}
-
+{% block search %}{% endblock %}
 {% block main_content %}
-Search
+<h1>{{ _('Search') }}</h1>
+
+<form action="" method="GET">  
+  <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
+  <input type="submit" value="{{ _('Search') }}"/>
+</form>
+
+{% for person in people %}
+    {# TODO We should reuse microformats like Domesday prototype #}
+    <img src="/en-US/user/photo/{{ person.stable_uid }}" /><br />
+    <h2>{{ person.full_name }}</h2>
+
+{% endfor %}
 {% endblock %}
