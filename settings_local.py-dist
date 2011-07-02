@@ -5,19 +5,24 @@ from settings import *
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '<fill this in with an absolute path>',
-        'USER': '',
-        'PASSWORD': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mozillians',
+        'USER': 'mozillians',
+        'PASSWORD': 'mozillians',
         'HOST': '',
         'PORT': '',
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=InnoDB',
+            'charset' : 'utf8',
+            'use_unicode' : True,
+        },
         'TEST_CHARSET': 'utf8',
         'TEST_COLLATION': 'utf8_general_ci',
     },
     'ldap': {
         'ENGINE': 'ldapdb.backends.ldap',
-        'NAME': "ldap://localhost/",
-        'USER': 'cn=admin,dc=mozillians,dc=org',
+        'NAME': "ldap://localhost:1389/",
+        'USER': 'cn=root,dc=mozillians,dc=org',
         'PASSWORD': 'secret',
         'SUPPORTS_TRANSACTIONS': False
     },

@@ -22,7 +22,7 @@ DATABASES = {
     'ldap': {
         'ENGINE': 'ldapdb.backends.ldap',
         'NAME': "ldap://localhost:1389/",
-        'USER': 'cn=admin,dc=mozillians,dc=org',
+        'USER': 'cn=root,dc=mozillians,dc=org',
         'PASSWORD': 'secret',
         'SUPPORTS_TRANSACTIONS': False
     },
