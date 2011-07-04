@@ -385,7 +385,12 @@ The 'T' codes are cross-references to the ACL test suite
  * T8030 Nobody other than the rootDN and Replicators may access the ou=system part of the DIT
  * T8040 System accounts can change their own passwords
 
- * T9010 Certain attributes must have values that are unique across all entries: uid and uniqueIdentifier
+ * T9010 Certain attributes must have values that are unique across all entries: uid
+
+ * T9020 All authenticated users may read and search all lookup tables
+ * T9024 Anon may not read or search lookup tables
+ * T9025 Mozillians and Applicants may not change the content of any lookup tables
+ * T9026 Any member of the manager group for a table may change the content
 
  * Anything not already mentioned above is prohibited
 

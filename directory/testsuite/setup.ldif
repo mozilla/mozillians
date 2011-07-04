@@ -111,3 +111,22 @@ uid: test900
 description: Testing a system agent
 userPassword: {SSHA}O+U9Eqdnsri9it9ZE4OgBtWWo7USCxV3
 
+# Temporary group for testing
+dn: cn=test987,ou=groups,ou=system,dc=mozillians,dc=org
+objectClass: groupOfNames
+cn: test987
+description: Temporary group for testing
+member: cn=dummy
+
+# Temporary lookup table for testing
+dn: cn=test-table-1,ou=tables,dc=mozillians,dc=org
+objectClass: mozilliansTable
+cn: test-table-1
+description: Temporary lookup table for testing
+manager: cn=test987,ou=groups,ou=system,dc=mozillians,dc=org
+
+dn: textTableKey=irc://moznet/,cn=test-table-1,ou=tables,dc=mozillians,dc=org
+objectclass: textTableEntry
+textTableKey: irc://moznet/
+textTableValue: Moznet IRC nick
+
