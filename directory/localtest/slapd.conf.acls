@@ -79,6 +79,33 @@ access to dn.children="ou=accounts,ou=system,dc=mozillians,dc=org" attrs="userPa
 access to dn.subtree="ou=system,dc=mozillians,dc=org"
 	by * none
 
+# Deal with lookup tables
+# All authenticated users may read and search
+# Members of the manager group of the parent entry can change/add/delete
+# Anon cannot see this at all
+
+# At the top level we only allow LDAP Admin to write, so that
+# they can create new tables
+access to dn.exact="ou=tables,dc=mozillians,dc=org"
+	by users read
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by * none
+
+# Each table has a manager group that can write
+# We also allow the LDAPAdmin group to do so
+access to dn.onelevel="ou=tables,dc=mozillians,dc=org"
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by set="this/manager/member & user" write
+	by users read
+	by * none
+
+# Table entries are controlled by the table's manager group or by LDAPAdmin members
+access to dn.subtree="ou=tables,dc=mozillians,dc=org"
+	by group/groupOfNames/member="cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org" write
+	by set="this/-1/manager/member & user" write
+	by users read
+	by * none
+
 # Users may change their own passwords
 # Registration Agents and LDAP Admins may change passwords for other people
 # Anon may authenticate
