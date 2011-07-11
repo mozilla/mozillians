@@ -14,6 +14,8 @@ then
 	exit 1
 fi
 
+. ./vars
+
 # Stop the server and clear out the database
 #
 x-stop-ldap

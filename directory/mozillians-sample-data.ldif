@@ -345,7 +345,7 @@ jpegPhoto:: /9j/4AAQSkZJRgABAQAAAQABAAD//gA8Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2lu
  MTyfMcZPJwDgDJ9AAB6AYoor5zEbR+X/AKSj6WPw/wDby/OJ/9kK
 title: Grease Gun
 postalAddress: 22 Somewhere Street, Enfield, SW1A 1AA
-uid: 0
+uid: gerv@mozilla.org
 
 dn: uniqueIdentifier=2,ou=people,dc=mozillians,dc=org
 objectClass: inetOrgPerson
@@ -1464,4 +1464,35 @@ displayName: An Applicant
 userPassword: secret
 description: An Applicant
 uid: 106
+
+dn: uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
+objectClass: inetOrgPerson
+objectClass: mozilliansPerson
+uniqueIdentifier: 8
+sn: Findlay
+cn: Andrew Findlay
+displayName: Andrew Findlay
+userPassword: {SSHA}XQMx6I1GIBejo8hnDcHcSdCk2jKcZqRn
+description: LDAP designer
+mozilliansVouchedBy: uniqueIdentifier=1,ou=people,dc=mozillians,dc=org
+mail: andrew.findlay@skills-1st.co.uk
+uid: afindlay
+
+dn: uniqueIdentifier=1309526546.511499281,uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
+objectClass: mozilliansLink
+uniqueIdentifier: 1309526546.511499281
+mozilliansServiceURI: irc://moznet/
+mozilliansServiceID: andrew_f
+
+dn: uniqueIdentifier=1309526546.512510724,uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
+objectClass: mozilliansLink
+uniqueIdentifier: 1309526546.512510724
+mozilliansServiceURI: https://bugzilla.mozilla.org/
+mozilliansServiceID: Andrew Findlay
+
+dn: uniqueIdentifier=1309526546.513422154,uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
+objectClass: mozilliansLink
+uniqueIdentifier: 1309526546.513422154
+mozilliansServiceURI: https://github.com/
+mozilliansServiceID: afindlay
 

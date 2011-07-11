@@ -39,6 +39,8 @@ ldap_applicant001PW = 'secret'
 # Credentials for an existing vouched Mozillian
 ldap_mozillian011DN = 'uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org'
 ldap_mozillian011PW = 'secret'
+# A sample link entry DN for that user
+ldap_link011aDN = 'uniqueIdentifier=a,uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org'
 
 # Credentials for a system account
 ldap_sys999DN = 'uid=test999,ou=accounts,ou=system,dc=mozillians,dc=org'
@@ -49,6 +51,13 @@ ldap_applicant002DN = 'uniqueIdentifier=test002,ou=people,dc=mozillians,dc=org'
 ldap_mozillian012DN = 'uniqueIdentifier=test012,ou=people,dc=mozillians,dc=org'
 ldap_newuserDN = 'uniqueIdentifier=testnew,ou=people,dc=mozillians,dc=org'
 ldap_sys900DN = 'uid=test900,ou=accounts,ou=system,dc=mozillians,dc=org'
+ldap_mozillian013DN = 'uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org'
+ldap_link013DN = 'uniqueIdentifier=1309526546.511499282,uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org'
+ldap_table_1DN = 'cn=test-table-1,ou=tables,dc=mozillians,dc=org'
+ldap_table_entry_DN = 'textTableKey=irc://moznet/,cn=test-table-1,ou=tables,dc=mozillians,dc=org'
+ldap_table_new_entry_DN = 'textTableKey=a,cn=test-table-1,ou=tables,dc=mozillians,dc=org'
+test_group = 'cn=test987,ou=groups,ou=system,dc=mozillians,dc=org'
+
 
 # The root of the system part of the DIT
 system_suffix = 'ou=system,dc=mozillians,dc=org'
@@ -365,6 +374,22 @@ class LdapUserTests(unittest.TestCase):
 		    [ (ldap.MOD_REPLACE,'cn','modified CN') ]
 		)
 
+    def test_T9024_anon_read_table(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+	    res = self.ldap_anon.search_s(
+		    ldap_table_1DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(textTableKey=*)'
+		)
+
+    def test_T9024_anon_read_table_entry(self):
+        with self.assertRaises(ldap.NO_SUCH_OBJECT):
+	    res = self.ldap_anon.search_s(
+		    ldap_table_entry_DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(textTableKey=*)'
+		)
+
     def test_T6040_applicant_search_person(self):
 	# Applicant trying to find a person entry that is not their own
 	# This should work, but not expose any data apart from the DN
@@ -384,6 +409,29 @@ class LdapUserTests(unittest.TestCase):
 	    if attr.lower() != 'uniqueIdentifier'.lower():
 	        self.fail( "Applicant should not be able to read attributes from user entries. Got: " +
 		           str(getAttrNames(res[0])) )
+
+    def test_T6040_applicant_search_links(self):
+	# Applicant should not get an error when trying this,
+	# but they should not get any results either
+	res = self.ldap_applicant001.search_s(
+		ldap_mozillian013DN,
+		ldap.SCOPE_SUBTREE,
+		filterstr='(mozilliansServiceURI=*)' )
+	self.assertEqual( len(res), 0,
+		"Applicant search for links should return zero entries. We got "+str(len(res)) )
+
+    def test_T9020_applicant_read_table(self):
+        try:
+	    res = self.ldap_applicant001.search_s(
+		    ldap_table_1DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(textTableKey=*)'
+		)
+        except ldap.LDAPError:
+	    self.fail( "Applicant cannot search under "+ldap_table_1DN+" " + str(sys.exc_info()[0]) )
+	self.assertGreater( len(res), 0,
+		"Applicant search of table should return at least one entry. We got "+str(len(res)) )
+
 
 # It is not practical to enforce different limits on Applicants and Mozillians
 # with the current implementation because the limits statement in OpenLDAP does not accept
@@ -434,6 +482,25 @@ class LdapUserTests(unittest.TestCase):
         # Now test to see if we got any attributes that we should not see (T1050)
 	if getAttrValue(res[0],'userPassword'):
 	    self.fail( "Mozillian should not be able to read passwords" )
+
+
+    def test_T6085_mozillian_search_links(self):
+	# Mozillian searching for a link entry
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_mozillian013DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(mozilliansServiceURI=*)' )
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search for link entries under "+ldap_mozillian013DN+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "Mozillian should see the objectClass value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceURI'):
+	    self.fail( "Mozillian should see the mozilliansServiceURI value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceID'):
+	    self.fail( "Mozillian should see the mozilliansServiceID value in a link entry" )
 
 
     def test_T6030_mozillian_search_applicant(self):
@@ -494,6 +561,26 @@ class LdapUserTests(unittest.TestCase):
         except ldap.LDAPError:
 	    self.fail( "Mozillian cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
 
+
+    def test_T9020_mozillian_read_table(self):
+        try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_table_1DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(textTableKey=*)'
+		)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot search under "+ldap_table_1DN+" " + str(sys.exc_info()[0]) )
+	self.assertGreater( len(res), 0,
+		"Mozillian search of table should return at least one entry. We got "+str(len(res)) )
+
+    def test_T9025_mozillian_fake_table_data(self):
+	# Mozillian should not be able to modify any table entry
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_table_entry_DN,
+		    [ (ldap.MOD_REPLACE,'textTableValue','Fake!') ]
+		)
 
     def test_T1010_applicant_change_password(self):
         change_and_check_password(
@@ -679,6 +766,47 @@ class LdapUserTests(unittest.TestCase):
 	    self.ldap_applicant001.modify_s(
 		    ldap_applicant002DN,
 		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+		)
+
+    def test_T6080_mozillian_manage_links(self):
+	try:
+	    self.ldap_mozillian011.add_s(
+		    ldap_link011aDN,
+		    [
+			('objectClass', 'mozilliansLink'),
+			('uniqueIdentifier', 'a'),
+			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceID', 'testeleven')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot add link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+        try:
+	    self.ldap_mozillian011.modify_s(
+		    ldap_link011aDN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','test-11')
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot modify link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+        try:
+	    self.ldap_mozillian011.delete_s(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "Mozillian cannot delete own link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+
+    def test_T6086_mozillian_hack_links(self):
+        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+	    self.ldap_mozillian011.modify_s(
+		    ldap_link013DN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','owned!')
+		    ]
 		)
 
 
@@ -1124,6 +1252,25 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.fail( "LDAP Admin should not be able to read passwords" )
 
 
+    def test_T2025_admin_search_links(self):
+	# LDAP Admin searching for a link entry
+	try:
+	    res = self.ldap_mozillian011.search_s(
+		    ldap_mozillian013DN,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(mozilliansServiceURI=*)' )
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot search for link entries under "+ldap_mozillian013DN+" " + str(sys.exc_info()[0]) )
+
+	# Check that we got values for the basic attributes
+	if not getAttrValue(res[0],'objectClass'):
+	    self.fail( "LDAP Admin should see the objectClass value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceURI'):
+	    self.fail( "LDAP Admin should see the mozilliansServiceURI value in a link entry" )
+	if not getAttrValue(res[0],'mozilliansServiceID'):
+	    self.fail( "LDAP Admin should see the mozilliansServiceID value in a link entry" )
+
+
     def test_T2020_admin_change_user_attributes(self):
         try:
 	    self.ldap_sys999.modify_s(
@@ -1172,6 +1319,41 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.ldap_sys999.delete_s(ldap_mozillian012DN)
         except ldap.LDAPError:
 	    self.fail( "LDAP Admin cannot delete a user " + str(sys.exc_info()[0]) )
+
+    # LDAP Admin is allowed to delete link entries completely
+    def test_T2025_admin_delete_linkentry(self):
+        try:
+	    self.ldap_sys999.delete_s(ldap_link013DN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot delete a link entry " + str(sys.exc_info()[0]) )
+
+    def test_T2025_admin_add_links(self):
+	try:
+	    self.ldap_sys999.add_s(
+		    ldap_link011aDN,
+		    [
+			('objectClass', 'mozilliansLink'),
+			('uniqueIdentifier', 'a'),
+			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceID', 'testeleven')
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_link011aDN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot add link entry "+ldap_link011aDN+" " + str(sys.exc_info()[0]) )
+
+    def test_T2025_admin_manage_links(self):
+        try:
+	    self.ldap_sys999.modify_s(
+		    ldap_link013DN,
+		    [
+			(ldap.MOD_REPLACE,'mozilliansServiceID','test-new-thirteen')
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot modify link entry "+ldap_link013DN+" " + str(sys.exc_info()[0]) )
+
 
     # LDAP Admin is allowed to add new user entries
     def test_T2060_admin_add_user(self):
@@ -1237,6 +1419,48 @@ class LdapAdminsUserTests(unittest.TestCase):
 	# Should not even see its own entry
         with self.assertRaises(ldap.NO_SUCH_OBJECT):
             self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
+
+
+    def test_T2070_ldapadmin_read_all_accounts(self):
+
+	# WARNING: this will take a long time if run on a server with a lot of entries
+	#          It may also cause memory exhaustion.
+        try:
+	    res = self.ldap_sys999.search_s(
+	            people_node,
+		    ldap.SCOPE_SUBTREE,
+		    filterstr='(objectclass=*)',
+		    attrlist=['*','+']
+		    )
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot enumerate the whole set of users " +
+	            str(sys.exc_info()[0]) )
+
+    def test_T9026_admin_change_table_data(self):
+        try:
+	    self.ldap_sys999.modify_s(
+	        ldap_table_entry_DN,
+		    [
+		        (ldap.MOD_REPLACE,'textTableValue','Modified by admin'),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot modify table data " + str(sys.exc_info()[0]) )
+
+    def test_T9026_admin_add_table_data(self):
+	try:
+	    self.ldap_sys999.add_s(
+		    ldap_table_new_entry_DN,
+		    [
+			('objectClass', 'textTableEntry'),
+			('textTableKey', 'a'),
+			('textTableValue', 'new data'),
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_table_new_entry_DN)
+        except ldap.LDAPError:
+	    self.fail( "LDAP Admin cannot add table entry "+ldap_table_new_entry_DN+" " + str(sys.exc_info()[0]) )
 
 
 class RegistrationAgentTests(unittest.TestCase):
@@ -1473,6 +1697,54 @@ class RegistrationAgentTests(unittest.TestCase):
             self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
 
 
+
+class TableManagerTests(unittest.TestCase):
+
+    # These tests require a system user in the temporary test group
+
+    def setUp(self):
+    	setUpCommon(self)
+	# Add test user to group
+	self.ldap_rootDN.modify_s(
+		test_group,
+		[ (ldap.MOD_ADD,'member',ldap_sys999DN) ]
+	    )
+
+    def tearDown(self):
+	# Remove test user from group
+	self.ldap_rootDN.modify_s(
+		test_group,
+		[ (ldap.MOD_DELETE,'member',ldap_sys999DN) ]
+	    )
+	# Now clear out test entries and close connections
+    	tearDownCommon(self)
+
+
+    def test_T9026_manager_change_table_data(self):
+        try:
+	    self.ldap_sys999.modify_s(
+	        ldap_table_entry_DN,
+		    [
+		        (ldap.MOD_REPLACE,'textTableValue','Modified by admin'),
+		    ]
+		)
+        except ldap.LDAPError:
+	    self.fail( "Table manager cannot modify table data " + str(sys.exc_info()[0]) )
+
+    def test_T9026_manager_add_table_data(self):
+	try:
+	    self.ldap_sys999.add_s(
+		    ldap_table_new_entry_DN,
+		    [
+			('objectClass', 'textTableEntry'),
+			('textTableKey', 'a'),
+			('textTableValue', 'new data'),
+		    ]
+		)
+	    # Make sure that we clear this entry up afterwards
+	    entry_list.append(ldap_table_new_entry_DN)
+        except ldap.LDAPError:
+	    self.fail( "Table manager cannot add table entry "+ldap_table_new_entry_DN+" " + str(sys.exc_info()[0]) )
 
 ########################################################################
 # Main program
