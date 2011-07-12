@@ -13,8 +13,8 @@ Vagrant::Config.run do |config|
     # see: https://github.com/jedi4ever/veewee/issues/14
     config.ssh.max_tries = 50
     config.ssh.timeout   = 300
-    
-    config.vm.share_folder("v-root", "/vagrant", ".")
+
+    config.vm.share_folder("v-root", "/vagrant", ".", :nfs => true)
 
     # Add to /etc/hosts: 33.33.33.24 dev.mozillians.org
     config.vm.network "33.33.33.24"
