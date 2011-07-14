@@ -19,3 +19,4 @@ locale/*
 .vagrant
 puppet/cache/*
 puppet/manifests/build/
+docs/_build
