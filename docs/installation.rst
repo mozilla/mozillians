@@ -26,11 +26,9 @@ Installation
    show up under /vagrant in the virtualbox.
 
 4. Start your engines::
-
-    vagrant@lucid32$ cd /vagrant/directory/localtest
-    vagrant@lucid32:/vagrant/directory/localtest$ x-rebuild
-    vagrant@lucid32:/vagrant/directory/localtest$ cd ../..
-    vagrant@lucid32:/vagrant/$ ./manage.py runserver 0.0.0.0:8001
+    $ pushd code/directory/localtest && x-rebuild && popd
+    $ cd code
+    $ ./manage.py runserver 0.0.0.0:8001
 
 5. Point your browser to http://localhost:8001
 
