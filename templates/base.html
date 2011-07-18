@@ -1,28 +1,31 @@
 <html>
 <body>
   {% block header %}
-username={{user.username}}
-auth={{user.is_authenticated() }}
-anon={{user.is_anonymous() }}
+    username={{user.username}}
+    auth={{user.is_authenticated() }}
+    anon={{user.is_anonymous() }}
 
-    <a href="/">Mozillians</a>
+    <a href="{{ url('home') }}">Mozillians</a>
     <div>META - This is the Anonymous case</div>
     {# if user.is_anonymous #}
-      <p><a href="/login">Log In</a> or <a href="/register">Join Us</a></p>
+    <p>
+      <a href="{{ url('login') }}">Log In</a> or
+      <a href="{{ url('register') }}">Join Us</a>
+    </p>
     {# else #}
     <div>META - This is the Authenticated case</div>
       <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
       <a href="/u/1">My Profile</a>
       <a href="/invite">Invite</a>
       {% block search %}
-        <form action="" method="GET">  
+        <form action="" method="GET">
           <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
           <input type="submit" value="{{ _('Search') }}"/>
         </form>
       {% endblock %}
     {# endif #}
 
-    
+
   {% endblock %}
 
   {% block main_content %}

@@ -9,10 +9,12 @@ log.setLevel(logging.DEBUG)
 
 from django_auth_ldap.backend import LDAPBackend
 
+
 def about(request):
     return jingo.render(request, 'landing/about.html')
 
-def home(request):    
+
+def home(request):
     # request.user.ldap_user.attrs
     try:
         log.error("ldap_user=%s" % str(dir(request.user.ldap_user)))
@@ -30,6 +32,7 @@ def home(request):
     #log.error(u)
     return jingo.render(request, 'landing/home.html')
 
+
 def handler404(request):
     return jingo.render(request, 'landing/404.html', status=404)
 
@@ -37,6 +40,7 @@ def handler404(request):
 def handler500(request):
     return jingo.render(request, 'landing/500.html', status=500)
 
-def robots(request):
-    return HttpResponse("""User-agent: *\nDisallow: /\n""", mimetype="text/plain")
 
+def robots(request):
+    return HttpResponse("""User-agent: *\nDisallow: /\n""",
+                        mimetype="text/plain")

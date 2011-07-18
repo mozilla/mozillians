@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import include, patterns
 
 from django.contrib import admin
-from django.contrib import auth
 admin.autodiscover()
 
 handler404 = 'landing.views.handler404'
@@ -12,8 +11,6 @@ urlpatterns = patterns('',
     (r'', include('landing.urls')),
     (r'', include('phonebook.urls')),
     (r'', include('users.urls')),
-
-
 
     (r'^admin/', include(admin.site.urls)),
 )
