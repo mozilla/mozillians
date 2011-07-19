@@ -1,3 +1,17 @@
+require "yaml"
+
+# Load up our vagrant config files -- vagrantconfig.yaml first
+_config = YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig.yaml"), File::RDONLY).read)
+
+# Local-specific/not-git-managed config -- vagrantconfig_local.yaml
+begin
+  _config.merge!(YAML.load(File.open(File.join(File.dirname(__FILE__), "vagrantconfig_local.yaml"), File::RDONLY).read))
+rescue Errno::ENOENT # No vagrantconfig_local.yaml found -- that's OK; just
+                     # use the defaults.
+end
+
+CONF = _config
+
 Vagrant::Config.run do |config|
 
     config.vm.box = "ubuntu-lucid-32-openldap.box"
@@ -14,7 +28,8 @@ Vagrant::Config.run do |config|
     config.ssh.max_tries = 50
     config.ssh.timeout   = 300
 
-    if RUBY_PLATFORM =~ /mswin(32|64)/
+    # nfs needs to be explicitly enabled to run.
+    if CONF['nfs'] == false or RUBY_PLATFORM =~ /mswin(32|64)/
         config.vm.share_folder("v-root", "/home/vagrant/code", ".")
     else
         config.vm.share_folder("v-root", "/home/vagrant/code", ".", :nfs => true)
