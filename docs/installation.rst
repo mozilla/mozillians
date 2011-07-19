@@ -26,6 +26,7 @@ Installation
    show up under /vagrant in the virtualbox.
 
 4. Start your engines::
+
     $ pushd code/directory/localtest && x-rebuild && popd
     $ cd code
     $ ./manage.py runserver 0.0.0.0:8001
