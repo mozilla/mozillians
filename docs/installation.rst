@@ -23,7 +23,7 @@ Installation
     vagrant ssh
 
    You can edit your files locally and they will automatically
-   show up under /vagrant in the virtualbox.
+   show up under /home/vagrant/code in the virtualbox.
 
 4. Start your engines::
 
