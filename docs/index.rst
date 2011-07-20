@@ -21,6 +21,7 @@ Contents:
    :maxdepth: 2
 
    installation
+   demo
    ldap
 
 Indices and tables

@@ -18,7 +18,7 @@
       <a href="/u/1">My Profile</a>
       <a href="/invite">Invite</a>
       {% block search %}
-        <form action="" method="GET">
+        <form action="/search" method="GET">
           <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
           <input type="submit" value="{{ _('Search') }}"/>
         </form>
