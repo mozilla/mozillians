@@ -3,7 +3,7 @@
 #
 import "classes/*.pp"
 
-$PROJ_DIR = "/home/vagrant/code"
+$PROJ_DIR = "/home/vagrant/mozillians"
 
 $DB_NAME = "mozillians"
 $DB_USER = "mozillians"
