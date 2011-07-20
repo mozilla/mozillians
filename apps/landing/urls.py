@@ -6,7 +6,7 @@ from . import views
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url('^$', views.home, name='home'),
+    url('^$', views.home, name='landing.home'),
     url('^robots.txt$', views.robots, name='robots.txt'),
     url('^about$', views.about, name='landing.about'),
 )

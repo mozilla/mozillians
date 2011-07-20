@@ -9,7 +9,7 @@ from . import views
 urlpatterns = patterns('',
     url('^u/(?P<userid>.*)$', views.profile_uid, name='phonebook.profile_uid'),
     url('^user/photo/(?P<stable_id>.*)$', views.photo,
-        name='phonebook.profile_uid'),
+        name='phonebook.profile_photo'),
 
     # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),
     # Post 1.0?

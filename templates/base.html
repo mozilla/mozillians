@@ -1,30 +1,24 @@
 <html>
 <body>
   {% block header %}
-    username={{user.username}}
-    auth={{user.is_authenticated() }}
-    anon={{user.is_anonymous() }}
-
-    <a href="{{ url('home') }}">Mozillians</a>
-    <div>META - This is the Anonymous case</div>
-    {# if user.is_anonymous #}
-    <p>
-      <a href="{{ url('login') }}">Log In</a> or
-      <a href="{{ url('register') }}">Join Us</a>
-    </p>
-    {# else #}
-    <div>META - This is the Authenticated case</div>
-      <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
-      <a href="/u/1">My Profile</a>
-      <a href="/invite">Invite</a>
+    <a href="{{ url('landing.home') }}">Mozillians</a>
+    {% if user.is_authenticated() %}
+      <p>Welcome, {{ user.username }}. <a href="{{ url('logout') }}">Log Out</a></p>
+      
+      <a href="{{ url('phonebook.profile_uid', user.username) }}">My Profile</a>
+      <a href="{{ url('phonebook.invite') }}">Invite</a>
       {% block search %}
-        <form action="/search" method="GET">
+        <form action="{{ url('phonebook.search') }}" method="GET">
           <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
           <input type="submit" value="{{ _('Search') }}"/>
         </form>
       {% endblock %}
-    {# endif #}
-
+    {% else %}
+    <p>
+      <a href="{{ url('login') }}">Log In</a> or
+      <a href="{{ url('register') }}">Join Us</a>
+    </p>
+    {% endif %}
 
   {% endblock %}
 
@@ -33,8 +27,7 @@
   {% endblock %}
 
   {% block footer %}
-Footer Jazz
-    <a href="/about">About</a>
+    <div><a href="{{ url('landing.about') }}">About</a></div>
   {% endblock %}
 </body>
 </html>
