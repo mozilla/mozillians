@@ -175,8 +175,8 @@ AUTHENTICATION_BACKENDS = (
     #'django.contrib.auth.backends.ModelBackend', # Optional TODO use or not?
 )
 AUTH_LDAP_SERVER_URI = "ldap://localhost:1389"
-AUTH_LDAP_BIND_DN = ""
-AUTH_LDAP_BIND_PASSWORD = ""
+AUTH_LDAP_BIND_DN = "cn=root,dc=mozillians,dc=org"
+AUTH_LDAP_BIND_PASSWORD = "secret"
 AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=people,dc=mozillians,dc=org",
     ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
@@ -266,21 +266,6 @@ BROKER_VHOST = 'playdoh'
 BROKER_CONNECTION_TIMEOUT = 0.1
 CELERY_RESULT_BACKEND = 'amqp'
 CELERY_IGNORE_RESULT = True
-
-MINIFY_BUNDLES = {
-    'css': {
-        # Pinched from www.mozilla.org
-        'base':   ['css/domesday/base.css'],
-        'screen-2010': ['css/domesday/screen-2010.css'],
-        'view':   ['css/domesday/view.css'],
-        'jquery': ['css/domesday/ui-lightness/jquery-ui-1.8.7.custom.css'],
-    },
-    'js': {
-        'jquery': ['js/libs/jquery-1.4.4.min.js', 
-                   'js/libs/jquery-ui-1.8.7.custom.min.js'],
-    },
-}
-
 
 # Make sure LDAP operations go to the LDAP directory
 DATABASE_ROUTERS = ('ldapdb.router.Router',)
