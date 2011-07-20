@@ -21,6 +21,7 @@ Contents:
    :maxdepth: 2
 
    installation
+   registration
    demo
    ldap
 
