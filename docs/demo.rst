@@ -4,18 +4,17 @@
 Demo
 ====
 
-If you load the sample LDAP data (using x-rebuild), then you can use these instructions for running the demo.
+If you load the sample LDAP data (using `x-rebuild`), then you can use these
+instructions for running the demo.
 
 -----
 Login
 -----
 
-Point your browser to http://localhost:8001
+You can log in using::
 
-Email: 1
-Password: secret
-
-TODO: That is a literal 1, yes I know it's not an email address :)
+    Email: 1
+    Password: secret
 
 You are now logged in as "Bridget Hill" email: 01@mozillians.org
 
@@ -23,8 +22,4 @@ You are now logged in as "Bridget Hill" email: 01@mozillians.org
 Search
 ------
 
-Point your browser to http://localhost:8001
-
-Search: david
-
-You should be David Boswell's photo and name.
+You can type ``david`` and see David Boswell's photo and name.
