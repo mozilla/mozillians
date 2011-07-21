@@ -1,1 +1,4 @@
-src/django-ldapdbsrc/django
+src/django-ldapdb
+src/django
+
+src/jingo
