@@ -17,14 +17,11 @@ MOUNT_POINT = '/home/vagrant/mozillians'
 
 Vagrant::Config.run do |config|
 
-    config.vm.box = "ubuntu-lucid-32-openldap.box"
-    config.vm.box_url = "http://people.mozilla.com/~aking/mozillians/ubuntu-lucid-32-openldap.box"
+    config.vm.box = "ubuntu-lucid-32-openldapV2.box"
+    config.vm.box_url = "http://people.mozilla.com/~aking/mozillians/ubuntu-lucid-32-openldapV2.box"
 
     config.vm.forward_port("web", 8001, 8001)
     config.vm.forward_port("ldap", 1389, 1389)
-
-    #config.vm.box = "centos-56-32-openldap"
-    #config.vm.box_url = "http://people.mozilla.com/~aking/mozillians/centos-56-32-openldap.box"
 
     # Increase vagrant's patience during hang-y CentOS bootup
     # see: https://github.com/jedi4ever/veewee/issues/14
