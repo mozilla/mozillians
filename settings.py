@@ -183,6 +183,8 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=people,dc=mozillians,dc=org",
 AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn", "email": "mail"}
 AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory", "unique_id": "uniqueIdentifier", "phone": "telephoneNumber:", "voucher": "mozilliansVouchedBy"}
 
+AUTH_LDAP_ALWAYS_UPDATE_USER = False
+
 
 ROOT_URLCONF = '%s.urls' % ROOT_PACKAGE
 
@@ -191,6 +193,7 @@ INSTALLED_APPS = (
     'landing',
     'phonebook',
     'users',
+    'larper',
     
     # Local apps
     'commons',  # Content common to most playdoh-based apps.

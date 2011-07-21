@@ -6,10 +6,12 @@ log.setLevel(logging.DEBUG)
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 
+import jingo
+
+from larper import models
+
 from . import forms
 from . import models
-
-import jingo
 
 
 def profile_uid(request, userid):
@@ -37,6 +39,11 @@ def search(request):
         log.error("Search Query: %s" % query)
         people = models.Person.objects.filter(email__startswith=query)
         log.error("Search Results: %s" % str(people))
+        # TODO(ozten) starting to replace django-ldapdb with larper
+        if request.user.is_authenticated():
+            user = models.Person(request) 
+            user.search('david')
+        
     return jingo.render(request, 'phonebook/search.html',
                         dict(people=people))
 

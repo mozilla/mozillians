@@ -6,9 +6,9 @@ import django.contrib.auth.views
 
 log = logging.getLogger('phonebook')
 
+import larper
 
 def login(request):
-    log.error("Logging out")
     logout(request)
 
     r = django.contrib.auth.views.login(
@@ -16,11 +16,13 @@ def login(request):
             template_name='users/login.html',
             redirect_field_name='to',
             authentication_form=auth_forms.AuthenticationForm)
+
     if isinstance(r, http.HttpResponseRedirect):
-        # user id 1 password secret
-        log.error('Success')
+        log.debug("login success, storing password in session.")
+        larper.store_password(request, request.POST['password'])
     else:
-        log.error("FAILURE")
+        log.debug("login failed")
+
     return r
 
 
