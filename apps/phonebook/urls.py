@@ -7,8 +7,8 @@ admin.autodiscover()
 from . import views
 
 urlpatterns = patterns('',
-    url('^u/(?P<userid>.*)$', views.profile_uid, name='phonebook.profile_uid'),
-    url('^user/photo/(?P<stable_id>.*)$', views.photo,
+    url('^u/(?P<uniqueIdentifier>.*)$', views.profile_uid, name='phonebook.profile_uid'),
+    url('^user/photo/(?P<uniqueIdentifier>.*)$', views.photo,
         name='phonebook.profile_photo'),
 
     # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),

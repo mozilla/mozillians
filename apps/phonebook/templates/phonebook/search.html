@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 {% block search %}{% endblock %}
 {% block main_content %}
-<h1>{{ _('Search') }}</h1>
+  <h1>{{ _('Search') }}</h1>
 
-<form action="" method="GET">  
-  <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
-  <input type="submit" value="{{ _('Search') }}"/>
-</form>
+  <form action="" method="GET">  
+    <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
+    <input type="submit" value="{{ _('Search') }}"/>
+  </form>
 
-{% for person in people %}
+  {% for person in people %}
     {# TODO We should reuse microformats like Domesday prototype #}
-    <img src="/en-US/user/photo/{{ person.stable_uid }}" /><br />
-    <h2>{{ person.full_name }}</h2>
-
-{% endfor %}
+    <div>
+      <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" />
+      <h2><a href="{{url('phonebook.profile_uid', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a></h2>
+      {% if person.mozilliansVouchedBy %}<div><strong>Mozillian</strong></div>
+      {% else %}<div><strong>Pending...</strong></div>
+      {% endif %}
+    </div>
+  {% endfor %}
 {% endblock %}
