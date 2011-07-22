@@ -6,6 +6,7 @@ import logging
 import ldap
 
 from django.conf import settings
+from django.core import signing
 
 log = logging.getLogger('phonebook')
 
@@ -35,7 +36,7 @@ def _find_and_cache_dn(request, uid):
     conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
     try:
         rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, "(uid=%s)" % uid)
-        if len(rs) == 1:                
+        if len(rs) == 1:
             dn, u = rs[0]
             request.session[DN_SESSION_KEY] = dn
             log.debug("Cached dn=%s in the session" % dn)
@@ -45,13 +46,11 @@ def _find_and_cache_dn(request, uid):
         conn.unbind()
 
 
-# HACK, TODO Bug#668308
-PASS_SESSION_KEY = 'larper-ct-password'
-
-
 def password(request):
     """ Not sure if this and store_password belong here..."""
-    return request.session[PASS_SESSION_KEY]
+    d = request.session.get('PASSWORD')
+    if d:
+        return signing.loads(d).get('password')
 
 
 def store_password(request, password):
@@ -59,5 +58,4 @@ def store_password(request, password):
     request - Django web request
     password - A clear text password
     """
-    request.session[PASS_SESSION_KEY] = password
-
+    request.session['PASSWORD'] = signing.dumps({'password': password})
