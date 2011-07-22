@@ -9,7 +9,7 @@
     {% if user.is_authenticated() %}
       <p>{{ _('Your profile can be found at:') }}
         <div><a href="{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}"
-          >{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}</a></div>
+          >{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0])|absolutify }}</a></div>
       </p>
     {% endif %}
   </div>
