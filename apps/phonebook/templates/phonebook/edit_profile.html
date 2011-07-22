@@ -1,5 +1,55 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-Hi
+
+  <form action="" method="POST">
+    {{ csrf() }}
+    {% if registration_flow %}
+    Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
+    {% endif %}
+
+    <h1>{% if person.mozilliansVouchedBy %}Mozillian{% else %}Pending{% endif %} Profile</h1>
+
+    <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" />
+
+    {{ form }}
+    {% if registration_flow %}
+      <button>{{ _('Next') }}</button>
+    {% else %}
+      <button>{{ _('Update') }}</button>
+    {% endif %}
+  </form>
+  
+  {% if person.displayName %}
+    <div>
+      <a href="{{url('phonebook.profile_uid', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
+    </div>
+  {% endif %}
+
+  {% if person.mozilliansVouchedBy %}
+    <div>
+      <strong>Mozillian</strong> vouched by
+      {{ person.mozilliansVouchedBy[0] }}
+    </div>
+  {% else %}
+    <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
+  {% endif %}
+ 
+  {% if person.mail %}
+    <div>
+      {% for mail in person.mail %}
+        <a href="mailto:{{ mail }}">{{ mail }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if person.telephoneNumber %}
+    <div class='tel'>{{ person.telephoneNumber[0] }}</div>
+  {% endif %}
+
+  <hr />
+  {% if user.username == person.uid[0] %}
+    <a href="{{url('phonebook.edit_profile', person.uniqueIdentifier[0])}}">Edit Profile</a>
+  {% endif %}
+
 {% endblock %}

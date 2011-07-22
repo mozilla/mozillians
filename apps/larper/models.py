@@ -1,4 +1,5 @@
 import ldap
+from ldap.modlist import modifyModlist
 from ldap.filter import filter_format
 
 import logging
@@ -9,7 +10,6 @@ import larper
 
 log = logging.getLogger('phonebook')
 log.setLevel(logging.DEBUG)
-
 
 class Person(object):
     """
@@ -80,3 +80,56 @@ class Person(object):
             log.error(ic)                
         finally:
             conn.unbind()
+
+    def update_person(self, person, profile):
+        """
+        person - larper.models.Person
+        profile - dictionary of attributes
+        Somethng old, something new ...
+        """
+        uid = self.request.user.username
+        dn = larper.dn(self.request, uid)        
+        password = larper.password(self.request)
+
+        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+
+        try:
+            conn.bind_s(dn, password)
+            log.error("Creating mods from %s" % person)
+            
+            #modlist = modifyModlist(person, profile, ignore_oldexistent=1)
+            mods = self._modlist(profile)
+            #log.error("dn = %s modlist = %s" % (dn, mods))
+            conn.modify_s(dn, mods)
+        except ldap.INVALID_CREDENTIALS, e:
+            log.error(e)
+        except ldap.INSUFFICIENT_ACCESS, e:
+            log.error("TODO(ozten) I'm seeing this, but it should never happen.")
+            log.error(e)
+        finally:
+            conn.unbind()
+
+    def _modlist(self, profile):
+        """
+        TODO(ozten) We should use modifyModlist, but it
+        generates the wrong modlist
+        modlist = [(0, 'givenName', 'Hambone'), (1, 'displayName', None), 
+        (0, 'displayName', 'Hambone McSlough'), (1, 'cn', None), 
+        (0, 'cn', 'Hambone McSlough'), (1, 'sn', None), (0, 'sn', 'McSlough')]
+        where 0 is ADD 1 is DELETE and 2 is REPLACE...
+        """
+
+        # Required fields
+        mods = [(ldap.MOD_REPLACE, 'cn', profile['cn']), 
+                (ldap.MOD_REPLACE, 'displayName', profile['displayName']),
+                (ldap.MOD_REPLACE, 'sn', profile['sn']),
+                (ldap.MOD_REPLACE, 'displayName', profile['displayName']),
+                ]
+
+        # Optional fields
+        if profile['givenName']:
+            mods.append((ldap.MOD_REPLACE, 'givenName', profile['givenName']))
+        else:
+            mods.append((ldap.MOD_DELETE, 'givenName', None))
+        
+        return mods

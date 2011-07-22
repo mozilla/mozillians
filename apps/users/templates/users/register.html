@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{# TODO move registration flow all into the phonebook app. 
+   Currently spread across all three apps :( #}
+{% block main_content %}
+  <div>
+    Step 1 of 3 [ <strong>register</strong> | profile | get vouched ]
+    <h1>{{ _('Create Your Profile') }}</h1>
+    <form method="post" action="{{ url('register') }}">
+      {{ csrf() }}
+      {{ form }}
+      <button>{{ _('Create Account') }}</button>
+    </form>
+  </div>
+{% endblock %}

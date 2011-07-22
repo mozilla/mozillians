@@ -13,8 +13,10 @@ urlpatterns = patterns('',
 
     # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),
     # Post 1.0?
-    url('^user/edit/(?P<userid>.*)$', views.edit_profile,
+    url('^user/edit/(?P<uniqueIdentifier>.*)$', views.edit_profile,
         name='phonebook.edit_profile'),
+    url('^register/edit/(?P<uniqueIdentifier>.*)$', views.edit_new_profile,
+        name='phonebook.edit_new_profile'),
     url('^search$', views.search, name='phonebook.search'),
     #url('^tag/(?P<tag>.*)$', views.tag, name='phonebook.tag'),
     # Post 1.0?

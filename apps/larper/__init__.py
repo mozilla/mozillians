@@ -3,7 +3,12 @@ LARPER - LDAP Authenticate Resources Per Each Request
 """
 
 import logging
+
 import ldap
+from ldap.modlist import addModlist
+from ldap.modlist import modifyModlist
+
+import uuid
 
 from django.conf import settings
 
@@ -60,4 +65,38 @@ def store_password(request, password):
     password - A clear text password
     """
     request.session[PASS_SESSION_KEY] = password
+
+# Increase length of random uniqueIdentifiers as size of Mozillians
+# community enters the low millions ;)
+UUID_SIZE = 8
+
+def create_person(request, profile, password):
+    """
+    Given a dictionary of profile attributes, creates
+    an LDAP user. Method returns their uid.
+
+    Method raises the following exceptions:
+    ...
+    """
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    try:
+        conn.bind_s(settings.LDAP_REGISTRAR_DN, 
+                    settings.LDAP_REGISTRAR_PASSWORD)
+        # TODO catch already exists and keep trying
+        # graphite would be great here (create, conflict, etc)
+        uniqueIdentifier = str(uuid.uuid4())[0:UUID_SIZE]
+        new_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier, 
+                                             settings.LDAP_USERS_GROUP)
+        log.debug("new uid=%s so dn=%s" % (uniqueIdentifier, new_dn))
+
+        profile['uniqueIdentifier'] = uniqueIdentifier
+        mods = addModlist(profile)
+        conn.add_s(new_dn, mods)
+        return uniqueIdentifier
+    except ldap.INSUFFICIENT_ACCESS, e:
+        log.error("TODO(ozten) Just started seeing this, but it should never happen.")
+        log.error(e)
+        raise
+    finally:
+        conn.unbind()
 

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+  <div>  
+    Step 3 of 3 [ register | profile | <strong>get vouched</strong> ]
+    <h1>{{ _('Thank You') }}</h1>
+    <p>{{ _('for creating a profile.') }}</p>
+
+    {% if user.is_authenticated() %}
+      <p>{{ _('Your profile can be found at:') }}
+        <div><a href="{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}"
+          >{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}</a></div>
+      </p>
+    {% endif %}
+  </div>
+{% endblock %}

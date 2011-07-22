@@ -44,3 +44,7 @@ def handler500(request):
 def robots(request):
     return HttpResponse("""User-agent: *\nDisallow: /\n""",
                         mimetype="text/plain")
+
+def confirm_register(request):
+    return jingo.render(request, 'landing/confirm_register.html',
+                        dict())

@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url('^$', views.home, name='landing.home'),
     url('^robots.txt$', views.robots, name='robots.txt'),
     url('^about$', views.about, name='landing.about'),
+    url('^confirm_register$', views.confirm_register, name='landing.confirm_register'),
 )
