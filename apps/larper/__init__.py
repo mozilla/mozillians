@@ -11,6 +11,7 @@ from ldap.modlist import modifyModlist
 import uuid
 
 from django.conf import settings
+from django.core import signing
 
 log = logging.getLogger('phonebook')
 
@@ -40,7 +41,7 @@ def _find_and_cache_dn(request, uid):
     conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
     try:
         rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, "(uid=%s)" % uid)
-        if len(rs) == 1:                
+        if len(rs) == 1:
             dn, u = rs[0]
             request.session[DN_SESSION_KEY] = dn
             log.debug("Cached dn=%s in the session" % dn)
@@ -50,13 +51,11 @@ def _find_and_cache_dn(request, uid):
         conn.unbind()
 
 
-# HACK, TODO Bug#668308
-PASS_SESSION_KEY = 'larper-ct-password'
-
-
 def password(request):
     """ Not sure if this and store_password belong here..."""
-    return request.session[PASS_SESSION_KEY]
+    d = request.session.get('PASSWORD')
+    if d:
+        return signing.loads(d).get('password')
 
 
 def store_password(request, password):
@@ -64,11 +63,13 @@ def store_password(request, password):
     request - Django web request
     password - A clear text password
     """
-    request.session[PASS_SESSION_KEY] = password
+    request.session['PASSWORD'] = signing.dumps({'password': password})
+
 
 # Increase length of random uniqueIdentifiers as size of Mozillians
 # community enters the low millions ;)
 UUID_SIZE = 8
+
 
 def create_person(request, profile, password):
     """
@@ -80,12 +81,12 @@ def create_person(request, profile, password):
     """
     conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
     try:
-        conn.bind_s(settings.LDAP_REGISTRAR_DN, 
+        conn.bind_s(settings.LDAP_REGISTRAR_DN,
                     settings.LDAP_REGISTRAR_PASSWORD)
         # TODO catch already exists and keep trying
         # graphite would be great here (create, conflict, etc)
         uniqueIdentifier = str(uuid.uuid4())[0:UUID_SIZE]
-        new_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier, 
+        new_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier,
                                              settings.LDAP_USERS_GROUP)
         log.debug("new uid=%s so dn=%s" % (uniqueIdentifier, new_dn))
 
@@ -99,4 +100,3 @@ def create_person(request, profile, password):
         raise
     finally:
         conn.unbind()
-
