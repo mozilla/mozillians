@@ -18,3 +18,4 @@ PATH=`/bin/pwd`/bin:$PATH
 
 export PATH
 
+export OPENLDAP_DB_PATH=/home/vagrant/openldap-db

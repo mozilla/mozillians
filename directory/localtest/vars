@@ -2,4 +2,3 @@ serverurl=ldap://:1389/
 basedn=dc=mozillians,dc=org
 manager=cn=root,dc=mozillians,dc=org
 password=secret
-openldap_db_path=/home/vagrant/openldap-db

@@ -18,7 +18,7 @@ fi
 #
 x-stop-ldap
 sleep 1
-rm ${openldap_db_path}/* > /dev/null 2>&1
+rm ${OPENLDAP_DB_PATH}/* > /dev/null 2>&1
 x-start-ldap
 sleep 1
 
@@ -39,4 +39,3 @@ fi
 
 # Now build the example DIT
 ./build
-
