@@ -95,6 +95,7 @@ SECRET_KEY = '1iz#v0m55@h26^m6hxk3a7at*h$qj_2a$juu1#nv50548j(x1v'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
+    'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
@@ -194,7 +195,7 @@ INSTALLED_APPS = (
     'phonebook',
     'users',
     'larper',
-    
+
     # Local apps
     'commons',  # Content common to most playdoh-based apps.
     'jingo_minify',
@@ -270,6 +271,5 @@ BROKER_CONNECTION_TIMEOUT = 0.1
 CELERY_RESULT_BACKEND = 'amqp'
 CELERY_IGNORE_RESULT = True
 
-# Make sure LDAP operations go to the LDAP directory
-DATABASE_ROUTERS = ('ldapdb.router.Router',)
-
+SESSION_COOKIE_HTTPONLY = True
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
