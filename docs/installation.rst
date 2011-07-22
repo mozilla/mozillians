@@ -61,5 +61,10 @@ Installation
 
    On your local desktop do::
 
-    ./bin/update_site -e dev -v
+    git pull -q origin master
+    git submodule update --recursive
+    pushd vendor
+    git pull -q origin master
+    git submodule update --recursive
+    popd
     vagrant destroy && vagrant up
