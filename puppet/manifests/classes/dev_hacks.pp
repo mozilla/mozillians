@@ -3,7 +3,7 @@ class dev_hacks {
 
     file { "$PROJ_DIR/settings_local.py":
         ensure => file,
-        source => "$PROJ_DIR/puppet/files/settings_local.py";
+        source => "$PROJ_DIR/settings_local.py-dist";
     }
 
     case $operatingsystem {
