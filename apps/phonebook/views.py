@@ -107,7 +107,7 @@ def _update_profile(p, person, form):
     profile = {
                #'objectclass': ['inetOrgPerson','person','mozilliansPerson'],
                'cn': display_name,
-               'givenName': first_name,
+               #'givenName': first_name,
                'sn': last_name,
                'displayName': display_name,
                #'userPassword': password,

@@ -94,7 +94,6 @@ def create_person(request, profile, password):
         conn.add_s(new_dn, mods)
         return uniqueIdentifier
     except ldap.INSUFFICIENT_ACCESS, e:
-        log.error("TODO(ozten) Just started seeing this, but it should never happen.")
         log.error(e)
         raise
     finally:

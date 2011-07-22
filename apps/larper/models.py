@@ -99,12 +99,11 @@ class Person(object):
             
             #modlist = modifyModlist(person, profile, ignore_oldexistent=1)
             mods = self._modlist(profile)
-            #log.error("dn = %s modlist = %s" % (dn, mods))
+            log.error("dn = %s modlist = %s" % (dn, mods))
             conn.modify_s(dn, mods)
         except ldap.INVALID_CREDENTIALS, e:
             log.error(e)
         except ldap.INSUFFICIENT_ACCESS, e:
-            log.error("TODO(ozten) I'm seeing this, but it should never happen.")
             log.error(e)
         finally:
             conn.unbind()
@@ -127,9 +126,10 @@ class Person(object):
                 ]
 
         # Optional fields
+        """ Bug#673476
         if profile['givenName']:
             mods.append((ldap.MOD_REPLACE, 'givenName', profile['givenName']))
         else:
             mods.append((ldap.MOD_DELETE, 'givenName', None))
-        
+        """
         return mods
