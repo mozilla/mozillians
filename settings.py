@@ -195,7 +195,6 @@ AUTH_LDAP_ALWAYS_UPDATE_USER = False
 ROOT_URLCONF = '%s.urls' % ROOT_PACKAGE
 
 INSTALLED_APPS = (
-    'domesday',
     'landing',
     'phonebook',
     'users',
