@@ -31,6 +31,17 @@ def url(viewname, *args, **kwargs):
     """Helper for Django's ``reverse`` in templates."""
     return reverse(viewname, args=args, kwargs=kwargs)
 
+@register.filter
+def absolutify(url):
+    """Takes a URL and prepends the SITE_URL"""
+    protocol = settings.PROTOCOL
+    hostname = settings.DOMAIN
+    port = settings.PORT
+    if (protocol == 'https://' and port == 443) or \
+       (protocol == 'http://'  and port == 80):
+       return ''.join(map(str, (protocol, hostname, url)))
+    else:
+        return ''.join(map(str, (protocol, hostname, port, url)))
 
 @register.filter
 def urlparams(url_, hash=None, **query):

@@ -3,6 +3,11 @@
 
 from settings import *
 
+# For absoluate urls
+DOMAIN = "localhost"
+PROTOCOL = "http://"
+PORT = 8001
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

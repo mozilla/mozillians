@@ -2,6 +2,7 @@
 # Django settings for the mozillians project.
 
 import os
+import socket
 
 from django.utils.functional import lazy
 
@@ -73,6 +74,10 @@ LANGUAGES = lazy(LazyLangs, dict)()
 # Paths that don't require a locale code in the URL.
 SUPPORTED_NONLOCALES = []
 
+# For absoluate urls
+DOMAIN = socket.gethostname()
+PROTOCOL = "https://"
+PORT = 443
 
 ## Media and templates.
 
