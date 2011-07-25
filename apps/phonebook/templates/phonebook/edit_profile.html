@@ -50,6 +50,11 @@
   <hr />
   {% if user.username == person.uid[0] %}
     <a href="{{url('phonebook.edit_profile', person.uniqueIdentifier[0])}}">Edit Profile</a>
+    <form action="{{ url('phonebook.delete_profile') }}" method="POST">
+      {{ csrf() }}
+      {{ delete_form }}
+      <button>{{ _('Delete Profile') }}</button>
+    </form>
   {% endif %}
 
 {% endblock %}

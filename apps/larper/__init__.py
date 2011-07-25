@@ -37,7 +37,7 @@ class UNKNOWN_USER(Exception):
     pass
 
 def _find_and_cache_dn(request, uid):
-    log.debug("Anonymous simple bind to find dn")
+    log.debug("Anonymous simple bind to find uid=%s" % uid)
     conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
     try:
         rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, "(uid=%s)" % uid)
@@ -127,6 +127,29 @@ def vouch_person(request, voucher, vouchee):
         log.error("Trying to vouch for an already vouched Mozillian.")
         log.error(e)
         raise
+    except ldap.INSUFFICIENT_ACCESS, e:
+        log.error(e)
+        raise
+    finally:
+        conn.unbind()
+
+def delete_person(request, uniqueIdentifier):
+    """
+    uniqueIdentifier - for the person to be deleted
+
+    Completely removes an account from the directory.
+
+    Note: Only Admin and replicator can delete accounts.
+    """
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    try:
+        conn.bind_s(settings.LDAP_ADMIN_DN,
+                    settings.LDAP_ADMIN_PASSWORD)
+        person_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier,
+                                                 settings.LDAP_USERS_GROUP)
+        conn.delete_s(person_dn)
+
+        return True
     except ldap.INSUFFICIENT_ACCESS, e:
         log.error(e)
         raise

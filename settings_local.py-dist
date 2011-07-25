@@ -26,6 +26,8 @@ DATABASES = {
     },
 }
 
+LDAP_ADMIN_DN = 'uid=LDAPAdmin,ou=accounts,ou=system,dc=mozillians,dc=org'
+LDAP_ADMIN_PASSWORD = 'secret'
 LDAP_REGISTRAR_DN = 'uid=regAgent,ou=accounts,ou=system,dc=mozillians,dc=org'
 LDAP_REGISTRAR_PASSWORD = 'secret'
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'

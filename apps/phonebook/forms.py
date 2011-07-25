@@ -13,6 +13,9 @@ class ProfileForm(forms.Form):
                                 required=False)
     #photo
 
+class DeleteForm(forms.Form):
+    uniqueIdentifier = forms.CharField(widget=forms.HiddenInput)
+
 class VouchForm(forms.Form):
     """ Vouching is captured via a user's uniqueIdentifier """
     voucher = forms.CharField(widget=forms.HiddenInput)

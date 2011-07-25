@@ -9,6 +9,8 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
+import django.contrib.auth
+
 from commons.urlresolvers import reverse
 
 import jingo
@@ -83,6 +85,8 @@ def edit_new_profile(request, uniqueIdentifier):
 def _edit_profile(request, uniqueIdentifier, new_account):
     p = models.Person(request)
     person = p.find_by_uniqueIdentifier(uniqueIdentifier)
+    del_form = forms.DeleteForm(
+        initial={'uniqueIdentifier': uniqueIdentifier})
     if person:
         if request.method == 'POST':
             form = forms.ProfileForm(request.POST)
@@ -109,6 +113,7 @@ def _edit_profile(request, uniqueIdentifier, new_account):
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,
+                delete_form=del_form,
                 person=person,
                 registration_flow=new_account,
                 ))
@@ -134,6 +139,18 @@ def _update_profile(p, person, form):
                'description': biography,
                }
     p.update_person(person, profile)
+
+
+@require_POST
+def delete(request):
+    form = forms.DeleteForm(request.POST)
+    if form.is_valid():
+        larper.delete_person(request, form.cleaned_data['uniqueIdentifier'])
+        django.contrib.auth.logout(request)
+    else:
+        log.error("Some funny business...")
+    return redirect('home')
+        
 
 
 def search(request):
