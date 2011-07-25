@@ -26,19 +26,30 @@
           {{ person.voucher.displayName[0] }}</a>
       {% endif %}
     </div>
+  {% elif user.username == person.uid[0] %}
+    <p>
+      {% trans %}
+        Your profile is waiting for approval. Send this link to someone who is
+        familiar with your contributions and ask them to vouch for you.
+      {% endtrans %}
+    </p>
   {% else %}
 
     {% if person.uid and user.username == person.uid[0] %}
-      <div><strong>Pending...</strong><a href="{{ url ('landing.confirm_register') }}">Get Vouched</a></div>
+      <div><strong>Pending...</strong><a href="{{ url ('landing.confirm_register') }}">{{ _('Vouch for me') }}</a></div>
     {% else %}
+      <p>
+      {% trans vouch='#' %}
+        This profile is waiting for approval. If you can vouch for this
+        person's contributions, please do so.
+      {% endtrans %}</p>
       {% if vouch_form %}
-        <div><strong>Pending...</strong>  
-          <form action="{{ url('phonebook.vouch') }}" method="POST">
+        <form action="{{ url('phonebook.vouch') }}" method="POST">
             {{ csrf() }}
             {{ vouch_form }}
-            <button>Vouch for {{person.displayName[0]}}</button>
-          </form>
-        </div>
+            {# TODO L10n #}
+          <button>Vouch for {{person.displayName[0]}}</button>
+        </form>
       {% endif %}
     {% endif %}
   {% endif %}
@@ -46,7 +57,7 @@
   {% if person.description %}
      <p>{{ person.description[0] }}</p>
   {% endif %}
- 
+
   {% if person.mail %}
     <div>
       {% for mail in person.mail %}
@@ -63,5 +74,7 @@
   {% if person.uid and user.username == person.uid[0] %}
     <a href="{{url('phonebook.edit_profile', person.uniqueIdentifier[0])}}">Edit Profile</a>
   {% endif %}
+
+
 
 {% endblock %}

@@ -34,7 +34,7 @@ def profile_uid(request, uniqueIdentifier):
 
 
 def profile_nickname(request, nickname):
-    """ 
+    """
     This is probably post 1.0, but we could provide
     a nicer url if we used let the user opt-in to
     a Mozillians nickname (pre-populated from their
@@ -88,7 +88,7 @@ def _edit_profile(request, uniqueIdentifier, new_account):
             if form.is_valid():
                 _update_profile(p, person, form)
                 if new_account:
-                    return redirect('landing.confirm_register')
+                    return redirect('confirm_register')
                 else:
                     return redirect('phonebook.profile_uid', uniqueIdentifier)
         else:
@@ -102,15 +102,15 @@ def _edit_profile(request, uniqueIdentifier, new_account):
                 bio = person['biography']
             else:
                 bio = ''
-            form = forms.ProfileForm(initial={                    
-                    'first_name': first, 
+            form = forms.ProfileForm(initial={
+                    'first_name': first,
                     'last_name': person['sn'][0],
                     'biography': bio, })
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,
                 person=person,
-                registration_flow=new_account,                
+                registration_flow=new_account,
                 ))
     else:
         raise Http404
@@ -146,15 +146,15 @@ def search(request):
         query = form.cleaned_data.get('q', '')
         log.error("Search Query: %s" % query)
         if request.user.is_authenticated():
-            user = models.Person(request) 
+            user = models.Person(request)
             people = user.search(query)
-        
+
     return jingo.render(request, 'phonebook/search.html',
                         dict(people=people))
 
 
 def photo(request, uniqueIdentifier):
-    user = models.Person(request) 
+    user = models.Person(request)
     person = user.find_by_uniqueIdentifier(uniqueIdentifier)
     if person and 'jpegPhoto' in person:
         return HttpResponse(person['jpegPhoto'][0], mimetype="image/jpeg")
@@ -163,6 +163,15 @@ def photo(request, uniqueIdentifier):
 
 
 def invite(request):
+    # TODO: actually send this
+    subject = _('Become a Mozillian')
+    message = _("Hi, I'm sending you this because I think you should join "
+                'mozillians.org, the community directory for Mozilla '
+                'contributors like you. You can create a profile for yourself '
+                'about what you do in the community as well as search for '
+                'other contributors to learn more about them or get in touch. '
+                'Check it out.')
+
     return jingo.render(request, 'phonebook/invite.html')
 
 @require_POST

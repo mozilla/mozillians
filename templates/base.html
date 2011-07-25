@@ -1,14 +1,13 @@
 <html>
 <body>
   {% block header %}
-    <a href="{{ url('landing.home') }}">Mozillians</a>
-
+    <a href="{{ url('home') }}">Mozillians</a>
     {% if user.is_authenticated() %}
       <p>Welcome, {{ user.username }}. <a href="{{ url('logout') }}">Log Out</a></p>
       {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
-          <a href="{{ url('phonebook.profile_uid', uniq_id) }}">My Profile</a>
+      <a href="{{ url('phonebook.profile_uid', uniq_id) }}">My Profile</a>
       {% endfor %}
-      <a href="{{ url('phonebook.invite') }}">Invite</a>
+      <a href="{{ url('invite') }}">Invite</a>
       {% block search %}
         <form action="{{ url('phonebook.search') }}" method="GET">
           <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
@@ -29,7 +28,7 @@
   {% endblock %}
 
   {% block footer %}
-    <div><a href="{{ url('landing.about') }}">About</a></div>
+    <div><a href="{{ url('about') }}">{{ _('About') }}</a></div>
   {% endblock %}
 </body>
 </html>
