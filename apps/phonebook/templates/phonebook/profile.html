@@ -2,7 +2,7 @@
 
 {% block main_content %}
 
-  {% if user.username == person.uid[0] %}
+  {% if person.uid and user.username == person.uid[0] %}
     <h1>My Profile</h1>
   {% else %}
     <h1>{% if person.mozilliansVouchedBy %}Mozillian{% else %}Pending{% endif %} Profile</h1>
@@ -18,11 +18,33 @@
 
   {% if person.mozilliansVouchedBy %}
     <div>
-      <strong>Mozillian</strong> vouched by
-      {{ person.mozilliansVouchedBy[0] }}
+      <strong>Mozillian</strong> 
+      {% if person.voucher %}
+        vouched by
+    
+        <a href="{{ url('phonebook.profile_uid', person.voucher.uniqueIdentifier[0]) }}">
+          {{ person.voucher.displayName[0] }}</a>
+      {% endif %}
     </div>
   {% else %}
-    <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
+
+    {% if person.uid and user.username == person.uid[0] %}
+      <div><strong>Pending...</strong><a href="{{ url ('landing.confirm_register') }}">Get Vouched</a></div>
+    {% else %}
+      {% if vouch_form %}
+        <div><strong>Pending...</strong>  
+          <form action="{{ url('phonebook.vouch') }}" method="POST">
+            {{ csrf() }}
+            {{ vouch_form }}
+            <button>Vouch for {{person.displayName[0]}}</button>
+          </form>
+        </div>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
+  {% if person.description %}
+     <p>{{ person.description[0] }}</p>
   {% endif %}
  
   {% if person.mail %}
@@ -38,7 +60,7 @@
   {% endif %}
 
   <hr />
-  {% if user.username == person.uid[0] %}
+  {% if person.uid and user.username == person.uid[0] %}
     <a href="{{url('phonebook.edit_profile', person.uniqueIdentifier[0])}}">Edit Profile</a>
   {% endif %}
 

@@ -99,3 +99,36 @@ def create_person(request, profile, password):
         raise
     finally:
         conn.unbind()
+
+def vouch_person(request, voucher, vouchee):
+    """
+    voucher - A Mozillian
+    vouchee - A Pending Account
+    A voucher can 'vouch for' another user as 
+    being part of the Mozillian community.
+    """
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    uniqueIdentifier = request.user.ldap_user.attrs['uniqueIdentifier'][0]
+    try:
+        conn.bind_s(dn(request, uniqueIdentifier), 
+                    password(request))
+        # TODO get the person and make sure they don't have a mozilliansvouchedBy
+        voucher_dn = "uniqueIdentifier=%s,%s" % (voucher,
+                                                 settings.LDAP_USERS_GROUP)
+        vouchee_dn = "uniqueIdentifier=%s,%s" % (vouchee,
+                                                 settings.LDAP_USERS_GROUP)
+        modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
+
+        rs = conn.modify_s(vouchee_dn, modlist)
+        log.error("We successfully changed our dudez")
+        log.error(rs)
+        return True
+    except ldap.TYPE_OR_VALUE_EXISTS, e:
+        log.error("Trying to vouch for an already vouched Mozillian.")
+        log.error(e)
+        raise
+    except ldap.INSUFFICIENT_ACCESS, e:
+        log.error(e)
+        raise
+    finally:
+        conn.unbind()

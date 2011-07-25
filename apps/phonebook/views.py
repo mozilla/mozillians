@@ -7,9 +7,13 @@ log.setLevel(logging.DEBUG)
 from django.http import HttpResponse
 from django.http import Http404
 from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+
+from commons.urlresolvers import reverse
 
 import jingo
 
+import larper
 from larper import models
 
 from . import forms
@@ -21,7 +25,9 @@ def profile_uid(request, uniqueIdentifier):
     """
     p = models.Person(request)
     person = p.find_by_uniqueIdentifier(uniqueIdentifier)
-    if person:
+    # TODO(ozten) API - A pending user gets {'uniqueIdentifier': ['7f3a67u000100']}
+    # when they search for others... A Mozillian gets a fuller object
+    if 'uid' in person:
         return _profile(request, person)
     else:
         raise Http404
@@ -39,8 +45,24 @@ def profile_nickname(request, nickname):
 
 
 def _profile(request, person):
+    vouch_form = None
+    person['voucher'] = None
+
+    if 'mozilliansVouchedBy' in person:
+        p = models.Person(request)
+        voucher_dn = person['mozilliansVouchedBy'][0]
+        person['voucher'] = p.find_by_dn(voucher_dn)
+    else:
+        try:            
+            voucher = request.user.ldap_user.attrs['uniqueIdentifier'][0]
+            vouch_form = forms.VouchForm(initial=dict(
+                    voucher=voucher, 
+                    vouchee=person['uniqueIdentifier'][0]))
+        except AttributeError, e:
+            form = forms.VouchForm()
+            log.error(e)
     return jingo.render(request, 'phonebook/profile.html',
-                        dict(person=person))
+                        dict(person=person, vouch_form=vouch_form))
 
 
 def edit_profile(request, uniqueIdentifier):
@@ -142,3 +164,12 @@ def photo(request, uniqueIdentifier):
 
 def invite(request):
     return jingo.render(request, 'phonebook/invite.html')
+
+@require_POST
+def vouch(request):    
+    form = forms.VouchForm(request.POST)
+    if form.is_valid():
+        voucher = form.cleaned_data.get('voucher').encode('utf-8')
+        vouchee = form.cleaned_data.get('vouchee').encode('utf-8')
+        larper.vouch_person(request, voucher, vouchee)
+        return redirect(reverse('phonebook.profile_uid', args=[vouchee]))

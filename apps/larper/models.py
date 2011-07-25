@@ -1,4 +1,5 @@
 import ldap
+from ldap.dn import explode_dn
 from ldap.modlist import modifyModlist
 from ldap.filter import filter_format
 
@@ -7,6 +8,8 @@ import logging
 from django.conf import settings
 
 import larper
+
+import re
 
 log = logging.getLogger('phonebook')
 log.setLevel(logging.DEBUG)
@@ -55,6 +58,32 @@ class Person(object):
 
         TODO DRY - extract function
         """
+        search_filter = filter_format("(uniqueIdentifier=%s)", (query, ))
+        attrs = None
+        return self._find_by_filter(search_filter, attrs)
+
+
+    def find_by_dn(self, dn):
+        """
+        TODO(ozten) Look at allowing LDAP connection to dereference
+        these aliases, instead of manually doing the lookup.
+        """
+        dn_parts = explode_dn(dn)
+        query = None
+        reg = re.compile('uniqueIdentifier=(.*)', re.IGNORECASE)
+        for part in dn_parts:
+            matcher = reg.match(part)
+            if matcher:
+                query = matcher.groups()[0]
+                break
+        if query:
+            return self.find_by_uniqueIdentifier(query)
+        else:
+            return None
+
+
+    def _find_by_filter(self, search_filter, attrs):
+
         person = {}
         uid = self.request.user.username
         dn = larper.dn(self.request, uid)        
@@ -64,12 +93,11 @@ class Person(object):
 
         try:
             o = conn.bind_s(dn, password)
-            search_filter = filter_format("(uniqueIdentifier=%s)", (query, ))
-            attrs = None
+
             rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, search_filter, attrs)
             if len(rs) > 0:
                 if len(rs) > 1:
-                    log.warning("Searching for %s gave %d results... expected 0 or 1. Returning the first one.", (query, len(rs)))
+                    log.warning("Searching for %s gave %d results... expected 0 or 1. Returning the first one.", (search_filter, len(rs)))
                 log.error("Search has results!")
                 for result in rs:
                     dn, person = result

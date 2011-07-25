@@ -19,6 +19,7 @@ urlpatterns = patterns('',
         name='phonebook.edit_new_profile'),
     url('^search$', views.search, name='phonebook.search'),
     #url('^tag/(?P<tag>.*)$', views.tag, name='phonebook.tag'),
+    url('^vouch$', views.vouch, name='phonebook.vouch'),
     # Post 1.0?
     url('^invite$', views.invite, name='phonebook.invite'),
 

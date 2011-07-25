@@ -12,3 +12,8 @@ class ProfileForm(forms.Form):
                                 widget=forms.Textarea(),
                                 required=False)
     #photo
+
+class VouchForm(forms.Form):
+    """ Vouching is captured via a user's uniqueIdentifier """
+    voucher = forms.CharField(widget=forms.HiddenInput)
+    vouchee = forms.CharField(widget=forms.HiddenInput)
