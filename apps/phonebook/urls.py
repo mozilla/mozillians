@@ -4,7 +4,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 admin.autodiscover()
 
-from . import views
+from phonebook import views
 
 urlpatterns = patterns('',
     url('^u/(?P<uniqueIdentifier>.*)$', views.profile_uid, name='phonebook.profile_uid'),

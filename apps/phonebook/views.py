@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from commons.urlresolvers import reverse
 
 import jingo
+from tower import ugettext as _
 
 import larper
 from larper import models
