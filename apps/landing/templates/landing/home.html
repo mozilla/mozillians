@@ -1,5 +1,31 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-Welcome Home
+  <p>
+    {% trans about=url('about') %}
+      Welcome to the Mozilla community directory. If you're looking for
+      information on your fellow contributors, what they do and how to connect
+      with them, you've come to right place.
+      <a href="{{ about }}">Learn more</a>
+    {% endtrans %}
+  </p>
+
+  <p id="cta">
+    {% if user.is_authenticated() %}
+      {% trans invite='#' %}
+        Tell other contributors about this directory and ask them to create a
+        profile.
+
+        <a href="{{ invite }}">Invite a Mozillian</a>
+
+      {% endtrans %}
+    {% else %}
+      {% trans register=url('register') %}
+        Join the directory to share information about yourself and to learn
+        more about other Mozillians.
+
+        <a href="{{ register }}">Create Profile</a>
+      {% endtrans %}
+    {% endif %}
+  </p>
 {% endblock %}
