@@ -27,8 +27,8 @@ Installation
 
 4. Start your engines::
 
-    $ pushd code/directory/localtest && x-rebuild && popd
-    $ cd code
+    $ pushd mozillians/directory/localtest && x-rebuild && popd
+    $ cd mozillians
     $ ./manage.py runserver 0.0.0.0:8001
 
 5. Point your browser to http://localhost:8001
