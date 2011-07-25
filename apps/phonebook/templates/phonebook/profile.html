@@ -21,10 +21,23 @@
       <strong>Mozillian</strong> vouched by
       {{ person.mozilliansVouchedBy[0] }}
     </div>
+  {% elif user.username == person.uid[0] %}
+    <p>
+      {% trans %}
+        Your profile is waiting for approval. Send this link to someone who is
+        familiar with your contributions and ask them to vouch for you.
+      {% endtrans %}
+    </p>
   {% else %}
-    <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
+    <p>
+      {% trans vouch='#' %}
+        This profile is waiting for approval. If you can vouch for this
+        person's contributions, please do so.
+        <a href="{{ vouch }}">Vouch for me</a>
+      {% endtrans %}
+    </p>
   {% endif %}
- 
+
   {% if person.mail %}
     <div>
       {% for mail in person.mail %}
