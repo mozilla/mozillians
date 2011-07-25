@@ -8,6 +8,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 001
 cn: Test 001
+givenName: Test
 sn: 001
 uniqueIdentifier: test001
 description: Applicant 001
@@ -22,6 +23,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 002
 cn: Test 002
+givenName: Test
 sn: 002
 uniqueIdentifier: test002
 description: Applicant 002
@@ -36,6 +38,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 003
 cn: Test 003
+givenName: Test
 sn: 003
 uniqueIdentifier: test003
 description: Applicant 003
@@ -51,6 +54,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 011
 cn: Test Mozillian 011
+givenName: Test
 sn: 011
 uniqueIdentifier: test011
 description: Mozillian 011
@@ -66,6 +70,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 012
 cn: Test Mozillian 012
+givenName: Test
 sn: 012
 uniqueIdentifier: test012
 description: Mozillian 012
@@ -81,6 +86,7 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Test 013
 cn: Test Mozillian 013
+givenName: Test
 sn: 013
 uniqueIdentifier: test013
 description: Mozillian 013

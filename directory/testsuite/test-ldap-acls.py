@@ -273,6 +273,7 @@ class LdapUserTests(unittest.TestCase):
 	        userDN,
 		    [
 		        (ldap.MOD_REPLACE,'cn','modified CN'),
+		        (ldap.MOD_REPLACE,'givenName','modified givenName'),
 		        (ldap.MOD_REPLACE,'sn','modified SN'),
 		        (ldap.MOD_REPLACE,'displayName','modified displayName'),
 		        (ldap.MOD_REPLACE,'mail',['new@mail.one','new@mail.two']),
@@ -416,6 +417,8 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Mozillian should see the objectClass value" )
 	if not getAttrValue(res[0],'cn'):
 	    self.fail( "Mozillian should see the cn value" )
+	if not getAttrValue(res[0],'givenName'):
+	    self.fail( "Mozillian should see the givenName value" )
 	if not getAttrValue(res[0],'sn'):
 	    self.fail( "Mozillian should see the sn value" )
 	if not getAttrValue(res[0],'uid'):
@@ -449,6 +452,8 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Mozillian should see the objectClass value" )
 	if not getAttrValue(res[0],'cn'):
 	    self.fail( "Mozillian should see the cn value" )
+	if not getAttrValue(res[0],'givenName'):
+	    self.fail( "Mozillian should see the givenName value" )
 	if not getAttrValue(res[0],'sn'):
 	    self.fail( "Mozillian should see the sn value" )
 	if not getAttrValue(res[0],'uid'):
@@ -580,6 +585,8 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Applicant should see their own objectClass value" )
 	if not getAttrValue(res[0],'cn'):
 	    self.fail( "Applicant should see their own cn value" )
+	if not getAttrValue(res[0],'givenName'):
+	    self.fail( "Mozillian should see the givenName value" )
 	if not getAttrValue(res[0],'sn'):
 	    self.fail( "Applicant should see their own sn value" )
 	if not getAttrValue(res[0],'description'):
@@ -675,6 +682,7 @@ class LdapUserTests(unittest.TestCase):
                    ('uniqueIdentifier', 'testnew'),
                    ('uid', 'testnew'),
                    ('cn', 'Test new user'),
+                   ('givenName', 'Tess'),
                    ('sn', 'Test')]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                               self.ldap_mozillian011.add_s(ldap_newuserDN, modlist))
@@ -689,6 +697,7 @@ class LdapUserTests(unittest.TestCase):
                    ('uniqueIdentifier', 'testnew'),
                    ('uid', 'testnew'),
                    ('cn', 'Test new user'),
+                   ('givenName', 'Tess'),
                    ('sn', 'Test')]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_applicant001.add_s(ldap_newuserDN, modlist))
@@ -839,6 +848,7 @@ class LdapMonitorUserTests(unittest.TestCase):
                     ('uniqueIdentifier', 'testnew'),
                     ('uid', 'testnew'),
                     ('cn', 'Test new user'),
+                    ('givenName', 'Tess'),
                     ('sn', 'Test')]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_sys999.add_s(ldap_newuserDN, modlist))
@@ -952,6 +962,7 @@ class LdapReplicatorsUserTests(unittest.TestCase):
                    ('uniqueIdentifier', 'testnew'),
                    ('uid', 'testnew'),
                    ('cn', 'Test new user'),
+                   ('givenName', 'Tess'),
                    ('sn', 'Test')]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_sys999.add_s(ldap_newuserDN, modlist))
@@ -1064,6 +1075,8 @@ class LdapAdminsUserTests(unittest.TestCase):
 	    self.fail( "LDAP Admin should see the objectClass value" )
 	if not getAttrValue(res[0],'cn'):
 	    self.fail( "LDAP Admin should see the cn value" )
+	if not getAttrValue(res[0],'givenName'):
+	    self.fail( "LDAP Admin should see the givenName value" )
 	if not getAttrValue(res[0],'sn'):
 	    self.fail( "LDAP Admin should see the sn value" )
 	if not getAttrValue(res[0],'uid'):
@@ -1084,6 +1097,7 @@ class LdapAdminsUserTests(unittest.TestCase):
 	        ldap_mozillian012DN,
 		    [
 		        (ldap.MOD_REPLACE,'cn','modified CN'),
+		        (ldap.MOD_REPLACE,'givenName','modified givenName'),
 		        (ldap.MOD_REPLACE,'sn','modified SN'),
 		        (ldap.MOD_REPLACE,'displayName','modified displayName'),
 		        (ldap.MOD_REPLACE,'mail',['new@mail.one','new@mail.two']),
@@ -1135,6 +1149,7 @@ class LdapAdminsUserTests(unittest.TestCase):
 			('uniqueIdentifier', 'testnew'),
 			('uid', 'testnew'),
 			('cn', 'Test new user'),
+                        ('givenName', 'Tess'),
 			('sn', 'Test')
 		    ]
 		)
@@ -1151,6 +1166,7 @@ class LdapAdminsUserTests(unittest.TestCase):
                     ('uniqueIdentifier', 'testnew'),
                     ('uid', 'testnew'),
                     ('cn', 'Test new user'),
+                    ('givenName', 'Tess'),
                     ('sn', 'Test')]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_sys999.add_s(ldap_newuserDN, modlist))
@@ -1280,6 +1296,8 @@ class RegistrationAgentTests(unittest.TestCase):
 	    self.fail( "regAgent should see the objectClass value" )
 	if not getAttrValue(res[0],'cn'):
 	    self.fail( "regAgent should see the cn value" )
+	if not getAttrValue(res[0],'givenName'):
+	    self.fail( "regAgent should see the givenName value" )
 	if not getAttrValue(res[0],'sn'):
 	    self.fail( "regAgent should see the sn value" )
 	if not getAttrValue(res[0],'uid'):
@@ -1327,6 +1345,7 @@ class RegistrationAgentTests(unittest.TestCase):
 			('uniqueIdentifier', 'testnew'),
 			('uid', 'testnew'),
 			('cn', 'Test new user'),
+                        ('givenName', 'Tess'),
 			('sn', 'Test')
 		    ]
 		)
@@ -1349,6 +1368,7 @@ class RegistrationAgentTests(unittest.TestCase):
 			('uniqueIdentifier', 'testnew'),
 			('uid', 'testnew'),
 			('cn', 'Test new user'),
+                        ('givenName', 'Tess'),
 			('sn', 'Test'),
 			('mozilliansVouchedBy', ldap_mozillian012DN),
 			('userPassword','notverysecret')
@@ -1367,6 +1387,7 @@ class RegistrationAgentTests(unittest.TestCase):
                    ('uniqueIdentifier', 'testnew'),
                    ('uid', 'testnew'),
                    ('cn', 'Test new user'),
+                   ('givenName', 'Tess'),
                    ('sn', 'Test') ]
         self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
                           self.ldap_sys999.add_s(ldap_newuserDN, modlist))

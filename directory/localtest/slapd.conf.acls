@@ -38,7 +38,7 @@ objectclass ( 1.3.6.1.4.1.13769.3000.3.1
 	NAME 'attrsetSelfModifiable'
         DESC 'Attributes that a user can modify in their own entry'
         AUXILIARY
-        MAY ( cn $ sn $ displayname $ mail $ uid $ telephoneNumber $ jpegPhoto $ description )
+        MAY ( cn $ givenName $ sn $ displayname $ mail $ uid $ telephoneNumber $ jpegPhoto $ description )
         )
 
 # Replicators have overriding read-only access to everything
