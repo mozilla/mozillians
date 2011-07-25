@@ -243,8 +243,7 @@ class LdapUserTests(unittest.TestCase):
 	    # We only expect one value here
 	    schema_ptr = getAttrValue(res[0],'subschemaSubentry')
 	    if schema_ptr:
-		self.assertRegexpMatches(
-			schema_ptr, '^[a-zA-Z]+=',
+		self.assertTrue(re.match('^[a-zA-Z]+=', schema_ptr),
 			'root DSE should contain a valid schema pointer')
             else:
 	        self.fail( user + " did not get a subschemaSubentry attribute from the root DSE" )
@@ -338,11 +337,8 @@ class LdapUserTests(unittest.TestCase):
 	# so we expect to get an exception.
 	# LDAP actually supplies the entries, but Python LDAP does not deliver them to us.
 	try:
-	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
-		res = self.ldap_anon.search_s(
-			people_node,
-			ldap.SCOPE_SUBTREE,
-			filterstr='(uid=test00*)' )
+	    self.assertRaises(ldap.SIZELIMIT_EXCEEDED, lambda:\
+                                  self.ldap_anon.search_s(people_node, ldap.SCOPE_SUBTREE, filterstr='(uid=test00*)'))
 
         except ldap.LDAPError:
 	    self.fail( "Anon cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
@@ -350,20 +346,18 @@ class LdapUserTests(unittest.TestCase):
     def test_T0040_anon_fake_vouch_for_applicant(self):
 	# Anon should not be able to put a DN into
 	# an applicant's mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_anon.modify_s(
-		    ldap_applicant001DN,
-		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
-		)
+        modlist = [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+        self.assertRaises(ldap.LDAPError, lambda:\
+                              self.ldap_anon.modify_s(ldap_applicant001DN, modlist))
+                           
 
     def test_T0040_anon_fake_cn(self):
 	# Anon should not be able to put a value into
 	# an applicant's cn attribute
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_anon.modify_s(
-		    ldap_applicant001DN,
-		    [ (ldap.MOD_REPLACE,'cn','modified CN') ]
-		)
+        modlist = [ (ldap.MOD_REPLACE,'cn','modified CN') ]
+        self.assertRaises(ldap.LDAPError, lambda:\
+                          self.ldap_anon.modify_s(ldap_applicant001DN, modlist))
+                           
 
     def test_T6040_applicant_search_person(self):
 	# Applicant trying to find a person entry that is not their own
@@ -394,11 +388,11 @@ class LdapUserTests(unittest.TestCase):
 #	# The filter matches 3 in this case
 #	# This should limit at 2 entries returned
 #	try:
-#	    with self.assertRaises(ldap.SIZELIMIT_EXCEEDED):
-#		res = self.ldap_applicant001.search_s(
-#			people_node,
+#	    self.assertRaises(ldap.SIZELIMIT_EXCEEDED,
+#		self.ldap_applicant001.search_s, 
+#			(people_node,
 #			ldap.SCOPE_SUBTREE,
-#			filterstr='(uid=test00*)' )
+#			filterstr='(uid=test00*)' ) )
 #
 #        except ldap.LDAPError:
 #	    self.fail( "Applicant cannot search under "+people_node+" " + str(sys.exc_info()[0]) )
@@ -471,12 +465,14 @@ class LdapUserTests(unittest.TestCase):
 	    self.fail( "Mozillian should see the mozilliansVouchedBy value" )
 
     def test_T6060_mozillian_delete_applicant(self):
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_mozillian011.delete_s(ldap_applicant002DN)
+        self.assertRaises(ldap.LDAPError,
+                          self.ldap_mozillian011.delete_s,
+                          (ldap_applicant002DN))
 
     def test_T6060_mozillian_delete_self(self):
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_mozillian011.delete_s(ldap_mozillian011DN)
+        self.assertRaises(ldap.LDAPError,
+                          self.ldap_mozillian011.delete_s,
+                          (ldap_mozillian011DN))
 
 
     def test_T0030_mozillian_search_multi(self):
@@ -488,7 +484,7 @@ class LdapUserTests(unittest.TestCase):
 		    ldap.SCOPE_SUBTREE,
 		    filterstr='(uid=test*)' )
 
-	    self.assertGreater( len(res), 2,
+	    self.assertTrue( len(res) > 2,
 	            "Mozillian search for (uid=test*) should return more than 2 entries. We got "+str(len(res)) )
             # print res[0]
         except ldap.LDAPError:
@@ -515,17 +511,17 @@ class LdapUserTests(unittest.TestCase):
 
     def test_T1020_change_others_password(self):
 	# Try to change other people's passwords
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.passwd_s(ldap_applicant002DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_mozillian011.passwd_s(ldap_applicant002DN, None, 'owned!'))
 
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.passwd_s(ldap_mozillian012DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_mozillian011.passwd_s(ldap_mozillian012DN, None, 'owned!'))
 
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.passwd_s(ldap_applicant002DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.passwd_s(ldap_applicant002DN, None, 'owned!'))
 
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.passwd_s(ldap_mozillian012DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.passwd_s(ldap_mozillian012DN, None, 'owned!'))
 
     def test_T6010_applicant_change_user_attributes(self):
         self.change_user_attributes(
@@ -544,13 +540,9 @@ class LdapUserTests(unittest.TestCase):
 	# impossible for them to log in again
 	# The error here is OBJECT_CLASS_VIOLATION because this is enforced
 	# by a DIT content rule rather than an ACL
-        with self.assertRaises(ldap.OBJECT_CLASS_VIOLATION):
-	    self.ldap_mozillian011.modify_s(
-		    ldap_mozillian011DN,
-		    [
-		        (ldap.MOD_DELETE,'uid',None),
-		    ]
-		)
+        modlist = [ (ldap.MOD_DELETE,'uid',None), ] 
+        self.assertRaises(ldap.OBJECT_CLASS_VIOLATION, lambda:\
+                          self.ldap_mozillian011.modify_s(ldap_mozillian011DN, modlist))
 
 
     def test_T6020_mozillian_read_obscure_attrs(self):
@@ -630,150 +622,124 @@ class LdapUserTests(unittest.TestCase):
     def test_T5010_mozillian_fake_vouch_for_applicant(self):
 	# Mozillian should not be able to put someone else's DN into
 	# an applicant's mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.modify_s(
-		    ldap_applicant001DN,
-		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
-		)
+        modlist = [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_mozillian011.modify_s(ldap_applicant001DN, modlist))
+                           
 
     def test_T5010_mozillian_unvouch_applicant(self):
 	# Mozillian should not be able to remove any value from
 	# an applicant's mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.modify_s(
-		    ldap_applicant001DN,
-		    [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
-		)
+        modlist = [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+	                  self.ldap_mozillian011.modify_s(ldap_applicant001DN, modlist))
+                           
 
     def test_T5020_mozillian_fake_vouch_for_self(self):
 	# Mozillian should not be able to modify
 	# their own mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.modify_s(
-		    ldap_mozillian011DN,
-		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
-		)
+        modlist = [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_mozillian011.modify_s(ldap_mozillian011DN, modlist))
+                           
 
     def test_T5020_applicant_fake_vouch_for_self(self):
 	# Applicant should not be able to modify
 	# their own mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.modify_s(
-		    ldap_applicant001DN,
-		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
-		)
+        modlist = [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.modify_s(ldap_applicant001DN, modlist))
+
 
     def test_T5020_mozillian_fake_unvouch_self(self):
 	# Mozillian should not be able to modify
 	# their own mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.modify_s(
-		    ldap_mozillian011DN,
-		    [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
-		)
+        modlist = [ (ldap.MOD_DELETE,'mozilliansVouchedBy',None) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                              self.ldap_mozillian011.modify_s(ldap_mozillian011DN, modlist))
+                           
 
     def test_T5030_applicant_fake_vouch_for_another(self):
 	# Applicant should not be able to modify
 	# another applicant's mozilliansVouchedBy attribute
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.modify_s(
-		    ldap_applicant002DN,
-		    [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
-		)
+        modlist = [ (ldap.MOD_ADD,'mozilliansVouchedBy',ldap_applicant001DN) ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.modify_s(ldap_applicant002DN, modlist))
+                           
 
 
     def test_T7030_mozillian_add_entry(self):
 	# Should not be able to add entries
 	global entry_list
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansPerson']),
+                   ('uniqueIdentifier', 'testnew'),
+                   ('uid', 'testnew'),
+                   ('cn', 'Test new user'),
+                   ('sn', 'Test')]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                              self.ldap_mozillian011.add_s(ldap_newuserDN, modlist))
 
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
     def test_T7030_applicant_add_entry(self):
 	# Should not be able to add entries
 	global entry_list
-
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansPerson']),
+                   ('uniqueIdentifier', 'testnew'),
+                   ('uid', 'testnew'),
+                   ('cn', 'Test new user'),
+                   ('sn', 'Test')]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.add_s(ldap_newuserDN, modlist))
+                           
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
     def test_T8010_mozillian_hack_people_node(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_mozillian011.modify_s(
-	        people_node,
-		    [
-		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
-		    ]
-		)
+        modlist = [(ldap.MOD_REPLACE,'description','Bad, very bad...'),]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_mozillian011.modify_s(people_node, modlist))
+        
 
     def test_T8010_applicant_hack_people_node(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_applicant001.modify_s(
-	        people_node,
-		    [
-		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
-		    ]
-		)
+        modlist = [(ldap.MOD_REPLACE,'description','Bad, very bad...'),]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_applicant001.modify_s(people_node, modlist))
 
     def test_T8030_applicant_snooping_on_system_tree(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_applicant001.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_applicant001.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_applicant001.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)'))
 
     def test_T8030_mozillian_snooping_on_system_tree(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_mozillian011.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                          self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                          self.ldap_mozillian011.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                          self.ldap_mozillian011.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)'))
 
 
     def test_T9010_uid_must_be_unique(self):
 	# There is already an entry with uid=test002 in the test data
 	# so we should not be able to change our own UID to clash
-        with self.assertRaises(ldap.CONSTRAINT_VIOLATION):
-	    self.ldap_mozillian011.modify_s(
-	        ldap_mozillian011DN,
-		    [
-		        (ldap.MOD_REPLACE,'uid','test002'),
-		    ]
-		)
+        modlist = [ (ldap.MOD_REPLACE,'uid','test002'), ]
+        self.assertRaises(ldap.CONSTRAINT_VIOLATION, lambda:\
+                          self.ldap_mozillian011.modify_s(ldap_mozillian011DN, modlist))
+        
 
     def test_T9010_uid_must_be_unique_even_when_forced(self):
 	# There is already an entry with uid=test002 in the test data
 	# so even rootDN should not be able to change a UID to clash
-        with self.assertRaises(ldap.CONSTRAINT_VIOLATION):
-	    self.ldap_rootDN.modify_s(
-	        ldap_mozillian011DN,
-		    [
-		        (ldap.MOD_REPLACE,'uid','test002'),
-		    ]
-		)
+        modlist = [(ldap.MOD_REPLACE,'uid','test002'), ]
+        self.assertRaises(ldap.CONSTRAINT_VIOLATION, lambda:\
+                          self.ldap_rootDN.modify_s(ldap_mozillian011DN, modlist))
+
 
 
 class LdapMonitorUserTests(unittest.TestCase):
@@ -802,16 +768,16 @@ class LdapMonitorUserTests(unittest.TestCase):
     	tearDownCommon(self)
 
     def test_T7050_mozillian_snooping_on_stats(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                          self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                          self.ldap_mozillian011.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
 
     def test_T7050_anon_snooping_on_stats(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_anon.search_s(monitor_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
 
     def test_T7050_monitor_read_suffix(self):
         try:
@@ -856,32 +822,26 @@ class LdapMonitorUserTests(unittest.TestCase):
 		'evenmoresecret' )
 
     def test_T8030_monitor_snooping_on_system_tree(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)'))
 
     def test_T6060_monitor_delete_applicant(self):
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+        self.assertRaises(ldap.LDAPError, self.ldap_sys999.delete_s, ldap_applicant002DN)
 
     def test_T7030_monitor_add_entry(self):
 	# Should not be able to add entries
 	global entry_list
-
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansPerson']),
+                    ('uniqueIdentifier', 'testnew'),
+                    ('uid', 'testnew'),
+                    ('cn', 'Test new user'),
+                    ('sn', 'Test')]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.add_s(ldap_newuserDN, modlist))
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
@@ -981,35 +941,29 @@ class LdapReplicatorsUserTests(unittest.TestCase):
 	    self.fail( "Replicator account should be able to see members in system groups" )
 
     def test_T6060_replicator_delete_applicant(self):
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+        self.assertRaises(ldap.LDAPError,
+                          self.ldap_sys999.delete_s,
+                          (ldap_applicant002DN))
 
     def test_T7030_replicator_add_entry(self):
 	# Should not be able to add entries
 	global entry_list
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansPerson']),
+                   ('uniqueIdentifier', 'testnew'),
+                   ('uid', 'testnew'),
+                   ('cn', 'Test new user'),
+                   ('sn', 'Test')]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.add_s(ldap_newuserDN, modlist))
 
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansPerson']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
     def test_T8010_replicator_hack_people_node(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.modify_s(
-	        people_node,
-		    [
-		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
-		    ]
-		)
+        modlist = [ (ldap.MOD_REPLACE,'description','Bad, very bad...'), ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.modify_s(people_node, modlist))
+
 
 class LdapAdminsUserTests(unittest.TestCase):
 
@@ -1145,12 +1099,8 @@ class LdapAdminsUserTests(unittest.TestCase):
 
     def test_T2030_admin_unvouch_user(self):
         try:
-	    self.ldap_sys999.modify_s(
-	        ldap_mozillian012DN,
-		    [
-		        (ldap.MOD_DELETE,'mozilliansVouchedBy',None),
-		    ]
-		)
+            modlist = [(ldap.MOD_DELETE,'mozilliansVouchedBy',None), ]
+	    self.ldap_sys999.modify_s(ldap_mozillian012DN, modlist)
         except ldap.LDAPError:
 	    self.fail( "LDAP Admin cannot un-vouch a user " + str(sys.exc_info()[0]) )
 
@@ -1197,46 +1147,38 @@ class LdapAdminsUserTests(unittest.TestCase):
 	# Should not be able to add entries with the wrong objectclass
 	# (mozilliansObject in place of mozilliansPerson in this case)
 	global entry_list
-
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansObject']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansObject']),
+                    ('uniqueIdentifier', 'testnew'),
+                    ('uid', 'testnew'),
+                    ('cn', 'Test new user'),
+                    ('sn', 'Test')]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.add_s(ldap_newuserDN, modlist))
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
 
     def test_T2050_admin_hack_sys_password(self):
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!'))
 
 
     def test_T8010_admin_hack_people_node(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.modify_s(
-	        people_node,
-		    [
-		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
-		    ]
-		)
+        modlist = [(ldap.MOD_REPLACE,'description','Bad, very bad...'), ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.modify_s(people_node, modlist))
 
     def test_T8030_ldapadmin_snooping_on_system_tree(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)'))
+
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)'))
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)'))
 	# Should not even see its own entry
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)'))
 
 
 class RegistrationAgentTests(unittest.TestCase):
@@ -1354,30 +1296,24 @@ class RegistrationAgentTests(unittest.TestCase):
 
     def test_T3040_regAgent_change_user_attributes(self):
 	# This should fail because it involves deleting a value as well as adding a new one
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.modify_s(
-	        ldap_mozillian012DN,
-		    [
-		        (ldap.MOD_REPLACE,'cn','modified CN'),
-		    ]
-		)
+        modlist = [(ldap.MOD_REPLACE,'cn','modified CN'),]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.modify_s(ldap_mozillian012DN, modlist))
 
 
     def test_T2030_regAgent_unvouch_user(self):
 	# We may permit the regAgent to vouch for users
 	# but we do not allow it to un-vouch
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.modify_s(
-	        ldap_mozillian012DN,
-		    [
-		        (ldap.MOD_DELETE,'mozilliansVouchedBy',None),
-		    ]
-		)
+        modlist = [(ldap.MOD_DELETE,'mozilliansVouchedBy',None), ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.modify_s(ldap_mozillian012DN, modlist))
+                           
 
     def test_T6060_replicator_delete_applicant(self):
 	# LDAP regAgent is not allowed to delete user entries
-        with self.assertRaises(ldap.LDAPError):
-	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+        self.assertRaises(ldap.LDAPError,
+                          self.ldap_sys999.delete_s,
+                          (ldap_applicant002DN))
 
     # regAgent is allowed to add new user entries
     def test_T3010_regAgent_add_user(self):
@@ -1427,50 +1363,51 @@ class RegistrationAgentTests(unittest.TestCase):
 	# Should not be able to add entries with the wrong objectclass
 	# (mozilliansObject in place of mozilliansPerson in this case)
 	global entry_list
+        modlist = [('objectClass', ['inetOrgPerson','mozilliansObject']),
+                   ('uniqueIdentifier', 'testnew'),
+                   ('uid', 'testnew'),
+                   ('cn', 'Test new user'),
+                   ('sn', 'Test') ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.add_s(ldap_newuserDN, modlist))
 
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.add_s(
-	            ldap_newuserDN,
-                    [
-		        ('objectClass', ['inetOrgPerson','mozilliansObject']),
-			('uniqueIdentifier', 'testnew'),
-			('uid', 'testnew'),
-			('cn', 'Test new user'),
-			('sn', 'Test')
-		    ]
-		)
 	# Make sure that we clear this entry up afterwards
         entry_list.append(ldap_newuserDN)
 
 
     def test_T3050_regAgent_delete_applicant(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.delete_s(ldap_applicant002DN)
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS,
+                          self.ldap_sys999.delete_s,
+                          (ldap_applicant002DN))
+
 
     def test_T2050_regAgent_hack_sys_password(self):
-	with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!')
+	self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
+                          self.ldap_sys999.passwd_s(ldap_sys900DN, None, 'owned!'))
 
 
     def test_T8010_regAgent_hack_people_node(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
-	    self.ldap_sys999.modify_s(
-	        people_node,
-		    [
-		        (ldap.MOD_REPLACE,'description','Bad, very bad...'),
-		    ]
-		)
+        modlist = [ (ldap.MOD_REPLACE,'description','Bad, very bad...'), ]
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, 
+                          lambda:\
+                              self.ldap_sys999.modify_s(people_node, modlist))
+
 
     def test_T8030_regAgent_snooping_on_system_tree(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_BASE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(system_suffix,ldap.SCOPE_SUBTREE,'(objectclass=*)')
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix, ldap.SCOPE_BASE, '(objectclass=*)'))
+                          
+            
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(system_suffix, ldap.SCOPE_SUBTREE, '(objectclass=*)'))
+
+            
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(admin_group,ldap.SCOPE_BASE,'(objectclass=*)'))
+            
 	# Should not even see its own entry
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-            self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)')
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+                              self.ldap_sys999.search_s(ldap_sys999DN,ldap.SCOPE_BASE,'(objectclass=*)'))
 
 
 
