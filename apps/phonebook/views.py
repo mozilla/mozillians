@@ -30,7 +30,7 @@ def profile_uid(request, uniqueIdentifier):
     person = p.find_by_uniqueIdentifier(uniqueIdentifier)
     # TODO(ozten) API - A pending user gets {'uniqueIdentifier': ['7f3a67u000100']}
     # when they search for others... A Mozillian gets a fuller object
-    if 'uid' in person:
+    if person and 'uid' in person:
         return _profile(request, person)
     else:
         raise Http404
