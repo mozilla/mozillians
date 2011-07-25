@@ -12,7 +12,7 @@
 
   <p id="cta">
     {% if user.is_authenticated() %}
-      {% trans invite='#' %}
+      {% trans invite=url('invite') %}
         Tell other contributors about this directory and ask them to create a
         profile.
 

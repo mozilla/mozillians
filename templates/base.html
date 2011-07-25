@@ -6,7 +6,7 @@
       <p>Welcome, {{ user.username }}. <a href="{{ url('logout') }}">Log Out</a></p>
 
       <a href="{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}">My Profile</a>
-      <a href="{{ url('phonebook.invite') }}">Invite</a>
+      <a href="{{ url('invite') }}">Invite</a>
       {% block search %}
         <form action="{{ url('phonebook.search') }}" method="GET">
           <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>

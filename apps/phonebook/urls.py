@@ -20,7 +20,7 @@ urlpatterns = patterns('',
     url('^search$', views.search, name='phonebook.search'),
     #url('^tag/(?P<tag>.*)$', views.tag, name='phonebook.tag'),
     # Post 1.0?
-    url('^invite$', views.invite, name='phonebook.invite'),
+    url('^invite$', views.invite, name='invite'),
 
     # Move to auth?
     #url('^login$', views.login, name='phonebook.login'),
