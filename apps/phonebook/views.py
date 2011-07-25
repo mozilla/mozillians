@@ -93,14 +93,13 @@ def _edit_profile(request, uniqueIdentifier, new_account):
                 else:
                     return redirect('phonebook.profile_uid', uniqueIdentifier)
         else:
-            # TODO(ozten) what is the first name ldap field?
             # TODO(ozten) Where layers do we let ldap nominclature bleed into?
-            if 'displayName' in person:
-                first = person['displayName'][0].split()[0]
+            if 'givenName' in person:
+                first = person['givenName'][0]
             else:
                 first = ''
-            if 'biography' in person:
-                bio = person['biography']
+            if 'description' in person:
+                bio = person['description'][0]
             else:
                 bio = ''
             form = forms.ProfileForm(initial={
@@ -126,16 +125,13 @@ def _update_profile(p, person, form):
     biography = form.cleaned_data['biography'].encode('utf-8')
 
     display_name = ("%s %s" % (first_name, last_name)).encode('utf-8')
-
+    # TODO push down into larper?
     profile = {
-               #'objectclass': ['inetOrgPerson','person','mozilliansPerson'],
                'cn': display_name,
-               #'givenName': first_name,
+               'givenName': first_name,
                'sn': last_name,
                'displayName': display_name,
-               #'userPassword': password,
-               #'uid': email,
-               #'mail': email,
+               'description': biography,
                }
     p.update_person(person, profile)
 

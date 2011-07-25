@@ -150,14 +150,15 @@ class Person(object):
         mods = [(ldap.MOD_REPLACE, 'cn', profile['cn']), 
                 (ldap.MOD_REPLACE, 'displayName', profile['displayName']),
                 (ldap.MOD_REPLACE, 'sn', profile['sn']),
-                (ldap.MOD_REPLACE, 'displayName', profile['displayName']),
                 ]
 
         # Optional fields
-        """ Bug#673476
         if profile['givenName']:
             mods.append((ldap.MOD_REPLACE, 'givenName', profile['givenName']))
         else:
             mods.append((ldap.MOD_DELETE, 'givenName', None))
-        """
+        if profile['description']:
+            mods.append((ldap.MOD_REPLACE, 'description', profile['description']))
+        else:
+            mods.append((ldap.MOD_DELETE, 'description', profile['description']))
         return mods
