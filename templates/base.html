@@ -1,34 +1,134 @@
-<html>
+<!doctype html>
+<!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>  <html class="no-js ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>  <html class="no-js ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <title>Mozillians: {% block page_title %}
+    {{ _('Welcome') }}{% endblock %}</title>
+  <meta name="description" content="Mozillians">
+  <meta name="author" content="Mozilla">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
+
+  {% block site_css %}
+    {{ css('common') }}
+    <!--[if IE]>
+      <link href="{{ MEDIA_URL }}css/ie.css" rel="stylesheet" type="text/css">
+    <![endif]-->
+  {% endblock %}
+
+  <link rel="shortcut icon" type="image/png"
+    href="{{ MEDIA_URL }}img/favicon.png">
+  {% block feeds %}{% endblock %}
+  {% block extra_headers %}{% endblock %}
+</head>
+
 <body>
-  {% block header %}
-    <a href="{{ url('home') }}">Mozillians</a>
-    {% if user.is_authenticated() %}
-      <p>Welcome, {{ user.username }}. <a href="{{ url('logout') }}">Log Out</a></p>
-      {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
-      <a href="{{ url('phonebook.profile_uid', uniq_id) }}">My Profile</a>
-      {% endfor %}
-      <a href="{{ url('invite') }}">Invite</a>
-      {% block search %}
-        <form action="{{ url('phonebook.search') }}" method="GET">
-          <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
-          <input type="submit" value="{{ _('Search') }}"/>
-        </form>
-      {% endblock %}
-    {% else %}
-    <p>
-      <a href="{{ url('login') }}">Log In</a> or
-      <a href="{{ url('register') }}">Join Us</a>
-    </p>
-    {% endif %}
+<ul id="skip" class="hide">
+  <li><a href="#main">Skip to Content</a></li>
+</ul>
 
-  {% endblock %}
+<header id="header">
+  <h1 class="unitPng"><a href="{{ url('home') }}">Mozillians</a></h1>
 
-  {% block main_content %}
+  <div id="header-contents">
+    <ul id="nav">
+      {% if user.is_authenticated() %}
+        {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
+          <li class="first">
+            <a href="{{ url('phonebook.profile_uid', uniq_id) }}">
+              {{ _('Profile') }}
+            </a>
+          </li>
+        {% endfor %}
+        <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+        <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
+      {% else %}
+        <li><a href="{{ url('login') }}">{{ _('Log In') }}</a></li>
+        <li><a href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
+      {% endif %}
+    </ul>
 
-  {% endblock %}
+    <form id="quick-search" action="{{ url('phonebook.search') }}"
+        method="GET">
+      <input type="search" id="q" name="q"
+        placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
+      <input type="image" src="{{ MEDIA_URL }}img/mozilla/search-submit.png"
+        alt="{{ _('Search') }}" id="quick-search-btn">
+    </form>
+  </div>
+</header>
 
-  {% block footer %}
-    <div><a href="{{ url('about') }}">{{ _('About') }}</a></div>
-  {% endblock %}
+<h1 id="page-title">{% block title %}Hey, I'm a title{% endblock %}</h1>
+
+<div id="main">
+  <div id="main-content">
+    {% block main_content %}{% endblock %}
+  </div>
+</div>
+
+<div id="footer-wrap">
+  <footer id="footer">
+    <a id="logo-footer" href="http://mozilla.org/">
+      <img src="{{ MEDIA_URL }}img/mozilla/logo_footer.png" alt="Mozilla">
+    </a>
+
+    {% block copyright %}
+    <div id="copyright">
+      <p id="footer-links">
+        {% block footer_links %}
+          <a href="{{ url('about') }}">
+            {{ _('About Mozillians') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="#get-involved">
+            {{ _('Get Involved') }}
+          </a>
+          <br id="footer-link-spacer">
+          <a href="http://mozilla.com/privacy-policy.html">
+            {{ _('Privacy Policy') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/about/legal.html">
+            {{ _('Legal Notices') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/legal/fraud-report/index.html">
+            {{ _('Report Trademark Abuse') }}
+          </a>
+          {% block extra_footer_links %}{% endblock %}
+        {% endblock %}
+      </p>
+      <p>
+        {% trans %}
+          Except where otherwise
+          <a href="http://mozilla.com/about/legal.html#site">noted</a>,
+          content on this site is licensed under the <br />
+          <a href="http://creativecommons.org/licenses/by-sa/3.0/">
+            Creative Commons Attribution Share-Alike License v3.0
+          </a> or any later version.
+        {% endtrans %}
+      </p>
+    </div>
+    {% endblock %}
+
+    {% block lang_switcher %}
+      {% include 'includes/lang_switcher.html' %}
+    {% endblock %}
+
+    <div class="clear"></div>
+  </footer>
+</div>
+
+{% block site_js %}
+  {{ js('common') }}
+{% endblock %}
+{% block js %}{% endblock %}
+
+{# include "includes/webtrends_desktop.html" #}
 </body>
 </html>

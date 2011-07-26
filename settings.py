@@ -144,13 +144,15 @@ def JINJA_CONFIG():
 # and js files that can be bundled together by the minify app.
 MINIFY_BUNDLES = {
     'css': {
-        'example_css': (
-            'css/examples/main.css',
+        'common': (
+            'css/mozilla-base.css',
+            'css/main.css',
         ),
     },
     'js': {
-        'example_js': (
+        'common': (
             'js/libs/jquery-1.4.4.min.js',
+            'js/main.js',
         ),
     }
 }
