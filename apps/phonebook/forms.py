@@ -11,7 +11,7 @@ class ProfileForm(forms.Form):
     biography = forms.CharField(label=_('Bio'), 
                                 widget=forms.Textarea(),
                                 required=False)
-    #photo
+    photo = forms.ImageField(label=_('Profile Photo'), required=False)
 
 class DeleteForm(forms.Form):
     uniqueIdentifier = forms.CharField(widget=forms.HiddenInput)

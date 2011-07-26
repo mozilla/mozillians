@@ -9,7 +9,7 @@
   {% endif %}
 
   <hr />
-  <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" />
+  <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" width="300" />
   {% if person.displayName %}
     <div>
       <a href="{{url('phonebook.profile_uid', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>

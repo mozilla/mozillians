@@ -8,12 +8,14 @@ import ldap
 from ldap.modlist import addModlist
 from ldap.modlist import modifyModlist
 
-import uuid
+import os
 
 from django.conf import settings
 from django.core import signing
 
 log = logging.getLogger('phonebook')
+
+LDAP_DEBUG = 0
 
 DN_SESSION_KEY = 'larper-dn'
 
@@ -38,7 +40,7 @@ class UNKNOWN_USER(Exception):
 
 def _find_and_cache_dn(request, uid):
     log.debug("Anonymous simple bind to find uid=%s" % uid)
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
     try:
         rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, "(uid=%s)" % uid)
         if len(rs) == 1:
@@ -68,7 +70,7 @@ def store_password(request, password):
 
 # Increase length of random uniqueIdentifiers as size of Mozillians
 # community enters the low millions ;)
-UUID_SIZE = 8
+UUID_SIZE = 5
 
 
 def create_person(request, profile, password):
@@ -79,13 +81,13 @@ def create_person(request, profile, password):
     Method raises the following exceptions:
     ...
     """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
     try:
         conn.bind_s(settings.LDAP_REGISTRAR_DN,
                     settings.LDAP_REGISTRAR_PASSWORD)
-        # TODO catch already exists and keep trying
+        # TODO(ozten) catch already exists and keep trying
         # graphite would be great here (create, conflict, etc)
-        uniqueIdentifier = str(uuid.uuid4())[0:UUID_SIZE]
+        uniqueIdentifier = os.urandom(UUID_SIZE).encode('hex')
         new_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier,
                                              settings.LDAP_USERS_GROUP)
         log.debug("new uid=%s so dn=%s" % (uniqueIdentifier, new_dn))
@@ -107,7 +109,7 @@ def vouch_person(request, voucher, vouchee):
     A voucher can 'vouch for' another user as 
     being part of the Mozillian community.
     """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
     uniqueIdentifier = request.user.ldap_user.attrs['uniqueIdentifier'][0]
     try:
         conn.bind_s(dn(request, uniqueIdentifier), 
@@ -141,7 +143,7 @@ def delete_person(request, uniqueIdentifier):
 
     Note: Only Admin and replicator can delete accounts.
     """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
     try:
         conn.bind_s(settings.LDAP_ADMIN_DN,
                     settings.LDAP_ADMIN_PASSWORD)

@@ -2,7 +2,7 @@
 
 {% block main_content %}
 
-  <form action="" method="POST">
+  <form action="" method="POST" enctype="multipart/form-data">
     {{ csrf() }}
     {% if registration_flow %}
     Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
@@ -10,7 +10,7 @@
 
     <h1>{% if person.mozilliansVouchedBy %}Mozillian{% else %}Pending{% endif %} Profile</h1>
 
-    <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" />
+    <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" width="300" />
 
     {{ form }}
     {% if registration_flow %}

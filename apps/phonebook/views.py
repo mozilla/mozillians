@@ -1,3 +1,4 @@
+import copy
 import logging
 log = logging.getLogger('phonebook')
 log.addHandler(logging.StreamHandler())
@@ -89,13 +90,15 @@ def _edit_profile(request, uniqueIdentifier, new_account):
         initial={'uniqueIdentifier': uniqueIdentifier})
     if person:
         if request.method == 'POST':
-            form = forms.ProfileForm(request.POST)
+            form = forms.ProfileForm(request.POST, request.FILES)
             if form.is_valid():
                 _update_profile(p, person, form)
                 if new_account:
                     return redirect('confirm_register')
                 else:
                     return redirect('phonebook.profile_uid', uniqueIdentifier)
+            else:
+                log.error("Form is INVALID")
         else:
             # TODO(ozten) Where layers do we let ldap nominclature bleed into?
             if 'givenName' in person:
@@ -122,22 +125,32 @@ def _edit_profile(request, uniqueIdentifier, new_account):
 
 
 def _update_profile(p, person, form):
-    """ TODO DRY with users/views.py """
+    """ 
+    TODO DRY with users/views.py 
+    """
 
     # Optional
     first_name = form.cleaned_data['first_name'].encode('utf-8') or ""
     last_name = form.cleaned_data['last_name'].encode('utf-8')
     biography = form.cleaned_data['biography'].encode('utf-8')
+    if form.cleaned_data['photo']:
+        photo = form.cleaned_data['photo'].file
+    else:
+        photo = None
+
 
     display_name = ("%s %s" % (first_name, last_name)).encode('utf-8')
     # TODO push down into larper?
-    profile = {
-               'cn': display_name,
-               'givenName': first_name,
-               'sn': last_name,
-               'displayName': display_name,
-               'description': biography,
-               }
+    profile = copy.deepcopy(person)
+    profile['givenName'] = first_name        
+    profile['sn'] = last_name
+    profile['cn'] = display_name
+    profile['displayName'] = display_name
+
+    profile['description'] = biography
+    if photo:
+        profile['jpegPhoto'] = photo.read()
+               
     p.update_person(person, profile)
 
 

@@ -8,3 +8,6 @@ py-bcrypt==0.2
 
 # LDAP
 python-ldap==2.4.0
+
+# Images
+PIL

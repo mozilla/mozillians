@@ -8,6 +8,7 @@ import logging
 from django.conf import settings
 
 import larper
+from larper import LDAP_DEBUG
 
 import re
 
@@ -28,7 +29,7 @@ class Person(object):
         dn = larper.dn(self.request, uid)        
         password = larper.password(self.request)
 
-        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
 
         try:
             log.debug("Doing bind_s(%s, %s)" % (dn, password, ))
@@ -37,7 +38,11 @@ class Person(object):
                 search_filter = filter_format("(cn=*%s*)", (query, ))
                 attrs = None # All for now
                 # TODO - optimize ['cn', 'mail']
-                rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, search_filter, attrs)
+                # TODO(ozten) use search_ext_s and SimplePagedResultsControl
+                try:
+                    rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, search_filter, attrs)
+                except ldap.SIZELIMIT_EXCEEDED:
+                    log.error("Too many results!")
                 if len(rs) > 0:
                     log.error("Search has results!")
                     for result in rs:
@@ -89,7 +94,7 @@ class Person(object):
         dn = larper.dn(self.request, uid)        
         password = larper.password(self.request)
 
-        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
 
         try:
             o = conn.bind_s(dn, password)
@@ -119,46 +124,16 @@ class Person(object):
         dn = larper.dn(self.request, uid)        
         password = larper.password(self.request)
 
-        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, 2)
+        conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
 
         try:
             conn.bind_s(dn, password)
-            log.error("Creating mods from %s" % person)
-            
-            #modlist = modifyModlist(person, profile, ignore_oldexistent=1)
-            mods = self._modlist(profile)
-            log.error("dn = %s modlist = %s" % (dn, mods))
+            mods = modifyModlist(person, profile, ignore_oldexistent=1)
             conn.modify_s(dn, mods)
+
         except ldap.INVALID_CREDENTIALS, e:
             log.error(e)
         except ldap.INSUFFICIENT_ACCESS, e:
             log.error(e)
         finally:
             conn.unbind()
-
-    def _modlist(self, profile):
-        """
-        TODO(ozten) We should use modifyModlist, but it
-        generates the wrong modlist
-        modlist = [(0, 'givenName', 'Hambone'), (1, 'displayName', None), 
-        (0, 'displayName', 'Hambone McSlough'), (1, 'cn', None), 
-        (0, 'cn', 'Hambone McSlough'), (1, 'sn', None), (0, 'sn', 'McSlough')]
-        where 0 is ADD 1 is DELETE and 2 is REPLACE...
-        """
-
-        # Required fields
-        mods = [(ldap.MOD_REPLACE, 'cn', profile['cn']), 
-                (ldap.MOD_REPLACE, 'displayName', profile['displayName']),
-                (ldap.MOD_REPLACE, 'sn', profile['sn']),
-                ]
-
-        # Optional fields
-        if profile['givenName']:
-            mods.append((ldap.MOD_REPLACE, 'givenName', profile['givenName']))
-        else:
-            mods.append((ldap.MOD_DELETE, 'givenName', None))
-        if profile['description']:
-            mods.append((ldap.MOD_REPLACE, 'description', profile['description']))
-        else:
-            mods.append((ldap.MOD_DELETE, 'description', profile['description']))
-        return mods
