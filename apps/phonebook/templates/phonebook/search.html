@@ -3,7 +3,7 @@
 {% block main_content %}
   <h1>{{ _('Search') }}</h1>
 
-  <form action="" method="GET">  
+  <form action="" method="GET">
     <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
     <input type="submit" value="{{ _('Search') }}"/>
   </form>
@@ -17,5 +17,14 @@
       {% else %}<div><strong>Pending...</strong></div>
       {% endif %}
     </div>
+  {% else %}
+    <p>
+      {% trans invite=url('invite') %}
+        The Mozillian you are looking for is not in the directory. Please check
+        your spelling or
+        <a href="{{ invite }}">invite this person</a>
+        to create a profile.
+      {% endtrans %}
+    </p>
   {% endfor %}
 {% endblock %}
