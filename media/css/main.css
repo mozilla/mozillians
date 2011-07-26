@@ -1,0 +1,17 @@
+.hide, .js .js-hide {
+    left: -9999px;
+    position: absolute;
+    top: 0;
+}
+html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
+    left: 0;
+    right: -9999px;
+}
+
+#main {
+    min-height: 275px;
+}
+
+.clear {
+    clear: both;
+}
