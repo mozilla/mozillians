@@ -12,17 +12,17 @@
   <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" width="300" />
   {% if person.displayName %}
     <div>
-      <a href="{{url('phonebook.profile_uid', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
+      <a href="{{url('profile', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
     </div>
   {% endif %}
 
   {% if person.mozilliansVouchedBy %}
     <div>
-      <strong>Mozillian</strong> 
+      <strong>Mozillian</strong>
       {% if person.voucher %}
         vouched by
-    
-        <a href="{{ url('phonebook.profile_uid', person.voucher.uniqueIdentifier[0]) }}">
+
+        <a href="{{ url('profile', person.voucher.uniqueIdentifier[0]) }}">
           {{ person.voucher.displayName[0] }}</a>
       {% endif %}
     </div>

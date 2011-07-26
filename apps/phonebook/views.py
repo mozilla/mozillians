@@ -57,10 +57,10 @@ def _profile(request, person):
         voucher_dn = person['mozilliansVouchedBy'][0]
         person['voucher'] = p.find_by_dn(voucher_dn)
     else:
-        try:            
+        try:
             voucher = request.user.ldap_user.attrs['uniqueIdentifier'][0]
             vouch_form = forms.VouchForm(initial=dict(
-                    voucher=voucher, 
+                    voucher=voucher,
                     vouchee=person['uniqueIdentifier'][0]))
         except AttributeError, e:
             form = forms.VouchForm()
@@ -96,7 +96,7 @@ def _edit_profile(request, uniqueIdentifier, new_account):
                 if new_account:
                     return redirect('confirm_register')
                 else:
-                    return redirect('phonebook.profile_uid', uniqueIdentifier)
+                    return redirect('profile', uniqueIdentifier)
             else:
                 log.error("Form is INVALID")
         else:
@@ -125,8 +125,8 @@ def _edit_profile(request, uniqueIdentifier, new_account):
 
 
 def _update_profile(p, person, form):
-    """ 
-    TODO DRY with users/views.py 
+    """
+    TODO DRY with users/views.py
     """
 
     # Optional
@@ -142,7 +142,7 @@ def _update_profile(p, person, form):
     display_name = ("%s %s" % (first_name, last_name)).encode('utf-8')
     # TODO push down into larper?
     profile = copy.deepcopy(person)
-    profile['givenName'] = first_name        
+    profile['givenName'] = first_name
     profile['sn'] = last_name
     profile['cn'] = display_name
     profile['displayName'] = display_name
@@ -150,7 +150,7 @@ def _update_profile(p, person, form):
     profile['description'] = biography
     if photo:
         profile['jpegPhoto'] = photo.read()
-               
+
     p.update_person(person, profile)
 
 
@@ -163,7 +163,7 @@ def delete(request):
     else:
         log.error("Some funny business...")
     return redirect('home')
-        
+
 
 
 def search(request):
@@ -202,10 +202,10 @@ def invite(request):
     return jingo.render(request, 'phonebook/invite.html')
 
 @require_POST
-def vouch(request):    
+def vouch(request):
     form = forms.VouchForm(request.POST)
     if form.is_valid():
         voucher = form.cleaned_data.get('voucher').encode('utf-8')
         vouchee = form.cleaned_data.get('vouchee').encode('utf-8')
         larper.vouch_person(request, voucher, vouchee)
-        return redirect(reverse('phonebook.profile_uid', args=[vouchee]))
+        return redirect(reverse('profile', args=[vouchee]))

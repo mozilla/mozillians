@@ -40,7 +40,7 @@
       {% if user.is_authenticated() %}
         {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
           <li class="first">
-            <a href="{{ url('phonebook.profile_uid', uniq_id) }}">
+            <a href="{{ url('profile', uniq_id) }}">
               {{ _('Profile') }}
             </a>
           </li>

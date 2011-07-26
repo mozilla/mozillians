@@ -1,16 +1,24 @@
 {% extends "base.html" %}
 
 {% block main_content %}
-  <div>  
+  <div>
     Step 3 of 3 [ register | profile | <strong>get vouched</strong> ]
     <h1>{{ _('Thank You') }}</h1>
-    <p>{{ _('for creating a profile.') }}</p>
+    <p>{{ _('Thanks for creating a profile.') }}</p>
+    <p>
+      {% trans profile=url('profile', user.ldap_user.attrs.uniqueIdentifier[0]) %}
+        To get full access to search for and invite other Mozillians you'll
+        need to have
+        <a href="{{ profile }}">your profile</a>
+        vouched for by someone who already has an
+        account.
 
-    {% if user.is_authenticated() %}
-      <p>{{ _('Your profile can be found at:') }}
-        <div><a href="{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0]) }}"
-          >{{ url('phonebook.profile_uid', user.ldap_user.attrs.uniqueIdentifier[0])|absolutify }}</a></div>
-      </p>
-    {% endif %}
+        Please send
+        <a href="{{ profile }}">your profile</a>
+        to a Mozillian who is familiar with your contributions and ask them to
+        vouch for you.
+      {% endtrans %}
+    </p>
+
   </div>
 {% endblock %}

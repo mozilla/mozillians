@@ -19,10 +19,10 @@
       <button>{{ _('Update') }}</button>
     {% endif %}
   </form>
-  
+
   {% if person.displayName %}
     <div>
-      <a href="{{url('phonebook.profile_uid', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
+      <a href="{{url('profile', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
     </div>
   {% endif %}
 
@@ -34,7 +34,7 @@
   {% else %}
     <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
   {% endif %}
- 
+
   {% if person.mail %}
     <div>
       {% for mail in person.mail %}

@@ -7,7 +7,7 @@ admin.autodiscover()
 from phonebook import views
 
 urlpatterns = patterns('',
-    url('^u/(?P<uniqueIdentifier>.*)$', views.profile_uid, name='phonebook.profile_uid'),
+    url('^u/(?P<uniqueIdentifier>.*)$', views.profile_uid, name='profile'),
     url('^user/photo/(?P<uniqueIdentifier>.*)$', views.photo,
         name='phonebook.profile_photo'),
 
