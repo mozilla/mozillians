@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{# TODO move registration flow all into the phonebook app. 
+{# TODO move registration flow all into the phonebook app.
    Currently spread across all three apps :( #}
 {% block main_content %}
   <div>
@@ -11,4 +11,12 @@
       <button>{{ _('Create Account') }}</button>
     </form>
   </div>
+
+  <p>
+    {% trans %}
+      At this time, profiles are only viewable by other Mozillians. Community
+      members may use them to identify and contact you about events, projects
+      and other Mozilla-related activities.
+    {% endtrans %}
+  </p>
 {% endblock %}
