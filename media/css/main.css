@@ -9,7 +9,11 @@ html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
 }
 
 #main {
-    min-height: 275px;
+    min-height: 325px;
+}
+
+#main-content p {
+    max-width: 685px;
 }
 
 .clear {

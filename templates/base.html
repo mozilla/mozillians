@@ -23,7 +23,9 @@
   {% block extra_headers %}{% endblock %}
 </head>
 
-<body>
+<body id="body-{% block body_id %}mozillians{% endblock %}"
+  class="{% block body_classes %}{% endblock %}">
+
 <ul id="skip" class="hide">
   <li><a href="#main">{{ _('Skip to Content') }}</a></li>
 </ul>
@@ -59,8 +61,6 @@
   </div>
 </header>
 
-<h1 id="page-title">{% block title %}Hey, I'm a title{% endblock %}</h1>
-
 <div id="main">
   <div id="main-content">
     {% block main_content %}{% endblock %}
@@ -73,7 +73,6 @@
       <img src="{{ MEDIA_URL }}img/mozilla/logo_footer.png" alt="Mozilla">
     </a>
 
-    {% block copyright %}
     <div id="copyright">
       <p id="footer-links">
         {% block footer_links %}
@@ -110,7 +109,6 @@
         {% endtrans %}
       </p>
     </div>
-    {% endblock %}
 
     {% block lang_switcher %}
       {% include 'includes/lang_switcher.html' %}

@@ -1,21 +1,26 @@
 {% extends "base.html" %}
 
+{% block page_title %}{{ _('About Mozillians') }}{% endblock %}
+
 {% block main_content %}
-  <h2>{{ _('About Mozillians') }}</h2>
+  <h1>{{ _('About Mozillians') }}</h1>
+
   {% trans %}
     <p>
       Mozillians are people who volunteer their time to advance the Mozilla
       mission. They're dedicated to promoting openness, innovation and
       opportunity on the Web and they form the core of our community.
-    </p><p>
+    </p>
+    <p>
       This directory is a resource to make it easy for Mozillians to learn who
       is involved, what they do and how to connect with them.
-    </p><p>
+    </p>
+    <p>
       Want to find Mozillians in Auckland for a meetup? Need an expert XPCOM
       hacker to review a patch? That's exactly what this site is for.
     </p>
 
-    <h3>Privacy First</h3>
+    <h2>Privacy First</h2>
 
     <p>
       Privacy has been an important part of this directory from the very
@@ -25,7 +30,7 @@
       to other Mozillians. Read our Privacy Policy for more information.
     </p>
 
-    <h3>Get Involved</h3>
+    <h2>Get Involved</h2>
 
     <p>
       The community directory is also a community project and you are welcome

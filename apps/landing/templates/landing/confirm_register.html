@@ -1,12 +1,21 @@
 {% extends "base.html" %}
 
+{% block page_title %}{{ _('Register, Step 3 — Get Vouched') }}{% endblock %}
+
 {% block main_content %}
+  <h2>{{ _('Step 3 of 3: Get Vouched') }}</h2>
+
   <div>
-    Step 3 of 3 [ register | profile | <strong>get vouched</strong> ]
-    <h1>{{ _('Thank You') }}</h1>
-    <p>{{ _('Thanks for creating a profile.') }}</p>
+    <h1>
+      {% trans %}
+        Thanks<br>
+        <small>for creating a profile.</small>
+      {% endtrans %}
+    </h1>
+
     <p>
-      {% trans profile=url('profile', user.ldap_user.attrs.uniqueIdentifier[0]) %}
+      {% trans profile=url('profile',
+        user.ldap_user.attrs.uniqueIdentifier[0]) %}
         To get full access to search for and invite other Mozillians you'll
         need to have
         <a href="{{ profile }}">your profile</a>
@@ -19,6 +28,5 @@
         vouch for you.
       {% endtrans %}
     </p>
-
   </div>
 {% endblock %}

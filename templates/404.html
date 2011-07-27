@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ _('Page Not Found') }}{% endblock %}
+
+{% block main_content %}
+  <h1>{{ ("Oh No! That Page Doesn't Exist!") }}</h1>
+
+  <p>Sorry, but the page you requested could not be found.</p>
+
+  <!--
+    Error information:
+
+    {% block error_info %}
+      404 Page Not Found
+    {% endblock %}
+  -->
+{% endblock main_content %}

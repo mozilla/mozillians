@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ _('Application Error') }}{% endblock %}
+
+{% block main_content %}
+  <h1>{{ ("We're Sorry, but Something Went Wrong!") }}</h1>
+
+  <p>You broke the Internet. Try again later.</p>
+
+  <!--
+    Error information:
+
+    {% block error_info %}
+      500 Server Error
+    {% endblock %}
+  -->
+{% endblock main_content %}

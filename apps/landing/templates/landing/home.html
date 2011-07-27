@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
+{% block page_title %}{{ _('Mozilla Community Directory') }}{% endblock %}
+
 {% block main_content %}
+  <h1>{{ _("Hi There, We're Mozillians!") }}</h1>
+
   <p>
     {% trans about=url('about') %}
       Welcome to the Mozilla community directory. If you're looking for
@@ -17,7 +21,6 @@
         profile.
 
         <a href="{{ invite }}">Invite a Mozillian</a>
-
       {% endtrans %}
     {% else %}
       {% trans register=url('register') %}
@@ -28,4 +31,4 @@
       {% endtrans %}
     {% endif %}
   </p>
-{% endblock %}
+{% endblock main_content %}
