@@ -1,14 +1,14 @@
 <!doctype html>
-<!--[if lt IE 7 ]> <html class="no-js ie6" lang="en"> <![endif]-->
-<!--[if IE 7 ]>  <html class="no-js ie7" lang="en"> <![endif]-->
-<!--[if IE 8 ]>  <html class="no-js ie8" lang="en"> <![endif]-->
-<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if lt IE 7 ]> <html class="no-js ie6" lang="{{ LANG }}" dir="{{ DIR }}"> <![endif]-->
+<!--[if IE 7 ]>  <html class="no-js ie7" lang="{{ LANG }}" dir="{{ DIR }}"> <![endif]-->
+<!--[if IE 8 ]>  <html class="no-js ie8" lang="{{ LANG }}" dir="{{ DIR }}"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--> <html class="no-js" lang="{{ LANG }}" dir="{{ DIR }}"> <!--<![endif]-->
 <head>
   <meta charset="utf-8">
 
-  <title>Mozillians: {% block page_title %}
+  <title>{{ _('Mozillians') }}: {% block page_title %}
     {{ _('Welcome') }}{% endblock %}</title>
-  <meta name="description" content="Mozillians">
+  <meta name="description" content="{{ _("Mozilla's contributor phonebook") }}">
   <meta name="author" content="Mozilla">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,11 +25,11 @@
 
 <body>
 <ul id="skip" class="hide">
-  <li><a href="#main">Skip to Content</a></li>
+  <li><a href="#main">{{ _('Skip to Content') }}</a></li>
 </ul>
 
 <header id="header">
-  <h1 class="unitPng"><a href="{{ url('home') }}">Mozillians</a></h1>
+  <h1><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></h1>
 
   <div id="header-contents">
     <ul id="nav">

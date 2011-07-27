@@ -52,6 +52,7 @@ body {
 	width: 381px;
 	height: 227px;
 	z-index: 1;
+    text-transform: lowercase;
 }
 
 #header h1 a,
