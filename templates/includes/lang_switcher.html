@@ -1,4 +1,4 @@
-<form id="language-switcher" class="languages go" method="get" action="">
+<form id="language-switcher" class="languages go" method="GET">
   <label for="language">{{ _('Other languages:') }}</label>
   <select id="language" name="lang" dir="ltr">
     {% for code, name in LANGUAGES|dictsort -%}
