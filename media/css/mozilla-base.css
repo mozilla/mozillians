@@ -1,8 +1,19 @@
 /* {{{ Reset */
 
-* { margin:0; padding:0; }
-body { background: #fff url(../img/mozilla/background.jpg) no-repeat left top; color: #4b4740; font: 100%/1.4 Georgia, Times, serif; }
-img { border: 0; }
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #fff url(../img/mozilla/background.jpg) no-repeat left top;
+    color: #4b4740;
+    font: 100%/1.4 Georgia, Times, serif;
+}
+
+img {
+    border: 0;
+}
 
 /* }}} */
 

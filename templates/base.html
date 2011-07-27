@@ -16,13 +16,10 @@
 
   {% block site_css %}
     {{ css('common') }}
-    <!--[if IE]>
-      <link href="{{ MEDIA_URL }}css/ie.css" rel="stylesheet" type="text/css">
-    <![endif]-->
   {% endblock %}
 
   <link rel="shortcut icon" type="image/png"
-    href="{{ MEDIA_URL }}img/favicon.png">
+    href="{{ MEDIA_URL }}favicon.png">
   {% block feeds %}{% endblock %}
   {% block extra_headers %}{% endblock %}
 </head>
