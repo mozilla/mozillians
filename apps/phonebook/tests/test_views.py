@@ -36,6 +36,7 @@ class TestViews(test_utils.TestCase):
         url = reverse('login')
         data = dict(username=PENDING['email'], password=PASSWORD)
         client.post(url, data, follow=True)
+
         # HACK Something is seriously hozed here...
         # First visit to /login always fails, so we make
         # second request... WTF
@@ -206,7 +207,6 @@ class TestViews(test_utils.TestCase):
 def _logged_in_html(response):
     doc = pq(response.content)
     return doc('a#logout') and doc('a#profile')
-
 
 def _create_new_user():
     newbie_client = test.Client()
