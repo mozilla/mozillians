@@ -1,10 +1,10 @@
+import test_utils
 from uuid import uuid4
 
 from django import test
 
 from nose.tools import eq_
 from pyquery import PyQuery as pq
-import test_utils
 
 from commons.urlresolvers import reverse
 from phonebook.views import UNAUTHORIZED_DELETE
@@ -183,6 +183,7 @@ class TestViews(test_utils.TestCase):
         first  = newbie.first_name
         last   = newbie.last_name
         bio    = newbie.biography
+
         # update
         data = dict(first_name='Hobo', last_name='LaRue',
                     biography='Rides the rails')
@@ -200,6 +201,7 @@ class TestViews(test_utils.TestCase):
         # cleanup
         delete_url = reverse('phonebook.delete_profile')
         data = dict(unique_id=newbie_uniq_id)
+
         r = newbie_client.post(delete_url, data, follow=True)
         eq_(200, r.status_code, 'A Mozillian can delete their own account')
 
