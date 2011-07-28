@@ -52,7 +52,7 @@ TEXT_DOMAIN = 'messages'
 LANGUAGE_CODE = 'en-US'
 
 # Accepted locales
-KNOWN_LANGUAGES = ('en-US',)
+KNOWN_LANGUAGES = ('en-US', 'de', 'fr')
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
