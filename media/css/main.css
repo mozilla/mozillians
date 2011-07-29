@@ -19,9 +19,12 @@ html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
 
 body.box-content #main-content {
     background: #f8f8f8;
-    box-shadow: #b6b6b6 0px 0px 9px;
-    -moz-box-shadow: #b6b6b6 0px 0px 9px;
-    -webkit-box-shadow: #b6b6b6 0px 0px 9px;
+    border-radius: 11px;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
+    box-shadow: #b6b6b6 0px 2px 7px;
+    -moz-box-shadow: #b6b6b6 0px 2px 7px;
+    -webkit-box-shadow: #b6b6b6 0px 2px 7px;
     margin: 50px 0 0 20px;
     padding: 20px;
     width: 720px;
