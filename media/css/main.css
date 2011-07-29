@@ -59,6 +59,51 @@ background-image: -moz-linear-gradient(
 );
 }
 
+.button.orange:hover {
+    border-color: #db8237;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.15, rgb(223,115,43)),
+    color-stop(0.85, rgb(241,210,85))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(223,115,43) 15%,
+    rgb(241,210,85) 85%
+);
+}
+
+/** Home Page */
+#body-home #main-content {
+    background: url(../img/home-bg.png) top center no-repeat;
+    height: 325px;
+    padding: 50px 125px 50px 175px;
+    text-align: center;
+    width: 445px;
+}
+
+#body-home #main-content h1 {
+    line-height: 35px;
+    margin-right: 0;
+    margin-top: 35px;
+}
+
+#body-home #main-content h1 small {
+    font-size: 26px;
+}
+
+#body-home #main-content p {
+    margin-left: auto;
+    margin-right: auto;
+    width: 425px;
+}
+
+#body-home #call-to-action .button {
+    margin: 30px 0 0;
+}
+
 /** About Page */
 #photo-collage {
     float: right;

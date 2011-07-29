@@ -287,18 +287,22 @@ fieldset legend {
     border-radius: 6px;
     -moz-border-radius: 6px;
     -webkit-border-radius: 6px;
+    box-shadow: 1px 1px 3px #888;
+    -moz-box-shadow: 1px 1px 3px #888;
+    -webkit-box-shadow: 1px 1px 3px #888;
     color: #b01a04 !important;
     display: inline-block;
     font-family: MetaBold, Trebuchet MS, sans-serif;
+    font-size: 18px;
     font-weight: bold;
     padding: .5em 1em;
     text-align: center;
     text-decoration: none !important;
-    text-shadow: 0 2px 1px #f7ddbe;
+    text-shadow: -1px 1px 1px #fff;
 }
 
-.button:hover{
-
+.button:hover {
+    text-shadow: -1px 1px 6px #fff;
 }
 
 /* {{{ Media Queries */
