@@ -282,42 +282,23 @@ fieldset legend {
 /*-------------------------------------------
     Buttons
 -------------------------------------------*/
-.button a{
-  display: inline-block;
-  padding:0.5em 1em;
-/*  font-size:2em;*/
-  color:#1075B3 !important;
-  text-shadow:0px 1px 0 #fff;
-	font-family: Arial, sans-serif;
-  font-weight:bold;
-  text-align:center;
-  border:1px solid #C9C8C9;
-  border-color:#C9C8C9 #999999 #999999 #C9C8C9;
-  border-color:#999999 #808080 #4d4d4d;  
-  -moz-border-radius:6px;
-  -webkit-border-radius:6px;
-  border-radius:6px;
-  background: #d3d3d3 url('../img/mozilla/widgets/button-bg.png') 0 0 repeat-x;  
-}
-.button a:hover{
-  background: #f2f2f2 url('../img/mozilla/widgets/button-bg.png') 0 -132px repeat-x; 
-  text-shadow:0px -1px 0 #fff;
-  text-decoration:none;
-  border-color:#4d4d4d #4d4d4d #4d4d4d;
-}
 .button {
-  display:inline-block;
-  border:4px solid #57A6C5;
-  -moz-border-radius:10px;
-  -webkit-border-radius:10px;
-  border-radius:10px;
-  margin:0 0 1em -6px;
+    border: 1px solid;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    color: #b01a04 !important;
+    display: inline-block;
+    font-family: MetaBold, Trebuchet MS, sans-serif;
+    font-weight: bold;
+    padding: .5em 1em;
+    text-align: center;
+    text-decoration: none !important;
+    text-shadow: 0 2px 1px #f7ddbe;
 }
-.button.donate {
-  border-color:#FBC51B;
-}
-.button img{
-  margin:0 0.75em 0 0  ;
+
+.button:hover{
+
 }
 
 /* {{{ Media Queries */

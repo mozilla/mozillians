@@ -12,10 +12,84 @@ html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
     min-height: 325px;
 }
 
+#main-content {
+    position: relative;
+    z-index: 1;
+}
+
+body.box-content #main-content {
+    background: #f8f8f8;
+    box-shadow: #b6b6b6 0px 0px 9px;
+    -moz-box-shadow: #b6b6b6 0px 0px 9px;
+    -webkit-box-shadow: #b6b6b6 0px 0px 9px;
+    margin: 50px 0 0 20px;
+    padding: 20px;
+    width: 720px;
+}
+
+body.box-content #main-content h1 {
+    font-size: 29px;
+    margin-top: 0;
+}
+
 #main-content p {
     max-width: 685px;
 }
 
 .clear {
     clear: both;
+}
+
+.button.orange {
+    border-color: #db8237;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(223,115,43)),
+    color-stop(0.75, rgb(241,210,85))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(223,115,43) 25%,
+    rgb(241,210,85) 75%
+);
+}
+
+/** About Page */
+#photo-collage {
+    float: right;
+    margin: -45px -5px 0 0;
+}
+
+.key-info {
+    background: left top no-repeat;
+    float: left;
+    margin: 30px 0 0;
+    padding: 0 15px 0 85px;
+    width: 265px;
+}
+
+.key-info h2 {
+    color: #1e4262;
+    font-size: 1.1em;
+    margin: 0 0 6px;
+}
+
+.key-info p {
+    font-size: 13px;
+    line-height: 1.5em;
+}
+
+#create-profile {
+    margin: 10px 0 0 200px;
+}
+
+#privacy {
+    background-image: url(../img/about-lock-icon.png);
+    margin-left: -10px;
+}
+
+#get-involved {
+    background-image: url(../img/about-globe-icon.png);
 }
