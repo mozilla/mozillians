@@ -237,7 +237,9 @@ DOMAIN_METHODS = {
     'messages': [
         ('apps/**.py',
             'tower.management.commands.extract.extract_tower_python'),
-        ('**/templates/**.html',
+        ('apps/**/templates/**.html',
+            'tower.management.commands.extract.extract_tower_template'),
+        ('templates/**.html',
             'tower.management.commands.extract.extract_tower_template'),
     ],
 
