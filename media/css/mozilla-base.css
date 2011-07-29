@@ -190,10 +190,11 @@ body {
 #copyright-links a { font-size:11px; }
 
 #language-switcher {
-    float: left;
     font-family: MetaBold, "Trebuchet MS", sans-serif;
     font-size: 12px;
     margin: 16px 0 0 15px;
+    position: absolute;
+    right: 14%;
 }
 
 #footer-wrap {
