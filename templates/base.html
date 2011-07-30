@@ -24,7 +24,8 @@
 </head>
 
 <body id="body-{% block body_id %}mozillians{% endblock %}"
-  class="{% block body_classes %}{% endblock %}">
+  class="{% block body_classes %}{% endblock %}
+  {{ 'auth' if user.is_authenticated() else 'anon' }}">
 
 <ul id="skip" class="hide">
   <li><a href="#main">{{ _('Skip to Content') }}</a></li>
