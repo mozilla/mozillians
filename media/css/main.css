@@ -18,7 +18,7 @@ html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
 }
 
 body.box-content #main-content {
-    background: #f8f8f8;
+    background: #fff;
     border-radius: 11px;
     -moz-border-radius: 11px;
     -webkit-border-radius: 11px;
@@ -113,6 +113,12 @@ background-image: -moz-linear-gradient(
 }
 
 /** About Page */
+#body-about #main-content {
+    background-image: url(../img/about-bg.png);
+    background-position: 0 120px;
+    background-repeat: no-repeat;
+}
+
 #photo-collage {
     float: right;
     margin: -45px -5px 0 0;
@@ -121,15 +127,15 @@ background-image: -moz-linear-gradient(
 .key-info {
     background: left top no-repeat;
     float: left;
-    margin: 30px 0 0;
-    padding: 0 15px 0 85px;
-    width: 265px;
+    margin: 60px 0 0;
+    padding: 0 20px 0 110px;
+    width: 235px;
 }
 
 .key-info h2 {
     color: #1e4262;
     font-size: 1.1em;
-    margin: 0 0 6px;
+    margin: 0;
 }
 
 .key-info p {
