@@ -323,11 +323,4 @@ fieldset legend {
 	#main { padding-left: 3%; }
 }
 
-@media screen and (max-width: 1070px) {
-	#quick-search #q {
-		width: 85px;
-	}
-}
-
 /* }}} */
-
