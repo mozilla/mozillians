@@ -5,15 +5,15 @@ from django.forms.util import ErrorList
 from tower import ugettext as _
 
 class RegistrationForm(forms.Form):
-    email = forms.CharField(label=_('Primary Email'), required=True)
-    password = forms.CharField(min_length=8, max_length=255, label=_('Password'),
-                               widget=forms.PasswordInput(render_value=False),
-                               required=True)
+    email = forms.EmailField(label=_('Primary Email'), required=True)
+    password = forms.CharField(min_length=8, max_length=255,
+                               label=_('Password'), required=True,
+                               widget=forms.PasswordInput(render_value=False))
     confirmp = forms.CharField(label=_('Confirm Password'),
                                widget=forms.PasswordInput(render_value=False),
                                required=True)
 
-    first_name = forms.CharField(label=_('Last Name'), required=False)
+    first_name = forms.CharField(label=_('First Name'), required=False)
     last_name = forms.CharField(label=_('Last Name'), required=True)
 
     #recaptcha = captcha.fields.ReCaptchaField()

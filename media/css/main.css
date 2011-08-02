@@ -39,9 +39,67 @@ body.box-content #main-content h1 {
     max-width: 685px;
 }
 
-.clear {
-    clear: both;
+/** Common and utility classes */
+.blue-pastels {
+    background: url(../img/blue-pastels-bg.png) center no-repeat;
+    display: block;
+    height: 386px;
+    padding: 20px;
+    width: 688px;
 }
+
+    .blue-pastels .field {
+        width: 50%;
+    }
+
+    .blue-pastels label {
+        color: #1e4262;
+        display: block;
+        font-size: 14px;
+        font-style: italic;
+        font-weight: 200;
+        padding: 0 0 2px 10px;
+    }
+
+    .blue-pastels .error label {
+        float: left;
+        padding-right: 10px;
+    }
+
+    .blue-pastels .errorlist, .blue-pastels .errorlist li {
+        color: red;
+        float: left;
+        margin: 0;
+    }
+
+    .blue-pastels label:hover, .blue-pastels label:focus {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .blue-pastels input, .blue-pastels select, .blue-pastels textarea {
+        border: 1px inset #d8d8d8;
+        border-bottom: 0;
+        clear: both;
+        color: #4b4740;
+        height: 14px;
+        font-family: Georgia, Times, serif;
+        font-size: 13px;
+        margin: 0 0 15px;
+        padding: 5px;
+        width: 300px;
+    }
+
+    .blue-pastels input[type=checkbox], .blue-pastels input[type=radio] {
+        width: auto;
+    }
+
+    .blue-pastels input:focus, .blue-pastels select:focus,
+    .blue-pastels textarea:focus {
+        box-shadow: 1px 1px 1px #1e4262;
+        -moz-box-shadow: 1px 1px 1px #1e4262;
+        -webkit-box-shadow: 1px 1px 1px #1e4262;
+    }
 
 .button.orange {
     border-color: #db8237;
@@ -73,6 +131,10 @@ background-image: -moz-linear-gradient(
     rgb(223,115,43) 15%,
     rgb(241,210,85) 85%
 );
+}
+
+.clear {
+    clear: both;
 }
 
 /** Home Page */
@@ -154,4 +216,21 @@ background-image: -moz-linear-gradient(
 
 #get-involved {
     background-image: url(../img/about-globe-icon.png);
+}
+
+/** Register Page (Step 1: Create a Profile) */
+#body-register form {
+    position: relative;
+}
+
+#body-register #privacy-info {
+    float: right;
+    margin-top: 20px;
+    text-align: center;
+    width: 47.5%;
+}
+
+#body-register #submit {
+    float: right;
+    margin: 0 50px 0 0;
 }
