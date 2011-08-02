@@ -35,22 +35,24 @@
   <h1><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></h1>
 
   <div id="header-contents">
-    <ul id="nav">
-      {% if user.is_authenticated() %}
-        {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
-          <li class="first">
-            <a href="{{ url('profile', uniq_id) }}">
-              {{ _('Profile') }}
-            </a>
-          </li>
-        {% endfor %}
-        <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
-        <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
-      {% else %}
-        <li><a href="{{ url('login') }}">{{ _('Log In') }}</a></li>
-        <li><a href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
-      {% endif %}
-    </ul>
+    <nav id="nav">
+      <ul>
+        {% if user.is_authenticated() %}
+          {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
+            <li class="first">
+              <a href="{{ url('profile', uniq_id) }}">
+                {{ _('Profile') }}
+              </a>
+            </li>
+          {% endfor %}
+          <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+          <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
+        {% else %}
+          <li><a href="{{ url('login') }}">{{ _('Log In') }}</a></li>
+          <li><a href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
+        {% endif %}
+      </ul>
+    </nav>
 
     <form id="quick-search" action="{{ url('phonebook.search') }}"
         method="GET">
