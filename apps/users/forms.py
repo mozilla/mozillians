@@ -17,7 +17,9 @@ class RegistrationForm(forms.Form):
     last_name = forms.CharField(label=_('Last Name'), required=True)
 
     #recaptcha = captcha.fields.ReCaptchaField()
-    optin = forms.BooleanField(label=_('I will bow before Zuul''s might.'))
+    optin = forms.BooleanField(label=_('I will bow before Zuul''s might.'),
+                               widget=forms.CheckboxInput(
+                                   attrs=dict(css_class='checkbox')))
 
     def clean(self):
         super(RegistrationForm, self).clean()

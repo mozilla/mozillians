@@ -36,7 +36,8 @@
 
       {% for f in form %}
         <div id="{{ f.name }}-container"
-            class="field {{ 'error' if form.errors[f.name] }} {{ f.widget }}">
+            class="field {{ 'error' if form.errors[f.name] }}
+            {{ f.field.widget.attrs['css_class'] }}">
           {{ f.label_tag() }}
           {{ form.errors[f.name] }}
           {{ f }}

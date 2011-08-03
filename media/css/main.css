@@ -101,6 +101,16 @@ body.box-content #main-content h1 {
         -webkit-box-shadow: 1px 1px 1px #1e4262;
     }
 
+    .blue-pastels .field.checkbox label {
+        float: left;
+        padding-right: 10px;
+    }
+
+    .blue-pastels .field.checkbox input {
+        position: relative;
+        top: -3px;
+    }
+
 .button.orange {
     border-color: #db8237;
 background-image: -webkit-gradient(
