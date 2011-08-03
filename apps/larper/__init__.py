@@ -1,59 +1,41 @@
 """
-LARPER - LDAP Authenticate Resources Per Each Request
-"""
+Design
+======
 
-import logging
+larper provides the following ways to start a directory session:
+* UserSession.connect(request)
+* RegistrarSession.connect(request)
+* AdminSession.connect(request)
+
+UserSession
+-----------
+Once one has obtained a directory session, one can search or
+update a person in the phonebook.
+
+Search results are larper.Person objects.
+
+RegistararSession
+-----------------
+With a registrar session, one can add new users to the system.
+
+AdminSession
+------------
+With an admin session, one can delete users from the system
+
+"""
+import os
+import re
 
 import ldap
-from ldap.modlist import addModlist
-from ldap.modlist import modifyModlist
-
-import os
+from ldap.dn import explode_dn, escape_dn_chars
+from ldap.filter import filter_format
+from ldap.modlist import addModlist, modifyModlist
 
 from django.conf import settings
 from django.core import signing
 
-log = logging.getLogger('phonebook')
 
-LDAP_DEBUG = 0
-
-DN_SESSION_KEY = 'larper-dn'
-
-def dn(request, uid):
-    """
-    An authenticated user's dn is needed for binding
-    to an LDAP directory. A user search is performed
-    based on the user's uid, which is an email address
-    and should be pulled from request.user.username in
-    most cases.
-
-    Exceptions:
-    Method raises larper.USER_NOT_FOUND if uid is invalid.
-    """
-    if not DN_SESSION_KEY in request.session:
-        _find_and_cache_dn(request, uid)
-    return request.session[DN_SESSION_KEY]
-
-class UNKNOWN_USER(Exception):
-    """ The LDAP server didn't find a user. """
-    pass
-
-def _find_and_cache_dn(request, uid):
-    log.debug("Anonymous simple bind to find uid=%s" % uid)
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
-    try:
-        rs = conn.search_s("ou=people,dc=mozillians,dc=org", ldap.SCOPE_SUBTREE, "(uid=%s)" % uid)
-        if len(rs) == 1:
-            dn, u = rs[0]
-            request.session[DN_SESSION_KEY] = dn
-            log.debug("Cached dn=%s in the session" % dn)
-        else:
-            raise UNKNOWN_USER("No user with uid '%s' was found." % request.user.username)
-    finally:
-        conn.unbind()
-
-
-def password(request):
+def get_password(request):
     """ Not sure if this and store_password belong here..."""
     d = request.session.get('PASSWORD')
     if d:
@@ -68,92 +50,474 @@ def store_password(request, password):
     request.session['PASSWORD'] = signing.dumps({'password': password})
 
 
+class NO_SUCH_PERSON(Exception):
+    """ Raised when a search by unique_id fails """
+    pass
+
+
+class INCONCEIVABLE(Exception):
+    """ Raised when something that should not happen,
+    happens. If this happens often, this Exception
+    might not mean what you think it means. """
+    pass
+
+
+CONNECTIONS_KEY = 'larper_conns'
+
+READ = 0
+WRITE = 1
+
+
+class UserSession(object):
+    """
+    A directory session for the currenly logged in user.
+
+    Data access to the directory is mediated on a
+    user by user, request by request basis. A person object
+    may be missing, or search results may be empty if the
+    current viewer of a directory doesn't have permissions
+    to see certain people.
+    """
+    def __init__(self, request):
+        self.request = request
+        self.conn = None
+        self._is_bound = False
+
+    def _ensure_conn(self, mode):
+        """
+        mode - One of READ or WRITE. Pass WRITE
+        if any of the LDAP operations will include
+        adding, modifying, or deleting entires.
+        """
+        if not self.conn:
+            if mode == WRITE:
+                server_uri = settings.LDAP_SYNC_PROVIDER_URI
+            else:
+                server_uri = settings.LDAP_SYNC_CONSUMER_URI
+            self.conn = ldap.initialize(server_uri)
+
+        if not self._is_bound:
+            dn, password = self.dn_pass()
+            self.conn.bind_s(dn, password)
+            self._is_bound = True
+            if not hasattr(self.request, CONNECTIONS_KEY):
+                self.request.larper_conns = [{}, {}]
+            if dn not in self.request.larper_conns[0]:
+                self.request.larper_conns[mode][dn] = self.conn
+        return self.conn
+
+    def dn_pass(self):
+        """
+        Returns a tuple of LDAP distinguished name and password
+        for use during authentication.
+        Subclasses of UserSession should override this method
+        if they don't auth against the user in the session.
+        """
+        unique_id = self.request.user.unique_id
+        return (_dn_from_unique_id(unique_id), get_password(self.request))
+
+    def search(self, query):
+        """
+        General purpose 'quick' search. Returns a list of
+        larper.Person objects.
+        """
+        q = filter_format("(|(cn=*%s*)(mail=*%s*))", (query, query))
+        return _populate_any(self._search(q))
+
+    def search_by_name(self, query):
+        """
+        Searches against the full_name field for people. Returns
+        same type of data as search.
+        """
+        q = filter_format("(cn=*%s*)", (query,))
+        return _populate_any(self._search(q))
+
+    def search_by_email(self, query):
+        """
+        Searches against the email fields for people. Returns
+        same type of data as search.
+        """
+        q = filter_format("(|(mail=*%s*)(uid=*%s*))", (query, query,))
+        return _populate_any(self._search(q))
+
+    def get_by_unique_id(self, unique_id):
+        """
+        Retrieves a person from LDAP with this unique_id.
+        Raises NO_SUCH_PERSON if unable to find them.
+        """
+        q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
+        results = self._search(q)
+        msg = 'Unable to locale %s in the LDAP directory'
+        if 0 == len(results):
+            raise NO_SUCH_PERSON(msg % unique_id)
+        elif 1 == len(results):
+            _dn, attrs = results[0]
+            # Pending users will detect the existance of another
+            # person, but there won't be any data besides uniqueIdentifier
+            if 'sn' not in attrs:
+                raise NO_SUCH_PERSON(msg % unique_id)
+            else:
+                return Person.new_from_directory(attrs)
+        else:
+            msg = 'Multiple people found for %s. This should never happen.'
+            raise INCONCEIVABLE(msg % unique_id)
+
+    def profile_photo(self, unique_id):
+        """
+        Retrieves a person's profile photo. Returns
+        jpeg binary data.
+        """
+        attrs = self._profile_photo_attrs(unique_id)
+        if 'jpegPhoto' in attrs:
+            return attrs['jpegPhoto'][0]
+        return False
+
+    def _profile_photo_attrs(self, unique_id):
+        """ Returns dict that contains the jpegPhoto key or None """
+        conn = self._ensure_conn(READ)
+        search_filter = filter_format("(uniqueIdentifier=%s)", (unique_id,))
+        rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                             search_filter, ['jpegPhoto'])
+        for r in rs:
+            _dn, attrs = r
+            if 'jpegPhoto' in attrs:
+                return attrs
+        return None
+
+    def update_person(self, unique_id, form):
+        """
+        Updates a person's LDAP directory record
+        based on phonebook.forms.ProfileForm
+        """
+        conn = self._ensure_conn(WRITE)
+
+        dn = _dn_from_unique_id((unique_id))
+
+        person = self.get_by_unique_id(unique_id)
+        form['unique_id'] = person.unique_id
+
+        if 'username' not in form:
+            form['username'] = person.username
+
+        newp = Person.form_to_ldap_attrs(form)
+        modlist = modifyModlist(person.ldap_attrs(), newp,
+                                ignore_oldexistent=1)
+        if modlist:
+            conn.modify_s(dn, modlist)
+        return True
+
+    def update_profile_photo(self, unique_id, form):
+        """
+        Adds or Updates a person's profile photo.
+        unique_id
+        form - An instance of phonebook.forms.ProfileForm
+        Safe to call if no photo has been uploaded by the user.
+        """
+        if 'photo' in form and form['photo']:
+            photo = form['photo'].file.read()
+        else:
+            return False
+
+        conn = self._ensure_conn(WRITE)
+        dn = _dn_from_unique_id((unique_id))
+
+        attrs = self._profile_photo_attrs(unique_id)
+        modlist = modifyModlist(attrs, {'jpegPhoto': photo})
+        if modlist:
+            conn.modify_s(dn, modlist)
+
+    def record_vouch(self, voucher, vouchee):
+        """
+        Updates a *Pending* account to *Mozillian* status.
+
+        voucher - The unique_id of the Mozillian who will vouch
+        vouchee - The unique_id of the Pending user who is being vouched for
+
+        TODO: I think I'm doing something dumb with encode('utf-8')
+        """
+        conn = self._ensure_conn(WRITE)
+        voucher_dn = _dn_from_unique_id(voucher).encode('utf-8')
+        vouchee_dn = _dn_from_unique_id(vouchee)
+
+        modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
+        conn.modify_s(vouchee_dn, modlist)
+        return True
+
+    def _search(self, search_filter):
+        conn = self._ensure_conn(READ)
+        return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                             search_filter, Person.search_attrs)
+
+    def __str__(self):
+        return "<larper.UserSession for %s>" % self.request.user.username
+
+    @staticmethod
+    def connect(request):
+        """
+        Open (or reuse) a connection to the phonebook directory.
+        Request must contain an authenticated user.
+        Data requests will be authorized based on the current
+        users rights.
+
+        Connection pooling, master/slave routing, and other low
+        level details will automagically work.
+        """
+        return UserSession(request)
+
+    @staticmethod
+    def disconnect(request):
+        """
+        Releases all connections to the LDAP directory, including:
+        * UserSession instances
+        * AdminSession instances
+        * RegistrarSession instances
+        """
+        if hasattr(request, CONNECTIONS_KEY):
+            for conns in request.larper_conns:
+                for dn in conns.keys():
+                    conns[dn].unbind()
+                    del conns[dn]
+
+
+class Person(object):
+    """
+    A person has a couple required attributes and then lots of optional
+    profile details. Data is populated based on what the current request's
+    user should see. If a property is None, it may be because
+    * the profile's property doesn't have any data or
+    * the viewer doesn't have permission to see this property
+
+    Required Properties
+    -------------------
+    * unique_id - A stable id that is randomly generated
+    * username - Email address used for authentication
+    * full_name - A person's full name
+    * last_name - A person's last name
+
+    Optional Properties
+    -------------------
+    * first_name - A person's first name
+    * biography - A person's bio
+    * voucher_unique_id - The unique_id of the Mozillian who vouched for them.
+
+    Photo
+    -----
+    Photo access is done seperatly to improve data access performance.
+
+    For a user's photo, see larper.UserSession.profile_photo and
+    update_profile_photo.
+    """
+    required_attrs = ['uniqueIdentifier', 'uid', 'cn', 'sn']
+    optional_attrs = ['givenName', 'description', 'mail', 'telephoneNumber',
+             'mozilliansVouchedBy']
+    search_attrs = required_attrs + optional_attrs
+    binary_attrs = ['jpegPhoto']
+
+    def __init__(self, unique_id, username,
+                 first_name=None, last_name=None,
+                 full_name=None,
+                 biography=None,
+                 voucher_unique_id=None):
+        self.unique_id = unique_id
+        self.username = username
+
+        self.first_name = first_name
+        self.last_name = last_name
+        self.full_name = full_name
+        self.display_name = u'%s %s' % (first_name, last_name)
+        self.biography = biography
+        self.voucher_unique_id = voucher_unique_id
+
+    def __str__(self):
+        return u'%s %s' % (self.first_name, self.last_name)
+
+    @staticmethod
+    def new_from_directory(ldap_attrs):
+        """
+        Given a dictionary of LDAP search result attributes, this
+        method returns a larper.Person instance.
+        """
+        # givenName is optional in LDAP, but required by our API
+        given_name = ldap_attrs.get('givenName', [''])
+        p = Person(ldap_attrs['uniqueIdentifier'][0], ldap_attrs['uid'][0],
+                   given_name[0], ldap_attrs['sn'][0], ldap_attrs['cn'][0])
+
+        if 'description' in ldap_attrs:
+            p.biography = ldap_attrs['description'][0]
+
+        if 'mozilliansVouchedBy' in ldap_attrs:
+            voucher = ldap_attrs['mozilliansVouchedBy'][0]
+            p.voucher_unique_id = _unique_id_from_dn(voucher)
+
+        return p
+
+    def ldap_attrs(self):
+        """
+        Converts this person object into a dict compatible
+        with the low level ldap libraries.
+        """
+        objectclass = ['inetOrgPerson', 'person', 'mozilliansPerson']
+        full_name = u'%s %s' % (self.first_name, self.last_name)
+        full_name = full_name
+        attrs = {'objectclass': objectclass,
+                 'uniqueIdentifier': [self.unique_id],
+                 'uid': [self.username],
+                 'givenName': [self.first_name],
+                 'sn': [self.last_name],
+                 'cn': [full_name],
+                 'displayName': [full_name],
+                 'mail': [self.username]}
+
+        # Optional
+        if self.biography:
+            attrs['description'] = [self.biography]
+
+        if self.voucher_unique_id:
+            attrs['mozilliansVouchedBy'] = [_dn_from_unique_id(
+                self.voucher_unique_id)]
+        return attrs
+
+    @staticmethod
+    def form_to_ldap_attrs(form):
+        """
+        Creates a dict compatible with the low level ldap libraries
+        from a form dictionary.
+
+        Form must contain the following keys:
+        * unique_id
+        * username
+        * first_name
+        * last_name
+        """
+        objectclass = ['inetOrgPerson', 'person', 'mozilliansPerson']
+        full_name = u'%s %s' % (form['first_name'], form['last_name'])
+        full_name = full_name.encode('utf-8')
+        attrs = {'objectclass': objectclass,
+                 'uniqueIdentifier': [form['unique_id'].encode('utf-8')],
+                 'uid': [form['username'].encode('utf-8')],
+                 'givenName': [form['first_name'].encode('utf-8')],
+                 'sn': [form['last_name'].encode('utf-8')],
+                 'cn': [full_name],
+                 'displayName': [full_name],
+                 'mail': [form['username'].encode('utf-8')]}
+
+        if 'password' in form:
+            attrs['userPassword'] = [form['password'].encode('utf-8')]
+
+        if 'biography' in form and form['biography']:
+            attrs['description'] = [form['biography'].encode('utf-8')]
+
+        return attrs
+
+
+class INVALID_PERSON_DN(Exception):
+    """ A function which expected a valid DN was
+    given an invalid DN. Probably didn't contain a
+    uniqueIdentifier component."""
+    pass
+
+
+def _unique_id_from_dn(dn):
+    dn_parts = explode_dn(dn)
+    reg = re.compile('uniqueIdentifier=(.*)', re.IGNORECASE)
+    for part in dn_parts:
+        matcher = reg.match(part)
+        if matcher:
+            return matcher.groups()[0]
+    raise INVALID_PERSON_DN(dn)
+
+
+def _dn_from_unique_id(unique_id):
+    params = (escape_dn_chars(unique_id), settings.LDAP_USERS_GROUP)
+    return 'uniqueIdentifier=%s,%s' % params
+
 # Increase length of random uniqueIdentifiers as size of Mozillians
 # community enters the low millions ;)
 UUID_SIZE = 5
 
 
-def create_person(request, profile, password):
+class RegistrarSession(UserSession):
     """
-    Given a dictionary of profile attributes, creates
-    an LDAP user. Method returns their uid.
-
-    Method raises the following exceptions:
-    ...
+    A directory session for the registrar user.
     """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
-    try:
-        conn.bind_s(settings.LDAP_REGISTRAR_DN,
-                    settings.LDAP_REGISTRAR_PASSWORD)
-        # TODO(ozten) catch already exists and keep trying
-        # graphite would be great here (create, conflict, etc)
-        uniqueIdentifier = os.urandom(UUID_SIZE).encode('hex')
-        new_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier,
-                                             settings.LDAP_USERS_GROUP)
-        log.debug("new uid=%s so dn=%s" % (uniqueIdentifier, new_dn))
+    def __init__(self, request):
+        UserSession.__init__(self, request)
 
-        profile['uniqueIdentifier'] = uniqueIdentifier
-        mods = addModlist(profile)
+    def dn_pass(self):
+        """ Returns registrar dn and password """
+        return (settings.LDAP_REGISTRAR_DN, settings.LDAP_REGISTRAR_PASSWORD)
+
+    def create_person(self, form):
+        """
+        Creates a new user account in the LDAP directory.
+        form - An instance of phonebook.forms.RegistrationForm
+        returns a string which is the unique_id of the new user.
+        """
+        conn = self._ensure_conn(WRITE)
+        unique_id = os.urandom(UUID_SIZE).encode('hex')
+        form['unique_id'] = unique_id
+        new_dn = _dn_from_unique_id(unique_id)
+
+        attrs = Person.form_to_ldap_attrs(form)
+        mods = addModlist(attrs)
         conn.add_s(new_dn, mods)
-        return uniqueIdentifier
-    except ldap.INSUFFICIENT_ACCESS, e:
-        log.error(e)
-        raise
-    finally:
-        conn.unbind()
+        return unique_id
 
-def vouch_person(request, voucher, vouchee):
+    @staticmethod
+    def connect(request):
+        """
+        Open (or reuse) a connection to the phonebook directory.
+
+        Data requests will be authorized based on the shared
+        system's registrar account.
+
+        Connection pooling, master/slave routing, and other low
+        level details will automagically work.
+        """
+        return RegistrarSession(request)
+
+
+class AdminSession(UserSession):
     """
-    voucher - A Mozillian
-    vouchee - A Pending Account
-    A voucher can 'vouch for' another user as 
-    being part of the Mozillian community.
+    A directory session for the admin user.
     """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
-    uniqueIdentifier = request.user.ldap_user.attrs['uniqueIdentifier'][0]
-    try:
-        conn.bind_s(dn(request, uniqueIdentifier), 
-                    password(request))
-        # TODO get the person and make sure they don't have a mozilliansvouchedBy
-        voucher_dn = "uniqueIdentifier=%s,%s" % (voucher,
-                                                 settings.LDAP_USERS_GROUP)
-        vouchee_dn = "uniqueIdentifier=%s,%s" % (vouchee,
-                                                 settings.LDAP_USERS_GROUP)
-        modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
+    def __init__(self, request):
+        UserSession.__init__(self, request)
 
-        rs = conn.modify_s(vouchee_dn, modlist)
-        log.error("We successfully changed our dudez")
-        log.error(rs)
-        return True
-    except ldap.TYPE_OR_VALUE_EXISTS, e:
-        log.error("Trying to vouch for an already vouched Mozillian.")
-        log.error(e)
-        raise
-    except ldap.INSUFFICIENT_ACCESS, e:
-        log.error(e)
-        raise
-    finally:
-        conn.unbind()
+    def dn_pass(self):
+        """ Returns administrator dn and password """
+        return (settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
 
-def delete_person(request, uniqueIdentifier):
-    """
-    uniqueIdentifier - for the person to be deleted
-
-    Completely removes an account from the directory.
-
-    Note: Only Admin and replicator can delete accounts.
-    """
-    conn = ldap.initialize(settings.AUTH_LDAP_SERVER_URI, LDAP_DEBUG)
-    try:
-        conn.bind_s(settings.LDAP_ADMIN_DN,
-                    settings.LDAP_ADMIN_PASSWORD)
-        person_dn = "uniqueIdentifier=%s,%s" % (uniqueIdentifier,
-                                                 settings.LDAP_USERS_GROUP)
+    def delete_person(self, unique_id):
+        """
+        Completely removes a user's data from the LDAP directory.
+        Note: Does not un-vouch any Mozillians for whom this user
+        has vouched.
+        """
+        conn = self._ensure_conn(WRITE)
+        params = (escape_dn_chars(unique_id),
+                  settings.LDAP_USERS_GROUP)
+        person_dn = "uniqueIdentifier=%s,%s" % params
         conn.delete_s(person_dn)
+        return self
 
-        return True
-    except ldap.INSUFFICIENT_ACCESS, e:
-        log.error(e)
-        raise
-    finally:
-        conn.unbind()
+    @staticmethod
+    def connect(request):
+        """
+        Open (or reuse) a connection to the phonebook directory.
+
+        Data requests will be authorized based on the shared
+        system's admin account.
+
+        Connection pooling, master/slave routing, and other low
+        level details will automagically work.
+        """
+        return AdminSession(request)
+
+
+def _populate_any(results):
+    people = []
+    for result in results:
+        dn, attrs = result
+        people.append(Person.new_from_directory(attrs))
+    return people

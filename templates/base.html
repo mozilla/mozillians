@@ -38,13 +38,11 @@
     <nav id="nav">
       <ul>
         {% if user.is_authenticated() %}
-          {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
-            <li class="first">
-              <a href="{{ url('profile', uniq_id) }}">
-                {{ _('Profile') }}
-              </a>
-            </li>
-          {% endfor %}
+          <li class="first">
+            <a href="{{ url('profile', user.unique_id) }}">
+              {{ _('Profile') }}
+            </a>
+          </li>
           <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
           <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
         {% else %}
