@@ -99,7 +99,7 @@ mozilliansVouchedBy: uniqueIdentifier=test011,ou=people,dc=mozillians,dc=org
 dn: uniqueIdentifier=1309526546.511499282,uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org
 objectClass: mozilliansLink
 uniqueIdentifier: 1309526546.511499282
-mozilliansServiceURI: irc://moznet/
+mozilliansServiceURI: irc://irc.mozilla.org/
 mozilliansServiceID: testthirteen
 
 # Temporary system accounts for testing
@@ -131,8 +131,8 @@ cn: test-table-1
 description: Temporary lookup table for testing
 manager: cn=test987,ou=groups,ou=system,dc=mozillians,dc=org
 
-dn: textTableKey=irc://moznet/,cn=test-table-1,ou=tables,dc=mozillians,dc=org
+dn: textTableKey=irc://irc.mozilla.org/,cn=test-table-1,ou=tables,dc=mozillians,dc=org
 objectclass: textTableEntry
-textTableKey: irc://moznet/
-textTableValue: Moznet IRC nick
+textTableKey: irc://irc.mozilla.org/
+textTableValue: Mozilla IRC nickname
 

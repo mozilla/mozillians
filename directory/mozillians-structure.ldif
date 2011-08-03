@@ -48,20 +48,20 @@ cn: linked services
 description: Table mapping URIs to human-friendly service names. Source of values for mozilliansServiceURI attributes.
 manager: cn=LDAPAdmins,ou=groups,ou=system,dc=mozillians,dc=org
 
-dn: textTableKey=irc://moznet/,cn=linked services,ou=tables,dc=mozillians,dc=org
+dn: textTableKey=irc://irc.mozilla.org/,cn=linked services,ou=tables,dc=mozillians,dc=org
 objectclass: textTableEntry
-textTableKey: irc://moznet/
-textTableValue: Moznet IRC nick
+textTableKey: irc://irc.mozilla.org/
+textTableValue: Mozilla IRC nickname
 
-dn: textTableKey=https://bugzilla.mozilla.org/,cn=linked services,ou=tables,dc=mozillians,dc=org
-objectclass: textTableEntry
-textTableKey: https://bugzilla.mozilla.org/
-textTableValue: Bugzilla ID
+#dn: textTableKey=https://bugzilla.mozilla.org/,cn=linked services,ou=tables,dc=mozillians,dc=org
+#objectclass: textTableEntry
+#textTableKey: https://bugzilla.mozilla.org/
+#textTableValue: Email Address
 
-dn: textTableKey=https://github.com/,cn=linked services,ou=tables,dc=mozillians,dc=org
-objectclass: textTableEntry
-textTableKey: https://github.com/
-textTableValue: GitHub ID
+#dn: textTableKey=https://github.com/,cn=linked services,ou=tables,dc=mozillians,dc=org
+#objectclass: textTableEntry
+#textTableKey: https://github.com/
+#textTableValue: Github Username
 
 # This is for system stuff that normal users do not need to see
 #
