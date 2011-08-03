@@ -54,7 +54,7 @@ ldap_sys900DN = 'uid=test900,ou=accounts,ou=system,dc=mozillians,dc=org'
 ldap_mozillian013DN = 'uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org'
 ldap_link013DN = 'uniqueIdentifier=1309526546.511499282,uniqueIdentifier=test013,ou=people,dc=mozillians,dc=org'
 ldap_table_1DN = 'cn=test-table-1,ou=tables,dc=mozillians,dc=org'
-ldap_table_entry_DN = 'textTableKey=irc://moznet/,cn=test-table-1,ou=tables,dc=mozillians,dc=org'
+ldap_table_entry_DN = 'textTableKey=irc://irc.mozilla.org/,cn=test-table-1,ou=tables,dc=mozillians,dc=org'
 ldap_table_new_entry_DN = 'textTableKey=a,cn=test-table-1,ou=tables,dc=mozillians,dc=org'
 test_group = 'cn=test987,ou=groups,ou=system,dc=mozillians,dc=org'
 
@@ -370,20 +370,20 @@ class LdapUserTests(unittest.TestCase):
                            
 
     def test_T9024_anon_read_table(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-	    res = self.ldap_anon.search_s(
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+	    self.ldap_anon.search_s(
 		    ldap_table_1DN,
 		    ldap.SCOPE_SUBTREE,
 		    filterstr='(textTableKey=*)'
-		)
+		))
 
     def test_T9024_anon_read_table_entry(self):
-        with self.assertRaises(ldap.NO_SUCH_OBJECT):
-	    res = self.ldap_anon.search_s(
+        self.assertRaises(ldap.NO_SUCH_OBJECT, lambda:\
+	    self.ldap_anon.search_s(
 		    ldap_table_entry_DN,
 		    ldap.SCOPE_SUBTREE,
 		    filterstr='(textTableKey=*)'
-		)
+		))
 
     def test_T6040_applicant_search_person(self):
 	# Applicant trying to find a person entry that is not their own
@@ -424,7 +424,7 @@ class LdapUserTests(unittest.TestCase):
 		)
         except ldap.LDAPError:
 	    self.fail( "Applicant cannot search under "+ldap_table_1DN+" " + str(sys.exc_info()[0]) )
-	self.assertGreater( len(res), 0,
+	self.assertTrue( len(res) > 0,
 		"Applicant search of table should return at least one entry. We got "+str(len(res)) )
 
 
@@ -572,16 +572,16 @@ class LdapUserTests(unittest.TestCase):
 		)
         except ldap.LDAPError:
 	    self.fail( "Mozillian cannot search under "+ldap_table_1DN+" " + str(sys.exc_info()[0]) )
-	self.assertGreater( len(res), 0,
+	self.assertTrue( len(res) > 0,
 		"Mozillian search of table should return at least one entry. We got "+str(len(res)) )
 
     def test_T9025_mozillian_fake_table_data(self):
 	# Mozillian should not be able to modify any table entry
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
 	    self.ldap_mozillian011.modify_s(
 		    ldap_table_entry_DN,
 		    [ (ldap.MOD_REPLACE,'textTableValue','Fake!') ]
-		)
+		))
 
     def test_T1010_applicant_change_password(self):
         change_and_check_password(
@@ -768,7 +768,7 @@ class LdapUserTests(unittest.TestCase):
 		    [
 			('objectClass', 'mozilliansLink'),
 			('uniqueIdentifier', 'a'),
-			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceURI', 'irc://irc.mozilla.org/'),
 			('mozilliansServiceID', 'testeleven')
 		    ]
 		)
@@ -794,13 +794,13 @@ class LdapUserTests(unittest.TestCase):
 
 
     def test_T6086_mozillian_hack_links(self):
-        with self.assertRaises(ldap.INSUFFICIENT_ACCESS):
+        self.assertRaises(ldap.INSUFFICIENT_ACCESS, lambda:\
 	    self.ldap_mozillian011.modify_s(
 		    ldap_link013DN,
 		    [
 			(ldap.MOD_REPLACE,'mozilliansServiceID','owned!')
 		    ]
-		)
+		))
 
 
     def test_T7030_mozillian_add_entry(self):
@@ -1298,7 +1298,7 @@ class LdapAdminsUserTests(unittest.TestCase):
 		    [
 			('objectClass', 'mozilliansLink'),
 			('uniqueIdentifier', 'a'),
-			('mozilliansServiceURI', 'irc://moznet/'),
+			('mozilliansServiceURI', 'irc://irc.mozilla.org/'),
 			('mozilliansServiceID', 'testeleven')
 		    ]
 		)

@@ -1481,7 +1481,7 @@ uid: afindlay
 dn: uniqueIdentifier=1309526546.511499281,uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
 objectClass: mozilliansLink
 uniqueIdentifier: 1309526546.511499281
-mozilliansServiceURI: irc://moznet/
+mozilliansServiceURI: irc://irc.mozilla.org/
 mozilliansServiceID: andrew_f
 
 dn: uniqueIdentifier=1309526546.512510724,uniqueIdentifier=8,ou=people,dc=mozillians,dc=org
