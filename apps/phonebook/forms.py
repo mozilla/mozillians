@@ -7,6 +7,7 @@ class SearchForm(forms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=True)
 
 
+
 class ProfileForm(forms.Form):
     first_name = forms.CharField(label=_('First Name'), required=False)
     last_name = forms.CharField(label=_('Last Name'), required=True)

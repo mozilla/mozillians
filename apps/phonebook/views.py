@@ -66,10 +66,12 @@ def edit_profile(request, unique_id):
     """
     return _edit_profile(request, unique_id, False)
 
-
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
 
+def _edit_profile(request, unique_id, new_account):
+    ldap = UserSession.connect(request)
+    person = ldap.get_by_unique_id(unique_id)
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
@@ -145,6 +147,7 @@ def search(request):
                 people = ldap.search(query)
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
+
     return jingo.render(request, 'phonebook/search.html',
                         dict(people=people,
                              form=form,
