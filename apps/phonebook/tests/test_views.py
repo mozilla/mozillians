@@ -1,10 +1,10 @@
-import test_utils
 from uuid import uuid4
 
 from django import test
 
 from nose.tools import eq_
 from pyquery import PyQuery as pq
+import test_utils
 
 from commons.urlresolvers import reverse
 from phonebook.views import UNAUTHORIZED_DELETE
