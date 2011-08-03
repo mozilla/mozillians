@@ -8,9 +8,9 @@
     Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
     {% endif %}
 
-    <h1>{% if person.mozilliansVouchedBy %}Mozillian{% else %}Pending{% endif %} Profile</h1>
+    <h1>{% if person.voucher_unique_id %}Mozillian{% else %}Pending{% endif %} Profile</h1>
 
-    <img src="{{url('phonebook.profile_photo', person.uniqueIdentifier[0]) }}" width="300" />
+    <img src="{{url('phonebook.profile_photo', person.unique_id) }}" width="300" />
 
     {{ form }}
     {% if registration_flow %}
@@ -20,16 +20,16 @@
     {% endif %}
   </form>
 
-  {% if person.displayName %}
+  {% if person.full_name %}
     <div>
-      <a href="{{url('profile', person.uniqueIdentifier[0]) }}">{{ person.displayName[0] }}</a>
+      <a href="{{url('profile', person.unique_id) }}">{{ person.full_name }}</a>
     </div>
   {% endif %}
 
-  {% if person.mozilliansVouchedBy %}
+  {% if person.voucher %}
     <div>
       <strong>Mozillian</strong> vouched by
-      {{ person.mozilliansVouchedBy[0] }}
+      {{ person.voucher.full_name }}
     </div>
   {% else %}
     <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
@@ -37,19 +37,13 @@
 
   {% if person.mail %}
     <div>
-      {% for mail in person.mail %}
-        <a href="mailto:{{ mail }}">{{ mail }}</a>
-      {% endfor %}
+      <a href="mailto:{{ person.username }}">{{ person.username }}</a>
     </div>
   {% endif %}
 
-  {% if person.telephoneNumber %}
-    <div class='tel'>{{ person.telephoneNumber[0] }}</div>
-  {% endif %}
-
   <hr />
-  {% if user.username == person.uid[0] %}
-    <a href="{{url('phonebook.edit_profile', person.uniqueIdentifier[0])}}">Edit Profile</a>
+  {% if user.username == person.username %}
+    <a href="{{url('phonebook.edit_profile', person.unique_id)}}">Edit Profile</a>
     <form action="{{ url('phonebook.delete_profile') }}" method="POST">
       {{ csrf() }}
       {{ delete_form }}

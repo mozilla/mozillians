@@ -38,29 +38,27 @@
     <nav id="nav">
       <ul>
         {% if user.is_authenticated() %}
-          {% for uniq_id in user.ldap_user.attrs.uniqueIdentifier %}
-            <li class="first">
-              <a href="{{ url('profile', uniq_id) }}">
-                {{ _('Profile') }}
-              </a>
-            </li>
-          {% endfor %}
-          <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
-          <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
+          <li class="first">
+            <a id="profile" href="{{ url('profile', user.unique_id) }}">
+              {{ _('Profile') }}
+            </a>
+          </li>
+          <li><a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+          <li><a id="logout" href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
         {% else %}
-          <li><a href="{{ url('login') }}">{{ _('Log In') }}</a></li>
-          <li><a href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
+          <li><a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a></li>
+          <li><a id="register" href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
         {% endif %}
       </ul>
     </nav>
 
-    <form id="quick-search" action="{{ url('phonebook.search') }}"
+    {% block search %}<form id="quick-search" action="{{ url('phonebook.search') }}"
         method="GET">
       <input type="search" id="q" name="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
       <input type="image" src="{{ MEDIA_URL }}img/mozilla/search-submit.png"
         alt="{{ _('Search') }}" id="quick-search-btn">
-    </form>
+    </form>{% endblock %}
   </div>
 </header>
 

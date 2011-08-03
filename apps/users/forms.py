@@ -4,8 +4,15 @@ from django.forms.util import ErrorList
 
 from tower import ugettext as _
 
+
+class AuthenticationForm(forms.Form):
+    username = forms.CharField(required=True)
+
+    password = forms.CharField(max_length=255, required=True)
+
+
 class RegistrationForm(forms.Form):
-    email = forms.EmailField(label=_('Primary Email'), required=True)
+    username = forms.EmailField(label=_('Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
                                label=_('Password'), required=True,
                                widget=forms.PasswordInput(render_value=False))

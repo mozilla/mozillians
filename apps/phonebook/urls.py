@@ -7,15 +7,15 @@ admin.autodiscover()
 from phonebook import views
 
 urlpatterns = patterns('',
-    url('^u/(?P<uniqueIdentifier>.*)$', views.profile_uid, name='profile'),
-    url('^user/photo/(?P<uniqueIdentifier>.*)$', views.photo,
+    url('^u/(?P<unique_id>.*)$', views.profile_uid, name='profile'),
+    url('^user/photo/(?P<unique_id>.*)$', views.photo,
         name='phonebook.profile_photo'),
 
     # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),
     # Post 1.0?
-    url('^user/edit/(?P<uniqueIdentifier>.*)$', views.edit_profile,
+    url('^user/edit/(?P<unique_id>.*)$', views.edit_profile,
         name='phonebook.edit_profile'),
-    url('^register/edit/(?P<uniqueIdentifier>.*)$', views.edit_new_profile,
+    url('^register/edit/(?P<unique_id>.*)$', views.edit_new_profile,
         name='phonebook.edit_new_profile'),
     url('^delete$', views.delete, name='phonebook.delete_profile'),
     url('^search$', views.search, name='phonebook.search'),

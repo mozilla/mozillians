@@ -121,10 +121,6 @@ Vouching
 User accounts are expected to follow this lifecycle:
 
 #. Anonymous web user requests an account, giving an e-mail address.
-#. A verification token is mailed to that address (this provides some
-   measure of accountability and limits account-spam)
-#. User presents the token to validate the account.
-   This makes it eligible for vouching and visible to existing Mozillians.
 #. User requests an existing Mozillian to vouch for them.
 #. Mozillian inspects the new user entry and (if they approve)
    writes their own entry DN into the *mozilliansVouchedBy* attribute.
@@ -205,12 +201,13 @@ The DIT (Directory Information Tree)
 * dc=mozillians,dc=org        - This is the LDAP suffix. It may be different if other people deploy the code
 
  * ou=people                  - Container for user account
- * ou=tags                      - (future) container for tag data
+ * ou=tags                    - (future) container for tag data
+ * ou=tables                  - Container for lookup tables
  * ou=system                  - Container for system data (may not be visible to normal users)
 
-   * ou=accounts          - Container for system accounts
-   * ou=groups             - Container for system groups
-   * ou=policies            - Container for password policies etc
+   * ou=accounts              - Container for system accounts
+   * ou=groups                - Container for system groups
+   * ou=policies              - Container for password policies etc
 
 ===============================================
 Attributes and Object Classes
@@ -258,7 +255,7 @@ Attributes for user accounts
 * mozilliansVouchedBy
 
 
-Some attributes will be required to have unique values, e.g. *uid* and *uniqueIdentifier*
+Some attributes will be required to have unique values, e.g. *uid*
 
 All text attributes are in the UTF-8 character set
 (except for a few more restrictive ones like mail)
@@ -280,6 +277,52 @@ Another example is the mail address, which may appear in *mail* (as an informati
 attribute) and also in *uid* where it is being used as a username.
 Keeping the two concepts separate allows for a user to change their username
 without changing their e-mail address and vice-versa.
+
+=================================
+Link entries
+=================================
+
+Mozillians.org allows people to record links to their IDs on other services.
+For each link there is a servicename:ID tuple, which is represented as *mozilliansLink*
+entry immediately beneath the user's main entry.
+
+Each link entry contains two important attributes:
+
+mozilliansServiceURI
+    This is a URI representing the remote service
+
+mozilliansServiceID
+    This is the person's visible identifier on the remote service.
+    Note that it may not be the same as the username that they use to login with.
+
+A *displayName* attribute is also allowed, in case the user wants to label the
+accountin some way (e.g. "My admin account" vs "My test account").
+
+Link entries are named with the *uniqueIdentifier* attribute.
+The value of this has no specific meaning.
+A convenient value would be the precise time of creation of the entry
+(e.g. 'date +%s.%N' output)
+
+
+=================================
+Lookup Tables
+=================================
+
+Most applications need lookup tables.
+An example in the mozillians.org project is the list of linked services.
+Although there is no intention to restrict the services that can be linked to,
+it will be convenient for users if a list of common services is provided,
+perhaps as a drop-down menu.
+
+In LDAP, tabular data is represented as a one-level tree of entries
+as described in RFC2293.
+For text tables, the mapping is between the attributes *textTableKey* and *textTableValue*
+The *textTableKey* attribute is conventionally used as the naming attribute.
+
+One table has been provided in the initial data:
+cn=linked services,ou=tables,dc=mozillians,dc=org
+It is modifiable by any member of the LDAP Managers group,
+and can be searched by anyone.
 
 =================================
 Access Control Rules
@@ -349,11 +392,13 @@ The 'T' codes are cross-references to the ACL test suite
 
  * T2010 LDAPAdmin may read everything in all user and tag entries (except passwords)
  * T2020 ??? LDAPAdmin may change all user-modifiable attributes in user entries ???
+ * T2025 LDAPAdmin may search, edit, create and remove mozilliansLink entries under any user
  * T2030 LDAPAdmin may delete the value of the mozilliansVouchedFor attribute of any user
  * T2035 ??? LDAPAdmin may write any value into the mozilliansVouchedFor attribute of any user ???
  * T2040 ??? LDAPAdmin may remove user entries entirely ???
  * T2050 LDAPAdmin cannot see or modify any entries in the system tree
  * T2060 ??? LDAPAdmin may add new user entries
+ * T2070 LDAPAdmin is not subject to size or time limits on searches
 
  * T3010 regAgent may create new entries directly under ou=People - these must be inetOrgPerson/mozilliansPerson entries.
  * T3020 regAgent may populate certain attributes when creating entries: all user-modifiable attributes plus uniqueIdentifier, userPassword and objectClass
@@ -374,6 +419,9 @@ The 'T' codes are cross-references to the ACL test suite
  * T6050 Applicants may search to the same extent that Anon can (though they can recieve as many entries as a Mozillian would get, there are no attributes disclosed)
  * T6060 Mozillians and Applicants cannot delete any user entries (not even their own)
  * T6070 Mozillians and Applicants cannot create new user entries
+ * T6080 Mozillians can create, edit, and delete mozilliansLink entries under their own entry
+ * T6085 Mozillians can search and view mozilliansLink entries under other users' entries
+ * T6086 Mozillians cannot modify others' link entries
 
  * T7010 Replicator may read the entire content of all entries (including passwords) in the entire tree under dc=mozillians,dc=org
  * T7020 Replicator is not subject to size or time limits on searches
@@ -385,7 +433,12 @@ The 'T' codes are cross-references to the ACL test suite
  * T8030 Nobody other than the rootDN and Replicators may access the ou=system part of the DIT
  * T8040 System accounts can change their own passwords
 
- * T9010 Certain attributes must have values that are unique across all entries: uid and uniqueIdentifier
+ * T9010 Certain attributes must have values that are unique across all entries: uid
+
+ * T9020 All authenticated users may read and search all lookup tables
+ * T9024 Anon may not read or search lookup tables
+ * T9025 Mozillians and Applicants may not change the content of any lookup tables
+ * T9026 Any member of the manager group for a table may change the content
 
  * Anything not already mentioned above is prohibited
 

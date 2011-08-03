@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # Django settings for the mozillians project.
-
+import ldap
 import os
 import socket
 
 from django.utils.functional import lazy
+
+from django_auth_ldap.config import _LDAPConfig, LDAPSearch
 
 # Make file paths relative to settings.
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -166,31 +168,22 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'larper.middleware.LarperMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 
     'commonware.middleware.FrameOptionsHeader',
 )
 
 # OpenLDAP
-import logging
-logger = logging.getLogger('django_auth_ldap')
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
-import ldap
-from django_auth_ldap.config import _LDAPConfig, LDAPSearch
+LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
+
+# django-auth-ldap
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
-    #'django.contrib.auth.backends.ModelBackend', # Optional TODO use or not?
 )
-AUTH_LDAP_SERVER_URI = "ldap://localhost:1389"
-AUTH_LDAP_BIND_DN = "cn=root,dc=mozillians,dc=org"
-AUTH_LDAP_BIND_PASSWORD = "secret"
-AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=people,dc=mozillians,dc=org",
-    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn", "email": "mail"}
 AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory", "unique_id": "uniqueIdentifier", "phone": "telephoneNumber:", "voucher": "mozilliansVouchedBy"}
-
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
 
@@ -224,6 +217,7 @@ INSTALLED_APPS = (
     # 'django.contrib.sites',
     # 'django.contrib.messages',
     'django.contrib.admin',
+    'django.contrib.auth',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 
