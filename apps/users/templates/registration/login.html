@@ -2,7 +2,7 @@
 
 {% block main_content %}
   <div>
-    <form method="post" action="?to=/">
+    <form method="post" action="?next={{ url('home') }}">
       {{ csrf() }}
       <fieldset>
         <ul>
