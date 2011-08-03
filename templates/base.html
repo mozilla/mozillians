@@ -52,13 +52,13 @@
       </ul>
     </nav>
 
-    <form id="quick-search" action="{{ url('phonebook.search') }}"
+    {% block search %}<form id="quick-search" action="{{ url('phonebook.search') }}"
         method="GET">
       <input type="search" id="q" name="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
       <input type="image" src="{{ MEDIA_URL }}img/mozilla/search-submit.png"
         alt="{{ _('Search') }}" id="quick-search-btn">
-    </form>
+    </form>{% endblock %}
   </div>
 </header>
 
