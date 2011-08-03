@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 
 {% block page_title %}{{ _('About Mozillians') }}{% endblock %}
+{% block body_id %}about{% endblock %}
+{% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
   <h1>{{ _('About Mozillians') }}</h1>
 
-  {% trans %}
+  <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
+    alt="{{ _('Photo collage of Mozillians') }}">
+
+  {% trans create_profile_url=url('register') %}
     <p>
       Mozillians are people who volunteer their time to advance the Mozilla
       mission. They're dedicated to promoting openness, innovation and
@@ -20,23 +25,34 @@
       hacker to review a patch? That's exactly what this site is for.
     </p>
 
-    <h2>Privacy First</h2>
+    <a href="{{ create_profile_url }}" id="create-profile"
+      class="button orange">Create Profile</a>
 
-    <p>
-      Privacy has been an important part of this directory from the very
-      beginning. We want to make sure we provide Mozillians with the best
-      experience possible, from the way the site is built to the way we vouch
-      for new users before they can access data that should only be available
-      to other Mozillians. Read our Privacy Policy for more information.
-    </p>
+    <div class="clear"></div>
 
-    <h2>Get Involved</h2>
+    <section id="privacy" class="key-info">
+      <h2>Privacy First</h2>
 
-    <p>
-      The community directory is also a community project and you are welcome
-      to get involved to help us make it even better or to integrate it into
-      other community tools. Get in touch with us on the Mozillians forums
-      (link) to learn how.
-    </p>
+      <p>
+        Privacy has been an important part of this directory from the very
+        beginning. We want to make sure we provide Mozillians with the best
+        experience possible, from the way the site is built to the way we vouch
+        for new users before they can access data that should only be available
+        to other Mozillians. Read our Privacy Policy for more information.
+      </p>
+    </section>
+
+    <section id="get-involved" class="key-info">
+      <h2>Get Involved</h2>
+
+      <p>
+        The community directory is also a community project and you are welcome
+        to get involved to help us make it even better or to integrate it into
+        other community tools. Get in touch with us on the Mozillians forums
+        (link) to learn how.
+      </p>
+    </section>
+
+    <div class="clear"></div>
   {% endtrans %}
 {% endblock %}

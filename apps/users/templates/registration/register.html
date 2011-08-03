@@ -1,22 +1,53 @@
 {% extends "base.html" %}
+
+{% block page_title %}{{ _('Create Your Profile') }}{% endblock %}
+{% block body_id %}register{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
 {# TODO move registration flow all into the phonebook app.
    Currently spread across all three apps :( #}
 {% block main_content %}
-  <div>
-    Step 1 of 3 [ <strong>register</strong> | profile | get vouched ]
-    <h1>{{ _('Create Your Profile') }}</h1>
-    <form method="post" action="{{ url('register') }}">
-      {{ csrf() }}
-      {{ form }}
-      <button>{{ _('Create Account') }}</button>
-    </form>
-  </div>
+  <form method="post" action="{{ url('register') }}">
+    {{ csrf() }}
 
-  <p>
-    {% trans %}
-      At this time, profiles are only viewable by other Mozillians. Community
-      members may use them to identify and contact you about events, projects
-      and other Mozilla-related activities.
-    {% endtrans %}
-  </p>
+    {#
+    TODO: Get these steps to reflect the mockups.
+    Step 1 of 3 [ <strong>register</strong> | profile | get vouched ]
+    #}
+    <h1>{{ _('Create Your Profile') }}</h1>
+
+    <div class="blue-pastels">
+      {{ form.management_form }}
+
+      {% if form.errors %}
+        <p class="form-errors">
+          {{ _("Sorry, but we couldn't create your account.
+                Please review the form, correct any errors, and try again.") }}
+        </p>
+      {% endif %}
+
+      <p id="privacy-info">
+        {% trans %}
+          At this time, profiles are only viewable by other Mozillians.
+          Community members may use them to identify and contact you about
+          events, projects and other Mozilla-related activities.
+        {% endtrans %}
+      </p>
+
+      {% for f in form %}
+        <div id="{{ f.name }}-container"
+            class="field {{ 'error' if form.errors[f.name] }} {{ f.widget }}">
+          {{ f.label_tag() }}
+          {{ form.errors[f.name] }}
+          {{ f }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <button id="submit" class="button orange">
+      {{ _('Create Account') }}
+    </button>
+
+    <div class="clear"></div>
+  </form>
 {% endblock %}

@@ -12,16 +12,15 @@ class AuthenticationForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    username = forms.CharField(label=_('Primary Email'), required=True)
+    username = forms.EmailField(label=_('Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
-                               label=_('Password'),
-                               widget=forms.PasswordInput(render_value=False),
-                               required=True)
+                               label=_('Password'), required=True,
+                               widget=forms.PasswordInput(render_value=False))
     confirmp = forms.CharField(label=_('Confirm Password'),
                                widget=forms.PasswordInput(render_value=False),
                                required=True)
 
-    first_name = forms.CharField(label=_('Last Name'), required=False)
+    first_name = forms.CharField(label=_('First Name'), required=False)
     last_name = forms.CharField(label=_('Last Name'), required=True)
 
     #recaptcha = captcha.fields.ReCaptchaField()

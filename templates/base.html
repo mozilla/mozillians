@@ -24,7 +24,8 @@
 </head>
 
 <body id="body-{% block body_id %}mozillians{% endblock %}"
-  class="{% block body_classes %}{% endblock %}">
+  class="{% block body_classes %}{% endblock %}
+  {{ 'auth' if user.is_authenticated() else 'anon' }}">
 
 <ul id="skip" class="hide">
   <li><a href="#main">{{ _('Skip to Content') }}</a></li>
@@ -34,20 +35,22 @@
   <h1><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></h1>
 
   <div id="header-contents">
-    <ul id="nav">
-      {% if user.is_authenticated() %}
+    <nav id="nav">
+      <ul>
+        {% if user.is_authenticated() %}
           <li class="first">
-            <a id="profile" href="{{ url('profile', user.unique_id) }}">
+            <a href="{{ url('profile', user.unique_id) }}">
               {{ _('Profile') }}
             </a>
           </li>
-        <li><a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
-        <li><a id="logout" href="{{ url('logout') }}?next={{ url('login') }}">{{ _('Log Out') }}</a></li>
-      {% else %}
-        <li><a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a></li>
-        <li><a id="joinus" href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
-      {% endif %}
-    </ul>
+          <li><a href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+          <li><a href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
+        {% else %}
+          <li><a href="{{ url('login') }}">{{ _('Log In') }}</a></li>
+          <li><a href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
+        {% endif %}
+      </ul>
+    </nav>
 
     <form id="quick-search" action="{{ url('phonebook.search') }}"
         method="GET">

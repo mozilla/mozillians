@@ -45,7 +45,7 @@ USE_I18N = True
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
 USE_L10N = True
-
+LOCALE_PATHS = [path('locale')]
 # Gettext text domain
 TEXT_DOMAIN = 'messages'
 
@@ -54,7 +54,7 @@ TEXT_DOMAIN = 'messages'
 LANGUAGE_CODE = 'en-US'
 
 # Accepted locales
-KNOWN_LANGUAGES = ('en-US',)
+KNOWN_LANGUAGES = ('en-US', 'de', 'fr')
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
@@ -231,7 +231,9 @@ DOMAIN_METHODS = {
     'messages': [
         ('apps/**.py',
             'tower.management.commands.extract.extract_tower_python'),
-        ('**/templates/**.html',
+        ('apps/**/templates/**.html',
+            'tower.management.commands.extract.extract_tower_template'),
+        ('templates/**.html',
             'tower.management.commands.extract.extract_tower_template'),
     ],
 

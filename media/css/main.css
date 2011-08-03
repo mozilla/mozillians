@@ -12,10 +12,225 @@ html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
     min-height: 325px;
 }
 
+#main-content {
+    position: relative;
+    z-index: 1;
+}
+
+body.box-content #main-content {
+    background: #fff;
+    border-radius: 11px;
+    -moz-border-radius: 11px;
+    -webkit-border-radius: 11px;
+    box-shadow: #b6b6b6 0px 2px 7px;
+    -moz-box-shadow: #b6b6b6 0px 2px 7px;
+    -webkit-box-shadow: #b6b6b6 0px 2px 7px;
+    margin: 50px 0 0 20px;
+    padding: 20px;
+    width: 720px;
+}
+
+body.box-content #main-content h1 {
+    font-size: 29px;
+    margin-top: 0;
+}
+
 #main-content p {
     max-width: 685px;
 }
 
+/** Common and utility classes */
+.blue-pastels {
+    background: url(../img/blue-pastels-bg.png) center no-repeat;
+    display: block;
+    height: 386px;
+    padding: 20px;
+    width: 688px;
+}
+
+    .blue-pastels .field {
+        width: 50%;
+    }
+
+    .blue-pastels label {
+        color: #1e4262;
+        display: block;
+        font-size: 14px;
+        font-style: italic;
+        font-weight: 200;
+        padding: 0 0 2px 10px;
+    }
+
+    .blue-pastels .error label {
+        float: left;
+        padding-right: 10px;
+    }
+
+    .blue-pastels .errorlist, .blue-pastels .errorlist li {
+        color: red;
+        float: left;
+        margin: 0;
+    }
+
+    .blue-pastels label:hover, .blue-pastels label:focus {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .blue-pastels input, .blue-pastels select, .blue-pastels textarea {
+        border: 1px inset #d8d8d8;
+        border-bottom: 0;
+        clear: both;
+        color: #4b4740;
+        height: 14px;
+        font-family: Georgia, Times, serif;
+        font-size: 13px;
+        margin: 0 0 15px;
+        padding: 5px;
+        width: 300px;
+    }
+
+    .blue-pastels input[type=checkbox], .blue-pastels input[type=radio] {
+        width: auto;
+    }
+
+    .blue-pastels input:focus, .blue-pastels select:focus,
+    .blue-pastels textarea:focus {
+        box-shadow: 1px 1px 1px #1e4262;
+        -moz-box-shadow: 1px 1px 1px #1e4262;
+        -webkit-box-shadow: 1px 1px 1px #1e4262;
+    }
+
+.button.orange {
+    border-color: #db8237;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(223,115,43)),
+    color-stop(0.75, rgb(241,210,85))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(223,115,43) 25%,
+    rgb(241,210,85) 75%
+);
+}
+
+.button.orange:hover {
+    border-color: #db8237;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.15, rgb(223,115,43)),
+    color-stop(0.85, rgb(241,210,85))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(223,115,43) 15%,
+    rgb(241,210,85) 85%
+);
+}
+
 .clear {
     clear: both;
+}
+
+/** Home Page */
+#body-home #main-content {
+    background: top center no-repeat;
+    height: 350px;
+    padding: 50px 125px 50px 175px;
+    text-align: center;
+    width: 445px;
+}
+
+#body-home.anon #main-content {
+    background-image: url(../img/home-anon-bg.png);
+}
+
+#body-home.auth #main-content {
+    background-image: url(../img/home-auth-bg.png);
+}
+
+#body-home #main-content h1 {
+    line-height: 35px;
+    margin-right: 0;
+    margin-top: 35px;
+}
+
+#body-home #main-content h1 small {
+    font-size: 26px;
+}
+
+#body-home #main-content p {
+    margin-left: auto;
+    margin-right: auto;
+    width: 425px;
+}
+
+#body-home #call-to-action .button {
+    margin: 30px 0 0;
+}
+
+/** About Page */
+#body-about #main-content {
+    background-image: url(../img/about-bg.png);
+    background-position: 0 120px;
+    background-repeat: no-repeat;
+}
+
+#photo-collage {
+    float: right;
+    margin: -45px -5px 0 0;
+}
+
+.key-info {
+    background: left top no-repeat;
+    float: left;
+    margin: 60px 0 0;
+    padding: 0 20px 0 110px;
+    width: 235px;
+}
+
+.key-info h2 {
+    color: #1e4262;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.key-info p {
+    font-size: 13px;
+    line-height: 1.5em;
+}
+
+#create-profile {
+    margin: 10px 0 0 200px;
+}
+
+#privacy {
+    background-image: url(../img/about-lock-icon.png);
+    margin-left: -10px;
+}
+
+#get-involved {
+    background-image: url(../img/about-globe-icon.png);
+}
+
+/** Register Page (Step 1: Create a Profile) */
+#body-register form {
+    position: relative;
+}
+
+#body-register #privacy-info {
+    float: right;
+    margin-top: 20px;
+    text-align: center;
+    width: 47.5%;
+}
+
+#body-register #submit {
+    float: right;
+    margin: 0 50px 0 0;
 }
