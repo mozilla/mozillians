@@ -4,7 +4,7 @@ from tower import ugettext as _
 
 
 class SearchForm(forms.Form):
-    q = forms.CharField(widget=forms.HiddenInput, required=False)
+    q = forms.CharField(widget=forms.HiddenInput, required=True)
 
 
 class ProfileForm(forms.Form):

@@ -1,3 +1,5 @@
+from ldap import SIZELIMIT_EXCEEDED
+
 from django.http import HttpResponse
 from django.http import Http404
 from django.shortcuts import redirect
@@ -133,15 +135,20 @@ def _user_owns_account(request, form):
 
 def search(request):
     people = []
+    size_exceeded = False
     form = forms.SearchForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
         if request.user.is_authenticated():
             ldap = UserSession.connect(request)
-            people = ldap.search(query)
-
+            try:
+                people = ldap.search(query)
+            except SIZELIMIT_EXCEEDED:
+                size_exceeded = True
     return jingo.render(request, 'phonebook/search.html',
-                        dict(people=people))
+                        dict(people=people,
+                             form=form,
+                             size_exceeded_error=size_exceeded))
 
 
 def photo(request, unique_id):

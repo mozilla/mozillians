@@ -4,27 +4,32 @@
   <h1>{{ _('Search') }}</h1>
 
   <form action="" method="GET">
-    <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
+    <input type="search" name="q" placeholder="{{ _('Name, IRC Nick, or Email') }}" value="{% if form.cleaned_data %}{{form.cleaned_data.q}}{% endif %}" autofocus>
     <input type="submit" value="{{ _('Search') }}"/>
   </form>
 
-  {% for person in people %}
-    {# TODO We should reuse microformats like Domesday prototype #}
-    <div>
-      <img src="{{url('phonebook.profile_photo', person.unique_id) }}" width="150" />
-      <h2><a href="{{url('profile', person.unique_id) }}">{{ person.full_name }}</a></h2>
-      {% if person.voucher_unique_id %}<div><strong>Mozillian</strong></div>
-      {% else %}<div><strong>Pending...</strong></div>
-      {% endif %}
-    </div>
+  {% if size_exceeded_error %}
+    <h2>{{ _('Error') }}</h2>
+    <p>{{ _('Please make your search more specific. Too many results to display.') }}</p>
   {% else %}
-    <p>
-      {% trans invite=url('invite') %}
-        The Mozillian you are looking for is not in the directory. Please check
-        your spelling or
-        <a href="{{ invite }}">invite this person</a>
-        to create a profile.
-      {% endtrans %}
-    </p>
-  {% endfor %}
+    {% for person in people %}
+      {# TODO We should reuse microformats like Domesday prototype #}
+      <div>
+        <img src="{{url('phonebook.profile_photo', person.unique_id) }}" width="150" />
+        <h2><a href="{{url('profile', person.unique_id) }}">{{ person.full_name }}</a></h2>
+        {% if person.voucher_unique_id %}<div><strong>Mozillian</strong></div>
+        {% else %}<div><strong>Pending...</strong></div>
+        {% endif %}
+      </div>
+    {% else %}
+      <p>
+        {% trans invite=url('invite') %}
+          The Mozillian you are looking for is not in the directory. Please check
+          your spelling or
+          <a href="{{ invite }}">invite this person</a>
+          to create a profile.
+        {% endtrans %}
+      </p>
+    {% endfor %}
+  {% endif %}
 {% endblock %}
