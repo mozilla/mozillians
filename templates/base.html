@@ -39,7 +39,7 @@
       <ul>
         {% if user.is_authenticated() %}
           <li class="first">
-            <a href="{{ url('profile', user.unique_id) }}">
+            <a id="profile" href="{{ url('profile', user.unique_id) }}">
               {{ _('Profile') }}
             </a>
           </li>
