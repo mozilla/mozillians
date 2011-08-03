@@ -18,12 +18,13 @@ objectclass: mozilliansPerson
 displayName: Bridget Hill
 cn: Bridget Hill
 sn: Hill
+givenName: Bridget
 uniqueIdentifier: 7f3a67u000001
 uid: u000001@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000001@mozillians.org
 telephoneNumber: +44 1234 567001
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000002,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000002,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -37,7 +38,7 @@ uid: u000002@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000002@mozillians.org
 telephoneNumber: +44 1234 567002
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000003,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -64,7 +65,7 @@ uid: u000004@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000004@mozillians.org
 telephoneNumber: +44 1234 567004
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000005,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -78,7 +79,7 @@ uid: u000005@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000005@mozillians.org
 telephoneNumber: +44 1234 567005
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000006,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -105,7 +106,7 @@ uid: u000007@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000007@mozillians.org
 telephoneNumber: +44 1234 567007
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000008,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -119,7 +120,7 @@ uid: u000008@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000008@mozillians.org
 telephoneNumber: +44 1234 567008
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000009,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -146,7 +147,7 @@ uid: u000010@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000010@mozillians.org
 telephoneNumber: +44 1234 567010
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000011,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -160,7 +161,7 @@ uid: u000011@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000011@mozillians.org
 telephoneNumber: +44 1234 567011
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000012,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -187,7 +188,7 @@ uid: u000013@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000013@mozillians.org
 telephoneNumber: +44 1234 567013
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000014,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -201,7 +202,7 @@ uid: u000014@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000014@mozillians.org
 telephoneNumber: +44 1234 567014
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000015,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -228,7 +229,7 @@ uid: u000016@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000016@mozillians.org
 telephoneNumber: +44 1234 567016
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000017,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -242,7 +243,7 @@ uid: u000017@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000017@mozillians.org
 telephoneNumber: +44 1234 567017
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000018,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -269,7 +270,7 @@ uid: u000019@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000019@mozillians.org
 telephoneNumber: +44 1234 567019
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000020,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -283,7 +284,7 @@ uid: u000020@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000020@mozillians.org
 telephoneNumber: +44 1234 567020
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000021,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -310,7 +311,7 @@ uid: u000022@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000022@mozillians.org
 telephoneNumber: +44 1234 567022
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000023,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -324,7 +325,7 @@ uid: u000023@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000023@mozillians.org
 telephoneNumber: +44 1234 567023
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000024,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -351,7 +352,7 @@ uid: u000025@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000025@mozillians.org
 telephoneNumber: +44 1234 567025
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000026,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -365,7 +366,7 @@ uid: u000026@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000026@mozillians.org
 telephoneNumber: +44 1234 567026
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000027,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -392,7 +393,7 @@ uid: u000028@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000028@mozillians.org
 telephoneNumber: +44 1234 567028
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000029,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -406,7 +407,7 @@ uid: u000029@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000029@mozillians.org
 telephoneNumber: +44 1234 567029
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000030,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -433,7 +434,7 @@ uid: u000031@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000031@mozillians.org
 telephoneNumber: +44 1234 567031
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000032,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -447,7 +448,7 @@ uid: u000032@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000032@mozillians.org
 telephoneNumber: +44 1234 567032
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000033,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -474,7 +475,7 @@ uid: u000034@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000034@mozillians.org
 telephoneNumber: +44 1234 567034
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000035,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -488,7 +489,7 @@ uid: u000035@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000035@mozillians.org
 telephoneNumber: +44 1234 567035
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000036,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -515,7 +516,7 @@ uid: u000037@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000037@mozillians.org
 telephoneNumber: +44 1234 567037
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000038,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -529,7 +530,7 @@ uid: u000038@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000038@mozillians.org
 telephoneNumber: +44 1234 567038
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000039,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -556,7 +557,7 @@ uid: u000040@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000040@mozillians.org
 telephoneNumber: +44 1234 567040
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000041,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -570,7 +571,7 @@ uid: u000041@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000041@mozillians.org
 telephoneNumber: +44 1234 567041
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000042,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -597,7 +598,7 @@ uid: u000043@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000043@mozillians.org
 telephoneNumber: +44 1234 567043
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000044,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -611,7 +612,7 @@ uid: u000044@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000044@mozillians.org
 telephoneNumber: +44 1234 567044
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000045,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -638,7 +639,7 @@ uid: u000046@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000046@mozillians.org
 telephoneNumber: +44 1234 567046
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000047,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -652,7 +653,7 @@ uid: u000047@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000047@mozillians.org
 telephoneNumber: +44 1234 567047
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000048,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -679,7 +680,7 @@ uid: u000049@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000049@mozillians.org
 telephoneNumber: +44 1234 567049
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000050,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -693,7 +694,7 @@ uid: u000050@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000050@mozillians.org
 telephoneNumber: +44 1234 567050
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000051,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -720,7 +721,7 @@ uid: u000052@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000052@mozillians.org
 telephoneNumber: +44 1234 567052
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000053,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -734,7 +735,7 @@ uid: u000053@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000053@mozillians.org
 telephoneNumber: +44 1234 567053
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000054,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -761,7 +762,7 @@ uid: u000055@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000055@mozillians.org
 telephoneNumber: +44 1234 567055
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000056,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -775,7 +776,7 @@ uid: u000056@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000056@mozillians.org
 telephoneNumber: +44 1234 567056
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000057,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -802,7 +803,7 @@ uid: u000058@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000058@mozillians.org
 telephoneNumber: +44 1234 567058
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000059,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -816,7 +817,7 @@ uid: u000059@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000059@mozillians.org
 telephoneNumber: +44 1234 567059
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000060,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -843,7 +844,7 @@ uid: u000061@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000061@mozillians.org
 telephoneNumber: +44 1234 567061
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000062,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -857,7 +858,7 @@ uid: u000062@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000062@mozillians.org
 telephoneNumber: +44 1234 567062
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000063,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -884,7 +885,7 @@ uid: u000064@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000064@mozillians.org
 telephoneNumber: +44 1234 567064
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000065,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -898,7 +899,7 @@ uid: u000065@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000065@mozillians.org
 telephoneNumber: +44 1234 567065
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000066,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -925,7 +926,7 @@ uid: u000067@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000067@mozillians.org
 telephoneNumber: +44 1234 567067
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000068,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -939,7 +940,7 @@ uid: u000068@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000068@mozillians.org
 telephoneNumber: +44 1234 567068
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000069,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -966,7 +967,7 @@ uid: u000070@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000070@mozillians.org
 telephoneNumber: +44 1234 567070
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000071,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -980,7 +981,7 @@ uid: u000071@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000071@mozillians.org
 telephoneNumber: +44 1234 567071
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000072,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1007,7 +1008,7 @@ uid: u000073@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000073@mozillians.org
 telephoneNumber: +44 1234 567073
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000074,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1021,7 +1022,7 @@ uid: u000074@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000074@mozillians.org
 telephoneNumber: +44 1234 567074
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000075,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1048,7 +1049,7 @@ uid: u000076@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000076@mozillians.org
 telephoneNumber: +44 1234 567076
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000077,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1062,7 +1063,7 @@ uid: u000077@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000077@mozillians.org
 telephoneNumber: +44 1234 567077
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000078,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1089,7 +1090,7 @@ uid: u000079@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000079@mozillians.org
 telephoneNumber: +44 1234 567079
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000080,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1103,7 +1104,7 @@ uid: u000080@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000080@mozillians.org
 telephoneNumber: +44 1234 567080
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000081,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1130,7 +1131,7 @@ uid: u000082@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000082@mozillians.org
 telephoneNumber: +44 1234 567082
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000083,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1144,7 +1145,7 @@ uid: u000083@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000083@mozillians.org
 telephoneNumber: +44 1234 567083
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000084,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1171,7 +1172,7 @@ uid: u000085@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000085@mozillians.org
 telephoneNumber: +44 1234 567085
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000086,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1185,7 +1186,7 @@ uid: u000086@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000086@mozillians.org
 telephoneNumber: +44 1234 567086
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000087,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1212,7 +1213,7 @@ uid: u000088@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000088@mozillians.org
 telephoneNumber: +44 1234 567088
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000089,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1226,7 +1227,7 @@ uid: u000089@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000089@mozillians.org
 telephoneNumber: +44 1234 567089
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000090,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1253,7 +1254,7 @@ uid: u000091@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000091@mozillians.org
 telephoneNumber: +44 1234 567091
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000092,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1267,7 +1268,7 @@ uid: u000092@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000092@mozillians.org
 telephoneNumber: +44 1234 567092
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000093,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1294,7 +1295,7 @@ uid: u000094@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000094@mozillians.org
 telephoneNumber: +44 1234 567094
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000095,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1308,7 +1309,7 @@ uid: u000095@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000095@mozillians.org
 telephoneNumber: +44 1234 567095
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000096,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1335,7 +1336,7 @@ uid: u000097@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000097@mozillians.org
 telephoneNumber: +44 1234 567097
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000098,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1343,13 +1344,14 @@ objectclass: person
 objectclass: mozilliansPerson
 displayName: Amandeep McIlrath
 cn: Amandeep McIlrath
+givenName: Amandeep
 sn: McIlrath
 uniqueIdentifier: 7f3a67u000098
 uid: u000098@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000098@mozillians.org
 telephoneNumber: +44 1234 567098
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 
 dn: uniqueIdentifier=7f3a67u000099,ou=people,dc=mozillians,dc=org
 objectclass: inetOrgPerson
@@ -1376,5 +1378,5 @@ uid: u000100@mozillians.org
 userPassword: {SSHA}VpIyfHhUQI62WgjTanEzi+NRVHYbu4c+
 mail: u000100@mozillians.org
 telephoneNumber: +44 1234 567100
-mozilliansVouchedBy: cn=test,ou=People,dc=mozillians,dc=org
+mozilliansVouchedBy: uniqueIdentifier=7f3a67u000001,ou=people,dc=mozillians,dc=org
 

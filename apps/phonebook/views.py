@@ -1,10 +1,3 @@
-import copy
-import logging
-log = logging.getLogger('phonebook')
-log.addHandler(logging.StreamHandler())
-log.setLevel(logging.DEBUG)
-
-
 from django.http import HttpResponse
 from django.http import Http404
 from django.shortcuts import redirect
@@ -17,23 +10,21 @@ from commons.urlresolvers import reverse
 import jingo
 from tower import ugettext as _
 
-import larper
-from larper import models
+from larper import UserSession, AdminSession, NO_SUCH_PERSON
 
 from . import forms
 
 
-def profile_uid(request, uniqueIdentifier):
+def profile_uid(request, unique_id):
     """
-    uniqueIdentifier is a stable, random user id.
+    unique_id is a stable, random user id.
     """
-    p = models.Person(request)
-    person = p.find_by_uniqueIdentifier(uniqueIdentifier)
-    # TODO(ozten) API - A pending user gets {'uniqueIdentifier': ['7f3a67u000100']}
-    # when they search for others... A Mozillian gets a fuller object
-    if person and 'uid' in person:
-        return _profile(request, person)
-    else:
+    ldap = UserSession.connect(request)
+    try:
+        person = ldap.get_by_unique_id(unique_id)
+        if person.last_name:
+            return _profile(request, person)
+    except NO_SUCH_PERSON:
         raise Http404
 
 
@@ -50,69 +41,56 @@ def profile_nickname(request, nickname):
 
 def _profile(request, person):
     vouch_form = None
-    person['voucher'] = None
+    ldap = UserSession.connect(request)
 
-    if 'mozilliansVouchedBy' in person:
-        p = models.Person(request)
-        voucher_dn = person['mozilliansVouchedBy'][0]
-        person['voucher'] = p.find_by_dn(voucher_dn)
-    else:
-        try:
-            voucher = request.user.ldap_user.attrs['uniqueIdentifier'][0]
-            vouch_form = forms.VouchForm(initial=dict(
-                    voucher=voucher,
-                    vouchee=person['uniqueIdentifier'][0]))
-        except AttributeError, e:
-            form = forms.VouchForm()
-            log.error(e)
+    if person.voucher_unique_id:
+        person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
+    elif request.user.unique_id != person.unique_id:
+        voucher = request.user.unique_id
+        vouch_form = forms.VouchForm(initial=dict(
+                voucher=voucher,
+                vouchee=person.unique_id))
+
     return jingo.render(request, 'phonebook/profile.html',
                         dict(person=person, vouch_form=vouch_form))
 
 
-def edit_profile(request, uniqueIdentifier):
-    """ Why does this and edit_new_profile accept a uniqueIdentifier
+def edit_profile(request, unique_id):
+    """ Why does this and edit_new_profile accept a unique_id
     Instead of just using the request.user object?
 
     LDAP's ACL owns if the current user can edit the user or not.
     We get a rich admin screen for free, for LDAPAdmin users.
     """
-    return _edit_profile(request, uniqueIdentifier, False)
+    return _edit_profile(request, unique_id, False)
 
 
-def edit_new_profile(request, uniqueIdentifier):
-    return _edit_profile(request, uniqueIdentifier, True)
+def edit_new_profile(request, unique_id):
+    return _edit_profile(request, unique_id, True)
 
 
-def _edit_profile(request, uniqueIdentifier, new_account):
-    p = models.Person(request)
-    person = p.find_by_uniqueIdentifier(uniqueIdentifier)
+def _edit_profile(request, unique_id, new_account):
+    ldap = UserSession.connect(request)
+    person = ldap.get_by_unique_id(unique_id)
+
     del_form = forms.DeleteForm(
-        initial={'uniqueIdentifier': uniqueIdentifier})
+        initial={'unique_id': unique_id})
     if person:
         if request.method == 'POST':
             form = forms.ProfileForm(request.POST, request.FILES)
             if form.is_valid():
-                _update_profile(p, person, form)
+                ldap = UserSession.connect(request)
+                ldap.update_person(unique_id, form.cleaned_data)
+                ldap.update_profile_photo(unique_id, form.cleaned_data)
                 if new_account:
                     return redirect('confirm_register')
                 else:
-                    return redirect('profile', uniqueIdentifier)
-            else:
-                log.error("Form is INVALID")
+                    return redirect('profile', unique_id)
         else:
-            # TODO(ozten) Where layers do we let ldap nominclature bleed into?
-            if 'givenName' in person:
-                first = person['givenName'][0]
-            else:
-                first = ''
-            if 'description' in person:
-                bio = person['description'][0]
-            else:
-                bio = ''
             form = forms.ProfileForm(initial={
-                    'first_name': first,
-                    'last_name': person['sn'][0],
-                    'biography': bio, })
+                    'first_name': person.first_name,
+                    'last_name': person.last_name,
+                    'biography': person.biography, })
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,
@@ -124,46 +102,33 @@ def _edit_profile(request, uniqueIdentifier, new_account):
         raise Http404
 
 
-def _update_profile(p, person, form):
-    """
-    TODO DRY with users/views.py
-    """
-
-    # Optional
-    first_name = form.cleaned_data['first_name'].encode('utf-8') or ""
-    last_name = form.cleaned_data['last_name'].encode('utf-8')
-    biography = form.cleaned_data['biography'].encode('utf-8')
-    if form.cleaned_data['photo']:
-        photo = form.cleaned_data['photo'].file
-    else:
-        photo = None
-
-
-    display_name = ("%s %s" % (first_name, last_name)).encode('utf-8')
-    # TODO push down into larper?
-    profile = copy.deepcopy(person)
-    profile['givenName'] = first_name
-    profile['sn'] = last_name
-    profile['cn'] = display_name
-    profile['displayName'] = display_name
-
-    profile['description'] = biography
-    if photo:
-        profile['jpegPhoto'] = photo.read()
-
-    p.update_person(person, profile)
+class UNAUTHORIZED_DELETE(Exception):
+    pass
 
 
 @require_POST
 def delete(request):
     form = forms.DeleteForm(request.POST)
-    if form.is_valid():
-        larper.delete_person(request, form.cleaned_data['uniqueIdentifier'])
+    if form.is_valid() and _user_owns_account(request, form):
+        admin_ldap = AdminSession.connect(request)
+        admin_ldap.delete_person(form.cleaned_data['unique_id'])
         django.contrib.auth.logout(request)
     else:
-        log.error("Some funny business...")
+        raise UNAUTHORIZED_DELETE("Unauthorized deletion of account, attempted")
+
     return redirect('home')
 
+
+def _user_owns_account(request, form):
+    """
+    A leak in our authentication abstraction...
+    We use a shared Admin account for deleting, so
+    we can't rely on LDAP ACL to test this for us.
+    We must ensure the current user is the same as the
+    account to be deleted.
+    """
+    uniq_id_to_delete = form.cleaned_data['unique_id']
+    return request.user.unique_id == uniq_id_to_delete
 
 
 def search(request):
@@ -171,26 +136,25 @@ def search(request):
     form = forms.SearchForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
-        log.error("Search Query: %s" % query)
         if request.user.is_authenticated():
-            user = models.Person(request)
-            people = user.search(query)
+            ldap = UserSession.connect(request)
+            people = ldap.search(query)
 
     return jingo.render(request, 'phonebook/search.html',
                         dict(people=people))
 
 
-def photo(request, uniqueIdentifier):
-    user = models.Person(request)
-    person = user.find_by_uniqueIdentifier(uniqueIdentifier)
-    if person and 'jpegPhoto' in person:
-        return HttpResponse(person['jpegPhoto'][0], mimetype="image/jpeg")
+def photo(request, unique_id):
+    ldap = UserSession.connect(request)
+    image = ldap.profile_photo(unique_id)
+    if image:
+        return HttpResponse(image, mimetype="image/jpeg")
     else:
         return redirect('/media/img/unknown.png')
 
 
 def invite(request):
-    # TODO: actually send this
+    # TODO(davedash): actually send this
     subject = _('Become a Mozillian')
     message = _("Hi, I'm sending you this because I think you should join "
                 'mozillians.org, the community directory for Mozilla '
@@ -201,11 +165,13 @@ def invite(request):
 
     return jingo.render(request, 'phonebook/invite.html')
 
+
 @require_POST
 def vouch(request):
     form = forms.VouchForm(request.POST)
     if form.is_valid():
-        voucher = form.cleaned_data.get('voucher').encode('utf-8')
-        vouchee = form.cleaned_data.get('vouchee').encode('utf-8')
-        larper.vouch_person(request, voucher, vouchee)
+        ldap = UserSession.connect(request)
+        data = form.cleaned_data
+        vouchee = data.get('vouchee')
+        ldap.record_vouch(data.get('voucher'), vouchee)
         return redirect(reverse('profile', args=[vouchee]))
