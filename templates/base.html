@@ -44,7 +44,7 @@
             </a>
           </li>
           <li><a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
-          <li><a id="logout" href="{{ url('logout') }}">{{ _('Log Out') }}</a></li>
+          <li><a id="logout" href="{{ url('logout') }}?next={{ url('login') }}">{{ _('Log Out') }}</a></li>
         {% else %}
           <li><a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a></li>
           <li><a id="register" href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
