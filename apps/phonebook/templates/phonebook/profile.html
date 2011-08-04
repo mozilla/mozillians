@@ -16,6 +16,18 @@
     </div>
   {% endif %}
 
+  {% if person.irc_nickname %}
+    We're good! 
+    <div><h3>{{_('IRC Nickname') }}</h3><a href="{{person.irc_nickname.service_uri}}">{{person.irc_nickname.service_id}}</a>
+  {% endif %}
+    <dl id="remote-services">
+      {% for uri, service in services.items() %}
+      <dt>{{service.service_uri}}</dt>
+      <dd><a href="{{service.service_uri}}">{{service.service_id}}</a></dd>
+      {% endfor %}
+    </dl>  
+
+
   {% if person.voucher %}
     <div>
       <strong>Mozillian</strong>

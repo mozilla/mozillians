@@ -1,6 +1,6 @@
 from django import forms
 
-from tower import ugettext as _
+from tower import ugettext_lazy as _lazy, ugettext as _
 
 
 class SearchForm(forms.Form):
@@ -14,6 +14,12 @@ class ProfileForm(forms.Form):
                                 widget=forms.Textarea(),
                                 required=False)
     photo = forms.ImageField(label=_('Profile Photo'), required=False)
+
+    # Remote System Ids
+    # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
+    irc_nickname = forms.CharField(label=_('IRC Nickname'), required=False)
+    irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
+                                             required=False)
 
 
 class DeleteForm(forms.Form):

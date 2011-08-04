@@ -13,13 +13,15 @@ import jingo
 from tower import ugettext as _
 
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
+from larper import MOZILLA_IRC_SERVICE_URI
 
 from . import forms
 
 
 def profile_uid(request, unique_id):
     """
-    unique_id is a stable, random user id.
+    View a profile by unique_id, which is a stable, 
+    random user id.
     """
     ldap = UserSession.connect(request)
     try:
@@ -53,12 +55,23 @@ def _profile(request, person):
                 voucher=voucher,
                 vouchee=person.unique_id))
 
+    services = ldap.profile_service_ids(person.unique_id)
+    person.irc_nickname = None
+    if MOZILLA_IRC_SERVICE_URI in services:
+        person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
+        del services[MOZILLA_IRC_SERVICE_URI]
+
     return jingo.render(request, 'phonebook/profile.html',
-                        dict(person=person, vouch_form=vouch_form))
+                        dict(person=person,
+                             vouch_form=vouch_form,
+                             services=services))
 
 
 def edit_profile(request, unique_id):
-    """ Why does this and edit_new_profile accept a unique_id
+    """ 
+    View for editing a profile, typically the user's own.
+
+    Why does this and edit_new_profile accept a unique_id
     Instead of just using the request.user object?
 
     LDAP's ACL owns if the current user can edit the user or not.
@@ -76,7 +89,7 @@ def _edit_profile(request, unique_id, new_account):
     person = ldap.get_by_unique_id(unique_id)
 
     del_form = forms.DeleteForm(
-        initial={'unique_id': unique_id})
+        initial=dict(unique_id=unique_id))
     if person:
         if request.method == 'POST':
             form = forms.ProfileForm(request.POST, request.FILES)
@@ -84,15 +97,18 @@ def _edit_profile(request, unique_id, new_account):
                 ldap = UserSession.connect(request)
                 ldap.update_person(unique_id, form.cleaned_data)
                 ldap.update_profile_photo(unique_id, form.cleaned_data)
+
                 if new_account:
                     return redirect('confirm_register')
                 else:
                     return redirect('profile', unique_id)
         else:
-            form = forms.ProfileForm(initial={
-                    'first_name': person.first_name,
-                    'last_name': person.last_name,
-                    'biography': person.biography, })
+            initial = dict(first_name=person.first_name,
+                           last_name=person.last_name,
+                           biography=person.biography,)
+
+            initial.update(_get_services_fields(ldap, unique_id))
+            form = forms.ProfileForm(initial)
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,
@@ -102,6 +118,19 @@ def _edit_profile(request, unique_id, new_account):
                 ))
     else:
         raise Http404
+
+
+def _get_services_fields(ldap, unique_id):
+    services = ldap.profile_service_ids(unique_id)
+    irc_nick = None
+    irc_nick_unique_id = None
+
+    if MOZILLA_IRC_SERVICE_URI in services:
+        irc = services[MOZILLA_IRC_SERVICE_URI]
+        irc_nick = irc.service_id
+        irc_nick_unique_id = irc.unique_id
+    return dict(irc_nickname=irc_nick,
+                irc_nickname_unique_id=irc_nick_unique_id,)
 
 
 class UNAUTHORIZED_DELETE(Exception):
@@ -116,7 +145,8 @@ def delete(request):
         admin_ldap.delete_person(form.cleaned_data['unique_id'])
         django.contrib.auth.logout(request)
     else:
-        raise UNAUTHORIZED_DELETE("Unauthorized deletion of account, attempted")
+        msg = "Unauthorized deletion of account, attempted"
+        raise UNAUTHORIZED_DELETE(msg)
 
     return redirect('home')
 
@@ -161,7 +191,7 @@ def photo(request, unique_id):
 
 
 def invite(request):
-    # TODO(davedash): actually send this
+    # TODO: actually send this
     subject = _('Become a Mozillian')
     message = _("Hi, I'm sending you this because I think you should join "
                 'mozillians.org, the community directory for Mozilla '

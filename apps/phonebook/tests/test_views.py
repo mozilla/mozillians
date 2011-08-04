@@ -94,7 +94,7 @@ class TestViews(test_utils.TestCase):
         r = self.mozillian_client.get(url, dict(q='Am'))
         peeps = r.context['people']
         saw_amandeep = saw_amanda = False
-        a = None
+
         for person in peeps:
             if person.full_name == AMANDEEP_NAME:
                 eq_(AMANDEEP_VOUCHER,
@@ -103,15 +103,11 @@ class TestViews(test_utils.TestCase):
                 saw_amandeep = True
             elif person.full_name == AMANDA_NAME:
                 if person.voucher_unique_id:
-                    self.fail('Amanda is pending status %s' % person.voucher_unique_id)
+                    self.fail('Amanda is pending status')
                 saw_amanda = True
             if saw_amandeep and saw_amanda:
                 break
-        if a:
-            msg = 'We see Mozillians %s' % str(a)
-        else:
-            msg = 'huh'
-        self.assertTrue(saw_amandeep, msg)
+        self.assertTrue(saw_amandeep, 'We see Mozillians')
         self.assertTrue(saw_amanda, 'We see Pending')
 
     def test_mozillian_sees_mozillian_profile(self):
@@ -209,6 +205,7 @@ class TestViews(test_utils.TestCase):
 def _logged_in_html(response):
     doc = pq(response.content)
     return doc('a#logout') and doc('a#profile')
+
 
 def _create_new_user():
     newbie_client = test.Client()

@@ -1,11 +1,3 @@
-"""
-Public API -
-Person
-    username - email address used for authentication login
-    unique_id - A random unique hexidecimal number
-
-
-"""
 from uuid import uuid4
 
 from nose.tools import eq_, ok_
@@ -17,7 +9,10 @@ from larper import UserSession, RegistrarSession, AdminSession
 
 requests = []
 
-def _mock_request(path, username='u000001@mozillians.org', unique_id='7f3a67u000001', password='secret'):
+
+def _mock_request(path, username='u000001@mozillians.org',
+                  unique_id='7f3a67u000001', password='secret'):
+    global requests
     rf = RequestFactory()
     # mock authenticated user
     request = rf.get(path)
@@ -26,6 +21,7 @@ def _mock_request(path, username='u000001@mozillians.org', unique_id='7f3a67u000
     larper.store_password(request, password)
     requests.append(request)
     return request
+
 
 def _with_temp_user(fn):
     """
@@ -41,9 +37,10 @@ def _with_temp_user(fn):
     username = '%s@home.net' % str(uuid4())[0:8]
     data = dict(first_name='Jane', last_name='Doe',
                 username=username, password='secret password',
-                biography='Keeping it real.')
+                biography='Keeping it real.',
+                         irc_nickname='',
+                         irc_nickname_unique_id='')
     new_unique_id = regi.create_person(data)
-    #regi.disconnect()
 
     fn(new_unique_id)
 
@@ -53,12 +50,10 @@ def _with_temp_user(fn):
 
         admin = AdminSession.connect(_mock_request('/en-US/search?q=David'))
         admin.delete_person(new_unique_id)
-        #admin.disconnect()
     except:
         pass
     finally:
         pass
-        #directory.disconnect()
 
 
 class MockUser(object):
@@ -68,16 +63,15 @@ class MockUser(object):
 
 
 class TestLarper(test_utils.TestCase):
-    def setUp(self):        
+    def setUp(self):
+        global requests
         requests = []
 
     def tearDown(self):
         """ Simulates middleware teardown """
-        #if hasattr(self, 'directory'):
-        #    self.d.disconnect()
+        global requests
         for r in requests:
             UserSession.disconnect(r)
-
 
     def test_person_api(self):
         request = _mock_request('/en-US/search?q=David')
@@ -127,7 +121,7 @@ class TestLarper(test_utils.TestCase):
     def test_get_by_unique_id(self):
         request = _mock_request('/en-US/')
         directory = self.d = UserSession.connect(request)
-        matt = directory.get_by_unique_id("7f3a67u000002")
+        directory.get_by_unique_id("7f3a67u000002")
 
     def test_get_by_unique_id_raises(self):
         request = _mock_request('/en-US/')
@@ -138,7 +132,7 @@ class TestLarper(test_utils.TestCase):
     def test_update_person(self):
         unique_id = '7f3a67u000098'
         username = 'u000098@mozillians.org'
-        request = _mock_request('/en-US/search?q=David', 
+        request = _mock_request('/en-US/search?q=David',
                                 username=username,
                                 unique_id='7f3a67u000098')
 
@@ -147,13 +141,15 @@ class TestLarper(test_utils.TestCase):
         amandeep = directory.get_by_unique_id(unique_id)
         first_name = amandeep.first_name
         last_name = amandeep.last_name
-        eq_('Amandeep', first_name) # Empty in test data
+        eq_('Amandeep', first_name)
         eq_('McIlrath', last_name)
         eq_('Amandeep McIlrath', amandeep.full_name)
 
         form_data = dict(first_name='Deep',
                          last_name=last_name,
-                         biography='')
+                         biography='',
+                         irc_nickname='',
+                         irc_nickname_unique_id='',)
 
         ok_(directory.update_person(unique_id, form_data))
 
@@ -164,7 +160,7 @@ class TestLarper(test_utils.TestCase):
         form_data['first_name'] = first_name
         ok_(directory.update_person(unique_id, form_data))
         amandeep = directory.get_by_unique_id(unique_id)
-        eq_(first_name, amandeep.first_name, 'Restore test data[%s]==[%s]' % (first_name, amandeep.first_name))
+        eq_(first_name, amandeep.first_name)
 
     def test_vouch_person(self):
         _with_temp_user(lambda u: self.vouch_person(u))
@@ -177,6 +173,7 @@ class TestLarper(test_utils.TestCase):
         newbie = directory.get_by_unique_id(new_unique_id)
         eq_('7f3a67u000001', newbie.voucher_unique_id)
 
+
 class TestRegistrarSession(TestLarper):
     def test_create_then_delete_person(self):
         regi = self.d = RegistrarSession.connect(
@@ -184,7 +181,9 @@ class TestRegistrarSession(TestLarper):
         username = '%s@home.net' % str(uuid4())[0:8]
         data = dict(first_name='Jane', last_name='Doe',
                     username=username, password='secret password',
-                    biography='Keeping it real.')
+                    biography='Keeping it real.',
+                         irc_nickname='',
+                         irc_nickname_unique_id='')
         new_unique_id = regi.create_person(data)
 
         directory = UserSession.connect(
@@ -195,9 +194,6 @@ class TestRegistrarSession(TestLarper):
         admin = AdminSession.connect(
             _mock_request('/en-US/search?q=David'))
         admin.delete_person(new_unique_id)
-        #admin.disconnect()
 
         self.assertRaises(larper.NO_SUCH_PERSON, lambda:\
                               directory.get_by_unique_id(new_unique_id))
-        #directory.disconnect()
-

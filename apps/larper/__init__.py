@@ -25,6 +25,7 @@ With an admin session, one can delete users from the system
 """
 import os
 import re
+from time import time
 
 import ldap
 from ldap.dn import explode_dn, escape_dn_chars
@@ -47,7 +48,7 @@ def store_password(request, password):
     request - Django web request
     password - A clear text password
     """
-    request.session['PASSWORD'] = signing.dumps({'password': password})
+    request.session['PASSWORD'] = signing.dumps(dict(password=password))
 
 
 class NO_SUCH_PERSON(Exception):
@@ -67,6 +68,10 @@ CONNECTIONS_KEY = 'larper_conns'
 READ = 0
 WRITE = 1
 
+MOZILLA_IRC_SERVICE_URI = 'irc://irc.mozilla.org/'
+KNOWN_SERVICE_URIS = [
+    MOZILLA_IRC_SERVICE_URI,
+]
 
 class UserSession(object):
     """
@@ -114,7 +119,7 @@ class UserSession(object):
         if they don't auth against the user in the session.
         """
         unique_id = self.request.user.unique_id
-        return (_dn_from_unique_id(unique_id), get_password(self.request))
+        return (Person.dn(unique_id), get_password(self.request))
 
     def search(self, query):
         """
@@ -172,6 +177,29 @@ class UserSession(object):
             return attrs['jpegPhoto'][0]
         return False
 
+    def profile_service_ids(self, person_unique_id):
+        """ Returns a dict that contains remote system ids.
+        Keys for dict include:
+
+        * MOZILLA_IRC_SERVICE_URI
+
+        Values are a SystemId object for that service.
+        """
+        services = {}
+        conn = self._ensure_conn(READ)
+        search_filter = '(mozilliansServiceURI=*)'
+        rs = conn.search_s(Person.dn(person_unique_id),
+                           ldap.SCOPE_SUBTREE,
+                           search_filter)
+        for r in rs:
+            _dn, attrs = r
+            sysid = SystemId(person_unique_id,
+                             attrs['uniqueIdentifier'][0],
+                             attrs['mozilliansServiceURI'][0],
+                             service_id=attrs['mozilliansServiceID'][0])
+            services[attrs['mozilliansServiceURI'][0]] = sysid
+        return services
+
     def _profile_photo_attrs(self, unique_id):
         """ Returns dict that contains the jpegPhoto key or None """
         conn = self._ensure_conn(READ)
@@ -191,7 +219,7 @@ class UserSession(object):
         """
         conn = self._ensure_conn(WRITE)
 
-        dn = _dn_from_unique_id((unique_id))
+        dn = Person.dn(unique_id)
 
         person = self.get_by_unique_id(unique_id)
         form['unique_id'] = person.unique_id
@@ -199,11 +227,33 @@ class UserSession(object):
         if 'username' not in form:
             form['username'] = person.username
 
-        newp = Person.form_to_ldap_attrs(form)
+        newp = Person.form_to_profile_attrs(form)
+        #raise Exception("old=%s \n new=%s" % (person.ldap_attrs(), newp,))
         modlist = modifyModlist(person.ldap_attrs(), newp,
                                 ignore_oldexistent=1)
         if modlist:
             conn.modify_s(dn, modlist)
+
+        services = self.profile_service_ids(unique_id)
+        oldservs = dict((k, v.ldap_attrs()) for k, v in services.iteritems())
+        newservs = SystemId.form_to_service_ids_attrs(form)
+        for service_uri in KNOWN_SERVICE_URIS:
+            newserv = newservs[service_uri]
+            sys_id_dn = SystemId.dn(unique_id, newserv['uniqueIdentifier'][0])
+
+            if service_uri in oldservs:
+                oldserv = oldservs[service_uri]
+                if newserv['mozilliansServiceID'][0]:
+                    modlist = modifyModlist(oldserv, newserv)
+                    if modlist:
+                        conn.modify_s(sys_id_dn, modlist)
+                else:
+                    conn.delete_s(sys_id_dn)
+            else:
+                if newserv['mozilliansServiceID'][0]:
+                    modlist = addModlist(newserv)
+                    if modlist:
+                        conn.add_s(sys_id_dn, modlist)
         return True
 
     def update_profile_photo(self, unique_id, form):
@@ -219,10 +269,10 @@ class UserSession(object):
             return False
 
         conn = self._ensure_conn(WRITE)
-        dn = _dn_from_unique_id((unique_id))
+        dn = Person.dn(unique_id)
 
         attrs = self._profile_photo_attrs(unique_id)
-        modlist = modifyModlist(attrs, {'jpegPhoto': photo})
+        modlist = modifyModlist(attrs, dict(jpegPhoto=photo))
         if modlist:
             conn.modify_s(dn, modlist)
 
@@ -236,8 +286,8 @@ class UserSession(object):
         TODO: I think I'm doing something dumb with encode('utf-8')
         """
         conn = self._ensure_conn(WRITE)
-        voucher_dn = _dn_from_unique_id(voucher).encode('utf-8')
-        vouchee_dn = _dn_from_unique_id(vouchee)
+        voucher_dn = Person.dn(voucher).encode('utf-8')
+        vouchee_dn = Person.dn(vouchee)
 
         modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
         conn.modify_s(vouchee_dn, modlist)
@@ -289,6 +339,7 @@ class Person(object):
 
     Required Properties
     -------------------
+
     * unique_id - A stable id that is randomly generated
     * username - Email address used for authentication
     * full_name - A person's full name
@@ -296,6 +347,7 @@ class Person(object):
 
     Optional Properties
     -------------------
+
     * first_name - A person's first name
     * biography - A person's bio
     * voucher_unique_id - The unique_id of the Mozillian who vouched for them.
@@ -347,7 +399,7 @@ class Person(object):
 
         if 'mozilliansVouchedBy' in ldap_attrs:
             voucher = ldap_attrs['mozilliansVouchedBy'][0]
-            p.voucher_unique_id = _unique_id_from_dn(voucher)
+            p.voucher_unique_id = Person.unique_id(voucher)
 
         return p
 
@@ -359,28 +411,29 @@ class Person(object):
         objectclass = ['inetOrgPerson', 'person', 'mozilliansPerson']
         full_name = u'%s %s' % (self.first_name, self.last_name)
         full_name = full_name
-        attrs = {'objectclass': objectclass,
-                 'uniqueIdentifier': [self.unique_id],
-                 'uid': [self.username],
-                 'givenName': [self.first_name],
-                 'sn': [self.last_name],
-                 'cn': [full_name],
-                 'displayName': [full_name],
-                 'mail': [self.username]}
+        attrs = dict(objectclass=objectclass,
+                     uniqueIdentifier=[self.unique_id],
+                     uid=[self.username],                     
+                     sn=[self.last_name],
+                     cn=[full_name],
+                     displayName=[full_name],
+                     mail=[self.username])
 
         # Optional
+        if self.first_name:
+            attrs['givenName'] = [self.first_name]
         if self.biography:
             attrs['description'] = [self.biography]
 
+        # TODO - deal with this somewhere else?
         if self.voucher_unique_id:
-            attrs['mozilliansVouchedBy'] = [_dn_from_unique_id(
-                self.voucher_unique_id)]
+            attrs['mozilliansVouchedBy'] = [Person.dn(self.voucher_unique_id)]
         return attrs
 
     @staticmethod
-    def form_to_ldap_attrs(form):
+    def form_to_profile_attrs(form):
         """
-        Creates a dict compatible with the low level ldap libraries
+        Creates a profile dict compatible with the low level ldap libraries
         from a form dictionary.
 
         Form must contain the following keys:
@@ -392,23 +445,117 @@ class Person(object):
         objectclass = ['inetOrgPerson', 'person', 'mozilliansPerson']
         full_name = u'%s %s' % (form['first_name'], form['last_name'])
         full_name = full_name.encode('utf-8')
-        attrs = {'objectclass': objectclass,
-                 'uniqueIdentifier': [form['unique_id'].encode('utf-8')],
-                 'uid': [form['username'].encode('utf-8')],
-                 'givenName': [form['first_name'].encode('utf-8')],
-                 'sn': [form['last_name'].encode('utf-8')],
-                 'cn': [full_name],
-                 'displayName': [full_name],
-                 'mail': [form['username'].encode('utf-8')]}
+        attrs = dict(objectclass=objectclass,
+                     uniqueIdentifier=[form['unique_id'].encode('utf-8')],
+                     uid=[form['username'].encode('utf-8')],
+
+                     sn=[form['last_name'].encode('utf-8')],
+                     cn=[full_name],
+                     displayName=[full_name],
+                     mail=[form['username'].encode('utf-8')])
 
         if 'password' in form:
             attrs['userPassword'] = [form['password'].encode('utf-8')]
 
+        if 'first_name' in form and form['first_name']:
+            attrs['givenName'] = [form['first_name'].encode('utf-8')]
+        else:
+            attrs['givenName'] = [None]
+
         if 'biography' in form and form['biography']:
             attrs['description'] = [form['biography'].encode('utf-8')]
+        else:
+            attrs['description'] = [None]
 
         return attrs
+    @staticmethod
+    def unique_id(dn):
+        dn_parts = explode_dn(dn)
+        reg = re.compile('uniqueIdentifier=(.*)', re.IGNORECASE)
+        for part in dn_parts:
+            matcher = reg.match(part)
+            if matcher:
+                return matcher.groups()[0]
+        raise INVALID_PERSON_DN(dn)
 
+    @staticmethod
+    def dn(unique_id):
+        params = (escape_dn_chars(unique_id), settings.LDAP_USERS_GROUP)
+        return 'uniqueIdentifier=%s,%s' % params
+
+
+class SystemId(object):
+    """
+    Represents a connection between a person and
+    a remote system.
+
+    Required Properties
+    -------------------
+
+    * person_unique_id - Person who owns this system id
+    * unique_id - internal stable id for this service id
+    * service_uri - A URI which commonly identifies a remote system
+    * service_id - username, email, or whatever is used in the
+               remote system as an ID.
+
+    KISS: Although many URIs could signify a remote system, we should not
+    have several URIs for a service which would only have one auth
+    credentials. Example: G+, Google docs, and Gmail would only have one
+    URI - http://google.com. Youtube (a Google property) would have
+    it's own URI, since it has seperate username.
+    """
+    def __init__(self, person_unique_id, unique_id, service_uri, service_id):
+        self.person_unique_id = person_unique_id
+        self.unique_id = unique_id
+        self.service_uri = service_uri
+        self.service_id = service_id
+
+    def ldap_attrs(self):
+        """
+        Converts this SystemId object into a dict compatible
+        with the low level ldap libraries.
+        """
+        attrs = dict(objectclass=['mozilliansLink'],
+                     uniqueIdentifier=[self.unique_id],
+                     mozilliansServiceURI=[self.service_uri],
+                     mozilliansServiceID=[self.service_id])
+        return attrs
+
+    @staticmethod
+    def form_to_service_ids_attrs(form):
+        """
+        Creates a list of dicts. Each dict of remote system ids
+        is compatible with the low level ldap libraries from
+        a form dictionary.
+
+        See phonebook.forms.ProfileForm for full list of fields.
+        """
+        known_service_fields = [
+            ('irc_nickname', MOZILLA_IRC_SERVICE_URI),
+        ]
+        attrs_list = {}
+        for field, uri in known_service_fields:
+            system_id = form[field].encode('utf-8')
+
+            system_unique_id = form['%s_unique_id' % field].encode('utf-8')
+            if not system_unique_id:
+                system_unique_id = str(time())
+            if not system_id:
+                system_id = None
+            attrs = dict(objectclass=['mozilliansLink'],
+                         uniqueIdentifier=[system_unique_id],
+                         mozilliansServiceURI=[MOZILLA_IRC_SERVICE_URI],
+                         mozilliansServiceID=[system_id])
+            attrs_list[uri] = attrs
+        return attrs_list
+
+    @staticmethod
+    def dn(person_unique_id, unique_id):
+        """
+        Formats an LDAP distinguished name for a remote system id
+        """
+        params = (escape_dn_chars(unique_id), Person.dn(person_unique_id))
+        return 'uniqueIdentifier=%s,%s' % params
 
 class INVALID_PERSON_DN(Exception):
     """ A function which expected a valid DN was
@@ -416,20 +563,6 @@ class INVALID_PERSON_DN(Exception):
     uniqueIdentifier component."""
     pass
 
-
-def _unique_id_from_dn(dn):
-    dn_parts = explode_dn(dn)
-    reg = re.compile('uniqueIdentifier=(.*)', re.IGNORECASE)
-    for part in dn_parts:
-        matcher = reg.match(part)
-        if matcher:
-            return matcher.groups()[0]
-    raise INVALID_PERSON_DN(dn)
-
-
-def _dn_from_unique_id(unique_id):
-    params = (escape_dn_chars(unique_id), settings.LDAP_USERS_GROUP)
-    return 'uniqueIdentifier=%s,%s' % params
 
 # Increase length of random uniqueIdentifiers as size of Mozillians
 # community enters the low millions ;)
@@ -456,9 +589,9 @@ class RegistrarSession(UserSession):
         conn = self._ensure_conn(WRITE)
         unique_id = os.urandom(UUID_SIZE).encode('hex')
         form['unique_id'] = unique_id
-        new_dn = _dn_from_unique_id(unique_id)
+        new_dn = Person.dn(unique_id)
 
-        attrs = Person.form_to_ldap_attrs(form)
+        attrs = Person.form_to_profile_attrs(form)
         mods = addModlist(attrs)
         conn.add_s(new_dn, mods)
         return unique_id
