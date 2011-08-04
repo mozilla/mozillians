@@ -2,7 +2,7 @@ from django import forms
 
 from django.forms.util import ErrorList
 
-from tower import ugettext as _
+from tower import ugettext_lazy as _lazy
 
 
 class AuthenticationForm(forms.Form):
@@ -12,19 +12,19 @@ class AuthenticationForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    username = forms.EmailField(label=_('Primary Email'), required=True)
+    username = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
-                               label=_('Password'), required=True,
+                               label=_lazy(u'Password'), required=True,
                                widget=forms.PasswordInput(render_value=False))
-    confirmp = forms.CharField(label=_('Confirm Password'),
+    confirmp = forms.CharField(label=_lazy(u'Confirm Password'),
                                widget=forms.PasswordInput(render_value=False),
                                required=True)
 
-    first_name = forms.CharField(label=_('First Name'), required=False)
-    last_name = forms.CharField(label=_('Last Name'), required=True)
+    first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
+    last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
 
     #recaptcha = captcha.fields.ReCaptchaField()
-    optin = forms.BooleanField(label=_('I will bow before Zuul''s might.'),
+    optin = forms.BooleanField(label=_lazy(u'I will bow before Zuul''s might.'),
                                widget=forms.CheckboxInput(
                                    attrs=dict(css_class='checkbox')))
 
@@ -38,7 +38,7 @@ class RegistrationForm(forms.Form):
         p2 = data.get('confirmp')
 
         if p1 != p2:
-            msg = _('The passwords did not match.')
+            msg = _lazy(u'The passwords did not match.')
             self._errors['confirmp'] = ErrorList([msg])
             if p2:
                 del data['confirmp']
