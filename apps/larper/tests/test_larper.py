@@ -41,7 +41,6 @@ def _with_temp_user(fn):
                          irc_nickname='',
                          irc_nickname_unique_id='')
     new_unique_id = regi.create_person(data)
-
     fn(new_unique_id)
 
     directory = UserSession.connect(_mock_request('/en-US/search?q=David'))

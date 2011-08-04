@@ -73,6 +73,7 @@ KNOWN_SERVICE_URIS = [
     MOZILLA_IRC_SERVICE_URI,
 ]
 
+
 class UserSession(object):
     """
     A directory session for the currenly logged in user.
@@ -120,6 +121,7 @@ class UserSession(object):
         """
         unique_id = self.request.user.unique_id
         return (Person.dn(unique_id), get_password(self.request))
+
 
     def search(self, query):
         """
@@ -228,7 +230,6 @@ class UserSession(object):
             form['username'] = person.username
 
         newp = Person.form_to_profile_attrs(form)
-        #raise Exception("old=%s \n new=%s" % (person.ldap_attrs(), newp,))
         modlist = modifyModlist(person.ldap_attrs(), newp,
                                 ignore_oldexistent=1)
         if modlist:
@@ -468,6 +469,7 @@ class Person(object):
             attrs['description'] = [None]
 
         return attrs
+
     @staticmethod
     def unique_id(dn):
         dn_parts = explode_dn(dn)

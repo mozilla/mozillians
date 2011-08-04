@@ -3,6 +3,7 @@ from django import forms
 from tower import ugettext_lazy as _lazy, ugettext as _
 
 
+
 class SearchForm(forms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=True)
 

@@ -79,10 +79,8 @@ def edit_profile(request, unique_id):
     """
     return _edit_profile(request, unique_id, False)
 
-
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
-
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
@@ -90,6 +88,7 @@ def _edit_profile(request, unique_id, new_account):
 
     del_form = forms.DeleteForm(
         initial=dict(unique_id=unique_id))
+
     if person:
         if request.method == 'POST':
             form = forms.ProfileForm(request.POST, request.FILES)
@@ -97,7 +96,6 @@ def _edit_profile(request, unique_id, new_account):
                 ldap = UserSession.connect(request)
                 ldap.update_person(unique_id, form.cleaned_data)
                 ldap.update_profile_photo(unique_id, form.cleaned_data)
-
                 if new_account:
                     return redirect('confirm_register')
                 else:
@@ -175,6 +173,7 @@ def search(request):
                 people = ldap.search(query)
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
+
     return jingo.render(request, 'phonebook/search.html',
                         dict(people=people,
                              form=form,
@@ -191,7 +190,7 @@ def photo(request, unique_id):
 
 
 def invite(request):
-    # TODO: actually send this
+    # TODO(davedash): actually send this
     subject = _('Become a Mozillian')
     message = _("Hi, I'm sending you this because I think you should join "
                 'mozillians.org, the community directory for Mozilla '

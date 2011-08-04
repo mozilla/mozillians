@@ -95,6 +95,7 @@ class TestViews(test_utils.TestCase):
         peeps = r.context['people']
         saw_amandeep = saw_amanda = False
 
+        a = None
         for person in peeps:
             if person.full_name == AMANDEEP_NAME:
                 eq_(AMANDEEP_VOUCHER,
