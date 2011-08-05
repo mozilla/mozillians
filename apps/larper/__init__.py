@@ -1,26 +1,33 @@
 """
+LARPER - Let's Authenticate Resources Per Each Request
+
 Design
 ======
 
-larper provides the following ways to start a directory session:
+larper provides the following ways to start an LDAP directory session:
 * UserSession.connect(request)
 * RegistrarSession.connect(request)
 * AdminSession.connect(request)
 
 UserSession
 -----------
+
 Once one has obtained a directory session, one can search or
 update a person in the phonebook.
 
 Search results are larper.Person objects.
 
+People have larper.SystemId objects as well as profile photos.
+
 RegistararSession
 -----------------
+
 With a registrar session, one can add new users to the system.
 
 AdminSession
 ------------
-With an admin session, one can delete users from the system
+
+With an admin session, one can delete users from the system.
 
 """
 import os
@@ -122,7 +129,6 @@ class UserSession(object):
         unique_id = self.request.user.unique_id
         return (Person.dn(unique_id), get_password(self.request))
 
-
     def search(self, query):
         """
         General purpose 'quick' search. Returns a list of
@@ -212,7 +218,7 @@ class UserSession(object):
             _dn, attrs = r
             if 'jpegPhoto' in attrs:
                 return attrs
-        return None
+        return {}
 
     def update_person(self, unique_id, form):
         """
@@ -273,7 +279,11 @@ class UserSession(object):
         dn = Person.dn(unique_id)
 
         attrs = self._profile_photo_attrs(unique_id)
-        modlist = modifyModlist(attrs, dict(jpegPhoto=photo))
+        new_attrs = dict(jpegPhoto=photo)
+
+        # Person record will always exist, so we only do a mod
+        modlist = modifyModlist(attrs, new_attrs, ignore_oldexistent=1)
+
         if modlist:
             conn.modify_s(dn, modlist)
 
@@ -414,7 +424,7 @@ class Person(object):
         full_name = full_name
         attrs = dict(objectclass=objectclass,
                      uniqueIdentifier=[self.unique_id],
-                     uid=[self.username],                     
+                     uid=[self.username],
                      sn=[self.last_name],
                      cn=[full_name],
                      displayName=[full_name],
@@ -558,6 +568,7 @@ class SystemId(object):
         """
         params = (escape_dn_chars(unique_id), Person.dn(person_unique_id))
         return 'uniqueIdentifier=%s,%s' % params
+
 
 class INVALID_PERSON_DN(Exception):
     """ A function which expected a valid DN was
