@@ -1,8 +1,12 @@
+import ldap
+
 from django.shortcuts import redirect
 
 from django.contrib import auth
 
 import jingo
+
+from tower import ugettext as _
 
 from larper import RegistrarSession
 
@@ -13,8 +17,11 @@ def register(request):
     form = forms.RegistrationForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
-            uniq_id = _save_new_user(request, form)
-            return redirect('phonebook.edit_new_profile', uniq_id)
+            try:
+                uniq_id = _save_new_user(request, form)
+                return redirect('phonebook.edit_new_profile', uniq_id)
+            except ldap.CONSTRAINT_VIOLATION:
+                _set_already_exists_error(form)
     return jingo.render(request, 'registration/register.html',
                         dict(form=form))
 
@@ -36,3 +43,10 @@ def _save_new_user(request, form):
     auth.login(request, user)
 
     return uniq_id
+
+def _set_already_exists_error(form):
+    msg = _('Someone has already registered an account with %(email)s.')
+    data = dict(email=form.cleaned_data['username'])
+    del form.cleaned_data['username']
+    error = _(msg % data)
+    form._errors['username'] = form.error_class([error])
