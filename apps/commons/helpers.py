@@ -1,4 +1,3 @@
-import cgi
 import datetime
 import urllib
 import urlparse
@@ -6,6 +5,7 @@ import urlparse
 from django.conf import settings
 from django.template import defaultfilters
 from django.utils.html import strip_tags
+from django.utils.encoding import smart_str
 
 from jingo import register
 import jinja2
@@ -19,7 +19,6 @@ register.filter(defaultfilters.timesince)
 register.filter(defaultfilters.truncatewords)
 
 
-
 @register.function
 def thisyear():
     """The current year."""
@@ -31,26 +30,27 @@ def url(viewname, *args, **kwargs):
     """Helper for Django's ``reverse`` in templates."""
     return reverse(viewname, args=args, kwargs=kwargs)
 
+
 @register.filter
 def absolutify(url):
     """Takes a URL and prepends the SITE_URL"""
     protocol = settings.PROTOCOL
     hostname = settings.DOMAIN
     port = settings.PORT
-    if (protocol == 'https://' and port == 443) or \
-       (protocol == 'http://'  and port == 80):
-       return ''.join(map(str, (protocol, hostname, url)))
+    if (protocol, port) in (('https://', port == 443), ('http://', 80)):
+        return ''.join(map(str, (protocol, hostname, url)))
     else:
-        return ''.join(map(str, (protocol, hostname, port, url)))
+        return ''.join(map(str, (protocol, hostname, ':', port, url)))
+
 
 @register.filter
 def urlparams(url_, hash=None, **query):
     """
-Add a fragment and/or query paramaters to a URL.
+    Add a fragment and/or query paramaters to a URL.
 
-New query params will be appended to exising parameters, except duplicate
-names, which will be replaced.
-"""
+    New query params will be appended to exising parameters, except duplicate
+    names, which will be replaced.
+    """
     url = urlparse.urlparse(url_)
     fragment = hash if hash is not None else url.fragment
 
@@ -64,6 +64,7 @@ names, which will be replaced.
     new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
                                query_string, fragment)
     return new.geturl()
+
 
 def _urlencode(items):
     """A Unicode-safe URLencoder."""
