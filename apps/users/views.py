@@ -33,7 +33,8 @@ def _save_new_user(request, form):
     We persist account to LDAP. If all goes well, we
     log the user in and persist their password to the session.
     """
-    username = form.cleaned_data['username']
+    # Email in the form is the "username" we'll use.
+    username = form.cleaned_data['email']
     password = form.cleaned_data['password']
 
     registrar = RegistrarSession.connect(request)
@@ -44,9 +45,10 @@ def _save_new_user(request, form):
 
     return uniq_id
 
+
 def _set_already_exists_error(form):
     msg = _('Someone has already registered an account with %(email)s.')
-    data = dict(email=form.cleaned_data['username'])
-    del form.cleaned_data['username']
+    data = dict(email=form.cleaned_data['email'])
+    del form.cleaned_data['email']
     error = _(msg % data)
     form._errors['username'] = form.error_class([error])
