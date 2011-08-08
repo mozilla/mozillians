@@ -12,7 +12,7 @@ class AuthenticationForm(forms.Form):
 
 
 class RegistrationForm(forms.Form):
-    username = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
+    email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
                                label=_lazy(u'Password'), required=True,
                                widget=forms.PasswordInput(render_value=False))
@@ -24,9 +24,10 @@ class RegistrationForm(forms.Form):
     last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
 
     #recaptcha = captcha.fields.ReCaptchaField()
-    optin = forms.BooleanField(label=_lazy(u'I will bow before Zuul''s might.'),
-                               widget=forms.CheckboxInput(
-                                   attrs=dict(css_class='checkbox')))
+    optin = forms.BooleanField(
+            label=_lazy(u'I will bow before Zuul''s might.'),
+            widget=forms.CheckboxInput(
+            attrs=dict(css_class='checkbox')))
 
     def clean(self):
         super(RegistrationForm, self).clean()

@@ -36,7 +36,7 @@ def _with_temp_user(fn):
         _mock_request('/en-US/search?q=David'))
     username = '%s@home.net' % str(uuid4())[0:8]
     data = dict(first_name='Jane', last_name='Doe',
-                username=username, password='secret password',
+                email=username, password='secret password',
                 biography='Keeping it real.',
                          irc_nickname='',
                          irc_nickname_unique_id='')
@@ -179,7 +179,7 @@ class TestRegistrarSession(TestLarper):
             _mock_request('/en-US/search?q=David'))
         username = '%s@home.net' % str(uuid4())[0:8]
         data = dict(first_name='Jane', last_name='Doe',
-                    username=username, password='secret password',
+                    email=username, password='secret password',
                     biography='Keeping it real.',
                          irc_nickname='',
                          irc_nickname_unique_id='')

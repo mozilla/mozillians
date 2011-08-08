@@ -232,8 +232,8 @@ class UserSession(object):
         person = self.get_by_unique_id(unique_id)
         form['unique_id'] = person.unique_id
 
-        if 'username' not in form:
-            form['username'] = person.username
+        if 'email' not in form:
+            form['email'] = person.username
 
         newp = Person.form_to_profile_attrs(form)
         modlist = modifyModlist(person.ldap_attrs(), newp,
@@ -458,12 +458,12 @@ class Person(object):
         full_name = full_name.encode('utf-8')
         attrs = dict(objectclass=objectclass,
                      uniqueIdentifier=[form['unique_id'].encode('utf-8')],
-                     uid=[form['username'].encode('utf-8')],
+                     uid=[form['email'].encode('utf-8')],
 
                      sn=[form['last_name'].encode('utf-8')],
                      cn=[full_name],
                      displayName=[full_name],
-                     mail=[form['username'].encode('utf-8')])
+                     mail=[form['email'].encode('utf-8')])
 
         if 'password' in form:
             attrs['userPassword'] = [form['password'].encode('utf-8')]

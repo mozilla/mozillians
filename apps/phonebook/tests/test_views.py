@@ -95,7 +95,6 @@ class TestViews(test_utils.TestCase):
         peeps = r.context['people']
         saw_amandeep = saw_amanda = False
 
-        a = None
         for person in peeps:
             if person.full_name == AMANDEEP_NAME:
                 eq_(AMANDEEP_VOUCHER,
@@ -140,7 +139,7 @@ class TestViews(test_utils.TestCase):
         data = dict(voucher=MOZILLIAN['uniq_id'], vouchee=newbie_uniq_id)
         vouched_profile = moz_client.post(vouch_url, data, follow=True)
         eq_(200, vouched_profile.status_code)
-        eq_('phonebook/profile.html', vouched_profile.template.name)
+        eq_('phonebook/profile.html', vouched_profile.templates[0].name)
 
         profile = moz_client.get(newbie_profile_url)
         eq_(name, profile.context['person'].full_name,
@@ -177,9 +176,9 @@ class TestViews(test_utils.TestCase):
         # original
         r = newbie_client.get(profile_url)
         newbie = r.context['person']
-        first  = newbie.first_name
-        last   = newbie.last_name
-        bio    = newbie.biography
+        first = newbie.first_name
+        last = newbie.last_name
+        bio = newbie.biography
 
         # update
         data = dict(first_name='Hobo', last_name='LaRue',
@@ -212,14 +211,14 @@ def _create_new_user():
     newbie_client = test.Client()
     newbie_email = '%s@test.net' % str(uuid4())[0:8]
     reg_url = reverse('register')
-    params = dict(username=newbie_email,
+    params = dict(email=newbie_email,
                   password='asdfasdf',
                   confirmp='asdfasdf',
                   first_name='Newbie',
                   last_name='McPal',
                   optin='True')
     r = newbie_client.post(reg_url, params, follow=True)
-    eq_('phonebook/edit_profile.html', r.template.name)
+    eq_('phonebook/edit_profile.html', r.templates[0].name)
     newbie_uniq_id = r.context['person'].unique_id
     if not newbie_uniq_id:
         msg = 'New user should be logged in and have a uniqueIdentifier'
