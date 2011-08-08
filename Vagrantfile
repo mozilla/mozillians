@@ -17,7 +17,7 @@ MOUNT_POINT = '/home/vagrant/mozillians'
 
 Vagrant::Config.run do |config|
 
-    config.vm.box = "ubuntu-lucid-32-openldapV2.box"
+    config.vm.box = "mozillians-v5.box"
     config.vm.box_url = "http://people.mozilla.com/~ddash/mozillians-v5.box"
 
     config.vm.forward_port("web", 8001, 8001)
