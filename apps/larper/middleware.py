@@ -3,14 +3,11 @@ from django.contrib.auth.signals import user_logged_in
 
 import larper
 from larper import UserSession
-from users import forms
 
 
 def handle_login(sender, **kwargs):
     request = kwargs['request']
-    form = forms.AuthenticationForm(request.POST)
-    if form.is_valid():
-        larper.store_password(request, form.cleaned_data['password'])
+    larper.store_password(request, request.POST.get('password', ''))
 
 user_logged_in.connect(handle_login)
 
