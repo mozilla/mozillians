@@ -23,31 +23,42 @@ class LarperMiddleware(object):
     """
     def process_request(self, request):
         if not hasattr(request, 'user'):
-            msg = "django.contrib.auth.middleware.AuthenticationMiddleware "
-            "is missing from your settings.py"
+            msg = ('django.contrib.auth.middleware.AuthenticationMiddleware '
+                   'is missing from your settings.py')
             raise ImproperlyConfigured(msg)
-
-        user = request.user
 
         if not hasattr(request, 'session'):
-            msg = "django.contrib.sessions.middleware.SessionMiddleware "
-            "is missing from your settings.py"
+            msg = ('django.contrib.sessions.middleware.SessionMiddleware '
+                   'is missing from your settings.py')
             raise ImproperlyConfigured(msg)
 
-        session = request.session
-
-        if '/en-US/media' not in request.path and\
-           request.user.is_authenticated():
-            _populate(user, session)
+        if request.user.is_authenticated():
+            _populate(request)
 
     def process_response(self, request, response):
         UserSession.disconnect(request)
         return response
 
 
-def _populate(user, session):
+def is_vouched(request):
+    user = request.user
+
+    def f():
+        if not hasattr(user, 'person'):
+            directory = UserSession.connect(request)
+            user.person = directory.get_by_unique_id(user.unique_id)
+        return bool(user.person.voucher_unique_id)
+    return f
+
+
+def _populate(request):
+    user = request.user
+    session = request.session
+
     if 'unique_id' in session:
         user.unique_id = session['unique_id']
     else:
         unique_id = user.ldap_user.attrs['uniqueIdentifier'][0]
         user.unique_id = session['unique_id'] = unique_id
+
+    user.is_vouched = is_vouched(request)
