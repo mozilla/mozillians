@@ -22,6 +22,7 @@ class RegistrationForm(forms.Form):
 
     first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
+    code = forms.CharField(widget=forms.HiddenInput, required=False)
 
     #recaptcha = captcha.fields.ReCaptchaField()
     optin = forms.BooleanField(
