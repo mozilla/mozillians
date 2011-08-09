@@ -34,13 +34,14 @@ def profile_uid(request, unique_id):
 
 def profile_nickname(request, nickname):
     """
+    TODO
     This is probably post 1.0, but we could provide
     a nicer url if we used let the user opt-in to
     a Mozillians nickname (pre-populated from their
     IRC nickname)
     """
-    person = do_some_magic(nickname)
-    return _profile(request, person)
+    pass
+    # return _profile(request, person)
 
 
 def _profile(request, person):
