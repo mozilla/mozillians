@@ -20,7 +20,7 @@ from . import forms
 
 def profile_uid(request, unique_id):
     """
-    View a profile by unique_id, which is a stable, 
+    View a profile by unique_id, which is a stable,
     random user id.
     """
     ldap = UserSession.connect(request)
@@ -68,7 +68,7 @@ def _profile(request, person):
 
 
 def edit_profile(request, unique_id):
-    """ 
+    """
     View for editing a profile, typically the user's own.
 
     Why does this and edit_new_profile accept a unique_id
@@ -79,8 +79,10 @@ def edit_profile(request, unique_id):
     """
     return _edit_profile(request, unique_id, False)
 
+
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
+
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
