@@ -2,7 +2,8 @@
 
 {% block main_content %}
   <div>
-    <form method="post" action="?next={{ url('home') }}">
+    {% set redirect=request.REQUEST.get('next', url('home')) %}
+    <form method="post" action="?next={{ redirect }}">
       {{ csrf() }}
       <fieldset>
         <ul>
