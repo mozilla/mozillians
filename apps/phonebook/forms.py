@@ -2,6 +2,7 @@ from django import forms
 
 from tower import ugettext_lazy as _lazy
 
+from phonebook.models import Invite
 
 
 class SearchForm(forms.Form):
@@ -18,7 +19,8 @@ class ProfileForm(forms.Form):
 
     # Remote System Ids
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
-    irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'), required=False)
+    irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
+                                   required=False)
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
 
@@ -28,6 +30,11 @@ class DeleteForm(forms.Form):
 
 
 class VouchForm(forms.Form):
-    """ Vouching is captured via a user's unique_id """
+    """Vouching is captured via a user's unique_id."""
     voucher = forms.CharField(widget=forms.HiddenInput)
     vouchee = forms.CharField(widget=forms.HiddenInput)
+
+
+class InviteForm(forms.ModelForm):
+    class Meta:
+        model = Invite

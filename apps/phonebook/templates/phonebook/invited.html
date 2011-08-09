@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+  <p>
+    {% trans email=invite.destination %}
+      {{ email }} has been invited to Mozillians.
+    {% endtrans %}
+  </p>
+{% endblock %}
+

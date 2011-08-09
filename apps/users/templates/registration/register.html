@@ -34,7 +34,7 @@
         {% endtrans %}
       </p>
 
-      {% for f in form %}
+      {% for f in form.visible_fields() %}
         <div id="{{ f.name }}-container"
             class="field {{ 'error' if form.errors[f.name] }}
             {{ f.field.widget.attrs['css_class'] }}">
@@ -43,6 +43,7 @@
           {{ f }}
         </div>
       {% endfor %}
+      {{ form.code }}
     </div>
 
     <button id="submit" class="button orange">

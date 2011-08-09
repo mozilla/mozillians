@@ -61,6 +61,7 @@ RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 
 LANGUAGE_URL_MAP = dict([(i.lower(), i) for i in KNOWN_LANGUAGES])
 
+
 # Override Django's built-in with our native names
 class LazyLangs(dict):
     def __new__(self):
@@ -124,22 +125,12 @@ TEMPLATE_DIRS = (
     path('templates'),
 )
 
+
 def JINJA_CONFIG():
     import jinja2
-    from django.conf import settings
-#    from caching.base import cache
     config = {'extensions': ['tower.template.i18n', 'jinja2.ext.do',
                              'jinja2.ext.with_', 'jinja2.ext.loopcontrols'],
               'finalize': lambda x: x if x is not None else ''}
-#    if 'memcached' in cache.scheme and not settings.DEBUG:
-        # We're passing the _cache object directly to jinja because
-        # Django can't store binary directly; it enforces unicode on it.
-        # Details: http://jinja.pocoo.org/2/documentation/api#bytecode-cache
-        # and in the errors you get when you try it the other way.
-#        bc = jinja2.MemcachedBytecodeCache(cache._cache,
-#                                           "%sj2:" % settings.CACHE_PREFIX)
-#        config['cache_size'] = -1 # Never clear the cache
-#        config['bytecode_cache'] = bc
     return config
 
 # Bundles is a dictionary of two dictionaries, css and js, which list css files
@@ -181,9 +172,15 @@ LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
 )
-AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn", "email": "mail"}
-AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory", "unique_id": "uniqueIdentifier", "phone": "telephoneNumber:", "voucher": "mozilliansVouchedBy"}
+
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                                   "(uid=%(user)s)")
+AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn",
+                           "email": "mail"}
+AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
+                              "unique_id": "uniqueIdentifier",
+                              "phone": "telephoneNumber:",
+                              "voucher": "mozilliansVouchedBy"}
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
 
@@ -275,3 +272,9 @@ CELERY_IGNORE_RESULT = True
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Auth
+LOGIN_URL = '/login'
