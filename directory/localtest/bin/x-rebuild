@@ -5,6 +5,7 @@
 # andrew.findlay@skills-1st.co.uk
 
 PROG=`basename "$0"`
+cd $(dirname $(dirname $0))
 
 # Sanity check
 #

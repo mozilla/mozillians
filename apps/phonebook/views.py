@@ -1,26 +1,25 @@
 from ldap import SIZELIMIT_EXCEEDED
 
-from django.http import HttpResponse
-from django.http import Http404
-from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
-
 import django.contrib.auth
-
-from commons.urlresolvers import reverse
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 import jingo
 from tower import ugettext as _
 
+from commons.urlresolvers import reverse
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
-
-from . import forms
+from phonebook import forms
+from phonebook.models import Invite
 
 
 def profile_uid(request, unique_id):
     """
-    View a profile by unique_id, which is a stable, 
+    View a profile by unique_id, which is a stable,
     random user id.
     """
     ldap = UserSession.connect(request)
@@ -34,13 +33,14 @@ def profile_uid(request, unique_id):
 
 def profile_nickname(request, nickname):
     """
+    TODO
     This is probably post 1.0, but we could provide
     a nicer url if we used let the user opt-in to
     a Mozillians nickname (pre-populated from their
     IRC nickname)
     """
-    person = do_some_magic(nickname)
-    return _profile(request, person)
+    pass
+    # return _profile(request, person)
 
 
 def _profile(request, person):
@@ -68,7 +68,7 @@ def _profile(request, person):
 
 
 def edit_profile(request, unique_id):
-    """ 
+    """
     View for editing a profile, typically the user's own.
 
     Why does this and edit_new_profile accept a unique_id
@@ -79,8 +79,10 @@ def edit_profile(request, unique_id):
     """
     return _edit_profile(request, unique_id, False)
 
+
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
+
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
@@ -189,17 +191,45 @@ def photo(request, unique_id):
         return redirect('/media/img/unknown.png')
 
 
-def invite(request):
-    # TODO(davedash): actually send this
-    subject = _('Become a Mozillian')
-    message = _("Hi, I'm sending you this because I think you should join "
-                'mozillians.org, the community directory for Mozilla '
-                'contributors like you. You can create a profile for yourself '
-                'about what you do in the community as well as search for '
-                'other contributors to learn more about them or get in touch. '
-                'Check it out.')
+@login_required
+def invited(request):
+    invite_id = request.session.get('invited')
+    if invite_id:
+        invite = Invite.objects.get(pk=invite_id)
+        return render(request, 'phonebook/invited.html', dict(invite=invite))
 
-    return jingo.render(request, 'phonebook/invite.html')
+    return HttpResponseRedirect('invite')
+
+
+@login_required
+def invite(request):
+    if request.method == 'POST':
+        f = forms.InviteForm(request.POST)
+        if f.is_valid():
+            invite = f.save(commit=False)
+            invite.inviter = request.user.unique_id
+            invite.save()
+            subject = _('Become a Mozillian')
+            message = _("Hi, I'm sending you this because I think you should "
+                        'join mozillians.org, the community directory for '
+                        'Mozilla contributors like you. You can create a '
+                        'profile for yourself about what you do in the '
+                        'community as well as search for other contributors '
+                        'to learn more about them or get in touch.  Check it '
+                        'out.')
+            # l10n: %s is the registration link.
+            link = _("Join Mozillians: %s") % invite.get_url()
+            message = "%s\n\n%s" % (message, link)
+            send_mail(subject, message, request.user.email,
+                      [invite.destination])
+
+            request.session['invited'] = invite.id
+            return HttpResponseRedirect('invited')
+    else:
+        f = forms.InviteForm()
+    data = dict(form=f, foo='bar')
+
+    return jingo.render(request, 'phonebook/invite.html', data)
 
 
 @require_POST

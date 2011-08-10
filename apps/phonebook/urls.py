@@ -19,15 +19,10 @@ urlpatterns = patterns('',
         name='phonebook.edit_new_profile'),
     url('^delete$', views.delete, name='phonebook.delete_profile'),
     url('^search$', views.search, name='phonebook.search'),
-    #url('^tag/(?P<tag>.*)$', views.tag, name='phonebook.tag'),
     url('^vouch$', views.vouch, name='phonebook.vouch'),
-    # Post 1.0?
-    url('^invite$', views.invite, name='invite'),
 
-    # Move to auth?
-    #url('^login$', views.login, name='phonebook.login'),
-    #url('^registration(/(?P<invitetoken>.*))?$', views.registration,
-    #    name='phonebook.registration'),
+    url('^invite$', views.invite, name='invite'),
+    url('^invited$', views.invited, name='invited'),
 
 )
 

@@ -1,20 +1,33 @@
+import datetime
 import ldap
 
 from django.shortcuts import redirect
-
 from django.contrib import auth
 
 import jingo
-
 from tower import ugettext as _
 
 from larper import RegistrarSession
+from phonebook.models import Invite
+from users import forms
 
-from . import forms
+
+get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
 
 def register(request):
-    form = forms.RegistrationForm(request.POST or None)
+    initial = {}
+    if 'code' in request.GET:
+        code = request.GET['code']
+        try:
+            invite = get_invite(code)
+            initial['email'] = invite.destination
+            initial['code'] = invite.code
+        except Invite.DoesNotExist:
+            pass
+
+    form = forms.RegistrationForm(request.POST or None, initial=initial)
+
     if request.method == 'POST':
         if form.is_valid():
             try:
@@ -33,20 +46,38 @@ def _save_new_user(request, form):
     We persist account to LDAP. If all goes well, we
     log the user in and persist their password to the session.
     """
-    username = form.cleaned_data['username']
+    # Email in the form is the "username" we'll use.
+    username = form.cleaned_data['email']
     password = form.cleaned_data['password']
 
     registrar = RegistrarSession.connect(request)
-    uniq_id = registrar.create_person(form.cleaned_data)
+
+    d = form.cleaned_data
+    uniq_id = registrar.create_person(d)
+
+    voucher = None
+
+    if d['code']:
+        try:
+            invite = get_invite(d['code'])
+            voucher = invite.inviter
+        except Invite.DoesNotExist:
+            pass
+
+    if voucher:
+        registrar.record_vouch(voucher=voucher, vouchee=uniq_id)
+        invite.redeemed = datetime.datetime.now()
+        invite.save()
 
     user = auth.authenticate(username=username, password=password)
     auth.login(request, user)
 
     return uniq_id
 
+
 def _set_already_exists_error(form):
     msg = _('Someone has already registered an account with %(email)s.')
-    data = dict(email=form.cleaned_data['username'])
-    del form.cleaned_data['username']
+    data = dict(email=form.cleaned_data['email'])
+    del form.cleaned_data['email']
     error = _(msg % data)
     form._errors['username'] = form.error_class([error])

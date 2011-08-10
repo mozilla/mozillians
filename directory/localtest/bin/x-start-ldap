@@ -6,6 +6,8 @@
 
 PROG=`basename "$0"`
 
+cd $(dirname $(dirname $0))
+
 if test ! -f slapd.conf
 then
 	echo "$PROG: must be run from the directory containing slapd.conf" 1>&2
@@ -16,7 +18,7 @@ fi
 . ./vars
 
 # Make the database directory if necessary
-if test ! -d $OPENLDAP_DB_PATH 
+if test ! -d $OPENLDAP_DB_PATH
 then
 	mkdir $OPENLDAP_DB_PATH
 fi
