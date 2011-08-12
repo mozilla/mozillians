@@ -192,13 +192,9 @@ def photo(request, unique_id):
 
 
 @login_required
-def invited(request):
-    invite_id = request.session.get('invited')
-    if invite_id:
-        invite = Invite.objects.get(pk=invite_id)
-        return render(request, 'phonebook/invited.html', dict(invite=invite))
-
-    return HttpResponseRedirect('invite')
+def invited(request, id):
+    invite = Invite.objects.get(pk=id)
+    return render(request, 'phonebook/invited.html', dict(invite=invite))
 
 
 @login_required
@@ -223,8 +219,7 @@ def invite(request):
             send_mail(subject, message, request.user.email,
                       [invite.destination])
 
-            request.session['invited'] = invite.id
-            return HttpResponseRedirect('invited')
+            return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:
         f = forms.InviteForm()
     data = dict(form=f, foo='bar')

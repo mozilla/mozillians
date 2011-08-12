@@ -22,7 +22,7 @@ urlpatterns = patterns('',
     url('^vouch$', views.vouch, name='phonebook.vouch'),
 
     url('^invite$', views.invite, name='invite'),
-    url('^invited$', views.invited, name='invited'),
+    url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
 )
 
