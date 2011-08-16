@@ -23,6 +23,7 @@ Contents:
    installation
    sessions
    registration
+   invites
    demo
    ldap
 
