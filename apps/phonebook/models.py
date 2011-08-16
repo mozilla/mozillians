@@ -13,7 +13,8 @@ from manage import path
 class Invite(models.Model):
     # uid of the person inviting, ozten can clarify size
     inviter = models.CharField(max_length=32, editable=False)
-    destination = models.EmailField()
+    recipient = models.EmailField()
+    redeemer = models.CharField(max_length=32, editable=False)
     code = models.CharField(max_length=32, editable=False, unique=True)
     redeemed = models.DateTimeField(null=True, editable=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)

@@ -1,9 +1,11 @@
+from functools import wraps
 from ldap import SIZELIMIT_EXCEEDED
 
 import django.contrib.auth
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import (Http404, HttpResponse, HttpResponseRedirect,
+                         HttpResponseForbidden)
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
@@ -15,6 +17,21 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+
+
+def vouch_required(f):
+    """
+    If a user is not vouched they get a 403.
+    """
+    @login_required
+    @wraps(f)
+    def wrapped(request, *args, **kwargs):
+        if request.user.is_vouched():
+            return f(request, *args, **kwargs)
+        else:
+            return HttpResponseForbidden(_('You must be vouched to do this.'))
+
+    return wrapped
 
 
 def profile_uid(request, unique_id):
@@ -197,7 +214,7 @@ def invited(request, id):
     return render(request, 'phonebook/invited.html', dict(invite=invite))
 
 
-@login_required
+@vouch_required
 def invite(request):
     if request.method == 'POST':
         f = forms.InviteForm(request.POST)
@@ -217,7 +234,7 @@ def invite(request):
             link = _("Join Mozillians: %s") % invite.get_url()
             message = "%s\n\n%s" % (message, link)
             send_mail(subject, message, request.user.email,
-                      [invite.destination])
+                      [invite.recipient])
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:

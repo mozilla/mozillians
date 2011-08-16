@@ -5,8 +5,6 @@ Invitation System
 Mozillians has an inivitation system that let's vouched users invite others to
 join Mozillians.  These users who join are automatically vouched.
 
-.. warning:: shit!!!
-
 
 The Model
 ---------
@@ -21,8 +19,6 @@ The invite model stores the following:
 
    This is the email address of where the invitation is sent.
 
-   .. warning:: shit!!!
-
 .. py:attribute:: Invite.code
 
    This is the randomly generated invite code.  This code is used in the
@@ -31,8 +27,6 @@ The invite model stores the following:
 .. py:attribute:: Invite.redeemer
 
    This is the ``uid`` of the newly created user who has redeemed the invite.
-
-   .. warning:: shit!!!
 
 .. py:attribute:: Invite.redeemed
 

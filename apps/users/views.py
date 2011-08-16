@@ -21,7 +21,7 @@ def register(request):
         code = request.GET['code']
         try:
             invite = get_invite(code)
-            initial['email'] = invite.destination
+            initial['email'] = invite.recipient
             initial['code'] = invite.code
         except Invite.DoesNotExist:
             pass
@@ -67,6 +67,7 @@ def _save_new_user(request, form):
     if voucher:
         registrar.record_vouch(voucher=voucher, vouchee=uniq_id)
         invite.redeemed = datetime.datetime.now()
+        invite.redeemer = uniq_id
         invite.save()
 
     user = auth.authenticate(username=username, password=password)
