@@ -24,6 +24,8 @@ Contents:
    registration
    demo
    ldap
+   ldap-developer-notes
+   ldap-design
 
 Indices and tables
 ------------------

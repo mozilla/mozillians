@@ -17,7 +17,7 @@ e.g.:
 
 Now, whenever you need this test environment, you do:
 
-	cd .../localtest
+	cd ../devslapd
 	. setup.sh
 
 You can then use commands like:

@@ -9,7 +9,7 @@ from commons.urlresolvers import reverse
 from manage import path
 
 # The test data (below in module constants) must match data in
-# directory/mozillians-bulk-test-data.ldif
+# directory/testsuite/mozillians-bulk-test-data.ldif
 # You must have run x-rebuild before these tests
 MOZILLIAN = dict(email='u000001@mozillians.org', uniq_id='7f3a67u000001')
 PENDING = dict(email='u000003@mozillians.org', uniq_id='7f3a67u000003')
@@ -53,7 +53,7 @@ class LDAPTestCase(test_utils.TestCase):
     def setup_class(cls):
         import os
         os.environ['OPENLDAP_DB_PATH'] = '/home/vagrant/openldap-db'
-        call(path('directory/localtest/bin/x-rebuild'))
+        call(path('directory/devslapd/bin/x-rebuild'))
 
     def setUp(self):
         """

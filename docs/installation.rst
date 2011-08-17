@@ -27,7 +27,7 @@ Installation
 
 4. Start your engines::
 
-    $ pushd mozillians/directory/localtest && x-rebuild && popd
+    $ pushd mozillians/directory/devslapd && x-rebuild && popd
     $ cd mozillians
     $ ./manage.py runserver 0.0.0.0:8001
 
@@ -68,3 +68,7 @@ Installation
     git submodule update --recursive
     popd
     vagrant destroy && vagrant up
+
+   With you vagrant VM do::
+
+    python vendor/src/schematic/schematic migrations/
