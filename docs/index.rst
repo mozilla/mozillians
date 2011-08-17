@@ -21,7 +21,9 @@ Contents:
    :maxdepth: 2
 
    installation
+   sessions
    registration
+   invites
    demo
    ldap
    ldap-developer-notes
