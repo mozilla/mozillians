@@ -1,25 +1,121 @@
 {% extends "base.html" %}
 
-{% block main_content %}
+{% block page_title %}{{ _('Edit Your Profile') }}{% endblock %}
+{% block body_id %}edit-profile{% endblock %}
+{% block body_classes %}box-content{% endblock %}
 
+{% block main_content %}
   <form action="" method="POST" enctype="multipart/form-data">
     {{ csrf() }}
+
+    {#
     {% if registration_flow %}
-    Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
+      Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
     {% endif %}
 
     <h1>{% if person.voucher_unique_id %}Mozillian{% else %}Pending{% endif %} Profile</h1>
+    #}
 
-    <img src="{{url('phonebook.profile_photo', person.unique_id) }}" width="300" />
+    <h1>{{ _('Edit Your Profile') }}</h1>
 
-    {{ form }}
-    {% if registration_flow %}
-      <button>{{ _('Next') }}</button>
-    {% else %}
-      <button>{{ _('Update') }}</button>
+    {% if form.errors %}
+      <p class="form-errors">
+        {{ _("Sorry, but there were problems with the info you submitted.
+              Please review the form, correct any errors, and try again.") }}
+      </p>
     {% endif %}
+
+    <div class="blue-pastels">
+      {{ form.management_form }}
+
+      <div class="left-col">
+        <h2>{{ _('My Info') }}</h2>
+
+        {% for f in ['first_name', 'last_name', 'biography'] %}
+          <div id="{{ form[f].name }}-container"
+            class="field {{ 'error' if form.errors[f] }}
+            {{ form[f].field.widget.attrs['css_class'] }}">
+
+            {{ form[f].label_tag() }}
+            {{ form.errors[f] }}
+            {{ form[f] }}
+          </div>
+        {% endfor %}
+
+        <div id="photo-container" class="{{ 'error' if form.errors['photo'] }}">
+          <img alt="{{ _('Your Profile Photo') }}" id="profile-photo"
+            src="{{ url('phonebook.profile_photo', person.unique_id) }}">
+
+          {{ form['photo'].label_tag() }}
+          {{ form.errors['photo'] }}
+          {{ form['photo'] }}
+
+          <div class="clear"></div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <h2>{{ _('My Mozilla Info') }}</h2>
+
+        {% for f in ['irc_nickname'] %}
+          <div id="{{ form[f].name }}-container"
+            class="field {{ 'error' if form.errors[f] }}
+            {{ form[f].field.widget.attrs['css_class'] }}">
+
+            {{ form[f].label_tag() }}
+            {{ form.errors[f] }}
+            {{ form[f] }}
+          </div>
+        {% endfor %}
+
+        <h2>{{ _('My Login Info') }}</h2>
+
+        <dl id="email-container">
+          <dt>{{ _('Primary Email:') }}</dt>
+          <dd>{{ request.user.email }}</dd>
+        </dl>
+
+        <div class="clear"></div>
+
+        <a href="#changepassword" class="button blue small">
+          {{ _('Change Password') }}
+        </a>
+      </div>
+
+      <div class="clear"></div>
+    </div>
+
+    <button id="submit" class="button orange">
+      {% if registration_flow %}
+        {{ _('Next') }}
+      {% else %}
+        {{ _('Update') }}
+      {% endif %}
+    </button>
+
+    <a href="{{ url('profile', user.unique_id) }}" id="cancel">
+      {{ _('Cancel') }}{# L10n: Cancel editing #}
+    </a>
+
+    <div class="clear"></div>
   </form>
 
+  {% if user.username == person.username %}
+    <div id="manage-profile">
+      <form action="{{ url('phonebook.delete_profile') }}" method="POST"
+        class="profile-action">
+        {{ csrf() }}
+
+        {{ delete_form }}
+
+        <button class="button red small">{{ _('Delete Profile') }}</button>
+      </form>
+
+      <div class="clear"></div>
+    </div>
+  {% endif %}
+
+  {#
   {% if person.full_name %}
     <div>
       <a href="{{url('profile', person.unique_id) }}">{{ person.full_name }}</a>
@@ -40,15 +136,5 @@
       <a href="mailto:{{ person.username }}">{{ person.username }}</a>
     </div>
   {% endif %}
-
-  <hr />
-  {% if user.username == person.username %}
-    <a href="{{url('phonebook.edit_profile', person.unique_id)}}">Edit Profile</a>
-    <form action="{{ url('phonebook.delete_profile') }}" method="POST">
-      {{ csrf() }}
-      {{ delete_form }}
-      <button>{{ _('Delete Profile') }}</button>
-    </form>
-  {% endif %}
-
+  #}
 {% endblock %}

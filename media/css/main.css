@@ -39,6 +39,23 @@ body.box-content #main-content h1 {
     max-width: 685px;
 }
 
+/** Element styles */
+dt, dd {
+    color: #1e4262;
+}
+
+dt {
+    clear: right;
+    float: left;
+    font-weight: bold;
+    margin-right: 2%;
+    width: 20%;
+}
+
+dd {
+    width: 78%;
+}
+
 /** Common and utility classes */
 .blue-pastels {
     background: url(../img/blue-pastels-bg.png) center no-repeat;
@@ -48,8 +65,34 @@ body.box-content #main-content h1 {
     width: 688px;
 }
 
-    .blue-pastels .field {
+.blue-pastels.small {
+    background-image: url(../img/blue-pastels-small-bg.png);
+    height: 275px;
+}
+
+    .blue-pastels h2 {
+        color: #1e4262;
+        font-family: MetaBold, 'Trebuchet MS', sans-serif;
+        font-size: 17px;
+        font-weight: bold;
+        margin: 0 0 15px;
+    }
+
+    .blue-pastels .left-col, .blue-pastels .right-col {
+        float: left;
+    }
+
+    .blue-pastels .field, .blue-pastels .left-col {
         width: 50%;
+    }
+
+    .blue-pastels .right-col {
+        padding-left: 1%;
+        width: 49%;
+    }
+
+    .blue-pastels .left-col .field, .blue-pastels .right-col .field {
+        width: auto;
     }
 
     .blue-pastels label {
@@ -90,6 +133,14 @@ body.box-content #main-content h1 {
         width: 300px;
     }
 
+    .blue-pastels textarea {
+        height: 5em;
+    }
+
+    .blue-pastels input[type=file] {
+        height: 2em;
+    }
+
     .blue-pastels input[type=checkbox], .blue-pastels input[type=radio] {
         width: auto;
     }
@@ -110,6 +161,74 @@ body.box-content #main-content h1 {
         position: relative;
         top: -3px;
     }
+
+.button.blue {
+    border-color: #52adcc;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(142,190,205)),
+    color-stop(0.75, rgb(251,252,252))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(142,190,205) 25%,
+    rgb(251,252,252) 75%
+);
+    color: #0489b7 !important;
+}
+
+.button.blue:hover {
+    border-color: #52adcc;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(142,190,205)),
+    color-stop(0.75, rgb(251,252,252))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(142,190,205) 25%,
+    rgb(251,252,252) 75%
+);
+    color: #0489b7 !important;
+}
+
+.button.red {
+    border-color: #cc5252;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(205,142,142)),
+    color-stop(0.75, rgb(252,251,251))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(205,142,142) 25%,
+    rgb(252,251,251) 75%
+);
+    color: #b70404 !important;
+}
+
+.button.red:hover {
+    border-color: #cc5252;
+background-image: -webkit-gradient(
+    linear,
+    left bottom,
+    left top,
+    color-stop(0.25, rgb(205,142,142)),
+    color-stop(0.75, rgb(252,251,251))
+);
+background-image: -moz-linear-gradient(
+    center bottom,
+    rgb(205,142,142) 25%,
+    rgb(252,251,251) 75%
+);
+    color: #b70404 !important;
+}
 
 .button.orange {
     border-color: #db8237;
@@ -141,6 +260,11 @@ background-image: -moz-linear-gradient(
     rgb(223,115,43) 15%,
     rgb(241,210,85) 85%
 );
+}
+
+.button.small {
+    font-size: 14px;
+    padding: .25em 1em;
 }
 
 .clear {
@@ -243,4 +367,88 @@ background-image: -moz-linear-gradient(
 #body-register #submit {
     float: right;
     margin: 0 50px 0 0;
+}
+
+/** Edit Profile Page (Step 2: Edit Profile) */
+#body-edit-profile #irc_nickname_unique_id-container {
+   /* HACK: Hack out fields that ought be invisible */
+    display: none;
+}
+
+#body-edit-profile #profile-photo {
+    border: 1px solid #52adcc;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    float: left;
+    width: 70px;
+}
+
+#body-edit-profile #id_photo {
+    width: 240px;
+}
+
+#body-edit-profile #email-container dt, #body-edit-profile #email-container dd {
+    color: #000;
+    float: left;
+    font-family: Georgia, Times, serif;
+    margin: 0;
+    width: auto;
+}
+
+#body-edit-profile dt {
+    font-size: 12px;
+    font-style: italic;
+}
+
+#body-edit-profile #email-container dd {
+    font-size: 16px;
+    margin: -4px 0 0 4px;
+}
+
+#body-edit-profile #manage-profile {
+    float: left;
+    margin: -35px 0 0 15px;
+}
+
+#body-edit-profile .profile-action {
+    float: left;
+    margin: 0 10px 0 0;
+}
+
+#body-edit-profile #cancel {
+    float: right;
+    margin: 12px 25px 0 0;
+}
+
+#body-edit-profile #submit {
+    float: right;
+    margin: 0 50px 0 0;
+}
+
+/** Login Page */
+#body-login {
+
+}
+
+/** Profile Page */
+#body-profile #profile-photo {
+    border: 1px solid #226b87;
+    float: left;
+    margin: 0 25px 0 0;
+    max-height: 175px;
+    max-width: 175px;
+}
+
+#body-profile #edit-profile {
+    float: right;
+}
+
+#profile-info .vouched {
+    background: url(../img/icon-person.png) center right no-repeat;
+    padding-right: 22px;
+}
+
+#body-profile #bio {
+    width: 73%;
 }

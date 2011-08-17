@@ -1,35 +1,44 @@
 {% extends "base.html" %}
 
+{% block page_title %}{{ _('Log in to Mozillians') }}{% endblock %}
+{% block body_id %}login{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
 {% block main_content %}
-  <div>
-    {% set redirect=request.REQUEST.get('next', url('home')) %}
-    <form method="post" action="?next={{ redirect }}">
-      {{ csrf() }}
-      <fieldset>
-        <ul>
-          <li>
-            <label for="id_username">{{ _('Email address') }}</label>
-            <input id="id_username" type="text" name="username"
-                                                          autofocus />
-            {{ form.username.errors|safe }}
-          </li>
-          <li>
-            <label for="id_password">{{ _('Password') }}</label>
-            {{ form.password|safe }}
-            {{ form.password.errors|safe }}
-          </li>
-          <li>
-            <!-- label for="id_rememberme" class="check">
-              {# form.rememberme|safe #}
-              {{ _('Remember me on this computer') }}
-            </label-->
-            {# form.rememberme.errors|safe #}
-          </li>
-        </ul>
-      </fieldset>
-      <div class="fm-control">
-        <button type="submit">{{ _('Log in') }}</button>
+  {% set redirect=request.REQUEST.get('next', url('home')) %}
+  <form method="post" action="{{ url('login') }}?next={{ redirect }}">
+    {{ csrf() }}
+    <div class="blue-pastels">
+      <div id="username-container"
+          class="field {{ 'error' if form.errors['username'] }}">
+        {{ form['username'].label_tag() }}
+        {{ form.errors['username'] }}
+        {{ form['username'] }}
       </div>
-    </form>
-  </div>
+
+      <div id="password-container"
+          class="field {{ 'error' if form.errors['password'] }}">
+        {{ form['password'].label_tag() }}
+        {{ form.errors['password'] }}
+        {{ form['password'] }}
+      </div>
+
+      <!--
+        <label for="id_username">{{ _('Email address') }}</label>
+          <input id="id_username" type="text" name="username"
+                                                        autofocus />
+          {{ form.username.errors|safe }}
+          <label for="id_password">{{ _('Password') }}</label>
+          {{ form.password|safe }}
+          {{ form.password.errors|safe }}
+          <label for="id_rememberme" class="check">
+            {# form.rememberme|safe #}
+            {{ _('Remember me on this computer') }}
+          </label>
+          {# form.rememberme.errors|safe #}
+      -->
+    </div>
+
+    <button type="submit" class="button orange">{{ _('Log in') }}</button>
+  </form>
 {% endblock %}
