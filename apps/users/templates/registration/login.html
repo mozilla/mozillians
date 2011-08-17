@@ -5,10 +5,12 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
+  <h1>{{ _('Log in to Mozillians') }}</h1>
+
   {% set redirect=request.REQUEST.get('next', url('home')) %}
   <form method="post" action="{{ url('login') }}?next={{ redirect }}">
     {{ csrf() }}
-    <div class="blue-pastels">
+    <div class="blue-pastels tiny">
       <div id="username-container"
           class="field {{ 'error' if form.errors['username'] }}">
         {{ form['username'].label_tag() }}
@@ -22,23 +24,12 @@
         {{ form.errors['password'] }}
         {{ form['password'] }}
       </div>
-
-      <!--
-        <label for="id_username">{{ _('Email address') }}</label>
-          <input id="id_username" type="text" name="username"
-                                                        autofocus />
-          {{ form.username.errors|safe }}
-          <label for="id_password">{{ _('Password') }}</label>
-          {{ form.password|safe }}
-          {{ form.password.errors|safe }}
-          <label for="id_rememberme" class="check">
-            {# form.rememberme|safe #}
-            {{ _('Remember me on this computer') }}
-          </label>
-          {# form.rememberme.errors|safe #}
-      -->
     </div>
 
-    <button type="submit" class="button orange">{{ _('Log in') }}</button>
+    <button type="submit" class="button orange" id="submit">
+      {{ _('Log in') }}
+    </button>
+
+    <div class="clear"></div>
   </form>
 {% endblock %}

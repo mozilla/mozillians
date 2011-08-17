@@ -70,6 +70,11 @@ dd {
     height: 275px;
 }
 
+.blue-pastels.tiny {
+    background-image: url(../img/blue-pastels-tiny-bg.png);
+    height: 173px;
+}
+
     .blue-pastels h2 {
         color: #1e4262;
         font-family: MetaBold, 'Trebuchet MS', sans-serif;
@@ -427,8 +432,9 @@ background-image: -moz-linear-gradient(
 }
 
 /** Login Page */
-#body-login {
-
+#body-login #submit {
+    float: right;
+    margin: 0 50px 0 0;
 }
 
 /** Profile Page */
