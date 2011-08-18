@@ -29,7 +29,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Mozillians'
-copyright = u'2011, Dave Dash, Austin King, Matthew Riley Macpherson'
+copyright = u'2011, Dave Dash, Austin King, Matthew Riley MacPherson'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -200,7 +200,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'mozillians', u'Mozillians Documentation',
-     [u'Dave Dash, Austin King, Matthew Riley Macpherson'], 1)
+     [u'Dave Dash, Austin King, Matthew Riley MacPherson'], 1)
 ]
 
 
