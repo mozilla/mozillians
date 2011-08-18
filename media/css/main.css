@@ -458,3 +458,14 @@ background-image: -moz-linear-gradient(
 #body-profile #bio {
     width: 73%;
 }
+
+/** Invite Page */
+#body-invite #id_recipient {
+    color: #4b4740;
+    height: 14px;
+    font-family: Georgia, Times, serif;
+    font-size: 13px;
+    margin: 0 0 15px;
+    padding: 5px;
+    width: 300px;
+}

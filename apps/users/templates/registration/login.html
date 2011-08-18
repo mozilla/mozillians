@@ -10,6 +10,7 @@
   {% set redirect=request.REQUEST.get('next', url('home')) %}
   <form method="post" action="{{ url('login') }}?next={{ redirect }}">
     {{ csrf() }}
+
     <div class="blue-pastels tiny">
       <div id="username-container"
           class="field {{ 'error' if form.errors['username'] }}">

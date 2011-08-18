@@ -1,17 +1,26 @@
 {% extends "base.html" %}
 
-{% block main_content %}
-  <p>
-  {% trans %}
-    If you'd like to invite a Mozillian to create a profile, please enter their
-    email address here.
-  {% endtrans %}
-  </p>
-  <form method="POST" action="{{ url('invite') }}">
-    {{ form.errors }}
-    {{ csrf() }}
-    {{ form.recipient }}
-    <input type="submit">
-  </form>
+{% block page_title %}{{ _('Invite a Mozillian') }}{% endblock %}
+{% block body_id %}invite{% endblock %}
+{% block body_classes %}box-content{% endblock %}
 
+{% block main_content %}
+  <h1>{{ _('Invite a Mozillian') }}</h1>
+
+  <p>
+    {% trans %}
+      If you'd like to invite a Mozillian to create a profile, please enter
+      their email address here:
+    {% endtrans %}
+  </p>
+
+  <form method="POST" action="{{ url('invite') }}">
+    {{ csrf() }}
+
+    {{ form.errors }}
+    {{ form.recipient }}
+    <button type="submit" class="button orange small">
+      {{ _('Send invite') }}
+    </button>
+  </form>
 {% endblock %}
