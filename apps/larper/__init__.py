@@ -246,10 +246,13 @@ class UserSession(object):
         newservs = SystemId.form_to_service_ids_attrs(form)
         for service_uri in KNOWN_SERVICE_URIS:
             newserv = newservs[service_uri]
-            sys_id_dn = SystemId.dn(unique_id, newserv['uniqueIdentifier'][0])
 
             if service_uri in oldservs:
                 oldserv = oldservs[service_uri]
+                newserv['uniqueIdentifier'][0] = oldserv['uniqueIdentifier'][0]
+                sys_id_dn = SystemId.dn(unique_id,
+                                        oldserv['uniqueIdentifier'][0])
+
                 if newserv['mozilliansServiceID'][0]:
                     modlist = modifyModlist(oldserv, newserv)
                     if modlist:
@@ -257,6 +260,8 @@ class UserSession(object):
                 else:
                     conn.delete_s(sys_id_dn)
             else:
+                sys_id_dn = SystemId.dn(unique_id,
+                                        newserv['uniqueIdentifier'][0])
                 if newserv['mozilliansServiceID'][0]:
                     modlist = addModlist(newserv)
                     if modlist:
