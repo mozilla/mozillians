@@ -13,8 +13,9 @@
 
     <div class="blue-pastels tiny">
       <div id="username-container"
-          class="field {{ 'error' if form.errors['username'] }}">
-        {{ form['username'].label_tag() }}
+        class="field {{ 'error' if form.errors['username'] }}">
+        <label for="id_username">{{ _('Email') }}</label>
+
         {{ form.errors['username'] }}
         {{ form['username'] }}
       </div>
