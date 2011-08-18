@@ -33,7 +33,7 @@ def vouch_required(f):
 
     return wrapped
 
-
+@login_required
 def profile_uid(request, unique_id):
     """
     View a profile by unique_id, which is a stable,
