@@ -87,7 +87,7 @@
 
     <button id="submit" class="button orange">
       {% if registration_flow %}
-        {{ _('Next') }}
+        {{ _('Next') }} 
       {% else %}
         {{ _('Update') }}
       {% endif %}
@@ -107,8 +107,9 @@
         {{ csrf() }}
 
         {{ delete_form }}
-
-        <button class="button red small">{{ _('Delete Profile') }}</button>
+        {% if not registration_flow %}
+          <button class="button red small">{{ _('Delete Profile') }}</button>
+        {% endif %}
       </form>
 
       <div class="clear"></div>
