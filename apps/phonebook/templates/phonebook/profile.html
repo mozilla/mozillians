@@ -20,26 +20,31 @@
           familiar with your contributions and ask them to vouch for you.
         {% endtrans %}
         </p>
-    {% else %}
-      <p>
-        {% trans vouch='#' %}
-          This profile is waiting for approval. If you can vouch for this
-          person's contributions, please do so.
-        {% endtrans %}
-      </p>
+      {% else %}
+        <div id="pending-approval">
+          <p>
+            {% trans vouch='#' %}
+              This profile is waiting for approval. If you can vouch for this
+              person's contributions, please do so.
+            {% endtrans %}
+          </p>
 
-      {% if vouch_form %}
-        <form action="{{ url('phonebook.vouch') }}" method="POST">
-          {{ csrf() }}
+          {% if vouch_form %}
+            <form action="{{ url('phonebook.vouch') }}" method="POST"
+              id="vouch-form">
+              {{ csrf() }}
 
-          {{ vouch_form }}
+              {{ vouch_form }}
 
-          {% trans name=person.full_name %}
-            <button>Vouch for {{ name }}</button>
-          {% endtrans %}
-        </form>
+              {% trans name=person.full_name %}
+                <button type="submit" class="button orange small">
+                  Vouch for {{ name }}
+                </button>
+              {% endtrans %}
+            </form>
+          {% endif %}
+        </div>
       {% endif %}
-    {% endif %}
   {% endif %}
 
   <div class="blue-pastels small">

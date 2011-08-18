@@ -438,6 +438,17 @@ background-image: -moz-linear-gradient(
 }
 
 /** Profile Page */
+#body-profile #pending-approval {
+    margin: 5px 0 15px;
+    text-align: center;
+}
+
+#body-profile #pending-approval p {
+    font-weight: bold;
+    margin: 0 auto 10px;
+    width: 70%;
+}
+
 #body-profile #profile-photo {
     border: 1px solid #226b87;
     float: left;
@@ -468,4 +479,36 @@ background-image: -moz-linear-gradient(
     margin: 0 0 15px;
     padding: 5px;
     width: 300px;
+}
+
+/** Search Results */
+#body-search #search-form {
+    display: block;
+    text-align: center;
+}
+
+#body-search #q {
+    color: #4b4740;
+    height: 14px;
+    font-family: Georgia, Times, serif;
+    font-size: 13px;
+    margin: 0 0 15px;
+    padding: 5px;
+    width: 300px;
+}
+
+#body-search .result .profile-photo {
+    border: 1px solid #52adcc;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    float: left;
+    margin: 0 10px 0 35px;
+    width: 70px;
+}
+
+#body-search .result h2 {
+    font-size: 19px;
+    margin: 0;
+    padding: 20px 0 0;
 }
