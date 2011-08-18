@@ -181,7 +181,7 @@ class TestRegistrarSession(TestLarper):
         data = dict(first_name='Jane', last_name='Doe',
                     email=username, password='secret password',
                     biography='Keeping it real.',
-                         irc_nickname='',
+                         irc_nickname='hobart',
                          irc_nickname_unique_id='')
         new_unique_id = regi.create_person(data)
 

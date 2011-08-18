@@ -646,9 +646,15 @@ class AdminSession(UserSession):
         has vouched.
         """
         conn = self._ensure_conn(WRITE)
-        params = (escape_dn_chars(unique_id),
-                  settings.LDAP_USERS_GROUP)
-        person_dn = "uniqueIdentifier=%s,%s" % params
+        person_dn = Person.dn(unique_id)
+
+        # Kill SystemId or other children
+        rs = conn.search_s(Person.dn(unique_id),
+                           ldap.SCOPE_ONELEVEL,
+                           '(objectclass=*)')
+        for sub_dn, attrs in rs:
+            conn.delete_s(sub_dn)
+
         conn.delete_s(person_dn)
         return self
 
