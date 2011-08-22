@@ -76,14 +76,14 @@
 
       {% if person.irc_nickname %}
         <dt>{{_('IRC Nickname') }}</dt>
-        <dd><a href="{{ person.irc_nickname.service_uri }}">
+        <dd><a class="url" rel="me" href="{{ person.irc_nickname.service_uri }}">
           {{person.irc_nickname.service_id}}
         </a></dd>
       {% endif %}
 
       {% for uri, service in services.items() %}
         <dt>{{ service.service_uri }}</dt>
-        <dd><a href="{{ service.service_uri }}">
+        <dd><a class="url" rel="me" href="{{ service.service_uri }}">
           {{ service.service_id }}
         </a></dd>
       {% endfor %}
@@ -108,7 +108,7 @@
 
     {% if person.biography %}
       <h3>{{ _('Bio:') }}{# L10n: Biography #}</h3>
-      <p id="bio">{{ person.biography }}</p>
+      <p id="bio" class="note">{{ person.biography }}</p>
     {% endif %}
 </div>
 {% endblock %}
