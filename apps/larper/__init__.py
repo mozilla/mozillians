@@ -134,15 +134,17 @@ class UserSession(object):
         General purpose 'quick' search. Returns a list of
         larper.Person objects.
         """
-        q = filter_format("(|(cn=*%s*)(mail=*%s*))", (query, query))
-        return _populate_any(self._search(q))
+        encoded_q = query.encode('utf-8')
+        esc_q = filter_format("(|(cn=*%s*)(mail=*%s*))",
+                              (encoded_q, encoded_q))
+        return _populate_any(self._search(esc_q))
 
     def search_by_name(self, query):
         """
         Searches against the full_name field for people. Returns
         same type of data as search.
         """
-        q = filter_format("(cn=*%s*)", (query,))
+        q = filter_format("(cn=*%s*)", (query.encode('utf-8'),))
         return _populate_any(self._search(q))
 
     def search_by_email(self, query):
@@ -150,7 +152,9 @@ class UserSession(object):
         Searches against the email fields for people. Returns
         same type of data as search.
         """
-        q = filter_format("(|(mail=*%s*)(uid=*%s*))", (query, query,))
+        encoded_q = query.encode('utf-8')
+        q = filter_format("(|(mail=*%s*)(uid=*%s*))",
+                          (encoded_q, encoded_q,))
         return _populate_any(self._search(q))
 
     def get_by_unique_id(self, unique_id):
@@ -202,9 +206,10 @@ class UserSession(object):
         for r in rs:
             _dn, attrs = r
             sysid = SystemId(person_unique_id,
-                             attrs['uniqueIdentifier'][0],
-                             attrs['mozilliansServiceURI'][0],
-                             service_id=attrs['mozilliansServiceID'][0])
+                             attrs['uniqueIdentifier'][0].decode('utf-8'),
+                             attrs['mozilliansServiceURI'][0].decode('utf-8'),
+                             service_id=attrs['mozilliansServiceID'][0]\
+                                 .decode('utf-8'))
             services[attrs['mozilliansServiceURI'][0]] = sysid
         return services
 
@@ -392,7 +397,7 @@ class Person(object):
         self.first_name = first_name
         self.last_name = last_name
         self.full_name = full_name
-        self.display_name = u'%s %s' % (first_name, last_name)
+        self.display_name = '%s %s' % (first_name, last_name)
         self.biography = biography
         self.voucher_unique_id = voucher_unique_id
 
@@ -407,14 +412,17 @@ class Person(object):
         """
         # givenName is optional in LDAP, but required by our API
         given_name = ldap_attrs.get('givenName', [''])
-        p = Person(ldap_attrs['uniqueIdentifier'][0], ldap_attrs['uid'][0],
-                   given_name[0], ldap_attrs['sn'][0], ldap_attrs['cn'][0])
+        p = Person(ldap_attrs['uniqueIdentifier'][0].decode('utf-8'),
+                   ldap_attrs['uid'][0].decode('utf-8'),
+                   given_name[0].decode('utf-8'),
+                   ldap_attrs['sn'][0].decode('utf-8'),
+                   ldap_attrs['cn'][0].decode('utf-8'))
 
         if 'description' in ldap_attrs:
-            p.biography = ldap_attrs['description'][0]
+            p.biography = ldap_attrs['description'][0].decode('utf-8')
 
         if 'mozilliansVouchedBy' in ldap_attrs:
-            voucher = ldap_attrs['mozilliansVouchedBy'][0]
+            voucher = ldap_attrs['mozilliansVouchedBy'][0].decode('utf-8')
             p.voucher_unique_id = Person.unique_id(voucher)
 
         return p
