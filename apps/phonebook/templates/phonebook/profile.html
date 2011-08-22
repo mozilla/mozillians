@@ -7,8 +7,10 @@
   <h1>
     {% if user.username == person.username %}
       {{ _('Your Profile') }}
+    {% elif person.voucher %}
+      {{ _('Mozillian Profile') }}
     {% else %}
-      {{ person.full_name }}
+      {{ _('Pending Profile') }}
     {% endif %}
   </h1>
 
@@ -47,9 +49,9 @@
       {% endif %}
   {% endif %}
 
-  <div class="blue-pastels small">
-    <img src="{{url('phonebook.profile_photo', person.unique_id) }}"
-      id="profile-photo" alt="{{ _('Profile photo') }}">
+  <div class="vcard blue-pastels small">
+    <img class="photo" src="{{url('phonebook.profile_photo', person.unique_id) }}"
+      id="profile-photo" alt="{{ _('Profile photo') }}" />
 
     {% if user.username == person.username %}
       <a href="{{ url('phonebook.edit_profile', person.unique_id) }}"
@@ -67,9 +69,11 @@
     </h2>
 
     <dl id="profile-info">
+        <dt>{{ _('Name') }}</dt>
+        <dd><a class="fn url" href="{{ url('profile', person.unique_id) }}">{{ person.full_name }}</a></dd>
       {% if person.username %}
         <dt>{{ _('Email') }}</dt>
-        <dd><a href="mailto:{{ person.username }}">
+        <dd><a class="email" href="mailto:{{ person.username }}">
           {{ person.username }}
         </a></dd>
       {% endif %}
