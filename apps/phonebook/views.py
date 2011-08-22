@@ -12,12 +12,14 @@ from django.views.decorators.http import require_POST
 import jingo
 from tower import ugettext as _
 
+import commonware.log
 from commons.urlresolvers import reverse
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
 
+log = commonware.log.getLogger('i.phonebook')
 
 def vouch_required(f):
     """
@@ -29,6 +31,7 @@ def vouch_required(f):
         if request.user.is_vouched():
             return f(request, *args, **kwargs)
         else:
+            log.warning('vouch_required forbidding access')
             return HttpResponseForbidden(_('You must be vouched to do this.'))
 
     return wrapped
@@ -40,11 +43,13 @@ def profile_uid(request, unique_id):
     random user id.
     """
     ldap = UserSession.connect(request)
+    log.warning('profile_uid [%s]' % unique_id)
     try:
         person = ldap.get_by_unique_id(unique_id)
         if person.last_name:
             return _profile(request, person)
     except NO_SUCH_PERSON:
+        log.warning('profile_uid Sending 404 for [%s]' % unique_id)
         raise Http404
 
 

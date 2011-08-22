@@ -2,12 +2,17 @@ import jingo
 
 from django.http import HttpResponse
 
+import commonware.log
+
+log = commonware.log.getLogger('i.landing')
+
 
 def about(request):
     return jingo.render(request, 'landing/about.html')
 
 
 def home(request):
+    log.warning('homepage requested profile_id')
     return jingo.render(request, 'landing/home.html')
 
 

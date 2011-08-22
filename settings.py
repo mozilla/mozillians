@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Django settings for the mozillians project.
 import ldap
+import logging
 import os
 import socket
 
@@ -22,6 +23,19 @@ ADMINS = ()
 MANAGERS = ADMINS
 
 DATABASES = {}  # See settings_local.
+
+## Log settings
+LOG_LEVEL = logging.DEBUG
+HAS_SYSLOG = True
+SYSLOG_TAG = "http_app_reporter"
+LOGGING_CONFIG = None
+LOGGING = {
+    'loggers': {
+        'i.landing': {'level': logging.INFO},
+        'i.phonebook': {'level': logging.INFO},
+    },
+}
+
 
 # Site ID is used by Django's Sites framework.
 SITE_ID = 1
