@@ -54,6 +54,10 @@ setup_environ(settings)
 import djcelery
 djcelery.setup_loader()
 
+# Import for side-effect: configures our logging handlers.
+# pylint: disable-msg=W0611
+import log_settings
+
 # Monkey-patch django forms to avoid having to use Jinja2's |safe everywhere.
 import safe_django_forms
 safe_django_forms.monkeypatch()
