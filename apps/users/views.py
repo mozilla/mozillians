@@ -4,6 +4,7 @@ import ldap
 from django.shortcuts import redirect
 from django.contrib import auth
 
+import commonware.log
 import jingo
 from tower import ugettext as _
 
@@ -11,6 +12,7 @@ from larper import RegistrarSession
 from phonebook.models import Invite
 from users import forms
 
+log = commonware.log.getLogger('m.users')
 
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
@@ -24,7 +26,7 @@ def register(request):
             initial['email'] = invite.recipient
             initial['code'] = invite.code
         except Invite.DoesNotExist:
-            pass
+            log.warning('Bad register code [%s], skipping invite' % code)
 
     form = forms.RegistrationForm(request.POST or None, initial=initial)
 
@@ -62,7 +64,8 @@ def _save_new_user(request, form):
             invite = get_invite(d['code'])
             voucher = invite.inviter
         except Invite.DoesNotExist:
-            pass
+            msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
+            log.warning(msg)
 
     if voucher:
         registrar.record_vouch(voucher=voucher, vouchee=uniq_id)
