@@ -1,8 +1,10 @@
 import datetime
 import ldap
 
+from django import http
 from django.shortcuts import redirect
 from django.contrib import auth
+from django.contrib.auth.tokens import default_token_generator
 
 import commonware.log
 import jingo
@@ -11,6 +13,7 @@ from tower import ugettext as _
 from larper import RegistrarSession
 from phonebook.models import Invite
 from users import forms
+from commons.urlresolvers import reverse
 
 log = commonware.log.getLogger('m.users')
 
@@ -39,6 +42,48 @@ def register(request):
                 _set_already_exists_error(form)
     return jingo.render(request, 'registration/register.html',
                         dict(form=form))
+
+
+def password_change(request):
+    r = auth.views.password_change(request,
+                                   'registration/password_change_form.html',
+                                   reverse('login'),
+                                   forms.PasswordChangeForm)
+    # Our session has the old password.
+    if isinstance(r, http.HttpResponseRedirect):
+        auth.logout(request)
+    return r
+
+
+def password_reset(request):
+    r = auth.views.password_reset(request,
+                                  False,
+                                  'registration/password_reset_form.html',
+                                  'registration/password_reset_email.html',
+                                  'registration/password_reset_subject.txt',
+                                  forms.PasswordResetForm,
+                                  default_token_generator,
+                                  reverse('password_reset_check_mail'))
+    return r
+
+
+def password_reset_confirm(request, uidb36=None, token=None):
+    r = auth.views.password_reset_confirm(
+        request,
+        uidb36,
+        token,
+        'registration/password_reset_confirm.html',
+        default_token_generator,
+        forms.SetPasswordForm,
+        reverse('login'))
+    return r
+
+
+def password_reset_check_mail(request):
+    return jingo.render(
+        request,
+        'registration/password_reset_check_mail.html',
+        dict())
 
 
 def _save_new_user(request, form):
