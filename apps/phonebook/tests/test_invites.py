@@ -20,8 +20,8 @@ class InviteTest(LDAPTestCase):
         d = dict(recipient='mr.fusion@gmail.com')
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
-        eq_(pq(r.content)('div#main-content p').text(),
-            'mr.fusion@gmail.com has been invited to Mozillians.')
+        assert ('mr.fusion@gmail.com has been invited to Mozillians.' in
+                pq(r.content)('div#main-content p').text())
 
         # See that the email was sent.
         eq_(len(mail.outbox), 1)
