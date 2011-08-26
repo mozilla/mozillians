@@ -44,8 +44,8 @@ LDAP_REGISTRAR_PASSWORD = 'secret'
 AUTH_LDAP_SERVER_URI = LDAP_SYNC_CONSUMER_URI
 
 # Simple bind user
-AUTH_LDAP_BIND_DN = "cn=root,dc=mozillians,dc=org"
-AUTH_LDAP_BIND_PASSWORD = "secret"
+AUTH_LDAP_BIND_DN = ""
+AUTH_LDAP_BIND_PASSWORD = ""
 
 
 
