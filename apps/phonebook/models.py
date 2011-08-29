@@ -5,9 +5,8 @@ from django.contrib.auth.utils import get_random_string
 from django.db import models
 from django.dispatch import receiver
 
-from commons.helpers import absolutify
-from commons.urlresolvers import reverse
-from manage import path
+from funfactory.urlresolvers import reverse
+from funfactory.utils import absolutify
 
 
 class Invite(models.Model):
@@ -24,7 +23,6 @@ class Invite(models.Model):
 
     class Meta:
         db_table = 'invite'
-
 
 
 @receiver(models.signals.pre_save, sender=Invite)

@@ -13,7 +13,7 @@ import jingo
 from tower import ugettext as _
 
 import commonware.log
-from commons.urlresolvers import reverse
+from funfactory.urlresolvers import reverse
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms

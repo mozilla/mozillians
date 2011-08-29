@@ -1,3 +1,5 @@
+-r ../vendor/src/funfactory/funfactory/requirements/prod.txt
+
 # Django stuff
 -e git://github.com/django/django@36c82ac8#egg=django
 
@@ -24,3 +26,6 @@ Babel>=0.9.4
 
 # Auth
 django-auth-ldap
+
+# Cache
+python-memcached==1.45

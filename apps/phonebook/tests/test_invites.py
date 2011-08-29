@@ -3,7 +3,7 @@ from django.core import mail
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from commons.urlresolvers import reverse
+from funfactory.urlresolvers import reverse
 from phonebook.models import Invite
 from phonebook.tests import LDAPTestCase
 
