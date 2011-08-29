@@ -5,8 +5,8 @@ from django import test
 import test_utils
 from nose.tools import eq_
 
-from commons.urlresolvers import reverse
-from manage import path
+from funfactory.urlresolvers import reverse
+from funfactory.manage import path
 
 # The test data (below in module constants) must match data in
 # directory/testsuite/mozillians-bulk-test-data.ldif
@@ -32,6 +32,7 @@ def pending_user_client():
     client = test.Client()
     url = reverse('login')
     r = client.post(url, data, follow=True)
+    eq_(r.status_code, 200, "Something broke. Got a %d error." % r.status_code)
     eq_(PENDING['email'], str(r.context['user']))
     return client
 

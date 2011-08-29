@@ -6,7 +6,7 @@ from nose.tools import eq_
 from pyquery import PyQuery as pq
 import test_utils
 
-from commons.urlresolvers import reverse
+from funfactory.urlresolvers import reverse
 from phonebook.views import UNAUTHORIZED_DELETE
 
 # The test data (below in module constants) must matches data in

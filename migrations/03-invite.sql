@@ -1,4 +1,4 @@
-DROP TABLE invite; -- things we can do before we launch.
+DROP TABLE IF EXISTS invites; -- things we can do before we launch.
 
 CREATE TABLE `invite` (
     `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,

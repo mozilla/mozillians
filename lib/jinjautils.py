@@ -37,3 +37,4 @@ def jinja_for_django(template_name, context=None, **kw):
     for d in context_instance.dicts:
         context.update(d)
     return jingo.render(request, template_name, context, **kw)
+

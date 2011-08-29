@@ -21,6 +21,7 @@ class dev {
         mysql: before => Class[python];
         python: before => Class[apache];
         apache: before => Class[playdoh_site];
+        memcached:;
         playdoh_site: ;
     }
 }
