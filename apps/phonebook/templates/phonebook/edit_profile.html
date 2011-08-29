@@ -87,7 +87,7 @@
 
     <button id="submit" class="button orange">
       {% if registration_flow %}
-        {{ _('Next') }} 
+        {{ _('Next') }}
       {% else %}
         {{ _('Update') }}
       {% endif %}
@@ -115,27 +115,4 @@
       <div class="clear"></div>
     </div>
   {% endif %}
-
-  {#
-  {% if person.full_name %}
-    <div>
-      <a href="{{url('profile', person.unique_id) }}">{{ person.full_name }}</a>
-    </div>
-  {% endif %}
-
-  {% if person.voucher %}
-    <div>
-      <strong>Mozillian</strong> vouched by
-      {{ person.voucher.full_name }}
-    </div>
-  {% else %}
-    <div><strong>Pending...</strong><a href="#">Vouch for Me</a></div>
-  {% endif %}
-
-  {% if person.mail %}
-    <div>
-      <a href="mailto:{{ person.username }}">{{ person.username }}</a>
-    </div>
-  {% endif %}
-  #}
 {% endblock %}
