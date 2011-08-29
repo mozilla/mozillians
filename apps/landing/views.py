@@ -11,14 +11,6 @@ def home(request):
     return jingo.render(request, 'landing/home.html')
 
 
-def handler404(request):
-    return jingo.render(request, 'landing/404.html', status=404)
-
-
-def handler500(request):
-    return jingo.render(request, 'landing/500.html', status=500)
-
-
 def robots(request):
     return HttpResponse("""User-agent: *\nDisallow: /\n""",
                         mimetype="text/plain")

@@ -512,3 +512,8 @@ background-image: -moz-linear-gradient(
     margin: 0;
     padding: 20px 0 0;
 }
+
+/** Error pages (404, 500, csrf, etc.) */
+.error-page #tumblebeast {
+    float: right;
+}

@@ -1,11 +1,31 @@
 {% extends 'base.html' %}
 
 {% block page_title %}{{ _('Application Error') }}{% endblock %}
+{% block body_classes %}box-content error-page{% endblock %}
 
 {% block main_content %}
   <h1>{{ _("We're Sorry, but Something Went Wrong!") }}</h1>
 
-  <p>You broke the Internet. Try again later.</p>
+  <img src="{{ MEDIA_URL}}img/tumblebeast-500.png" id="tumblebeast"
+       alt="{{ _('Tumblebeast from The Oatmeal (http://theoatmeal.com)') }}">
+
+  {% trans home_url=url('home') %}
+    <p>
+      Sorry, but we encountered an unexpected error and can't process your
+      request. You can try again by refreshing your browser or you can
+      <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Websites&component=mozillians.org">
+      file a bug</a> letting us know what happened and we'll get right on
+      fixing the problem.
+    </p>
+
+    <p>
+      If refreshing the page didn't work, you can <a href="{{ home_url }}">head
+      to the Mozillians home page</a> to find out more about Mozillians.
+      Sorry about this!
+    </p>
+  {% endtrans %}
+
+  <div class="clear"></div>
 
   <!--
     Error information:
