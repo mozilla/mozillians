@@ -7,7 +7,6 @@ from tower import ugettext_lazy as _lazy
 
 class AuthenticationForm(forms.Form):
     username = forms.CharField(required=True)
-
     password = forms.CharField(max_length=255, required=True)
 
 
@@ -26,7 +25,8 @@ class RegistrationForm(forms.Form):
 
     #recaptcha = captcha.fields.ReCaptchaField()
     optin = forms.BooleanField(
-            label=_lazy(u'I will bow before Zuul''s might.'),
+            label=_lazy(u"I'm okay with you handling this info as you "
+                        u'explain in your privacy policy.'),
             widget=forms.CheckboxInput(
             attrs=dict(css_class='checkbox')))
 
