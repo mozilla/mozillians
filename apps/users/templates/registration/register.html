@@ -39,10 +39,18 @@
             class="field {{ 'error' if form.errors[f.name] }}
             {{ f.field.widget.attrs['css_class'] }}">
           {{ f.label_tag() }}
+
+          {% if f.field.required %}
+            <span class="required" title="{{ _('This field is required.') }}">
+              *
+            </span>
+          {% endif %}
+
           {{ form.errors[f.name] }}
           {{ f }}
         </div>
       {% endfor %}
+
       {{ form.code }}
     </div>
 
