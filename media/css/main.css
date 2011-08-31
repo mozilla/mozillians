@@ -558,6 +558,11 @@ background-image: -moz-linear-gradient(
     padding: 20px 0 0;
 }
 
+#body-search .result h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
 /** Error pages (404, 500, csrf, etc.) */
 .error-page #tumblebeast {
     float: right;
