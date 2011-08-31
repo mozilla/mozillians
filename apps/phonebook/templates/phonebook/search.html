@@ -15,7 +15,7 @@
 
   <div class="blue-pastels">
     <form method="GET" id="search-form">
-      <input type="search" name="q"
+      <input type="search" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}"
         value="{% if form.cleaned_data %}{{form.cleaned_data.q}}{% endif %}"
         autofocus>
@@ -25,8 +25,14 @@
     </form>
 
     {% if size_exceeded_error %}
-      <h2>{{ _('Error') }}</h2>
-      <p>{{ _('Please make your search more specific. Too many results to display.') }}</p>
+      {% trans %}
+        <h2>Too Many Search Results</h2>
+
+        <p>
+          Sorry, but there were too many results to display.
+          Please make your search more specific.
+        </p>
+      {% endtrans %}
     {% else %}
       {% for person in people %}
         {# TODO We should reuse microformats like Domesday prototype #}
@@ -34,22 +40,28 @@
           <img src="{{ url('phonebook.profile_photo', person.unique_id) }}"
             alt="{{ _('Profile photo') }}" class="profile-photo">
 
-            <h2><a href="{{url('profile', person.unique_id) }}">
-                {{ person.full_name }}
-            </a></h2>
-          {% if person.voucher_unique_id %}<div><strong>Mozillian</strong></div>
-          {% else %}<div><strong>Pending...</strong></div>
+          <h2><a href="{{url('profile', person.unique_id) }}">
+              {{ person.full_name }}
+          </a></h2>
+
+          {% if person.voucher_unique_id %}
+            <h3 title="{{ _('This user is a vouched Mozillian.') }}">
+              {{ _('Mozillian') }}
+            </h3>
+          {% else %}
+            <h3 title="{{ _('This user has not yet been vouched.') }}">
+              {{ _('Pending') }}
+            </h3>
           {% endif %}
 
           <div class="clear"></div>
         </div>
       {% else %}
-        <p>
+        <p id="not-found">
           {% trans invite=url('invite') %}
-            The Mozillian you are looking for is not in the directory. Please check
-            your spelling or
-            <a href="{{ invite }}">invite this person</a>
-            to create a profile.
+            The Mozillian you are looking for is not in the directory.
+            Please check your spelling or
+            <a href="{{ invite }}">invite this person</a> to create a profile.
           {% endtrans %}
         </p>
       {% endfor %}
