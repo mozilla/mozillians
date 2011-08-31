@@ -58,22 +58,30 @@ dd {
 
 /** Common and utility classes */
 .blue-pastels {
-    background: url(../img/blue-pastels-bg.png) center no-repeat;
+    background: #bbdfec url(../img/blue-pastels-bottom.png) no-repeat bottom center;
+    border: 5px solid #fff;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    border-radius: 15px;
+    -moz-box-shadow: 1px 1px 5px #d9d9d9;
+    -webkit-box-shadow: 1px 1px 5px #d9d9d9;
+    box-shadow: 1px 1px 5px #d9d9d9;
     display: block;
-    height: 386px;
-    padding: 20px;
-    width: 688px;
+    margin: 5px 0 10px;
+    min-height: 204px;
+    padding: 15px 10px;
+    width: 690px;
 }
 
-.blue-pastels.small {
-    background-image: url(../img/blue-pastels-small-bg.png);
-    height: 275px;
-}
-
-.blue-pastels.tiny {
-    background-image: url(../img/blue-pastels-tiny-bg.png);
-    height: 173px;
-}
+    .blue-pastels:before {
+        background: url(../img/blue-pastels-top.png) no-repeat top center;
+        content: '';
+        display: block;
+        height: 204px;
+        margin: -15px 0 -204px -10px;
+        padding: 15px 0 0;
+        width: 710px;
+    }
 
     .blue-pastels h2 {
         color: #1e4262;
@@ -377,6 +385,10 @@ background-image: -moz-linear-gradient(
     position: relative;
 }
 
+#body-register .blue-pastels input {
+    clear: left;
+}
+
 #body-register #privacy-info {
     float: right;
     margin-top: 20px;
@@ -387,6 +399,11 @@ background-image: -moz-linear-gradient(
 #body-register #optin-container label {
     float: left;
     width: 275px;
+}
+
+#body-register #id_optin {
+    clear: none;
+    top: 3px;
 }
 
 #body-register #submit {
@@ -516,6 +533,7 @@ background-image: -moz-linear-gradient(
 
 #body-search #q {
     color: #4b4740;
+    display: inline-block;
     height: 14px;
     font-family: Georgia, Times, serif;
     font-size: 13px;
