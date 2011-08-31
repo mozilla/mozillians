@@ -31,7 +31,9 @@
     <button type="submit" class="button orange" id="submit">
       {{ _('Log in') }}
     </button>
-
+    <div id="fyp-container">
+      <a href="{{ url('password_reset') }}">{{ _('I forgot my password') }}</a>
+    </div>
     <div class="clear"></div>
   </form>
 {% endblock %}

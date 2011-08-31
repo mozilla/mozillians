@@ -42,6 +42,10 @@ from ldap.modlist import addModlist, modifyModlist
 from django.conf import settings
 from django.core import signing
 
+import commonware.log
+
+log = commonware.log.getLogger('i.larper')
+
 
 def get_password(request):
     """ Not sure if this and store_password belong here..."""
@@ -686,3 +690,47 @@ def _populate_any(results):
         dn, attrs = result
         people.append(Person.new_from_directory(attrs))
     return people
+
+
+def change_password(unique_id, oldpass, password):
+    """
+    Changes a user's password
+    """
+    dn = Person.dn(unique_id)
+
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    try:
+        conn.bind_s(dn, oldpass)
+
+        conn.passwd_s(dn, None, password)
+        log.debug("Changed %s password" % dn)
+        return True
+    except Exception, e:
+        log.error("Password change failed %s", e)
+        return False
+    finally:
+        conn.unbind()
+
+
+def set_password(username, password):
+    """
+    Careful! This function has the capability to change
+    anyone's password. It should only be used for
+    un-authenticated users from the reset-password email
+    flow.
+
+    If the user is authenticated, then use the change_password
+    method above.
+    """
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    try:
+        conn.bind_s(settings.LDAP_ADMIN_DN,
+                    settings.LDAP_ADMIN_PASSWORD)
+        search_filter = filter_format("(uid=%s)", (username,))
+        rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                           search_filter)
+        for dn, attrs in rs:
+            conn.passwd_s(dn, None, password)
+            log.debug("Resetting %s password" % dn)
+    finally:
+        conn.unbind()
