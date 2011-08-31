@@ -37,6 +37,13 @@
             {{ form[f].field.widget.attrs['css_class'] }}">
 
             {{ form[f].label_tag() }}
+
+            {% if form[f].field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+            {% endif %}
+
             {{ form.errors[f] }}
             {{ form[f] }}
           </div>
@@ -47,6 +54,13 @@
             src="{{ url('phonebook.profile_photo', person.unique_id) }}">
 
           {{ form['photo'].label_tag() }}
+
+          {% if form['photo'].field.required %}
+            <span class="required" title="{{ _('This field is required.') }}">
+              *
+            </span>
+          {% endif %}
+
           {{ form.errors['photo'] }}
           {{ form['photo'] }}
 
@@ -63,6 +77,13 @@
             {{ form[f].field.widget.attrs['css_class'] }}">
 
             {{ form[f].label_tag() }}
+
+            {% if form[f].field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+            {% endif %}
+
             {{ form.errors[f] }}
             {{ form[f] }}
           </div>
@@ -77,7 +98,7 @@
 
         <div class="clear"></div>
 
-        <a href="{{ url('password_change') }}" class="button blue small">
+        <a href="{{ url('password_change') }}">
           {{ _('Change Password') }}
         </a>
       </div>

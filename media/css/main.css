@@ -144,6 +144,7 @@ dd {
         border-bottom: 0;
         clear: both;
         color: #4b4740;
+        display: block;
         height: 14px;
         font-family: Georgia, Times, serif;
         font-size: 13px;
@@ -394,6 +395,10 @@ background-image: -moz-linear-gradient(
 }
 
 /** Edit Profile Page (Step 2: Edit Profile) */
+#body-edit-profile #id_biography {
+    resize: vertical;
+}
+
 #body-edit-profile #irc_nickname_unique_id-container {
    /* HACK: Hack out fields that ought be invisible */
     display: none;
@@ -409,6 +414,9 @@ background-image: -moz-linear-gradient(
 }
 
 #body-edit-profile #id_photo {
+    clear: right;
+    float: left;
+    margin: 0 0 0 5px;
     width: 240px;
 }
 
