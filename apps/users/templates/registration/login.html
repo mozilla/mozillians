@@ -11,7 +11,7 @@
   <form method="post" action="{{ url('login') }}?next={{ redirect }}">
     {{ csrf() }}
 
-    <div class="blue-pastels tiny">
+    <div class="blue-pastels">
       <div id="username-container"
         class="field {{ 'error' if form.errors['username'] }}">
         <label for="id_username">{{ _('Email') }}</label>
