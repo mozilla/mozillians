@@ -2,10 +2,13 @@
 
 # Django settings for the mozillians project.
 import ldap
+import logging
 
 from django_auth_ldap.config import _LDAPConfig, LDAPSearch
 
-from funfactory.settings_base import *
+from funfactory.manage import path
+from funfactory import settings_base as base
+from settings import pre
 
 ## Log settings
 SYSLOG_TAG = "http_app_mozillians"
@@ -56,7 +59,7 @@ MINIFY_BUNDLES = {
 }
 
 
-MIDDLEWARE_CLASSES = list(MIDDLEWARE_CLASSES) + [
+MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'larper.middleware.LarperMiddleware',
 ]
 
@@ -79,7 +82,7 @@ AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
 
-INSTALLED_APPS = list(INSTALLED_APPS) + [
+INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'landing',
     'phonebook',
     'users',
@@ -117,4 +120,11 @@ CACHES = {
         'LOCATION': '127.0.0.1:11211',
     }
 }
+
+#: Userpics will be uploaded here.
+USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
+
+#: Userpics will accessed here.
+USERPICS_URL = pre.UPLOAD_URL + '/userpics'
+
 
