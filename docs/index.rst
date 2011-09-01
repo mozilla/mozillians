@@ -21,6 +21,7 @@ Contents:
    :maxdepth: 2
 
    installation
+   settings
    sessions
    registration
    invites
