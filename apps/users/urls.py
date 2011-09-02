@@ -29,8 +29,8 @@ urlpatterns = patterns('',
         name='password_reset_check_mail'),
 
     url(r'^password_reset_confirm/(?P<uidb36>[0-9A-Za-z]{1,13})-(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-     views.password_reset_confirm,
-     name='password_reset_confirm'),
+        views.password_reset_confirm,
+        name='password_reset_confirm'),
 
     url(r'^password_reset_complete$', auth_views.password_reset_complete,
         name='password_reset_complete'),

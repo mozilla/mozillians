@@ -2,8 +2,6 @@ from django import forms
 from django.forms.util import ErrorList
 from django.template import loader
 from django.utils.http import int_to_base36
-
-
 from django.contrib import auth
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
@@ -61,17 +59,17 @@ class RegistrationForm(forms.Form):
 
 
 class PasswordChangeForm(auth.forms.PasswordChangeForm):
-    """ Do LDAP goodness instead of RDBMS goodness. """
+    """Do LDAP goodness instead of RDBMS goodness."""
 
     def clean_old_password(self):
-        """ Do a bind with email and old_password to make sure everything
-        is good to go. """
-        username = self.user.username
-        password = self.cleaned_data.get('old_password')
-        user = auth.authenticate(username=username,
-                                 password=password)
+        """
+        Do a bind with email and old_password to make sure old
+        credentials are valid.
+        """
+        user = auth.authenticate(self.user.username, self.cleaned_data.get('old_password'))
+
         if user:
-            log.info("Old Password is good")
+            log.debug("Old Password is good")
             return password
         else:
             log.info("Auth with old password failed.")
@@ -87,6 +85,7 @@ class PasswordChangeForm(auth.forms.PasswordChangeForm):
         if rv:
             return self.user
         else:
+            log.error("Unable to change password for %s" % self.user.unique_id)
             raise Exception("Unknown error changing password")
 
 
@@ -111,7 +110,7 @@ class PasswordResetForm(auth.forms.PasswordResetForm):
              from_email=None, request=None):
         """
         Generates a one-use only link for resetting password
-        and sends to the user
+        and sends to the user.
         """
         from django.core.mail import send_mail
         for user in self.users_cache:
