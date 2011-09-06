@@ -8,7 +8,7 @@ from django_auth_ldap.config import _LDAPConfig, LDAPSearch
 
 from funfactory.manage import path
 from funfactory import settings_base as base
-from settings import pre
+from settings import initial as pre
 
 ## Log settings
 SYSLOG_TAG = "http_app_mozillians"

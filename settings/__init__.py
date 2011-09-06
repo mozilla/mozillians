@@ -1,5 +1,5 @@
 from funfactory.settings_base import *
-from settings.pre import *
+from settings.initial import *
 from settings.default import *
 
 try:
