@@ -66,7 +66,9 @@ class PasswordChangeForm(auth.forms.PasswordChangeForm):
         Do a bind with email and old_password to make sure old
         credentials are valid.
         """
-        user = auth.authenticate(self.user.username, self.cleaned_data.get('old_password'))
+        password = self.cleaned_data.get('old_password')
+        user = auth.authenticate(username=self.user.username, 
+                                 password=password)
 
         if user:
             log.debug("Old Password is good")

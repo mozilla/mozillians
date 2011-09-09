@@ -33,6 +33,7 @@ PROTOCOL = "https://"
 PORT = 443
 
 ## Media and templates.
+TEMPLATE_DIRS = (path('apps/users/templates'), )
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
