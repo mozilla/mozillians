@@ -190,6 +190,10 @@ dd {
         top: -3px;
     }
 
+.button {
+    cursor: pointer;
+}
+
 .button.blue {
     border-color: #52adcc;
 background-image: -webkit-gradient(
