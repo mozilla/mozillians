@@ -22,3 +22,4 @@ puppet/manifests/build/
 vagrantconfig_local.yaml
 docs/_build
 settings/*local.py
+directory

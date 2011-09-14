@@ -1,5 +1,0 @@
-# build the test server and load test data
-
-x-load-ldif -a ../migrations/01-mozillians-structure.ldif
-x-load-ldif -a ../testsuite/mozillians-sample-data.ldif
-x-load-ldif -a ../testsuite/mozillians-bulk-test-data.ldif

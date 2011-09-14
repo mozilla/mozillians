@@ -1,4 +1,0 @@
-serverurl=ldap://:1389/
-basedn=dc=mozillians,dc=org
-manager=cn=root,dc=mozillians,dc=org
-password=secret
