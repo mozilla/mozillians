@@ -12,6 +12,7 @@ from tower import ugettext as _
 
 from larper import RegistrarSession
 from phonebook.models import Invite
+from session_csrf import anonymous_csrf
 from users import forms
 from funfactory.urlresolvers import reverse
 
@@ -20,6 +21,7 @@ log = commonware.log.getLogger('m.users')
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
 
+@anonymous_csrf
 def register(request):
     initial = {}
     if 'code' in request.GET:
