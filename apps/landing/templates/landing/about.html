@@ -10,7 +10,7 @@
   <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
     alt="{{ _('Photo collage of Mozillians') }}">
 
-  {% trans create_profile_url=url('register') %}
+  {% trans create_profile_url=url('register'), locale=LANG %}
     <p>
       Mozillians are people who volunteer their time to advance the Mozilla
       mission. They're dedicated to promoting openness, innovation and
@@ -38,7 +38,10 @@
         beginning. We want to make sure we provide Mozillians with the best
         experience possible, from the way the site is built to the way we vouch
         for new users before they can access data that should only be available
-        to other Mozillians. Read our Privacy Policy for more information.
+        to other Mozillians. Read our
+        <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html">
+          Privacy Policy
+        </a> for more information.
       </p>
     </section>
 
@@ -48,8 +51,10 @@
       <p>
         The community directory is also a community project and you are welcome
         to get involved to help us make it even better or to integrate it into
-        other community tools. Get in touch with us on the Mozillians forums
-        (link) to learn how.
+        other community tools. Get in touch with us on the
+        <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">
+          Mozillians forums
+        </a> to learn how.
       </p>
     </section>
 
