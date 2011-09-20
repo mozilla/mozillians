@@ -10,7 +10,7 @@
   <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
     alt="{{ _('Photo collage of Mozillians') }}">
 
-  {% trans create_profile_url=url('register'), locale=LANG %}
+  {% trans %}
     <p>
       Mozillians are people who volunteer their time to advance the Mozilla
       mission. They're dedicated to promoting openness, innovation and
@@ -24,12 +24,17 @@
       Want to find Mozillians in Auckland for a meetup? Need an expert XPCOM
       hacker to review a patch? That's exactly what this site is for.
     </p>
+  {% endtrans %}
 
-    <a href="{{ create_profile_url }}" id="create-profile"
-      class="button orange">Create Profile</a>
+  {% if user.is_anonymous() %}
+    <a href="{{ url('register') }}" id="create-profile" class="button orange">
+      {{ _('Create Profile') }}
+    </a>
+  {% endif %}
 
-    <div class="clear"></div>
+  <div class="clear"></div>
 
+  {% trans locale=LANG %}
     <section id="privacy" class="key-info">
       <h2>Privacy First</h2>
 
