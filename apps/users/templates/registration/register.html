@@ -37,7 +37,7 @@
       {% for f in form.visible_fields() %}
         <div id="{{ f.name }}-container"
             class="field {{ 'error' if form.errors[f.name] }}
-            {{ f.field.widget.attrs['css_class'] }}">
+            {{ f.field.widget.attrs['class'] }}">
           {{ f.label_tag() }}
 
           {% if f.field.required %}

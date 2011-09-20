@@ -37,8 +37,7 @@ class RegistrationForm(forms.Form):
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
                         u'explain in your privacy policy.'),
-            widget=forms.CheckboxInput(
-            attrs=dict(css_class='checkbox')))
+            widget=forms.CheckboxInput(attrs={'class': 'checkbox'}))
 
     def clean(self):
         super(RegistrationForm, self).clean()
@@ -60,6 +59,14 @@ class RegistrationForm(forms.Form):
 
 class PasswordChangeForm(auth.forms.PasswordChangeForm):
     """Do LDAP goodness instead of RDBMS goodness."""
+
+    def __init__(self, *args, **kwargs):
+        """Override the __init__ method to change form labels"""
+        super(PasswordChangeForm, self).__init__(*args, **kwargs)
+
+        self.fields['old_password'].label = _lazy(u'Verify your old password')
+        self.fields['new_password1'].label = _lazy(u'Enter a new password')
+        self.fields['new_password2'].label = _lazy(u'Confirm new password')
 
     def clean_old_password(self):
         """
