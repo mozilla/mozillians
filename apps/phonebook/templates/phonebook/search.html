@@ -16,12 +16,11 @@
   <div class="blue-pastels">
     <form method="GET" id="search-form">
       <input type="search" name="q" id="q"
-        placeholder="{{ _('Name, IRC Nick, or Email') }}"
-        value="{% if form.cleaned_data %}{{form.cleaned_data.q}}{% endif %}"
-        autofocus>
-        <button type="submit" class="button orange small">
-          {{ _('Search') }}
-        </button>
+        placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
+        value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
+      <button type="submit" class="button orange small">
+        {{ _('Search') }}
+      </button>
     </form>
 
     {% if size_exceeded_error %}
