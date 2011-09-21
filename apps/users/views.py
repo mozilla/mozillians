@@ -133,6 +133,11 @@ def _save_new_user(request, form):
         invite.save()
 
     user = auth.authenticate(username=username, password=password)
+    # Should never happen
+    if not user or not user.is_authenticated():
+        msg = "Authentication for new user [%s] with password len %d failed" %\
+            (username, len(password))
+        raise Exception(msg)
     auth.login(request, user)
 
     return uniq_id
