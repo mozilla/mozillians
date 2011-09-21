@@ -48,22 +48,34 @@
               <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
             </li>
           {% endif %}
-          <li><a id="logout" href="{{ url('logout') }}?next={{ url('login') }}">{{ _('Log Out') }}</a></li>
+          <li>
+            <a id="logout" href="{{ url('logout') }}?next={{ url('login') }}">
+              {{ _('Log Out') }}
+            </a>
+          </li>
         {% else %}
-          <li><a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a></li>
-          <li><a id="register" href="{{ url('register') }}">{{ _('Join Us') }}</a></li>
+          <li>
+            <a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a>
+          </li>
+          <li>
+            <a id="register" href="{{ url('register') }}">
+              {{ _('Join Us') }}
+            </a>
+          </li>
         {% endif %}
       </ul>
     </nav>
 
     {% if user.is_authenticated() and user.is_vouched() %}
-      {% block search %}<form id="quick-search" action="{{ url('phonebook.search') }}"
-          method="GET">
-        <input type="search" id="q" name="q"
-          placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus>
-        <input type="image" src="{{ MEDIA_URL }}img/mozilla/search-submit.png"
-          alt="{{ _('Search') }}" id="quick-search-btn">
-      </form>{% endblock %}
+      {% block search %}
+        <form id="quick-search" action="{{ url('phonebook.search') }}"
+              method="GET">
+          <input type="search" id="q" name="q"
+                 placeholder="{{ _('Name, IRC Nick, or Email') }}">
+          <input type="image" alt="{{ _('Search') }}" id="quick-search-btn"
+                 src="{{ MEDIA_URL }}img/mozilla/search-submit.png">
+        </form>
+      {% endblock %}
     {% endif %}
   </div>
 </header>
