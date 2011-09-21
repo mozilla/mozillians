@@ -156,6 +156,10 @@ def _get_services_fields(ldap, unique_id):
     return dict(irc_nickname=irc_nick,
                 irc_nickname_unique_id=irc_nick_unique_id,)
 
+def confirm_delete(request):
+    """TODO write me"""
+    pass
+
 
 class UNAUTHORIZED_DELETE(Exception):
     pass
