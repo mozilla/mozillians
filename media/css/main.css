@@ -499,6 +499,7 @@ background-image: -moz-linear-gradient(
 
 #body-profile #profile-photo {
     border: 1px solid #226b87;
+    display: inline-block;
     float: left;
     margin: 0 25px 0 0;
     max-height: 175px;
@@ -507,9 +508,17 @@ background-image: -moz-linear-gradient(
 
 #body-profile #edit-profile {
     float: right;
+    margin-top: -30px;
+    position: relative;
+    top: 30px;
 }
 
-#profile-info .vouched {
+#body-profile #profile-info {
+    float: left;
+    width: 445px;
+}
+
+#body-profile #profile-info .vouched {
     background: url(../img/icon-person.png) center right no-repeat;
     padding-right: 22px;
 }

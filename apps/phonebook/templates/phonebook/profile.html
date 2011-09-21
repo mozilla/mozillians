@@ -58,51 +58,53 @@
       </a>
     {% endif %}
 
-    <h2>
-      {% if person.voucher %}
-        {{ _('Mozillian Profile') }}
-      {% else %}
-        {{ _('Pending Profile') }}
-      {% endif %}
-    </h2>
+    <div id="profile-info">
+      <h2>
+        {% if person.voucher %}
+          {{ _('Mozillian Profile') }}
+        {% else %}
+          {{ _('Pending Profile') }}
+        {% endif %}
+      </h2>
 
-    <dl id="profile-info">
-      {% if person.username %}
-        <dt>{{ _('Email') }}</dt>
-        <dd><a href="mailto:{{ person.username }}">
-          {{ person.username }}
-        </a></dd>
-      {% endif %}
+      <dl>
+        {% if person.username %}
+          <dt>{{ _('Email') }}</dt>
+          <dd><a href="mailto:{{ person.username }}">
+            {{ person.username }}
+          </a></dd>
+        {% endif %}
 
-      {% if person.irc_nickname %}
-        <dt>{{_('IRC Nickname') }}</dt>
-        <dd><a class="url" rel="me" href="{{ person.irc_nickname.service_uri }}">
-          {{person.irc_nickname.service_id}}
-        </a></dd>
-      {% endif %}
+        {% if person.irc_nickname %}
+          <dt>{{_('IRC Nickname') }}</dt>
+          <dd><a class="url" rel="me" href="{{ person.irc_nickname.service_uri }}">
+            {{person.irc_nickname.service_id}}
+          </a></dd>
+        {% endif %}
 
-      {% for uri, service in services.items() %}
-        <dt>{{ service.service_uri }}</dt>
-        <dd><a class="url" rel="me" href="{{ service.service_uri }}">
-          {{ service.service_id }}
-        </a></dd>
-      {% endfor %}
+        {% for uri, service in services.items() %}
+          <dt>{{ service.service_uri }}</dt>
+          <dd><a class="url" rel="me" href="{{ service.service_uri }}">
+            {{ service.service_id }}
+          </a></dd>
+        {% endfor %}
 
-      {% if person.voucher %}
-        <dt>{{ _('Vouched by') }}</dt>
-        <dd>
-        <a href="{{ url('profile', person.voucher.unique_id) }}"
-          class="vouched">
-            {{ person.voucher.full_name }}
-          </a>
-        </dd>
-      {% elif user.username == person.username %}
-        <dt>{{ _('Pending...') }}</dt>
-        <dd><a href="{{ url('confirm_register') }}">
-          {{ _('Vouch for me') }}
-        </a></dd>
-      {% endif %}
-    </dl>
+        {% if person.voucher %}
+          <dt>{{ _('Vouched by') }}</dt>
+          <dd>
+          <a href="{{ url('profile', person.voucher.unique_id) }}"
+            class="vouched">
+              {{ person.voucher.full_name }}
+            </a>
+          </dd>
+        {% elif user.username == person.username %}
+          <dt>{{ _('Pending...') }}</dt>
+          <dd><a href="{{ url('confirm_register') }}">
+            {{ _('Vouch for me') }}
+          </a></dd>
+        {% endif %}
+      </dl>
+    </div>
 
     <div class="clear"></div>
 
