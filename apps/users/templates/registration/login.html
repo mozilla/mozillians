@@ -12,6 +12,11 @@
     {{ csrf() }}
 
     <div class="blue-pastels">
+      {% if form.errors %}
+        {% for key in form.errors %}
+          <p class="form-errors">{{form.errors[key]}}</p>
+        {% endfor %}
+      {% endif %}
       <div id="username-container"
         class="field {{ 'error' if form.errors['username'] }}">
         <label for="id_username">{{ _('Email') }}</label>
