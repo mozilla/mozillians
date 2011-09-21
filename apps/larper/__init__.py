@@ -127,7 +127,18 @@ class UserSession(object):
         if they don't auth against the user in the session.
         """
         unique_id = self.request.user.unique_id
-        return (Person.dn(unique_id), get_password(self.request))
+        password = get_password(self.request)
+        if unique_id and password:            
+            return (Person.dn(unique_id), password)
+        else:
+            # Should never happen
+            if unique_id == None:
+                raise Exception("No unique id on the request.user object")
+            elif password == None:
+                raise Exception("No password in the session")
+            else:
+                raise Exception("unique_id [%s] password length [%d]" %\
+                                    (unique_id, len(password)))
 
     def search(self, query):
         """
