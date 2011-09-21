@@ -97,8 +97,6 @@ class UserSession(object):
     """
     def __init__(self, request):
         self.request = request
-        self.conn = None
-        self._is_bound = False
 
     def _ensure_conn(self, mode):
         """
@@ -106,22 +104,20 @@ class UserSession(object):
         if any of the LDAP operations will include
         adding, modifying, or deleting entires.
         """
-        if not self.conn:
+        dn, password = self.dn_pass()
+        if not hasattr(self.request, CONNECTIONS_KEY):
+            self.request.larper_conns = [{}, {}]
+        if dn not in self.request.larper_conns[mode]:
             if mode == WRITE:
                 server_uri = settings.LDAP_SYNC_PROVIDER_URI
             else:
                 server_uri = settings.LDAP_SYNC_CONSUMER_URI
-            self.conn = ldap.initialize(server_uri)
+            conn = ldap.initialize(server_uri)
 
-        if not self._is_bound:
-            dn, password = self.dn_pass()
-            self.conn.bind_s(dn, password)
-            self._is_bound = True
-            if not hasattr(self.request, CONNECTIONS_KEY):
-                self.request.larper_conns = [{}, {}]
-            if dn not in self.request.larper_conns[0]:
-                self.request.larper_conns[mode][dn] = self.conn
-        return self.conn
+            conn.bind_s(dn, password)
+            self.request.larper_conns[mode][dn] = conn
+        
+        return self.request.larper_conns[mode][dn]
 
     def dn_pass(self):
         """
@@ -349,10 +345,12 @@ class UserSession(object):
         * RegistrarSession instances
         """
         if hasattr(request, CONNECTIONS_KEY):
-            for conns in request.larper_conns:
-                for dn in conns.keys():
-                    conns[dn].unbind()
-                    del conns[dn]
+            # Each mode (read/write)
+            conns = request.larper_conns
+            for i in range(len(conns)):
+                for dn in conns[i].keys():
+                    conns[i][dn].unbind()
+                    del request.larper_conns[i][dn]
 
 
 class Person(object):

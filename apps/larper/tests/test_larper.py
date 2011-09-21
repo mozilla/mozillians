@@ -196,3 +196,61 @@ class TestRegistrarSession(TestLarper):
 
         self.assertRaises(larper.NO_SUCH_PERSON, lambda:\
                               directory.get_by_unique_id(new_unique_id))
+
+
+class TestConnectionPooling(test_utils.TestCase):
+    def test_connection_pooling(self):
+        # Don't use _mock_request, nor TestLarper since we want full control
+        # over the request to find pooling bugs
+        rf = RequestFactory()
+        request = rf.get('/en-US')
+        request.session = {}
+        request.user = MockUser('u000001@mozillians.org', '7f3a67u000001')
+
+        larper.store_password(request, 'secret')
+
+        R = larper.READ
+        W = larper.WRITE
+
+        directory = UserSession.connect(request)
+        self.assertFalse(hasattr(request, 'larper_conns'))
+
+        regi = RegistrarSession.connect(request)
+        self.assertFalse(hasattr(request, 'larper_conns'))
+
+        regi_W_conn = regi._ensure_conn(W)
+        regi_W_conn2 = regi._ensure_conn(W)
+
+        self.assertIs(regi_W_conn, regi_W_conn2)
+        self.assertTrue(hasattr(request, 'larper_conns'))
+        self.assertEqual(len(request.larper_conns[R].keys()), 0)
+        self.assertEqual(len(request.larper_conns[W].keys()), 1)
+
+        dir_W_conn = directory._ensure_conn(W)
+        dir_W_conn2 = directory._ensure_conn(W)
+
+        self.assertIs(dir_W_conn, dir_W_conn2)
+        self.assertEqual(len(request.larper_conns[R].keys()), 0)
+        self.assertEqual(len(request.larper_conns[W].keys()), 2)
+
+        dir_R_conn = directory._ensure_conn(R)
+
+        admin = AdminSession.connect(request)
+        admin_R_conn = admin._ensure_conn(R)
+        admin_R_conn2 = admin._ensure_conn(R)
+        admin_W_conn = admin._ensure_conn(W)
+
+        self.assertIs(admin_R_conn, admin_R_conn2)
+        self.assertIsNot(admin_R_conn, admin_W_conn)
+
+        for conn in (regi_W_conn, dir_R_conn, admin_R_conn, admin_W_conn):
+            # nor is it dir_R_conn2 or admin_R_conn2
+            self.assertIsNot(dir_W_conn, conn)
+
+        self.assertEqual(len(request.larper_conns[R].keys()), 2)
+        self.assertEqual(len(request.larper_conns[W].keys()), 3)
+
+        directory.disconnect(request)
+
+        self.assertEqual(len(request.larper_conns[R].keys()), 0)
+        self.assertEqual(len(request.larper_conns[W].keys()), 0)
