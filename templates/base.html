@@ -43,7 +43,11 @@
               {{ _('Profile') }}
             </a>
           </li>
-          <li><a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+          {% if user.is_vouched() %}
+            <li>
+              <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
+            </li>
+          {% endif %}
           <li><a id="logout" href="{{ url('logout') }}?next={{ url('login') }}">{{ _('Log Out') }}</a></li>
         {% else %}
           <li><a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a></li>
