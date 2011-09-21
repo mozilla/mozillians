@@ -97,11 +97,6 @@
               {{ person.voucher.full_name }}
             </a>
           </dd>
-        {% elif user.username == person.username %}
-          <dt>{{ _('Pending...') }}</dt>
-          <dd><a href="{{ url('confirm_register') }}">
-            {{ _('Vouch for me') }}
-          </a></dd>
         {% endif %}
       </dl>
     </div>

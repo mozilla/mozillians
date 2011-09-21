@@ -19,7 +19,7 @@ from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
 
-log = commonware.log.getLogger('i.phonebook')
+log = commonware.log.getLogger('m.phonebook')
 
 def vouch_required(f):
     """
