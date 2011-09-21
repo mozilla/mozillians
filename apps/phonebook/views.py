@@ -116,8 +116,7 @@ def _edit_profile(request, unique_id, new_account):
         log.info('profile_uid Sending 404 for [%s]' % unique_id)
         raise Http404
 
-    del_form = forms.DeleteForm(
-        initial=dict(unique_id=unique_id))
+    del_form = forms.DeleteForm(initial=dict(unique_id=unique_id))
 
     if person:
         if request.user.unique_id != person.unique_id:
@@ -162,14 +161,16 @@ def _get_services_fields(ldap, unique_id):
     return dict(irc_nickname=irc_nick,
                 irc_nickname_unique_id=irc_nick_unique_id,)
 
-@login_required
-def confirm_delete(request):
-    """TODO write me"""
-    pass
-
 
 class UNAUTHORIZED_DELETE(Exception):
     pass
+
+
+@login_required
+def confirm_delete(request):
+    """Display a confirmation page asking the user if they want to leave."""
+    del_form = forms.DeleteForm(initial=dict(unique_id=request.user.unique_id))
+    return render(request, 'phonebook/confirm_delete.html', {'form': del_form})
 
 
 @require_POST

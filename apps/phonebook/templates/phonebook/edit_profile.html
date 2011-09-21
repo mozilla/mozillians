@@ -124,7 +124,8 @@
 
   {% if user.username == person.username %}
     <div id="manage-profile">
-      <a class="button red small" href="{{ url('confirm_delete') }}">
+      <a class="button red small" href="{{ url('confirm_delete') }}"
+         id="delete-profile">
         {{ _('Delete Profile') }}
       </a>
 

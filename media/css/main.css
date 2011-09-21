@@ -3,6 +3,7 @@
     position: absolute;
     top: 0;
 }
+
 html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
     left: 0;
     right: -9999px;
@@ -574,6 +575,21 @@ background-image: -moz-linear-gradient(
 #body-search .result h3 {
     font-size: 16px;
     margin: 0;
+}
+
+/** Confirm Profile Delete */
+#body-confirm-delete #are-you-sure {
+    font-size: 24px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+#body-confirm-delete #actions {
+    text-align: center;
+}
+
+#body-confirm-delete #delete-action {
+    margin-left: 30px;
 }
 
 /** Error pages (404, 500, csrf, etc.) */

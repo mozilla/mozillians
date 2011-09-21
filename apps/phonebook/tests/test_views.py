@@ -2,11 +2,12 @@ from uuid import uuid4
 
 from django import test
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 from pyquery import PyQuery as pq
 import test_utils
 
 from funfactory.urlresolvers import reverse
+from phonebook.tests import LDAPTestCase
 from phonebook.views import UNAUTHORIZED_DELETE
 
 # The test data (below in module constants) must matches data in
@@ -21,39 +22,70 @@ AMANDA_NAME = 'Amanda Younger'
 PASSWORD = 'secret'
 
 
-class TestViews(test_utils.TestCase):
+class TestDeleteUser(LDAPTestCase):
+    """Separate test class used to test account deletion flow.
+
+    We create a separate class to delete a user because other tests depend
+    on Mozillian users existing.
+    """
+    def test_confirm_delete(self):
+        """Test the account deletion flow, including confirmation.
+
+        A user should not be presented with a form/link that allows them to
+        delete their account without a confirmation page. Once they access that
+        page, they should be presented with a link to "go back" to their
+        profile or to permanently delete their account.
+
+        This test is abstracted away to a generic user deletion flow so
+        we can test both non-vouched and vouched user's ability to delete
+        their own profile.
+        """
+        for user in [MOZILLIAN, PENDING]:
+            self._delete_flow(user)
+
+    def _delete_flow(self, user):
+        """Private method used to walk through account deletion flow."""
+        client = _mozillian_client(user['email'])
+        uniq_id = user['uniq_id']
+
+        r = client.get(reverse('phonebook.edit_profile', args=[uniq_id]))
+        doc = pq(r.content)
+
+        # Make sure there's a link to a confirm deletion page, and nothing
+        # pointing directly to the delete URL.
+        eq_(reverse('confirm_delete'), doc('#delete-profile').attr('href'),
+            'We see a link to a confirmation page.')
+        self.assertFalse(any((reverse('phonebook.delete_profile') in el.action)
+                              for el in doc('#main form')),
+            "We don't see a form posting to the account delete URL.")
+
+        # Follow the link to the deletion confirmation page.
+        r = client.get(doc('#delete-profile').attr('href'))
+
+        # Test that we can go back (i.e. cancel account deletion).
+        doc = pq(r.content)
+        eq_(reverse('phonebook.edit_profile', args=[uniq_id]),
+            doc('#cancel-action').attr('href'))
+
+        # Test that account deletion works.
+        delete_url = doc('#delete-action').closest('form').attr('action')
+        r = client.post(delete_url, {'unique_id': uniq_id}, follow=True)
+        eq_(200, r.status_code)
+        self.assertFalse(_logged_in_html(r))
+
+        # Make sure the user can't login anymore
+        client = test.Client()
+        data = dict(username=user['email'], password=PASSWORD)
+        r = client.post(reverse('login'), data, follow=True)
+        self.assertFalse(_logged_in_html(r))
+
+
+class TestViews(LDAPTestCase):
     def setUp(self):
-        """
-        We'll use multiple clients at the same time.
-        """
+        """Create multiple test clients of varying authorization levels."""
         self.anon_client = self.client
-        self.pending_client = self._pending_user()
-        self.mozillian_client = self._mozillian_user()
-
-    def _pending_user(self):
-        client = test.Client()
-        # We can't use client.login for these tests
-        url = reverse('login')
-        data = dict(username=PENDING['email'], password=PASSWORD)
-        client.post(url, data, follow=True)
-
-        # HACK Something is seriously hozed here...
-        # First visit to /login always fails, so we make
-        # second request... WTF
-        client = test.Client()
-        url = reverse('login')
-        r = client.post(url, data, follow=True)
-        eq_(PENDING['email'], str(r.context['user']))
-        return client
-
-    def _mozillian_user(self):
-        client = test.Client()
-        # We can't use c.login for these tests
-        url = reverse('login')
-        data = dict(username=MOZILLIAN['email'], password=PASSWORD)
-        r = client.post(url, data, follow=True)
-        eq_(MOZILLIAN['email'], str(r.context['user']))
-        return client
+        self.pending_client = _mozillian_client(PENDING['email'])
+        self.mozillian_client = _mozillian_client(MOZILLIAN['email'])
 
     def test_anonymous_home(self):
         r = self.anon_client.get('/', follow=True)
@@ -205,6 +237,18 @@ class TestViews(test_utils.TestCase):
 def _logged_in_html(response):
     doc = pq(response.content)
     return doc('a#logout') and doc('a#profile')
+
+
+def _mozillian_client(email, password=PASSWORD):
+    """Create and return an authorized Mozillian test client."""
+    client = test.Client()
+
+    # We can't use c.login for these tests because of some LDAP strangeness,
+    # so we manually login with a POST request. (TODO: Fix this.)
+    r = client.post(reverse('login'), dict(username=email, password=password),
+                    follow=True)
+    eq_(email, str(r.context['user']))
+    return client
 
 
 def _create_new_user():
