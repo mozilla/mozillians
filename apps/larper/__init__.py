@@ -175,7 +175,7 @@ class UserSession(object):
         """
         q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
         results = self._search(q)
-        msg = 'Unable to locale %s in the LDAP directory'
+        msg = 'Unable to locate %s in the LDAP directory'
         if 0 == len(results):
             raise NO_SUCH_PERSON(msg % unique_id)
         elif 1 == len(results):
