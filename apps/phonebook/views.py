@@ -110,7 +110,11 @@ def edit_new_profile(request, unique_id):
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
-    person = ldap.get_by_unique_id(unique_id)
+    try:
+        person = ldap.get_by_unique_id(unique_id)
+    except NO_SUCH_PERSON:
+        log.info('profile_uid Sending 404 for [%s]' % unique_id)
+        raise Http404
 
     del_form = forms.DeleteForm(
         initial=dict(unique_id=unique_id))
