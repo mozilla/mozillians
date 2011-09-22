@@ -41,7 +41,7 @@ LDAP_REGISTRAR_DN = 'uid=regAgent,ou=accounts,ou=system,dc=mozillians,dc=org'
 LDAP_REGISTRAR_PASSWORD = 'secret'
 
 #### django-auth-ldap ####
-AUTH_LDAP_SERVER_URI = LDAP_SYNC_CONSUMER_URI
+AUTH_LDAP_SERVER_URI = LDAP_SYNC_PROVIDER_URI
 
 # Simple bind user
 AUTH_LDAP_BIND_DN = ""
