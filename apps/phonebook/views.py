@@ -89,6 +89,7 @@ def _profile(request, person):
                              services=services))
 
 
+@login_required
 def edit_profile(request, unique_id):
     """
     View for editing a profile, typically the user's own.
@@ -102,6 +103,7 @@ def edit_profile(request, unique_id):
     return _edit_profile(request, unique_id, False)
 
 
+@login_required
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
 
@@ -156,6 +158,7 @@ def _get_services_fields(ldap, unique_id):
     return dict(irc_nickname=irc_nick,
                 irc_nickname_unique_id=irc_nick_unique_id,)
 
+@login_required
 def confirm_delete(request):
     """TODO write me"""
     pass
@@ -191,6 +194,7 @@ def _user_owns_account(request, form):
     return request.user.unique_id == uniq_id_to_delete
 
 
+@login_required
 def search(request):
     people = []
     size_exceeded = False
