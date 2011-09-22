@@ -20,7 +20,7 @@ UPLOAD_URL = '/uploads'
 SITE_URL = 'http://mozillians.localhost.net.ru'
 
 try:
-    from settings.pre_local import *
+    from settings.initial_local import *
 except ImportError:
     pass
 
