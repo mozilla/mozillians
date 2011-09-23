@@ -46,6 +46,7 @@ def is_vouched(request):
     def f():
         if not hasattr(user, 'person'):
             directory = UserSession.connect(request)
+            # Stale data okay
             user.person = directory.get_by_unique_id(user.unique_id)
         return bool(user.person.voucher_unique_id)
     return f

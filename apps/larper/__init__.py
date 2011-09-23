@@ -168,13 +168,16 @@ class UserSession(object):
                           (encoded_q, encoded_q,))
         return _populate_any(self._search(q))
 
-    def get_by_unique_id(self, unique_id):
+    def get_by_unique_id(self, unique_id, use_master=False):
         """
         Retrieves a person from LDAP with this unique_id.
         Raises NO_SUCH_PERSON if unable to find them.
+
+        use_master can be set to True to force reading from master
+        where stale data isn't acceptable.
         """
         q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
-        results = self._search(q)
+        results = self._search(q, use_master)
         msg = 'Unable to locate %s in the LDAP directory'
         if 0 == len(results):
             raise NO_SUCH_PERSON(msg % unique_id)
@@ -200,7 +203,7 @@ class UserSession(object):
             return attrs['jpegPhoto'][0]
         return False
 
-    def profile_service_ids(self, person_unique_id):
+    def profile_service_ids(self, person_unique_id, use_master=False):
         """
         Returns a dict that contains remote system ids.
         Keys for dict include:
@@ -208,9 +211,15 @@ class UserSession(object):
         * MOZILLA_IRC_SERVICE_URI
 
         Values are a SystemId object for that service.
+
+        use_master can be set to True to force reading from master
+        where stale data isn't acceptable.
         """
         services = {}
-        conn = self._ensure_conn(READ)
+        if use_master:
+            conn = self._ensure_conn(WRITE)
+        else:
+            conn = self._ensure_conn(READ)
         search_filter = '(mozilliansServiceURI=*)'
         rs = conn.search_s(Person.dn(person_unique_id),
                            ldap.SCOPE_SUBTREE,
@@ -240,7 +249,9 @@ class UserSession(object):
     def update_person(self, unique_id, form):
         """
         Updates a person's LDAP directory record
-        based on phonebook.forms.ProfileForm
+        based on phonebook.forms.ProfileForm.
+
+        Method always uses master.
         """
         conn = self._ensure_conn(WRITE)
 
@@ -291,6 +302,8 @@ class UserSession(object):
         unique_id
         form - An instance of phonebook.forms.ProfileForm
         Safe to call if no photo has been uploaded by the user.
+
+        Method always uses master.
         """
         if 'photo' in form and form['photo']:
             photo = form['photo'].file.read()
@@ -317,6 +330,8 @@ class UserSession(object):
         vouchee - The unique_id of the Pending user who is being vouched for
 
         TODO: I think I'm doing something dumb with encode('utf-8')
+
+        Method always uses master.
         """
         conn = self._ensure_conn(WRITE)
         voucher_dn = Person.dn(voucher).encode('utf-8')
@@ -326,8 +341,15 @@ class UserSession(object):
         conn.modify_s(vouchee_dn, modlist)
         return True
 
-    def _search(self, search_filter):
-        conn = self._ensure_conn(READ)
+    def _search(self, search_filter, use_master=False):
+        """
+        use_master can be set to True to force reading from master
+        where stale data isn't acceptable.
+        """
+        if use_master:
+            conn = self._ensure_conn(WRITE)
+        else:
+            conn = self._ensure_conn(READ)
         return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                              search_filter, Person.search_attrs)
 
@@ -625,6 +647,8 @@ class RegistrarSession(UserSession):
         Creates a new user account in the LDAP directory.
         form - An instance of phonebook.forms.RegistrationForm
         returns a string which is the unique_id of the new user.
+
+        Method always uses master.
         """
         conn = self._ensure_conn(WRITE)
         unique_id = os.urandom(UUID_SIZE).encode('hex')
@@ -666,6 +690,8 @@ class AdminSession(UserSession):
         Completely removes a user's data from the LDAP directory.
         Note: Does not un-vouch any Mozillians for whom this user
         has vouched.
+
+        Method always uses master.
         """
         conn = self._ensure_conn(WRITE)
         person_dn = Person.dn(unique_id)

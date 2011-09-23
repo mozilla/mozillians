@@ -42,12 +42,15 @@ def profile_uid(request, unique_id):
     View a profile by unique_id, which is a stable,
     random user id.
     """
+    needs_master = (request.user.unique_id == unique_id)
+
     ldap = UserSession.connect(request)
     log.warning('profile_uid [%s]' % unique_id)
     try:
-        person = ldap.get_by_unique_id(unique_id)
+        # Stale data okay when viewing others
+        person = ldap.get_by_unique_id(unique_id, needs_master)
         if person.last_name:
-            return _profile(request, person)
+            return _profile(request, person, needs_master)
     except NO_SUCH_PERSON:
         log.warning('profile_uid Sending 404 for [%s]' % unique_id)
         raise Http404
@@ -65,11 +68,12 @@ def profile_nickname(request, nickname):
     # return _profile(request, person)
 
 
-def _profile(request, person):
+def _profile(request, person, use_master):
     vouch_form = None
     ldap = UserSession.connect(request)
 
     if person.voucher_unique_id:
+        # Stale data okay
         person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
     elif request.user.unique_id != person.unique_id:
         voucher = request.user.unique_id
@@ -77,7 +81,7 @@ def _profile(request, person):
                 voucher=voucher,
                 vouchee=person.unique_id))
 
-    services = ldap.profile_service_ids(person.unique_id)
+    services = ldap.profile_service_ids(person.unique_id, use_master)
     person.irc_nickname = None
     if MOZILLA_IRC_SERVICE_URI in services:
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
@@ -110,8 +114,8 @@ def edit_new_profile(request, unique_id):
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
-    try:
-        person = ldap.get_by_unique_id(unique_id)
+    try:        
+        person = ldap.get_by_unique_id(unique_id, use_master=True)
     except NO_SUCH_PERSON:
         log.info('profile_uid Sending 404 for [%s]' % unique_id)
         raise Http404
@@ -124,7 +128,6 @@ def _edit_profile(request, unique_id, new_account):
         if request.method == 'POST':
             form = forms.ProfileForm(request.POST, request.FILES)
             if form.is_valid():
-                ldap = UserSession.connect(request)
                 ldap.update_person(unique_id, form.cleaned_data)
                 ldap.update_profile_photo(unique_id, form.cleaned_data)
                 if new_account:
@@ -136,7 +139,7 @@ def _edit_profile(request, unique_id, new_account):
                            last_name=person.last_name,
                            biography=person.biography,)
 
-            initial.update(_get_services_fields(ldap, unique_id))
+            initial.update(_get_services_fields(ldap, unique_id, use_master=True))
             form = forms.ProfileForm(initial)
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
@@ -149,8 +152,8 @@ def _edit_profile(request, unique_id, new_account):
         raise Http404
 
 
-def _get_services_fields(ldap, unique_id):
-    services = ldap.profile_service_ids(unique_id)
+def _get_services_fields(ldap, unique_id, use_master=False):
+    services = ldap.profile_service_ids(unique_id, use_master)
     irc_nick = None
     irc_nick_unique_id = None
 
@@ -209,6 +212,7 @@ def search(request):
         if request.user.is_authenticated():
             ldap = UserSession.connect(request)
             try:
+                # Stale data okay
                 people = ldap.search(query)
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
@@ -219,9 +223,12 @@ def search(request):
                              size_exceeded_error=size_exceeded))
 
 
+@login_required
 def photo(request, unique_id):
+    needs_master = (request.user.unique_id == unique_id)
+
     ldap = UserSession.connect(request)
-    image = ldap.profile_photo(unique_id)
+    image = ldap.profile_photo(unique_id, use_master=needs_master)
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:
