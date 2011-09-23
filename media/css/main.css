@@ -389,10 +389,6 @@ background-image: -moz-linear-gradient(
 }
 
 /** Register Page (Step 1: Create a Profile) */
-#body-register form {
-    position: relative;
-}
-
 #body-register .blue-pastels input {
     clear: left;
 }

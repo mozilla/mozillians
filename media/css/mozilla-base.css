@@ -158,8 +158,6 @@ body {
     margin: 105px 0 0 6%;
     padding: 25px 0 50px 64px;
     position: relative;
-    padding-right: 14%;
-    height: 1%;
 }
 
 #footer h1, #footer h2, #footer h3, #footer h4, #footer h5, #footer h6,
@@ -190,7 +188,8 @@ body {
 }
 
 #footer-link-spacer {
-    line-height: 50px;
+    display: block;
+    height: 20px;
 }
 
 #copyright {
@@ -212,7 +211,7 @@ body {
     font-size: 12px;
     margin: 16px 0 0 15px;
     position: absolute;
-    right: 14%;
+    right: 5%;
 }
 
 #footer-wrap {
