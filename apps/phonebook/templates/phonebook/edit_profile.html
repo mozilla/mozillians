@@ -50,7 +50,8 @@
           </div>
         {% endfor %}
 
-        <div id="photo-container" class="{{ 'error' if form.errors['photo'] }}">
+        <div id="photo-container"
+             class="field {{ 'error' if form.errors['photo'] }}">
           <img alt="{{ _('Your Profile Photo') }}" id="profile-photo"
             src="{{ url('phonebook.profile_photo', person.unique_id) }}">
 
