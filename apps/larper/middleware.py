@@ -48,6 +48,7 @@ def is_vouched(request):
             directory = UserSession.connect(request)
             # Stale data okay
             user.person = directory.get_by_unique_id(user.unique_id)
+        # Presence of voucher DN is enough, don't validate
         return bool(user.person.voucher_unique_id)
     return f
 

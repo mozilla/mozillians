@@ -89,7 +89,9 @@
           </a></dd>
         {% endfor %}
 
-        {% if person.voucher %}
+        {% if person.voucher == "Unknown Voucher" %}
+          <!-- This user's voucher is no longer active. -->
+        {% elif person.voucher %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
           <a href="{{ url('profile', person.voucher.unique_id) }}"

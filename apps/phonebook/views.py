@@ -21,6 +21,10 @@ from phonebook.models import Invite
 
 log = commonware.log.getLogger('m.phonebook')
 
+
+BAD_VOUCHER = 'Unknown Voucher'
+
+
 def vouch_required(f):
     """
     If a user is not vouched they get a 403.
@@ -73,8 +77,12 @@ def _profile(request, person, use_master):
     ldap = UserSession.connect(request)
 
     if person.voucher_unique_id:
-        # Stale data okay
-        person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
+        try:
+            # Stale data okay
+            person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
+        except NO_SUCH_PERSON, e:
+            # Bug#688788 Invalid voucher is okay
+            person.voucher = BAD_VOUCHER
     elif request.user.unique_id != person.unique_id:
         voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(
