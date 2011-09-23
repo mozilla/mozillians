@@ -41,6 +41,7 @@ class InviteTest(LDAPTestCase):
     def redeem_invite(self, invite, **kw):
         """Given an invite_url go to it and redeem an invite."""
         # Now let's look at the register form.
+        self.client.logout()
         d = kw
 
         # Now let's register
