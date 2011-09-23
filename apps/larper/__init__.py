@@ -193,12 +193,12 @@ class UserSession(object):
             msg = 'Multiple people found for %s. This should never happen.'
             raise INCONCEIVABLE(msg % unique_id)
 
-    def profile_photo(self, unique_id):
+    def profile_photo(self, unique_id, use_master=False):
         """
         Retrieves a person's profile photo. Returns
         jpeg binary data.
         """
-        attrs = self._profile_photo_attrs(unique_id)
+        attrs = self._profile_photo_attrs(unique_id, use_master)
         if 'jpegPhoto' in attrs:
             return attrs['jpegPhoto'][0]
         return False
@@ -234,9 +234,12 @@ class UserSession(object):
             services[attrs['mozilliansServiceURI'][0]] = sysid
         return services
 
-    def _profile_photo_attrs(self, unique_id):
+    def _profile_photo_attrs(self, unique_id, use_master=False):
         """Returns dict that contains the jpegPhoto key or None."""
-        conn = self._ensure_conn(READ)
+        if use_master:
+            conn = self._ensure_conn(WRITE)
+        else:
+            conn = self._ensure_conn(READ)
         search_filter = filter_format("(uniqueIdentifier=%s)", (unique_id,))
         rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                              search_filter, ['jpegPhoto'])
