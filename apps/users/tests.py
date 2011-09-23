@@ -2,7 +2,7 @@ from funfactory.urlresolvers import reverse
 from pyquery import PyQuery as pq
 
 from phonebook.tests import LDAPTestCase, MOZILLIAN, PENDING
-from phonebook.tests_views import _mozillian_client
+from phonebook.tests.test_views import _mozillian_client
 
 
 class TestThingsForPeople(LDAPTestCase):
