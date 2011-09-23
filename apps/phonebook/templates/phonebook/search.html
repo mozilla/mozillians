@@ -23,7 +23,16 @@
       </button>
     </form>
 
-    {% if size_exceeded_error %}
+    {% if not form.cleaned_data %}
+      {% trans %}
+        <h2>Search For a Mozillian</h2>
+
+        <p>
+          You can search for another Mozillian using their name, email, or
+          nickname.
+        </p>
+      {% endtrans %}
+    {% elif size_exceeded_error %}
       {% trans %}
         <h2>Too Many Search Results</h2>
 
