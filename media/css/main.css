@@ -115,7 +115,7 @@ dd {
         font-size: 14px;
         font-style: italic;
         font-weight: 200;
-        padding: 0 0 2px 10px;
+        padding: 0 0 2px 2px;
     }
 
     .blue-pastels .error label {
