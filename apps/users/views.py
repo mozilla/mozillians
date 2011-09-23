@@ -8,7 +8,7 @@ from django.contrib.auth.tokens import default_token_generator
 
 import commonware.log
 import jingo
-from tower import ugettext as _
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 from larper import RegistrarSession
 from phonebook.models import Invite
@@ -23,6 +23,9 @@ get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
 @anonymous_csrf
 def register(request):
+    if request.user.is_authenticated():
+        return redirect(reverse('profile', args=[request.user.unique_id]))
+
     initial = {}
     if 'code' in request.GET:
         code = request.GET['code']
