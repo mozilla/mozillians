@@ -57,7 +57,7 @@ body {
     color: #fff;
     display: inline;
     float: left;
-    font-family: MetaBold, 'Trebuchet MS', sans-serif;
+    font-family: MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
     font-size: 50px;
     font-weight: bold;
     letter-spacing: -2px;
