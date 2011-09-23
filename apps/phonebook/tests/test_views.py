@@ -115,11 +115,12 @@ class TestViews(LDAPTestCase):
 
     def test_anonymous_or_pending_search(self):
         search = reverse('phonebook.search')
-        for client in [self.anon_client, self.pending_client]:
-            r = client.get(search, dict(q='Am'), follow=True)
-            peeps = r.context['people']
-            eq_(0, len(peeps),
-                'Search should fail for interlopers')
+
+        r = self.anon_client.get(search, dict(q='Am'), follow=True)
+        self.assertFalse('people' in r.context)
+
+        r = self.pending_client.get(search, dict(q='Am'), follow=True)
+        eq_([], r.context['people'])
 
     def test_mozillian_search(self):
         url = reverse('phonebook.search')
