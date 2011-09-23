@@ -167,6 +167,9 @@ dd {
     }
 
     .blue-pastels input[type=file] {
+        box-shadow: none !important;
+        -moz-box-shadow: none !important;
+        -webkit-box-shadow: none !important;
         height: 2em;
     }
 
