@@ -57,6 +57,11 @@ dd {
     width: 78%;
 }
 
+em.underline {
+    font-style: normal;
+    text-decoration: underline;
+}
+
 /** Common and utility classes */
 .blue-pastels {
     background: #bbdfec url(../img/blue-pastels-bottom.png) no-repeat bottom center;
@@ -486,9 +491,43 @@ background-image: -moz-linear-gradient(
 }
 
 /** Profile Page */
+#body-profile #main-content h1 {
+    float: left;
+    width: 230px;
+}
+
+#body-profile #pending-approval:before {
+    background: url(../img/pending-alert-bg.png) no-repeat center;
+    content: "";
+    display: block;
+    height: 32px;
+    left: 17px;
+    position: absolute;
+    top: 7px;
+    width: 8px;
+}
+
 #body-profile #pending-approval {
-    margin: 5px 0 15px;
-    text-align: center;
+    background: #fdde80;
+    background: -moz-linear-gradient(top, #fdde80 0%, #eaaf17 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fdde80), color-stop(100%, #eaaf17));
+    background: -webkit-linear-gradient(top, #fdde80 0%, #eaaf17 100%);
+    background: -o-linear-gradient(top, #fdde80 0%, #eaaf17 100%);
+    background: linear-gradient(top, #fdde80 0%, #eaaf17 100%);
+    border: 1px solid #d76517;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    color: #e3232f;
+    float: left;
+    font-family: Verdana, Helvetiva, Arial, "DejaVu Sans", sans-serif;
+    font-size: 12px;
+    line-height: 14px;
+    margin: -10px 0 10px 10px;
+    min-height: 40px;
+    padding: 5px 10px 5px 40px;
+    position: relative;
+    width: 380px;
 }
 
 #body-profile #pending-approval p {

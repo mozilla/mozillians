@@ -14,6 +14,7 @@ from tower import ugettext as _
 
 import commonware.log
 from funfactory.urlresolvers import reverse
+from funfactory.utils import absolutify
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
@@ -96,7 +97,8 @@ def _profile(request, person, use_master):
         del services[MOZILLA_IRC_SERVICE_URI]
 
     return jingo.render(request, 'phonebook/profile.html',
-                        dict(person=person,
+                        dict(absolutify=absolutify,
+                             person=person,
                              vouch_form=vouch_form,
                              services=services))
 

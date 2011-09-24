@@ -15,9 +15,12 @@
   {% if not person.voucher %}
     {% if user.username == person.username %}
       <p id="pending-approval">
-        {% trans %}
+        {% trans profile_url=absolutify(url('profile', user.unique_id)) %}
           Your profile is waiting for approval. Send this link to someone who is
-          familiar with your contributions and ask them to vouch for you.
+          familiar with your contributions and ask them to vouch for you:<br>
+          <em class="underline" title="Your profile URL">
+            {{ profile_url }}
+          </em>
         {% endtrans %}
       </p>
     {% else %}
@@ -46,6 +49,8 @@
       </div>
     {% endif %}
   {% endif %}
+
+  <div class="clear"></div>
 
   <div class="blue-pastels">
     <img src="{{url('phonebook.profile_photo', person.unique_id) }}"
