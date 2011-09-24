@@ -122,7 +122,7 @@ def edit_new_profile(request, unique_id):
 
 def _edit_profile(request, unique_id, new_account):
     ldap = UserSession.connect(request)
-    try:        
+    try:
         person = ldap.get_by_unique_id(unique_id, use_master=True)
     except NO_SUCH_PERSON:
         log.info('profile_uid Sending 404 for [%s]' % unique_id)
