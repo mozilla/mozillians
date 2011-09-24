@@ -48,7 +48,10 @@ class RegistrationForm(forms.Form):
         p1 = data.get('password')
         p2 = data.get('confirmp')
 
-        if p1 != p2:
+        # Only check for matching passwords if the supplied password is valid
+        # in the first place; otherwise, extra errors seem redundant (see
+        # bug 680444 -- https://bugzilla.mozilla.org/show_bug.cgi?id=680444).
+        if not self.errors.get('password') and p1 != p2:
             msg = _lazy(u'The passwords did not match.')
             self._errors['confirmp'] = ErrorList([msg])
             if p2:
