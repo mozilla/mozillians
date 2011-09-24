@@ -35,20 +35,44 @@
       </p>
 
       {% for f in form.visible_fields() %}
-        <div id="{{ f.name }}-container"
-            class="field {{ 'error' if form.errors[f.name] }}
-            {{ f.field.widget.attrs['class'] }}">
-          {{ f.label_tag() }}
+        {% if f.name != 'optin' %}
+          <div id="{{ f.name }}-container"
+               class="field {{ 'error' if form.errors[f.name] }}
+                            {{ f.field.widget.attrs['class'] }}">
+            {{ f.label_tag() }}
 
-          {% if f.field.required %}
-            <span class="required" title="{{ _('This field is required.') }}">
-              *
-            </span>
-          {% endif %}
+            {% if f.field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+            {% endif %}
 
-          {{ form.errors[f.name] }}
-          {{ f }}
-        </div>
+            {{ form.errors[f.name] }}
+            {{ f }}
+          </div>
+        {% else %}
+          <div id="{{ f.name }}-container"
+               class="field {{ 'error' if form.errors[f.name] }}
+                             {{ f.field.widget.attrs['class'] }}">
+              {% trans name=f.name,
+                       url='http://www.mozilla.org/%s/privacy-policy.html' %
+                            LANG %}
+                <label for="id_{{ name }}">
+                  I'm okay with you handling this info as you explain in your
+                  <a href="{{ url }}">privacy policy</a>.
+                </label>
+              {% endtrans %}
+
+            {% if f.field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+            {% endif %}
+
+            {{ form.errors[f.name] }}
+            {{ f }}
+          </div>
+        {% endif %}
       {% endfor %}
 
       {{ form.code }}
