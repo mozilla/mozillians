@@ -19,32 +19,32 @@
           Your profile is waiting for approval. Send this link to someone who is
           familiar with your contributions and ask them to vouch for you.
         {% endtrans %}
+      </p>
+    {% else %}
+      <div id="pending-approval">
+        <p>
+          {% trans vouch='#' %}
+            This profile is waiting for approval. If you can vouch for this
+            person's contributions, please do so.
+          {% endtrans %}
         </p>
-      {% else %}
-        <div id="pending-approval">
-          <p>
-            {% trans vouch='#' %}
-              This profile is waiting for approval. If you can vouch for this
-              person's contributions, please do so.
+
+        {% if vouch_form %}
+          <form action="{{ url('phonebook.vouch') }}" method="POST"
+            id="vouch-form">
+            {{ csrf() }}
+
+            {{ vouch_form }}
+
+            {% trans name=person.full_name %}
+              <button type="submit" class="button orange small">
+                Vouch for {{ name }}
+              </button>
             {% endtrans %}
-          </p>
-
-          {% if vouch_form %}
-            <form action="{{ url('phonebook.vouch') }}" method="POST"
-              id="vouch-form">
-              {{ csrf() }}
-
-              {{ vouch_form }}
-
-              {% trans name=person.full_name %}
-                <button type="submit" class="button orange small">
-                  Vouch for {{ name }}
-                </button>
-              {% endtrans %}
-            </form>
-          {% endif %}
-        </div>
-      {% endif %}
+          </form>
+        {% endif %}
+      </div>
+    {% endif %}
   {% endif %}
 
   <div class="blue-pastels">
