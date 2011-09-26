@@ -107,7 +107,7 @@ class PasswordResetForm(auth.forms.PasswordResetForm):
         Validates that an active user exists with the given email address.
         """
         email = self.cleaned_data["email"]
-        self.users_cache = auth.models.User.objects.filter(email__iexact=email)
+        self.users_cache = auth.models.User.objects.filter(username__iexact=email)
         # NOTICE: If we ever drop django-auth-ldap, this Form will break.
         if not len(self.users_cache):
             msg = _lazy("That e-mail address doesn't have an associated "
