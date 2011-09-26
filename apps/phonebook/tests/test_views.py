@@ -2,24 +2,14 @@ from uuid import uuid4
 
 from django import test
 
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 from pyquery import PyQuery as pq
-import test_utils
 
 from funfactory.urlresolvers import reverse
-from phonebook.tests import LDAPTestCase
+from phonebook.tests import (LDAPTestCase, AMANDA_NAME, AMANDEEP_NAME,
+                             AMANDEEP_VOUCHER, MOZILLIAN, PENDING,
+                             OTHER_MOZILLIAN, PASSWORD, mozillian_client)
 from phonebook.views import UNAUTHORIZED_DELETE
-
-# The test data (below in module constants) must matches data in
-# directory/mozillians-bulk-test-data.ldif
-# You must have run x-rebuild before these tests
-MOZILLIAN = dict(email='u000001@mozillians.org', uniq_id='7f3a67u000001')
-PENDING = dict(email='u000003@mozillians.org', uniq_id='7f3a67u000003')
-OTHER_MOZILLIAN = dict(email='u000098@mozillians.org', uniq_id='7f3a67u000098')
-AMANDEEP_NAME = 'Amandeep McIlrath'
-AMANDEEP_VOUCHER = '7f3a67u000001'
-AMANDA_NAME = 'Amanda Younger'
-PASSWORD = 'secret'
 
 
 class TestDeleteUser(LDAPTestCase):
@@ -45,7 +35,7 @@ class TestDeleteUser(LDAPTestCase):
 
     def _delete_flow(self, user):
         """Private method used to walk through account deletion flow."""
-        client = _mozillian_client(user['email'])
+        client = mozillian_client(user['email'])
         uniq_id = user['uniq_id']
 
         r = client.get(reverse('phonebook.edit_profile', args=[uniq_id]))
@@ -81,14 +71,9 @@ class TestDeleteUser(LDAPTestCase):
 
 
 class TestViews(LDAPTestCase):
-    def setUp(self):
-        """Create multiple test clients of varying authorization levels."""
-        self.anon_client = self.client
-        self.pending_client = _mozillian_client(PENDING['email'])
-        self.mozillian_client = _mozillian_client(MOZILLIAN['email'])
 
     def test_anonymous_home(self):
-        r = self.anon_client.get('/', follow=True)
+        r = self.client.get('/', follow=True)
         self.assertEquals(200, r.status_code)
         doc = pq(r.content)
         login = reverse('login')
@@ -116,7 +101,7 @@ class TestViews(LDAPTestCase):
     def test_anonymous_or_pending_search(self):
         search = reverse('phonebook.search')
 
-        r = self.anon_client.get(search, dict(q='Am'), follow=True)
+        r = self.client.get(search, dict(q='Am'), follow=True)
         self.assertFalse('people' in r.context)
 
         r = self.pending_client.get(search, dict(q='Am'), follow=True)
@@ -130,8 +115,7 @@ class TestViews(LDAPTestCase):
 
         for person in peeps:
             if person.full_name == AMANDEEP_NAME:
-                eq_(AMANDEEP_VOUCHER,
-                    person.voucher_unique_id,
+                eq_(AMANDEEP_VOUCHER, person.voucher_unique_id,
                     'Amandeep is a Mozillian')
                 saw_amandeep = True
             elif person.full_name == AMANDA_NAME:
@@ -238,18 +222,6 @@ class TestViews(LDAPTestCase):
 def _logged_in_html(response):
     doc = pq(response.content)
     return doc('a#logout') and doc('a#profile')
-
-
-def _mozillian_client(email, password=PASSWORD):
-    """Create and return an authorized Mozillian test client."""
-    client = test.Client()
-
-    # We can't use c.login for these tests because of some LDAP strangeness,
-    # so we manually login with a POST request. (TODO: Fix this.)
-    r = client.post(reverse('login'), dict(username=email, password=password),
-                    follow=True)
-    eq_(email, str(r.context['user']))
-    return client
 
 
 def _create_new_user():

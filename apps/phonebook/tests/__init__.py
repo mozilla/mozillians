@@ -1,6 +1,7 @@
 import subprocess
 
 from django import test
+from django.contrib.auth import authenticate
 
 import test_utils
 from nose.tools import eq_
@@ -15,36 +16,10 @@ MOZILLIAN = dict(email='u000001@mozillians.org', uniq_id='7f3a67u000001')
 PENDING = dict(email='u000003@mozillians.org', uniq_id='7f3a67u000003')
 OTHER_MOZILLIAN = dict(email='u000098@mozillians.org', uniq_id='7f3a67u000098')
 AMANDEEP_NAME = 'Amandeep McIlrath'
-AMANDEEP_VOUCHER = 'cn=test,ou=People,dc=mozillians,dc=org'
+AMANDEEP_VOUCHER = '7f3a67u000001'
 AMANDA_NAME = 'Amanda Younger'
 PASSWORD = 'secret'
 
-
-def pending_user_client():
-    client = test.Client()
-    # We can't use client.login for these tests
-    url = reverse('login')
-    data = dict(username=PENDING['email'], password=PASSWORD)
-    client.post(url, data, follow=True)
-    # HACK Something is seriously hozed here...
-    # First visit to /login always fails, so we make
-    # second request... WTF
-    client = test.Client()
-    url = reverse('login')
-    r = client.post(url, data, follow=True)
-    eq_(r.status_code, 200, "Something broke. Got a %d error." % r.status_code)
-    eq_(PENDING['email'], str(r.context['user']))
-    return client
-
-
-def mozillian_client():
-    client = test.Client()
-    # We can't use c.login for these tests
-    url = reverse('login')
-    data = dict(username=MOZILLIAN['email'], password=PASSWORD)
-    r = client.post(url, data, follow=True)
-    eq_(MOZILLIAN['email'], str(r.context['user']))
-    return client
 
 call = lambda x: subprocess.Popen(x, stdout=subprocess.PIPE).communicate()
 
@@ -60,5 +35,26 @@ class LDAPTestCase(test_utils.TestCase):
         """
         We'll use multiple clients at the same time.
         """
-        self.pending_client = pending_user_client()
-        self.mozillian_client = mozillian_client()
+        self.pending_client = mozillian_client(email=PENDING['email'],
+                                               password=PASSWORD)
+        self.mozillian_client = mozillian_client(email=MOZILLIAN['email'],
+                                                 password=PASSWORD)
+
+
+def mozillian_client(email, password=PASSWORD):
+    """Create and return an authorized Mozillian test client."""
+    client = test.Client()
+
+    # We can't use c.login for these tests because of some LDAP strangeness,
+    # so we manually login with a POST request. (TODO: Fix this.)
+    data = dict(username=email, password=password)
+    user = authenticate(**data)
+    user.get_profile().is_confirmed = True
+    user.get_profile().save()
+    # This login never works
+    # TODO: deep-dive and find out why
+    client.post(reverse('login'), data)
+    r = client.post(reverse('login'), data, follow=True)
+    eq_(email, str(r.context['user']))
+
+    return client

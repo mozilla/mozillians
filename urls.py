@@ -1,10 +1,7 @@
 from django.conf import settings
 from django.conf.urls.defaults import include, patterns
-
 from django.contrib import admin
-
-import jingo
-
+from django.shortcuts import render
 
 admin.autodiscover()
 
@@ -14,13 +11,11 @@ def _error_page(request, status):
     Render error pages with jinja2. Error templates are in the root
     /templates directory.
     """
-    return jingo.render(request, '%d.html' % status, status=status)
-
+    return render(request, '%d.html' % status, status=status)
 
 handler404 = lambda r: _error_page(r, 404)
 handler500 = lambda r: _error_page(r, 500)
-handler_csrf = lambda r, cb=None: jingo.render(r, 'csrf_error.html', status=400)
-
+handler_csrf = lambda r, cb=None: render(r, 'csrf_error.html', status=400)
 
 urlpatterns = patterns('',
     (r'', include('landing.urls')),

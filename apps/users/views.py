@@ -2,23 +2,53 @@ import datetime
 import ldap
 
 from django import http
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import auth
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 
 import commonware.log
 import jingo
-from tower import ugettext as _, ugettext_lazy as _lazy
+from funfactory.urlresolvers import reverse
+from tower import ugettext as _
 
 from larper import RegistrarSession
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
 from users import forms
-from funfactory.urlresolvers import reverse
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
+
+
+def _send_confirmation_email(user):
+    """This sends a confirmation email to the user."""
+    subject = _('Confirm your account')
+    message = (_("Please confirm your Mozillian's account:\n\n %s") %
+               user.get_profile().get_confirmation_url())
+    send_mail(subject, message, 'no-reply@mozillians.org', [user.username])
+
+
+def send_confirmation(request):
+    user = request.GET['user']
+    user = get_object_or_404(auth.models.User, username=user)
+    _send_confirmation_email(user)
+    return render(request, 'users/confirmation_sent.html')
+
+
+def confirm(request):
+    """Confirms a user.
+
+    1. Recognize the code or 404.
+    2. On recognition, mark user as confirmed.
+    """
+    code = request.GET['code']
+    profile = get_object_or_404(UserProfile, confirmation_code=code)
+    profile.is_confirmed = True
+    profile.save()
+    return render(request, 'users/confirmed.html')
 
 
 @anonymous_csrf
@@ -42,6 +72,7 @@ def register(request):
         if form.is_valid():
             try:
                 uniq_id = _save_new_user(request, form)
+                _send_confirmation_email(request.user)
                 return redirect('phonebook.edit_new_profile', uniq_id)
             except ldap.CONSTRAINT_VIOLATION:
                 _set_already_exists_error(form)
@@ -113,7 +144,6 @@ def _save_new_user(request, form):
     # Email in the form is the "username" we'll use.
     username = form.cleaned_data['email']
     password = form.cleaned_data['password']
-
     registrar = RegistrarSession.connect(request)
 
     d = form.cleaned_data

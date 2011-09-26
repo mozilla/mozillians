@@ -128,4 +128,4 @@ USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
 #: Userpics will accessed here.
 USERPICS_URL = pre.UPLOAD_URL + '/userpics'
 
-
+AUTH_PROFILE_MODULE = 'users.UserProfile'
