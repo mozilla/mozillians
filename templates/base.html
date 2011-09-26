@@ -43,7 +43,7 @@
               {{ _('Profile') }}
             </a>
           </li>
-          {% if user.is_vouched() %}
+          {% if user|vouched %}
             <li>
               <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
             </li>
@@ -66,7 +66,7 @@
       </ul>
     </nav>
 
-    {% if user.is_authenticated() and user.is_vouched() %}
+    {% if user.is_authenticated() and user|vouched %}
       {% block search %}
         <form id="quick-search" action="{{ url('phonebook.search') }}"
               method="GET">

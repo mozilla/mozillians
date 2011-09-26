@@ -1,6 +1,3 @@
-import random
-import string
-
 from django.contrib.auth.utils import get_random_string
 from django.db import models
 from django.dispatch import receiver

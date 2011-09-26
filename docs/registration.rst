@@ -43,3 +43,7 @@ be as flexible as possible to support all variety names:
 Are all perfectly valid names that we must support.
 
 Email address, however can be validated.  As can IRC nickname.
+
+Auto-Vouch
+----------
+
