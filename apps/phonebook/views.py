@@ -187,6 +187,7 @@ def confirm_delete(request):
     return render(request, 'phonebook/confirm_delete.html', {'form': del_form})
 
 
+@login_required
 @require_POST
 def delete(request):
     form = forms.DeleteForm(request.POST)
@@ -213,7 +214,7 @@ def _user_owns_account(request, form):
     return request.user.unique_id == uniq_id_to_delete
 
 
-@login_required
+@vouch_required
 def search(request):
     people = []
     size_exceeded = False
@@ -282,6 +283,7 @@ def invite(request):
     return jingo.render(request, 'phonebook/invite.html', data)
 
 
+@vouch_required
 @require_POST
 def vouch(request):
     form = forms.VouchForm(request.POST)

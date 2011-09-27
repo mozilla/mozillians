@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 
 {% block body_id %}profile{% endblock %}
-{% block body_classes %}box-content{% endblock %}
+{% block body_classes %}
+    box-content {% if not person.voucher %}pending{% endif %}
+{% endblock %}
 
 {% block main_content %}
   <h1>
     {% if user.username == person.username %}
       {{ _('Your Profile') }}
+    {% elif person.voucher %}
+      {{ _('Mozillian Profile') }}
     {% else %}
-      {{ person.full_name }}
+      {{ _('Pending Profile') }}
     {% endif %}
   </h1>
 
@@ -16,8 +20,9 @@
     {% if user.username == person.username %}
       <p id="pending-approval">
         {% trans profile_url=absolutify(url('profile', user.unique_id)) %}
-          Your profile is waiting for approval. Send this link to someone who is
-          familiar with your contributions and ask them to vouch for you:<br>
+          Your profile is waiting for approval. Send this link to someone who
+          is familiar with your contributions and ask them to vouch for you:
+          <br>
           <em class="underline" title="Your profile URL">
             {{ profile_url }}
           </em>
@@ -25,12 +30,10 @@
       </p>
     {% else %}
       <div id="pending-approval">
-        <p>
-          {% trans vouch='#' %}
-            This profile is waiting for approval. If you can vouch for this
-            person's contributions, please do so.
-          {% endtrans %}
-        </p>
+        {% trans vouch='#' %}
+          This profile is waiting for approval. If you can vouch for this
+          person's contributions, please do so.
+        {% endtrans %}
 
         {% if vouch_form %}
           <form action="{{ url('phonebook.vouch') }}" method="POST"
@@ -53,7 +56,7 @@
   <div class="clear"></div>
 
   <div class="blue-pastels">
-    <img src="{{url('phonebook.profile_photo', person.unique_id) }}"
+    <img src="{{ url('phonebook.profile_photo', person.unique_id) }}"
       id="profile-photo" alt="{{ _('Profile photo') }}">
 
     {% if user.username == person.username %}
@@ -65,11 +68,7 @@
 
     <div id="profile-info">
       <h2>
-        {% if person.voucher %}
-          {{ _('Mozillian Profile') }}
-        {% else %}
-          {{ _('Pending Profile') }}
-        {% endif %}
+        {{ person.full_name }}
       </h2>
 
       <dl>
