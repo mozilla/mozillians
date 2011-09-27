@@ -46,15 +46,16 @@ dt, dd {
 }
 
 dt {
-    clear: right;
+    clear: both;
     float: left;
     font-weight: bold;
     margin-right: 2%;
-    width: 20%;
+    width: 30%;
 }
 
 dd {
-    width: 78%;
+    float: left;
+    width: 66%;
 }
 
 em.underline {
