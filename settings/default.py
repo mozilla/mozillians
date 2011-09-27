@@ -59,11 +59,14 @@ MINIFY_BUNDLES = {
     }
 }
 
-
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
+    'commonware.response.middleware.StrictTransportMiddleware',
     'phonebook.middleware.PermissionDeniedMiddleware',
     'larper.middleware.LarperMiddleware',
 ]
+
+# StrictTransport
+STS_SUBDOMAINS = True
 
 # OpenLDAP
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
