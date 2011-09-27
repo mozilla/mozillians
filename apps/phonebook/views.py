@@ -22,7 +22,6 @@ from phonebook.models import Invite
 
 log = commonware.log.getLogger('m.phonebook')
 
-
 BAD_VOUCHER = 'Unknown Voucher'
 
 
@@ -40,6 +39,7 @@ def vouch_required(f):
             return HttpResponseForbidden(_('You must be vouched to do this.'))
 
     return wrapped
+
 
 @login_required
 def profile_uid(request, unique_id):
@@ -81,7 +81,7 @@ def _profile(request, person, use_master):
         try:
             # Stale data okay
             person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
-        except NO_SUCH_PERSON, e:
+        except NO_SUCH_PERSON:
             # Bug#688788 Invalid voucher is okay
             person.voucher = BAD_VOUCHER
     elif request.user.unique_id != person.unique_id:
@@ -149,7 +149,8 @@ def _edit_profile(request, unique_id, new_account):
                            last_name=person.last_name,
                            biography=person.biography,)
 
-            initial.update(_get_services_fields(ldap, unique_id, use_master=True))
+            initial.update(_get_services_fields(ldap, unique_id,
+                                                use_master=True))
             form = forms.ProfileForm(initial)
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
@@ -270,7 +271,7 @@ def invite(request):
             # l10n: %s is the registration link.
             link = _("Join Mozillians: %s") % invite.get_url()
             message = "%s\n\n%s" % (message, link)
-            send_mail(subject, message, request.user.email,
+            send_mail(subject, message, request.user.username,
                       [invite.recipient])
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))

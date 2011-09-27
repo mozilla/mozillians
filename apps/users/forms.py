@@ -1,23 +1,54 @@
 from django import forms
-from django.forms.util import ErrorList
-from django.template import loader
-from django.utils.http import int_to_base36
 from django.contrib import auth
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
+from django.forms.util import ErrorList
+from django.template import loader
+from django.utils.http import int_to_base36
 
 import commonware.log
-from tower import ugettext_lazy as _lazy
-
+from funfactory.urlresolvers import reverse
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 
 
-class AuthenticationForm(forms.Form):
-    username = forms.CharField(required=True)
-    password = forms.CharField(max_length=255, required=True)
+class AuthenticationForm(auth.forms.AuthenticationForm):
+    def clean(self):
+        """Copied from ``super()``.
+
+        This also checks if the UserProfile `is_confirmed`"""
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+
+        if username and password:
+            self.user_cache = auth.authenticate(
+                    username=username, password=password)
+            if self.user_cache is None:
+                raise forms.ValidationError(
+                        _('Please enter a correct username and password. '
+                          'Note that both fields are case-sensitive.'))
+            elif not self.user_cache.is_active:
+                raise forms.ValidationError(_("This account is inactive."))
+
+            try:
+                self.user_cache.get_profile()
+            except UserProfile.DoesNotExist:
+                UserProfile.objects.create(user=self.user_cache)
+
+            if not self.user_cache.get_profile().is_confirmed:
+                # TODO: add a "re-send confirmation" link here.
+
+                msg = _('You need to confirm your account before you can log '
+                        'in.  <a href="%s">Resend confirmation email?</a>')
+                url = (reverse('send_confirmation') + '?user=' +
+                       self.user_cache.username)
+                raise forms.ValidationError(msg % url)
+        self.check_for_test_cookie()
+        return self.cleaned_data
 
 
 class RegistrationForm(forms.Form):
@@ -77,7 +108,7 @@ class PasswordChangeForm(auth.forms.PasswordChangeForm):
         credentials are valid.
         """
         password = self.cleaned_data.get('old_password')
-        user = auth.authenticate(username=self.user.username, 
+        user = auth.authenticate(username=self.user.username,
                                  password=password)
 
         if user:
