@@ -3,19 +3,23 @@ from django.conf.urls.defaults import include, patterns
 from django.contrib import admin
 from django.shortcuts import render
 
+
 admin.autodiscover()
 
 
-def _error_page(request, status):
-    """
-    Render error pages with jinja2. Error templates are in the root
-    /templates directory.
-    """
-    return render(request, '%d.html' % status, status=status)
+def error_page(request, template, status=None):
+    """Render error templates, found in the root /templates directory.
 
-handler404 = lambda r: _error_page(r, 404)
-handler500 = lambda r: _error_page(r, 500)
-handler_csrf = lambda r, cb=None: render(r, 'csrf_error.html', status=400)
+    If no status parameter is explcitedly passed, this function assumes
+    your HTTP status code is the same as your template name (i.e. passing
+    a template=404 will render 404.html with the HTTP status code 404).
+    """
+    return render(request, '%d.html' % template, status=(status or template))
+
+
+handler404 = lambda r: error_page(r, 404)
+handler500 = lambda r: error_page(r, 500)
+handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns('',
     (r'', include('landing.urls')),
