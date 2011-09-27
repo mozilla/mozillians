@@ -61,6 +61,7 @@ MINIFY_BUNDLES = {
 
 
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
+    'phonebook.middleware.PermissionDeniedMiddleware',
     'larper.middleware.LarperMiddleware',
 ]
 
