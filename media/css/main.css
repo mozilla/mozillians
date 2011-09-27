@@ -491,7 +491,7 @@ background-image: -moz-linear-gradient(
 }
 
 /** Profile Page */
-#body-profile #main-content h1 {
+#body-profile.pending #main-content h1 {
     float: left;
     width: 230px;
 }
@@ -528,6 +528,11 @@ background-image: -moz-linear-gradient(
     padding: 5px 10px 5px 40px;
     position: relative;
     width: 380px;
+}
+
+#body-profile #vouch-form {
+    display: block;
+    margin: 10px 0 5px;
 }
 
 #body-profile #pending-approval p {
