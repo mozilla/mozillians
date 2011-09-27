@@ -151,7 +151,7 @@ def _edit_profile(request, unique_id, new_account):
 
             initial.update(_get_services_fields(ldap, unique_id,
                                                 use_master=True))
-            form = forms.ProfileForm(initial)
+            form = forms.ProfileForm(initial=initial)
 
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,

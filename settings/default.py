@@ -130,3 +130,5 @@ USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
 USERPICS_URL = pre.UPLOAD_URL + '/userpics'
 
 AUTH_PROFILE_MODULE = 'users.UserProfile'
+
+MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)

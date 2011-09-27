@@ -1,6 +1,10 @@
 from django import forms
+from django.conf import settings
 
-from tower import ugettext_lazy as _lazy
+import Image
+import tempfile
+from easy_thumbnails import processors
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
 
@@ -23,6 +27,42 @@ class ProfileForm(forms.Form):
                                    required=False)
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
+
+    def clean_photo(self):
+        """Let's make sure things are right.
+
+        Cribbed from zamboni.  Thanks Dave Dash!
+
+        TODO: this needs to go into celery
+
+        - File IT bug for celery
+        - Ensure files aren't InMemory files
+        - See zamboni.apps.users.forms
+        """
+        photo = self.cleaned_data['photo']
+
+        if not photo:
+            return
+
+        if photo.content_type not in ('image/png', 'image/jpeg'):
+            raise forms.ValidationError(
+                    _('Images must be either PNG or JPG.'))
+
+        if photo.size > settings.MAX_PHOTO_UPLOAD_SIZE:
+            raise forms.ValidationError(
+                    _('Please use images smaller than %dMB.' %
+                      (settings.MAX_PHOTO_UPLOAD_SIZE / 1024 / 1024 - 1)))
+
+        im = Image.open(photo)
+        # Resize large images
+        if any(d > 300 for d in im.size):
+            im = processors.scale_and_crop(im, (300, 300), crop=True)
+        fn = tempfile.mktemp(suffix='.jpg')
+        f = open(fn, 'w')
+        im.save(f, 'JPEG')
+        f.close()
+        photo.file = open(fn)
+        return photo
 
 
 class DeleteForm(forms.Form):
