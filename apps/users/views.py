@@ -166,7 +166,7 @@ def _save_new_user(request, form):
         invite.redeemer = uniq_id
         invite.save()
     # auto vouch moz.com:
-    elif any(username.endswith(x) for x in settings.AUTO_VOUCH_DOMAINS):
+    elif any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
         registrar.record_vouch(voucher='ZUUL', vouchee=uniq_id)
 
     user = auth.authenticate(username=username, password=password)
