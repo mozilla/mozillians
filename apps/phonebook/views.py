@@ -141,9 +141,9 @@ def _edit_profile(request, unique_id, new_account):
                 ldap.update_person(unique_id, form.cleaned_data)
                 ldap.update_profile_photo(unique_id, form.cleaned_data)
                 if new_account:
-                    return redirect('confirm_register')
+                    return redirect(reverse('confirm_register'))
                 else:
-                    return redirect('profile', unique_id)
+                    return redirect(reverse('profile', args=[unique_id]))
         else:
             initial = dict(first_name=person.first_name,
                            last_name=person.last_name,
@@ -199,7 +199,7 @@ def delete(request):
         msg = "Unauthorized deletion of account, attempted"
         raise UNAUTHORIZED_DELETE(msg)
 
-    return redirect('home')
+    return redirect(reverse('home'))
 
 
 def _user_owns_account(request, form):
