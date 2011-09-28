@@ -3,6 +3,7 @@ import ldap
 
 from django import http
 from django.shortcuts import get_object_or_404, redirect, render
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -164,6 +165,9 @@ def _save_new_user(request, form):
         invite.redeemed = datetime.datetime.now()
         invite.redeemer = uniq_id
         invite.save()
+    # auto vouch moz.com:
+    elif any(username.endswith(x) for x in settings.AUTO_VOUCH_DOMAINS):
+        registrar.record_vouch(voucher='ZUUL', vouchee=uniq_id)
 
     user = auth.authenticate(username=username, password=password)
     # Should never happen

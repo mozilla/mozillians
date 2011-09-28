@@ -17,10 +17,9 @@ NETAPP_STORAGE = path('tmp')
 UPLOAD_URL = '/uploads'
 
 #: This is the base URL for the current instance of the site.
-SITE_URL = 'http://mozillians.localhost.net.ru'
+SITE_URL = 'http://mozillians.org'
 
 try:
     from settings.initial_local import *
 except ImportError:
     pass
-
