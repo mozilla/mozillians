@@ -181,4 +181,4 @@ def _set_already_exists_error(form):
     data = dict(email=form.cleaned_data['email'])
     del form.cleaned_data['email']
     error = _(msg % data)
-    form._errors['username'] = form.error_class([error])
+    form._errors['email'] = form.error_class([error])
