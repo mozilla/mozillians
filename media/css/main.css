@@ -313,6 +313,13 @@ background-image: -moz-linear-gradient(
     clear: both;
 }
 
+.errorlist, .errorlist li {
+    background: none;
+    color: red;
+    margin: 0;
+    padding: 0;
+}
+
 /** Home Page */
 #body-home #main-content {
     background: top center no-repeat;
