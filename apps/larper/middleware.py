@@ -1,4 +1,8 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
+from django.contrib.auth.models import User
 from django.contrib.auth.signals import user_logged_in
 
 import larper
@@ -10,6 +14,11 @@ def handle_login(sender, **kwargs):
     larper.store_password(request, request.POST.get('password', ''))
 
 user_logged_in.connect(handle_login)
+
+
+@receiver(pre_save, sender=User)
+def handle_pre_save(sender, instance, **kwargs):
+    instance.email = instance.username
 
 
 class LarperMiddleware(object):
