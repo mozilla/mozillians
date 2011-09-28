@@ -7,6 +7,8 @@ from django.core.mail import send_mail
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 import jingo
@@ -41,6 +43,7 @@ def vouch_required(f):
     return wrapped
 
 
+@never_cache
 @login_required
 def profile_uid(request, unique_id):
     """
@@ -103,6 +106,7 @@ def _profile(request, person, use_master):
                              services=services))
 
 
+@never_cache
 @login_required
 def edit_profile(request, unique_id):
     """
@@ -117,6 +121,7 @@ def edit_profile(request, unique_id):
     return _edit_profile(request, unique_id, False)
 
 
+@never_cache
 @login_required
 def edit_new_profile(request, unique_id):
     return _edit_profile(request, unique_id, True)
@@ -180,6 +185,7 @@ class UNAUTHORIZED_DELETE(Exception):
     pass
 
 
+@never_cache
 @login_required
 def confirm_delete(request):
     """Display a confirmation page asking the user if they want to leave."""
@@ -187,6 +193,7 @@ def confirm_delete(request):
     return render(request, 'phonebook/confirm_delete.html', {'form': del_form})
 
 
+@never_cache
 @login_required
 @require_POST
 def delete(request):
