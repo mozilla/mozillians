@@ -17,6 +17,12 @@ log = commonware.log.getLogger('m.users')
 
 
 class AuthenticationForm(auth.forms.AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        """Override the username field to prevent issues with maxlength."""
+        super(AuthenticationForm, self).__init__(*args, **kwargs)
+
+        self.fields['username'] = forms.CharField(max_length=255, required=True)
+
     def clean(self):
         """Copied from ``super()``.
 
