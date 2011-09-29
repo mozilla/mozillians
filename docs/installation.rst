@@ -23,7 +23,7 @@ Installation
     git clone git://github.com/mozilla/mozillians-ldap.git directory
     popd
 
-5. Run a virual dev environment::
+5. Run a virtual dev environment::
 
     vagrant up
     vagrant ssh
