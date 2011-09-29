@@ -27,7 +27,7 @@ get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 def _send_confirmation_email(user):
     """This sends a confirmation email to the user."""
     subject = _('Confirm your account')
-    message = (_("Please confirm your Mozillian's account:\n\n %s") %
+    message = (_("Please confirm your Mozillians account:\n\n %s") %
                user.get_profile().get_confirmation_url())
     send_mail(subject, message, 'no-reply@mozillians.org', [user.username])
 
