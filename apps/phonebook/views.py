@@ -8,7 +8,6 @@ from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 import jingo
@@ -99,9 +98,16 @@ def _profile(request, person, use_master):
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
         del services[MOZILLA_IRC_SERVICE_URI]
 
+    if request.user.unique_id != person.unique_id:
+        profile_photo_url = reverse('phonebook.profile_photo',
+                                    person.unique_id)
+    else:
+        profile_photo_url = reverse('my_profile_photo')
+
     return jingo.render(request, 'phonebook/profile.html',
                         dict(absolutify=absolutify,
                              person=person,
+                             profile_photo_url=profile_photo_url,
                              vouch_form=vouch_form,
                              services=services))
 
@@ -158,10 +164,13 @@ def _edit_profile(request, unique_id, new_account):
                                                 use_master=True))
             form = forms.ProfileForm(initial=initial)
 
+        profile_photo_url = reverse('my_profile_photo')
+
         return jingo.render(request, 'phonebook/edit_profile.html', dict(
                 form=form,
                 delete_form=del_form,
                 person=person,
+                profile_photo_url=profile_photo_url,
                 registration_flow=new_account,
                 ))
     else:
@@ -248,6 +257,17 @@ def photo(request, unique_id):
 
     ldap = UserSession.connect(request)
     image = ldap.profile_photo(unique_id, use_master=needs_master)
+    if image:
+        return HttpResponse(image, mimetype="image/jpeg")
+    else:
+        return redirect('/media/img/unknown.png')
+
+
+@never_cache
+@login_required
+def my_photo(request):
+    ldap = UserSession.connect(request)
+    image = ldap.profile_photo(request.user.unique_id, use_master=True)
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:

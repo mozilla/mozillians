@@ -8,6 +8,7 @@ from phonebook import views
 
 urlpatterns = patterns('',
     url('^u/(?P<unique_id>.*)$', views.profile_uid, name='profile'),
+    url('^user/photo/me$', views.my_photo, name='my_profile_photo'),
     url('^user/photo/(?P<unique_id>.*)$', views.photo,
         name='phonebook.profile_photo'),
 

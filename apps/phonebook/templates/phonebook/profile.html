@@ -56,7 +56,7 @@
   <div class="clear"></div>
 
   <div class="blue-pastels">
-    <img src="{{ url('phonebook.profile_photo', person.unique_id) }}"
+    <img src="{{ profile_photo_url }}"
       id="profile-photo" alt="{{ _('Profile photo') }}">
 
     {% if user.username == person.username %}
