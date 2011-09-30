@@ -84,6 +84,11 @@ KNOWN_SERVICE_URIS = [
     MOZILLA_IRC_SERVICE_URI,
 ]
 
+SEARCH_FILTER = """(|(cn=*%s*)
+                     (mail=*%s*)
+                     (&(mozilliansServiceID=*%s*)
+                       (mozilliansServiceURI=irc://irc.mozilla.org/)))"""
+
 
 class UserSession(object):
     """
@@ -116,7 +121,7 @@ class UserSession(object):
 
             conn.bind_s(dn, password)
             self.request.larper_conns[mode][dn] = conn
-        
+
         return self.request.larper_conns[mode][dn]
 
     def dn_pass(self):
@@ -128,7 +133,7 @@ class UserSession(object):
         """
         unique_id = self.request.user.unique_id
         password = get_password(self.request)
-        if unique_id and password:            
+        if unique_id and password:
             return (Person.dn(unique_id), password)
         else:
             # Should never happen
@@ -146,9 +151,10 @@ class UserSession(object):
         larper.Person objects.
         """
         encoded_q = query.encode('utf-8')
-        esc_q = filter_format("(|(cn=*%s*)(mail=*%s*))",
-                              (encoded_q, encoded_q))
-        return _populate_any(self._search(esc_q))
+        esc_q = filter_format(SEARCH_FILTER,
+                              (encoded_q, encoded_q, encoded_q))
+
+        return self._populate_any(self._search(esc_q))
 
     def search_by_name(self, query):
         """
@@ -156,7 +162,7 @@ class UserSession(object):
         same type of data as search.
         """
         q = filter_format("(cn=*%s*)", (query.encode('utf-8'),))
-        return _populate_any(self._search(q))
+        return self._populate_any(self._search(q))
 
     def search_by_email(self, query):
         """
@@ -166,7 +172,7 @@ class UserSession(object):
         encoded_q = query.encode('utf-8')
         q = filter_format("(|(mail=*%s*)(uid=*%s*))",
                           (encoded_q, encoded_q,))
-        return _populate_any(self._search(q))
+        return self._populate_any(self._search(q))
 
     def get_by_unique_id(self, unique_id, use_master=False):
         """
@@ -353,8 +359,32 @@ class UserSession(object):
             conn = self._ensure_conn(WRITE)
         else:
             conn = self._ensure_conn(READ)
+            search_attrs = Person.search_attrs + SystemId.search_attrs
         return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
-                             search_filter, Person.search_attrs)
+                             search_filter, search_attrs)
+
+    def _populate_any(self, results):
+        people = []
+        cache = {}
+        for result in results:
+            dn, attrs = result
+            if _result_is_person(dn, attrs):
+                p = Person.new_from_directory(attrs)
+            elif _result_is_service_id(dn, attrs):
+                p = _person_from_service_id(self, dn, attrs)
+            else:
+                msg = "Unknown type of LDAP search result [%s]" % str(attrs)
+                raise Exception(msg)
+            if not p or p.unique_id in cache:
+                log.info("Skipping dup")
+                continue
+            else:
+                log.info("new item")
+                cache[p.unique_id] = True
+                people.append(p)
+        # make unique via dict key and value
+        # if 'key' in dict... return values()
+        return people
 
     def __str__(self):
         return "<larper.UserSession for %s>" % self.request.user.username
@@ -422,7 +452,7 @@ class Person(object):
     required_attrs = ['uniqueIdentifier', 'uid', 'cn', 'sn']
     optional_attrs = ['givenName', 'description', 'mail', 'telephoneNumber',
              'mozilliansVouchedBy']
-    search_attrs = required_attrs + optional_attrs
+    search_attrs = required_attrs + optional_attrs + ['objectClass']
     binary_attrs = ['jpegPhoto']
 
     def __init__(self, unique_id, username,
@@ -568,6 +598,9 @@ class SystemId(object):
     URI - http://google.com. Youtube (a Google property) would have
     it's own URI, since it has seperate username.
     """
+    search_attrs = ['objectClass', 'uniqueIdentifier',
+                    'mozilliansServiceURI', 'mozilliansServiceID']
+
     def __init__(self, person_unique_id, unique_id, service_uri, service_id):
         self.person_unique_id = person_unique_id
         self.unique_id = unique_id
@@ -723,12 +756,30 @@ class AdminSession(UserSession):
         return AdminSession(request)
 
 
-def _populate_any(results):
-    people = []
-    for result in results:
-        dn, attrs = result
-        people.append(Person.new_from_directory(attrs))
-    return people
+def _result_is_person(dn, attrs):
+    log.info(str(attrs))
+    return 'mozilliansPerson' in attrs['objectClass']
+
+
+def _result_is_service_id(dn, attrs):
+    log.info(str(attrs))
+    return 'mozilliansLink' in attrs['objectClass']
+
+
+def _person_from_service_id(self, dn, attrs):
+    log.debug("Loading a person from _%s_" % dn)
+    parts = ldap.dn.explode_dn(dn)
+    # ['uniqueIdentifier=1317339108.99', 'uniqueIdentifier=7f3a67u000001',
+    #  'ou=people', 'dc=mozillians', 'dc=org']
+    if len(parts) > 1:
+        subparts = parts[1].split('=')
+        # ['uniqueIdentifier', '7f3a67u000001']
+        if len(subparts) == 2:
+            person_id = subparts[1]
+            # 7f3a67u000001
+            return self.get_by_unique_id(person_id)
+    log.error("Unable to turn service dn into person unique_id %s" % dn)
+    return None
 
 
 def change_password(unique_id, oldpass, password):
@@ -758,7 +809,7 @@ def set_password(username, password):
     un-authenticated users from the reset-password email
     flow.
 
-    *If the user is authenticated*, then 
+    *If the user is authenticated*, then
     *use the change_password method above*.
     """
     conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
