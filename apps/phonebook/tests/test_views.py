@@ -105,12 +105,7 @@ class TestViews(LDAPTestCase):
         self.assertFalse('people' in r.context)
 
         r = self.pending_client.get(search, dict(q='Am'), follow=True)
-
-        # Either way we shouldn't have any people in search results
-        if hasattr(r.context, 'people'):
-            eq_([], r.context['people'])
-        else:
-            pass
+        eq_(r.context.get('people', []), [])
 
     def test_mozillian_search(self):
         url = reverse('phonebook.search')
