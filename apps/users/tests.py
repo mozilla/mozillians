@@ -72,6 +72,23 @@ class RegistrationTest(LDAPTestCase):
         eq_(d['email'], str(r.context['user']))
         assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
 
+    def test_plus_signs(self):
+        d = dict(
+                 email='mrfusion+dotcom@mozilla.com',
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+        )
+        r = self.client.post(reverse('register'), d, follow=True)
+        eq_(len(mail.outbox), 1)
+        u = r.context['user'].get_profile()
+        assert u.get_confirmation_url() in mail.outbox[0].body
+
+        r = self.client.post(u.get_send_confirmation_url())
+        eq_(r.status_code, 200)
+
 
 class TestThingsForPeople(LDAPTestCase):
     """Verify that the wrong users don't see things."""

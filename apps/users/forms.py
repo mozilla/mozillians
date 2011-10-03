@@ -7,7 +7,6 @@ from django.template import loader
 from django.utils.http import int_to_base36
 
 import commonware.log
-from funfactory.urlresolvers import reverse
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
@@ -21,7 +20,8 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         """Override the username field to prevent issues with maxlength."""
         super(AuthenticationForm, self).__init__(*args, **kwargs)
 
-        self.fields['username'] = forms.CharField(max_length=255, required=True)
+        self.fields['username'] = forms.CharField(
+                max_length=255, required=True)
 
     def clean(self):
         """Copied from ``super()``.
@@ -41,17 +41,16 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
                 raise forms.ValidationError(_("This account is inactive."))
 
             try:
-                self.user_cache.get_profile()
+                profile = self.user_cache.get_profile()
             except UserProfile.DoesNotExist:
-                UserProfile.objects.create(user=self.user_cache)
+                profile = UserProfile.objects.create(user=self.user_cache)
 
             if not self.user_cache.get_profile().is_confirmed:
                 # TODO: add a "re-send confirmation" link here.
 
                 msg = _('You need to confirm your account before you can log '
                         'in.  <a href="%s">Resend confirmation email?</a>')
-                url = (reverse('send_confirmation') + '?user=' +
-                       self.user_cache.username)
+                url = profile.get_send_confirmation_url()
                 raise forms.ValidationError(msg % url)
         self.check_for_test_cookie()
         return self.cleaned_data
@@ -144,7 +143,8 @@ class PasswordResetForm(auth.forms.PasswordResetForm):
         Validates that an active user exists with the given email address.
         """
         email = self.cleaned_data["email"]
-        self.users_cache = auth.models.User.objects.filter(username__iexact=email)
+        self.users_cache = auth.models.User.objects.filter(
+                username__iexact=email)
         # NOTICE: If we ever drop django-auth-ldap, this Form will break.
         if not len(self.users_cache):
             msg = _lazy("That e-mail address doesn't have an associated "

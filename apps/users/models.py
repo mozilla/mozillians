@@ -1,3 +1,5 @@
+import urllib
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
@@ -23,6 +25,11 @@ class UserProfile(models.Model):
     def get_confirmation_url(self):
         url = (absolutify(reverse('confirm')) + '?code=' +
                self.confirmation_code)
+        return url
+
+    def get_send_confirmation_url(self):
+        url = (reverse('send_confirmation') + '?' +
+               urllib.urlencode({'user': self.user.username}))
         return url
 
 
