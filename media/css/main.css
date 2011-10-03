@@ -413,6 +413,10 @@ background-image: -moz-linear-gradient(
     width: 47.5%;
 }
 
+#body-register #optin-container {
+    width: 44%;
+}
+
 #body-register #optin-container label {
     float: left;
     width: 275px;
@@ -421,6 +425,7 @@ background-image: -moz-linear-gradient(
 #body-register #id_optin {
     clear: none;
     top: 3px;
+    float: right;
 }
 
 #body-register #submit {
