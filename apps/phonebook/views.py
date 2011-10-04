@@ -16,7 +16,6 @@ from tower import ugettext as _
 
 import commonware.log
 from funfactory.urlresolvers import reverse
-from funfactory.utils import absolutify
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
@@ -99,8 +98,7 @@ def _profile(request, person, use_master):
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
         del services[MOZILLA_IRC_SERVICE_URI]
 
-    data = dict(absolutify=absolutify, person=person, vouch_form=vouch_form,
-                services=services)
+    data = dict(person=person, vouch_form=vouch_form, services=services)
     return jingo.render(request, 'phonebook/profile.html', data)
 
 

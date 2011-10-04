@@ -2,7 +2,11 @@ import time
 
 import jinja2
 from funfactory.urlresolvers import reverse
+from funfactory.utils import absolutify
 from jingo import register
+
+
+absolutify = register.function(absolutify)
 
 
 @register.filter
