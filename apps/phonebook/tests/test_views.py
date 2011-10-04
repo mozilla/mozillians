@@ -218,6 +218,13 @@ class TestViews(LDAPTestCase):
         r = newbie_client.post(delete_url, data, follow=True)
         eq_(200, r.status_code, 'A Mozillian can delete their own account')
 
+    def test_my_profile(self):
+        """Are we cachebusting our picture?"""
+        profile = reverse('profile', args=[MOZILLIAN['uniq_id']])
+        r = self.mozillian_client.get(profile)
+        doc = pq(r.content)
+        assert '?' in doc('#profile-photo').attr('src')
+
 
 def _logged_in_html(response):
     doc = pq(response.content)
