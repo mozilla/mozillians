@@ -8,7 +8,6 @@ from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 import jingo
@@ -99,11 +98,9 @@ def _profile(request, person, use_master):
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
         del services[MOZILLA_IRC_SERVICE_URI]
 
-    return jingo.render(request, 'phonebook/profile.html',
-                        dict(absolutify=absolutify,
-                             person=person,
-                             vouch_form=vouch_form,
-                             services=services))
+    data = dict(absolutify=absolutify, person=person, vouch_form=vouch_form,
+                services=services)
+    return jingo.render(request, 'phonebook/profile.html', data)
 
 
 @never_cache
