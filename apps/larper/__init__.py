@@ -84,10 +84,9 @@ KNOWN_SERVICE_URIS = [
     MOZILLA_IRC_SERVICE_URI,
 ]
 
-SEARCH_FILTER = """(|(cn=*%s*)
-                     (mail=*%s*)
-                     (&(mozilliansServiceID=*%s*)
-                       (mozilliansServiceURI=irc://irc.mozilla.org/)))"""
+PEEP_SRCH_FLTR = '(&(objectClass=mozilliansPerson)(|(cn=*%s*)(mail=*%s*)))'
+IRC_SRCH_FLTR = """(&(objectClass=mozilliansLink)(mozilliansServiceID=*%s*)
+                     (mozilliansServiceURI=irc://irc.mozilla.org/))"""
 
 
 class UserSession(object):
@@ -151,10 +150,12 @@ class UserSession(object):
         larper.Person objects.
         """
         encoded_q = query.encode('utf-8')
-        esc_q = filter_format(SEARCH_FILTER,
-                              (encoded_q, encoded_q, encoded_q))
-
-        return self._populate_any(self._search(esc_q))
+        peep_esc_q = filter_format(PEEP_SRCH_FLTR, (encoded_q, encoded_q))
+        irc_esc_q = filter_format(IRC_SRCH_FLTR, (encoded_q,))
+        people = self._people_search(peep_esc_q)
+        irc_nicks = self._irc_search(irc_esc_q)
+        people += self._people_from_irc_results_search(irc_nicks)
+        return self._populate_people_results(people)
 
     def search_by_name(self, query):
         """
@@ -162,7 +163,7 @@ class UserSession(object):
         same type of data as search.
         """
         q = filter_format("(cn=*%s*)", (query.encode('utf-8'),))
-        return self._populate_any(self._search(q))
+        return self._populate_people_results(self._people_search(q))
 
     def search_by_email(self, query):
         """
@@ -172,7 +173,7 @@ class UserSession(object):
         encoded_q = query.encode('utf-8')
         q = filter_format("(|(mail=*%s*)(uid=*%s*))",
                           (encoded_q, encoded_q,))
-        return self._populate_any(self._search(q))
+        return self._populate_people_results(self._people_search(q))
 
     def get_by_unique_id(self, unique_id, use_master=False):
         """
@@ -183,7 +184,7 @@ class UserSession(object):
         where stale data isn't acceptable.
         """
         q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
-        results = self._search(q, use_master)
+        results = self._people_search(q, use_master)
         msg = 'Unable to locate %s in the LDAP directory'
         if 0 == len(results):
             raise NO_SUCH_PERSON(msg % unique_id)
@@ -350,7 +351,7 @@ class UserSession(object):
         conn.modify_s(vouchee_dn, modlist)
         return True
 
-    def _search(self, search_filter, use_master=False):
+    def _people_search(self, search_filter, use_master=False):
         """
         use_master can be set to True to force reading from master
         where stale data isn't acceptable.
@@ -359,31 +360,74 @@ class UserSession(object):
             conn = self._ensure_conn(WRITE)
         else:
             conn = self._ensure_conn(READ)
-            search_attrs = Person.search_attrs + SystemId.search_attrs
         return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
-                             search_filter, search_attrs)
+                             search_filter, Person.search_attrs)
 
-    def _populate_any(self, results):
+    def _irc_search(self, search_filter, use_master=False):
+        """
+        Searches for SystemIDs based on IRC nickname.
+
+        use_master can be set to True to force reading from master
+        where stale data isn't acceptable.
+        """
+        if use_master:
+            conn = self._ensure_conn(WRITE)
+        else:
+            conn = self._ensure_conn(READ)
+        return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                             search_filter, SystemId.search_attrs)
+
+    def _people_from_irc_results_search(self, irc_results, use_master=False):
+        """
+        Searches for SystemIDs based on IRC nickname.
+
+        use_master can be set to True to force reading from master
+        where stale data isn't acceptable.
+        """
+        if use_master:
+            conn = self._ensure_conn(WRITE)
+        else:
+            conn = self._ensure_conn(READ)
+        uniq_ids = []
+        for result in irc_results:
+            dn, attrs = result
+
+            parts = ldap.dn.explode_dn(dn)
+            # ['uniqueIdentifier=13173391.34', 'uniqueIdentifier=7f3a67u000',
+            #  'ou=people', 'dc=mozillians', 'dc=org']
+            if len(parts) > 1:
+                subparts = parts[1].split('=')
+            # ['uniqueIdentifier', '7f3a67u000001']
+            if len(subparts) == 2:
+                # 7f3a67u000001
+                uniq_ids.append(subparts[1])
+        if not uniq_ids:
+            return []
+
+        # "(uniqueIdentifier=7f3a67u00001)(uniqueIdentifier=7f3a67u00002)"
+        frags = ["(uniqueIdentifier=%s)" % x for x in uniq_ids]
+        dn_filter_frag = ''.join(frags)
+
+        base_filter = '(&(objectClass=mozilliansPerson)(|%s))'
+        search_filter = base_filter % dn_filter_frag
+        return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                             search_filter, Person.search_attrs)
+
+    def _populate_people_results(self, results):
+        """
+        Given LDAP search results, method sorts and ensures
+        unique set of results.
+        """
         people = []
         cache = {}
         for result in results:
             dn, attrs = result
-            if _result_is_person(dn, attrs):
-                p = Person.new_from_directory(attrs)
-            elif _result_is_service_id(dn, attrs):
-                p = _person_from_service_id(self, dn, attrs)
-            else:
-                msg = "Unknown type of LDAP search result [%s]" % str(attrs)
-                raise Exception(msg)
+            p = Person.new_from_directory(attrs)
             if not p or p.unique_id in cache:
-                log.info("Skipping dup")
                 continue
             else:
-                log.info("new item")
                 cache[p.unique_id] = True
                 people.append(p)
-        # make unique via dict key and value
-        # if 'key' in dict... return values()
         return people
 
     def __str__(self):
@@ -452,7 +496,7 @@ class Person(object):
     required_attrs = ['uniqueIdentifier', 'uid', 'cn', 'sn']
     optional_attrs = ['givenName', 'description', 'mail', 'telephoneNumber',
              'mozilliansVouchedBy']
-    search_attrs = required_attrs + optional_attrs + ['objectClass']
+    search_attrs = required_attrs + optional_attrs
     binary_attrs = ['jpegPhoto']
 
     def __init__(self, unique_id, username,
@@ -598,8 +642,8 @@ class SystemId(object):
     URI - http://google.com. Youtube (a Google property) would have
     it's own URI, since it has seperate username.
     """
-    search_attrs = ['objectClass', 'uniqueIdentifier',
-                    'mozilliansServiceURI', 'mozilliansServiceID']
+    search_attrs = ['uniqueIdentifier', 'mozilliansServiceURI',
+                    'mozilliansServiceID']
 
     def __init__(self, person_unique_id, unique_id, service_uri, service_id):
         self.person_unique_id = person_unique_id
@@ -754,32 +798,6 @@ class AdminSession(UserSession):
         level details will automagically work.
         """
         return AdminSession(request)
-
-
-def _result_is_person(dn, attrs):
-    log.info(str(attrs))
-    return 'mozilliansPerson' in attrs['objectClass']
-
-
-def _result_is_service_id(dn, attrs):
-    log.info(str(attrs))
-    return 'mozilliansLink' in attrs['objectClass']
-
-
-def _person_from_service_id(self, dn, attrs):
-    log.debug("Loading a person from _%s_" % dn)
-    parts = ldap.dn.explode_dn(dn)
-    # ['uniqueIdentifier=1317339108.99', 'uniqueIdentifier=7f3a67u000001',
-    #  'ou=people', 'dc=mozillians', 'dc=org']
-    if len(parts) > 1:
-        subparts = parts[1].split('=')
-        # ['uniqueIdentifier', '7f3a67u000001']
-        if len(subparts) == 2:
-            person_id = subparts[1]
-            # 7f3a67u000001
-            return self.get_by_unique_id(person_id)
-    log.error("Unable to turn service dn into person unique_id %s" % dn)
-    return None
 
 
 def change_password(unique_id, oldpass, password):

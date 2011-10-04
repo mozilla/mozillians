@@ -106,10 +106,13 @@ class TestLarper(test_utils.TestCase):
         eq_(1, len(rs))
 
     def test_search_by_irc_nick(self):
-        request = _mock_request('/en-US/search?q=David')
-        directory = self.d = UserSession.connect(request)
+        request = _mock_request('/en-US/')
+        directory = UserSession.connect(request)
         rs = directory.search("andrew_f")
         eq_(1, len(rs))
+        person = rs[0]
+        eq_('Andrew Findlay', person.full_name)
+        eq_('8', person.unique_id)
 
     def test_search_by_name(self):
         request = _mock_request('/en-US/search?q=David')

@@ -1,5 +1,6 @@
 from functools import wraps
 from ldap import SIZELIMIT_EXCEEDED
+from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib.auth.decorators import login_required
@@ -229,7 +230,8 @@ def search(request):
             ldap = UserSession.connect(request)
             try:
                 # Stale data okay
-                people = ldap.search(query)
+                sortk = attrgetter('full_name')
+                people = sorted(ldap.search(query), key=sortk)
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
 
