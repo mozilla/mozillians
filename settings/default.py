@@ -53,7 +53,6 @@ MINIFY_BUNDLES = {
     'js': {
         'common': (
             'js/libs/jquery-1.4.4.min.js',
-            'js/webtrends.js',
             'js/main.js',
         ),
     }
