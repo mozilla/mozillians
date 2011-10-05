@@ -19,8 +19,8 @@ LOGGING = {
     },
 }
 
+## L10n
 LOCALE_PATHS = [path('locale')]
-
 
 # Accepted locales
 PROD_LANGUAGES = ('de', 'en-US', 'es', 'fr', 'pl', 'sl', 'sq', 'zh-TW')
