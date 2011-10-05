@@ -2,20 +2,18 @@
 class dev_tools {
     case $operatingsystem {
         centos: {
-            package { 
+            package {
                 [ "git", "vim-enhanced" ]:
                 ensure => installed;
             }
         }
 
         ubuntu: {
-            package { 
+            package {
                 [ "git-core", "vim", "emacs" ]:
                 ensure => installed;
             }
         }
 
-
     }
-    
 }
