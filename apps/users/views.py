@@ -76,8 +76,8 @@ def register(request):
                 _send_confirmation_email(request.user)
 
                 msg = _(u'Your account has been created but needs to be '
-                        u'verified. Please check your email to verify '
-                        u'your account.')
+                         'verified. Please check your email to verify '
+                         'your account.')
                 messages.info(request, msg)
                 auth.logout(request)
 
