@@ -4,7 +4,7 @@ import ldap
 from django import http
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
-from django.contrib import auth
+from django.contrib import auth, messages
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 
@@ -74,7 +74,14 @@ def register(request):
             try:
                 uniq_id = _save_new_user(request, form)
                 _send_confirmation_email(request.user)
-                return redirect('phonebook.edit_new_profile', uniq_id)
+
+                msg = _(u'Your account has been created but needs to be '
+                        u'verified. Please check your email to verify '
+                        u'your account.')
+                messages.info(request, msg)
+                auth.logout(request)
+
+                return redirect(reverse('login'))
             except ldap.CONSTRAINT_VIOLATION:
                 _set_already_exists_error(form)
     return jingo.render(request, 'registration/register.html',

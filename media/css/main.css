@@ -320,6 +320,44 @@ background-image: -moz-linear-gradient(
     padding: 0;
 }
 
+/* Django Message Framework */
+#messages li {
+    border: 2px solid;
+    font-weight: bold;
+    margin: 0 auto;
+    padding: 5px;
+    text-align: center;
+    text-shadow: none;
+    width: 90%;
+}
+
+#messages a {
+    color: #000;
+    text-shadow: none;
+}
+
+#messages a:hover, #messages a:focus {
+    background: #fff;
+}
+
+#messages .error {
+    background: #ffb3b3;
+    border-color: #8c3c3c;
+    color: #8c3c3c;
+}
+
+#messages .warning {
+    background: #ffe8b3;
+    border-color: #8c713c;
+    color: #593e09;
+}
+
+#messages .info, #messages .success {
+    background: #b9ffb3;
+    border-color: #428c3c;
+    color: #428c3c;
+}
+
 /** Home Page */
 #body-home #main-content {
     background: top center no-repeat;

@@ -82,6 +82,18 @@
 
 <div id="main">
   <div id="main-content">
+    {% block messages %}
+      {% if messages %}
+        <ul id="messages">
+          {% for message in messages %}
+            <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+              {{ message }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endblock messages %}
+
     {% block main_content %}{% endblock %}
   </div>
 </div>
