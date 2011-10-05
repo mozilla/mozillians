@@ -577,7 +577,11 @@ function dcsDebug(){
 Function.prototype.wtbind = function(obj){
 	var method=this;
 	var temp=function(){
-		return method.apply(obj,arguments);
+        try {
+		    return method.apply(obj,arguments);
+        catch (e) {
+            return null;
+        }
 	};
 	return temp;
 }
