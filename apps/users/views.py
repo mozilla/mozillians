@@ -68,7 +68,7 @@ def register(request):
             log.warning('Bad register code [%s], skipping invite' % code)
 
     form = forms.RegistrationForm(request.POST or None, initial=initial)
-
+    
     if request.method == 'POST':
         if form.is_valid():
             try:
