@@ -579,7 +579,7 @@ Function.prototype.wtbind = function(obj){
 	var temp=function(){
         try {
 		    return method.apply(obj,arguments);
-        catch (e) {
+        } catch (e) {
             return null;
         }
 	};
