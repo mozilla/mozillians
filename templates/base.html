@@ -74,8 +74,7 @@
               method="GET">
           <input type="search" id="q" name="q"
                  placeholder="{{ _('Name, IRC Nick, or Email') }}">
-          <input type="image" alt="{{ _('Search') }}" id="quick-search-btn"
-                 src="{{ MEDIA_URL }}img/mozilla/search-submit.png">
+          <button alt="{{ _('Search') }}" type="submit" id="quick-search-btn">{{ _('Search') }}</button>
         </form>
       {% endblock %}
     {% endif %}

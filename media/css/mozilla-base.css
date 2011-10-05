@@ -142,7 +142,13 @@ body {
 }
 
 #quick-search-btn {
-    left: -16px;
+    background: url(../img/mozilla/search-submit.png) 2px 50% no-repeat;
+    left: -18px;
+    width: 42px;
+    height: 23px;
+    border: 0px;
+    font-size: 1px;
+    text-indent: -9999px;
     position: relative;
     vertical-align: middle;
     z-index: 1;
