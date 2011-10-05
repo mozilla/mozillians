@@ -57,11 +57,13 @@
           <li>
             <a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a>
           </li>
-          <li>
-            <a id="register" href="{{ url('register') }}">
-              {{ _('Join Us') }}
-            </a>
-          </li>
+          {% block register_button %}
+            <li>
+              <a id="register" href="{{ url('register') }}">
+                {{ _('Join Us') }}
+              </a>
+            </li>
+          {% endblock %}
         {% endif %}
       </ul>
     </nav>
