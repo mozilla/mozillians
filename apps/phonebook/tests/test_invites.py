@@ -1,3 +1,5 @@
+from re import search
+
 from django.core import mail
 
 from nose.tools import eq_
@@ -52,7 +54,16 @@ class InviteTest(LDAPTestCase):
                 confirmp='tacoface',
                 optin=True
                 )
-        return self.client.post(invite.get_url(), d, follow=True)
+
+        self.client.post(invite.get_url(), d, follow=True)
+
+        code = search('\?code=(.*)$', mail.outbox[-1].body).group(1)
+        self.client.get(reverse('confirm') + '?code=%s' % code)
+
+        credentials =  dict(username=d['email'], password=d['password'])
+
+        # return self.client.post(invite.get_url(), d, follow=True)
+        return self.client.post(reverse('login'), credentials, follow=True)
 
     def test_send_invite_flow(self):
         """
