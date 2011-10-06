@@ -104,27 +104,25 @@ def _profile(request, person, use_master):
 
 @never_cache
 @login_required
-def edit_profile(request, unique_id):
+def edit_profile(request):
     """
     View for editing a profile, typically the user's own.
-
-    Why does this and edit_new_profile accept a unique_id
-    Instead of just using the request.user object?
 
     LDAP's ACL owns if the current user can edit the user or not.
     We get a rich admin screen for free, for LDAPAdmin users.
     """
-    return _edit_profile(request, unique_id, False)
+    return _edit_profile(request, False)
 
 
 @never_cache
 @login_required
-def edit_new_profile(request, unique_id):
-    return _edit_profile(request, unique_id, True)
+def edit_new_profile(request):
+    return _edit_profile(request, True)
 
 
-def _edit_profile(request, unique_id, new_account):
+def _edit_profile(request, new_account):
     ldap = UserSession.connect(request)
+    unique_id = request.user.unique_id
     try:
         person = ldap.get_by_unique_id(unique_id, use_master=True)
     except NO_SUCH_PERSON:

@@ -13,9 +13,9 @@ urlpatterns = patterns('',
 
     # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),
     # Post 1.0?
-    url('^user/edit/(?P<unique_id>.*)$', views.edit_profile,
+    url('^user/edit/$', views.edit_profile,
         name='phonebook.edit_profile'),
-    url('^register/edit/(?P<unique_id>.*)$', views.edit_new_profile,
+    url('^register/edit/$', views.edit_new_profile,
         name='phonebook.edit_new_profile'),
     url('^confirm-delete$', views.confirm_delete, name='confirm_delete'),
     url('^delete$', views.delete, name='phonebook.delete_profile'),
