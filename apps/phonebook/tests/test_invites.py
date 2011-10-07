@@ -1,4 +1,5 @@
 from django.core import mail
+from django.contrib.auth.models import User
 
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -52,7 +53,17 @@ class InviteTest(LDAPTestCase):
                 confirmp='tacoface',
                 optin=True
                 )
-        return self.client.post(invite.get_url(), d, follow=True)
+
+        self.client.post(invite.get_url(), d, follow=True)
+
+        u = User.objects.filter(email=d['email'])[0].get_profile()
+        u.is_confirmed = True
+        u.save()
+
+        return self.client.post(reverse('login'),
+                                dict(username=d['email'],
+                                     password=d['password']),
+                                follow=True)
 
     def test_send_invite_flow(self):
         """
@@ -65,7 +76,9 @@ class InviteTest(LDAPTestCase):
         invite = self.invite_someone()
         r = self.get_register(invite)
         d = r.context['form'].initial
+
         r = self.redeem_invite(invite, **d)
+
         eq_(r.context['user'].is_vouched(), True)
         eq_(r.context['user'].unique_id,
             Invite.objects.get(pk=invite.pk).redeemer)

@@ -1,4 +1,5 @@
 from django.core import mail
+from django.contrib.auth.models import User
 
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
@@ -31,7 +32,7 @@ class RegistrationTest(LDAPTestCase):
                 )
         r = self.client.post(reverse('register'), d, follow=True)
         eq_(len(mail.outbox), 1)
-        u = r.context['user'].get_profile()
+        u = User.objects.filter(email=d['email'])[0].get_profile()
         assert u.get_confirmation_url() in mail.outbox[0].body
 
         r = self.client.post(reverse('login'),
@@ -42,7 +43,9 @@ class RegistrationTest(LDAPTestCase):
         r = self.client.get(u.get_confirmation_url())
         assert "Your email address has been confirmed." in r.content
 
-        r = self.client.post(reverse('login'), d)
+        r = self.client.post(reverse('login'),
+                             dict(username=d['email'], password=d['password']),
+                             follow=True)
         eq_(d['email'], str(r.context['user']))
 
     def test_mozillacom_registration(self):
@@ -57,7 +60,7 @@ class RegistrationTest(LDAPTestCase):
         )
         r = self.client.post(reverse('register'), d, follow=True)
         eq_(len(mail.outbox), 1)
-        u = r.context['user'].get_profile()
+        u = User.objects.filter(email=d['email'])[0].get_profile()
         assert u.get_confirmation_url() in mail.outbox[0].body
 
         r = self.client.post(reverse('login'),
@@ -68,7 +71,9 @@ class RegistrationTest(LDAPTestCase):
         r = self.client.get(u.get_confirmation_url())
         assert "Your email address has been confirmed." in r.content
 
-        r = self.client.post(reverse('login'), d)
+        r = self.client.post(reverse('login'),
+                             dict(username=d['email'], password=d['password']),
+                             follow=True)
         eq_(d['email'], str(r.context['user']))
         assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
 
@@ -83,7 +88,7 @@ class RegistrationTest(LDAPTestCase):
         )
         r = self.client.post(reverse('register'), d, follow=True)
         eq_(len(mail.outbox), 1)
-        u = r.context['user'].get_profile()
+        u = User.objects.filter(email=d['email'])[0].get_profile()
         assert u.get_confirmation_url() in mail.outbox[0].body
 
         r = self.client.post(u.get_send_confirmation_url())

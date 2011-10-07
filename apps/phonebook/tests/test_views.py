@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django import test
+from django.contrib.auth.models import User
 
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -242,7 +243,21 @@ def _create_new_user():
                   last_name='McPal',
                   optin='True')
     r = newbie_client.post(reg_url, params, follow=True)
-    eq_('phonebook/edit_profile.html', r.templates[0].name)
+    eq_('registration/login.html', r.templates[0].name)
+
+    u = User.objects.filter(email=params['email'])[0].get_profile()
+    u.is_confirmed = True
+    u.save()
+
+    r = newbie_client.post(reverse('login'),
+                           dict(username=params['email'],
+                                password=params['password']),
+                           follow=True)
+
+    r = newbie_client.get(reverse('profile',
+                                  args=[r.context['user'].unique_id]))
+    eq_('phonebook/profile.html', r.templates[0].name)
+
     newbie_uniq_id = r.context['person'].unique_id
     if not newbie_uniq_id:
         msg = 'New user should be logged in and have a uniqueIdentifier'
