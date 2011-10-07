@@ -1,19 +1,21 @@
+import tempfile
+
 from django import forms
 from django.conf import settings
 
+import happyforms
 import Image
-import tempfile
 from easy_thumbnails import processors
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
 
 
-class SearchForm(forms.Form):
+class SearchForm(happyforms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=True)
 
 
-class ProfileForm(forms.Form):
+class ProfileForm(happyforms.Form):
     first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
     biography = forms.CharField(label=_lazy(u'Bio'),
@@ -65,16 +67,16 @@ class ProfileForm(forms.Form):
         return photo
 
 
-class DeleteForm(forms.Form):
+class DeleteForm(happyforms.Form):
     unique_id = forms.CharField(widget=forms.HiddenInput)
 
 
-class VouchForm(forms.Form):
+class VouchForm(happyforms.Form):
     """Vouching is captured via a user's unique_id."""
     voucher = forms.CharField(widget=forms.HiddenInput)
     vouchee = forms.CharField(widget=forms.HiddenInput)
 
 
-class InviteForm(forms.ModelForm):
+class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite

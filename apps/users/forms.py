@@ -7,6 +7,7 @@ from django.template import loader
 from django.utils.http import int_to_base36
 
 import commonware.log
+import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
@@ -56,7 +57,7 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         return self.cleaned_data
 
 
-class RegistrationForm(forms.Form):
+class RegistrationForm(happyforms.Form):
     email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
                                label=_lazy(u'Password'), required=True,
