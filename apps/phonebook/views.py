@@ -4,6 +4,8 @@ from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
+from django.core.mail import send_mail
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
@@ -77,7 +79,7 @@ def _profile(request, person, use_master):
     vouch_form = None
     ldap = UserSession.connect(request)
 
-    if person.voucher_unique_id:
+    if person.voucher_unique_id or cache.get('vouched_' + person.unique_id):
         try:
             # Stale data okay
             person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
@@ -87,7 +89,6 @@ def _profile(request, person, use_master):
     elif request.user.unique_id != person.unique_id:
         voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(
-                voucher=voucher,
                 vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
@@ -273,10 +274,18 @@ def invite(request):
 @vouch_required
 @require_POST
 def vouch(request):
+    """
+    When a voucher approves a vouch for a vouchee, there
+    can be a replication lag between master -> slave. As a
+    result, there is a possibility that viewing the vouchee's
+    profile will not show the updated state. So we currently
+    will cache the state for immediate feedback.
+    """
     form = forms.VouchForm(request.POST)
     if form.is_valid():
         ldap = UserSession.connect(request)
         data = form.cleaned_data
         vouchee = data.get('vouchee')
-        ldap.record_vouch(data.get('voucher'), vouchee)
+        ldap.record_vouch(request.user.unique_id, vouchee)
+        cache.set('vouched_' + vouchee, True)
         return redirect(reverse('profile', args=[vouchee]))
