@@ -47,8 +47,11 @@ AUTH_LDAP_SERVER_URI = LDAP_SYNC_PROVIDER_URI
 AUTH_LDAP_BIND_DN = ""
 AUTH_LDAP_BIND_PASSWORD = ""
 
+## Email
 
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
