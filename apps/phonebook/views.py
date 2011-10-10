@@ -11,10 +11,10 @@ from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from tower import ugettext as _
-
 import commonware.log
 from funfactory.urlresolvers import reverse
+from tower import ugettext as _
+
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
