@@ -4,7 +4,6 @@ from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
@@ -261,19 +260,7 @@ def invite(request):
             invite = f.save(commit=False)
             invite.inviter = request.user.unique_id
             invite.save()
-            subject = _('Become a Mozillian')
-            message = _("Hi, I'm sending you this because I think you should "
-                        'join mozillians.org, the community directory for '
-                        'Mozilla contributors like you. You can create a '
-                        'profile for yourself about what you do in the '
-                        'community as well as search for other contributors '
-                        'to learn more about them or get in touch.  Check it '
-                        'out.')
-            # l10n: %s is the registration link.
-            link = _("Join Mozillians: %s") % invite.get_url()
-            message = "%s\n\n%s" % (message, link)
-            send_mail(subject, message, request.user.username,
-                      [invite.recipient])
+            invite.send(sender=request.user.username)
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:

@@ -92,14 +92,13 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'users',
     'larper',
 
-    # Local apps
     'jingo_minify',
-    'tower',  # for ./manage.py extract (L10n)
+    'tower',
+    'cronjobs',
 
     'django.contrib.admin',
     'django.contrib.auth',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+
 ]
 
 ## Auth
