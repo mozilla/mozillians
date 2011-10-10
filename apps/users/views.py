@@ -179,8 +179,8 @@ def _save_new_user(request, form):
     user = auth.authenticate(username=username, password=password)
     # Should never happen
     if not user or not user.is_authenticated():
-        msg = "Authentication for new user [%s] with password len %d failed" %\
-            (username, len(password))
+        msg = 'Authentication for new user (%s) failed' % username
+        # TODO: make this a unique exception.
         raise Exception(msg)
     auth.login(request, user)
 
