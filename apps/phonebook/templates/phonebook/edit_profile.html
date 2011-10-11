@@ -5,7 +5,7 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
-<form action="{{ url('phonebook.edit_profile', user.unique_id) }}"
+<form action="{{ url('phonebook.edit_profile') }}"
       method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
