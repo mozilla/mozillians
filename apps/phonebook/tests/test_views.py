@@ -39,7 +39,7 @@ class TestDeleteUser(LDAPTestCase):
         client = mozillian_client(user['email'])
         uniq_id = user['uniq_id']
 
-        r = client.get(reverse('phonebook.edit_profile', args=[uniq_id]))
+        r = client.get(reverse('phonebook.edit_profile'))
         doc = pq(r.content)
 
         # Make sure there's a link to a confirm deletion page, and nothing
@@ -55,7 +55,7 @@ class TestDeleteUser(LDAPTestCase):
 
         # Test that we can go back (i.e. cancel account deletion).
         doc = pq(r.content)
-        eq_(reverse('phonebook.edit_profile', args=[uniq_id]),
+        eq_(reverse('phonebook.edit_profile'),
             doc('#cancel-action').attr('href'))
 
         # Test that account deletion works.
@@ -192,8 +192,7 @@ class TestViews(LDAPTestCase):
         # do all then reset
         newbie_uniq_id, newbie_client = _create_new_user()
         profile_url = reverse('profile', args=[newbie_uniq_id])
-        edit_profile_url = reverse('phonebook.edit_profile',
-                                   args=[newbie_uniq_id])
+        edit_profile_url = reverse('phonebook.edit_profile')
         # original
         r = newbie_client.get(profile_url)
         newbie = r.context['person']
