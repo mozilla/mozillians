@@ -11,27 +11,28 @@ The Model
 
 The invite model stores the following:
 
-.. py:attribute:: Invite.inviter
+.. autoclass:: phonebook.models.Invite
+   :members:
 
-   This is the ``uid`` of the vouched Mozillian who is doing the inviting.
 
-.. py:attribute:: Invite.recipient
+Inviting en-masse
+-----------------
 
-   This is the email address of where the invitation is sent.
+Let's say you have a large list of contributors to invite to your phonebook,
+well we thought of that.
 
-.. py:attribute:: Invite.code
+You can format a file (``myfriends.txt``) with one email address per line::
 
-   This is the randomly generated invite code.  This code is used in the
-   :ref:`registration` system.
+    bob@thebobcats.com
+    juno@reactor.org
+    diane@hunters.org
 
-.. py:attribute:: Invite.redeemer
+And feed it on the admin node like so::
 
-   This is the ``uid`` of the newly created user who has redeemed the invite.
+    ./manage.py cron invite myfriends.txt
 
-.. py:attribute:: Invite.redeemed
+And voila!  Invitations will be mailed to your friends.
 
-   This is the date the invite was redeemed.
-
-.. py:attribute:: Invite.created
-
-   This is the date the invite was created.
+This creates one :py:class:`~phonebook.models.Invite` and sets the
+:py:attr:`~phonebook.models.Invite.receiver` to ``ZUUL``.  This also sends an
+invitation email to each recipient.
