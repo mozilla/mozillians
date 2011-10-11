@@ -9,7 +9,6 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 
 import commonware.log
-import jingo
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
@@ -72,7 +71,7 @@ def register(request):
     if request.method == 'POST':
         if form.is_valid():
             try:
-                uniq_id = _save_new_user(request, form)
+                _save_new_user(request, form)
                 _send_confirmation_email(request.user)
 
                 msg = _(u'Your account has been created but needs to be '
@@ -84,8 +83,7 @@ def register(request):
                 return redirect(reverse('login'))
             except ldap.CONSTRAINT_VIOLATION:
                 _set_already_exists_error(form)
-    return jingo.render(request, 'registration/register.html',
-                        dict(form=form))
+    return render(request, 'registration/register.html', dict(form=form))
 
 
 def password_change(request):
@@ -136,10 +134,7 @@ def password_reset_confirm(request, uidb36=None, token=None):
 
 
 def password_reset_check_mail(request):
-    return jingo.render(
-        request,
-        'registration/password_reset_check_mail.html',
-        dict())
+    return render(request, 'registration/password_reset_check_mail.html')
 
 
 def _save_new_user(request, form):

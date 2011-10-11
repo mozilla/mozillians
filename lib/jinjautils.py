@@ -1,3 +1,4 @@
+# TODO: let's see if we can get rid of this, it's garbage
 from django.contrib.admin import options, actions, sites
 from django.template import loader
 
@@ -37,4 +38,3 @@ def jinja_for_django(template_name, context=None, **kw):
     for d in context_instance.dicts:
         context.update(d)
     return jingo.render(request, template_name, context, **kw)
-

@@ -11,7 +11,6 @@ from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-import jingo
 from tower import ugettext as _
 
 import commonware.log
@@ -99,7 +98,7 @@ def _profile(request, person, use_master):
         del services[MOZILLA_IRC_SERVICE_URI]
 
     data = dict(person=person, vouch_form=vouch_form, services=services)
-    return jingo.render(request, 'phonebook/profile.html', data)
+    return render(request, 'phonebook/profile.html', data)
 
 
 @never_cache
@@ -154,12 +153,12 @@ def _edit_profile(request, unique_id, new_account):
                                                 use_master=True))
             form = forms.ProfileForm(initial=initial)
 
-        return jingo.render(request, 'phonebook/edit_profile.html', dict(
-                form=form,
-                delete_form=del_form,
-                person=person,
-                registration_flow=new_account,
-                ))
+        d = dict(form=form,
+                 delete_form=del_form,
+                 person=person,
+                 registration_flow=new_account
+                )
+        return render(request, 'phonebook/edit_profile.html', d)
     else:
         raise Http404
 
@@ -232,11 +231,10 @@ def search(request):
                 people = sorted(ldap.search(query), key=sortk)
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
-
-    return jingo.render(request, 'phonebook/search.html',
-                        dict(people=people,
-                             form=form,
-                             size_exceeded_error=size_exceeded))
+    d = dict(people=people,
+             form=form,
+             size_exceeded_error=size_exceeded)
+    return render(request, 'phonebook/search.html', d)
 
 
 @login_required
@@ -284,7 +282,7 @@ def invite(request):
         f = forms.InviteForm()
     data = dict(form=f, foo='bar')
 
-    return jingo.render(request, 'phonebook/invite.html', data)
+    return render(request, 'phonebook/invite.html', data)
 
 
 @vouch_required
