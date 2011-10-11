@@ -3,6 +3,9 @@
 # Django stuff
 -e git://github.com/django/django@36c82ac8#egg=django
 
+# Django Extensions
+-e git://github.com/mozilla/happyforms.git#egg=happyforms
+
 # Templates
 -e git://github.com/jbalogh/jingo.git#egg=jingo
 -e git://github.com/jsocol/jingo-minify.git#egg=jingo-minify
