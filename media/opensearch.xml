@@ -1,0 +1,8 @@
+<OpenSearchDescription>
+  <ShortName>Mozillians</ShortName>
+  <LongName>Mozillians</LongName>
+  <Description>Search people on Mozillians</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image width="16" height="16">http://mozillians.org/media/favicon.ico</Image>
+  <Url type="text/html" template="http://mozillians.org/search?q={searchTerms}&x=0&y=0"/>
+</OpenSearchDescription>
