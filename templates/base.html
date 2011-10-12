@@ -19,6 +19,8 @@
   {% endblock %}
 
   <link rel="shortcut icon" type="image/ico" href="{{ MEDIA_URL }}favicon.ico">
+  <link rel="search" type="application/opensearchdescription+xml"
+      href="{{ MEDIA_URL }}opensearch.xml" title="Mozillians.org" />
   {% block feeds %}{% endblock %}
   {% block extra_headers %}{% endblock %}
 </head>
