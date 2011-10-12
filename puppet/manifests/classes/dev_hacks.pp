@@ -1,9 +1,15 @@
 # Do some dirty, dirty things to make development nicer.
 class dev_hacks {
 
-    file { "$PROJ_DIR/settings_local.py":
+    file { "$PROJ_DIR/settings/local.py":
         ensure => file,
-        source => "$PROJ_DIR/settings_local.py-dist";
+        source => "$PROJ_DIR/settings/local.py-dist";
+    }
+
+    file { "/home/vagrant/.zshrc":
+        ensure => file,
+        source => "$PROJ_DIR/puppet/files/home/vagrant/zshrc",
+        owner => "vagrant", group => "vagrant", mode => 0644;
     }
 
     case $operatingsystem {
