@@ -73,7 +73,6 @@ class DeleteForm(happyforms.Form):
 
 class VouchForm(happyforms.Form):
     """Vouching is captured via a user's unique_id."""
-    voucher = forms.CharField(widget=forms.HiddenInput)
     vouchee = forms.CharField(widget=forms.HiddenInput)
 
 

@@ -157,7 +157,7 @@ class TestViews(LDAPTestCase):
         # test for vouch form...
         self.assertTrue(profile.context['vouch_form'], 'Newb needs a voucher')
         vouch_url = reverse('phonebook.vouch')
-        data = dict(voucher=MOZILLIAN['uniq_id'], vouchee=newbie_uniq_id)
+        data = dict(vouchee=newbie_uniq_id)
         vouched_profile = moz_client.post(vouch_url, data, follow=True)
         eq_(200, vouched_profile.status_code)
         eq_('phonebook/profile.html', vouched_profile.templates[0].name)
