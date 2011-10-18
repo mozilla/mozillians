@@ -27,9 +27,7 @@ BAD_VOUCHER = 'Unknown Voucher'
 
 
 def vouch_required(f):
-    """
-    If a user is not vouched they get a 403.
-    """
+    """If a user is not vouched they get a 403."""
     @login_required
     @wraps(f)
     def wrapped(request, *args, **kwargs):
@@ -45,10 +43,7 @@ def vouch_required(f):
 @never_cache
 @login_required
 def profile_uid(request, unique_id):
-    """
-    View a profile by unique_id, which is a stable,
-    random user id.
-    """
+    """View a profile by unique_id, which is a stable, random user id."""
     needs_master = (request.user.unique_id == unique_id)
 
     ldap = UserSession.connect(request)
@@ -104,12 +99,7 @@ def _profile(request, person, use_master):
 @never_cache
 @login_required
 def edit_profile(request):
-    """
-    View for editing a profile, typically the user's own.
-
-    LDAP's ACL owns if the current user can edit the user or not.
-    We get a rich admin screen for free, for LDAPAdmin users.
-    """
+    """View for editing the current user's profile."""
     return _edit_profile(request, False)
 
 
