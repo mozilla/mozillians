@@ -4,6 +4,7 @@ from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -11,10 +12,10 @@ from django.shortcuts import redirect, render
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from tower import ugettext as _
-
 import commonware.log
 from funfactory.urlresolvers import reverse
+from tower import ugettext as _
+
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
@@ -26,9 +27,7 @@ BAD_VOUCHER = 'Unknown Voucher'
 
 
 def vouch_required(f):
-    """
-    If a user is not vouched they get a 403.
-    """
+    """If a user is not vouched they get a 403."""
     @login_required
     @wraps(f)
     def wrapped(request, *args, **kwargs):
@@ -44,10 +43,7 @@ def vouch_required(f):
 @never_cache
 @login_required
 def profile_uid(request, unique_id):
-    """
-    View a profile by unique_id, which is a stable,
-    random user id.
-    """
+    """View a profile by unique_id, which is a stable, random user id."""
     needs_master = (request.user.unique_id == unique_id)
 
     ldap = UserSession.connect(request)
@@ -78,7 +74,7 @@ def _profile(request, person, use_master):
     vouch_form = None
     ldap = UserSession.connect(request)
 
-    if person.voucher_unique_id:
+    if person.voucher_unique_id or cache.get('vouched_' + person.unique_id):
         try:
             # Stale data okay
             person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
@@ -88,7 +84,6 @@ def _profile(request, person, use_master):
     elif request.user.unique_id != person.unique_id:
         voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(
-                voucher=voucher,
                 vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
@@ -103,27 +98,24 @@ def _profile(request, person, use_master):
 
 @never_cache
 @login_required
-def edit_profile(request, unique_id):
-    """
-    View for editing a profile, typically the user's own.
-
-    Why does this and edit_new_profile accept a unique_id
-    Instead of just using the request.user object?
+def edit_profile(request):
+    """View for editing a profile, typically the user's own.
 
     LDAP's ACL owns if the current user can edit the user or not.
     We get a rich admin screen for free, for LDAPAdmin users.
     """
-    return _edit_profile(request, unique_id, False)
+    return _edit_profile(request, False)
 
 
 @never_cache
 @login_required
-def edit_new_profile(request, unique_id):
-    return _edit_profile(request, unique_id, True)
+def edit_new_profile(request):
+    return _edit_profile(request, True)
 
 
-def _edit_profile(request, unique_id, new_account):
+def _edit_profile(request, new_account):
     ldap = UserSession.connect(request)
+    unique_id = request.user.unique_id
     try:
         person = ldap.get_by_unique_id(unique_id, use_master=True)
     except NO_SUCH_PERSON:
@@ -263,19 +255,7 @@ def invite(request):
             invite = f.save(commit=False)
             invite.inviter = request.user.unique_id
             invite.save()
-            subject = _('Become a Mozillian')
-            message = _("Hi, I'm sending you this because I think you should "
-                        'join mozillians.org, the community directory for '
-                        'Mozilla contributors like you. You can create a '
-                        'profile for yourself about what you do in the '
-                        'community as well as search for other contributors '
-                        'to learn more about them or get in touch.  Check it '
-                        'out.')
-            # l10n: %s is the registration link.
-            link = _("Join Mozillians: %s") % invite.get_url()
-            message = "%s\n\n%s" % (message, link)
-            send_mail(subject, message, request.user.username,
-                      [invite.recipient])
+            invite.send(sender=request.user.username)
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:
@@ -288,10 +268,18 @@ def invite(request):
 @vouch_required
 @require_POST
 def vouch(request):
+    """
+    When a voucher approves a vouch for a vouchee, there
+    can be a replication lag between master -> slave. As a
+    result, there is a possibility that viewing the vouchee's
+    profile will not show the updated state. So we currently
+    will cache the state for immediate feedback.
+    """
     form = forms.VouchForm(request.POST)
     if form.is_valid():
         ldap = UserSession.connect(request)
         data = form.cleaned_data
         vouchee = data.get('vouchee')
-        ldap.record_vouch(data.get('voucher'), vouchee)
+        ldap.record_vouch(request.user.unique_id, vouchee)
+        cache.set('vouched_' + vouchee, True)
         return redirect(reverse('profile', args=[vouchee]))

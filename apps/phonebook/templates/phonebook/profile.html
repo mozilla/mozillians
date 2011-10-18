@@ -59,7 +59,7 @@
     {{ profile_photo(person) }}
 
     {% if user.username == person.username %}
-      <a href="{{ url('phonebook.edit_profile', person.unique_id) }}"
+      <a href="{{ url('phonebook.edit_profile') }}"
         class="button blue small" id="edit-profile">
         {{ _('Edit My Profile') }}
       </a>

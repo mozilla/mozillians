@@ -5,7 +5,7 @@ Settings
 Pre-requisite Settings
 ----------------------
 
-.. automodule:: settings.pre
+.. automodule:: settings.initial
     :members:
 
 

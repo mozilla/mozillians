@@ -2,7 +2,7 @@
 import sys, os
 
 sys.path.insert(0, os.path.abspath('..'))
-
+sys.path.insert(0, os.path.abspath('../apps'))
 
 class Mock(object):
     def __init__(self, *args):
@@ -11,12 +11,14 @@ class Mock(object):
     def __getattr__(self, name):
         return Mock
 
-for mod_name in ('ldap', '_ldap', 'django_auth_ldap', 'django_auth_ldap.config'):
+for mod_name in ('ldap', '_ldap', 'django_auth_ldap',
+                 'django_auth_ldap.config'):
     sys.modules[mod_name] = Mock()
 
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from django.conf import settings
 import funfactory.manage
 funfactory.manage.ROOT = os.path.abspath('..')
-
 
 # -- General configuration -----------------------------------------------------
 
