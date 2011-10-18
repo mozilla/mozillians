@@ -87,7 +87,6 @@ AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
-    'landing',
     'phonebook',
     'users',
     'larper',
