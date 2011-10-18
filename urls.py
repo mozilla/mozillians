@@ -22,7 +22,6 @@ handler500 = lambda r: error_page(r, 500)
 handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns('',
-    (r'', include('landing.urls')),
     (r'', include('phonebook.urls')),
     (r'', include('users.urls')),
 

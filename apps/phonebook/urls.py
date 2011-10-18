@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
+from django.views.generic.simple import direct_to_template
 
 from django.contrib import admin
 admin.autodiscover()
@@ -25,6 +26,14 @@ urlpatterns = patterns('',
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
+    # Static pages
+    url('^about$', direct_to_template, {'template': 'phonebook/about.html'},
+        name='about'),
+    url('^confirm-register$', direct_to_template,
+        {'template': 'phonebook/confirm_register.html'},
+        name='confirm_register'),
+    url('^$', direct_to_template, {'template': 'phonebook/home.html'},
+        name='home'),
 )
 
 ## In DEBUG mode, serve media files through Django.
