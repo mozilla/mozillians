@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
-from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
 import commonware.log
@@ -223,6 +223,13 @@ def search(request):
              form=form,
              size_exceeded_error=size_exceeded)
     return render(request, 'phonebook/search.html', d)
+
+
+@cache_page(60 * 60 * 168) # 1 week.
+def search_plugin(request):
+    """Render an OpenSearch Plugin."""
+    return render(request, 'phonebook/search_opensearch.xml',
+                  content_type='application/opensearchdescription+xml')
 
 
 @login_required

@@ -13,6 +13,8 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
+  <link rel="search" type="application/opensearchdescription+xml" 
+        title="{{ _('Mozillians') }}" href="{{ url('phonebook.search_plugin') }}">
 
   {% block site_css %}
     {{ css('common') }}

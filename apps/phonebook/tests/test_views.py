@@ -3,10 +3,11 @@ from uuid import uuid4
 from django import test
 from django.contrib.auth.models import User
 
+import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from funfactory.urlresolvers import reverse
+from funfactory.urlresolvers import set_url_prefix, reverse
 from phonebook.tests import (LDAPTestCase, AMANDA_NAME, AMANDEEP_NAME,
                              AMANDEEP_VOUCHER, MOZILLIAN, PENDING,
                              OTHER_MOZILLIAN, PASSWORD, mozillian_client)
@@ -227,6 +228,28 @@ class TestViews(LDAPTestCase):
         r = self.mozillian_client.get(profile)
         doc = pq(r.content)
         assert '?' in doc('#profile-photo').attr('src')
+
+
+class TestOpensearchViews(test_utils.TestCase):
+    """Tests for the OpenSearch plugin, accessible to anonymous visitors"""
+    def test_search_plugin(self):
+        """The plugin loads with the correct mimetype."""
+        response = self.client.get(reverse('phonebook.search_plugin'))
+        eq_(200, response.status_code)
+        assert 'expires' in response
+        eq_('application/opensearchdescription+xml', response['content-type'])
+
+    def test_localized_search_plugin(self):
+        """Every locale gets its own plugin!"""
+        response = self.client.get(reverse('phonebook.search_plugin',
+                                   prefix='/en-US/'))
+        assert '/en-US/search' in response.content
+
+        # Prefixer and its locale are sticky; clear it before the next request
+        set_url_prefix(None)
+        response = self.client.get(reverse('phonebook.search_plugin',
+                                   prefix='/fr/'))
+        assert '/fr/search' in response.content
 
 
 def _logged_in_html(response):

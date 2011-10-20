@@ -20,6 +20,7 @@ urlpatterns = patterns('',
         name='phonebook.edit_new_profile'),
     url('^confirm-delete$', views.confirm_delete, name='confirm_delete'),
     url('^delete$', views.delete, name='phonebook.delete_profile'),
+    url('^opensearch.xml$', views.search_plugin, name='phonebook.search_plugin'),
     url('^search$', views.search, name='phonebook.search'),
     url('^vouch$', views.vouch, name='phonebook.vouch'),
 
