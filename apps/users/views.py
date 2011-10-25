@@ -5,6 +5,7 @@ from django import http
 from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.contrib import auth, messages
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 
@@ -49,6 +50,14 @@ def confirm(request):
     profile.is_confirmed = True
     profile.save()
     return render(request, 'users/confirmed.html')
+
+
+@anonymous_csrf
+def login(request, **kwargs):
+    """Login view that wraps Django's login but redirects auth'd users."""
+    return (auth_views.login(request, **kwargs)
+            if request.user.is_anonymous()
+            else redirect(reverse('profile', args=[request.user.unique_id])))
 
 
 @anonymous_csrf

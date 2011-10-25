@@ -13,7 +13,7 @@ auth_views.render_to_response = jinja_for_django
 
 
 urlpatterns = patterns('',
-    url(r'^login', anonymous_csrf(auth_views.login),
+    url(r'^login', views.login,
         dict(authentication_form=forms.AuthenticationForm), name='login'),
     url(r'^logout', auth_views.logout, dict(redirect_field_name='next'),
         name='logout'),
