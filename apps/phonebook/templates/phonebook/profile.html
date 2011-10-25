@@ -110,7 +110,9 @@
 
     {% if person.biography %}
       <h3>{{ _('Bio:') }}{# L10n: Biography #}</h3>
-      <p id="bio" class="note p-note">{{ person.biography }}</p>
+      <div id="bio" class="note p-note">
+        {{ person.biography|paragraphize }}
+      </div>
     {% endif %}
 </div>
 {% endblock %}
