@@ -1,3 +1,4 @@
+import re
 import time
 
 import jinja2
@@ -6,7 +7,17 @@ from funfactory.utils import absolutify
 from jingo import register
 
 
+PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
+
+
 absolutify = register.function(absolutify)
+
+
+@register.filter
+def paragraphize(value):
+    return jinja2.Markup(
+            u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
+                         for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
 @register.filter
