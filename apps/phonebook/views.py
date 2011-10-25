@@ -3,6 +3,7 @@ from ldap import SIZELIMIT_EXCEEDED
 from operator import attrgetter
 
 import django.contrib.auth
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
@@ -285,4 +286,10 @@ def vouch(request):
         vouchee = data.get('vouchee')
         ldap.record_vouch(request.user.unique_id, vouchee)
         cache.set('vouched_' + vouchee, True)
+
+        # Notify the current user that they vouched successfully.
+        msg = _(u'Thanks for vouching for a fellow Mozillian! '
+                 'This user is now vouched!')
+        messages.info(request, msg)
+
         return redirect(reverse('profile', args=[vouchee]))
