@@ -30,6 +30,10 @@ class ProfileForm(happyforms.Form):
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
 
+    tags = forms.CharField(label=_lazy(u'Tags'), required=False,
+                           widget=forms.TextInput())
+
+
     def clean_photo(self):
         """Let's make sure things are right.
 

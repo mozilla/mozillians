@@ -18,6 +18,7 @@ class UserProfile(models.Model):
     confirmation_code = models.CharField(max_length=32, editable=False,
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
+    tags = models.ManyToManyField('tags.Tag')
 
     class Meta:
         db_table = 'profile'
@@ -31,6 +32,24 @@ class UserProfile(models.Model):
         url = (reverse('send_confirmation') + '?' +
                urllib.urlencode({'user': self.user.username}))
         return url
+
+    def save_tags_from_string(self, tags):
+        """Parse a string of (usually space-demilited) tags and save them."""
+        # If no tags are supplied, we're deleting all non-hidden,
+        # non-special tags.
+        if not tags or tags == '':
+            tags_to_remove = self.tags.filter(hidden=False)
+            self.tags.remove(*tags_to_remove)
+
+    def tags_as_string(self, include_hidden=False):
+        """Return this user's list of tags as a space-delimited string."""
+        return u' '.join([tag.name for tag in
+                          (self.tags.all() if include_hidden
+                           else self.tags.filter(hidden=False))])
+
+    def __unicode__(self):
+        """Return this user's name when their profile is called."""
+        return self.user.first_name
 
 
 @receiver(models.signals.post_save, sender=User)

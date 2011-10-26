@@ -50,6 +50,33 @@
           </div>
         {% endfor %}
 
+        <div id="{{ form['tags'].name }}-container"
+          class="field {{ 'error' if form.errors['tags'] }}
+          {{ form['tags'].field.widget.attrs['class'] }}">
+
+          {{ form['tags'].label_tag() }}
+
+          {% if form['tags'].field.required %}
+            <span class="required" title="{{ _('This field is required.') }}">
+              *
+            </span>
+          {% endif %}
+
+          {{ form.errors['tags'] }}
+
+          <div class="clear"></div>
+
+          {{ form['tags'] }}
+
+          <!-- <ul id="tag-list" class="js-show">-->
+          <!--   {% for t in user_tags.split(' ') %}-->
+          <!--     <li>{{ t }}</li>-->
+          <!--   {% endfor %}-->
+          <!-- </ul>-->
+
+          <div class="clear"></div>
+        </div>
+
         <div id="photo-container"
              class="field {{ 'error' if form.errors['photo'] }}">
           {{ profile_photo(person) }}

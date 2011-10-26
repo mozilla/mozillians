@@ -64,6 +64,16 @@ em.underline {
 }
 
 /** Common and utility classes */
+.ui-autocomplete li {
+    background-image: none;
+}
+
+.ui-autocomplete-input:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
 .blue-pastels {
     background: #bbdfec url(../img/blue-pastels-bottom.png) no-repeat bottom center;
     border: 5px solid #fff;
@@ -154,7 +164,8 @@ em.underline {
         text-decoration: underline;
     }
 
-    .blue-pastels input, .blue-pastels select, .blue-pastels textarea {
+    .blue-pastels input, .blue-pastels select, .blue-pastels textarea,
+    .blue-pastels .ui-widget.tagit {
         border: 1px inset #d8d8d8;
         border-bottom: 0;
         clear: both;
@@ -513,6 +524,14 @@ background-image: -moz-linear-gradient(
 #body-edit-profile #email-container dd {
     font-size: 16px;
     margin: -4px 0 0 4px;
+}
+
+/* Autocomplete tag fun on the edit profile page */
+#body-edit-profile #tags-container .tagit {
+    -moz-border-radius: inherit;
+    -webkit-border-radius: inherit;
+    border-radius: inherit;
+    height: auto;
 }
 
 #body-edit-profile #manage-profile {

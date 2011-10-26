@@ -128,14 +128,26 @@ def _edit_profile(request, new_account):
             if form.is_valid():
                 ldap.update_person(unique_id, form.cleaned_data)
                 ldap.update_profile_photo(unique_id, form.cleaned_data)
+
+                # Update the user's tags using the space-demilited list
+                # sent by either a text input or the autocomplete JS thing.
+                request.user.get_profile().save_tags_from_string(
+                        request.POST.get('tags'))
+
                 if new_account:
                     return redirect(reverse('confirm_register'))
                 else:
                     return redirect(reverse('profile', args=[unique_id]))
+            else:
+                # We need user tags because we aren't redirecting.
+                user_tags = request.user.get_profile().tags_as_string()
         else:
+            user_tags = request.user.get_profile().tags_as_string()
+
             initial = dict(first_name=person.first_name,
                            last_name=person.last_name,
-                           biography=person.biography,)
+                           biography=person.biography,
+                           tags=user_tags)
 
             initial.update(_get_services_fields(ldap, unique_id,
                                                 use_master=True))
@@ -144,7 +156,8 @@ def _edit_profile(request, new_account):
         d = dict(form=form,
                  delete_form=del_form,
                  person=person,
-                 registration_flow=new_account
+                 registration_flow=new_account,
+                 user_tags=user_tags,
                 )
         return render(request, 'phonebook/edit_profile.html', d)
     else:
