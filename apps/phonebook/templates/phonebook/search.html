@@ -73,6 +73,18 @@
           {% endtrans %}
         </p>
       {% endfor %}
+      
+      {% if show_pagination %}
+        <div class="pagination">
+          {% for page in people.paginator.page_range %}
+            {% if page == people.number %}
+              <span>{{ page }}</span>
+            {% else %}
+              <a href="{{ url('phonebook.search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
     {% endif %}
   </div>
 {% endblock %}

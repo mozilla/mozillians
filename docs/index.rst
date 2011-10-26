@@ -29,6 +29,7 @@ Contents:
    ldap
    ldap-developer-notes
    ldap-design
+   search
 
 Indices and tables
 ------------------

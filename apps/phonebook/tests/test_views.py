@@ -132,6 +132,31 @@ class TestViews(LDAPTestCase):
         self.assertTrue(saw_amandeep, 'We see Mozillians')
         self.assertTrue(saw_amanda, 'We see Pending')
 
+    def test_mozillian_search_pagination(self):
+        """
+        Tests the pagination on search.
+        First assumes no page is passed, but valid limit is passed
+        Second assumes invalid page is passed, no limit is passed
+        Third assumes valid page is passed, no limit is passed
+        Fourth assumes valid page is passed, valid limit is passed
+        """
+        url = reverse('phonebook.search')
+        r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 1)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+    
+        r = self.mozillian_client.get(url, dict(q='Amand', page='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+ 
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 1)
+    
     def test_mozillian_sees_mozillian_profile(self):
         url = reverse('profile', args=[OTHER_MOZILLIAN['uniq_id']])
         r = self.mozillian_client.get(url)

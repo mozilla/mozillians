@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
 from django.shortcuts import redirect, render
@@ -26,6 +27,7 @@ log = commonware.log.getLogger('m.phonebook')
 
 BAD_VOUCHER = 'Unknown Voucher'
 
+PAGINATION_LIMIT = 20
 
 def vouch_required(f):
     """If a user is not vouched they get a 403."""
@@ -209,6 +211,7 @@ def _user_owns_account(request, form):
 def search(request):
     people = []
     size_exceeded = False
+    show_pagination = False
     form = forms.SearchForm(request.GET)
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
@@ -218,10 +221,29 @@ def search(request):
                 # Stale data okay
                 sortk = attrgetter('full_name')
                 people = sorted(ldap.search(query), key=sortk)
+                try:
+                    limit = int(request.GET.get('limit'))
+                except TypeError:
+                    limit = PAGINATION_LIMIT
+                                
+                paginator = Paginator(people, limit)
+                page = request.GET.get('page', 1)            
+                try:
+                    people = paginator.page(page)
+                except PageNotAnInteger:
+                    people = paginator.page(1)
+                except EmptyPage:
+                    people = paginator.page(paginator.num_pages)
+                
+                if paginator.count > PAGINATION_LIMIT:
+                    show_pagination = True
+                    
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
     d = dict(people=people,
              form=form,
+             limit=limit,
+             show_pagination=show_pagination,
              size_exceeded_error=size_exceeded)
     return render(request, 'phonebook/search.html', d)
 
