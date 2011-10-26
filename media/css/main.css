@@ -650,6 +650,10 @@ background-image: -moz-linear-gradient(
     width: 300px;
 }
 
+#body-search .result {
+    margin-bottom: 10px;
+}
+
 #body-search .result .profile-photo {
     border: 1px solid #52adcc;
     border-radius: 4px;
@@ -669,6 +673,12 @@ background-image: -moz-linear-gradient(
 #body-search .result h3 {
     font-size: 16px;
     margin: 0;
+}
+
+.pagination {
+    margin: 20px 35px 10px 35px;
+    font-size: 16px;
+    font-family: MetaBold,'Trebuchet MS',sans-serif;
 }
 
 /** Confirm Profile Delete */
