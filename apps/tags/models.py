@@ -1,13 +1,4 @@
-import urllib
-
-from django.contrib.auth.models import User
 from django.db import models
-from django.dispatch import receiver
-
-from funfactory.utils import absolutify
-from funfactory.urlresolvers import reverse
-
-from users.models import UserProfile
 
 
 class Tag(models.Model):
@@ -30,14 +21,6 @@ class Tag(models.Model):
     class Meta:
         db_table = 'tag'
 
-
     def __unicode__(self):
         """Return the name of this tag, unless it doesn't have one yet."""
         return getattr(self, 'name', u'Unnamed Tag')
-
-
-# @receiver(models.signals.post_save, sender=Tag)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         UserProfile.objects.create(user=instance)
-

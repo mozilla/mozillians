@@ -1,28 +1,15 @@
-from functools import wraps
-from ldap import SIZELIMIT_EXCEEDED
-from operator import attrgetter
-
-import django.contrib.auth
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
-from django.http import (Http404, HttpResponse, HttpResponseRedirect,
-                         HttpResponseForbidden)
-from django.shortcuts import redirect, render
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.utils import simplejson
-from django.views.decorators.cache import cache_control, never_cache
-from django.views.decorators.http import require_POST
-from django.views.decorators.vary import vary_on_cookie
+from django.views.decorators.cache import cache_control
 
 import commonware.log
-from funfactory.urlresolvers import reverse
-from tower import ugettext as _
 
-from larper import UserSession, AdminSession, NO_SUCH_PERSON
-from larper import MOZILLA_IRC_SERVICE_URI
-from tags import forms
 from tags.models import Tag
 
 log = commonware.log.getLogger('m.tags')
+
 
 @login_required
 def list(request):

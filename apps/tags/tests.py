@@ -1,11 +1,10 @@
-from django.core import mail
 from django.contrib.auth.models import User
 
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from phonebook.tests import LDAPTestCase, MOZILLIAN, PENDING, mozillian_client
+from phonebook.tests import LDAPTestCase, MOZILLIAN, mozillian_client
 from tags.models import Tag
 
 
@@ -17,7 +16,6 @@ class TagTest(LDAPTestCase):
         user = User.objects.get(email=MOZILLIAN['email'])
         profile = user.get_profile()
         eq_(0, len(profile.tags.all()), 'User has no tags by default.')
-
 
     def test_mozillian_can_have_tags(self):
         """Allow a mozillian to have zero, one, or many tags."""
@@ -37,7 +35,6 @@ class TagTest(LDAPTestCase):
         profile.tags.add(another_tag)
         profile.save()
         eq_(2, len(profile.tags.all()), 'User can have many tags.')
-
 
     def test_users_cant_remove_hidden_tags(self):
         """Make sure removing tags in a profile doesn't delete hidden tags.
@@ -67,7 +64,6 @@ class TagTest(LDAPTestCase):
         eq_(1, len(profile.tags.filter(name='Hiddentag')),
             'User still has the hidden tag.')
 
-
     def test_users_cant_see_hidden_tags(self):
         """Make sure special/hidden tags don't show up in responses."""
         user = User.objects.get(email=MOZILLIAN['email'])
@@ -85,18 +81,11 @@ class TagTest(LDAPTestCase):
 
         client = mozillian_client(MOZILLIAN['email'])
 
-        # View this user's profile to ensure hidden tags aren't shown there.
-        # response = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
-        # doc = pq(response.content)
-        # assert 'Regulartag' in doc('#id_tags').attr('value')
-        # assert not 'Hiddentag' in doc('#id_tags').attr('value')
-
         # Edit the user's profile to check for hidden tags there.
         response = client.get(reverse('phonebook.edit_profile'))
         doc = pq(response.content)
         assert 'Regulartag' in doc('#id_tags').attr('value')
         assert not 'Hiddentag' in doc('#id_tags').attr('value')
-
 
     def test_pending_user_cant_add_tags(self):
         """Ensure pending users can't add tags."""
