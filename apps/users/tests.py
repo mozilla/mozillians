@@ -143,3 +143,7 @@ class TestThingsForPeople(LDAPTestCase):
         errmsg = 'Self vouching... silliness.'
         assert not doc('#vouch-form button'), errmsg
         assert 'Vouch for me' not in r.content, errmsg
+
+def get_profile(email):
+    """Get a UserProfile for a particular user."""
+    return User.objects.get(email=email).get_profile()

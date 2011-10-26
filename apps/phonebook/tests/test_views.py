@@ -133,6 +133,10 @@ class TestViews(LDAPTestCase):
         self.assertTrue(saw_amanda, 'We see Pending')
 
     def test_mozillian_sees_mozillian_profile(self):
+        # HACK: This user isn't made by default. WTF?
+        User.objects.create(username=OTHER_MOZILLIAN['email'],
+                            email=OTHER_MOZILLIAN['email'])
+
         url = reverse('profile', args=[OTHER_MOZILLIAN['uniq_id']])
         r = self.mozillian_client.get(url)
         eq_(AMANDEEP_NAME, r.context['person'].full_name)
@@ -241,8 +245,7 @@ class TestOpensearchViews(test_utils.TestCase):
 
     def test_localized_search_plugin(self):
         """Every locale gets its own plugin!"""
-        response = self.client.get(reverse('phonebook.search_plugin',
-                                   prefix='/en-US/'))
+        response = self.client.get(reverse('phonebook.search_plugin'))
         assert '/en-US/search' in response.content
 
         # Prefixer and its locale are sticky; clear it before the next request

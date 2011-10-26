@@ -64,6 +64,16 @@ em.underline {
 }
 
 /** Common and utility classes */
+.ui-autocomplete li {
+    background-image: none;
+}
+
+.ui-autocomplete-input:focus {
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
 .blue-pastels {
     background: #bbdfec url(../img/blue-pastels-bottom.png) no-repeat bottom center;
     border: 5px solid #fff;
@@ -154,7 +164,8 @@ em.underline {
         text-decoration: underline;
     }
 
-    .blue-pastels input, .blue-pastels select, .blue-pastels textarea {
+    .blue-pastels input, .blue-pastels select, .blue-pastels textarea,
+    .blue-pastels .ui-widget.tagit {
         border: 1px inset #d8d8d8;
         border-bottom: 0;
         clear: both;
@@ -515,6 +526,14 @@ background-image: -moz-linear-gradient(
     margin: -4px 0 0 4px;
 }
 
+/* Autocomplete group fun on the edit profile page */
+#body-edit-profile #groups-container .tagit {
+    -moz-border-radius: inherit;
+    -webkit-border-radius: inherit;
+    border-radius: inherit;
+    height: auto;
+}
+
 #body-edit-profile #manage-profile {
     float: left;
     margin: -35px 0 0 15px;
@@ -622,6 +641,22 @@ background-image: -moz-linear-gradient(
     width: 73%;
 }
 
+/** HACK: Group hack to make groups look like jQuery UI everywhere ^_^ */
+#body-profile #groups, #body-group-index #groups {
+    background: none;
+    border: 0;
+    height: auto;
+    overflow: auto;
+}
+
+#body-profile #groups li, #body-group-index #groups li {
+    padding-right: .5em;
+}
+
+#body-profile #groups a, #body-group-index #groups a {
+    display: block;
+}
+
 /** Invite Page */
 #body-invite #id_recipient {
     color: #4b4740;
@@ -650,7 +685,7 @@ background-image: -moz-linear-gradient(
     width: 300px;
 }
 
-#body-search .result .profile-photo {
+.search-page .result .profile-photo {
     border: 1px solid #52adcc;
     border-radius: 4px;
     -moz-border-radius: 4px;
@@ -660,13 +695,13 @@ background-image: -moz-linear-gradient(
     width: 70px;
 }
 
-#body-search .result h2 {
+.search-page .result h2 {
     font-size: 19px;
     margin: 0;
     padding: 20px 0 0;
 }
 
-#body-search .result h3 {
+.search-page .result h3 {
     font-size: 16px;
     margin: 0;
 }

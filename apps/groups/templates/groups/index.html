@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block body_id %}group-index{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
+{% block main_content %}
+  {% if groups %}
+    <h1>{{ _('Group Listing') }}</h1>
+
+    <p>
+      {% trans %}
+        Mozillians work on all sorts of different things! From Add-on
+        developers to localizers, find Mozillians who work on similar things
+        using user-created groups.
+      {% endtrans %}
+    </p>
+
+    <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+      {% for group in groups %}
+        <li class="tagit-choice ui-widget-content ui-state-default
+                   ui-corner-all">
+          <a href="{{ url('group', group.name) }}">
+            {{ group.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock main_content %}

@@ -1,3 +1,6 @@
 [submodule "vendor"]
 	path = vendor
 	url = git://github.com/mozilla/mozillians-lib.git
+[submodule "media/js/libs/tag-it"]
+	path = media/js/libs/tag-it
+	url = git://github.com/aehlke/tag-it.git

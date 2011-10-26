@@ -24,8 +24,9 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 urlpatterns = patterns('',
     (r'', include('phonebook.urls')),
     (r'', include('users.urls')),
+    (r'', include('groups.urls')),
 
-    #(r'^admin/', include(admin.site.urls)),
+    (r'^admin/', include(admin.site.urls)),
 )
 
 # In DEBUG mode, serve media files through Django, and serve error pages
