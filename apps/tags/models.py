@@ -2,6 +2,9 @@ from django.db import models
 from django.dispatch import receiver
 
 
+SYSTEM_TAG_CHARACTER = u':'
+
+
 class Tag(models.Model):
     """A Tag is an arbitrary name attached to one or more UserProfiles.
 
@@ -32,7 +35,7 @@ class Tag(models.Model):
 
         Users cannot create system tags.
         """
-        return ':' in self.name
+        return SYSTEM_TAG_CHARACTER in self.name
 
     def __unicode__(self):
         """Return the name of this tag, unless it doesn't have one yet."""

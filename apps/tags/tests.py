@@ -1,3 +1,5 @@
+import json
+
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -47,6 +49,19 @@ class TagTest(LDAPTestCase):
         system_tag = Tag.objects.create(name='vagabond:hippie')
         assert system_tag.system, 'The system attribute should be True.'
 
+    def test_tags_are_always_lowercase(self):
+        """Ensure all tags are saved with lowercase names only."""
+        Tag.objects.create(name='lowercase')
+        Tag.objects.create(name='Uppercase')
+        Tag.objects.create(name='YELLING')
+
+        # Make sure tags created from a profile are lowercase too.
+        profile = get_profile(MOZILLIAN['email'])
+        profile.tags.create(name='ILIKEITLOUD')
+
+        for t in Tag.objects.all():
+            assert t.name == t.name.lower(), 'All tags are lowercase.'
+
     def test_tags_are_case_insensitive(self):
         """Ensure tags are case insensitive/respect the original tag's case."""
         profile = get_profile(MOZILLIAN['email'])
@@ -66,6 +81,12 @@ class TagTest(LDAPTestCase):
             assert t in tag_string, 'All three saved tags should be lowercase.'
         assert not 'Awesome' in tag_string, (
                 'Uppercase tag should be transformed to lowercase.')
+
+        # Make an AJAX request for a tag using a capital letter.
+        r = client.get(reverse('tag_search'), dict(term='Awesome'),
+                       HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        for t in json.loads(r.content):
+            assert t.name == t.name.lower(), 'Tag search is case-insensitive.'
 
     def test_users_cant_remove_system_tags(self):
         """Make sure removing tags in a profile doesn't delete system tags.
