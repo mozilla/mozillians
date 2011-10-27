@@ -41,4 +41,12 @@ class Tag(models.Model):
 
 @receiver(models.signals.pre_save, sender=Tag)
 def _denormalize_system_attribute(sender, instance, raw, using, **kwargs):
+    """Mark any tags with our special system delimiter as such in the DB.
+
+    Allows queries on system tags by searching for them via an attribute."""
     instance.system = instance._is_system()
+
+@receiver(models.signals.pre_save, sender=Tag)
+def _lowercase_name(sender, instance, raw, using, **kwargs):
+    """Convert any tag's name to lowercase before it's saved."""
+    instance.name = instance.name.lower()
