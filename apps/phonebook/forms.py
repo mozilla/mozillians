@@ -8,7 +8,9 @@ import Image
 from easy_thumbnails import processors
 from tower import ugettext as _, ugettext_lazy as _lazy
 
+from phonebook.helpers import vouched
 from phonebook.models import Invite
+from tags.models import Tag
 
 
 class SearchForm(happyforms.Form):
@@ -29,6 +31,8 @@ class ProfileForm(happyforms.Form):
                                    required=False)
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
+
+    tags = forms.CharField(label=_lazy(u'Tags'), required=False)
 
     def clean_photo(self):
         """Let's make sure things are right.
@@ -66,6 +70,45 @@ class ProfileForm(happyforms.Form):
         photo.file = open(fn)
         return photo
 
+    def clean_tags(self):
+        """All tags are saved in lowercase because it's easy and consistent."""
+        return [t for t in self.cleaned_data['tags'].lower().split()]
+
+    def save(self, request, ldap):
+        """Save this form to both LDAP and RDBMS backends, as appropriate."""
+        # Save stuff in LDAP first...
+        # TODO: Find out why this breaks the larper tests
+        # ldap.update_person(request.user.unique_id, self.cleaned_data)
+        # ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
+
+        # ... then save other stuff in RDBMS.
+        self._save_tags(request)
+
+    def _save_tags(self, request):
+        """Parse a string of (usually space-demilited) tags and save them."""
+        # If this user isn't vouched they can't edit their tags.
+        if not vouched(request.user):
+            return
+
+        profile = request.user.get_profile()
+
+        # If no tags are supplied, we're deleting all non-hidden,
+        # non-special tags.
+        if not self.cleaned_data['tags']:
+            profile.tags.filter(system=False).delete()
+            return
+
+        # Remove any non-hidden tags that weren't supplied in this list.
+        profile.tags.remove(*[t for t in profile.tags.filter(system=False)
+                              if t.name not in self.cleaned_data['tags']])
+
+        # Add/create the rest of the tags
+        tags_to_add = []
+        for t in self.cleaned_data['tags']:
+            (tag, created) = Tag.objects.get_or_create(name=t)
+            tags_to_add.append(tag)
+
+        profile.tags.add(*tags_to_add)
 
 class DeleteForm(happyforms.Form):
     unique_id = forms.CharField(widget=forms.HiddenInput)

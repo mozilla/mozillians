@@ -22,6 +22,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+from tags.helpers import stringify_tags
 
 log = commonware.log.getLogger('m.phonebook')
 
@@ -123,36 +124,43 @@ def _edit_profile(request, new_account):
 
     del_form = forms.DeleteForm(initial=dict(unique_id=unique_id))
 
-    if person:
-        if request.user.unique_id != person.unique_id:
-            return HttpResponseForbidden()
-        if request.method == 'POST':
-            form = forms.ProfileForm(request.POST, request.FILES)
-            if form.is_valid():
-                ldap.update_person(unique_id, form.cleaned_data)
-                ldap.update_profile_photo(unique_id, form.cleaned_data)
-                if new_account:
-                    return redirect(reverse('confirm_register'))
-                else:
-                    return redirect(reverse('profile', args=[unique_id]))
-        else:
-            initial = dict(first_name=person.first_name,
-                           last_name=person.last_name,
-                           biography=person.biography,)
-
-            initial.update(_get_services_fields(ldap, unique_id,
-                                                use_master=True))
-            form = forms.ProfileForm(initial=initial)
-
-        d = dict(form=form,
-                 delete_form=del_form,
-                 person=person,
-                 registration_flow=new_account
-                )
-        return render(request, 'phonebook/edit_profile.html', d)
-    else:
+    if not person:
         raise Http404
 
+    if request.user.unique_id != person.unique_id:
+        return HttpResponseForbidden()
+
+    profile = request.user.get_profile()
+    user_tags = stringify_tags(profile.tags.all())
+
+    if request.method == 'POST':
+        form = forms.ProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save both LDAP and RDBS data via our ProfileForm
+            ldap.update_person(unique_id, form.cleaned_data)
+            ldap.update_profile_photo(unique_id, form.cleaned_data)
+
+            form.save(request, ldap)
+
+            return redirect(reverse('confirm_register') if new_account
+                            else reverse('profile', args=[unique_id]))
+    else:
+        initial = dict(first_name=person.first_name,
+                       last_name=person.last_name,
+                       biography=person.biography,
+                       tags=user_tags)
+
+        initial.update(_get_services_fields(ldap, unique_id,
+                                            use_master=True))
+        form = forms.ProfileForm(initial=initial)
+
+    d = dict(form=form,
+             delete_form=del_form,
+             person=person,
+             registration_flow=new_account,
+             user_tags=user_tags,
+            )
+    return render(request, 'phonebook/edit_profile.html', d)
 
 def _get_services_fields(ldap, unique_id, use_master=False):
     services = ldap.profile_service_ids(unique_id, use_master)
