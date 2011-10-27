@@ -8,7 +8,9 @@ import Image
 from easy_thumbnails import processors
 from tower import ugettext as _, ugettext_lazy as _lazy
 
+from phonebook.helpers import vouched
 from phonebook.models import Invite
+from tags.models import Tag
 
 
 class SearchForm(happyforms.Form):
@@ -32,7 +34,6 @@ class ProfileForm(happyforms.Form):
 
     tags = forms.CharField(label=_lazy(u'Tags'), required=False,
                            widget=forms.TextInput())
-
 
     def clean_photo(self):
         """Let's make sure things are right.
@@ -70,6 +71,44 @@ class ProfileForm(happyforms.Form):
         photo.file = open(fn)
         return photo
 
+    def clean_tags(self):
+        """All tags are saved in lowercase because it's easy and consistent."""
+        return [t.lower() for t in self.cleaned_data['tags'].split(u' ')]
+
+    def save_tags(self, request):
+        """Parse a string of (usually space-demilited) tags and save them."""
+        # If this user isn't vouched they can't edit their tags.
+        if not vouched(request.user):
+            return
+
+        profile = request.user.get_profile()
+
+        # If no tags are supplied, we're deleting all non-hidden,
+        # non-special tags.
+        if not len(self.cleaned_data['tags']):
+            tags_to_remove = profile.tags.filter(hidden=False)
+            profile.tags.remove(*tags_to_remove)
+            return
+
+        current_tags = profile.tags.filter(hidden=False)
+        tags_to_remove = []
+
+        # Remove any non-hidden tags that weren't supplied in this list.
+        if len(current_tags):
+            for t in current_tags:
+                if t not in [tag.name for tag in current_tags]:
+                    tags_to_remove.append(tag)
+
+            if len(tags_to_remove):
+                profile.tags.remove(*tags_to_remove)
+
+        # Add/create the rest of the tags
+        for t in self.cleaned_data['tags']:
+            try:
+                tag = Tag.objects.get(name__iexact=t)
+                profile.tags.add(tag)
+            except Tag.DoesNotExist:
+                profile.tags.create(name=t)
 
 class DeleteForm(happyforms.Form):
     unique_id = forms.CharField(widget=forms.HiddenInput)

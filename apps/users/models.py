@@ -33,14 +33,6 @@ class UserProfile(models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
-    def save_tags_from_string(self, tags):
-        """Parse a string of (usually space-demilited) tags and save them."""
-        # If no tags are supplied, we're deleting all non-hidden,
-        # non-special tags.
-        if not tags or tags == '':
-            tags_to_remove = self.tags.filter(hidden=False)
-            self.tags.remove(*tags_to_remove)
-
     def tags_as_string(self, include_hidden=False):
         """Return this user's list of tags as a space-delimited string."""
         return u' '.join([tag.name for tag in

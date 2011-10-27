@@ -120,49 +120,44 @@ def _edit_profile(request, new_account):
 
     del_form = forms.DeleteForm(initial=dict(unique_id=unique_id))
 
-    if person:
-        if request.user.unique_id != person.unique_id:
-            return HttpResponseForbidden()
-        if request.method == 'POST':
-            form = forms.ProfileForm(request.POST, request.FILES)
-            if form.is_valid():
-                ldap.update_person(unique_id, form.cleaned_data)
-                ldap.update_profile_photo(unique_id, form.cleaned_data)
-
-                # Update the user's tags using the space-demilited list
-                # sent by either a text input or the autocomplete JS thing.
-                request.user.get_profile().save_tags_from_string(
-                        request.POST.get('tags'))
-
-                if new_account:
-                    return redirect(reverse('confirm_register'))
-                else:
-                    return redirect(reverse('profile', args=[unique_id]))
-            else:
-                # We need user tags because we aren't redirecting.
-                user_tags = request.user.get_profile().tags_as_string()
-        else:
-            user_tags = request.user.get_profile().tags_as_string()
-
-            initial = dict(first_name=person.first_name,
-                           last_name=person.last_name,
-                           biography=person.biography,
-                           tags=user_tags)
-
-            initial.update(_get_services_fields(ldap, unique_id,
-                                                use_master=True))
-            form = forms.ProfileForm(initial=initial)
-
-        d = dict(form=form,
-                 delete_form=del_form,
-                 person=person,
-                 registration_flow=new_account,
-                 user_tags=user_tags,
-                )
-        return render(request, 'phonebook/edit_profile.html', d)
-    else:
+    if not person:
         raise Http404
 
+    if request.user.unique_id != person.unique_id:
+        return HttpResponseForbidden()
+
+    profile = request.user.get_profile()
+    user_tags = profile.tags_as_string()
+
+    if request.method == 'POST':
+        form = forms.ProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            ldap.update_person(unique_id, form.cleaned_data)
+            ldap.update_profile_photo(unique_id, form.cleaned_data)
+
+            # Update the user's tags using the space-demilited list
+            # sent by either a text input or the autocomplete JS thing.
+            form.save_tags(request)
+
+            return redirect(reverse('confirm_register') if new_account
+                            else reverse('profile', args=[unique_id]))
+    else:
+        initial = dict(first_name=person.first_name,
+                       last_name=person.last_name,
+                       biography=person.biography,
+                       tags=user_tags)
+
+        initial.update(_get_services_fields(ldap, unique_id,
+                                            use_master=True))
+        form = forms.ProfileForm(initial=initial)
+
+    d = dict(form=form,
+             delete_form=del_form,
+             person=person,
+             registration_flow=new_account,
+             user_tags=user_tags,
+            )
+    return render(request, 'phonebook/edit_profile.html', d)
 
 def _get_services_fields(ldap, unique_id, use_master=False):
     services = ldap.profile_service_ids(unique_id, use_master)
