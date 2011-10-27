@@ -1,4 +1,5 @@
 from django.db import models
+from django.dispatch import receiver
 
 
 class Tag(models.Model):
@@ -16,11 +17,28 @@ class Tag(models.Model):
 
     # If this is true, this Tag will appear in the autocomplete list.
     auto_complete = models.BooleanField(db_index=True, default=False)
-    hidden = models.BooleanField(db_index=True, default=False)
+    system = models.BooleanField(db_index=True, default=False)
 
     class Meta:
         db_table = 'tag'
 
+    def _is_system(self):
+        """Return True if this tag is a "system tag" (usually hidden).
+
+        Certain tags (with a special key -- usually ":") are system tags
+        that can have special meaning and are not shown by default. Instead
+        of using a custom attribute and messing with a custom Manager, we
+        simply denote a system tag as one with a special character.
+
+        Users cannot create system tags.
+        """
+        return ':' in self.name
+
     def __unicode__(self):
         """Return the name of this tag, unless it doesn't have one yet."""
         return getattr(self, 'name', u'Unnamed Tag')
+
+
+@receiver(models.signals.pre_save, sender=Tag)
+def _denormalize_system_attribute(sender, instance, raw, using, **kwargs):
+    instance.system = instance._is_system()

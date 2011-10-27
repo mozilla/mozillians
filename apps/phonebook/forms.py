@@ -32,8 +32,7 @@ class ProfileForm(happyforms.Form):
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
 
-    tags = forms.CharField(label=_lazy(u'Tags'), required=False,
-                           widget=forms.TextInput())
+    tags = forms.CharField(label=_lazy(u'Tags'), required=False)
 
     def clean_photo(self):
         """Let's make sure things are right.
@@ -73,9 +72,18 @@ class ProfileForm(happyforms.Form):
 
     def clean_tags(self):
         """All tags are saved in lowercase because it's easy and consistent."""
-        return [t.lower() for t in self.cleaned_data['tags'].split(u' ')]
+        return [t for t in self.cleaned_data['tags'].lower().split(u' ')]
 
-    def save_tags(self, request):
+    def save(self, request, ldap):
+        """Save this form to both LDAP and RDBS backends, as appropriate."""
+        # Save stuff in LDAP first...
+        ldap.update_person(request.user.unique_id, self.cleaned_data)
+        ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
+
+        # ... then save other stuff in MySQL.
+        self._save_tags(request)
+
+    def _save_tags(self, request):
         """Parse a string of (usually space-demilited) tags and save them."""
         # If this user isn't vouched they can't edit their tags.
         if not vouched(request.user):
@@ -85,30 +93,28 @@ class ProfileForm(happyforms.Form):
 
         # If no tags are supplied, we're deleting all non-hidden,
         # non-special tags.
-        if not len(self.cleaned_data['tags']):
-            tags_to_remove = profile.tags.filter(hidden=False)
-            profile.tags.remove(*tags_to_remove)
+        if not self.cleaned_data['tags']:
+            profile.tags.filter(system=False).delete()
             return
 
-        current_tags = profile.tags.filter(hidden=False)
+        current_tags = profile.tags.filter(system=False)
+        tags_to_add = []
         tags_to_remove = []
 
         # Remove any non-hidden tags that weren't supplied in this list.
-        if len(current_tags):
-            for t in current_tags:
-                if t not in [tag.name for tag in current_tags]:
-                    tags_to_remove.append(tag)
+        for t in current_tags:
+            if t.name not in self.cleaned_data['tags']:
+                tags_to_remove.append(t)
 
-            if len(tags_to_remove):
-                profile.tags.remove(*tags_to_remove)
+        if tags_to_remove:
+            profile.tags.remove(*tags_to_remove)
 
         # Add/create the rest of the tags
         for t in self.cleaned_data['tags']:
-            try:
-                tag = Tag.objects.get(name__iexact=t)
-                profile.tags.add(tag)
-            except Tag.DoesNotExist:
-                profile.tags.create(name=t)
+            (tag, created) = Tag.objects.get_or_create(name=t)
+            tags_to_add.append(tag)
+
+        profile.tags.add(*tags_to_add)
 
 class DeleteForm(happyforms.Form):
     unique_id = forms.CharField(widget=forms.HiddenInput)

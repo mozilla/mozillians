@@ -28,7 +28,7 @@ def search(request):
     if search_term:
         data['tags'] = ([t.name for t in
                          Tag.objects.filter(name__istartswith=search_term,
-                                            auto_complete=True, hidden=False)])
+                                            auto_complete=True, system=False)])
 
     if request.is_ajax():
         # Django's serializers wrapper module messes things up, but using

@@ -33,12 +33,6 @@ class UserProfile(models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
-    def tags_as_string(self, include_hidden=False):
-        """Return this user's list of tags as a space-delimited string."""
-        return u' '.join([tag.name for tag in
-                          (self.tags.all() if include_hidden
-                           else self.tags.filter(hidden=False))])
-
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.user.first_name

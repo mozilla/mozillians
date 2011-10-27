@@ -20,6 +20,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+from tags.helpers import stringify_tags
 
 log = commonware.log.getLogger('m.phonebook')
 
@@ -127,17 +128,13 @@ def _edit_profile(request, new_account):
         return HttpResponseForbidden()
 
     profile = request.user.get_profile()
-    user_tags = profile.tags_as_string()
+    user_tags = stringify_tags(profile.tags.all())
 
     if request.method == 'POST':
         form = forms.ProfileForm(request.POST, request.FILES)
         if form.is_valid():
-            ldap.update_person(unique_id, form.cleaned_data)
-            ldap.update_profile_photo(unique_id, form.cleaned_data)
-
-            # Update the user's tags using the space-demilited list
-            # sent by either a text input or the autocomplete JS thing.
-            form.save_tags(request)
+            # Save both LDAP and RDBS data via our ProfileForm
+            form.save(request, ldap)
 
             return redirect(reverse('confirm_register') if new_account
                             else reverse('profile', args=[unique_id]))
