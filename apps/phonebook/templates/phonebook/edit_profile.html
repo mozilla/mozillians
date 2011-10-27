@@ -56,12 +56,6 @@
 
           {{ form['tags'].label_tag() }}
 
-          {% if form['tags'].field.required %}
-            <span class="required" title="{{ _('This field is required.') }}">
-              *
-            </span>
-          {% endif %}
-
           {{ form.errors['tags'] }}
 
           <div class="clear"></div>
@@ -76,12 +70,6 @@
           {{ profile_photo(person) }}
 
           {{ form['photo'].label_tag() }}
-
-          {% if form['photo'].field.required %}
-            <span class="required" title="{{ _('This field is required.') }}">
-              *
-            </span>
-          {% endif %}
 
           {{ form.errors['photo'] }}
           {{ form['photo'] }}
@@ -99,12 +87,6 @@
             {{ form[f].field.widget.attrs['class'] }}">
 
             {{ form[f].label_tag() }}
-
-            {% if form[f].field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
-                *
-              </span>
-            {% endif %}
 
             {{ form.errors[f] }}
             {{ form[f] }}
