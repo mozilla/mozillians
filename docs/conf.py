@@ -20,6 +20,9 @@ from django.conf import settings
 import funfactory.manage
 funfactory.manage.ROOT = os.path.abspath('..')
 
+# side effect of giving us all the vendor libs
+import manage
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
