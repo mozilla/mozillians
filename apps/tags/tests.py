@@ -37,6 +37,22 @@ class TagTest(LDAPTestCase):
         assert not profile.tags.all(), (
                 "Pending user shouldn't be able to edit tags.")
 
+    def test_string_split_works_properly(self):
+        """Ensure tags sent as a space-delimited string are parsed alright."""
+        profile = get_profile(MOZILLIAN['email'])
+        profile.tags.clear()
+        assert not profile.tags.all(), 'User has no tags at beginning of test.'
+
+        client = mozillian_client(MOZILLIAN['email'])
+        client.post(reverse('phonebook.edit_profile'),
+                    dict(
+                         last_name='McAwesomepants',
+                         # This should result in four tags
+                         tags='Awesome   foo  Bar     g     '),
+                    follow=True)
+
+        eq_(4, len(profile.tags.all()), 'User should have four tags.')
+
     def test_system_attribute_is_denormalized(self):
         """Ensure the pre_save signal to mark tags as "system" works."""
         # We shouldn't even explicitly set system as True, but we can

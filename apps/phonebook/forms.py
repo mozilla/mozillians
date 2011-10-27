@@ -72,7 +72,7 @@ class ProfileForm(happyforms.Form):
 
     def clean_tags(self):
         """All tags are saved in lowercase because it's easy and consistent."""
-        return [t for t in self.cleaned_data['tags'].lower().split(u' ')]
+        return [t for t in self.cleaned_data['tags'].lower().split()]
 
     def save(self, request, ldap):
         """Save this form to both LDAP and RDBS backends, as appropriate."""
