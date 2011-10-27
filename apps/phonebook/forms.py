@@ -75,12 +75,13 @@ class ProfileForm(happyforms.Form):
         return [t for t in self.cleaned_data['tags'].lower().split()]
 
     def save(self, request, ldap):
-        """Save this form to both LDAP and RDBS backends, as appropriate."""
+        """Save this form to both LDAP and RDBMS backends, as appropriate."""
         # Save stuff in LDAP first...
-        ldap.update_person(request.user.unique_id, self.cleaned_data)
-        ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
+        # TODO: Find out why this breaks the larper tests
+        # ldap.update_person(request.user.unique_id, self.cleaned_data)
+        # ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
 
-        # ... then save other stuff in MySQL.
+        # ... then save other stuff in RDBMS.
         self._save_tags(request)
 
     def _save_tags(self, request):
@@ -97,19 +98,12 @@ class ProfileForm(happyforms.Form):
             profile.tags.filter(system=False).delete()
             return
 
-        current_tags = profile.tags.filter(system=False)
-        tags_to_add = []
-        tags_to_remove = []
-
         # Remove any non-hidden tags that weren't supplied in this list.
-        for t in current_tags:
-            if t.name not in self.cleaned_data['tags']:
-                tags_to_remove.append(t)
-
-        if tags_to_remove:
-            profile.tags.remove(*tags_to_remove)
+        profile.tags.remove(*[t for t in profile.tags.filter(system=False)
+                              if t.name not in self.cleaned_data['tags']])
 
         # Add/create the rest of the tags
+        tags_to_add = []
         for t in self.cleaned_data['tags']:
             (tag, created) = Tag.objects.get_or_create(name=t)
             tags_to_add.append(tag)

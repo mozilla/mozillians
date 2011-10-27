@@ -241,8 +241,7 @@ class TestOpensearchViews(test_utils.TestCase):
 
     def test_localized_search_plugin(self):
         """Every locale gets its own plugin!"""
-        response = self.client.get(reverse('phonebook.search_plugin',
-                                   prefix='/en-US/'))
+        response = self.client.get(reverse('phonebook.search_plugin'))
         assert '/en-US/search' in response.content
 
         # Prefixer and its locale are sticky; clear it before the next request

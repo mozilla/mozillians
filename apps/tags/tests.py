@@ -51,7 +51,7 @@ class TagTest(LDAPTestCase):
                          tags='Awesome   foo  Bar     g     '),
                     follow=True)
 
-        eq_(4, len(profile.tags.all()), 'User should have four tags.')
+        eq_(4, profile.tags.count(), 'User should have four tags.')
 
     def test_system_attribute_is_denormalized(self):
         """Ensure the pre_save signal to mark tags as "system" works."""
@@ -89,7 +89,7 @@ class TagTest(LDAPTestCase):
                          tags='Awesome foo Bar'),
                     follow=True)
 
-        eq_(3, len(profile.tags.all()), 'Three tags should be saved.')
+        eq_(3, profile.tags.count(), 'Three tags should be saved.')
 
         tag_string = stringify_tags(profile.tags.all())
 
@@ -113,7 +113,7 @@ class TagTest(LDAPTestCase):
         profile = get_profile(MOZILLIAN['email'])
 
         profile.tags.add(NORMAL_TAG, HIDDEN_TAG)
-        eq_(2, len(profile.tags.all()), 'User should have both tags.')
+        eq_(2, profile.tags.count(), 'User should have both tags.')
 
         # Edit this user's profile and remove a tag.
         client = mozillian_client(MOZILLIAN['email'])
@@ -130,7 +130,7 @@ class TagTest(LDAPTestCase):
         profile = get_profile(MOZILLIAN['email'])
 
         profile.tags.add(NORMAL_TAG, HIDDEN_TAG)
-        eq_(2, len(profile.tags.all()), 'User should have both tags.')
+        eq_(2, profile.tags.count(), 'User should have both tags.')
 
         client = mozillian_client(MOZILLIAN['email'])
 

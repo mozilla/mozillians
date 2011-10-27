@@ -134,6 +134,9 @@ def _edit_profile(request, new_account):
         form = forms.ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             # Save both LDAP and RDBS data via our ProfileForm
+            ldap.update_person(unique_id, form.cleaned_data)
+            ldap.update_profile_photo(unique_id, form.cleaned_data)
+
             form.save(request, ldap)
 
             return redirect(reverse('confirm_register') if new_account
