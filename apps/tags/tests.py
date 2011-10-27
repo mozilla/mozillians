@@ -90,7 +90,7 @@ class TagTest(LDAPTestCase):
         profile = get_profile(MOZILLIAN['email'])
 
         client = mozillian_client(MOZILLIAN['email'])
-        r = client.post(reverse('phonebook.edit_profile'),
+        client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='tofumatt',
                          tags='Awesome foo Bar'),
