@@ -30,14 +30,12 @@ class Group(models.Model):
         db_table = 'group'
 
     def _is_system(self):
-        """Return True if this group is a "system group" (usually hidden).
+        """Return True if this group is a "system group".
 
         Certain groups (with a special key -- usually ":") are system groups
-        that can have special meaning and are not shown by default. Instead
-        of using a custom attribute and messing with a custom Manager, we
-        simply denote a system group as one with a special character.
+        that can have special meaning.
 
-        Users cannot create system groups.
+        Users cannot create system groups, but they can add themselves to one.
         """
         return SYSTEM_GROUP_CHARACTER in self.name
 

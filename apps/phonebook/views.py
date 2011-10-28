@@ -99,7 +99,7 @@ def _profile(request, person, use_master):
         del services[MOZILLA_IRC_SERVICE_URI]
 
     # Get user groups from their profile.
-    groups = person.get_profile().groups.filter(system=False)
+    groups = person.get_profile().groups.all()
 
     data = dict(person=person, vouch_form=vouch_form, services=services,
                 groups=groups)
@@ -137,8 +137,7 @@ def _edit_profile(request, new_account):
         return HttpResponseForbidden()
 
     profile = request.user.get_profile()
-    user_groups = stringify_groups(profile.groups.filter(system=False)
-                                           .order_by('name'))
+    user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
     if request.method == 'POST':
         form = forms.ProfileForm(request.POST, request.FILES)

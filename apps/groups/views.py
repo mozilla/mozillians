@@ -17,7 +17,7 @@ log = commonware.log.getLogger('m.groups')
 @login_required
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
-    all_groups = Group.objects.filter(system=False).order_by('name')
+    all_groups = Group.objects.all().order_by('name')
 
     data = dict(groups=all_groups)
     return render(request, 'groups/index.html', data)
@@ -51,8 +51,7 @@ def search(request):
     if search_term:
         data['groups'] = list(Group.objects
                                    .filter(name__istartswith=search_term,
-                                           auto_complete=True,
-                                           system=False)
+                                           auto_complete=True)
                                    .values_list('name', flat=True))
 
     if request.is_ajax():

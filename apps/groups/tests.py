@@ -36,7 +36,7 @@ class GroupTest(LDAPTestCase):
                 "Pending user shouldn't be able to edit groups.")
 
     def test_string_split_works_properly(self):
-        """Ensure groups are saved correctly from a space-delimited string."""
+        """Ensure groups are saved correctly from a comma-delimited string."""
         profile = get_profile(MOZILLIAN['email'])
         profile.groups.clear()
         assert not profile.groups.all(), (
@@ -47,10 +47,17 @@ class GroupTest(LDAPTestCase):
                     dict(
                          last_name='McAwesomepants',
                          # This should result in four groups
-                         groups='Awesome   foo  Bar     g     '),
+                         groups='Awesome,,foo bar,  Bar,g '),
                     follow=True)
 
         eq_(4, profile.groups.count(), 'User should have four groups.')
+        assert profile.groups.get(name='foo bar'), (
+                'Group should contain spaces.')
+        for g in profile.groups.all():
+            assert not g.name.startswith(u' '), (
+                    'Group should not start with a space.')
+            assert not g.name.endswith(u' '), (
+                    'Group should not end with a space.')
 
     def test_system_attribute_is_denormalized(self):
         """Ensure the pre_save signal to mark groups as "system" works."""
@@ -85,7 +92,7 @@ class GroupTest(LDAPTestCase):
         client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='tofumatt',
-                         groups='Awesome foo Bar'),
+                         groups='Awesome,foo,Bar'),
                     follow=True)
 
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
@@ -113,7 +120,7 @@ class GroupTest(LDAPTestCase):
         client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='tofumatt',
-                         groups='mozilla:festival good stuff'),
+                         groups='mozilla:festival,good,stuff'),
                     follow=True)
 
         groups = profile.groups.all()
@@ -123,44 +130,3 @@ class GroupTest(LDAPTestCase):
         for g in groups:
             assert not g.system, (
                     "None of this user's groups should be system groups.")
-
-    def test_users_cant_remove_system_groups(self):
-        """Make sure removing groups in a profile doesn't delete system groups.
-
-        When a user deletes their (visible) groups in the edit profile page,
-        they shouldn't delete any system groups.
-        """
-        profile = get_profile(MOZILLIAN['email'])
-
-        profile.groups.add(NORMAL_GROUP, HIDDEN_GROUP)
-        eq_(2, profile.groups.count(), 'User should have both groups.')
-
-        # Edit this user's profile and remove a group.
-        client = mozillian_client(MOZILLIAN['email'])
-        response = client.post(reverse('phonebook.edit_profile'),
-                               dict(last_name="McLovin'", groups=''),
-                               follow=True)
-        doc = pq(response.content)
-        assert not doc('#id_groups').attr('value'), (
-                'User should have no visible groups.')
-
-        assert profile.groups.count(), 'User should not have zero groups.'
-        for g in profile.groups.all():
-            assert g.system, 'User should only have system groups.'
-
-    def test_users_cant_see_system_groups(self):
-        """Make sure system groups don't show up in responses."""
-        profile = get_profile(MOZILLIAN['email'])
-
-        profile.groups.add(NORMAL_GROUP, HIDDEN_GROUP)
-        eq_(2, profile.groups.count(), 'User should have both groups.')
-
-        client = mozillian_client(MOZILLIAN['email'])
-
-        # Edit the user's profile to check for hidden groups there.
-        response = client.get(reverse('phonebook.edit_profile'))
-        doc = pq(response.content)
-        assert NORMAL_GROUP.name in doc('#id_groups').attr('value'), (
-                'Group "%s" should be visible.' % NORMAL_GROUP.name)
-        assert not HIDDEN_GROUP.name in doc('#id_groups').attr('value'), (
-                'Group "%s" should hidden.' % HIDDEN_GROUP.name)

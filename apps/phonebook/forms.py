@@ -2,6 +2,7 @@ import tempfile
 
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 import happyforms
 import Image
@@ -72,8 +73,9 @@ class ProfileForm(happyforms.Form):
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
-        return [g for g in self.cleaned_data['groups'].lower().split()
-                if SYSTEM_GROUP_CHARACTER not in g]
+        return [g.strip() for g in (self.cleaned_data['groups']
+                                        .lower().split(','))
+                if g and ',' not in g]
 
     def save(self, request, ldap):
         """Save this form to both LDAP and RDBMS backends, as appropriate."""
@@ -86,27 +88,32 @@ class ProfileForm(happyforms.Form):
         self._save_groups(request)
 
     def _save_groups(self, request):
-        """Parse a string of (usually space-demilited) groups and save them."""
+        """Parse a string of (usually comma-demilited) groups and save them."""
         # If this user isn't vouched they can't edit their groups.
         if not vouched(request.user):
             return
 
         profile = request.user.get_profile()
 
-        # If no groups are supplied, we're deleting all non-hidden,
-        # non-special groups.
+        # If no groups are supplied, we're deleting all groups.
         if not self.cleaned_data['groups']:
-            profile.groups.filter(system=False).delete()
+            profile.groups.clear()
             return
 
-        # Remove any non-hidden groups that weren't supplied in this list.
-        profile.groups.remove(*[g for g in profile.groups.filter(system=False)
+        # Remove any groups that weren't supplied in this list.
+        profile.groups.remove(*[g for g in profile.groups.all()
                                 if g.name not in self.cleaned_data['groups']])
 
         # Add/create the rest of the groups
         groups_to_add = []
         for g in self.cleaned_data['groups']:
-            (group, created) = Group.objects.get_or_create(name=g)
+            if SYSTEM_GROUP_CHARACTER in g:
+                try:
+                    group = Group.objects.get(name=g)
+                except ObjectDoesNotExist:
+                    continue
+            else:
+                (group, created) = Group.objects.get_or_create(name=g)
             groups_to_add.append(group)
 
         profile.groups.add(*groups_to_add)
