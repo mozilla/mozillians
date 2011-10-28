@@ -16,5 +16,5 @@ def assign_autocomplete_to_groups():
     # TODO: add stats.d timer here
     for g in (Group.objects.filter(system=False)
                            .annotate(count=Count('userprofile'))):
-        g.auto_complete = True if g.count > AUTO_COMPLETE_COUNT else False
+        g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
