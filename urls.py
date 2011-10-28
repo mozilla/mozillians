@@ -1,8 +1,9 @@
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns
+from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-
+from django.views.decorators.cache import cache_page
+from django.views.i18n import javascript_catalog
 
 admin.autodiscover()
 
@@ -27,6 +28,9 @@ urlpatterns = patterns('',
     (r'', include('groups.urls')),
 
     (r'^admin/', include(admin.site.urls)),
+    url(r'^jsi18n/$', cache_page(60 * 60 * 24 * 365)(javascript_catalog),
+        {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
+    #(r'^admin/', include(admin.site.urls)),
 )
 
 # In DEBUG mode, serve media files through Django, and serve error pages
