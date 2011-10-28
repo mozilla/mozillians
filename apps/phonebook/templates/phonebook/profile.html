@@ -114,5 +114,20 @@
         {{ person.biography|paragraphize }}
       </div>
     {% endif %}
+
+    {% if groups %}
+      <h3>{{ _('Groups') }}</h3>
+
+      <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+        {% for group in groups %}
+          <li class="tagit-choice ui-widget-content ui-state-default
+                     ui-corner-all">
+            <a href="{{ url('group', group.name) }}">
+              {{ group.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 </div>
 {% endblock %}

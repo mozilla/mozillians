@@ -50,17 +50,26 @@
           </div>
         {% endfor %}
 
+        <div id="{{ form['groups'].name }}-container"
+          class="field {{ 'error' if form.errors['groups'] }}
+          {{ form['groups'].field.widget.attrs['class'] }}">
+
+          {{ form['groups'].label_tag() }}
+
+          {{ form.errors['groups'] }}
+
+          <div class="clear"></div>
+
+          {{ form['groups'] }}
+
+          <div class="clear"></div>
+        </div>
+
         <div id="photo-container"
              class="field {{ 'error' if form.errors['photo'] }}">
           {{ profile_photo(person) }}
 
           {{ form['photo'].label_tag() }}
-
-          {% if form['photo'].field.required %}
-            <span class="required" title="{{ _('This field is required.') }}">
-              *
-            </span>
-          {% endif %}
 
           {{ form.errors['photo'] }}
           {{ form['photo'] }}
@@ -78,12 +87,6 @@
             {{ form[f].field.widget.attrs['class'] }}">
 
             {{ form[f].label_tag() }}
-
-            {% if form[f].field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
-                *
-              </span>
-            {% endif %}
 
             {{ form.errors[f] }}
             {{ form[f] }}

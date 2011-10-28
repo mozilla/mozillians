@@ -18,6 +18,7 @@ class UserProfile(models.Model):
     confirmation_code = models.CharField(max_length=32, editable=False,
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
+    groups = models.ManyToManyField('groups.Group')
 
     class Meta:
         db_table = 'profile'
@@ -31,6 +32,10 @@ class UserProfile(models.Model):
         url = (reverse('send_confirmation') + '?' +
                urllib.urlencode({'user': self.user.username}))
         return url
+
+    def __unicode__(self):
+        """Return this user's name when their profile is called."""
+        return self.user.first_name
 
 
 @receiver(models.signals.post_save, sender=User)

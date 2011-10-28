@@ -37,3 +37,9 @@ def profile_photo(context, person):
         url += '?%d' % int(time.time())
 
     return dict(image_url=url)
+
+
+@register.inclusion_tag('phonebook/includes/search_result.html')
+@jinja2.contextfunction
+def search_result(context, person):
+    return dict(person=person)

@@ -43,9 +43,15 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+JINGO_EXCLUDE_APPS = [
+    'admin',
+]
+
 MINIFY_BUNDLES = {
     'css': {
         'common': (
+            'css/jquery-ui-1.8.16.custom.css',
+            'js/libs/tag-it/css/jquery.tagit.css',
             'css/mozilla-base.css',
             'css/main.css',
         ),
@@ -53,7 +59,10 @@ MINIFY_BUNDLES = {
     'js': {
         'common': (
             'js/libs/jquery-1.4.4.min.js',
+            'js/libs/jquery-ui-1.8.7.custom.min.js',
+            'js/libs/tag-it/js/tag-it.js',
             'js/main.js',
+            'js/groups.js',
         ),
     }
 }
@@ -89,6 +98,7 @@ AUTH_LDAP_ALWAYS_UPDATE_USER = False
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
     'users',
+    'groups',
     'larper',
 
     'jingo_minify',

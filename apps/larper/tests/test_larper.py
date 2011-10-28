@@ -6,6 +6,7 @@ from django.test.client import RequestFactory
 
 import larper
 from larper import UserSession, RegistrarSession, AdminSession
+from phonebook.tests import LDAPTestCase
 
 requests = []
 
@@ -61,7 +62,7 @@ class MockUser(object):
         self.unique_id = unique_id
 
 
-class TestLarper(test_utils.TestCase):
+class TestLarper(LDAPTestCase):
     def setUp(self):
         global requests
         requests = []
@@ -207,7 +208,7 @@ class TestRegistrarSession(TestLarper):
                               directory.get_by_unique_id(new_unique_id))
 
 
-class TestConnectionPooling(test_utils.TestCase):
+class TestConnectionPooling(LDAPTestCase):
     def test_connection_pooling(self):
         # Don't use _mock_request, nor TestLarper since we want full control
         # over the request to find pooling bugs

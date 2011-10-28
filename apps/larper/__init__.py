@@ -41,6 +41,7 @@ from ldap.modlist import addModlist, modifyModlist
 
 from django.conf import settings
 from django.core import signing
+from django.contrib.auth.models import User
 
 import commonware.log
 
@@ -539,6 +540,10 @@ class Person(object):
             p.voucher_unique_id = Person.unique_id(voucher)
 
         return p
+
+    def get_profile(self):
+        """Retrieve the Django UserProfile for this Person."""
+        return User.objects.get(email=self.username).get_profile()
 
     def ldap_attrs(self):
         """

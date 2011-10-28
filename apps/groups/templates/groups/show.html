@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body_id %}group-show{% endblock %}
+{% block body_classes %}
+  box-content search-page group-name-{{ group.name }}
+{% endblock %}
+
+{% block main_content %}
+  {% trans name=group.name %}
+    <h1>Users in Group "{{ name }}"</h1>
+  {% endtrans %}
+
+  <div class="blue-pastels">
+    {% for user in users %}
+      {{ search_result(user) }}
+    {% endfor %}
+  </div>
+{% endblock main_content %}
