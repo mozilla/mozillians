@@ -18,7 +18,8 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
-from groups.helpers import stringify_groups
+from groups.models import Group
+from groups.helpers import stringify_groups, users_from_groups
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
@@ -227,6 +228,12 @@ def search(request):
     size_exceeded = False
     show_pagination = False
     form = forms.SearchForm(request.GET)
+
+    try:
+        limit = int(request.GET.get('limit'))
+    except TypeError:
+        limit = PAGINATION_LIMIT
+
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
         if request.user.is_authenticated():
@@ -235,23 +242,26 @@ def search(request):
                 # Stale data okay
                 sortk = attrgetter('full_name')
                 people = sorted(ldap.search(query), key=sortk)
-                try:
-                    limit = int(request.GET.get('limit'))
-                except TypeError:
-                    limit = PAGINATION_LIMIT
-                                
+
+                # Search based on group name as well
+                groups = Group.objects.filter(name__icontains=query)[:limit]
+                for group in groups:
+                    for user in users_from_groups(request, group):
+                        if not user.unique_id in [p.unique_id for p in people]:
+                            people.append(user)
+
                 paginator = Paginator(people, limit)
-                page = request.GET.get('page', 1)            
+                page = request.GET.get('page', 1)
                 try:
                     people = paginator.page(page)
                 except PageNotAnInteger:
                     people = paginator.page(1)
                 except EmptyPage:
                     people = paginator.page(paginator.num_pages)
-                
+
                 if paginator.count > PAGINATION_LIMIT:
                     show_pagination = True
-                    
+
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
     d = dict(people=people,

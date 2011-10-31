@@ -8,7 +8,7 @@ from django.views.decorators.cache import cache_control
 
 import commonware.log
 
-from larper import UserSession
+from .helpers import users_from_groups
 from .models import Group
 
 log = commonware.log.getLogger('m.groups')
@@ -28,16 +28,9 @@ def show(request, name):
     """List all users with this group."""
     group = get_object_or_404(Group, name=name)
 
-    profiles = group.userprofile_set.all()
-    users = User.objects.filter(id__in=[p.user_id for p in profiles])
-    ldap = UserSession.connect(request)
+    users = users_from_groups(request, group)
 
-    ldap_users = []
-    for u in users:
-        # We have to walk this so we don't hit LDAP's HARD LIMIT.
-        ldap_users.append(ldap.search_by_email(u.email)[0])
-
-    data = dict(group=group, users=ldap_users)
+    data = dict(group=group, users=users)
     return render(request, 'groups/show.html', data)
 
 
