@@ -19,9 +19,9 @@ var Validator = function() {
             var email_pattern = /^([\w-\.\+]+@([\w-]+\.)+[a-zA-Z]{2,})?$/;
 
             if (!email_pattern.test(email.val())) {
-                displayError(email, message.email_invalid);
+                displayError(email, gettext('Enter a valid e-mail address.'));
             } else if ($.trim(email.val()).length < 1) {
-                displayError(email, message.field_required);
+                displayError(email, gettext('This field is required.'));
             } else {
                 this.resetField(email.attr('name') + '-container');
             }
@@ -30,7 +30,7 @@ var Validator = function() {
             var limit = 8;
 
             if ($.trim(password.val()).length < 8) {
-                displayError(password, message.field_limit_8);
+                displayError(password, gettext('Ensure this value has at least 8 characters.'));
             } else {
                 var field = '#' + password.attr('name') + '-container';
                 this.resetField(field);
@@ -38,7 +38,7 @@ var Validator = function() {
         },
         validateLastName: function(last_name) {
             if ($.trim(last_name.val()).length < 1) {
-                displayError(last_name, message.field_required);
+                displayError(last_name, gettext('This field is required.'));
             } else {
                 var field = '#' + last_name.attr('name') + '-container';
                 this.resetField(field);
@@ -60,26 +60,22 @@ $(function() {
     app.validator.errors = false;
     var form = $('form');
 
-    form.delegate('#id_email, #id_password, #id_last_name', 'focus',
-    function() {
+    form.delegate('#id_email, #id_password, #id_last_name', 'focus', function() {
         var field = '#' + $(this).attr('name') + '-container';
         app.validator.resetField(field);
     });
 
-    form.delegate('#id_email', 'blur',
-    function() {
+    form.delegate('#id_email', 'blur', function() {
         var email = $(this);
         app.validator.validateEmail(email);
     });
 
-    form.delegate('#id_password', 'blur',
-    function() {
+    form.delegate('#id_password', 'blur', function() {
         var password = $(this);
         app.validator.validatePassword(password);
     });
 
-    form.delegate('#id_last_name', 'blur',
-    function() {
+    form.delegate('#id_last_name', 'blur', function() {
         var last_name = $(this);
         app.validator.validateLastName(last_name);
     });
