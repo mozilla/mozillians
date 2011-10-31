@@ -7,6 +7,6 @@ from . import views
 
 urlpatterns = patterns('',
     url('^groups$', views.index, name='group_index'),
-    url('^group/(?P<name>.+)$', views.show, name='group'),
+    url('^group/(?P<id>\d+)-(?P<url>.+)$', views.show, name='group'),
     url('^groups/search$', views.search, name='group_search'),
 )

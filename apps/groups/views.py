@@ -1,12 +1,12 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control
 
 import commonware.log
+from funfactory.urlresolvers import reverse
 
 from .helpers import users_from_groups
 from .models import Group
@@ -24,9 +24,13 @@ def index(request):
 
 
 @login_required
-def show(request, name):
+def show(request, id, url=None):
     """List all users with this group."""
-    group = get_object_or_404(Group, name=name)
+    group = get_object_or_404(Group, id=id)
+
+    # Redirect to the full URL if it wasn't supplied
+    if not url:
+        redirect(reverse('group', args[group.id, group.url]))
 
     users = users_from_groups(request, group)
 

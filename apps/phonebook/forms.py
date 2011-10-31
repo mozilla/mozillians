@@ -1,3 +1,4 @@
+import re
 import tempfile
 
 from django import forms
@@ -73,6 +74,11 @@ class ProfileForm(happyforms.Form):
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
+            raise forms.ValidationError(_(u'Tags can only contain '
+                                           'alphanumeric characters, dashes, '
+                                           'spaces.'))
+
         return [g.strip() for g in (self.cleaned_data['groups']
                                         .lower().split(','))
                 if g and ',' not in g]
