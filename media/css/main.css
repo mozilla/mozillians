@@ -649,6 +649,10 @@ background-image: -moz-linear-gradient(
     overflow: auto;
 }
 
+#body-profile #groups {
+    width: 75%;
+}
+
 #body-profile #groups li, #body-group-index #groups li {
     padding-right: .5em;
 }
