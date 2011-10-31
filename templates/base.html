@@ -154,6 +154,7 @@
 </div>
 
 {% block site_js %}
+  <script src="{{ url('jsi18n') }}"></script>
   {{ js('common') }}
   {% include "includes/webtrends_desktop.html" %}
 {% endblock %}

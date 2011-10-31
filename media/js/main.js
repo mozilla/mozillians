@@ -1,4 +1,4 @@
-app = {}; // Let's namespace our app's functions in here.
+var app = {}; // Let's namespace our app's functions in here.
 
 (function($) {
     $().ready(function() {

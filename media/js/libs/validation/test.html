@@ -1,0 +1,45 @@
+<!DOCTYPE>
+<html>
+<head>
+  <script src="../jquery-1.4.4.min.js"></script>
+  <link rel="stylesheet" href="../qunit-1.2.0pre.css" type="text/css" media="screen" />
+  <script type="text/javascript" src="../qunit-1.2.0pre.js"></script>
+  <script type="text/javascript">
+    var app = {};
+    var gettext = function() {
+      // stub
+    };
+  </script>
+  <script type="text/javascript" src="messages.js"></script>
+  <script type="text/javascript" src="validation.js"></script>
+  <script type="text/javascript" src="validation_tests.js"></script>
+</head>
+<body>
+  <div class="field" id="email-container">
+    <label for="id_email">Primary Email</label>
+    <span title="This field is required." class="required">*</span>
+    <input type="text" id="id_email" name="email">
+  </div>
+  <div class="field" id="password-container">
+    <label for="id_password">Mot de passe</label>
+    <span title="This field is required." class="required">*</span>
+    <input type="password" maxlength="255" name="password" id="id_password">
+  </div>
+  <div class="field" id="confirmp-container">
+    <label for="id_confirmp">Confirm Password</label>
+    <span title="This field is required." class="required">*</span>
+    <input type="password" id="id_confirmp" name="confirmp">
+  </div>
+  <div class="field error" id="last_name-container">
+    <label for="id_last_name">Last Name</label>
+    <span title="This field is required." class="required">*</span>
+  </div>
+  
+  <h1 id="qunit-header">Validation Tests</h1>
+  <h2 id="qunit-banner"></h2>
+  <div id="qunit-testrunner-toolbar"></div>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+  <div id="qunit-fixture"></div>
+</body>
+</html>

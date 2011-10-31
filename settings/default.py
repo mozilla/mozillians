@@ -61,6 +61,8 @@ MINIFY_BUNDLES = {
             'js/libs/jquery-1.4.4.min.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
             'js/libs/tag-it/js/tag-it.js',
+            'js/libs/validation/messages.js',
+            'js/libs/validation/validation.js',
             'js/main.js',
             'js/groups.js',
         ),
