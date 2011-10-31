@@ -693,14 +693,25 @@ background-image: -moz-linear-gradient(
     margin-bottom: 10px;
 }
 
+.search-page .result .avatar {
+    float: left;
+    width: 70px;
+    margin: 0 10px 0 35px;
+    height: 70px;
+}
+
+.search-page .result .details {
+    float: left;
+}
+
 .search-page .result .profile-photo {
     border: 1px solid #52adcc;
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     float: left;
-    margin: 0 10px 0 35px;
     width: 70px;
+    max-height: 70px;
 }
 
 .search-page .result h2 {
