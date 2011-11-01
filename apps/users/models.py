@@ -28,6 +28,19 @@ class UserProfile(models.Model):
     class Meta:
         db_table = 'profile'
 
+    def vouch(self, vouchee):
+        if vouchee and vouchee.is_vouched:
+            self.is_vouched = True
+            self.vouched_by = vouchee
+            self.save()
+            # TODO: remove this when we take vouch status out of LDAP.
+            #       - need to do search filtering of vouch from mysql
+            #       - checking of vouch status via profile instead of LDAP
+            self.get_ldap_person()
+            my_uid = self.get_ldap_person()[1]['uniqueIdentifier'][0]
+            their_uid = vouchee.get_ldap_person()[1]['uniqueIdentifier'][0]
+            larper.record_vouch(my_uid, their_uid)
+
     def get_confirmation_url(self):
         url = (absolutify(reverse('confirm')) + '?code=' +
                self.confirmation_code)
