@@ -187,9 +187,9 @@ class UserSession(object):
         q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
         results = self._people_search(q, use_master)
         msg = 'Unable to locate %s in the LDAP directory'
-        if 0 == len(results):
+        if not results:
             raise NO_SUCH_PERSON(msg % unique_id)
-        elif 1 == len(results):
+        elif len(results) == 1:
             _dn, attrs = results[0]
             # Pending users will detect the existance of another
             # person, but there won't be any data besides uniqueIdentifier
