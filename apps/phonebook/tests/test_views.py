@@ -156,6 +156,14 @@ class TestViews(LDAPTestCase):
         r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='1'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 1)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='x'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='-3'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
     
     def test_mozillian_sees_mozillian_profile(self):
         # HACK: This user isn't made by default. WTF?
