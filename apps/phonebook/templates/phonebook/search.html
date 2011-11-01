@@ -18,6 +18,7 @@
       <input type="search" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
+      <input type="hidden" name="limit" id="limit" value="{{ limit }}">
       <button type="submit" class="button orange small">
         {{ _('Search') }}
       </button>

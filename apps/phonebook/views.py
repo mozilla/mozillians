@@ -31,8 +31,6 @@ log = commonware.log.getLogger('m.phonebook')
 
 BAD_VOUCHER = 'Unknown Voucher'
 
-PAGINATION_LIMIT = 20
-
 def vouch_required(f):
     """If a user is not vouched they get a 403."""
     @login_required
@@ -229,13 +227,10 @@ def search(request):
     show_pagination = False
     form = forms.SearchForm(request.GET)
 
-    try:
-        limit = int(request.GET.get('limit'))
-    except TypeError:
-        limit = PAGINATION_LIMIT
-
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
+        limit = form.cleaned_data['limit']
+
         if request.user.is_authenticated():
             ldap = UserSession.connect(request)
             try:
@@ -259,7 +254,7 @@ def search(request):
                 except EmptyPage:
                     people = paginator.page(paginator.num_pages)
 
-                if paginator.count > PAGINATION_LIMIT:
+                if paginator.count > forms.PAGINATION_LIMIT:
                     show_pagination = True
 
             except SIZELIMIT_EXCEEDED:
