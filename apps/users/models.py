@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 
+import larper
 from groups.models import Group
 from phonebook.models import get_random_string
 
@@ -36,6 +37,9 @@ class UserProfile(models.Model):
         url = (reverse('send_confirmation') + '?' +
                urllib.urlencode({'user': self.user.username}))
         return url
+
+    def get_ldap_person(self):
+        return larper.get_user_by_email(self.user.email)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
