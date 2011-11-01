@@ -15,8 +15,25 @@ from phonebook.models import Invite
 from groups.models import SYSTEM_GROUP_CHARACTER, Group
 
 
+PAGINATION_LIMIT = 20
+
+REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
+
+
 class SearchForm(happyforms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=True)
+    limit = forms.CharField(widget=forms.HiddenInput, required=False)
+
+    def clean_limit(self):
+        """Validate that this limit is numeric and greater than 1"""
+        limit = self.cleaned_data['limit']
+
+        if not limit:
+            limit = PAGINATION_LIMIT
+        elif not REGEX_NUMERIC.match(str(limit)) or int(limit) < 1:
+            limit = PAGINATION_LIMIT
+
+        return limit
 
 
 class ProfileForm(happyforms.Form):
@@ -123,6 +140,7 @@ class ProfileForm(happyforms.Form):
             groups_to_add.append(group)
 
         profile.groups.add(*groups_to_add)
+
 
 class DeleteForm(happyforms.Form):
     unique_id = forms.CharField(widget=forms.HiddenInput)
