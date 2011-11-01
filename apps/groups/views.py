@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.cache import cache_control
 
 import commonware.log
@@ -10,6 +11,7 @@ from funfactory.urlresolvers import reverse
 
 from .helpers import users_from_groups
 from .models import Group
+from phonebook.views import PAGINATION_LIMIT
 
 log = commonware.log.getLogger('m.groups')
 
@@ -17,9 +19,17 @@ log = commonware.log.getLogger('m.groups')
 @login_required
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
-    all_groups = Group.objects.all().order_by('name')
+    paginator = Paginator(Group.objects.all(), PAGINATION_LIMIT)
 
-    data = dict(groups=all_groups)
+    page = request.GET.get('page')
+    try:
+        groups = paginator.page(page)
+    except PageNotAnInteger:
+        groups = paginator.page(1)
+    except EmptyPage:
+        groups = paginator.page(paginator.num_pages)
+
+    data = dict(groups=groups)
     return render(request, 'groups/index.html', data)
 
 

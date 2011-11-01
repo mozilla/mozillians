@@ -25,5 +25,25 @@
         </li>
       {% endfor %}
     </ul>
+
+    <div class="pagination">
+      <span class="step-links">
+        {% if groups.has_previous() %}
+          <a href="?page={{ groups.previous_page_number() }}">
+            {{ _('Back') }}
+          </a>
+        {% endif %}
+
+        <span class="current">
+          {{ groups.number }} / {{ groups.paginator.num_pages }}
+        </span>
+
+        {% if groups.has_next() %}
+          <a href="?page={{ groups.next_page_number() }}">
+            {{ _('Next') }}
+          </a>
+        {% endif %}
+      </span>
+    </div>
   {% endif %}
 {% endblock main_content %}
