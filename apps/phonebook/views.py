@@ -25,13 +25,12 @@ from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
 
-
 log = commonware.log.getLogger('m.phonebook')
-
 
 BAD_VOUCHER = 'Unknown Voucher'
 
 PAGINATION_LIMIT = 20
+
 
 def vouch_required(f):
     """If a user is not vouched they get a 403."""
