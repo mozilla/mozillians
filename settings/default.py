@@ -109,6 +109,11 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'django.contrib.admin',
     'django.contrib.auth',
 
+    # DB migrations
+    'south',
+    # re-assert dominance of 'django_nose'
+    'django_nose',
+
 ]
 
 ## Auth
@@ -145,3 +150,4 @@ AUTH_PROFILE_MODULE = 'users.UserProfile'
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
 AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
+SOUTH_TESTS_MIGRATE = False
