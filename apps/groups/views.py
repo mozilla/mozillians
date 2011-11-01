@@ -11,7 +11,7 @@ from funfactory.urlresolvers import reverse
 
 from .helpers import users_from_groups
 from .models import Group
-from phonebook.views import PAGINATION_LIMIT
+from phonebook.forms import PAGINATION_LIMIT
 
 log = commonware.log.getLogger('m.groups')
 

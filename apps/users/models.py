@@ -1,5 +1,6 @@
 import urllib
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
@@ -7,6 +8,7 @@ from django.dispatch import receiver
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 
+from groups.models import Group
 from phonebook.models import get_random_string
 
 
@@ -41,8 +43,11 @@ class UserProfile(models.Model):
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        profile = UserProfile.objects.create(user=instance)
 
+        if any(instance.email.endswith('@' + d)
+               for d in settings.AUTO_VOUCH_DOMAINS):
+            profile.groups.add(Group.objects.get(name='staff', system=True))
 
 @receiver(models.signals.pre_save, sender=UserProfile)
 def generate_code(sender, instance, raw, using, **kwargs):

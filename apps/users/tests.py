@@ -5,7 +5,11 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+from groups.models import Group
 from phonebook.tests import LDAPTestCase, PENDING
+
+
+Group.objects.get_or_create(name='staff', system=True)
 
 
 class RegistrationTest(LDAPTestCase):
@@ -48,8 +52,12 @@ class RegistrationTest(LDAPTestCase):
                              follow=True)
         eq_(d['email'], str(r.context['user']))
 
+        assert not (r.context['user'].get_profile().groups
+                     .filter(name='staff')), (
+                    'Regular user should not belong to the "staff" group.')
+
     def test_mozillacom_registration(self):
-        """Verify that @mozilla.com user is auto-vouched."""
+        """Verify @mozilla.com users are auto-vouched and marked "staff"."""
         d = dict(
                  email='mrfusion@mozilla.com',
                  first_name='Akaaaaaaash',
@@ -76,6 +84,9 @@ class RegistrationTest(LDAPTestCase):
                              follow=True)
         eq_(d['email'], str(r.context['user']))
         assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
+
+        assert r.context['user'].get_profile().groups.filter(name='staff'), (
+                'Moz.com should belong to the "staff" group.')
 
     def test_plus_signs(self):
         d = dict(
