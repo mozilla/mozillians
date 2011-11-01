@@ -20,6 +20,8 @@ class UserProfile(models.Model):
     confirmation_code = models.CharField(max_length=32, editable=False,
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
+    is_vouched = models.BooleanField(default=False)
+    vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
 
     class Meta:
