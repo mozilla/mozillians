@@ -9,7 +9,6 @@ import Image
 from easy_thumbnails import processors
 from tower import ugettext as _
 
-from phonebook.helpers import vouched
 from phonebook.models import Invite
 from groups.models import SYSTEM_GROUP_CHARACTER, Group
 
@@ -90,7 +89,7 @@ class ProfileForm(happyforms.Form):
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""
         # If this user isn't vouched they can't edit their groups.
-        if not vouched(request.user):
+        if not request.user.get_profile().is_vouched:
             return
 
         profile = request.user.get_profile()

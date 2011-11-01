@@ -20,12 +20,6 @@ def paragraphize(value):
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
-@register.filter
-def vouched(user):
-    if hasattr(user, 'is_vouched'):
-        return user.is_vouched()
-
-
 @register.inclusion_tag('phonebook/includes/photo.html')
 @jinja2.contextfunction
 def profile_photo(context, person):
