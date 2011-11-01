@@ -5,9 +5,6 @@ from django.template.defaultfilters import slugify
 
 # If ten or more users use a group, it will get auto-completed.
 AUTO_COMPLETE_COUNT = 10
-# System groups have a special character in them; that's how we know they're
-# system groups!
-SYSTEM_GROUP_CHARACTER = u':'
 
 
 class Group(models.Model):
@@ -20,26 +17,18 @@ class Group(models.Model):
     their canonical case.
 
     Users can add their own groups to the system, but certain Groups may be
-    deemed more important by admins."""
+    deemed more important by admins.
+    """
     name = models.CharField(db_index=True, max_length=50, unique=True)
     url = models.SlugField()
 
     # If this is true, this Group will appear in the autocomplete list.
     auto_complete = models.BooleanField(db_index=True, default=False)
+    always_auto_complete = models.BooleanField(default=False)
     system = models.BooleanField(db_index=True, default=False)
 
     class Meta:
         db_table = 'group'
-
-    def _is_system(self):
-        """Return True if this group is a "system group".
-
-        Certain groups (with a special key -- usually ":") are system groups
-        that can have special meaning.
-
-        Users cannot create system groups, but they can add themselves to one.
-        """
-        return SYSTEM_GROUP_CHARACTER in self.name
 
     def __unicode__(self):
         """Return the name of this group, unless it doesn't have one yet."""
@@ -51,14 +40,6 @@ def _create_url_slug(sender, instance, raw, using, **kwargs):
     """Create a Group's URL slug when it's first saved."""
     if not instance.pk:
         instance.url = slugify(instance.name.lower())
-
-
-@receiver(models.signals.pre_save, sender=Group)
-def _denormalize_system_attribute(sender, instance, raw, using, **kwargs):
-    """Mark any groups with our special system delimiter as such in the DB.
-
-    Allows queries on system groups by searching for them via an attribute."""
-    instance.system = instance._is_system()
 
 
 @receiver(models.signals.pre_save, sender=Group)

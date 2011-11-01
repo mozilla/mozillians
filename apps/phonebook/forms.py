@@ -12,7 +12,7 @@ from tower import ugettext as _
 
 from phonebook.helpers import vouched
 from phonebook.models import Invite
-from groups.models import SYSTEM_GROUP_CHARACTER, Group
+from groups.models import Group
 
 
 PAGINATION_LIMIT = 20
@@ -118,26 +118,18 @@ class ProfileForm(happyforms.Form):
 
         profile = request.user.get_profile()
 
-        # If no groups are supplied, we're deleting all groups.
-        if not self.cleaned_data['groups']:
-            profile.groups.clear()
-            return
-
-        # Remove any groups that weren't supplied in this list.
+        # Remove any non-system groups that weren't supplied in this list.
         profile.groups.remove(*[g for g in profile.groups.all()
-                                if g.name not in self.cleaned_data['groups']])
+                                if g.name not in self.cleaned_data['groups']
+                                and not g.system])
 
         # Add/create the rest of the groups
         groups_to_add = []
         for g in self.cleaned_data['groups']:
-            if SYSTEM_GROUP_CHARACTER in g:
-                try:
-                    group = Group.objects.get(name=g)
-                except ObjectDoesNotExist:
-                    continue
-            else:
-                (group, created) = Group.objects.get_or_create(name=g)
-            groups_to_add.append(group)
+            (group, created) = Group.objects.get_or_create(name=g)
+
+            if not group.system:
+                groups_to_add.append(group)
 
         profile.groups.add(*groups_to_add)
 
