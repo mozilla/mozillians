@@ -1,3 +1,4 @@
+DELETE FROM `profile_groups`;
 DELETE FROM `group`;
 
 ALTER TABLE `group` ADD COLUMN `always_auto_complete` bool NOT NULL;
