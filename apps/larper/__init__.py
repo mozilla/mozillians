@@ -847,3 +847,28 @@ def set_password(username, password):
             log.info("Resetting %s password" % dn)
     finally:
         conn.unbind()
+
+
+def get_user_by_email(email):
+    """
+    Resets a user's LDAP password.
+    .. warning:
+    *Careful!* This function has the capability to change
+    anyone's password. It should only be used for
+    un-authenticated users from the reset-password email
+    flow.
+
+    *If the user is authenticated*, then
+    *use the change_password method above*.
+    """
+
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    encoded_q = email.encode('utf-8')
+
+    search_filter = filter_format("(|(mail=*%s*)(uid=*%s*))",
+                                  (encoded_q, encoded_q,))
+
+    rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                       search_filter)
+    return rs[0]
