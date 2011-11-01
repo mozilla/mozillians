@@ -13,7 +13,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
-  <link rel="search" type="application/opensearchdescription+xml" 
+  <link rel="search" type="application/opensearchdescription+xml"
         title="{{ _('Mozillians') }}" href="{{ url('phonebook.search_plugin') }}">
 
   {% block site_css %}
@@ -46,7 +46,7 @@
               {{ _('Profile') }}
             </a>
           </li>
-          {% if user|vouched %}
+          {% if user.get_profile().is_vouched %}
             <li>
               <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
             </li>
@@ -71,7 +71,7 @@
       </ul>
     </nav>
 
-    {% if user.is_authenticated() and user|vouched %}
+    {% if user.is_authenticated() and user.get_profile().is_vouched %}
       {% block search %}
         <form id="quick-search" action="{{ url('phonebook.search') }}"
               method="GET">
