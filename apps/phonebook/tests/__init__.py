@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 from django import test
@@ -8,6 +9,8 @@ from nose.tools import eq_
 
 from funfactory.urlresolvers import reverse
 from funfactory.manage import path
+
+from users import cron
 
 # The test data (below in module constants) must match data in
 # directory/testsuite/mozillians-bulk-test-data.ldif
@@ -27,7 +30,6 @@ call = lambda x: subprocess.Popen(x, stdout=subprocess.PIPE).communicate()
 class LDAPTestCase(test_utils.TestCase):
     @classmethod
     def setup_class(cls):
-        import os
         os.environ['OPENLDAP_DB_PATH'] = '/home/vagrant/openldap-db'
         call(path('directory/devslapd/bin/x-rebuild'))
 
@@ -39,6 +41,7 @@ class LDAPTestCase(test_utils.TestCase):
                                                password=PASSWORD)
         self.mozillian_client = mozillian_client(email=MOZILLIAN['email'],
                                                  password=PASSWORD)
+        cron.vouchify()
 
 
 def mozillian_client(email, password=PASSWORD):

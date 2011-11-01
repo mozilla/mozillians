@@ -872,3 +872,35 @@ def get_user_by_email(email):
     rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                        search_filter)
     return rs[0]
+
+
+def get_user_by_uid(uid):
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    search_filter = filter_format("(uniqueIdentifier=%s)", (uid,))
+
+    rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                       search_filter, Person.search_attrs)
+    if rs:
+        return rs[0]
+
+
+def record_vouch(voucher, vouchee):
+    """
+    Updates a *Pending* account to *Mozillian* status.
+
+    voucher - The unique_id of the Mozillian who will vouch
+    vouchee - The unique_id of the Pending user who is being vouched for
+
+    TODO: I think I'm doing something dumb with encode('utf-8')
+
+    Method always uses master.
+    """
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    voucher_dn = Person.dn(voucher).encode('utf-8')
+    vouchee_dn = Person.dn(vouchee)
+
+    modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
+    conn.modify_s(vouchee_dn, modlist)
+    return True
