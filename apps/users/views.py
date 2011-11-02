@@ -186,7 +186,7 @@ def _save_new_user(request, form):
 
     if voucher:
         # TODO: invite system should be use FKs not UIDs
-        profile.vouch(UserProfile.objects.get_by_uid(uniq_id))
+        profile.vouch(UserProfile.objects.get_by_unique_id(uniq_id))
         invite.redeemed = datetime.datetime.now()
         invite.redeemer = uniq_id
         invite.save()

@@ -14,8 +14,8 @@ from phonebook.models import get_random_string
 
 class UserProfileManager(models.Manager):
     def get_by_unique_id(self, uid):
-        rs = larper.get_by_uid(uid)
-        mail = rs[1]['mail']
+        rs = larper.get_user_by_uid(uid)
+        mail = rs[1]['mail'][0]
         return User.objects.get(email=mail).get_profile()
 
 
