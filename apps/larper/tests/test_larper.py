@@ -178,7 +178,7 @@ class TestLarper(LDAPTestCase):
         request = _mock_request('/en-US/', username='u000001@mozillians.org')
         directory = self.d = UserSession.connect(request)
 
-        ok_(directory.record_vouch('7f3a67u000001', new_unique_id))
+        ok_(larper.record_vouch('7f3a67u000001', new_unique_id))
         newbie = directory.get_by_unique_id(new_unique_id)
         eq_('7f3a67u000001', newbie.voucher_unique_id)
 

@@ -333,25 +333,6 @@ class UserSession(object):
         if modlist:
             conn.modify_s(dn, modlist)
 
-    def record_vouch(self, voucher, vouchee):
-        """
-        Updates a *Pending* account to *Mozillian* status.
-
-        voucher - The unique_id of the Mozillian who will vouch
-        vouchee - The unique_id of the Pending user who is being vouched for
-
-        TODO: I think I'm doing something dumb with encode('utf-8')
-
-        Method always uses master.
-        """
-        conn = self._ensure_conn(WRITE)
-        voucher_dn = Person.dn(voucher).encode('utf-8')
-        vouchee_dn = Person.dn(vouchee)
-
-        modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
-        conn.modify_s(vouchee_dn, modlist)
-        return True
-
     def _people_search(self, search_filter, use_master=False):
         """
         use_master can be set to True to force reading from master
