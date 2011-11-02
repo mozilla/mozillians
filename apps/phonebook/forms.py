@@ -3,12 +3,11 @@ import tempfile
 
 from django import forms
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 
 import happyforms
 import Image
 from easy_thumbnails import processors
-from tower import ugettext as _
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.helpers import vouched
 from phonebook.models import Invite
@@ -37,21 +36,21 @@ class SearchForm(happyforms.Form):
 
 
 class ProfileForm(happyforms.Form):
-    first_name = forms.CharField(label=_(u'First Name'), required=False)
-    last_name = forms.CharField(label=_(u'Last Name'), required=True)
-    biography = forms.CharField(label=_(u'Bio'),
+    first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
+    last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
+    biography = forms.CharField(label=_lazy(u'Bio'),
                                 widget=forms.Textarea(),
                                 required=False)
-    photo = forms.ImageField(label=_(u'Profile Photo'), required=False)
+    photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
 
     # Remote System Ids
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
-    irc_nickname = forms.CharField(label=_(u'IRC Nickname'),
+    irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
                                    required=False)
     irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
                                              required=False)
 
-    groups = forms.CharField(label=_(u'Groups'), required=False)
+    groups = forms.CharField(label=_lazy(u'Groups'), required=False)
 
     def clean_photo(self):
         """Let's make sure things are right.
