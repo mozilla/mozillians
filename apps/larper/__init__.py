@@ -831,17 +831,7 @@ def set_password(username, password):
 
 
 def get_user_by_email(email):
-    """
-    Resets a user's LDAP password.
-    .. warning:
-    *Careful!* This function has the capability to change
-    anyone's password. It should only be used for
-    un-authenticated users from the reset-password email
-    flow.
-
-    *If the user is authenticated*, then
-    *use the change_password method above*.
-    """
+    """Given an email address, return an ldap record."""
 
     conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
     conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
@@ -856,6 +846,7 @@ def get_user_by_email(email):
 
 
 def get_user_by_uid(uid):
+    """Given a uniqueIdentifier, return an ldap record."""
     conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
     conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
     search_filter = filter_format("(uniqueIdentifier=%s)", (uid,))
@@ -867,19 +858,14 @@ def get_user_by_uid(uid):
 
 
 def record_vouch(voucher, vouchee):
-    """
-    Updates a *Pending* account to *Mozillian* status.
+    """Updates a *Pending* account to *Mozillian* status.
 
     voucher - The unique_id of the Mozillian who will vouch
     vouchee - The unique_id of the Pending user who is being vouched for
-
-    TODO: I think I'm doing something dumb with encode('utf-8')
-
-    Method always uses master.
     """
     conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
     conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
-    voucher_dn = Person.dn(voucher).encode('utf-8')
+    voucher_dn = Person.dn(voucher)
     vouchee_dn = Person.dn(vouchee)
 
     modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]

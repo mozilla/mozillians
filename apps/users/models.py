@@ -13,7 +13,10 @@ from phonebook.models import get_random_string
 
 
 class UserProfileManager(models.Manager):
+    """Custom manager that can query via LDAP attributes."""
+
     def get_by_unique_id(self, uid):
+        """Given an LDAP uniqueIdentifier, find a match."""
         rs = larper.get_user_by_uid(uid)
         mail = rs[1]['mail'][0]
         return User.objects.get(email=mail).get_profile()
@@ -100,7 +103,7 @@ def generate_code(sender, instance, raw, using, **kwargs):
 
 @receiver(models.signals.pre_save, sender=UserProfile)
 def auto_vouch(sender, instance, raw, using, **kwargs):
-    # auto vouch moz.com:
+    """Auto vouch mozilla.com users."""
     username = instance.user.username
     if any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
         instance.vouch(None, system=True, commit=False)

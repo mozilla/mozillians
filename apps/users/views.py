@@ -179,13 +179,13 @@ def _save_new_user(request, form):
         # TODO: make this a unique exception.
         raise Exception(msg)
 
-    # TODO: what the hell is this doing???
+    # TODO: Remove when LDAP goes away
     auth.login(request, user)
 
     profile = user.get_profile()
 
     if voucher:
-        # TODO: invite system should be use FKs not UIDs
+        # TODO: invite system should use FKs not UIDs.
         profile.vouch(UserProfile.objects.get_by_unique_id(uniq_id))
         invite.redeemed = datetime.datetime.now()
         invite.redeemer = uniq_id
