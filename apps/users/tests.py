@@ -84,7 +84,8 @@ class RegistrationTest(LDAPTestCase):
                              dict(username=d['email'], password=d['password']),
                              follow=True)
         eq_(d['email'], str(r.context['user']))
-        assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
+        assert r.context['user'].get_profile().is_vouched, (
+                "Moz.com should be auto-vouched")
 
         assert r.context['user'].get_profile().groups.filter(name='staff'), (
                 'Moz.com should belong to the "staff" group.')
@@ -185,4 +186,4 @@ class VouchTest(LDAPTestCase):
 
         profile.vouch(vouchee)
         profile = get_profile(PENDING['email'])
-        assert profile.is_vouched, "User should be marked as vouched."
+        assert profile.is_vouched, 'User should be marked as vouched.'
