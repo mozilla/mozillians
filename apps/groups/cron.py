@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db.models import Count
 
 import commonware.log
@@ -18,3 +20,19 @@ def assign_autocomplete_to_groups():
                            .annotate(count=Count('userprofile'))):
         g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
+
+
+@cronjobs.register
+def assign_staff_to_early_users():
+    """Add "staff" group to all auto-vouched users."""
+    staff = Group.objects.get(name='staff')
+    staff_users = []
+
+    for d in settings.AUTO_VOUCH_DOMAINS:
+        if not staff_users:
+            staff_users = User.objects.filter(email__iendswith=d)
+        else:
+            staff_users = staff_users | staff_users.filter(email__iendswith=d)
+
+    for u in staff_users:
+        u.get_profile().groups.add(staff)
