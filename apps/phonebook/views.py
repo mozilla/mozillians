@@ -35,7 +35,7 @@ def vouch_required(f):
     @login_required
     @wraps(f)
     def wrapped(request, *args, **kwargs):
-        if request.user.is_vouched():
+        if request.user.get_profile().is_vouched:
             return f(request, *args, **kwargs)
         else:
             log.warning('vouch_required forbidding access')

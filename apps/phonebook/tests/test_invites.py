@@ -80,13 +80,13 @@ class InviteTest(LDAPTestCase):
 
         r = self.redeem_invite(invite, **d)
 
-        eq_(r.context['user'].is_vouched(), True)
+        eq_(r.context['user'].get_profile().is_vouched, True)
         eq_(r.context['user'].unique_id,
             Invite.objects.get(pk=invite.pk).redeemer)
 
         # Don't reuse codes.
         r = self.redeem_invite(invite, email='mr2@gmail.com')
-        eq_(r.context['user'].is_vouched(), False)
+        eq_(r.context['user'].get_profile().is_vouched, False)
 
         # Don't reinvite a vouched user
         url = reverse('invite')
