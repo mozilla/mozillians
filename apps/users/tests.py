@@ -76,7 +76,8 @@ class RegistrationTest(LDAPTestCase):
                              dict(username=d['email'], password=d['password']),
                              follow=True)
         eq_(d['email'], str(r.context['user']))
-        assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
+        assert r.context['user'].get_profile().is_vouched, (
+                "Moz.com should be auto-vouched")
 
     def test_plus_signs(self):
         d = dict(

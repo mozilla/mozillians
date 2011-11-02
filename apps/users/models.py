@@ -1,5 +1,6 @@
 import urllib
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
@@ -9,6 +10,13 @@ from funfactory.urlresolvers import reverse
 
 import larper
 from phonebook.models import get_random_string
+
+
+class UserProfileManager(models.Manager):
+    def get_by_unique_id(self, uid):
+        rs = larper.get_by_uid(uid)
+        mail = rs[1]['mail']
+        return User.objects.get(email=mail).get_profile()
 
 
 class UserProfile(models.Model):
@@ -23,14 +31,20 @@ class UserProfile(models.Model):
     vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
 
+    objects = UserProfileManager()
+
     class Meta:
         db_table = 'profile'
 
-    def vouch(self, vouchee):
+    def vouch(self, vouchee, system=True, commit=True):
+        changed = system # have we changed anything?
+        if system:
+            self.is_vouched = True
+
         if vouchee and vouchee.is_vouched:
+            changed = True
             self.is_vouched = True
             self.vouched_by = vouchee
-            self.save()
             # TODO: remove this when we take vouch status out of LDAP.
             #       - need to do search filtering of vouch from mysql
             #       - checking of vouch status via profile instead of LDAP
@@ -38,6 +52,9 @@ class UserProfile(models.Model):
             my_uid = self.get_ldap_person()[1]['uniqueIdentifier'][0]
             their_uid = vouchee.get_ldap_person()[1]['uniqueIdentifier'][0]
             larper.record_vouch(my_uid, their_uid)
+
+        if commit and changed:
+            self.save()
 
     def get_confirmation_url(self):
         url = (absolutify(reverse('confirm')) + '?code=' +
@@ -75,3 +92,11 @@ def generate_code(sender, instance, raw, using, **kwargs):
             continue
 
     instance.confirmation_code = code
+
+
+@receiver(models.signals.pre_save, sender=UserProfile)
+def auto_vouch(sender, instance, raw, using, **kwargs):
+    # auto vouch moz.com:
+    username = instance.user.username
+    if any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+        instance.vouch(None, system=True, commit=False)
