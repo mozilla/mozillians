@@ -70,6 +70,10 @@ class UserProfile(models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
+    def get_unique_id(self):
+        r = self.get_ldap_person()
+        return r[1]['uniqueIdentifier'][0]
+
     def get_ldap_person(self):
         return larper.get_user_by_email(self.user.email)
 

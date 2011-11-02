@@ -24,6 +24,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 
@@ -77,18 +78,12 @@ def profile_nickname(request, nickname):
 def _profile(request, person, use_master):
     vouch_form = None
     ldap = UserSession.connect(request)
+    profile = person.get_profile()
 
-    if person.voucher_unique_id or cache.get('vouched_' + person.unique_id):
-        try:
-            # Stale data okay
-            person.voucher = ldap.get_by_unique_id(person.voucher_unique_id)
-        except NO_SUCH_PERSON:
-            # Bug#688788 Invalid voucher is okay
-            person.voucher = BAD_VOUCHER
-    elif request.user.unique_id != person.unique_id:
+    # TODO: rely more on db for this test
+    if not profile.is_vouched and request.user.unique_id != person.unique_id:
         voucher = request.user.unique_id
-        vouch_form = forms.VouchForm(initial=dict(
-                vouchee=person.unique_id))
+        vouch_form = forms.VouchForm(initial=dict(vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
     person.irc_nickname = None
@@ -99,8 +94,8 @@ def _profile(request, person, use_master):
     # Get user groups from their profile.
     groups = person.get_profile().groups.all()
 
-    data = dict(person=person, vouch_form=vouch_form, services=services,
-                groups=groups)
+    data = dict(person=person, profile=profile, vouch_form=vouch_form,
+                services=services, groups=groups)
     return render(request, 'phonebook/profile.html', data)
 
 
@@ -323,10 +318,13 @@ def vouch(request):
     """
     form = forms.VouchForm(request.POST)
     if form.is_valid():
-        ldap = UserSession.connect(request)
         data = form.cleaned_data
         vouchee = data.get('vouchee')
-        ldap.record_vouch(request.user.unique_id, vouchee)
+        # TODO: make the form give us the User's id...
+        p = UserProfile.objects.get_by_unique_id(vouchee)
+        p.vouch(request.user.get_profile())
+
+        # TODO: Is this still necessary?...
         cache.set('vouched_' + vouchee, True)
 
         # Notify the current user that they vouched successfully.
