@@ -242,7 +242,8 @@ def search(request):
                 # Search based on group name as well
                 groups = Group.objects.filter(name__icontains=query)[:limit]
                 for group in groups:
-                    for user in users_from_groups(request, group):
+                    for user in users_from_groups(request, group,
+                            limit=forms.PAGINATION_LIMIT):
                         if not user.unique_id in [p.unique_id for p in people]:
                             people.append(user)
 

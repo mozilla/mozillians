@@ -43,7 +43,7 @@ def show(request, id, url=None):
     if not url:
         redirect(reverse('group', args=[group.id, group.url]))
 
-    users = users_from_groups(request, group)
+    users = users_from_groups(request, group, limit=PAGINATION_LIMIT)
 
     data = dict(group=group, users=users)
     return render(request, 'groups/show.html', data)
