@@ -111,10 +111,6 @@ class ProfileForm(happyforms.Form):
 
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""
-        # If this user isn't vouched they can't edit their groups.
-        if not vouched(request.user):
-            return
-
         profile = request.user.get_profile()
 
         # Remove any non-system groups that weren't supplied in this list.

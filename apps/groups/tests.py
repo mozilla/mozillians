@@ -63,8 +63,8 @@ class GroupTest(LDAPTestCase):
             assert g.name == g.name.lower(), (
                     'Group search is case-insensitive.')
 
-    def test_pending_user_cant_edit_groups(self):
-        """Ensure pending users can't add/edit groups."""
+    def test_pending_user_can_add_groups(self):
+        """Ensure pending users can add/edit groups."""
         profile = get_profile(PENDING['email'])
         assert not profile.groups.all(), 'User should have no groups.'
 
@@ -73,8 +73,8 @@ class GroupTest(LDAPTestCase):
                     dict(last_name='McAwesomepants', groups='Awesome foo Bar'),
                     follow=True)
 
-        assert not profile.groups.all(), (
-                "Pending user shouldn't be able to edit groups.")
+        assert profile.groups.all(), (
+                "Pending user should be able to edit groups.")
 
     def test_string_split_works_properly(self):
         """Ensure groups are saved correctly from a comma-delimited string."""
