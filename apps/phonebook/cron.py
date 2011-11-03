@@ -24,4 +24,3 @@ def invite(filename):
         i = Invite.objects.create(inviter='ZUUL', recipient=addr)
         i.send()
         log.info('Invited %s' % addr)
-
