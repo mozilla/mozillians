@@ -222,6 +222,7 @@ def _user_owns_account(request, form):
 
 @vouch_required
 def search(request):
+    limit = None
     people = []
     size_exceeded = False
     show_pagination = False
