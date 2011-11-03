@@ -23,7 +23,7 @@ LOGGING = {
 LOCALE_PATHS = [path('locale')]
 
 # Accepted locales
-PROD_LANGUAGES = ('de', 'en-US', 'es', 'fr', 'pl', 'sl', 'sq', 'zh-TW')
+PROD_LANGUAGES = ('de', 'en-US', 'es', 'fr', 'nl', 'pl', 'sl', 'zh-TW')
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
