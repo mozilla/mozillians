@@ -7,7 +7,7 @@
 
 {% block main_content %}
   <h1>
-    {% if user.username == person.username %}
+    {% if user.unique_id == person.unique_id %}
       {{ _('Your Profile') }}
     {% elif person.voucher %}
       {{ _('Mozillian Profile') }}
@@ -17,7 +17,7 @@
   </h1>
 
   {% if not person.voucher %}
-    {% if user.username == person.username %}
+    {% if user.unique_id == person.unique_id %}
       <p id="pending-approval">
         {% trans profile_url=absolutify(url('profile', user.unique_id)) %}
           Your profile is waiting for approval. Send this link to someone who
@@ -58,7 +58,7 @@
   <div class="blue-pastels vcard h-card">
     {{ profile_photo(person) }}
 
-    {% if user.username == person.username %}
+    {% if user.unique_id == person.unique_id %}
       <a href="{{ url('phonebook.edit_profile') }}"
         class="button blue small" id="edit-profile">
         {{ _('Edit My Profile') }}
