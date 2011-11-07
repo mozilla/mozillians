@@ -4,6 +4,9 @@
 Installation
 ============
 
+.. note::
+    Installing Mozillians might be daunting.  Ask for help in #mozillians on 
+    irc.mozilla.org.  tofumatt, ednapiranha or davedash will be happy to help.
 
 1. Install vagrant::
 
