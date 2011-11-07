@@ -72,6 +72,7 @@ class InviteTest(LDAPTestCase):
         Send an invite.  See that email is sent.
         See that link allows us to sign in and be auto-vouched.
         Verify that we can't reuse the invite_url
+        Verify we can't reinvite a vouched user
         """
         invite = self.invite_someone()
         r = self.get_register(invite)
@@ -86,6 +87,14 @@ class InviteTest(LDAPTestCase):
         # Don't reuse codes.
         r = self.redeem_invite(invite, email='mr2@gmail.com')
         eq_(r.context['user'].is_vouched(), False)
+
+        # Don't reinvite a vouched user
+        url = reverse('invite')
+        d = dict(recipient='mr.fusion@gmail.com')
+        r = self.mozillian_client.post(url, d, follow=True)
+        eq_(r.status_code, 200)
+        assert ('You cannot invite someone who has already been vouched.' in
+                pq(r.content)('ul.errorlist li').text())
 
     def test_unvouched_cant_invite(self):
         """
