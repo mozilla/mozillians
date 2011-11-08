@@ -3,6 +3,3 @@
 # Work around since -r ../vendor/src/funfactory/funfactory/requirements/prod.txt
 # isn't found on rtfd.
 -e git://github.com/django/django@36c82ac8#egg=django
-
-
--r dev.txt
