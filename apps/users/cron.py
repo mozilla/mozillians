@@ -33,5 +33,5 @@ def vouchify():
                 except User.DoesNotExist:
                     log.warning('No matching user for %s' % email)
             user.save()
-            log.info("Data copied for %s" % user.user.username)
-        log.debug("%s is still unvouched... skipping" % user.user.username)
+            log.info('Data copied for %s' % user.user.username)
+        log.debug('%s is still unvouched... skipping' % user.user.username)

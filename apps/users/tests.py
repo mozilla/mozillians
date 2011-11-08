@@ -175,4 +175,4 @@ class VouchTest(LDAPTestCase):
 
         profile.vouch(vouchee)
         profile = get_profile(PENDING['email'])
-        assert profile.is_vouched, "User should be marked as vouched."
+        assert profile.is_vouched, 'User should be marked as vouched.'
