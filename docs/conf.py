@@ -16,9 +16,9 @@ for mod_name in ('ldap', '_ldap', 'django_auth_ldap',
     sys.modules[mod_name] = Mock()
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from django.conf import settings
 import funfactory.manage
 funfactory.manage.ROOT = os.path.abspath('..')
+from django.conf import settings
 
 # side effect of giving us all the vendor libs
 import manage
