@@ -117,7 +117,7 @@
     <div class="clear"></div>
   </form>
 
-  {% if user.username == person.username %}
+  {% if user.unique_id == person.unique_id %}
     <div id="manage-profile">
       <a class="button red small" href="{{ url('confirm_delete') }}"
          id="delete-profile">

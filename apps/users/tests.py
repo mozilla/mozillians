@@ -90,6 +90,19 @@ class RegistrationTest(LDAPTestCase):
         assert r.context['user'].get_profile().groups.filter(name='staff'), (
                 'Moz.com should belong to the "staff" group.')
 
+    def test_mozillacom_registration_case_insensitive_username(self):
+        """Verify @mozilla.com users can sign up only once with the same email"""
+        d = dict(
+                 email='mRfUsIoN@mozilla.com',
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+        )
+        r = self.client.post(reverse('register'), d, follow=True)
+        eq_(len(mail.outbox), 0)
+
     def test_plus_signs(self):
         d = dict(
                  email='mrfusion+dotcom@mozilla.com',
