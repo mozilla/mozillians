@@ -1,0 +1,2 @@
+-r dev.txt
+-e git://github.com/mozilla/funfactory.git#egg=funfactory
