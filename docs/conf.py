@@ -3,6 +3,7 @@ import sys, os
 
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../apps'))
+sys.path.insert(0, os.path.abspath('../vendor'))
 
 class Mock(object):
     def __init__(self, *args):
