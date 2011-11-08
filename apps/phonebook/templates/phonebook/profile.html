@@ -80,7 +80,7 @@
 
         {% if person.irc_nickname %}
           <dt>{{_('IRC Nickname') }}</dt>
-          <dd><a class="nickname p-nickname" rel="me" href="{{ person.irc_nickname.service_uri }}">
+          <dd><a class="nickname p-nickname" href="{{ person.irc_nickname.service_uri }}">
             {{person.irc_nickname.service_id}}
           </a></dd>
         {% endif %}
@@ -121,7 +121,7 @@
       <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
         {% for group in groups %}
           <li class="tagit-choice ui-widget-content ui-state-default
-                     ui-corner-all">
+                     ui-corner-all p-category category">
             {% if request.user|vouched %}
               <a href="{{ url('group', group.id, group.url) }}">
                 {{ group.name }}
