@@ -9,7 +9,6 @@ import Image
 from easy_thumbnails import processors
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from phonebook.helpers import vouched
 from phonebook.models import Invite
 from groups.models import Group
 from users.models import User

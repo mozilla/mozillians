@@ -24,7 +24,7 @@
 
         <br><a href="{{ register }}" class="button orange">Create Profile</a>
       {% endtrans %}
-    {% elif user.is_vouched() %}
+    {% elif user.get_profile().is_vouched %}
       {% trans invite=url('invite') %}
         Tell other contributors about this directory and ask them to create a
         profile.

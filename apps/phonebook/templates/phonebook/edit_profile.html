@@ -9,14 +9,6 @@
       method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
-    {#
-    {% if registration_flow %}
-      Step 2 of 3 [ register | <strong>profile</strong> | get vouched ]
-    {% endif %}
-
-    <h1>{% if person.voucher_unique_id %}Mozillian{% else %}Pending{% endif %} Profile</h1>
-    #}
-
     <h1>{{ _('Edit Your Profile') }}</h1>
 
     {% if form.errors %}

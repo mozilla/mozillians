@@ -6,9 +6,7 @@ from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from jingo import register
 
-
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
-
 
 absolutify = register.function(absolutify)
 
@@ -18,12 +16,6 @@ def paragraphize(value):
     return jinja2.Markup(
             u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
-
-
-@register.filter
-def vouched(user):
-    if hasattr(user, 'is_vouched'):
-        return user.is_vouched()
 
 
 @register.inclusion_tag('phonebook/includes/photo.html')

@@ -187,9 +187,9 @@ class UserSession(object):
         q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
         results = self._people_search(q, use_master)
         msg = 'Unable to locate %s in the LDAP directory'
-        if 0 == len(results):
+        if not results:
             raise NO_SUCH_PERSON(msg % unique_id)
-        elif 1 == len(results):
+        elif len(results) == 1:
             _dn, attrs = results[0]
             # Pending users will detect the existance of another
             # person, but there won't be any data besides uniqueIdentifier
@@ -332,25 +332,6 @@ class UserSession(object):
 
         if modlist:
             conn.modify_s(dn, modlist)
-
-    def record_vouch(self, voucher, vouchee):
-        """
-        Updates a *Pending* account to *Mozillian* status.
-
-        voucher - The unique_id of the Mozillian who will vouch
-        vouchee - The unique_id of the Pending user who is being vouched for
-
-        TODO: I think I'm doing something dumb with encode('utf-8')
-
-        Method always uses master.
-        """
-        conn = self._ensure_conn(WRITE)
-        voucher_dn = Person.dn(voucher).encode('utf-8')
-        vouchee_dn = Person.dn(vouchee)
-
-        modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
-        conn.modify_s(vouchee_dn, modlist)
-        return True
 
     def _people_search(self, search_filter, use_master=False):
         """
@@ -848,15 +829,57 @@ def set_password(username, password):
     finally:
         conn.unbind()
 
+
 def _return_all():
     """Return all LDAP records, provided no LIMITs are set."""
     conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
     conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
     encoded_q = '@'.encode('utf-8')
-
-    search_filter = filter_format("(|(mail=*%s*)(uid=*%s*))",
+    search_filter = filter_format('(|(mail=*%s*)(uid=*%s*))',
                                   (encoded_q, encoded_q,))
 
     rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                        search_filter)
     return rs
+
+
+def get_user_by_email(email):
+    """Given an email address, return an ldap record."""
+
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    encoded_q = email.encode('utf-8')
+    search_filter = filter_format('(|(mail=*%s*)(uid=*%s*))',
+                                  (encoded_q, encoded_q,))
+
+    rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                       search_filter)
+    return rs[0]
+
+
+def get_user_by_uid(uid):
+    """Given a uniqueIdentifier, return an ldap record."""
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    search_filter = filter_format('(uniqueIdentifier=%s)', (uid,))
+
+    rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                       search_filter, Person.search_attrs)
+    if rs:
+        return rs[0]
+
+
+def record_vouch(voucher, vouchee):
+    """Updates a *Pending* account to *Mozillian* status.
+
+    voucher - The unique_id of the Mozillian who will vouch
+    vouchee - The unique_id of the Pending user who is being vouched for
+    """
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    voucher_dn = Person.dn(voucher)
+    vouchee_dn = Person.dn(vouchee)
+
+    modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
+    conn.modify_s(vouchee_dn, modlist)
+    return True

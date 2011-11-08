@@ -6,7 +6,8 @@ from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 from groups.models import Group
-from phonebook.tests import LDAPTestCase, PENDING
+from phonebook.tests import LDAPTestCase, MOZILLIAN, PENDING
+from users import cron
 
 
 Group.objects.get_or_create(name='staff', system=True)
@@ -83,7 +84,8 @@ class RegistrationTest(LDAPTestCase):
                              dict(username=d['email'], password=d['password']),
                              follow=True)
         eq_(d['email'], str(r.context['user']))
-        assert r.context['user'].is_vouched(), "Moz.com should be auto-vouched"
+        assert r.context['user'].get_profile().is_vouched, (
+                "Moz.com should be auto-vouched")
 
         assert r.context['user'].get_profile().groups.filter(name='staff'), (
                 'Moz.com should belong to the "staff" group.')
@@ -158,3 +160,30 @@ class TestThingsForPeople(LDAPTestCase):
 def get_profile(email):
     """Get a UserProfile for a particular user."""
     return User.objects.get(email=email).get_profile()
+
+
+class VouchTest(LDAPTestCase):
+    def test_vouchify_task(self):
+        """``vouchify`` task should mark vouched users in the db.
+
+        Test that an already vouched user will will look right in the DB.
+        Note this relies on LDAPTestCase having run ``cron.vouchify()``.
+        """
+        profile = get_profile(MOZILLIAN['email'])
+        assert profile.is_vouched
+
+    def test_vouch_method(self):
+        """Test UserProfile.vouch()
+
+        Assert that a previously unvouched user shows up as unvouched in the
+        database.
+
+        Assert that when vouched they are listed as vouched.
+        """
+        vouchee = get_profile(MOZILLIAN['email'])
+        profile = get_profile(PENDING['email'])
+        assert not profile.is_vouched
+
+        profile.vouch(vouchee)
+        profile = get_profile(PENDING['email'])
+        assert profile.is_vouched, 'User should be marked as vouched.'

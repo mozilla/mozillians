@@ -171,22 +171,25 @@ def _save_new_user(request, form):
             msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
             log.warning(msg)
 
-    if voucher:
-        registrar.record_vouch(voucher=voucher, vouchee=uniq_id)
-        invite.redeemed = datetime.datetime.now()
-        invite.redeemer = uniq_id
-        invite.save()
-    # auto vouch moz.com:
-    elif any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-        registrar.record_vouch(voucher='ZUUL', vouchee=uniq_id)
-
     user = auth.authenticate(username=username, password=password)
+
     # Should never happen
     if not user or not user.is_authenticated():
         msg = 'Authentication for new user (%s) failed' % username
         # TODO: make this a unique exception.
         raise Exception(msg)
+
+    # TODO: Remove when LDAP goes away
     auth.login(request, user)
+
+    profile = user.get_profile()
+
+    if voucher:
+        # TODO: invite system should use FKs not UIDs.
+        profile.vouch(UserProfile.objects.get_by_unique_id(uniq_id))
+        invite.redeemed = datetime.datetime.now()
+        invite.redeemer = uniq_id
+        invite.save()
 
     return uniq_id
 
