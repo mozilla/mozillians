@@ -161,6 +161,7 @@ def _edit_profile(request, new_account):
             )
     return render(request, 'phonebook/edit_profile.html', d)
 
+
 def _get_services_fields(ldap, unique_id, use_master=False):
     services = ldap.profile_service_ids(unique_id, use_master)
     irc_nick = None
@@ -263,7 +264,7 @@ def search(request):
     return render(request, 'phonebook/search.html', d)
 
 
-@cache_page(60 * 60 * 168) # 1 week.
+@cache_page(60 * 60 * 168)  # 1 week.
 def search_plugin(request):
     """Render an OpenSearch Plugin."""
     return render(request, 'phonebook/search_opensearch.xml',
@@ -293,10 +294,22 @@ def invite(request):
     if request.method == 'POST':
         f = forms.InviteForm(request.POST)
         if f.is_valid():
+            ldap = UserSession.connect(request)
+            unique_id = request.user.unique_id
+            try:
+                person = ldap.get_by_unique_id(unique_id, use_master=True)
+            except NO_SUCH_PERSON:
+                log.info('profile_uid Sending 404 for [%s]' % unique_id)
+                raise Http404
+
+            sender = '"%s %s" <%s>' % (person.first_name,
+                                       person.last_name,
+                                       request.user.username)
+
             invite = f.save(commit=False)
             invite.inviter = request.user.unique_id
             invite.save()
-            invite.send(sender=request.user.username)
+            invite.send(sender=sender)
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:
