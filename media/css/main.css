@@ -215,108 +215,101 @@ em.underline {
         top: -3px;
     }
 
-.button {
+.button, a.button {
+    background-image: linear-gradient(bottom, rgb(179,179,179) 15%, rgb(209,209,209) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(209,209,209) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(209,209,209) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(209,209,209) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(209,209,209) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(179,179,179)),
+        color-stop(0.85, rgb(209,209,209))
+    );
+    border-color: #8f8f8f;
+    color: #fff;
     cursor: pointer;
+    text-shadow: -1px 1px 1px #666666;
 }
 
-.button.blue {
-    border-color: #52adcc;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(142,190,205)),
-    color-stop(0.75, rgb(251,252,252))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(142,190,205) 25%,
-    rgb(251,252,252) 75%
-);
-    color: #0489b7 !important;
+.button:hover, .button:focus, a.button:hover, a.button:focus {
+    background-image: linear-gradient(bottom, rgb(179,179,179) 15%, rgb(237,237,237) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(237,237,237) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(237,237,237) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(237,237,237) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(179,179,179) 15%, rgb(237,237,237) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(179,179,179)),
+        color-stop(0.85, rgb(237,237,237))
+    );
 }
 
-.button.blue:hover {
-    border-color: #52adcc;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(142,190,205)),
-    color-stop(0.75, rgb(251,252,252))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(142,190,205) 25%,
-    rgb(251,252,252) 75%
-);
-    color: #0489b7 !important;
+.button.primary, a.button.primary {
+    background-image: linear-gradient(bottom, rgb(20,141,181) 15%, rgb(116,187,211) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(116,187,211) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(116,187,211) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(116,187,211) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(116,187,211) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(20,141,181)),
+        color-stop(0.85, rgb(116,187,211))
+    );
+    border-color: #066d90;
+    text-shadow: -1px 1px 1px #0f6380;
 }
 
-.button.red {
-    border-color: #cc5252;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(205,142,142)),
-    color-stop(0.75, rgb(252,251,251))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(205,142,142) 25%,
-    rgb(252,251,251) 75%
-);
-    color: #b70404 !important;
+.button.primary:hover, .button.primary:focus, a.button.primary:hover, a.button.primary:focus {
+    background-image: linear-gradient(bottom, rgb(20,141,181) 15%, rgb(132,211,238) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(132,211,238) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(132,211,238) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(132,211,238) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(20,141,181) 15%, rgb(132,211,238) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(20,141,181)),
+        color-stop(0.85, rgb(132,211,238))
+    );
 }
 
-.button.red:hover {
-    border-color: #cc5252;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(205,142,142)),
-    color-stop(0.75, rgb(252,251,251))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(205,142,142) 25%,
-    rgb(252,251,251) 75%
-);
-    color: #b70404 !important;
+.button.destructive, a.button.destructive {
+    background-image: linear-gradient(bottom, rgb(181,20,20) 15%, rgb(211,116,116) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(211,116,116) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(211,116,116) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(211,116,116) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(211,116,116) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(181,20,20)),
+        color-stop(0.85, rgb(211,116,116))
+    );
+    text-shadow: -1px 1px 1px #800f0f;
 }
 
-.button.orange {
-    border-color: #db8237;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.25, rgb(223,115,43)),
-    color-stop(0.75, rgb(241,210,85))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(223,115,43) 25%,
-    rgb(241,210,85) 75%
-);
-}
-
-.button.orange:hover {
-    border-color: #db8237;
-background-image: -webkit-gradient(
-    linear,
-    left bottom,
-    left top,
-    color-stop(0.15, rgb(223,115,43)),
-    color-stop(0.85, rgb(241,210,85))
-);
-background-image: -moz-linear-gradient(
-    center bottom,
-    rgb(223,115,43) 15%,
-    rgb(241,210,85) 85%
-);
+.button.destructive:hover, .button.destructive:focus, a.button.destructive:hover, a.button.destructive:focus {
+    background-image: linear-gradient(bottom, rgb(181,20,20) 15%, rgb(238,132,132) 85%);
+    background-image: -o-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(238,132,132) 85%);
+    background-image: -moz-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(238,132,132) 85%);
+    background-image: -webkit-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(238,132,132) 85%);
+    background-image: -ms-linear-gradient(bottom, rgb(181,20,20) 15%, rgb(238,132,132) 85%);
+    background-image: -webkit-gradient(
+        linear,
+        left bottom,
+        left top,
+        color-stop(0.15, rgb(181,20,20)),
+        color-stop(0.85, rgb(238,132,132))
+    );
 }
 
 .button.small {
@@ -747,6 +740,11 @@ background-image: -moz-linear-gradient(
 
 #body-confirm-delete #delete-action {
     margin-left: 30px;
+}
+
+/** Password Reset */
+#body-password-reset #submit {
+    float: none;
 }
 
 /** Error pages (404, 500, csrf, etc.) */

@@ -33,7 +33,7 @@
   {% endtrans %}
 
   {% if user.is_anonymous() %}
-    <a href="{{ url('register') }}" id="create-profile" class="button orange">
+    <a href="{{ url('register') }}" id="create-profile" class="button primary">
       {{ _('Create Profile') }}
     </a>
   {% endif %}

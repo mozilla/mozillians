@@ -102,7 +102,7 @@
       <div class="clear"></div>
     </div>
 
-    <button id="submit" class="button orange">
+    <button id="submit" class="button primary">
       {% if registration_flow %}
         {{ _('Next') }}
       {% else %}
@@ -119,7 +119,7 @@
 
   {% if user.unique_id == person.unique_id %}
     <div id="manage-profile">
-      <a class="button red small" href="{{ url('confirm_delete') }}"
+      <a class="button destructive small" href="{{ url('confirm_delete') }}"
          id="delete-profile">
         {{ _('Delete Profile') }}
       </a>

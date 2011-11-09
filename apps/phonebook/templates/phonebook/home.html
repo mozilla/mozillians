@@ -22,14 +22,14 @@
         Join the directory to share information about yourself and to learn
         more about other Mozillians.
 
-        <br><a href="{{ register }}" class="button orange">Create Profile</a>
+        <br><a href="{{ register }}" class="button primary">Create Profile</a>
       {% endtrans %}
     {% elif user.get_profile().is_vouched %}
       {% trans invite=url('invite') %}
         Tell other contributors about this directory and ask them to create a
         profile.
 
-        <br><a href="{{ invite }}" class="button orange">Invite a Mozillian</a>
+        <br><a href="{{ invite }}" class="button primary">Invite a Mozillian</a>
       {% endtrans %}
     {% endif %}
   </p>

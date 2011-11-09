@@ -400,7 +400,7 @@ fieldset legend {
 
 /** Buttons, utility classes, etc. */
 
-.button {
+.button, a.button {
     border: 1px solid;
     border-radius: 6px;
     -moz-border-radius: 6px;
@@ -408,19 +408,15 @@ fieldset legend {
     box-shadow: 1px 1px 3px #888;
     -moz-box-shadow: 1px 1px 3px #888;
     -webkit-box-shadow: 1px 1px 3px #888;
-    color: #b01a04 !important;
+    color: #b01a04;
     display: inline-block;
     font-family: MetaBold, 'Trebuchet MS', sans-serif;
     font-size: 18px;
     font-weight: bold;
     padding: .5em 1em;
     text-align: center;
-    text-decoration: none !important;
+    text-decoration: none;
     text-shadow: -1px 1px 1px #fff;
-}
-
-.button:hover {
-    text-shadow: -1px 1px 6px #fff;
 }
 
 /** Media Queries */

@@ -43,7 +43,7 @@
             {{ vouch_form }}
 
             {% trans name=person.full_name %}
-              <button type="submit" class="button orange small">
+              <button type="submit" class="button primary small">
                 Vouch for {{ name }}
               </button>
             {% endtrans %}
@@ -60,7 +60,7 @@
 
     {% if user.unique_id == person.unique_id %}
       <a href="{{ url('phonebook.edit_profile') }}"
-        class="button blue small" id="edit-profile">
+        class="button primary small" id="edit-profile">
         {{ _('Edit My Profile') }}
       </a>
     {% endif %}
