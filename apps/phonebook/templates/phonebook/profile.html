@@ -16,7 +16,7 @@
     {% endif %}
   </h1>
 
-  {% if not person.voucher %}
+  {% if not person.get_profile().is_vouched %}
     {% if user.unique_id == person.unique_id %}
       <p id="pending-approval">
         {% trans profile_url=absolutify(url('profile', user.unique_id)) %}

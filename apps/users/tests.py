@@ -83,9 +83,14 @@ class RegistrationTest(LDAPTestCase):
         r = self.client.post(reverse('login'),
                              dict(username=d['email'], password=d['password']),
                              follow=True)
+        doc = pq(r.content)
+
         eq_(d['email'], str(r.context['user']))
         assert r.context['user'].get_profile().is_vouched, (
                 "Moz.com should be auto-vouched")
+
+        assert not doc('#pending-approval'), (
+                'Moz.com profile page should not having pending vouch div.')
 
         assert r.context['user'].get_profile().groups.filter(name='staff'), (
                 'Moz.com should belong to the "staff" group.')
