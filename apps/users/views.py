@@ -60,6 +60,16 @@ def login(request, **kwargs):
             else redirect(reverse('profile', args=[request.user.unique_id])))
 
 
+def logout(request, **kwargs):
+    """Logout view that wraps Django's logout but always redirects.
+
+    Django's contrib.auth.views logout method renders a template if the
+    `next_page` argument is `None`, which we don't want. This view always
+    returns an HTTP redirect instead.
+    """
+    return auth_views.logout(request, next_page=reverse('login'), **kwargs)
+
+
 @anonymous_csrf
 def register(request):
     if request.user.is_authenticated():
