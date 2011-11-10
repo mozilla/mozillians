@@ -75,9 +75,12 @@ def vouchify():
             if by:
                 email = by[1]['mail'][0]
                 try:
-                    user.vouched_by = User.objects.get(email=email)
+                    user.vouched_by = (User.objects.get(email=email)
+                                                   .get_profile())
                 except User.DoesNotExist:
                     log.warning('No matching user for %s' % email)
+                except UserProfile.DoesNotExist:
+                    log.warning('No matching user_profile for %s' % email)
             user.save()
             log.info('Data copied for %s' % user.user.username)
         log.debug('%s is still unvouched... skipping' % user.user.username)
