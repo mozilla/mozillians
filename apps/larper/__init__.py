@@ -889,7 +889,6 @@ def get_user_by_email(email):
     encoded_q = email.encode('utf-8')
     search_filter = filter_format('(|(mail=*%s*)(uid=*%s*))',
                                   (encoded_q, encoded_q,))
-
     rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                        search_filter)
     if rs:

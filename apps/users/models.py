@@ -75,7 +75,8 @@ class UserProfile(models.Model):
         return r[1]['uniqueIdentifier'][0]
 
     def get_ldap_person(self):
-        return larper.get_user_by_email(self.user.email)
+        email = self.user.email or self.user.username
+        return larper.get_user_by_email(email)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
