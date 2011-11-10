@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 import sys, os
+import site
 
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../apps'))
+site.addsitedir(os.path.abspath('../vendor'))
 
 class Mock(object):
     def __init__(self, *args):
@@ -15,21 +18,13 @@ for mod_name in ('ldap', '_ldap', 'django_auth_ldap',
                  'django_auth_ldap.config'):
     sys.modules[mod_name] = Mock()
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-import funfactory.manage
-funfactory.manage.ROOT = os.path.abspath('..')
-from django.conf import settings
+import fake_funfactory
+# sys.modules['funfactory'] = fake_funfactory
+sys.modules['funfactory.manage'] = fake_funfactory
+# sys.modules['funfactory.settings_base'] = fake_funfactory
 
-# side effect of giving us all the vendor libs
-import manage
+os.environ['DJANGO_SETTINGS_MODULE'] = 'fake_settings'
 
-# -- General configuration -----------------------------------------------------
-
-# If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
-
-# Add any Sphinx extension module names here, as strings. They can be extensions
-# coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -226,3 +221,49 @@ intersphinx_mapping = dict(
     python= ('http://docs.python.org/', None),
     django= ('https://docs.djangoproject.com/en/dev/', 'django.inv')
 )
+
+
+
+#Add RTD Template Path.
+if 'templates_path' in locals():
+    templates_path.insert(0, '/Users/dash/Projects/rtd/the_code/readthedocs/templates/sphinx')
+else:
+    templates_path = ['/Users/dash/Projects/rtd/the_code/readthedocs/templates/sphinx', 'templates', '_templates', '.templates']
+
+#Add RTD Static Path. Add to the end because it overwrites previous files.
+if 'html_static_path' in locals():
+    html_static_path.append('/Users/dash/Projects/rtd/the_code/readthedocs/templates/sphinx/_static')
+else:
+    html_static_path = ['_static', '/Users/dash/Projects/rtd/the_code/readthedocs/templates/sphinx/_static']
+
+#Add RTD CSS File only if they aren't overriding it already
+using_rtd_theme = False
+if 'html_theme' in locals():
+    if html_theme in ['default']:
+        if not 'html_style' in locals():
+            html_style = 'rtd.css'
+            html_theme = 'default'
+            html_theme_options = {}
+            using_rtd_theme = True
+else:
+    html_style = 'rtd.css'
+    html_theme = 'default'
+    html_theme_options = {}
+    using_rtd_theme = True
+
+#Add sponsorship and project information to the template context.
+context = {
+    'using_theme': using_rtd_theme,
+    'current_version': "latest",
+    'MEDIA_URL': "/media/",
+    'versions': [
+    ],
+    'slug': 'mozillians',
+    'name': 'Mozillians',
+    'badge_revsys': False,
+    'analytics_code': 'None',
+}
+if 'html_context' in locals():
+    html_context.update(context)
+else:
+    html_context = context
