@@ -87,9 +87,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         profile = UserProfile.objects.create(user=instance)
 
-        if any(instance.email.endswith('@' + d)
-               for d in settings.AUTO_VOUCH_DOMAINS):
-            profile.groups.add(Group.objects.get(name='staff', system=True))
 
 @receiver(models.signals.pre_save, sender=UserProfile)
 def generate_code(sender, instance, raw, using, **kwargs):
@@ -111,3 +108,13 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
     username = instance.user.username
     if any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
         instance.vouch(None, system=True, commit=False)
+
+
+@receiver(models.signals.post_save, sender=UserProfile)
+def add_to_staff_group(sender, instance, created, **kwargs):
+    """Add all mozilla.com users to the "staff" group upon creation."""
+    if created:
+        username = instance.user.username
+        if (any(username.endswith('@' + x) for x in
+                                               settings.AUTO_VOUCH_DOMAINS)):
+            instance.groups.add(Group.objects.get(name='staff', system=True))

@@ -41,8 +41,11 @@ from ldap.modlist import addModlist, modifyModlist
 
 from django.conf import settings
 from django.core import signing
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
+from django.db.models import Q
 
+from statsd import statsd
 import commonware.log
 
 log = commonware.log.getLogger('i.larper')
@@ -523,8 +526,43 @@ class Person(object):
         return p
 
     def get_profile(self):
-        """Retrieve the Django UserProfile for this Person."""
-        return User.objects.get(email=self.username).get_profile()
+        """Retrieve the Django UserProfile for this Person.
+
+        This is full of hacks because all the Mozillians servers are throwing
+        ObjectDoesNotExist errors (even in production) if we try a straight-up
+        `User.objects.get(email=self.username)`. This method now exhaustively
+        tries to get a User object from the database. If it doesn't find one,
+        or finds one without a UserProfile, we make one on the spot, trying
+        our best to fill things in sanely. FML.
+
+        See: https://bugzilla.mozilla.org/show_bug.cgi?id=698699
+
+        TODO: Remove this as soon as possible. It's insane.
+        """
+        user = (User.objects.filter(Q(email=self.username) |
+                                    Q(username=self.username)))[:1]
+
+        if user:
+            # Yes, sometimes the User exists but the UserProfile doesn't.
+            # See: https://bugzilla.mozilla.org/show_bug.cgi?id=699234
+            try:
+                profile = user[0].get_profile()
+            except ObjectDoesNotExist, e:
+                statsd.incr('user.errors.profile_doesnotexist')
+                log.warning(e)
+
+                profile = UserProfile.objects.create(user=user[0])
+        else:
+            statsd.incr('user.errors.doesnotexist')
+            log.warning('No user with email %s' % self.username)
+
+            user = User(username=self.username, email=self.username)
+            user.set_unusable_password()
+            user.save()
+
+            profile = user.get_profile()
+
+        return profile
 
     def ldap_attrs(self):
         """

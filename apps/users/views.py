@@ -11,6 +11,7 @@ from django.core.mail import send_mail
 
 import commonware.log
 from funfactory.urlresolvers import reverse
+from statsd import statsd
 from tower import ugettext as _
 
 from larper import RegistrarSession
@@ -181,13 +182,28 @@ def _save_new_user(request, form):
             msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
             log.warning(msg)
 
-    user = auth.authenticate(username=username, password=password)
+    for i in range(1, 10):
+        try:
+            user = auth.authenticate(username=username, password=password)
 
-    # Should never happen
-    if not user or not user.is_authenticated():
-        msg = 'Authentication for new user (%s) failed' % username
-        # TODO: make this a unique exception.
-        raise Exception(msg)
+            # Should never happen
+            if not user or not user.is_authenticated():
+                msg = 'Authentication for new user (%s) failed' % username
+                # TODO: make this a unique exception.
+                raise Exception(msg)
+
+            statsd.incr('user.successful_registration')
+            statsd.incr('user.successful_registration_attempt_%s' % i)
+            break
+        except Exception, e:
+            statsd.incr('user.errors.registration_failed')
+            statsd.incr('user.errors.registration_failed_attempt_%s' % i)
+            log.warning(e)
+
+            # All hope is lost.
+            if i == 10:
+                statsd.incr('user.errors.user_record_never_created')
+                raise Exception(e)
 
     # TODO: Remove when LDAP goes away
     auth.login(request, user)
