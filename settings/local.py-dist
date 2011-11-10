@@ -47,6 +47,11 @@ AUTH_LDAP_SERVER_URI = LDAP_SYNC_PROVIDER_URI
 AUTH_LDAP_BIND_DN = ""
 AUTH_LDAP_BIND_PASSWORD = ""
 
+# Statsd Defaults -- adjust as needed
+STATSD_HOST = 'localhost'
+STATSD_PORT = 8125
+STATSD_PREFIX = 'mozillians'
+
 ## Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
