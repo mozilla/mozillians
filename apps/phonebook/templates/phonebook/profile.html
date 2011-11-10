@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% block page_title %}{{ person.full_name }}{% endblock %}
 {% block body_id %}profile{% endblock %}
 {% block body_classes %}
     box-content {% if not person.voucher %}pending{% endif %}
