@@ -67,7 +67,7 @@ def vouchify():
 
     for user in users:
         person = user.get_ldap_person()
-        if 'mozilliansVouchedBy' in person[1]:
+        if person and 'mozilliansVouchedBy' in person[1]:
             user.is_vouched = True
             voucher = (person[1]['mozilliansVouchedBy'][0].split(',')[0]
                                                           .split('=')[1])
