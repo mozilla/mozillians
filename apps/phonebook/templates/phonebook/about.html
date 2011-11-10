@@ -40,36 +40,37 @@
 
   <div class="clear"></div>
 
-    <section id="privacy" class="key-info">
-      <h2>{{ _('Privacy First') }}</h2>
+  <section id="privacy" class="key-info">
+    <h2>{{ _('Privacy First') }}</h2>
 
-      <p>
-        {% trans locale=LANG %}
+    <p>
+      {% trans locale=LANG %}
         Privacy has been an important part of this directory from the very
         beginning. We want to make sure we provide Mozillians with the best
-        experience possible, from the way the site is built to the way we vouch
-        for new users before they can access data that should only be available
-        to other Mozillians. Read our
+        experience possible, from the way the site is built to the way we
+        vouch for new users before they can access data that should only be
+        available to other Mozillians. Read our
         <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html">
           Privacy Policy
         </a> for more information.
-        {% endtrans %}
-      </p>
-    </section>
+      {% endtrans %}
+    </p>
+  </section>
 
-    <section id="get-involved" class="key-info">
-      <h2>{{ _('Get Involved') }}</h2>
+  <section id="get-involved" class="key-info">
+    <h2>{{ _('Get Involved') }}</h2>
 
-      <p>
-        {% trans %}
-        The community directory is also a community project and you are welcome
-        to get involved to help us make it even better or to integrate it into
-        other community tools. Get in touch with us on the
+    <p>
+      {% trans %}
+        The community directory is also a community project and you are
+        welcome to get involved to help us make it even better or to
+        integrate it into other community tools. Get in touch with us on the
         <a href="http://groups.google.com/group/mozilla.mozillians/topics">
           Mozillians forums
         </a> to learn how.
-        {% endtrans %}
-      </p>
-    </section>
-    <div class="clear"></div>
+      {% endtrans %}
+    </p>
+  </section>
+  
+  <div class="clear"></div>
 {% endblock %}

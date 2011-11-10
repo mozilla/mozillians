@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ _('Register, Step 3 &mdash;
-  Get Vouched') }}{% endblock %}
+{% block page_title %}{{ _('Get Vouched') }}{% endblock %}
+{% block body_id %}get-vouched{% endblock %}
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
@@ -16,15 +16,11 @@
     {% trans profile=url('profile',
       user.ldap_user.attrs.uniqueIdentifier[0]) %}
       To get full access to search for and invite other Mozillians you'll
-      need to have
-      <a href="{{ profile }}">your profile</a>
-      vouched for by someone who already has an
-      account.
+      need to have <a href="{{ profile }}">your profile</a> vouched for by
+      someone who already has an account.
 
-      Please send
-      <a href="{{ profile }}">your profile</a>
-      to a Mozillian who is familiar with your contributions and ask them to
-      vouch for you.
+      Please send <a href="{{ profile }}">your profile</a> to a Mozillian who
+      is familiar with your contributions and ask them to vouch for you.
     {% endtrans %}
   </p>
 {% endblock %}
