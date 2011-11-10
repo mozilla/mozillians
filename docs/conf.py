@@ -19,9 +19,7 @@ for mod_name in ('ldap', '_ldap', 'django_auth_ldap',
     sys.modules[mod_name] = Mock()
 
 import fake_funfactory
-# sys.modules['funfactory'] = fake_funfactory
 sys.modules['funfactory.manage'] = fake_funfactory
-# sys.modules['funfactory.settings_base'] = fake_funfactory
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'fake_settings'
 
