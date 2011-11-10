@@ -892,7 +892,8 @@ def get_user_by_email(email):
 
     rs = conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                        search_filter)
-    return rs[0]
+    if rs:
+        return rs[0]
 
 
 def get_user_by_uid(uid):
