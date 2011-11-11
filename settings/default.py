@@ -70,6 +70,8 @@ MINIFY_BUNDLES = {
 
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
+    'commonware.response.middleware.GraphiteMiddleware',
+    'commonware.response.middleware.GraphiteRequestTimingMiddleware',
     'phonebook.middleware.PermissionDeniedMiddleware',
     'larper.middleware.LarperMiddleware',
 ]
