@@ -143,6 +143,12 @@ em.underline {
         padding-right: 10px;
     }
 
+    .blue-pastels .error input,
+    .blue-pastels .error textarea {
+        background-color: #ffefef;
+        border: 1px solid #f00;
+    }
+
     .blue-pastels .errorlist, .blue-pastels .errorlist li {
         background: none;
         color: red;
