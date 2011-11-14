@@ -17,7 +17,7 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
 
    .. seealso::
       `Vagrant: Getting Started 
-       <http://vagrantup.com/docs/getting-started/index.html>`
+       <http://vagrantup.com/docs/getting-started/index.html>`_
 
 2. Install virtualbox_ by Oracle.
 
