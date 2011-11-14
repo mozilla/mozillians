@@ -8,67 +8,62 @@ Installation
     Installing Mozillians might be daunting.  Ask for help in #mozillians on 
     irc.mozilla.org.  tofumatt, ednapiranha or davedash will be happy to help.
 
-1. Install vagrant::
+You'll need ruby, vagrant, Virtualbox and git.  The following steps will help you:
+
+
+1. Install vagrant (requires ``ruby``)::
 
     gem install vagrant
 
+   .. seealso::
+      `Vagrant: Getting Started 
+       <http://vagrantup.com/docs/getting-started/index.html`
+
 2. Install virtualbox_ by Oracle.
+
+   .. note::
+      If you run Linux, you'll need to make sure virtualization isn't disabled 
+      in your kernel.
 
 .. _virtualbox: http://www.virtualbox.org/
 
+
 3. Get a copy of Mozillians.org::
 
-    git clone --recursive git://github.com/mozilla/mozillians.git mozillians.org
+    git clone --recursive git://github.com/mozilla/mozillians.git mozillians
 
 4. Get a copy of Mozillians.org's LDAP backend::
 
-    pushd mozillians.org
+    cd mozillians
     git clone git://github.com/mozilla/mozillians-ldap.git directory
-    popd
 
 5. Run a virtual dev environment::
 
     vagrant up
-    vagrant ssh
+    vagrant ssh # you will now enter the virtualized environment
 
-   You can edit your files locally and they will automatically
-   show up under /home/vagrant/mozillians in the virtualbox.
+   .. note:: Run this in your working copy directory (i.e. ``mozillians/``)
 
-6. Start your engines::
+   You can edit files under (``mozillians/``) locally and they will automatically
+   show up under /home/vagrant/mozillians in the virtualbox.  This means you can edit
+   in your favorite text-editor, yet run Mozillians from our virtualized environment.
 
-    $ pushd mozillians/directory/devslapd && x-rebuild && popd
-    $ cd mozillians
+6. Run the development web server (in the virtualized environment)::
+
+    $ x-rebuild
     $ ./manage.py runserver 0.0.0.0:8001
 
-7. Point your browser to http://localhost:8001
+7. Point your web browser to http://localhost:8001
 
-   If you don't want to use 8001, edit the Vagrant script which
-   maps your virtualbox port. Then restart vagrant::
+   .. note::
+      If you don't want to use 8001, edit the Vagrant script which
+      maps your virtualbox port. Then restart vagrant::
 
-    vargrant halt && vagrant up
+          vargrant halt && vagrant up
 
-8. Optional - Install a directory viewer (Apache Directory Studio)
+8. Stay up to date
 
-   Visit http://directory.apache.org/studio/download/download-linux.html and
-   download the (100MB!) Apache Directory Studio.
-   Unzip the tarball and run the file (requires Java).
-
-   a. Click "go to the workbench".
-   b. Click "New Connection" in the Connections window in the bottom left
-   c. Name: Mozillians Vagrant Director
-   d. Hostname: localhost
-   e. Port: 1389
-   f. <Next>
-   g. Bind DN or user: cn=root,dc=mozillians,dc=org
-   h. Bind password: secret
-   i. Click "Finish"
-   j. Double-click on the resulting connection and you should see the test data.
-
-   The refresh button is F5.
-
-9. Stay up to date
-
-   On your local desktop do::
+   On your host machien do::
 
     git pull -q origin master
     git submodule update --recursive
@@ -78,6 +73,7 @@ Installation
     popd
     vagrant destroy && vagrant up
 
-   With you vagrant VM do::
+   Within your vagrant VM do::
 
-    python vendor/src/schematic/schematic migrations/
+    dj syncdb
+    dj manage
