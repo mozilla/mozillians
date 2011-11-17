@@ -2,12 +2,13 @@ import datetime
 import ldap
 
 from django import http
-from django.shortcuts import get_object_or_404, redirect, render
 from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -41,12 +42,15 @@ def send_confirmation(request):
 
 
 def confirm(request):
-    """Confirms a user.
+    """Confirm a user's email address using a generated code.
 
     1. Recognize the code or 404.
     2. On recognition, mark user as confirmed.
     """
-    code = request.GET['code']
+    code = request.GET.get('code')
+    if not code:
+        raise Http404
+
     profile = get_object_or_404(UserProfile, confirmation_code=code)
     profile.is_confirmed = True
     profile.save()

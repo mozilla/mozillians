@@ -13,6 +13,32 @@ from users import cron
 Group.objects.get_or_create(name='staff', system=True)
 
 
+class ViewTest(LDAPTestCase):
+    """Test views in the users app."""
+    def test_confirmation_code(self):
+        """Verify the confirm view accepts valid codes and 404s otherwise."""
+        d = dict(
+                 email='mrfusion@gmail.com',
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+                )
+        r = self.client.post(reverse('register'), d, follow=True)
+        user = User.objects.filter(email=d['email'])[0].get_profile()
+        code = user.get_confirmation_url()
+
+        r = self.client.get(reverse('confirm'))
+        eq_(r.status_code, 404, 'No confirmation code raises a 404.')
+
+        r = self.client.get(reverse('confirm') + '?code=badcode')
+        eq_(r.status_code, 404, 'A bad confirmation code raises a 404.')
+
+        r = self.client.get(user.get_confirmation_url())
+        eq_(r.status_code, 200, 'A good confirmation code works.')
+        
+
 class RegistrationTest(LDAPTestCase):
     """Tests registration."""
 
