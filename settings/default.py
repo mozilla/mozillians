@@ -72,6 +72,7 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
     'commonware.response.middleware.GraphiteMiddleware',
     'commonware.response.middleware.GraphiteRequestTimingMiddleware',
+    'csp.middleware.CSPMiddleware',
     'phonebook.middleware.PermissionDeniedMiddleware',
     'larper.middleware.LarperMiddleware',
 ]
@@ -104,6 +105,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'groups',
     'larper',
 
+    'csp',
     'jingo_minify',
     'tower',
     'cronjobs',
@@ -153,3 +155,11 @@ MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
 AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 SOUTH_TESTS_MIGRATE = False
+
+# Django-CSP
+CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
+               'https://statse.webtrendslive.com',)
+CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
+                  'https://statse.webtrendslive.com',)
+CSP_REPORT_ONLY = True
+CSP_REPORT_URI = '/csp/report'
