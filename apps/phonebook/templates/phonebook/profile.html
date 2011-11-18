@@ -80,9 +80,9 @@
         {% endif %}
 
         {% if person.irc_nickname %}
-          <dt>{{_('IRC Nickname') }}</dt>
+          <dt>{{ _('IRC Nickname') }}</dt>
           <dd><a class="nickname p-nickname" href="{{ person.irc_nickname.service_uri }}">
-            {{person.irc_nickname.service_id}}
+            {{ person.irc_nickname.service_id }}
           </a></dd>
         {% endif %}
 
@@ -94,12 +94,13 @@
         {% endfor %}
 
         {% if person.voucher == "Unknown Voucher" %}
-          <!-- This user's voucher is no longer active. -->
+          <dt>{{ _('Vouched by') }}</dt>
+          <dd>{{ _('No longer active') }}</dd>
         {% elif person.voucher %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-          <a href="{{ url('profile', person.voucher.unique_id) }}"
-            class="vouched">
+            <a href="{{ url('profile', person.voucher.unique_id) }}"
+               class="vouched">
               {{ person.voucher.full_name }}
             </a>
           </dd>
