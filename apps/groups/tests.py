@@ -144,3 +144,53 @@ class GroupTest(LDAPTestCase):
         assert profile.groups.count(), 'User should not have zero groups.'
         for g in profile.groups.all():
             assert g.system, 'User should only have system groups.'
+
+    def test_toggle_membership_on_group_page(self):
+        """Verify a user can join/leave a group on its page.
+
+        Make sure the Join/Leave Group buttons appear on group listings for
+        authorized users. Make sure system groups cannot be joined via the
+        toggle view and that the buttons don't appear there."""
+        profile = get_profile(MOZILLIAN['email'])
+
+        client = mozillian_client(MOZILLIAN['email'])
+        response = client.get(reverse('group', args=[NORMAL_GROUP.id,
+                                                     NORMAL_GROUP.url]))
+        doc = pq(response.content)
+
+        assert not profile.groups.filter(id=NORMAL_GROUP.id), (
+                'User should not be in the "%s" group' % NORMAL_GROUP.name)
+        assert "Join Group" in response.content, (
+                '"Join Group" button should be present in the response.')
+
+        # Follow the toggle membership form action.
+        r = client.post(doc('#toggle-group').attr('action'), follow=True)
+        doc = pq(r.content)
+
+        assert "Leave Group" in r.content, (
+                '"Leave Group" button should be present in the response.')
+        assert profile.groups.get(id=NORMAL_GROUP.id), (
+                'User should be part of the "%s" group' % NORMAL_GROUP.name)
+        
+        # Do it again and they should leave the group.
+        r = client.post(doc('#toggle-group').attr('action'), {}, follow=True)
+        assert not profile.groups.filter(id=NORMAL_GROUP.id), (
+                'User should not be in the "%s" group' % NORMAL_GROUP.name)
+
+        # Test against a system group, where we shouldn't be able to toggle
+        # membership.
+        response = client.get(reverse('group', args=[SYSTEM_GROUP.id,
+                                                     SYSTEM_GROUP.url]))
+        doc = pq(response.content)
+
+        assert not profile.groups.filter(id=SYSTEM_GROUP.id), (
+                'User should not be in the "%s" group' % SYSTEM_GROUP.name)
+        assert not "Join Group" in response.content, (
+                '"Join Group" button should not be present in the response.')
+
+        # Attempt to manually toggle the group membership
+        r = client.post(reverse('group_toggle', args=[SYSTEM_GROUP.id,
+                                                      SYSTEM_GROUP.url]),
+                        follow=True)
+        assert not profile.groups.filter(id=SYSTEM_GROUP.id), (
+                'User should not be in the "%s" group' % SYSTEM_GROUP.name)

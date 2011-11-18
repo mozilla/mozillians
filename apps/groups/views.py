@@ -1,10 +1,12 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.cache import cache_control
+from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -34,21 +36,6 @@ def index(request):
     return render(request, 'groups/index.html', data)
 
 
-@vouch_required
-def show(request, id, url=None):
-    """List all users with this group."""
-    group = get_object_or_404(Group, id=id)
-
-    # Redirect to the full URL if it wasn't supplied
-    if not url:
-        redirect(reverse('group', args=[group.id, group.url]))
-
-    users = users_from_groups(request, group, limit=PAGINATION_LIMIT)
-
-    data = dict(group=group, users=users)
-    return render(request, 'groups/show.html', data)
-
-
 @login_required
 @cache_control(must_revalidate=True, max_age=3600)
 def search(request):
@@ -67,3 +54,37 @@ def search(request):
                             mimetype='application/json')
     else:
         return render(request, 'groups/index.html', data)
+
+
+@vouch_required
+def show(request, id, url=None):
+    """List all users with this group."""
+    group = get_object_or_404(Group, id=id)
+
+    # Redirect to the full URL if it wasn't supplied
+    if not url:
+        redirect(reverse('group', args=[group.id, group.url]))
+
+    in_group = (request.user.get_profile()
+                            .groups.filter(id=group.id).count())
+    users = users_from_groups(request, group, limit=PAGINATION_LIMIT)
+
+    data = dict(group=group, in_group=in_group, users=users)
+    return render(request, 'groups/show.html', data)
+
+
+@require_POST
+@vouch_required
+def toggle(request, id, url):
+    """Toggle the current user's membership of a group."""
+    group = get_object_or_404(Group, url=url)
+    profile = request.user.get_profile()
+
+    # We don't operate on system groups using this view.
+    if not group.system:
+        if profile.groups.filter(id=group.id).count():
+            profile.groups.remove(group)
+        else:
+            profile.groups.add(group)
+
+    return redirect(reverse('group', args=[group.id, group.url]))

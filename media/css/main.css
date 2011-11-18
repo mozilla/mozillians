@@ -664,6 +664,23 @@ em.underline {
     display: block;
 }
 
+/** Group Page */
+#body-group-show #main-content h1 {
+    float: left;
+}
+
+html[dir='rtl'] #body-group-show #main-content h1 {
+    float: right;
+}
+
+#body-group-show #toggle-group {
+    float: right;
+}
+
+html[dir='rtl'] #body-group-show #toggle-group {
+    float: left;
+}
+
 /** Invite Page */
 #body-invite #id_recipient {
     color: #4b4740;

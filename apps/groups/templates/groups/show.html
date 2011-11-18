@@ -13,6 +13,23 @@
     <h1>Users in Group "{{ name }}"</h1>
   {% endtrans %}
 
+  {% if not group.system %}
+    <form action="{{ url('group_toggle', group.id, group.url) }}"
+          id="toggle-group" method="post">
+      {{ csrf() }}
+
+      <button class="button {{ ('destructive' if in_group else 'primary') }}">
+        {% if not in_group %}
+          {{ _('Join Group') }}
+        {% else %}
+          {{ _('Leave Group') }}
+        {% endif %}
+      </button>
+    </form>
+  {% endif %}
+
+  <div class="clear"></div>
+
   <div class="blue-pastels">
     {% for user in users %}
       {{ search_result(user) }}
