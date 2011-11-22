@@ -45,8 +45,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-from statsd import statsd
 import commonware.log
+from statsd import statsd
+from users.models import UserProfile
 
 log = commonware.log.getLogger('i.larper')
 
