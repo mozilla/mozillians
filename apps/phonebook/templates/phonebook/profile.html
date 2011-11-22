@@ -10,7 +10,7 @@
   <h1>
     {% if user.unique_id == person.unique_id %}
       {{ _('Your Profile') }}
-    {% elif person.voucher %}
+    {% elif person.get_profile().is_vouched %}
       {{ _('Mozillian Profile') }}
     {% else %}
       {{ _('Pending Profile') }}
