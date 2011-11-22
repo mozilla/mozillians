@@ -133,7 +133,7 @@
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
               {% if request.user.get_profile().is_vouched %}
-                <a href="{{ url('group', group.id, group.url) }}">
+                <a href="{{ url('group', group.slug) }}">
                   {{ group.name }}
                 </a>
               {% else %}
