@@ -32,3 +32,6 @@ django-auth-ldap
 
 # Cache
 python-memcached==1.45
+
+# Multidb
+-e https://github.com/jbalogh/django-multidb-router#egg=multidb
