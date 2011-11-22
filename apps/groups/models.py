@@ -40,7 +40,7 @@ class GroupBase(models.Model):
 
 
 class Group(GroupBase):
-    url = models.SlugField()
+    url = models.SlugField(unique=True)
     system = models.BooleanField(db_index=True, default=False)
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=255,
