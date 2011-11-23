@@ -9,7 +9,7 @@
       {{ person.full_name }}
     </a></h2>
 
-    {% if person.voucher_unique_id %}
+    {% if person.get_profile().is_vouched %}
       <h3 title="{{ _('This user is a vouched Mozillian.') }}">
         {{ _('Mozillian') }}
       </h3>
