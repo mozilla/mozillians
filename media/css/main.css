@@ -90,7 +90,7 @@ em.underline {
     box-shadow: 1px 1px 5px #d9d9d9;
     display: block;
     margin: 5px 0 10px;
-    min-height: 204px;
+    min-height: 344px;
     padding: 15px 10px;
     width: 690px;
 }
@@ -103,6 +103,10 @@ em.underline {
         margin: -15px 0 -204px -10px;
         padding: 15px 0 0;
         width: 710px;
+    }
+
+    body[dir="rtl"] .blue-pastels:before {
+        margin: -15px -10px -204px 0px;
     }
 
     .blue-pastels h2 {
