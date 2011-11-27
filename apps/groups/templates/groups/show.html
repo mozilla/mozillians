@@ -18,7 +18,7 @@
           id="toggle-group" method="post">
       {{ csrf() }}
 
-      <button class="button {{ ('destructive' if in_group else 'primary') }}">
+      <button class="button small {{ ('destructive' if in_group else 'primary') }}">
         {% if not in_group %}
           {{ _('Join Group') }}
         {% else %}
