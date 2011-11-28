@@ -511,6 +511,20 @@ em.underline {
     width: 240px;
 }
 
+#body-edit-profile #photo-delete-container {
+    margin-top: 15px;
+}
+
+#body-edit-profile #photo-delete-container label {
+    float: left;
+    padding-right: 10px;
+}
+
+#body-edit-profile #id_photo_delete {
+    clear: none;
+    float: left;
+}
+
 #body-edit-profile #email-container dt, #body-edit-profile #email-container dd {
     color: #000;
     float: left;

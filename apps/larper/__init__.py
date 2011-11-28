@@ -322,6 +322,8 @@ class UserSession(object):
         """
         if 'photo' in form and form['photo']:
             photo = form['photo'].file.read()
+        elif form.get('photo_delete'):
+            photo = None
         else:
             return False
 
@@ -329,10 +331,18 @@ class UserSession(object):
         dn = Person.dn(unique_id)
 
         attrs = self._profile_photo_attrs(unique_id)
-        new_attrs = dict(jpegPhoto=photo)
+        if photo:
+            new_attrs = dict(jpegPhoto=photo)
+        elif attrs.get('jpegPhoto'):
+            new_attrs = dict(**attrs)
+            del new_attrs['jpegPhoto']
+        else: # If no photo exists for this user, we don't bother trying to
+              # delete it.
+            return False
 
         # Person record will always exist, so we only do a mod
-        modlist = modifyModlist(attrs, new_attrs, ignore_oldexistent=1)
+        modlist = modifyModlist(attrs, new_attrs,
+                                ignore_oldexistent=bool(photo))
 
         if modlist:
             conn.modify_s(dn, modlist)

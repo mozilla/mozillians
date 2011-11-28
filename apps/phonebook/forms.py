@@ -42,6 +42,8 @@ class ProfileForm(happyforms.Form):
                                 widget=forms.Textarea(),
                                 required=False)
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
+    photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
+                                      required=False)
 
     # Remote System Ids
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
