@@ -303,14 +303,10 @@ def invite(request):
                 log.info('profile_uid Sending 404 for [%s]' % unique_id)
                 raise Http404
 
-            sender = '"%s %s" <%s>' % (person.first_name,
-                                       person.last_name,
-                                       request.user.username)
-
             invite = f.save(commit=False)
             invite.inviter = request.user.unique_id
             invite.save()
-            invite.send(sender=sender)
+            invite.send(sender=person)
 
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:

@@ -33,18 +33,27 @@ class Invite(models.Model):
         return absolutify(reverse('register')) + '?code=' + self.code
 
     def send(self, sender=None):
+        """Mail this invite to the specified user.
+
+        Includes the name and email of the inviting person, if available.
+        """
+        if sender:
+            # TODO: Return and use email attribute, not username.
+            sender = '%s %s (%s)' % (sender.first_name,
+                                     sender.last_name,
+                                     sender.username)
+
         subject = _('Become a Mozillian')
-        message = _("Hi, I'm sending you this because I think you should "
-                    'join mozillians.org, the community directory for '
-                    'Mozilla contributors like you. You can create a '
-                    'profile for yourself about what you do in the '
-                    'community as well as search for other contributors '
-                    'to learn more about them or get in touch.  Check it '
-                    'out.')
+        message = _('Hi there. %s has invited you to join mozillians.org, '
+                    'the community directory for Mozilla contributors. You '
+                    'can create a community profile for yourself and search '
+                    'for other contributors to learn more about them or get '
+                    'in touch.' % (sender or _('A fellow Mozillian')))
         # l10n: %s is the registration link.
         link = _("Join Mozillians: %s") % self.get_url()
         message = "%s\n\n%s" % (message, link)
-        send_mail(subject, message, sender or 'no-reply@mozillians.org',
+
+        send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.recipient])
 
     class Meta:
