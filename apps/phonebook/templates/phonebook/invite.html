@@ -26,8 +26,16 @@
     {% endif %}
 
     {{ form.recipient }}
+
     <button type="submit" class="button primary small">
       {{ _('Send invite') }}
     </button>
+
+    <p>
+      {% trans %}
+        <strong>Note:</strong>
+        Your name and email will be sent to whomever you invite.
+      {% endtrans %}
+    </p>
   </form>
 {% endblock %}
