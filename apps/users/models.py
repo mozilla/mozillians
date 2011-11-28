@@ -2,11 +2,13 @@ import urllib
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
 
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
+from tower import ugettext as _
 
 import larper
 from groups.models import Group
@@ -60,6 +62,9 @@ class UserProfile(models.Model):
         if commit and changed:
             self.save()
 
+            # Email the user and tell them they were vouched.
+            self._email_now_vouched()
+
     def get_confirmation_url(self):
         url = (absolutify(reverse('confirm')) + '?code=' +
                self.confirmation_code)
@@ -77,6 +82,15 @@ class UserProfile(models.Model):
     def get_ldap_person(self):
         email = self.user.email or self.user.username
         return larper.get_user_by_email(email)
+
+    def _email_now_vouched(self):
+        """Email this user, letting them know they are now vouched."""
+        subject = _(u'You are now vouched on Mozillians!')
+        message = _(u'Your Mozillians profile has been vouched for. Head '
+                     'over to %s to add more info to your profile or find '
+                     'other Mozillians!' % absolutify(''), absolutify(''))
+        send_mail(subject, message, 'no-reply@mozillians.org',
+                  [self.user.username])
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
