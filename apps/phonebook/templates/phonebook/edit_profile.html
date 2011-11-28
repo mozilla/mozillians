@@ -5,8 +5,8 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
-<form action="{{ url('phonebook.edit_profile') }}"
-      method="POST" enctype="multipart/form-data">
+  <form action="{{ url('phonebook.edit_profile') }}"
+        method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
     <h1>{{ _('Edit Your Profile') }}</h1>
@@ -68,6 +68,17 @@
 
           <div class="clear"></div>
         </div>
+
+        {% if photo %}
+          <div id="photo-delete-container" class="field">
+            {{ form['photo_delete'].label_tag() }}
+
+            {{ form.errors['photo_delete'] }}
+            {{ form['photo_delete'] }}
+
+            <div class="clear"></div>
+          </div>
+        {% endif %}
       </div>
 
       <div class="right-col">

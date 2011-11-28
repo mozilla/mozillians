@@ -1,7 +1,9 @@
+import os
 from uuid import uuid4
 
 from django import test
 from django.contrib.auth.models import User
+from django.core.files import File
 
 import test_utils
 from nose.tools import eq_
@@ -252,12 +254,69 @@ class TestViews(LDAPTestCase):
         display_name = "%s %s" % (newbie.first_name, newbie.last_name)
         eq_(display_name, newbie.full_name,
                          'Editing should update display name')
+
         # cleanup
         delete_url = reverse('phonebook.delete_profile')
         data = dict(unique_id=newbie_uniq_id)
 
         r = newbie_client.post(delete_url, data, follow=True)
         eq_(200, r.status_code, 'A Mozillian can delete their own account')
+
+    def test_profile_photo(self):
+        """Make sure profile photo uploads and removals work.
+
+        Test the upload, encoding, and removal of photo profiles. Also make
+        sure edge cases (from naughty user input) and HTML elements work
+        properly.
+        """
+        client = self.mozillian_client
+
+        # No photo exists by default, the delete photo form control shouldn't
+        # be present, and trying to delete a non-existant photo shouldn't
+        # do anything.
+        r = client.get(reverse('phonebook.edit_profile'))
+        doc = pq(r.content)
+        image = client.get(doc('#profile-photo').attr('src'))
+
+        eq_(image.status_code, 302, (
+                'Profile image URL should redirect to "unknown" image.'))
+        assert not doc('#id_photo_delete'), (
+                '"Remove Profile Photo" control should not appear.')
+        # Try to game the form -- it shouldn't do anything.
+        r = client.post(reverse('phonebook.edit_profile'),
+                        dict(last_name='foo', photo_delete=1))
+        eq_(r.status_code, 302, ('Trying to delete a non-existant photo '
+                                 "shouldn't result in an error."))
+
+        # Add a profile photo
+        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
+                 'rb')
+        r = client.post(reverse('phonebook.edit_profile'),
+                        dict(last_name='foo', photo=f))
+        f.close()
+        eq_(r.status_code, 302, 'Form should validate and redirect the user.')
+
+        r = client.get(reverse('phonebook.edit_profile'))
+        doc = pq(r.content)
+        image = client.get(doc('#profile-photo').attr('src'))
+
+        eq_(image.status_code, 200, 'Profile image URL should not redirect.')
+        assert doc('#id_photo_delete'), (
+                '"Remove Profile Photo" control should appear.')
+
+        # Remove a profile photo
+        r = client.post(reverse('phonebook.edit_profile'),
+                        dict(last_name='foo', photo_delete='1'))
+        eq_(r.status_code, 302, 'Form should validate and redirect the user.')
+
+        r = client.get(reverse('phonebook.edit_profile'))
+        doc = pq(r.content)
+        image = client.get(doc('#profile-photo').attr('src'))
+
+        eq_(image.status_code, 302, (
+                'Profile image URL should redirect to "unknown" image.'))
+        assert not doc('#id_photo_delete'), (
+                '"Remove Profile Photo" control should not appear.')
 
     def test_my_profile(self):
         """Are we cachebusting our picture?"""

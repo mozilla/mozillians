@@ -158,6 +158,7 @@ def _edit_profile(request, new_account):
              person=person,
              registration_flow=new_account,
              user_groups=user_groups,
+             photo=ldap.profile_photo(unique_id, use_master=True),
             )
     return render(request, 'phonebook/edit_profile.html', d)
 
