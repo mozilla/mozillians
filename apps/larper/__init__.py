@@ -92,6 +92,9 @@ KNOWN_SERVICE_URIS = [
 PEEP_SRCH_FLTR = '(&(objectClass=mozilliansPerson)(|(cn=*%s*)(mail=*%s*)))'
 IRC_SRCH_FLTR = """(&(objectClass=mozilliansLink)(mozilliansServiceID=*%s*)
                      (mozilliansServiceURI=irc://irc.mozilla.org/))"""
+NONVOUCHED_SRCH_FLTR = """(&(objectClass=mozilliansPerson)(|(cn=*%s*)
+                            (mail=*%s*))(&(!(mail=*@mozilla*))
+                            (!(mozilliansVouchedBy=*))))"""
 
 
 class UserSession(object):
@@ -149,13 +152,16 @@ class UserSession(object):
                 raise Exception("unique_id [%s] password length [%d]" %\
                                     (unique_id, len(password)))
 
-    def search(self, query):
+    def search(self, query, nonvouched_only=False):
         """
         General purpose 'quick' search. Returns a list of
         larper.Person objects.
         """
         encoded_q = query.encode('utf-8')
-        peep_esc_q = filter_format(PEEP_SRCH_FLTR, (encoded_q, encoded_q))
+        if nonvouched_only:
+            peep_esc_q = filter_format(NONVOUCHED_SRCH_FLTR, (encoded_q, encoded_q))
+        else:
+            peep_esc_q = filter_format(PEEP_SRCH_FLTR, (encoded_q, encoded_q))
         irc_esc_q = filter_format(IRC_SRCH_FLTR, (encoded_q,))
         people = self._people_search(peep_esc_q)
         irc_nicks = self._irc_search(irc_esc_q)

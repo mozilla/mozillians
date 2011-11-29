@@ -19,6 +19,12 @@
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
+      <div class="search-options-wrapper">
+        <div class="search-options">
+          <input type="checkbox" name="nonvouched_only" id="nonvouched_only" {% if nonvouched_only %}checked="checked"{% endif %}>
+          <span>{{ _('Show non-vouched members only') }}</span>
+        </div>
+      </div>
       <button type="submit" class="button primary small">
         {{ _('Search') }}
       </button>
