@@ -86,9 +86,9 @@ class UserProfile(models.Model):
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
-        message = _(u'Your Mozillians profile has been vouched for. Head '
-                     'over to %s to add more info to your profile or find '
-                     'other Mozillians!' % absolutify(''), absolutify(''))
+        message = _(u"You've now been vouched on Mozillians.org. "
+                     "You'll now be able to search, vouch "
+                     "and invite other Mozillians onto the site.")
         send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.user.username])
 
