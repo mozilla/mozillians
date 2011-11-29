@@ -40,8 +40,13 @@
   <div id="header-contents">
     <nav id="nav">
       <ul>
+        <li class="first">
+          <a href="{{ url('about') }}">
+            {{ _('About') }}
+          </a>
+        </li>
         {% if user.is_authenticated() %}
-          <li class="first">
+          <li>
             <a id="profile" href="{{ url('profile', user.unique_id) }}">
               {{ _('Profile') }}
             </a>
