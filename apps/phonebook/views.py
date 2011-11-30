@@ -243,7 +243,8 @@ def search(request):
                 groups = Group.objects.filter(name__icontains=query)[:limit]
                 for group in groups:
                     for user in users_from_groups(request, group,
-                            limit=forms.PAGINATION_LIMIT):
+                            limit=forms.PAGINATION_LIMIT,
+                            nonvouched_only=nonvouched_only):
                         if not user.unique_id in [p.unique_id for p in people]:
                             people.append(user)
 

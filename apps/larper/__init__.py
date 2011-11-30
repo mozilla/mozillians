@@ -95,6 +95,9 @@ IRC_SRCH_FLTR = """(&(objectClass=mozilliansLink)(mozilliansServiceID=*%s*)
 NONVOUCHED_SRCH_FLTR = """(&(objectClass=mozilliansPerson)(|(cn=*%s*)
                             (mail=*%s*))(&(!(mail=*@mozilla*))
                             (!(mozilliansVouchedBy=*))))"""
+NONVOUCHED_EMAIL_SRCH_FLTR = """(&(|(mail=*%s*)(uid=*%s*))
+                                    (&(!(mail=*@mozilla*))
+                                    (!(mozilliansVouchedBy=*))))"""
 
 
 class UserSession(object):
@@ -176,14 +179,18 @@ class UserSession(object):
         q = filter_format("(cn=*%s*)", (query.encode('utf-8'),))
         return self._populate_people_results(self._people_search(q))
 
-    def search_by_email(self, query):
+    def search_by_email(self, query, nonvouched_only=False):
         """
         Searches against the email fields for people. Returns
         same type of data as search.
         """
         encoded_q = query.encode('utf-8')
-        q = filter_format("(|(mail=*%s*)(uid=*%s*))",
-                          (encoded_q, encoded_q,))
+        if nonvouched_only:
+            q = filter_format(NONVOUCHED_EMAIL_SRCH_FLTR,
+                              (encoded_q, encoded_q,))
+        else:
+            q = filter_format("(|(mail=*%s*)(uid=*%s*))",
+                              (encoded_q, encoded_q,))
         return self._populate_people_results(self._people_search(q))
 
     def get_by_unique_id(self, unique_id, use_master=False):
