@@ -13,7 +13,7 @@ def stringify_groups(groups):
 
 
 @jinja2.contextfunction
-def users_from_groups(context, groups, limit=None):
+def users_from_groups(context, groups, limit=None, nonvouched_only=False):
     """Return all Person objects of users in the Group QuerySet.
 
     This helper exists because of our mixed datastore environment."""
@@ -27,7 +27,7 @@ def users_from_groups(context, groups, limit=None):
     ldap_users = []
     for u in users:
         # We have to walk this so we don't hit LDAP's HARD LIMIT.
-        search_result = ldap.search_by_email(u.email)
+        search_result = ldap.search_by_email(u.email, nonvouched_only)
         if search_result:
             ldap_users.append(search_result[0])
 
