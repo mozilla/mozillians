@@ -4,6 +4,16 @@
 {% block body_id %}home{% endblock %}
 
 {% block main_content %}
+
+  {% if False %}
+    ======================= l10n ========================
+    {{ _('This website requires JavaScript to be enabled.') }}
+    {{ _('ID') }}{# L10n: Used in BrowserID button #}
+    {{ _('Sign In with BrowserID') }}
+    {{ _('What is BrowserID? Why are we using it?') }}
+    =====================================================
+  {% endif %}
+
   {% trans %}
     <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
   {% endtrans %}

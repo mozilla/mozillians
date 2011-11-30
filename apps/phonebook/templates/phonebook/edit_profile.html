@@ -18,6 +18,19 @@
       </p>
     {% endif %}
 
+    {% if False %}
+       ===================== l10n ===========================
+       {{ _('Already have a profile?') }}{# L10n: Unknown email during login #}
+       {% trans logout=url('logout') %}
+         <strong>{{ email }}</strong> does not have a profile.
+         If you think you've already created a profile, try
+         <a id="browserid-retry-login" href="{{ logout }}">logging in</a>
+         with a different email address.
+       {% endtrans %}
+       {{ _('Create Account') }}
+       ====================================================== 
+    {% endif %}
+
     <div class="blue-pastels">
       {{ form.management_form }}
 
