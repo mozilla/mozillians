@@ -147,6 +147,7 @@ def _edit_profile(request, new_account):
         initial = dict(first_name=person.first_name,
                        last_name=person.last_name,
                        biography=person.biography,
+                       website=profile.website,
                        groups=user_groups)
 
         initial.update(_get_services_fields(ldap, unique_id,

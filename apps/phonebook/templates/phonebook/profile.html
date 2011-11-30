@@ -81,9 +81,17 @@
 
         {% if person.irc_nickname %}
           <dt>{{ _('IRC Nickname') }}</dt>
-          <dd><a class="nickname p-nickname" href="{{ person.irc_nickname.service_uri }}">
+          <dd><a class="nickname p-nickname"
+               href="{{ person.irc_nickname.service_uri }}">
             {{ person.irc_nickname.service_id }}
           </a></dd>
+        {% endif %}
+
+        {% if profile.website %}
+          <dt class="website">{{ _('Website') }}</dt>
+          <dd class="website">
+            <a href="{{ profile.website }}">{{ profile.website }}</a>
+          </dd>
         {% endif %}
 
         {% for uri, service in services.items() %}

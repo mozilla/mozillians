@@ -34,6 +34,9 @@ class UserProfile(models.Model):
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
+    website = models.URLField(max_length=200, null=True)
+
+    # Foreign Keys and Relationships
     vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
 

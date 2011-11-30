@@ -30,8 +30,7 @@ class InviteTest(LDAPTestCase):
         i = Invite.objects.get()
         invite_url = i.get_url()
 
-        assert ('"Bridget Hill" <u000001@mozillians.org>' in
-                mail.outbox[0].from_email)
+        assert 'no-reply@mozillians.org' in mail.outbox[0].from_email
         assert invite_url in mail.outbox[0].body, "No link in email."
         return i
 
