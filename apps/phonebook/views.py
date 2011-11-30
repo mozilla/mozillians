@@ -4,9 +4,7 @@ from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -18,6 +16,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
+from browserid.decorators import browserid_login_required
 from groups.models import Group
 from groups.helpers import stringify_groups, users_from_groups
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
@@ -33,7 +32,7 @@ BAD_VOUCHER = 'Unknown Voucher'
 
 def vouch_required(f):
     """If a user is not vouched they get a 403."""
-    @login_required
+    @browserid_login_required
     @wraps(f)
     def wrapped(request, *args, **kwargs):
         if request.user.get_profile().is_vouched:
@@ -46,13 +45,11 @@ def vouch_required(f):
 
 
 @never_cache
-@login_required
+@browserid_login_required
 def profile_uid(request, unique_id):
     """View a profile by unique_id, which is a stable, random user id."""
     needs_master = (request.user.unique_id == unique_id)
-
     ldap = UserSession.connect(request)
-    log.warning('profile_uid [%s]' % unique_id)
     try:
         # Stale data okay when viewing others
         person = ldap.get_by_unique_id(unique_id, needs_master)
@@ -82,10 +79,10 @@ def _profile(request, person, use_master):
 
     # TODO: rely more on db for this test
     if not profile.is_vouched and request.user.unique_id != person.unique_id:
-        voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
+
     person.irc_nickname = None
     if MOZILLA_IRC_SERVICE_URI in services:
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
@@ -100,14 +97,14 @@ def _profile(request, person, use_master):
 
 
 @never_cache
-@login_required
+@browserid_login_required
 def edit_profile(request):
     """View for editing the current user's profile."""
     return _edit_profile(request, False)
 
 
 @never_cache
-@login_required
+@browserid_login_required
 def edit_new_profile(request):
     return _edit_profile(request, True)
 
@@ -154,6 +151,7 @@ def _edit_profile(request, new_account):
         form = forms.ProfileForm(initial=initial)
 
     d = dict(form=form,
+             edit_form_action=reverse('phonebook.edit_profile'),
              delete_form=del_form,
              person=person,
              registration_flow=new_account,
@@ -181,7 +179,7 @@ class UNAUTHORIZED_DELETE(Exception):
 
 
 @never_cache
-@login_required
+@browserid_login_required
 def confirm_delete(request):
     """Display a confirmation page asking the user if they want to leave."""
     del_form = forms.DeleteForm(initial=dict(unique_id=request.user.unique_id))
@@ -189,7 +187,7 @@ def confirm_delete(request):
 
 
 @never_cache
-@login_required
+@browserid_login_required
 @require_POST
 def delete(request):
     form = forms.DeleteForm(request.POST)
@@ -272,7 +270,7 @@ def search_plugin(request):
                   content_type='application/opensearchdescription+xml')
 
 
-@login_required
+@browserid_login_required
 def photo(request, unique_id):
     needs_master = (request.user.unique_id == unique_id)
 
@@ -284,7 +282,7 @@ def photo(request, unique_id):
         return redirect('/media/img/unknown.png')
 
 
-@login_required
+@browserid_login_required
 def invited(request, id):
     invite = Invite.objects.get(pk=id)
     return render(request, 'phonebook/invited.html', dict(invite=invite))

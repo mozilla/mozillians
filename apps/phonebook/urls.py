@@ -5,6 +5,8 @@ from django.views.generic.simple import direct_to_template
 from django.contrib import admin
 admin.autodiscover()
 
+from session_csrf import anonymous_csrf
+
 from phonebook import views
 
 urlpatterns = patterns('',
@@ -20,7 +22,8 @@ urlpatterns = patterns('',
         name='phonebook.edit_new_profile'),
     url('^confirm-delete$', views.confirm_delete, name='confirm_delete'),
     url('^delete$', views.delete, name='phonebook.delete_profile'),
-    url('^opensearch.xml$', views.search_plugin, name='phonebook.search_plugin'),
+    url('^opensearch.xml$', views.search_plugin,
+        name='phonebook.search_plugin'),
     url('^search$', views.search, name='phonebook.search'),
     url('^vouch$', views.vouch, name='phonebook.vouch'),
 
@@ -28,13 +31,13 @@ urlpatterns = patterns('',
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
     # Static pages
+    url('^$', anonymous_csrf(direct_to_template),
+        {'template': 'phonebook/home.html'}, name='home'),
     url('^about$', direct_to_template, {'template': 'phonebook/about.html'},
         name='about'),
     url('^confirm-register$', direct_to_template,
         {'template': 'phonebook/confirm_register.html'},
         name='confirm_register'),
-    url('^$', direct_to_template, {'template': 'phonebook/home.html'},
-        name='home'),
 )
 
 ## In DEBUG mode, serve media files through Django.

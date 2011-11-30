@@ -19,12 +19,12 @@ from optparse import  OptionParser
 
 # Constants
 PROJECT = 0
-VENDOR  = 1
+VENDOR = 1
 
 ENV_BRANCH = {
     # 'environment': [PROJECT_BRANCH, VENDOR_BRANCH],
-    'dev':   ['master',   'master'], 
-    'stage': ['master', 'master'], 
+    'dev':   ['master',   'master'],
+    'stage': ['master', 'master'],
     'prod':  ['prod',   'master'],
 }
 

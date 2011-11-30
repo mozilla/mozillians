@@ -1,7 +1,5 @@
 import json
 
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -13,13 +11,14 @@ from funfactory.urlresolvers import reverse
 
 from .helpers import users_from_groups
 from .models import Group
+from browserid.decorators import browserid_login_required
 from phonebook.forms import PAGINATION_LIMIT
 from phonebook.views import vouch_required
 
 log = commonware.log.getLogger('m.groups')
 
 
-@login_required
+@browserid_login_required
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
     paginator = Paginator(Group.objects.all(), PAGINATION_LIMIT)
@@ -36,7 +35,7 @@ def index(request):
     return render(request, 'groups/index.html', data)
 
 
-@login_required
+@browserid_login_required
 @cache_control(must_revalidate=True, max_age=3600)
 def search(request):
     """Simple wildcard search for a group using a GET parameter."""
