@@ -219,6 +219,7 @@ def _user_owns_account(request, form):
 @vouch_required
 def search(request):
     limit = None
+    nonvouched_only = False
     people = []
     size_exceeded = False
     show_pagination = False
@@ -227,13 +228,16 @@ def search(request):
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
         limit = form.cleaned_data['limit']
+        nonvouched_only = form.cleaned_data['nonvouched_only']
 
         if request.user.is_authenticated():
             ldap = UserSession.connect(request)
             try:
                 # Stale data okay
                 sortk = attrgetter('full_name')
-                people = sorted(ldap.search(query), key=sortk)
+                people = sorted(ldap.search(query,
+                                            nonvouched_only=nonvouched_only),
+                                            key=sortk)
 
                 # Search based on group name as well
                 groups = Group.objects.filter(name__icontains=query)[:limit]
@@ -260,6 +264,7 @@ def search(request):
     d = dict(people=people,
              form=form,
              limit=limit,
+             nonvouched_only=nonvouched_only,
              show_pagination=show_pagination,
              size_exceeded_error=size_exceeded)
     return render(request, 'phonebook/search.html', d)

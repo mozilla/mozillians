@@ -727,15 +727,40 @@ html[dir='rtl'] #body-group-show #toggle-group {
     width: 300px;
 }
 
+.search-options-wrapper {
+    clear: both;
+    float: left;
+    padding: 10px 0 30px;
+    width: 100%;
+}
+
+.search-options {
+    display: block;
+    font-size: 13px;
+    margin: 0 auto;
+    text-align: center;
+    width: 400px;
+}
+
+.search-options input, .search-options span {
+    display: block;
+    float: left;
+}
+
+.search-options input {
+    margin-left: 40px;
+    margin-right: 10px;
+}
+
 .search-page .result {
     margin-bottom: 10px;
 }
 
 .search-page .result .avatar {
     float: left;
-    width: 70px;
-    margin: 0 10px 0 35px;
     height: 70px;
+    margin: 0 10px 0 35px;
+    width: 70px;
 }
 
 .search-page .result .details {
