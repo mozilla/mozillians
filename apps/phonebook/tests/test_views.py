@@ -115,8 +115,10 @@ class TestViews(LDAPTestCase):
         url = reverse('phonebook.search')
         r = self.mozillian_client.get(url, dict(q='Am'))
         rs = self.mozillian_client.get(url, dict(q=' Am'))
+        rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
         peeps = r.context['people']
         peeps_ws = rs.context['people']
+        peeps_nv = rnv.context['people']
         saw_amandeep = saw_amanda = False
 
         for person in peeps:
@@ -131,6 +133,7 @@ class TestViews(LDAPTestCase):
             if saw_amandeep and saw_amanda:
                 break
         self.assertEqual(peeps[0].full_name, peeps_ws[0].full_name)
+        self.assertEqual(peeps_nv[0].full_name, AMANDA_NAME)
         self.assertTrue(saw_amandeep, 'We see Mozillians')
         self.assertTrue(saw_amanda, 'We see Pending')
 
