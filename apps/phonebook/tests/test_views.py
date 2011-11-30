@@ -324,6 +324,27 @@ class TestViews(LDAPTestCase):
         assert not doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should not appear.')
 
+    def test_has_website(self):
+        """Verify a user's website appears in their profile (as a link)."""
+        client = self.mozillian_client
+
+        # No website URL is present.
+        r = client.get(reverse('phonebook.edit_profile'))
+        doc = pq(r.content)
+
+        assert not doc('#dd.website'), (
+                "No website info appears on the user's profile.")
+        
+        # Add a URL sans protocol.
+        r = client.post(reverse('phonebook.edit_profile'),
+                        dict(last_name='foo', website='tofumatt.com'))
+        eq_(r.status_code, 302, 'Submission works and user is redirected.')
+        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
+        doc = pq(r.content)
+
+        eq_(doc('dd.website a').attr('href'), 'http://tofumatt.com/', (
+                'User should have a URL with protocol added.'))
+
     def test_my_profile(self):
         """Are we cachebusting our picture?"""
         profile = reverse('profile', args=[MOZILLIAN['uniq_id']])

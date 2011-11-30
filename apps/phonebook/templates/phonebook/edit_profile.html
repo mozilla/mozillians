@@ -95,9 +95,11 @@
       </div>
 
       <div class="right-col">
+        {#
         <h2>{{ _('My Mozilla Info') }}</h2>
+        #}
 
-        {% for f in ['irc_nickname'] %}
+        {% for f in ['irc_nickname', 'website'] %}
           <div id="{{ form[f].name }}-container"
             class="field {{ 'error' if form.errors[f] }}
             {{ form[f].field.widget.attrs['class'] }}">
