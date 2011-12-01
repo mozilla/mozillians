@@ -125,7 +125,7 @@ class TestViews(LDAPTestCase):
             if person.full_name == AMANDEEP_NAME:
                 # we add the vouched user into a group and make
                 # sure a nonvouch search doesn't return them
-                person.groups.create(name='IAMVOUCHED')
+                person.get_profile().groups.create(name='IAMVOUCHED')
                 eq_(AMANDEEP_VOUCHER, person.voucher_unique_id,
                     'Amandeep is a Mozillian')
                 saw_amandeep = True
