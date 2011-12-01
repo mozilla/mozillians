@@ -90,7 +90,7 @@
         {% if profile.website %}
           <dt class="website">{{ _('Website') }}</dt>
           <dd class="website">
-            <a href="{{ profile.website }}">{{ profile.website }}</a>
+            <a class="url u-url" rel="me" href="{{ profile.website }}">{{ profile.website }}</a>
           </dd>
         {% endif %}
 
