@@ -103,6 +103,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
     'users',
     'groups',
+    'locations',
     'larper',
 
     'csp',
