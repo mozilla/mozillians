@@ -95,6 +95,11 @@
           </dd>
         {% endif %}
 
+        {% if profile.location %}
+          <dt>{{ _('Location') }}</dt>
+          <dd>{{ profile.location }}</dd>
+        {% endif %}
+
         {% for uri, service in services.items() %}
           <dt>{{ service.service_uri }}</dt>
           <dd><a class="url u-url" rel="me" href="{{ service.service_uri }}">
@@ -146,5 +151,5 @@
     {% endif %}
 
     <div class="clear"></div>
-</div>
+  </div>
 {% endblock %}

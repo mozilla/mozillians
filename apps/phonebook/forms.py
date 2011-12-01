@@ -56,6 +56,16 @@ class ProfileForm(happyforms.Form):
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
     website = forms.URLField(label=_lazy(u'Website'), required=False)
 
+    #: L10n: Street address; not entire address
+    street = forms.CharField(label=_lazy(u'Address'), required=False)
+    city = forms.CharField(label=_lazy(u'City'), required=False)
+    # TODO: Add validation of states/provinces/etc. for known/large countries.
+    province = forms.CharField(label=_lazy(u'Province/State'), required=False)
+    # TODO: Add list of countries.
+    country = forms.CharField(label=_lazy(u'Country'), required=False)
+    postal_code = forms.CharField(label=_lazy(u'Postal/Zip Code'),
+                                  required=False)
+
     def clean_photo(self):
         """Let's make sure things are right.
 
