@@ -57,13 +57,9 @@ def search(request):
 
 
 @vouch_required
-def show(request, id, url=None):
+def show(request, url):
     """List all users with this group."""
-    group = get_object_or_404(Group, id=id)
-
-    # Redirect to the full URL if it wasn't supplied
-    if not url:
-        redirect(reverse('group', args=[group.id, group.url]))
+    group = get_object_or_404(Group, url=url)
 
     in_group = (request.user.get_profile()
                             .groups.filter(id=group.id).count())
@@ -75,7 +71,7 @@ def show(request, id, url=None):
 
 @require_POST
 @vouch_required
-def toggle(request, id, url):
+def toggle(request, url):
     """Toggle the current user's membership of a group."""
     group = get_object_or_404(Group, url=url)
     profile = request.user.get_profile()
@@ -87,4 +83,4 @@ def toggle(request, id, url):
         else:
             profile.groups.add(group)
 
-    return redirect(reverse('group', args=[group.id, group.url]))
+    return redirect(reverse('group', args=[group.url]))

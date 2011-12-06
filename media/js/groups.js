@@ -14,7 +14,7 @@
                 singleField: true,
                 singleFieldDelimiter: ',',
                 removeConfirmation: true,
-                tagSource: app.localeUrl('groups/search'),
+                tagSource: app.localeUrl('groups-search'),
                 triggerKeys: ['enter', 'comma', 'tab']
             });
         }

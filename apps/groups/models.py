@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 
 
-# If ten or more users use a group, it will get auto-completed.
+#: If ten or more users use a group, it will get auto-completed.
 AUTO_COMPLETE_COUNT = 10
 
 
@@ -20,7 +20,7 @@ class Group(models.Model):
     deemed more important by admins.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
-    url = models.SlugField()
+    url = models.SlugField(unique=True)
 
     # If this is true, this Group will appear in the autocomplete list.
     auto_complete = models.BooleanField(db_index=True, default=False)

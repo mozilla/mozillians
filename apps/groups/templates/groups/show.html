@@ -14,7 +14,7 @@
   {% endtrans %}
 
   {% if not group.system %}
-    <form action="{{ url('group_toggle', group.id, group.url) }}"
+    <form action="{{ url('group_toggle', group.url) }}"
           id="toggle-group" method="post">
       {{ csrf() }}
 

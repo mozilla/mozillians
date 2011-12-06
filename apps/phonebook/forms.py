@@ -3,6 +3,7 @@ import tempfile
 
 from django import forms
 from django.conf import settings
+from django.template.defaultfilters import slugify
 
 import happyforms
 import Image
@@ -138,7 +139,10 @@ class ProfileForm(happyforms.Form):
         # Add/create the rest of the groups
         groups_to_add = []
         for g in self.cleaned_data['groups']:
-            (group, created) = Group.objects.get_or_create(name=g)
+            existing_group = Group.objects.filter(url=slugify(g))[:1]
+
+            group = (Group.objects.create(name=g) if not existing_group
+                                                  else existing_group[0])
 
             if not group.system:
                 groups_to_add.append(group)

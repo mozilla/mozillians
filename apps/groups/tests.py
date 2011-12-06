@@ -70,7 +70,7 @@ class GroupTest(LDAPTestCase):
 
         client = mozillian_client(PENDING['email'])
         client.post(reverse('phonebook.edit_profile'),
-                    dict(last_name='McAwesomepants', groups='Awesome foo Bar'),
+                    dict(last_name='McAwesomepants', groups='Awesome,foo,Bar'),
                     follow=True)
 
         assert profile.groups.all(), (
@@ -154,8 +154,7 @@ class GroupTest(LDAPTestCase):
         profile = get_profile(MOZILLIAN['email'])
 
         client = mozillian_client(MOZILLIAN['email'])
-        response = client.get(reverse('group', args=[NORMAL_GROUP.id,
-                                                     NORMAL_GROUP.url]))
+        response = client.get(reverse('group', args=[NORMAL_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=NORMAL_GROUP.id), (
@@ -179,8 +178,7 @@ class GroupTest(LDAPTestCase):
 
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
-        response = client.get(reverse('group', args=[SYSTEM_GROUP.id,
-                                                     SYSTEM_GROUP.url]))
+        response = client.get(reverse('group', args=[SYSTEM_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=SYSTEM_GROUP.id), (
@@ -189,8 +187,30 @@ class GroupTest(LDAPTestCase):
                 '"Join Group" button should not be present in the response.')
 
         # Attempt to manually toggle the group membership
-        r = client.post(reverse('group_toggle', args=[SYSTEM_GROUP.id,
-                                                      SYSTEM_GROUP.url]),
+        r = client.post(reverse('group_toggle', args=[SYSTEM_GROUP.url]),
                         follow=True)
         assert not profile.groups.filter(id=SYSTEM_GROUP.id), (
                 'User should not be in the "%s" group' % SYSTEM_GROUP.name)
+    
+    def test_groups_are_compared_by_url(self):
+        """Test that groups whose URL would be the same are combined.
+
+        Groups are unique based on their URL slug -- this makes their URLs
+        "discoverable" (i.e. /groups/add-ons) but also automatically "finds"
+        the right group for a user who enters a group's name in a slightly
+        "off" way (i.e. enters "add ons" instead of "add-ons").
+
+        The former point is a nice bonus, though it's not the main way of
+        "linking" group names together, which is an upcoming feature.
+        TODO: Redo this text when group name linking is better.
+        """
+        profile = get_profile(MOZILLIAN['email'])
+
+        client = mozillian_client(MOZILLIAN['email'])
+        client.post(reverse('phonebook.edit_profile'),
+                    dict(last_name='McAwesomepants',
+                         groups='Awesome,foo bar,foo Bar,foo-Bar'),
+                    follow=True)
+
+        eq_(2, profile.groups.count(), (
+                "Groups submitted should have been consolidated by URL."))
