@@ -39,7 +39,10 @@ class UserProfile(models.Model):
     # Foreign Keys and Relationships
     vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
-
+    bio = models.CharField(max_length=255, default='')
+    photo = models.BooleanField(default=False)
+    display_name = models.CharField(max_length=30)
+    ircname = models.CharField(max_length=63, blank=True)
     objects = UserProfileManager()
 
     class Meta:

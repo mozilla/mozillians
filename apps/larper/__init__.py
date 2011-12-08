@@ -1060,3 +1060,34 @@ def record_vouch(voucher, vouchee):
     modlist = [(ldap.MOD_ADD, 'mozilliansVouchedBy', [voucher_dn])]
     conn.modify_s(vouchee_dn, modlist)
     return True
+
+def get_service_data(uid):
+    """
+    Returns a dict that contains remote system ids.
+    Keys for dict include:
+
+    * MOZILLA_IRC_SERVICE_URI
+
+    Values are a SystemId object for that service.
+
+    use_master can be set to True to force reading from master
+    where stale data isn't acceptable.
+    """
+    services = {}
+    conn = ldap.initialize(settings.LDAP_SYNC_PROVIDER_URI)
+    conn.bind_s(settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
+    search_filter = '(mozilliansServiceURI=*)'
+    try:
+        rs = conn.search_s(Person.dn(uid), ldap.SCOPE_SUBTREE, search_filter)
+
+        for r in rs:
+            _dn, attrs = r
+            sysid = SystemId(uid,
+                             attrs['uniqueIdentifier'][0].decode('utf-8'),
+                             attrs['mozilliansServiceURI'][0].decode('utf-8'),
+                             service_id=attrs['mozilliansServiceID'][0]\
+                                 .decode('utf-8'))
+            services[attrs['mozilliansServiceURI'][0]] = sysid
+    except ldap.NO_SUCH_OBJECT:
+        pass
+    return services
