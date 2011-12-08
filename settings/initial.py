@@ -1,7 +1,8 @@
 """
-:py:mod:`settings.pre` contains settings that IT will usually override.
+:py:mod:`settings.initial` contains settings that IT will usually override.
 
-The overrides can happen in :py:mod:`settings.pre_local`.
+The overrides can happen in :py:mod:`settings.initial_local`
+(``settings/initial_local.py``).
 
 Settings in :py:mod:`settings.default` and :py:mod:`settings.local` depend on
 these.
