@@ -2,16 +2,16 @@ from django import forms
 from django.contrib import auth
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
-from django.forms.util import ErrorList
 from django.template import loader
 from django.utils.http import int_to_base36
 
 import commonware.log
-import happyforms
-from tower import ugettext as _, ugettext_lazy as _lazy
+
+from tower import ugettext_lazy as _lazy
 
 import larper
-from users.models import UserProfile
+from phonebook.forms import ProfileForm
+
 
 log = commonware.log.getLogger('m.users')
 
@@ -24,53 +24,10 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         self.fields['username'] = forms.CharField(
                 max_length=255, required=True)
 
-    def clean(self):
-        """Copied from ``super()``.
 
-        This also checks if the UserProfile `is_confirmed`"""
-        username = self.cleaned_data.get('username')
-        password = self.cleaned_data.get('password')
-
-        if username and password:
-            self.user_cache = auth.authenticate(
-                    username=username, password=password)
-            if self.user_cache is None:
-                raise forms.ValidationError(
-                        _('Please enter a correct username and password. '
-                          'Note that both fields are case-sensitive.'))
-            elif not self.user_cache.is_active:
-                raise forms.ValidationError(_("This account is inactive."))
-
-            try:
-                profile = self.user_cache.get_profile()
-            except UserProfile.DoesNotExist:
-                profile = UserProfile.objects.create(user=self.user_cache)
-
-            if not self.user_cache.get_profile().is_confirmed:
-                # TODO: add a "re-send confirmation" link here.
-
-                msg = _('You need to confirm your account before you can log '
-                        'in.  <a href="%s">Resend confirmation email?</a>')
-                url = profile.get_send_confirmation_url()
-                raise forms.ValidationError(msg % url)
-        self.check_for_test_cookie()
-        return self.cleaned_data
-
-
-class RegistrationForm(happyforms.Form):
-    email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
-    password = forms.CharField(min_length=8, max_length=255,
-                               label=_lazy(u'Password'), required=True,
-                               widget=forms.PasswordInput(render_value=False))
-    confirmp = forms.CharField(label=_lazy(u'Confirm Password'),
-                               widget=forms.PasswordInput(render_value=False),
-                               required=True)
-
-    first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
-    last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
+class RegistrationForm(ProfileForm):
     code = forms.CharField(widget=forms.HiddenInput, required=False)
 
-    #recaptcha = captcha.fields.ReCaptchaField()
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
                         u'explain in your privacy policy.'),
@@ -80,19 +37,6 @@ class RegistrationForm(happyforms.Form):
         super(RegistrationForm, self).clean()
 
         data = self.cleaned_data
-
-        # Passwords
-        p1 = data.get('password')
-        p2 = data.get('confirmp')
-
-        # Only check for matching passwords if the supplied password is valid
-        # in the first place; otherwise, extra errors seem redundant (see
-        # bug 680444 -- https://bugzilla.mozilla.org/show_bug.cgi?id=680444).
-        if not self.errors.get('password') and p1 != p2:
-            msg = _lazy(u'The passwords did not match.')
-            self._errors['confirmp'] = ErrorList([msg])
-            if p2:
-                del data['confirmp']
 
         return data
 

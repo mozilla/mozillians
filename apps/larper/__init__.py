@@ -28,8 +28,8 @@ AdminSession
 ------------
 
 With an admin session, one can delete users from the system.
-
 """
+import hashlib
 import os
 import re
 from time import time
@@ -46,25 +46,37 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 import commonware.log
+from funfactory.utils import absolutify
 from statsd import statsd
 from users.models import UserProfile
 
-log = commonware.log.getLogger('i.larper')
+import browserid
+
+log = commonware.log.getLogger('m.larper')
 
 
-def get_password(request):
-    """Not sure if this and store_password belong here..."""
-    d = request.session.get('PASSWORD')
+ASSERTION_SIGNED_KEY = 'ASSERTION'
+ASSERTION_KEY = 'assertion'
+
+
+def get_assertion(request):
+    """Retrieves the assertion from the user's session."""
+    d = request.session.get(ASSERTION_SIGNED_KEY)
     if d:
-        return signing.loads(d).get('password')
+        assertion = signing.loads(d).get(ASSERTION_KEY)
+        return (hashlib.md5(assertion).hexdigest(), assertion)
+    else:
+        return (None, None)
 
 
-def store_password(request, password):
-    """
+def store_assertion(request, assertion):
+    """Stores assertion into the session.
+
     request - Django web request
     password - A clear text password
     """
-    request.session['PASSWORD'] = signing.dumps(dict(password=password))
+    request.session[ASSERTION_SIGNED_KEY] = signing.dumps({
+            ASSERTION_KEY: assertion})
 
 
 class NO_SUCH_PERSON(Exception):
@@ -89,6 +101,9 @@ KNOWN_SERVICE_URIS = [
     MOZILLA_IRC_SERVICE_URI,
 ]
 
+KNOWN_USER = re.compile(
+    'dn:uniqueIdentifier=([^,]*),ou=people,dc=mozillians,dc=org')
+NEW_USER = re.compile('dn:uid=([^,]*),cn=browser-id,cn=auth')
 PEEP_SRCH_FLTR = '(&(objectClass=mozilliansPerson)(|(cn=*%s*)(mail=*%s*)))'
 IRC_SRCH_FLTR = """(&(objectClass=mozilliansLink)(mozilliansServiceID=*%s*)
                      (mozilliansServiceURI=irc://irc.mozilla.org/))"""
@@ -112,12 +127,63 @@ class UserSession(object):
     """
     def __init__(self, request):
         self.request = request
+        self._is_bound = False
 
     def _ensure_conn(self, mode):
-        """
+        """Lazily connect to LDAP.
+
         mode - One of READ or WRITE. Pass WRITE
         if any of the LDAP operations will include
         adding, modifying, or deleting entires.
+
+        UserSession connections will be established with
+        an assertion stored in the user's session.
+
+        Raises exceptions if this class is used with a
+        non-authenticated user (Anonymous).
+        """
+        return self._ensure_conn_sasl(mode)
+
+    def _ensure_conn_sasl(self, mode):
+        """Lazily connect to LDAP using sasl bind.
+
+        Using the assertion from the user's session,
+        connects to LDAP via sasl_interactive_bind and
+        the BROWSER-ID auth mechanism.
+        """
+        assrtn_hsh, assertion = get_assertion(self.request)
+        if not assertion:
+            raise Exception('Programming error, do not use UserSession '
+                            'without an assertion')
+
+        if not hasattr(self.request, CONNECTIONS_KEY):
+            self.request.larper_conns = [{}, {}]
+
+        fresh_bind = False
+        if assrtn_hsh not in self.request.larper_conns[mode]:
+            if mode == WRITE:
+                server_uri = settings.LDAP_SYNC_PROVIDER_URI
+            else:
+                server_uri = settings.LDAP_SYNC_CONSUMER_URI
+            self.conn = ldap.initialize(server_uri)
+            self.request.larper_conns[mode][assrtn_hsh] = self.conn
+            self._sasl_bind(assertion)
+            fresh_bind = True
+        else:
+            self.conn = self.request.larper_conns[mode][assrtn_hsh]
+
+        # During registration, during a single request, we can go from
+        # an invalid dn, to a valid one. We'll need to re-bind to LDAP.
+        if not fresh_bind and not self._dn(assertion):
+            self._sasl_bind(assertion)
+        return self.conn
+
+    def _ensure_conn_simple(self, mode):
+        """Lazily connect to LDAP using bind.
+
+        Using the dn and password from the apps config
+        connects to LDAP via simple bind. Useful for
+        non-human agents.
         """
         dn, password = self.dn_pass()
         if not hasattr(self.request, CONNECTIONS_KEY):
@@ -127,33 +193,65 @@ class UserSession(object):
                 server_uri = settings.LDAP_SYNC_PROVIDER_URI
             else:
                 server_uri = settings.LDAP_SYNC_CONSUMER_URI
-            conn = ldap.initialize(server_uri)
-
-            conn.bind_s(dn, password)
-            self.request.larper_conns[mode][dn] = conn
-
+            self.conn = ldap.initialize(server_uri)
+            self.request.larper_conns[mode][dn] = self.conn
+            self.conn.bind_s(dn, password)
         return self.request.larper_conns[mode][dn]
 
+    def _sasl_bind(self, assertion):
+        """Binds to LDAP using sasl and BrowserID credentials."""
+        audience = absolutify('')
+        sasl_creds = browserid.Credentials(assertion, audience)
+        self.conn.sasl_interactive_bind_s('', sasl_creds)
+
+    def _dn(self, assertion):
+        """Convience wrapper for checking dn after sasl bind."""
+        dn = None
+        new_dn = self.conn.whoami_s()
+        # this could be an invalid dn if the user isn't registered
+        # it would look like uid=shout@ozten.com,cn=browser-id,cn=auth
+        match = KNOWN_USER.match(new_dn)
+        if match:
+            dn = Person.dn(match.group(1))
+            statsd.incr('larper.existing_email_address')
+            log.info('New DN=%s' % dn)
+        else:
+            statsd.incr('larper.unknown_email_address')
+            log.info('Unknown email address %s' % new_dn)
+        return dn
+
     def dn_pass(self):
-        """
+        """Abstract method for managing dn and password in sub-classes.
+
         Returns a tuple of LDAP distinguished name and password
         for use during authentication.
         Subclasses of UserSession should override this method
         if they don't auth against the user in the session.
         """
-        unique_id = self.request.user.unique_id
-        password = get_password(self.request)
-        if unique_id and password:
-            return (Person.dn(unique_id), password)
+        raise Exception('UserSession should be used with an assertion, '
+                        'not dn/password')
+
+    def registered_user(self):
+        """Checks if the current user is registered in the system.
+
+        Returns a two element tuple:
+
+        * boolean - True if the user is registered, False if they are
+                    new.
+        * string -  unique_id if they are registered, verified
+                    email address if they are new.
+        """
+        conn = self._ensure_conn(READ)
+        dn = conn.whoami_s()
+        match = KNOWN_USER.match(dn)
+        if match:
+            return (True, match.group(1))
         else:
-            # Should never happen
-            if unique_id == None:
-                raise Exception("No unique id on the request.user object")
-            elif password == None:
-                raise Exception("No password in the session")
+            match = NEW_USER.match(dn)
+            if match:
+                return (False, match.group(1))
             else:
-                raise Exception("unique_id [%s] password length [%d]" %\
-                                    (unique_id, len(password)))
+                raise INCONCEIVABLE('LDAP authz error for dn=[%s]' % dn)
 
     def search(self, query, nonvouched_only=False):
         """
@@ -172,9 +270,9 @@ class UserSession(object):
         return self._populate_people_results(people)
 
     def search_by_name(self, query):
-        """
-        Searches against the full_name field for people. Returns
-        same type of data as search.
+        """Searches against the full_name field for people.
+
+        Returns same type of data as search.
         """
         q = filter_format("(cn=*%s*)", (query.encode('utf-8'),))
         return self._populate_people_results(self._people_search(q))
@@ -194,14 +292,15 @@ class UserSession(object):
         return self._populate_people_results(self._people_search(q))
 
     def get_by_unique_id(self, unique_id, use_master=False):
-        """
-        Retrieves a person from LDAP with this unique_id.
+        """Retrieves a person from LDAP with this unique_id.
+
         Raises NO_SUCH_PERSON if unable to find them.
 
         use_master can be set to True to force reading from master
         where stale data isn't acceptable.
         """
-        q = filter_format("(uniqueIdentifier=%s)", (unique_id,))
+        f = "(&(objectClass=mozilliansPerson)(uniqueIdentifier=%s))"
+        q = filter_format(f, (unique_id,))
         results = self._people_search(q, use_master)
         msg = 'Unable to locate %s in the LDAP directory'
         if not results:
@@ -216,12 +315,13 @@ class UserSession(object):
                 return Person.new_from_directory(attrs)
         else:
             msg = 'Multiple people found for %s. This should never happen.'
+            statsd.incr('larper.errors.get_by_unique_id_has_multiple')
             raise INCONCEIVABLE(msg % unique_id)
 
     def profile_photo(self, unique_id, use_master=False):
-        """
-        Retrieves a person's profile photo. Returns
-        jpeg binary data.
+        """Retrieves a person's profile photo.
+
+        Returns jpeg binary data.
         """
         attrs = self._profile_photo_attrs(unique_id, use_master)
         if 'jpegPhoto' in attrs:
@@ -229,8 +329,8 @@ class UserSession(object):
         return False
 
     def profile_service_ids(self, person_unique_id, use_master=False):
-        """
-        Returns a dict that contains remote system ids.
+        """Returns a dict that contains remote system ids.
+
         Keys for dict include:
 
         * MOZILLA_IRC_SERVICE_URI
@@ -275,9 +375,7 @@ class UserSession(object):
         return {}
 
     def update_person(self, unique_id, form):
-        """
-        Updates a person's LDAP directory record
-        based on phonebook.forms.ProfileForm.
+        """Updates a person's LDAP directory record based on ProfileForm.
 
         Method always uses master.
         """
@@ -325,8 +423,8 @@ class UserSession(object):
         return True
 
     def update_profile_photo(self, unique_id, form):
-        """
-        Adds or Updates a person's profile photo.
+        """Adds or Updates a person's profile photo.
+
         unique_id
         form - An instance of phonebook.forms.ProfileForm
         Safe to call if no photo has been uploaded by the user.
@@ -361,7 +459,8 @@ class UserSession(object):
             conn.modify_s(dn, modlist)
 
     def _people_search(self, search_filter, use_master=False):
-        """
+        """Wrapper function around LDAP search.
+
         use_master can be set to True to force reading from master
         where stale data isn't acceptable.
         """
@@ -369,12 +468,11 @@ class UserSession(object):
             conn = self._ensure_conn(WRITE)
         else:
             conn = self._ensure_conn(READ)
-        return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+        return conn.search_s(settings.LDAP_USERS_GROUP, ldap.SCOPE_ONELEVEL,
                              search_filter, Person.search_attrs)
 
     def _irc_search(self, search_filter, use_master=False):
-        """
-        Searches for SystemIDs based on IRC nickname.
+        """Searches for SystemIDs based on IRC nickname.
 
         use_master can be set to True to force reading from master
         where stale data isn't acceptable.
@@ -387,8 +485,7 @@ class UserSession(object):
                              search_filter, SystemId.search_attrs)
 
     def _people_from_irc_results_search(self, irc_results, use_master=False):
-        """
-        Searches for SystemIDs based on IRC nickname.
+        """Searches for SystemIDs based on IRC nickname.
 
         use_master can be set to True to force reading from master
         where stale data isn't acceptable.
@@ -423,9 +520,10 @@ class UserSession(object):
                              search_filter, Person.search_attrs)
 
     def _populate_people_results(self, results):
-        """
-        Given LDAP search results, method sorts and ensures
-        unique set of results.
+        """Processes search results.
+
+        Given LDAP search results, method sorts and ensures unique
+        set of results.
         """
         people = []
         cache = {}
@@ -439,13 +537,14 @@ class UserSession(object):
                 people.append(p)
         return people
 
-    def __str__(self):
-        return "<larper.UserSession for %s>" % self.request.user.username
+    def __unicode__(self):
+        """Provides a string representation for this object."""
+        return u'<larper.UserSession for %s>' % self.request.user.username
 
     @staticmethod
     def connect(request):
-        """
-        Open (or reuse) a connection to the phonebook directory.
+        """Open (or reuse) a connection to the phonebook directory.
+
         Request must contain an authenticated user.
         Data requests will be authorized based on the current
         users rights.
@@ -457,7 +556,8 @@ class UserSession(object):
 
     @staticmethod
     def disconnect(request):
-        """
+        """Disconnects from LDAP.
+
         Releases all connections to the LDAP directory, including:
         * UserSession instances
         * AdminSession instances
@@ -523,12 +623,14 @@ class Person(object):
         self.biography = biography
         self.voucher_unique_id = voucher_unique_id
 
-    def __str__(self):
+    def __unicode__(self):
+        """Provides a string representation for this object."""
         return u'%s %s' % (self.first_name, self.last_name)
 
     @staticmethod
     def new_from_directory(ldap_attrs):
-        """
+        """Creates Person objects based on LDAP attributes.
+
         Given a dictionary of LDAP search result attributes, this
         method returns a larper.Person instance.
         """
@@ -589,7 +691,8 @@ class Person(object):
         return profile
 
     def ldap_attrs(self):
-        """
+        """Transforms Person object into LDAP compatible data.
+
         Converts this person object into a dict compatible
         with the low level ldap libraries.
         """
@@ -617,7 +720,8 @@ class Person(object):
 
     @staticmethod
     def form_to_profile_attrs(form):
-        """
+        """Transforms a form into LDAP compatible data.
+
         Creates a profile dict compatible with the low level ldap libraries
         from a form dictionary.
 
@@ -656,6 +760,7 @@ class Person(object):
 
     @staticmethod
     def unique_id(dn):
+        """Parses DN into a unique_id."""
         dn_parts = explode_dn(dn)
         reg = re.compile('uniqueIdentifier=(.*)', re.IGNORECASE)
         for part in dn_parts:
@@ -666,6 +771,7 @@ class Person(object):
 
     @staticmethod
     def dn(unique_id):
+        """Formats a unique_id into a DN."""
         params = (escape_dn_chars(unique_id), settings.LDAP_USERS_GROUP)
         return 'uniqueIdentifier=%s,%s' % params
 
@@ -700,7 +806,8 @@ class SystemId(object):
         self.service_id = service_id
 
     def ldap_attrs(self):
-        """
+        """Transforms SystemId objects into LDAP compatible data.
+
         Converts this SystemId object into a dict compatible
         with the low level ldap libraries.
         """
@@ -712,8 +819,9 @@ class SystemId(object):
 
     @staticmethod
     def form_to_service_ids_attrs(form):
-        """
-        Creates a list of dicts. Each dict of remote system ids
+        """Creates a list of dicts.
+
+        Each dict of remote system ids
         is compatible with the low level ldap libraries from
         a form dictionary.
 
@@ -740,9 +848,7 @@ class SystemId(object):
 
     @staticmethod
     def dn(person_unique_id, unique_id):
-        """
-        Formats an LDAP distinguished name for a remote system id
-        """
+        """Formats an LDAP distinguished name for a remote system id."""
         params = (escape_dn_chars(unique_id), Person.dn(person_unique_id))
         return 'uniqueIdentifier=%s,%s' % params
 
@@ -763,16 +869,21 @@ class RegistrarSession(UserSession):
     """
     A directory session for the registrar user.
     """
-    def __init__(self, request):
-        UserSession.__init__(self, request)
+    def _ensure_conn(self, mode):
+        """Overrides UserSession._ensure_conn to use dn pass.
+
+        RegistrarSession uses a configurable dn and password
+        instead of a BrowserID assertion.
+        """
+        return self._ensure_conn_simple(mode)
 
     def dn_pass(self):
         """Returns registrar dn and password."""
         return (settings.LDAP_REGISTRAR_DN, settings.LDAP_REGISTRAR_PASSWORD)
 
     def create_person(self, form):
-        """
-        Creates a new user account in the LDAP directory.
+        """Creates a new user account in the LDAP directory.
+
         form - An instance of phonebook.forms.RegistrationForm
         returns a string which is the unique_id of the new user.
 
@@ -790,8 +901,7 @@ class RegistrarSession(UserSession):
 
     @staticmethod
     def connect(request):
-        """
-        Open (or reuse) a connection to the phonebook directory.
+        """Open (or reuse) a connection to the phonebook directory.
 
         Data requests will be authorized based on the shared
         system's registrar account.
@@ -803,19 +913,23 @@ class RegistrarSession(UserSession):
 
 
 class AdminSession(UserSession):
-    """
-    A directory session for the admin user.
-    """
-    def __init__(self, request):
-        UserSession.__init__(self, request)
+    """A directory session for the admin user."""
+
+    def _ensure_conn(self, mode):
+        """Overrides UserSession._ensure_conn to use dn and pass.
+
+        Admin session uses a configurable dn and password
+        instead of a BrowserID assertion.
+        """
+        return self._ensure_conn_simple(mode)
 
     def dn_pass(self):
         """Returns administrator dn and password."""
         return (settings.LDAP_ADMIN_DN, settings.LDAP_ADMIN_PASSWORD)
 
     def delete_person(self, unique_id):
-        """
-        Completely removes a user's data from the LDAP directory.
+        """Completely removes a user's data from the LDAP directory.
+
         Note: Does not un-vouch any Mozillians for whom this user
         has vouched.
 
@@ -836,8 +950,7 @@ class AdminSession(UserSession):
 
     @staticmethod
     def connect(request):
-        """
-        Open (or reuse) a connection to the phonebook directory.
+        """Open (or reuse) a connection to the phonebook directory.
 
         Data requests will be authorized based on the shared
         system's admin account.
@@ -867,8 +980,8 @@ def change_password(unique_id, oldpass, password):
 
 
 def set_password(username, password):
-    """
-    Resets a user's LDAP password.
+    """Resets a user's LDAP password.
+
     .. warning:
     *Careful!* This function has the capability to change
     anyone's password. It should only be used for

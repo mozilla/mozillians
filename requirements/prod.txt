@@ -29,6 +29,7 @@ Babel>=0.9.4
 
 # Auth
 django-auth-ldap
+-e git://github.com/mozilla/django-browserid.git
 
 # Cache
 python-memcached==1.45

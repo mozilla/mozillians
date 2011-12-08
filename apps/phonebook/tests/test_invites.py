@@ -10,7 +10,7 @@ from phonebook.tests import LDAPTestCase
 
 
 class InviteTest(LDAPTestCase):
-    def invite_someone(self):
+    def invite_someone(self, email):
         """
         This method will invite a user.
 
@@ -18,7 +18,7 @@ class InviteTest(LDAPTestCase):
         """
         # Send an invite.
         url = reverse('invite')
-        d = dict(recipient='mr.fusion@gmail.com')
+        d = dict(recipient=email)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('mr.fusion@gmail.com has been invited to Mozillians.' in
@@ -35,10 +35,8 @@ class InviteTest(LDAPTestCase):
         return i
 
     def get_register(self, invite):
-        r = self.client.get(invite.get_url())
-        doc = pq(r.content)
-        eq_(doc('input#id_email')[0].value, invite.recipient)
-        eq_(doc('input#id_code')[0].value, invite.code)
+        r = self.client.get(invite.get_url(), follow=True)
+        eq_(self.client.session['invite-code'], invite.code)
         return r
 
     def redeem_invite(self, invite, **kw):
@@ -47,25 +45,29 @@ class InviteTest(LDAPTestCase):
         self.client.logout()
         d = kw
 
+        # Login
+        login_d = dict(assertion=d['assertion'],
+                       email=d['email'],
+                       mode='register')
+
+        # first time we hit /register
+        self.client.get(invite.get_url(), follow=True)
+        self.client.post(reverse('browserid_login'), login_d, follow=True)
+
         # Now let's register
         d.update(
                 first_name='Akaaaaaaash',
                 last_name='Desaaaaaaai',
-                password='tacoface',
-                confirmp='tacoface',
                 optin=True
                 )
 
-        self.client.post(invite.get_url(), d, follow=True)
+        r = self.client.post(reverse('register'), d, follow=True)
 
         u = User.objects.filter(email=d['email'])[0].get_profile()
         u.is_confirmed = True
         u.save()
 
-        return self.client.post(reverse('login'),
-                                dict(username=d['email'],
-                                     password=d['password']),
-                                follow=True)
+        return r
 
     def test_send_invite_flow(self):
         """
@@ -76,27 +78,26 @@ class InviteTest(LDAPTestCase):
         Verify that we can't reuse the invite_url
         Verify we can't reinvite a vouched user
         """
-        invite = self.invite_someone()
-        r = self.get_register(invite)
-        d = r.context['form'].initial
+        email = 'mr.fusion@gmail.com'
+        assertion = 'mrfusionsomereallylongstring'
+        invite = self.invite_someone(email)
+        d = dict(assertion=assertion, email=email, mode='register')
 
+        r = self.get_register(invite)
         r = self.redeem_invite(invite, **d)
 
-        eq_(r.context['user'].get_profile().is_vouched, True)
+        uniq_id = r.context['user'].unique_id
+        r = self.client.get(reverse('profile', args=[uniq_id]))
+
         eq_(r.context['user'].unique_id,
             Invite.objects.get(pk=invite.pk).redeemer)
 
-        # Don't reuse codes.
-        r = self.redeem_invite(invite, email='mr2@gmail.com')
-        eq_(r.context['user'].get_profile().is_vouched, False)
+        eq_(r.context['user'].get_profile().is_vouched, True)
 
-        # Don't reinvite a vouched user
-        url = reverse('invite')
-        d = dict(recipient='mr.fusion@gmail.com')
-        r = self.mozillian_client.post(url, d, follow=True)
-        eq_(r.status_code, 200)
-        assert ('You cannot invite someone who has already been vouched.' in
-                pq(r.content)('ul.errorlist li').text())
+        # Don't reuse codes.
+        r = self.redeem_invite(invite, assertion='mr2reallylongstring',
+                               email='mr2@gmail.com')
+        eq_(r.context['user'].get_profile().is_vouched, False)
 
     def test_unvouched_cant_invite(self):
         """

@@ -11,7 +11,7 @@ var app = {}; // Let's namespace our app's functions in here.
         // Return a localized URL.
         app.localeUrl = function(url) {
             return '/' + app.locale + '/' + url.toString();
-        }
+        };
 
         // Apply language change once another language is selected
         $('#language').change(function() {

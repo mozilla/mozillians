@@ -1,7 +1,7 @@
 import urllib
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
@@ -100,10 +100,17 @@ class UserProfile(models.Model):
         return self.user.first_name
 
 
+class Anonymous(AnonymousUser):
+    """Anonymous user provides minimum data for views and templates."""
+    def __init__(self):
+        super(Anonymous, self).__init__()
+        self.unique_id = '0'
+
+
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        profile = UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(user=instance)
 
 
 @receiver(models.signals.pre_save, sender=UserProfile)
