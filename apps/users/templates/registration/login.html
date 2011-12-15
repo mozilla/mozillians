@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Log in to Mozillians') }}{% endblock %}
+{% block body_id %}login{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
+{% block main_content %}
+  <h1>{{ _('Log in to Mozillians') }}</h1>
+
+  {% set redirect=request.REQUEST.get('next', url('home')) %}
+  <form method="post" action="{{ url('login') }}?next={{ redirect }}">
+    {{ csrf() }}
+
+    <div class="blue-pastels">
+      {% for error in form.non_field_errors() %}
+        <p class="form-errors error">{{ error|safe }}</p>
+      {% endfor %}
+      <div id="username-container"
+        class="field {{ 'error' if form.errors['username'] }}">
+        <label for="id_username">{{ _('Email') }}</label>
+
+        <span class="required" title="{{ _('This field is required.') }}">
+          *
+        </span>
+
+        {{ form.errors['username'] }}
+        {{ form['username'] }}
+      </div>
+
+      <div id="password-container"
+          class="field {{ 'error' if form.errors['password'] }}">
+        {{ form['password'].label_tag() }}
+
+        <span class="required" title="{{ _('This field is required.') }}">
+          *
+        </span>
+
+        {{ form.errors['password'] }}
+        {{ form['password'] }}
+      </div>
+    </div>
+
+    <button type="submit" class="button primary" id="submit">
+      {{ _('Log in') }}
+    </button>
+    <div id="fyp-container">
+      <a href="{{ url('password_reset') }}">{{ _('I forgot my password') }}</a>
+    </div>
+    <div class="clear"></div>
+  </form>
+{% endblock %}

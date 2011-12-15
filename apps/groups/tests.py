@@ -4,8 +4,7 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from phonebook.tests import (MOZILLIAN, MOZ_ASSERTION, PENDING, PND_ASSERTION,
-                             LDAPTestCase, mozillian_client)
+from phonebook.tests import LDAPTestCase, MOZILLIAN, PENDING, mozillian_client
 from groups.helpers import stringify_groups
 from groups.models import Group
 from users.tests import get_profile
@@ -40,7 +39,7 @@ class GroupTest(LDAPTestCase):
         """Ensure groups are case insensitive."""
         profile = get_profile(MOZILLIAN['email'])
 
-        client = mozillian_client(MOZILLIAN['email'], MOZ_ASSERTION)
+        client = mozillian_client(MOZILLIAN['email'])
         client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='tofumatt',
@@ -69,7 +68,7 @@ class GroupTest(LDAPTestCase):
         profile = get_profile(PENDING['email'])
         assert not profile.groups.all(), 'User should have no groups.'
 
-        client = mozillian_client(PENDING['email'], PND_ASSERTION)
+        client = mozillian_client(PENDING['email'])
         client.post(reverse('phonebook.edit_profile'),
                     dict(last_name='McAwesomepants', groups='Awesome foo Bar'),
                     follow=True)
@@ -84,7 +83,7 @@ class GroupTest(LDAPTestCase):
         assert not profile.groups.all(), (
                 'User has no groups at beginning of test.')
 
-        client = mozillian_client(MOZILLIAN['email'], MOZ_ASSERTION)
+        client = mozillian_client(MOZILLIAN['email'])
         client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='McAwesomepants',
@@ -105,7 +104,7 @@ class GroupTest(LDAPTestCase):
         """Make sure users can't add system groups to their profile."""
         profile = get_profile(MOZILLIAN['email'])
 
-        client = mozillian_client(MOZILLIAN['email'], MOZ_ASSERTION)
+        client = mozillian_client(MOZILLIAN['email'])
         client.post(reverse('phonebook.edit_profile'),
                     dict(
                          last_name='tofumatt',
@@ -133,7 +132,7 @@ class GroupTest(LDAPTestCase):
         eq_(2, profile.groups.count(), 'User should have both groups.')
 
         # Edit this user's profile and remove a group.
-        client = mozillian_client(MOZILLIAN['email'], MOZ_ASSERTION)
+        client = mozillian_client(MOZILLIAN['email'])
         response = client.post(reverse('phonebook.edit_profile'),
                                dict(last_name="McLovin'", groups=''),
                                follow=True)
@@ -154,7 +153,7 @@ class GroupTest(LDAPTestCase):
         toggle view and that the buttons don't appear there."""
         profile = get_profile(MOZILLIAN['email'])
 
-        client = mozillian_client(MOZILLIAN['email'], MOZ_ASSERTION)
+        client = mozillian_client(MOZILLIAN['email'])
         response = client.get(reverse('group', args=[NORMAL_GROUP.id,
                                                      NORMAL_GROUP.url]))
         doc = pq(response.content)
@@ -172,7 +171,7 @@ class GroupTest(LDAPTestCase):
                 '"Leave Group" button should be present in the response.')
         assert profile.groups.get(id=NORMAL_GROUP.id), (
                 'User should be part of the "%s" group' % NORMAL_GROUP.name)
-
+        
         # Do it again and they should leave the group.
         r = client.post(doc('#toggle-group').attr('action'), {}, follow=True)
         assert not profile.groups.filter(id=NORMAL_GROUP.id), (

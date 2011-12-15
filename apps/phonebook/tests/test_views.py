@@ -1,19 +1,18 @@
 import os
+from uuid import uuid4
 
 from django import test
 from django.contrib.auth.models import User
+from django.core.files import File
 
+import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
-import test_utils
 
 from funfactory.urlresolvers import set_url_prefix, reverse
-from funfactory.manage import path
-
-from phonebook.tests import (AMANDA_NAME, AMANDEEP_NAME, AMANDEEP_VOUCHER,
-                             MOZILLIAN, MOZ_ASSERTION, OTHER_MOZILLIAN,
-                             PENDING, PND_ASSERTION, LDAPTestCase,
-                             mozillian_client, call)
+from phonebook.tests import (LDAPTestCase, AMANDA_NAME, AMANDEEP_NAME,
+                             AMANDEEP_VOUCHER, MOZILLIAN, PENDING,
+                             OTHER_MOZILLIAN, PASSWORD, mozillian_client)
 from phonebook.views import UNAUTHORIZED_DELETE
 
 
@@ -35,14 +34,12 @@ class TestDeleteUser(LDAPTestCase):
         we can test both non-vouched and vouched user's ability to delete
         their own profile.
         """
-        for user, assertion in [(MOZILLIAN, MOZ_ASSERTION),
-                     (PENDING, PND_ASSERTION)]:
-            self._delete_flow(user, assertion)
-        call(path('directory/devslapd/bin/x-rebuild'))
+        for user in [MOZILLIAN, PENDING]:
+            self._delete_flow(user)
 
-    def _delete_flow(self, user, assertion):
+    def _delete_flow(self, user):
         """Private method used to walk through account deletion flow."""
-        client = mozillian_client(user['email'], assertion)
+        client = mozillian_client(user['email'])
         uniq_id = user['uniq_id']
 
         r = client.get(reverse('phonebook.edit_profile'))
@@ -70,21 +67,21 @@ class TestDeleteUser(LDAPTestCase):
         eq_(200, r.status_code)
         self.assertFalse(_logged_in_html(r))
 
+        # Make sure the user can't login anymore
         client = test.Client()
-        client.get(reverse('home'))
-        data = dict(assertion=assertion, mode='register')
-        r = client.post(reverse('browserid_login'), data, follow=True)
-
+        data = dict(username=user['email'], password=PASSWORD)
+        r = client.post(reverse('login'), data, follow=True)
         self.assertFalse(_logged_in_html(r))
 
 
 class TestViews(LDAPTestCase):
+
     def test_anonymous_home(self):
         r = self.client.get('/', follow=True)
         self.assertEquals(200, r.status_code)
         doc = pq(r.content)
-
-        self.assertTrue(doc('#browserid-login'), 'We see a link to login')
+        login = reverse('login')
+        eq_(doc('a#login').attr('href'), login, 'We see a link to login')
         self.assertFalse(_logged_in_html(r))
 
     def test_pending_home(self):
@@ -165,19 +162,15 @@ class TestViews(LDAPTestCase):
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='1'))
-        # Check for redirect on one search result because we don't expect
-        # a search page.
-        assert r.status_code == 302
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 1)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='x'))
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='x'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='-3'))
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='-3'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
@@ -389,22 +382,29 @@ def _logged_in_html(response):
 
 def _create_new_user():
     newbie_client = test.Client()
-    newbie_email = 'new@test.net'
-    assertion = 'newabcdefghi'
-    data = dict(assertion=assertion, mode='register')
-    r = newbie_client.post(reverse('browserid_login'), data, follow=True)
-
+    newbie_email = '%s@test.net' % str(uuid4())[0:8]
     reg_url = reverse('register')
     params = dict(email=newbie_email,
+                  password='asdfasdf',
+                  confirmp='asdfasdf',
                   first_name='Newbie',
                   last_name='McPal',
                   optin='True')
     r = newbie_client.post(reg_url, params, follow=True)
-    eq_('phonebook/profile.html', r.templates[0].name)
+    eq_('registration/login.html', r.templates[0].name)
 
     u = User.objects.filter(email=params['email'])[0].get_profile()
     u.is_confirmed = True
     u.save()
+
+    r = newbie_client.post(reverse('login'),
+                           dict(username=params['email'],
+                                password=params['password']),
+                           follow=True)
+
+    r = newbie_client.get(reverse('profile',
+                                  args=[r.context['user'].unique_id]))
+    eq_('phonebook/profile.html', r.templates[0].name)
 
     newbie_uniq_id = r.context['person'].unique_id
     if not newbie_uniq_id:

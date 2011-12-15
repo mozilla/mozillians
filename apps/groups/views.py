@@ -1,5 +1,7 @@
 import json
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -11,7 +13,6 @@ from funfactory.urlresolvers import reverse
 
 from .helpers import users_from_groups
 from .models import Group
-from browserid.decorators import login_required
 from phonebook.forms import PAGINATION_LIMIT
 from phonebook.views import vouch_required
 

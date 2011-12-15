@@ -2,11 +2,10 @@ import os
 import subprocess
 
 from django import test
-from django.contrib.auth.models import User
-
-from nose.tools import eq_
+from django.contrib.auth import authenticate
 
 import test_utils
+from nose.tools import eq_
 
 from funfactory.urlresolvers import reverse
 from funfactory.manage import path
@@ -17,53 +16,48 @@ from users import cron
 # directory/testsuite/mozillians-bulk-test-data.ldif
 # You must have run x-rebuild before these tests
 MOZILLIAN = dict(email='u000001@mozillians.org', uniq_id='7f3a67u000001')
-MOZ_ASSERTION = 'abcdefghijklmnop'
 PENDING = dict(email='u000003@mozillians.org', uniq_id='7f3a67u000003')
-PND_ASSERTION = 'qrstuvwxyz'
 OTHER_MOZILLIAN = dict(email='u000098@mozillians.org', uniq_id='7f3a67u000098')
-OTH_ASSERTION = 'somelongstring'
 AMANDEEP_NAME = 'Amandeep McIlrath'
 AMANDEEP_VOUCHER = '7f3a67u000001'
 AMANDA_NAME = 'Amanda Younger'
+PASSWORD = 'secret'
+
 
 call = lambda x: subprocess.Popen(x, stdout=subprocess.PIPE).communicate()
 
 
 class LDAPTestCase(test_utils.TestCase):
-
     @classmethod
     def setup_class(cls):
         os.environ['OPENLDAP_DB_PATH'] = '/home/vagrant/openldap-db'
         call(path('directory/devslapd/bin/x-rebuild'))
 
     def setUp(self):
-        """We'll use multiple clients at the same time."""
-
+        """
+        We'll use multiple clients at the same time.
+        """
         self.pending_client = mozillian_client(email=PENDING['email'],
-                                               assertion=PND_ASSERTION)
+                                               password=PASSWORD)
         self.mozillian_client = mozillian_client(email=MOZILLIAN['email'],
-                                                 assertion=MOZ_ASSERTION)
+                                                 password=PASSWORD)
         cron.vouchify()
 
 
-def mozillian_client(email, assertion):
-    """Create and return an authorized Mozillian test client.
-
-    We can't use client.login because of bugs like
-    https://code.djangoproject.com/ticket/11475
-
-    We step the client through the actual auth process so
-    sessions will be all setup properly.
-    """
+def mozillian_client(email, password=PASSWORD):
+    """Create and return an authorized Mozillian test client."""
     client = test.Client()
-    client.get(reverse('home'))
-    data = dict(assertion=assertion, mode='register')
-    r = client.post(reverse('browserid_login'), data, follow=True)
-    eq_(email, str(r.context['user']))
 
-    # Why is this done here?
-    user = User.objects.get(email=email)
+    # We can't use c.login for these tests because of some LDAP strangeness,
+    # so we manually login with a POST request. (TODO: Fix this.)
+    data = dict(username=email, password=password)
+    user = authenticate(**data)
     user.get_profile().is_confirmed = True
     user.get_profile().save()
+    # This login never works
+    # TODO: deep-dive and find out why
+    client.post(reverse('login'), data)
+    r = client.post(reverse('login'), data, follow=True)
+    eq_(email, str(r.context['user']))
 
     return client

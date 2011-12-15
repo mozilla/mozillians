@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # Django settings for the mozillians project.
+import ldap
 import logging
+
+from django_auth_ldap.config import _LDAPConfig, LDAPSearch
 
 from funfactory.manage import path
 from funfactory import settings_base as base
@@ -31,14 +34,15 @@ PROTOCOL = "https://"
 PORT = 443
 
 ## Media and templates.
-TEMPLATE_DIRS = base.TEMPLATE_DIRS + (path('apps/users/templates'), )
+TEMPLATE_DIRS = (path('apps/users/templates'), )
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = ('jingo.Loader',) + base.TEMPLATE_LOADERS
-
-TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS +
-    ('django_browserid.context_processors.browserid_form',))
-
+TEMPLATE_LOADERS = (
+    'jingo.Loader',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
+#     'django.template.loaders.eggs.Loader',
+)
 
 JINGO_EXCLUDE_APPS = [
     'admin',
@@ -59,7 +63,6 @@ MINIFY_BUNDLES = {
             'js/libs/jquery-ui-1.8.7.custom.min.js',
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
-            'js/browserid.js',
             'js/main.js',
             'js/groups.js',
         ),
@@ -83,8 +86,19 @@ LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
 # django-auth-ldap
 AUTHENTICATION_BACKENDS = (
-    'browserid.backend.SaslBrowserIDBackend',
+    'django_auth_ldap.backend.LDAPBackend',
 )
+
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
+                                   "(uid=%(user)s)")
+AUTH_LDAP_USER_ATTR_MAP = {"first_name": "cn", "last_name": "sn",
+                           "email": "mail"}
+AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
+                              "unique_id": "uniqueIdentifier",
+                              "phone": "telephoneNumber:",
+                              "voucher": "mozilliansVouchedBy"}
+AUTH_LDAP_ALWAYS_UPDATE_USER = False
+
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
@@ -92,10 +106,8 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'groups',
     # 'locations',
     'larper',
-    'browserid',
 
     'csp',
-    'django_browserid',  # We use forms, etc. but not the auth backend
     'jingo_minify',
     'tower',
     'cronjobs',
@@ -117,10 +129,7 @@ HMAC_KEYS = {
 }
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_ENGINE = "django.contrib.sessions.backends.db"
-
-# BrowserID 21600 would be 6 hour sessions
-SESSION_EXP_SECONDS = 21600
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -153,8 +162,6 @@ SOUTH_TESTS_MIGRATE = False
 CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
                'https://statse.webtrendslive.com',)
 CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
-                  'https://statse.webtrendslive.com',
-                  'http://browserid.org',
-                  'https://browserid.org',)
+                  'https://statse.webtrendslive.com',)
 CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report'

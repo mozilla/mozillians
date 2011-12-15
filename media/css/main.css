@@ -463,23 +463,22 @@ em.underline {
     clear: left;
 }
 
-#body-edit-profile #privacy-info {
+#body-register #privacy-info {
     float: right;
     margin-top: 20px;
-    text-align: left;
     width: 47.5%;
 }
 
-#body-edit-profile #optin-container {
-    width: 50%;
+#body-register #optin-container {
+    width: 44%;
 }
 
-#body-edit-profile #optin-container label {
+#body-register #optin-container label {
     float: left;
     width: 275px;
 }
 
-#body-edit-profile #id_optin {
+#body-register #id_optin {
     clear: none;
     top: 3px;
     float: right;
@@ -818,113 +817,4 @@ html[dir='rtl'] #body-group-show #toggle-group {
 /** Error pages (404, 500, csrf, etc.) */
 .error-page #tumblebeast {
     float: right;
-}
-
-/* TODO: I need other vendor prefixed gradients */
-#body-home #create_profile {
-    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-
-    background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(177,219,250)),
-	color-stop(0.73, rgb(58,170,255))
-    );
-    border: 1px solid #3697E5;
-    border-radius: 1px;
-    white-space: nowrap;
-}
-
-#body-home #create_profile:hover {
-    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-
-    background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(177,219,250)),
-	color-stop(0.73, rgb(89,180,254))
-    );
-    border: 1px solid #3697E5;
-}
-
-#body-home #create_profile:active {
-    background-image: linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -o-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -moz-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-
-    background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(141,202,252)),
-	color-stop(0.73, rgb(58,170,255))
-    );
-    border: 1px solid #3697E5;
-}
-
-#body-home .id, #body-home .signin {
-    font-size: 12px;
-    font-weight: bold;
-    line-height: 21px;
-    padding: 1px 10px;
-}
-
-#body-home .id {
-    border-right: 1px solid #4DAFFE;
-    box-shadow: 1px 0 0 #ACDAFF;
-    display: inline-block;
-    padding-bottom: 2px;
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
-#body-home .signin {
-    color: #FFFFFF;
-    text-shadow: 0 -0.7px 0 #3497E4, 0 1px 1px #3497E4;
-}
-
-#body-home .bid, #body-home .arrow {
-    font-size: 13px;
-    line-height: 9px;
-}
-
-#body-home .bid {
-    background-color: white;
-    color: #7DC4FC;
-    display: inline-block;
-    font-weight: bold;
-    padding: 2px 0 2px 2px;
-    text-shadow: 0 -0.5px 0 #499DF3;
-}
-
-/* TODO, do we need this? */
-#body-home .bid-webkit {
-    line-height: 11px;
-}
-
-#body-home .arrow {
-    border-color: transparent transparent transparent white;
-    border-style: outset;
-    border-width: 6px 0 7px 4px;
-    display: inline-block;
-    height: 0;
-    margin-bottom: 3px;
-    vertical-align: middle;
-    width: 0;
-}
-
-#body-home .arrow-webkit {
-    margin-bottom: 4px;
 }

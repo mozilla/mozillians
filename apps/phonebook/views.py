@@ -4,7 +4,9 @@ from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -16,15 +18,13 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
-from browserid.decorators import login_required
 from groups.models import Group
 from groups.helpers import stringify_groups, users_from_groups
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
-from session_csrf import anonymous_csrf
-from users.models import Anonymous, UserProfile
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 
@@ -50,7 +50,9 @@ def vouch_required(f):
 def profile_uid(request, unique_id):
     """View a profile by unique_id, which is a stable, random user id."""
     needs_master = (request.user.unique_id == unique_id)
+
     ldap = UserSession.connect(request)
+    log.warning('profile_uid [%s]' % unique_id)
     try:
         # Stale data okay when viewing others
         person = ldap.get_by_unique_id(unique_id, needs_master)
@@ -80,10 +82,10 @@ def _profile(request, person, use_master):
 
     # TODO: rely more on db for this test
     if not profile.is_vouched and request.user.unique_id != person.unique_id:
+        voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
-
     person.irc_nickname = None
     if MOZILLA_IRC_SERVICE_URI in services:
         person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
@@ -105,7 +107,7 @@ def edit_profile(request):
 
 
 @never_cache
-@anonymous_csrf
+@login_required
 def edit_new_profile(request):
     return _edit_profile(request, True)
 
@@ -153,7 +155,6 @@ def _edit_profile(request, new_account):
         form = forms.ProfileForm(initial=initial)
 
     d = dict(form=form,
-             edit_form_action=reverse('phonebook.edit_profile'),
              delete_form=del_form,
              person=person,
              email=person.username,

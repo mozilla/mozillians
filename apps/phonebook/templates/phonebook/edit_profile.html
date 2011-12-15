@@ -5,15 +5,11 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
-  <form action="{{ edit_form_action }}"
+  <form action="{{ url('phonebook.edit_profile') }}"
         method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
-    {% if mode == 'new' %}
-      <h1>{{ _('Create Your Profile') }}</h1>
-    {% else %}
-      <h1>{{ _('Edit Your Profile') }}</h1>
-    {% endif %}
+    <h1>{{ _('Edit Your Profile') }}</h1>
 
     {% if form.errors %}
       <p class="form-errors">
@@ -22,18 +18,17 @@
       </p>
     {% endif %}
 
-    {% if intent == 'login' %}
-      <div class="login-unknown-email">
-        <h3>{{ _('Already have a profile?') }}{# L10n: Unknown email during login #}</h3>
-        <p>
-          {% trans logout=url('logout') %}
-            <strong>{{ email }}</strong> does not have a profile.
-            If you think you've already created a profile, try
-            <a id="browserid-retry-login" href="{{ logout }}">logging in</a>
-            with a different email address.
-          {% endtrans %}
-        </p>
-      </div>
+    {% if False %}
+       ===================== l10n ===========================
+       {{ _('Already have a profile?') }}{# L10n: Unknown email during login #}
+       {% trans logout=url('logout') %}
+         <strong>{{ email }}</strong> does not have a profile.
+         If you think you've already created a profile, try
+         <a id="browserid-retry-login" href="{{ logout }}">logging in</a>
+         with a different email address.
+       {% endtrans %}
+       {{ _('Create Account') }}
+       ======================================================
     {% endif %}
 
     <div class="blue-pastels">
@@ -70,9 +65,6 @@
             {{ form['photo'] }}
             <div class="clear"></div>
           </div>
-        {% endif %}
-
-        {% if mode != 'new' %}
           <div id="{{ form['groups'].name }}-container"
                class="field {{ 'error' if form.errors['groups'] }}
                       {{ form['groups'].field.widget.attrs['class'] }}">
@@ -88,7 +80,6 @@
             <div class="clear"></div>
           </div>
         {% endif %}
-
         {% if photo %}
           <div id="photo-delete-container" class="field">
             {{ form['photo_delete'].label_tag() }}
@@ -124,39 +115,22 @@
 
         <dl id="email-container">
           <dt>{{ _('Primary Email:') }}</dt>
-          <dd>{{ email }}</dd>
+          <dd>{{ user.username }}</dd>
         </dl>
 
         <div class="clear"></div>
 
+        <a href="{{ url('password_change') }}">
+          {{ _('Change Password') }}
+        </a>
       </div>
-      {% if mode == 'new' %}
-        <p id="privacy-info">
-          {% trans %}
-            At this time, profiles are only viewable by other Mozillians.
-            Community members may use them to identify and contact you about
-            events, projects and other Mozilla-related activities.
-          {% endtrans %}
-        </p>
 
-        <div class="clear"></div>
-
-        <div id="optin-container">
-          {{ form.errors['optin'] }}
-          {{ form['optin'].label_tag() }}
-          <span class="required" title="{{ _('This field is required.') }}">*</span>
-          {{ form['optin'] }}
-        </div>
-      {% endif %}
       <div class="clear"></div>
-
     </div>
 
     <button id="submit" class="button primary">
       {% if registration_flow %}
         {{ _('Next') }}
-      {% elif mode == 'new' %}
-        {{ _('Create Account') }}
       {% else %}
         {{ _('Update') }}
       {% endif %}
@@ -181,7 +155,6 @@
       </a>
 
       <div class="clear"></div>
-
     </div>
   {% endif %}
 {% endblock %}
