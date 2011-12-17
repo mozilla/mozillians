@@ -41,7 +41,8 @@ class LarperMiddleware(object):
                    'is missing from your settings.py')
             raise ImproperlyConfigured(msg)
 
-        if request.user.is_authenticated():
+        if (request.user.is_authenticated() and
+            hasattr(request.user, 'ldap_user')):
             _populate(request)
 
     def process_response(self, request, response):

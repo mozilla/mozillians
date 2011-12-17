@@ -2,7 +2,6 @@ import datetime
 import ldap
 
 from django import http
-from django.conf import settings
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.tokens import default_token_generator
@@ -218,7 +217,7 @@ def _save_new_user(request, form):
         # TODO: invite system should use FKs not UIDs.
         profile.vouch(UserProfile.objects.get_by_unique_id(uniq_id))
         invite.redeemed = datetime.datetime.now()
-        invite.redeemer = uniq_id
+        invite.redeemer = profile
         invite.save()
 
     return uniq_id

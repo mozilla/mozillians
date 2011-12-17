@@ -6,7 +6,6 @@ import django.contrib.auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
-from django.core.mail import send_mail
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
@@ -82,7 +81,6 @@ def _profile(request, person, use_master):
 
     # TODO: rely more on db for this test
     if not profile.is_vouched and request.user.unique_id != person.unique_id:
-        voucher = request.user.unique_id
         vouch_form = forms.VouchForm(initial=dict(vouchee=person.unique_id))
 
     services = ldap.profile_service_ids(person.unique_id, use_master)
@@ -307,19 +305,9 @@ def invite(request):
     if request.method == 'POST':
         f = forms.InviteForm(request.POST)
         if f.is_valid():
-            ldap = UserSession.connect(request)
-            unique_id = request.user.unique_id
-            try:
-                person = ldap.get_by_unique_id(unique_id, use_master=True)
-            except NO_SUCH_PERSON:
-                log.info('profile_uid Sending 404 for [%s]' % unique_id)
-                raise Http404
-
-            invite = f.save(commit=False)
-            invite.inviter = request.user.unique_id
-            invite.save()
-            invite.send(sender=person)
-
+            profile = request.user.get_profile()
+            invite = f.save(profile)
+            invite.send(sender=profile)
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:
         f = forms.InviteForm()

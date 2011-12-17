@@ -83,7 +83,7 @@ class InviteTest(LDAPTestCase):
         r = self.redeem_invite(invite, **d)
 
         eq_(r.context['user'].get_profile().is_vouched, True)
-        eq_(r.context['user'].unique_id,
+        eq_(r.context['user'].get_profile(),
             Invite.objects.get(pk=invite.pk).redeemer)
 
         # Don't reuse codes.

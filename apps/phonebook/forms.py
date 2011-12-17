@@ -165,5 +165,12 @@ class InviteForm(happyforms.ModelForm):
                                             'already been vouched.'))
         return recipient
 
+    def save(self, inviter):
+        invite = super(InviteForm, self).save(commit=False)
+        invite.inviter = inviter
+        invite.save()
+        return invite
+
     class Meta:
         model = Invite
+        exclude = ('redeemer', 'inviter')
