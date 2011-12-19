@@ -61,6 +61,9 @@
               {{ _('Log Out') }}
             </a>
           </li>
+        {% elif intent and intent == 'register' %}
+          {# User is currently registering, doesn't make sense to display
+             the log in/sign up links. #}
         {% else %}
           <li id="browserid-login">
             <span>{{ _('Log In') }}</span>
