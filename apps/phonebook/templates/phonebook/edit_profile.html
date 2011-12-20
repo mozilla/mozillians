@@ -161,7 +161,7 @@
       {% endif %}
     </button>
 
-    {% if registration_flow %}
+    {% if intent %} {# BrowserID Sign-up #}
       <a href="{{ url('home') }}" id="cancel">
     {% else %}
       <a href="{{ url('profile', user.unique_id) }}" id="cancel">
