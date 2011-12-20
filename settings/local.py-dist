@@ -8,6 +8,8 @@ DOMAIN = "localhost"
 PROTOCOL = "http://"
 PORT = 8001
 
+SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
