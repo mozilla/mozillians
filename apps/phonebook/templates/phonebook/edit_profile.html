@@ -161,7 +161,11 @@
       {% endif %}
     </button>
 
-    <a href="{{ url('profile', user.unique_id) }}" id="cancel">
+    {% if registration_flow %}
+      <a href="{{ url('home') }}" id="cancel">
+    {% else %}
+      <a href="{{ url('profile', user.unique_id) }}" id="cancel">
+    {% endif %}
       {{ _('Cancel') }}{# L10n: Cancel editing #}
     </a>
 
