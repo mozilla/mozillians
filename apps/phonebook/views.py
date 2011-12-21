@@ -156,6 +156,7 @@ def _edit_profile(request, new_account):
              edit_form_action=reverse('phonebook.edit_profile'),
              delete_form=del_form,
              person=person,
+             email=person.username,
              registration_flow=new_account,
              user_groups=user_groups,
              photo=ldap.profile_photo(unique_id, use_master=True),
