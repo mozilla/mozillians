@@ -529,6 +529,8 @@ class UserSession(object):
         cache = {}
         for result in results:
             dn, attrs = result
+            if 'sn' not in attrs:
+                continue
             p = Person.new_from_directory(attrs)
             if not p or p.unique_id in cache:
                 continue
