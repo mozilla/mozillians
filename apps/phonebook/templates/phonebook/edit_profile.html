@@ -61,7 +61,6 @@
         {% endfor %}
 
         <div id="photo-container" class="{{ 'error' if form.errors['photo'] }}">
-
           {% if mode == 'new' %}
             <img alt="{{ _('Your Profile Photo') }}" id="profile-photo"
                  src="{{ MEDIA_URL }}img/unknown.png">
@@ -74,21 +73,23 @@
           {{ form['photo'] }}
           <div class="clear"></div>
         </div>
-        <div id="{{ form['groups'].name }}-container"
-          class="field {{ 'error' if form.errors['groups'] }}
-          {{ form['groups'].field.widget.attrs['class'] }}">
 
-          {{ form['groups'].label_tag() }}
+        {% if mode != 'new' %}
+          <div id="{{ form['groups'].name }}-container"
+               class="field {{ 'error' if form.errors['groups'] }}
+                      {{ form['groups'].field.widget.attrs['class'] }}">
 
-          {{ form.errors['groups'] }}
+            {{ form['groups'].label_tag() }}
 
-          <div class="clear"></div>
+            {{ form.errors['groups'] }}
 
-          {{ form['groups'] }}
+            <div class="clear"></div>
 
-          <div class="clear"></div>
+            {{ form['groups'] }}
 
-        </div>
+            <div class="clear"></div>
+          </div>
+        {% endif %}
 
         {% if photo %}
           <div id="photo-delete-container" class="field">
@@ -107,17 +108,19 @@
         <h2>{{ _('My Mozilla Info') }}</h2>
         #}
 
-        {% for f in ['irc_nickname', 'website'] %}
-          <div id="{{ form[f].name }}-container"
-            class="field {{ 'error' if form.errors[f] }}
-            {{ form[f].field.widget.attrs['class'] }}">
+        {% if mode != 'new' %}
+          {% for f in ['irc_nickname', 'website'] %}
+            <div id="{{ form[f].name }}-container"
+              class="field {{ 'error' if form.errors[f] }}
+              {{ form[f].field.widget.attrs['class'] }}">
 
-            {{ form[f].label_tag() }}
+              {{ form[f].label_tag() }}
 
-            {{ form.errors[f] }}
-            {{ form[f] }}
-          </div>
-        {% endfor %}
+              {{ form.errors[f] }}
+              {{ form[f] }}
+            </div>
+          {% endfor %}
+        {% endif %}
 
         <h2>{{ _('My Login Info') }}</h2>
 
