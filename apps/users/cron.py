@@ -1,3 +1,5 @@
+from ldap import TYPE_OR_VALUE_EXISTS
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -84,3 +86,22 @@ def vouchify():
             user.save()
             log.info('Data copied for %s' % user.user.username)
         log.debug('%s is still unvouched... skipping' % user.user.username)
+
+
+@cronjobs.register
+def fix_bad_ldap_vouch():
+    """Synchronizes MySQL vouch data into broken LDAP accounts.
+
+    Just vouches them as ZUUL because the MySQL vouch data is good and what
+    we'll use going forward.
+    """
+    users = UserProfile.objects.filter(is_vouched=True)
+
+    for user in users:
+        person = user.get_ldap_person()
+
+        if person:
+            try:
+                larper.record_vouch('ZUUL', person[1]['uniqueIdentifier'][0])
+            except TYPE_OR_VALUE_EXISTS:
+                log.info('User is already vouched; no big.')

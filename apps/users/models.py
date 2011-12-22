@@ -51,7 +51,7 @@ class UserProfile(models.Model):
             self.is_vouched = True
             self.get_ldap_person()
             my_uid = self.get_ldap_person()[1]['uniqueIdentifier'][0]
-            their_uid = 'uniqueIdentifier=ZUUL,ou=people,dc=mozillians,dc=org'
+            their_uid = 'ZUUL'
             larper.record_vouch(their_uid, my_uid)
 
         if vouchee and vouchee.is_vouched:
