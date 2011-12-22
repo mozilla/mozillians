@@ -60,19 +60,17 @@
           </div>
         {% endfor %}
 
-        <div id="photo-container" class="{{ 'error' if form.errors['photo'] }}">
-          {% if mode == 'new' %}
-            <img alt="{{ _('Your Profile Photo') }}" id="profile-photo"
-                 src="{{ MEDIA_URL }}img/unknown.png">
-          {% else %}
+        {% if mode != 'new' %}
+          <div id="photo-container"
+               class="{{ 'error' if form.errors['photo'] }}">
             {{ profile_photo(person) }}
-          {% endif %}
 
-          {{ form['photo'].label_tag() }}
-          {{ form.errors['photo'] }}
-          {{ form['photo'] }}
-          <div class="clear"></div>
-        </div>
+            {{ form['photo'].label_tag() }}
+            {{ form.errors['photo'] }}
+            {{ form['photo'] }}
+            <div class="clear"></div>
+          </div>
+        {% endif %}
 
         {% if mode != 'new' %}
           <div id="{{ form['groups'].name }}-container"
