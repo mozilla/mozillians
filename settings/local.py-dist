@@ -65,3 +65,8 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DEBUG = TEMPLATE_DEBUG = True
+
+# ElasticSearch
+ES_DISABLED = False
+ES_HOSTS = ['127.0.0.1:9200']
+ES_INDEXES = dict(default='mozillians_dev')

@@ -4,8 +4,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import signals as dbsignals
 from django.dispatch import receiver
 
+from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
@@ -25,7 +27,7 @@ class UserProfileManager(models.Manager):
         return User.objects.get(email=mail).get_profile()
 
 
-class UserProfile(models.Model):
+class UserProfile(SearchMixin, models.Model):
     # This field is required.
     user = models.OneToOneField(User)
 
@@ -49,7 +51,7 @@ class UserProfile(models.Model):
         db_table = 'profile'
 
     def vouch(self, vouchee, system=True, commit=True):
-        changed = system # have we changed anything?
+        changed = system  # have we changed anything?
         if system:
             self.is_vouched = True
             self.get_ldap_person()
@@ -106,11 +108,24 @@ class UserProfile(models.Model):
         """Return this user's name when their profile is called."""
         return self.user.first_name
 
+    def fields(self):
+        attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
+                 'bio', 'photo', 'display_name', 'ircname')
+        d = dict((a, getattr(self, a)) for a in attrs)
+        # user data
+        attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
+                 'date_joined')
+        d.update(dict((a, getattr(self.user, a)) for a in attrs))
+        # Index group ids... for fun.
+        groups = list(self.groups.values_list('id', flat=True))
+        d.update(dict(groups=groups))
+        return d
+
 
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        profile = UserProfile.objects.create(user=instance)
+        UserProfile.objects.create(user=instance)
 
 
 @receiver(models.signals.pre_save, sender=UserProfile)
@@ -145,3 +160,16 @@ def add_to_staff_group(sender, instance, created, **kwargs):
         if (any(username.endswith('@' + x) for x in
                                                settings.AUTO_VOUCH_DOMAINS)):
             instance.groups.add(Group.objects.get(name='staff', system=True))
+
+
+@receiver(dbsignals.post_save, sender=User)
+@receiver(dbsignals.post_save, sender=UserProfile)
+def update_search_index(sender, instance, **kw):
+    from elasticutils import tasks
+    tasks.index_objects.delay(UserProfile, [instance.id])
+
+
+@receiver(dbsignals.post_delete, sender=UserProfile)
+def remove_from_search_index(sender, instance, **kw):
+    from elasticutils import tasks
+    tasks.unindex_objects.delay(sender, [instance.id])

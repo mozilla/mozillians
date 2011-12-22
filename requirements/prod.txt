@@ -35,3 +35,6 @@ python-memcached==1.45
 
 # Multidb
 -e https://github.com/jbalogh/django-multidb-router#egg=multidb
+
+# ElasticUtils
+-e git://github.com/davedash/elasticutils#egg=elasticutils

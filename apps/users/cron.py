@@ -8,6 +8,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import commonware.log
 import cronjobs
+from celery.task.sets import TaskSet
+from celeryutils import chunked
 
 import larper
 from users.models import UserProfile
@@ -91,6 +93,7 @@ def vouchify():
         log.debug('%s is still unvouched... skipping' % user.user.username)
 
 
+# TODO: Remove after we can safely say that LDAP is gone.
 @cronjobs.register
 def fix_bad_ldap_vouch():
     """Synchronizes MySQL vouch data into broken LDAP accounts.
@@ -123,7 +126,6 @@ def flee_ldap():
         if 'jpegPhoto' in person[1]:
             photo = person[1]['jpegPhoto'][0]
         lastname = person[1]['sn'][0]
-        email = person[1]['mail'][0]
         firstname = ''
         if 'givenName' in person[1]:
             firstname = person[1]['givenName'][0]
@@ -181,3 +183,13 @@ def flee_ldap():
         profile.user.save()
         profile.save()
         log.debug('u:%d saved' % profile.user_id)
+
+
+@cronjobs.register
+def index_all_profiles():
+    from elasticutils import tasks
+
+    ids = (UserProfile.objects.values_list('id', flat=True))
+    ts = [tasks.index_objects.subtask(args=[UserProfile, chunk])
+          for chunk in chunked(sorted(list(ids)), 150)]
+    TaskSet(ts).apply_async()
