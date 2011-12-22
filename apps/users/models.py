@@ -144,7 +144,7 @@ def add_to_staff_group(sender, instance, created, **kwargs):
                                                settings.AUTO_VOUCH_DOMAINS)):
             instance.groups.add(Group.objects.get(name='staff', system=True))
 
-        instance.get_ldap_person()
-        my_uid = instance.get_ldap_person()[1]['uniqueIdentifier'][0]
-        their_uid = 'uniqueIdentifier=ZUUL,ou=people,dc=mozillians,dc=org'
-        larper.record_vouch(their_uid, my_uid)
+            instance.get_ldap_person()
+            my_uid = instance.get_ldap_person()[1]['uniqueIdentifier'][0]
+            their_uid = 'uniqueIdentifier=ZUUL,ou=people,dc=mozillians,dc=org'
+            larper.record_vouch(their_uid, my_uid)
