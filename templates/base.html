@@ -47,7 +47,7 @@
         </li>
         {% if user.is_authenticated() %}
           <li>
-            <a id="profile" href="{{ url('profile', user.unique_id) }}">
+            <a id="profile" href="{{ url('profile', user.username) }}">
               {{ _('Profile') }}
             </a>
           </li>

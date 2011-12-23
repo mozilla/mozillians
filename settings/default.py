@@ -75,7 +75,7 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.GraphiteRequestTimingMiddleware',
     'csp.middleware.CSPMiddleware',
     'phonebook.middleware.PermissionDeniedMiddleware',
-    'larper.middleware.LarperMiddleware',
+    # 'larper.middleware.LarperMiddleware',
 ]
 
 # StrictTransport
@@ -84,10 +84,7 @@ STS_SUBDOMAINS = True
 # OpenLDAP
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
-# django-auth-ldap
-AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
-)
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                                    "(uid=%(user)s)")

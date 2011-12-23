@@ -4,6 +4,7 @@ import ldap
 from django import http
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.http import Http404
@@ -77,7 +78,7 @@ def logout(request, **kwargs):
 @anonymous_csrf
 def register(request):
     if request.user.is_authenticated():
-        return redirect(reverse('profile', args=[request.user.unique_id]))
+        return redirect(reverse('profile', args=[request.user.username]))
 
     initial = {}
     if 'code' in request.GET:
@@ -94,8 +95,10 @@ def register(request):
     if request.method == 'POST':
         if form.is_valid():
             try:
-                _save_new_user(request, form)
-                _send_confirmation_email(request.user)
+                # TODO: offload this to form.save()
+                # Note: possible race condition on unique username/emails
+                user = _save_new_user(request, form)
+                _send_confirmation_email(user)
 
                 msg = _(u'Your account has been created but needs to be '
                          'verified. Please check your email to verify '
@@ -162,18 +165,10 @@ def password_reset_check_mail(request):
 
 def _save_new_user(request, form):
     """
-    form - must be a valid form
-
-    We persist account to LDAP. If all goes well, we
-    log the user in and persist their password to the session.
+    Save a new user.
     """
     # Email in the form is the "username" we'll use.
-    username = form.cleaned_data['email']
-    password = form.cleaned_data['password']
-    registrar = RegistrarSession.connect(request)
-
     d = form.cleaned_data
-    uniq_id = registrar.create_person(d)
 
     voucher = None
 
@@ -185,42 +180,21 @@ def _save_new_user(request, form):
             msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
             log.warning(msg)
 
-    for i in range(1, 10):
-        try:
-            user = auth.authenticate(username=username, password=password)
+    u = User.objects.create(username=d['email'], email=d['email'],
+                            first_name=d['first_name'],
+                            last_name=d['last_name'])
+    u.set_password(d['password'])
+    u.save()
 
-            # Should never happen
-            if not user or not user.is_authenticated():
-                msg = 'Authentication for new user (%s) failed' % username
-                # TODO: make this a unique exception.
-                raise Exception(msg)
-
-            statsd.incr('user.successful_registration')
-            statsd.incr('user.successful_registration_attempt_%s' % i)
-            break
-        except Exception, e:
-            statsd.incr('user.errors.registration_failed')
-            statsd.incr('user.errors.registration_failed_attempt_%s' % i)
-            log.warning(e)
-
-            # All hope is lost.
-            if i == 10:
-                statsd.incr('user.errors.user_record_never_created')
-                raise Exception(e)
-
-    # TODO: Remove when LDAP goes away
-    auth.login(request, user)
-
-    profile = user.get_profile()
+    profile = u.get_profile()
 
     if voucher:
-        # TODO: invite system should use FKs not UIDs.
-        profile.vouch(UserProfile.objects.get_by_unique_id(uniq_id))
+        profile.vouch(invite.inviter)
         invite.redeemed = datetime.datetime.now()
         invite.redeemer = profile
         invite.save()
 
-    return uniq_id
+    return u
 
 
 def _set_already_exists_error(form):

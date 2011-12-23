@@ -34,13 +34,7 @@ class LDAPTestCase(test_utils.TestCase):
         call(path('directory/devslapd/bin/x-rebuild'))
 
     def setUp(self):
-        """
-        We'll use multiple clients at the same time.
-        """
-        self.pending_client = mozillian_client(email=PENDING['email'],
-                                               password=PASSWORD)
-        self.mozillian_client = mozillian_client(email=MOZILLIAN['email'],
-                                                 password=PASSWORD)
+        """We'll use multiple clients at the same time."""
         cron.vouchify()
 
 

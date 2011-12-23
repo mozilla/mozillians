@@ -5,16 +5,18 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+from common.tests import ESTestCase, TestCase
 from groups.models import Group
-from phonebook.tests import LDAPTestCase, MOZILLIAN, PENDING
+from phonebook.tests import MOZILLIAN, PENDING
 from users import cron
-
+from users.models import UserProfile
 
 Group.objects.get_or_create(name='staff', system=True)
 
 
-class ViewTest(LDAPTestCase):
+class ViewTest(TestCase):
     """Test views in the users app."""
+
     def test_confirmation_code(self):
         """Verify the confirm view accepts valid codes and 404s otherwise."""
         d = dict(
@@ -37,9 +39,9 @@ class ViewTest(LDAPTestCase):
 
         r = self.client.get(user.get_confirmation_url())
         eq_(r.status_code, 200, 'A good confirmation code works.')
-        
 
-class RegistrationTest(LDAPTestCase):
+
+class RegistrationTest(TestCase):
     """Tests registration."""
 
     def test_confirmation(self):
@@ -131,8 +133,14 @@ class RegistrationTest(LDAPTestCase):
                  confirmp='tacoface',
                  optin=True
         )
+        # once
+        self.client.post(reverse('register'), d, follow=True)
+        eq_(len(mail.outbox), 1)
+        # twice
         r = self.client.post(reverse('register'), d, follow=True)
-        eq_(len(mail.outbox), 0)
+        assert r.context['form'].errors, "Form should throw errors."
+        eq_(len(mail.outbox), 1)
+
 
     def test_plus_signs(self):
         d = dict(
@@ -152,7 +160,7 @@ class RegistrationTest(LDAPTestCase):
         eq_(r.status_code, 200)
 
 
-class TestThingsForPeople(LDAPTestCase):
+class TestThingsForPeople(TestCase):
     """Verify that the wrong users don't see things."""
 
     def test_searchbox(self):
@@ -191,7 +199,7 @@ class TestThingsForPeople(LDAPTestCase):
 
     def test_vouchlink(self):
         """No vouch link when PENDING looks at PENDING."""
-        url = reverse('profile', args=[PENDING['uniq_id']])
+        url = reverse('profile', args=['pending'])
         r = self.mozillian_client.get(url)
         doc = pq(r.content)
         assert doc('#vouch-form button')
@@ -206,15 +214,7 @@ def get_profile(email):
     return User.objects.get(email=email).get_profile()
 
 
-class VouchTest(LDAPTestCase):
-    def test_vouchify_task(self):
-        """``vouchify`` task should mark vouched users in the db.
-
-        Test that an already vouched user will will look right in the DB.
-        Note this relies on LDAPTestCase having run ``cron.vouchify()``.
-        """
-        profile = get_profile(MOZILLIAN['email'])
-        assert profile.is_vouched
+class VouchTest(ESTestCase):
 
     def test_vouch_method(self):
         """Test UserProfile.vouch()
@@ -224,8 +224,8 @@ class VouchTest(LDAPTestCase):
 
         Assert that when vouched they are listed as vouched.
         """
-        vouchee = get_profile(MOZILLIAN['email'])
-        profile = get_profile(PENDING['email'])
+        vouchee = self.mozillian.get_profile()
+        profile = self.pending.get_profile()
         assert not profile.is_vouched, 'User should not yet be vouched.'
         r = self.mozillian_client.get(reverse('phonebook.search'),
                                       {'q': PENDING['email']},follow=True)
@@ -235,11 +235,11 @@ class VouchTest(LDAPTestCase):
                 'User should not appear as a Mozillian in search.')
 
         profile.vouch(vouchee)
-        profile = get_profile(PENDING['email'])
+        profile = UserProfile.objects.get(pk=profile.pk)
         assert profile.is_vouched, 'User should be marked as vouched.'
 
-        r = self.mozillian_client.get(reverse('profile',
-                                              args=[PENDING['uniq_id']]))
+        r = self.mozillian_client.get(reverse('profile', args=['pending']))
+        eq_(r.status_code, 200)
         doc = pq(r.content)
         assert 'Mozillian Profile' in r.content, (
                 'User should appear as having a vouched profile.')
@@ -247,7 +247,7 @@ class VouchTest(LDAPTestCase):
                 'User should not appear as having a pending profile.')
         assert not doc('#pending-approval'), (
                 'Pending profile div should not be in DOM.')
-        
+
         # Make sure the user appears vouched in search results
         r = self.mozillian_client.get(reverse('phonebook.search'),
                                       {'q': PENDING['email']})

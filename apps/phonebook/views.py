@@ -2,12 +2,14 @@ from functools import wraps
 
 import django.contrib.auth
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import (Http404, HttpResponse, HttpResponseRedirect,
                          HttpResponseForbidden)
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -43,174 +45,81 @@ def vouch_required(f):
 
 @never_cache
 @login_required
-def profile_uid(request, unique_id):
-    """View a profile by unique_id, which is a stable, random user id."""
-    needs_master = (request.user.unique_id == unique_id)
+def profile(request, username):
+    """View a profile by username."""
+    user = get_object_or_404(User, username=username)
 
-    ldap = UserSession.connect(request)
-    log.warning('profile_uid [%s]' % unique_id)
-    try:
-        # Stale data okay when viewing others
-        person = ldap.get_by_unique_id(unique_id, needs_master)
-        if person.last_name:
-            return _profile(request, person, needs_master)
-    except NO_SUCH_PERSON:
-        log.warning('profile_uid Sending 404 for [%s]' % unique_id)
-        raise Http404
-
-
-def profile_nickname(request, nickname):
-    """
-    TODO
-    This is probably post 1.0, but we could provide
-    a nicer url if we used let the user opt-in to
-    a Mozillians nickname (pre-populated from their
-    IRC nickname)
-    """
-    pass
-    # return _profile(request, person)
-
-
-def _profile(request, person, use_master):
     vouch_form = None
-    ldap = UserSession.connect(request)
-    profile = person.get_profile()
+    profile = user.get_profile()
 
-    # TODO: rely more on db for this test
-    if not profile.is_vouched and request.user.unique_id != person.unique_id:
-        vouch_form = forms.VouchForm(initial=dict(vouchee=person.unique_id))
-
-    services = ldap.profile_service_ids(person.unique_id, use_master)
-    person.irc_nickname = None
-    if MOZILLA_IRC_SERVICE_URI in services:
-        person.irc_nickname = services[MOZILLA_IRC_SERVICE_URI]
-        del services[MOZILLA_IRC_SERVICE_URI]
+    if not profile.is_vouched and request.user.username != username:
+        voucher = request.user.username
+        vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 
     # Get user groups from their profile.
-    groups = person.get_profile().groups.all()
+    groups = profile.groups.all()
 
-    data = dict(person=person, profile=profile, vouch_form=vouch_form,
-                services=services, groups=groups)
+    data = dict(user=user, profile=profile, vouch_form=vouch_form,
+                groups=groups)
     return render(request, 'phonebook/profile.html', data)
 
 
-@never_cache
-@login_required
-def edit_profile(request):
-    """View for editing the current user's profile."""
-    return _edit_profile(request, False)
-
-
+# TODO: consolidatify
 @never_cache
 @login_required
 def edit_new_profile(request):
-    return _edit_profile(request, True)
+    return edit_profile(request, True)
 
 
-def _edit_profile(request, new_account):
-    ldap = UserSession.connect(request)
-    unique_id = request.user.unique_id
-    try:
-        person = ldap.get_by_unique_id(unique_id, use_master=True)
-    except NO_SUCH_PERSON:
-        log.info('profile_uid Sending 404 for [%s]' % unique_id)
-        raise Http404
-
-    del_form = forms.DeleteForm(initial=dict(unique_id=unique_id))
-
-    if not person:
-        raise Http404
-
-    if request.user.unique_id != person.unique_id:
-        return HttpResponseForbidden()
-
+@never_cache
+@login_required
+def edit_profile(request, new_account=False):
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
     if request.method == 'POST':
+
         form = forms.ProfileForm(request.POST, request.FILES)
         if form.is_valid():
-            # Save both LDAP and RDBS data via our ProfileForm
-            ldap.update_person(unique_id, form.cleaned_data)
-            ldap.update_profile_photo(unique_id, form.cleaned_data)
-
-            form.save(request, ldap)
-
-            return redirect(reverse('confirm_register') if new_account
-                            else reverse('profile', args=[unique_id]))
+            form.save(request)
+            next = (reverse('confirm_register') if new_account
+                    else reverse('profile', args=[request.user.username]))
+            return redirect(next)
     else:
-        initial = dict(first_name=person.first_name,
-                       last_name=person.last_name,
-                       biography=person.biography,
+        initial = dict(first_name=request.user.first_name,
+                       last_name=request.user.last_name,
+                       biography=profile.bio,
                        website=profile.website,
+                       irc_nickname=profile.ircname,
                        groups=user_groups)
 
-        initial.update(_get_services_fields(ldap, unique_id,
-                                            use_master=True))
         form = forms.ProfileForm(initial=initial)
 
     d = dict(form=form,
-             delete_form=del_form,
-             person=person,
-             email=person.username,
              registration_flow=new_account,
              user_groups=user_groups,
-             photo=ldap.profile_photo(unique_id, use_master=True),
+             # TODO: photo!!
+#             photo=ldap.profile_photo(unique_id, use_master=True),
             )
     return render(request, 'phonebook/edit_profile.html', d)
-
-
-def _get_services_fields(ldap, unique_id, use_master=False):
-    services = ldap.profile_service_ids(unique_id, use_master)
-    irc_nick = None
-    irc_nick_unique_id = None
-
-    if MOZILLA_IRC_SERVICE_URI in services:
-        irc = services[MOZILLA_IRC_SERVICE_URI]
-        irc_nick = irc.service_id
-        irc_nick_unique_id = irc.unique_id
-    return dict(irc_nickname=irc_nick,
-                irc_nickname_unique_id=irc_nick_unique_id,)
-
-
-class UNAUTHORIZED_DELETE(Exception):
-    pass
 
 
 @never_cache
 @login_required
 def confirm_delete(request):
     """Display a confirmation page asking the user if they want to leave."""
-    del_form = forms.DeleteForm(initial=dict(unique_id=request.user.unique_id))
-    return render(request, 'phonebook/confirm_delete.html', {'form': del_form})
+    return render(request, 'phonebook/confirm_delete.html')
 
 
 @never_cache
 @login_required
 @require_POST
 def delete(request):
-    form = forms.DeleteForm(request.POST)
-    if form.is_valid() and _user_owns_account(request, form):
-        admin_ldap = AdminSession.connect(request)
-        admin_ldap.delete_person(form.cleaned_data['unique_id'])
-        django.contrib.auth.logout(request)
-    else:
-        msg = "Unauthorized deletion of account, attempted"
-        raise UNAUTHORIZED_DELETE(msg)
-
+    delete_me = request.user.pk
+    logout(request)
+    User.objects.get(pk=delete_me).delete()
+    log.info('Deleting %d' % delete_me)
     return redirect(reverse('home'))
-
-
-def _user_owns_account(request, form):
-    """
-    A leak in our authentication abstraction...
-    We use a shared Admin account for deleting, so
-    we can't rely on LDAP ACL to test this for us.
-    We must ensure the current user is the same as the
-    account to be deleted.
-    """
-    uniq_id_to_delete = form.cleaned_data['unique_id']
-    return request.user.unique_id == uniq_id_to_delete
 
 
 @vouch_required
@@ -294,27 +203,18 @@ def invite(request):
 @vouch_required
 @require_POST
 def vouch(request):
-    """
-    When a voucher approves a vouch for a vouchee, there
-    can be a replication lag between master -> slave. As a
-    result, there is a possibility that viewing the vouchee's
-    profile will not show the updated state. So we currently
-    will cache the state for immediate feedback.
-    """
+    """Vouch a user."""
     form = forms.VouchForm(request.POST)
-    if form.is_valid():
-        data = form.cleaned_data
-        vouchee = data.get('vouchee')
-        # TODO: make the form give us the User's id...
-        p = UserProfile.objects.get_by_unique_id(vouchee)
-        p.vouch(request.user.get_profile())
 
-        # TODO: Is this still necessary?...
-        cache.set('vouched_' + vouchee, True)
+    if form.is_valid():
+        p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
+        p.vouch(request.user.get_profile())
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
                  'This user is now vouched!')
         messages.info(request, msg)
 
-        return redirect(reverse('profile', args=[vouchee]))
+        return redirect(reverse('profile', args=[p.user.username]))
+
+    return HttpResponseForbidden

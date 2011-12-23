@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import auth
+from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
 from django.forms.util import ErrorList
@@ -57,6 +58,7 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         return self.cleaned_data
 
 
+# TODO: This should be a ModelForm
 class RegistrationForm(happyforms.Form):
     email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
@@ -93,6 +95,14 @@ class RegistrationForm(happyforms.Form):
             self._errors['confirmp'] = ErrorList([msg])
             if p2:
                 del data['confirmp']
+
+        # TODO: check unique username as well
+        email = data.get('email')
+
+        # TODO: See if this can be validated via a builtin.
+        if User.objects.filter(email=email).count():
+            raise forms.ValidationError(_('Email address already in use.'))
+
 
         return data
 

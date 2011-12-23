@@ -33,5 +33,5 @@ def profile_photo(context, person):
 
 @register.inclusion_tag('phonebook/includes/search_result.html')
 @jinja2.contextfunction
-def search_result(context, person):
-    return dict(person=person)
+def search_result(context, profile):
+    return dict(profile=profile)

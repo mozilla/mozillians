@@ -19,7 +19,6 @@
     {% endif %}
 
     {% if False %}
-       ===================== l10n ===========================
        {{ _('Already have a profile?') }}{# L10n: Unknown email during login #}
        {% trans logout=url('logout') %}
          <strong>{{ email }}</strong> does not have a profile.
@@ -28,7 +27,6 @@
          with a different email address.
        {% endtrans %}
        {{ _('Create Account') }}
-       ======================================================
     {% endif %}
 
     <div class="blue-pastels">
@@ -45,7 +43,8 @@
             {{ form[f].label_tag() }}
 
             {% if form[f].field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
+              <span class="required"
+                    title="{{ _('This field is required.') }}">
                 *
               </span>
             {% endif %}
@@ -147,7 +146,7 @@
     <div class="clear"></div>
   </form>
 
-  {% if user.unique_id == person.unique_id %}
+  {% if request.user.id == user.id %}
     <div id="manage-profile">
       <a class="button destructive small" href="{{ url('confirm_delete') }}"
          id="delete-profile">

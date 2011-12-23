@@ -8,12 +8,9 @@ admin.autodiscover()
 from phonebook import views
 
 urlpatterns = patterns('',
-    url('^u/(?P<unique_id>.*)$', views.profile_uid, name='profile'),
     url('^user/photo/(?P<unique_id>.*)$', views.photo,
         name='phonebook.profile_photo'),
 
-    # url('^n/(?P<nickname>.*)$', views.profile, name='phonebook.profile'),
-    # Post 1.0?
     url('^user/edit/$', views.edit_profile,
         name='phonebook.edit_profile'),
     url('^register/edit/$', views.edit_new_profile,
@@ -35,13 +32,6 @@ urlpatterns = patterns('',
         name='confirm_register'),
     url('^$', direct_to_template, {'template': 'phonebook/home.html'},
         name='home'),
-)
 
-## In DEBUG mode, serve media files through Django.
-if settings.DEBUG:
-    # Remove leading and trailing slashes so the regex matches.
-    media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
-    urlpatterns += patterns('',
-        (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
-         {'document_root': settings.MEDIA_ROOT}),
-    )
+    url(r'^(?P<username>.+)$', views.profile, name='profile'),
+)

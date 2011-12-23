@@ -113,18 +113,24 @@ class ProfileForm(happyforms.Form):
                                         .lower().split(','))
                 if g and ',' not in g]
 
-    def save(self, request, ldap):
-        """Save this form to both LDAP and RDBMS backends, as appropriate."""
-        # Save stuff in LDAP first...
-        # TODO: Find out why this breaks the larper tests
-        # ldap.update_person(request.user.unique_id, self.cleaned_data)
-        # ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
-
-        # ... then save other stuff in RDBMS.
+    def save(self, request):
+        """Save the data to profile."""
         self._save_groups(request)
-        profile = request.user.get_profile()
-        profile.website = self.cleaned_data['website']
+        user = request.user
+        profile = user.get_profile()
+        d = self.cleaned_data
+
+        user.first_name = d['first_name']
+        user.last_name = d['last_name']
+
+        profile.bio = d['biography']
+        # TODO: save/delete photo data...
+        # photo
+        # photo_delete
+        profile.ircname = d['irc_nickname']
+        profile.website = d['website']
         profile.save()
+        user.save()
 
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""
@@ -146,13 +152,9 @@ class ProfileForm(happyforms.Form):
         profile.groups.add(*groups_to_add)
 
 
-class DeleteForm(happyforms.Form):
-    unique_id = forms.CharField(widget=forms.HiddenInput)
-
-
 class VouchForm(happyforms.Form):
-    """Vouching is captured via a user's unique_id."""
-    vouchee = forms.CharField(widget=forms.HiddenInput)
+    """Vouching is captured via a user's id."""
+    vouchee = forms.IntegerField(widget=forms.HiddenInput)
 
 
 class InviteForm(happyforms.ModelForm):

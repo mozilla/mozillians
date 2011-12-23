@@ -67,9 +67,9 @@ def show(request, id, url=None):
 
     in_group = (request.user.get_profile()
                             .groups.filter(id=group.id).count())
-    users = users_from_groups(request, group, limit=PAGINATION_LIMIT)
+    profiles = group.userprofile_set.all()
 
-    data = dict(group=group, in_group=in_group, users=users)
+    data = dict(group=group, in_group=in_group, profiles=profiles)
     return render(request, 'groups/show.html', data)
 
 

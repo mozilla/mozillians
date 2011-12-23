@@ -4,12 +4,12 @@ from django.contrib.auth.models import User
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+import common.tests
 from funfactory.urlresolvers import reverse
 from phonebook.models import Invite
-from phonebook.tests import LDAPTestCase
 
 
-class InviteTest(LDAPTestCase):
+class InviteTest(common.tests.TestCase):
     def invite_someone(self):
         """
         This method will invite a user.
@@ -19,7 +19,8 @@ class InviteTest(LDAPTestCase):
         # Send an invite.
         url = reverse('invite')
         d = dict(recipient='mr.fusion@gmail.com')
-        r = self.mozillian_client.post(url, d, follow=True)
+        self.client.login(email=self.mozillian.email)
+        r = self.client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('mr.fusion@gmail.com has been invited to Mozillians.' in
                 pq(r.content)('div#main-content p').text())
@@ -32,10 +33,12 @@ class InviteTest(LDAPTestCase):
 
         assert 'no-reply@mozillians.org' in mail.outbox[0].from_email
         assert invite_url in mail.outbox[0].body, "No link in email."
+        self.client.logout()
         return i
 
     def get_register(self, invite):
         r = self.client.get(invite.get_url())
+        eq_(r.status_code, 200)
         doc = pq(r.content)
         eq_(doc('input#id_email')[0].value, invite.recipient)
         eq_(doc('input#id_code')[0].value, invite.code)
@@ -56,16 +59,11 @@ class InviteTest(LDAPTestCase):
                 optin=True
                 )
 
-        self.client.post(invite.get_url(), d, follow=True)
-
+        r = self.client.post(invite.get_url(), d, follow=True)
+        assert not r.context['form'].errors, r.context['form'].errors
         u = User.objects.filter(email=d['email'])[0].get_profile()
         u.is_confirmed = True
         u.save()
-
-        return self.client.post(reverse('login'),
-                                dict(username=d['email'],
-                                     password=d['password']),
-                                follow=True)
 
     def test_send_invite_flow(self):
         """
@@ -80,20 +78,20 @@ class InviteTest(LDAPTestCase):
         r = self.get_register(invite)
         d = r.context['form'].initial
 
-        r = self.redeem_invite(invite, **d)
-
-        eq_(r.context['user'].get_profile().is_vouched, True)
-        eq_(r.context['user'].get_profile(),
-            Invite.objects.get(pk=invite.pk).redeemer)
+        self.redeem_invite(invite, **d)
+        profile = Invite.objects.get(pk=invite.pk).redeemer
+        eq_(profile.is_vouched, True)
 
         # Don't reuse codes.
-        r = self.redeem_invite(invite, email='mr2@gmail.com')
-        eq_(r.context['user'].get_profile().is_vouched, False)
+        self.redeem_invite(invite, email='mr2@gmail.com')
+        eq_(User.objects.get(email='mr2@gmail.com').get_profile().is_vouched,
+            False)
 
         # Don't reinvite a vouched user
         url = reverse('invite')
         d = dict(recipient='mr.fusion@gmail.com')
-        r = self.mozillian_client.post(url, d, follow=True)
+        self.client.login(email=self.mozillian.email)
+        r = self.client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('You cannot invite someone who has already been vouched.' in
                 pq(r.content)('ul.errorlist li').text())
@@ -106,5 +104,6 @@ class InviteTest(LDAPTestCase):
         """
         url = reverse('invite')
         d = dict(recipient='mr.fusion@gmail.com')
-        r = self.pending_client.post(url, d, follow=True)
+        self.client.login(email=self.pending.email)
+        r = self.client.post(url, d, follow=True)
         eq_(r.status_code, 403)

@@ -51,30 +51,18 @@ class UserProfile(SearchMixin, models.Model):
     class Meta:
         db_table = 'profile'
 
-    def vouch(self, vouchee, system=True, commit=True):
-        changed = system  # have we changed anything?
+    def vouch(self, vouched_by, system=True, commit=True):
+        changed = system # have we changed anything?
         if system:
             self.is_vouched = True
-            self.get_ldap_person()
-            my_uid = self.get_ldap_person()[1]['uniqueIdentifier'][0]
-            their_uid = 'ZUUL'
-            larper.record_vouch(their_uid, my_uid)
 
-        if vouchee and vouchee.is_vouched:
+        if vouched_by and vouched_by.is_vouched:
             changed = True
             self.is_vouched = True
-            self.vouched_by = vouchee
-            # TODO: remove this when we take vouch status out of LDAP.
-            #       - need to do search filtering of vouch from mysql
-            #       - checking of vouch status via profile instead of LDAP
-            self.get_ldap_person()
-            my_uid = self.get_ldap_person()[1]['uniqueIdentifier'][0]
-            their_uid = vouchee.get_ldap_person()[1]['uniqueIdentifier'][0]
-            larper.record_vouch(my_uid, their_uid)
+            self.vouched_by = vouched_by
 
         if commit and changed:
             self.save()
-
             # Email the user and tell them they were vouched.
             self._email_now_vouched()
 
@@ -104,6 +92,10 @@ class UserProfile(SearchMixin, models.Model):
                      "and invite other Mozillians onto the site.")
         send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.user.username])
+
+    @property
+    def full_name(self):
+        "%s %s" % (self.user.first_name, self.user.last_name)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -140,9 +132,14 @@ class UserProfile(SearchMixin, models.Model):
 
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
+    dn = '%s %s' % (instance.first_name, instance.last_name)
+
     if created:
-        dn = '%s %s' % (instance.first_name, instance.last_name)
         UserProfile.objects.create(user=instance, display_name=dn)
+    else:
+        u = UserProfile.objects.get(user=instance)
+        u.display_name = dn
+        u.save()
 
 
 @receiver(models.signals.pre_save, sender=UserProfile)
