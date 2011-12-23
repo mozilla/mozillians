@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import signals as dbsignals
 from django.dispatch import receiver
 
+from elasticutils import S
 from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
@@ -117,15 +118,31 @@ class UserProfile(SearchMixin, models.Model):
                  'date_joined')
         d.update(dict((a, getattr(self.user, a)) for a in attrs))
         # Index group ids... for fun.
-        groups = list(self.groups.values_list('id', flat=True))
+        groups = list(self.groups.values_list('name', flat=True))
         d.update(dict(groups=groups))
         return d
+
+    @classmethod
+    def search(cls, query, vouched=None):
+        """Sensible default search for UserProfiles."""
+        # TODO: groups
+        query = query.lower().strip()
+        fields = ('first_name__text', 'last_name__text', 'display_name__text',
+                  'username__text', 'bio__text', 'website__text',
+                  'email__text', 'groups__text', 'first_name__startswith',
+                  'last_name__startswith')
+        q = dict((field, query) for field in fields)
+        s = S(cls).query(or_=q)
+        if vouched is not None:
+            s = s.filter(is_vouched=vouched)
+        return s
 
 
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
+        dn = '%s %s' % (instance.first_name, instance.last_name)
+        UserProfile.objects.create(user=instance, display_name=dn)
 
 
 @receiver(models.signals.pre_save, sender=UserProfile)

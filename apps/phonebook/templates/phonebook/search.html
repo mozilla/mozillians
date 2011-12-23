@@ -41,15 +41,6 @@
           nickname.
         </p>
       {% endtrans %}
-    {% elif size_exceeded_error %}
-      {% trans %}
-        <h2>Too Many Search Results</h2>
-
-        <p>
-          Sorry, but there were too many results to display.
-          Please make your search more specific.
-        </p>
-      {% endtrans %}
     {% else %}
       {% for person in people %}
         {{ search_result(person) }}
@@ -62,7 +53,7 @@
           {% endtrans %}
         </p>
       {% endfor %}
-      
+
       {% if show_pagination %}
         <div class="pagination">
           {% for page in people.paginator.page_range %}

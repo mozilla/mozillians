@@ -167,3 +167,5 @@ CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report'
 
 ES_DISABLED = True
+ES_HOSTS = ['127.0.0.1:9200']
+ES_INDEXES = dict(default='mozillians')

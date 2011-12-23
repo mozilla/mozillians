@@ -1,6 +1,4 @@
 from functools import wraps
-from ldap import SIZELIMIT_EXCEEDED
-from operator import attrgetter
 
 import django.contrib.auth
 from django.contrib import messages
@@ -17,8 +15,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
-from groups.models import Group
-from groups.helpers import stringify_groups, users_from_groups
+from groups.helpers import stringify_groups
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
@@ -221,57 +218,35 @@ def search(request):
     limit = None
     nonvouched_only = False
     people = []
-    size_exceeded = False
     show_pagination = False
     form = forms.SearchForm(request.GET)
 
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
         limit = form.cleaned_data['limit']
-        nonvouched_only = form.cleaned_data['nonvouched_only']
+        vouched = False if form.cleaned_data['nonvouched_only'] else None
 
         if request.user.is_authenticated():
-            ldap = UserSession.connect(request)
+            profiles = UserProfile.search(query, vouched=vouched)
+
+            paginator = Paginator(profiles, limit)
+            page = request.GET.get('page', 1)
+
             try:
-                # Stale data okay
-                sortk = attrgetter('full_name')
-                people = sorted(ldap.search(query,
-                                            nonvouched_only=nonvouched_only),
-                                            key=sortk)
+                people = paginator.page(page)
+            except PageNotAnInteger:
+                people = paginator.page(1)
+            except EmptyPage:
+                people = paginator.page(paginator.num_pages)
 
-                # Search based on group name as well
-                groups = Group.objects.filter(name__icontains=query)[:limit]
-                for group in groups:
-                    for user in users_from_groups(request, group,
-                            limit=forms.PAGINATION_LIMIT,
-                            nonvouched_only=nonvouched_only):
-                        if not user.unique_id in [p.unique_id for p in people]:
-                            people.append(user)
-
-                paginator = Paginator(people, limit)
-                page = request.GET.get('page', 1)
-                try:
-                    people = paginator.page(page)
-                except PageNotAnInteger:
-                    people = paginator.page(1)
-                except EmptyPage:
-                    people = paginator.page(paginator.num_pages)
-
-                if paginator.count > forms.PAGINATION_LIMIT:
-                    show_pagination = True
-
-            except SIZELIMIT_EXCEEDED:
-                size_exceeded = True
-
-            if len(people) == 1 and not show_pagination:
-                return redirect(reverse('profile', args=[people[0].unique_id]))
+            if paginator.count > forms.PAGINATION_LIMIT:
+                show_pagination = True
 
     d = dict(people=people,
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
-             show_pagination=show_pagination,
-             size_exceeded_error=size_exceeded)
+             show_pagination=show_pagination)
     return render(request, 'phonebook/search.html', d)
 
 

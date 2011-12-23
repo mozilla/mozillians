@@ -3,16 +3,16 @@ from uuid import uuid4
 
 from django import test
 from django.contrib.auth.models import User
-from django.core.files import File
 
 import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+import common.tests
 from funfactory.urlresolvers import set_url_prefix, reverse
 from phonebook.tests import (LDAPTestCase, AMANDA_NAME, AMANDEEP_NAME,
-                             AMANDEEP_VOUCHER, MOZILLIAN, PENDING,
-                             OTHER_MOZILLIAN, PASSWORD, mozillian_client)
+                             MOZILLIAN, PENDING, OTHER_MOZILLIAN, PASSWORD,
+                             mozillian_client)
 from phonebook.views import UNAUTHORIZED_DELETE
 
 
@@ -110,69 +110,6 @@ class TestViews(LDAPTestCase):
 
         r = self.pending_client.get(search, dict(q='Am'), follow=True)
         eq_(r.context.get('people', []), [])
-
-    def test_mozillian_search(self):
-        url = reverse('phonebook.search')
-        r = self.mozillian_client.get(url, dict(q='Am'))
-        rs = self.mozillian_client.get(url, dict(q=' Am'))
-        rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
-        peeps = r.context['people']
-        peeps_ws = rs.context['people']
-        peeps_nv = rnv.context['people']
-        saw_amandeep = saw_amanda = False
-
-        for person in peeps:
-            if person.full_name == AMANDEEP_NAME:
-                # we add the vouched user into a group and make
-                # sure a nonvouch search doesn't return them
-                person.get_profile().groups.create(name='IAMVOUCHED')
-                eq_(AMANDEEP_VOUCHER, person.voucher_unique_id,
-                    'Amandeep is a Mozillian')
-                saw_amandeep = True
-            elif person.full_name == AMANDA_NAME:
-                if person.voucher_unique_id:
-                    self.fail('Amanda is pending status')
-                saw_amanda = True
-            if saw_amandeep and saw_amanda:
-                break
-        self.assertEqual(peeps[0].full_name, peeps_ws[0].full_name)
-        self.assertEqual(peeps_nv[0].full_name, AMANDA_NAME)
-        self.assertTrue(saw_amandeep, 'We see Mozillians')
-        self.assertTrue(saw_amanda, 'We see Pending')
-
-    def test_mozillian_search_pagination(self):
-        """
-        Tests the pagination on search.
-        First assumes no page is passed, but valid limit is passed
-        Second assumes invalid page is passed, no limit is passed
-        Third assumes valid page is passed, no limit is passed
-        Fourth assumes valid page is passed, valid limit is passed
-        """
-        url = reverse('phonebook.search')
-        r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
-        # Check for redirect on one search result because we don't expect
-        # a search page.
-        assert r.status_code == 302
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 1)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='x'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test', limit='-3'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
 
     def test_mozillian_sees_mozillian_profile(self):
         # HACK: This user isn't made by default. WTF?
@@ -373,6 +310,74 @@ class TestOpensearchViews(test_utils.TestCase):
         response = self.client.get(reverse('phonebook.search_plugin',
                                    prefix='/fr/'))
         assert '/fr/search' in response.content
+
+
+class TestSearch(common.tests.ESTestCase):
+    def test_mozillian_search(self):
+        url = reverse('phonebook.search')
+        r = self.mozillian_client.get(url, dict(q='Am'))
+        rs = self.mozillian_client.get(url, dict(q=' Am'))
+        rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
+
+        eq_(r.status_code, 200)
+        peeps = r.context['people']
+        peeps_ws = rs.context['people']
+        peeps_nv = rnv.context['people']
+
+        saw_amandeep = saw_amanda = False
+
+        for person in peeps:
+            if person.display_name == AMANDEEP_NAME:
+                assert person.is_vouched, 'Amandeep is a Mozillian'
+                saw_amandeep = True
+            elif person.display_name == AMANDA_NAME:
+                if person.is_vouched:
+                    self.fail('Amanda is pending status')
+                saw_amanda = True
+            if saw_amandeep and saw_amanda:
+                break
+        self.assertEqual(peeps[0].id, peeps_ws[0].id)
+        self.assertEqual(peeps_nv[0].display_name, AMANDA_NAME)
+        self.assertTrue(saw_amandeep, 'We see Mozillians')
+        self.assertTrue(saw_amanda, 'We see Pending')
+
+        assert all(not person.is_vouched for person in peeps_nv)
+
+    def test_mozillian_search_pagination(self):
+        """
+        Tests the pagination on search.
+        First assumes no page is passed, but valid limit is passed
+        Second assumes invalid page is passed, no limit is passed
+        Third assumes valid page is passed, no limit is passed
+        Fourth assumes valid page is passed, valid limit is passed
+        """
+        url = reverse('phonebook.search')
+        r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 1)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
+                                                limit='1'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 1)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
+                                                limit='x'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
+
+        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
+                                                limit='-3'))
+        peeps = r.context['people']
+        self.assertEqual(len(peeps), 2)
 
 
 def _logged_in_html(response):
