@@ -7,8 +7,6 @@ from pyquery import PyQuery as pq
 
 from common.tests import ESTestCase, TestCase
 from groups.models import Group
-from phonebook.tests import MOZILLIAN, PENDING
-from users import cron
 from users.models import UserProfile
 
 Group.objects.get_or_create(name='staff', system=True)
@@ -29,7 +27,7 @@ class ViewTest(TestCase):
                 )
         r = self.client.post(reverse('register'), d, follow=True)
         user = User.objects.filter(email=d['email'])[0].get_profile()
-        code = user.get_confirmation_url()
+        user.get_confirmation_url()
 
         r = self.client.get(reverse('confirm'))
         eq_(r.status_code, 404, 'No confirmation code raises a 404.')
@@ -124,7 +122,8 @@ class RegistrationTest(TestCase):
                 'Moz.com should belong to the "staff" group.')
 
     def test_mozillacom_registration_case_insensitive_username(self):
-        """Verify @mozilla.com users can sign up only once with the same email"""
+        """Verify @mozilla.com users can sign up only once with the same email.
+        """
         d = dict(
                  email='mRfUsIoN@mozilla.com',
                  first_name='Akaaaaaaash',
@@ -140,7 +139,6 @@ class RegistrationTest(TestCase):
         r = self.client.post(reverse('register'), d, follow=True)
         assert r.context['form'].errors, "Form should throw errors."
         eq_(len(mail.outbox), 1)
-
 
     def test_plus_signs(self):
         d = dict(
@@ -209,6 +207,7 @@ class TestThingsForPeople(TestCase):
         assert not doc('#vouch-form button'), errmsg
         assert 'Vouch for me' not in r.content, errmsg
 
+
 def get_profile(email):
     """Get a UserProfile for a particular user."""
     return User.objects.get(email=email).get_profile()
@@ -228,10 +227,8 @@ class VouchTest(ESTestCase):
         profile = self.pending.get_profile()
         assert not profile.is_vouched, 'User should not yet be vouched.'
         r = self.mozillian_client.get(reverse('phonebook.search'),
-                                      {'q': PENDING['email']},follow=True)
-
-
-        assert 'Pending Profile' in r.content, (
+                                      {'q': self.pending.email})
+        assert 'Non-Vouched' in r.content, (
                 'User should not appear as a Mozillian in search.')
 
         profile.vouch(vouchee)
@@ -250,6 +247,6 @@ class VouchTest(ESTestCase):
 
         # Make sure the user appears vouched in search results
         r = self.mozillian_client.get(reverse('phonebook.search'),
-                                      {'q': PENDING['email']})
-        assert not 'Pending Profile' in r.content, (
+                                      {'q': self.pending.email})
+        assert 'Mozillian' in r.content, (
                 'User should appear as a Mozillian in search.')

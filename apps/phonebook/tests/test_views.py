@@ -11,8 +11,6 @@ from pyquery import PyQuery as pq
 
 from common.tests import TestCase, ESTestCase
 from funfactory.urlresolvers import set_url_prefix, reverse
-from phonebook.tests import (AMANDA_NAME, AMANDEEP_NAME, MOZILLIAN, PENDING,
-                             OTHER_MOZILLIAN, PASSWORD, mozillian_client)
 
 
 class TestDeleteUser(TestCase):
@@ -68,6 +66,7 @@ class TestDeleteUser(TestCase):
         # Make sure the user can't login anymore
         assert not self.client.login(email=user.email)
 
+
 class TestViews(TestCase):
 
     def test_anonymous_home(self):
@@ -110,7 +109,7 @@ class TestViews(TestCase):
 
     def test_mozillian_sees_mozillian_profile(self):
         user = User.objects.create(
-                username='other', email=OTHER_MOZILLIAN['email'])
+                username='other', email='whatever@whatver.man')
 
         url = reverse('profile', args=['other'])
         r = self.mozillian_client.get(url)
@@ -267,7 +266,7 @@ class TestViews(TestCase):
         r = client.post(reverse('phonebook.edit_profile'),
                         dict(last_name='foo', website='tofumatt.com'))
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
-        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
+        r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
 
         eq_(doc('dd.website a').attr('href'), 'http://tofumatt.com/', (
@@ -276,7 +275,7 @@ class TestViews(TestCase):
     def test_my_profile(self):
         """Are we cachebusting our picture?"""
         raise SkipTest
-        profile = reverse('profile', args=[MOZILLIAN['uniq_id']])
+        profile = reverse('profile', args=[self.mozillian.username])
         r = self.mozillian_client.get(profile)
         doc = pq(r.content)
         assert '?' in doc('#profile-photo').attr('src')
@@ -305,6 +304,8 @@ class TestOpensearchViews(test_utils.TestCase):
 
 class TestSearch(ESTestCase):
     def test_mozillian_search(self):
+        amanda = 'Amanda Younger'
+        amandeep = 'Amandeep McIlrath'
         url = reverse('phonebook.search')
         r = self.mozillian_client.get(url, dict(q='Am'))
         rs = self.mozillian_client.get(url, dict(q=' Am'))
@@ -318,17 +319,17 @@ class TestSearch(ESTestCase):
         saw_amandeep = saw_amanda = False
 
         for person in peeps:
-            if person.display_name == AMANDEEP_NAME:
+            if person.display_name == amandeep:
                 assert person.is_vouched, 'Amandeep is a Mozillian'
                 saw_amandeep = True
-            elif person.display_name == AMANDA_NAME:
+            elif person.display_name == amanda:
                 if person.is_vouched:
                     self.fail('Amanda is pending status')
                 saw_amanda = True
             if saw_amandeep and saw_amanda:
                 break
         self.assertEqual(peeps[0].id, peeps_ws[0].id)
-        self.assertEqual(peeps_nv[0].display_name, AMANDA_NAME)
+        self.assertEqual(peeps_nv[0].display_name, amanda)
         self.assertTrue(saw_amandeep, 'We see Mozillians')
         self.assertTrue(saw_amanda, 'We see Pending')
 

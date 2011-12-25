@@ -12,21 +12,10 @@ from funfactory.manage import path
 
 from users import cron
 
-# The test data (below in module constants) must match data in
-# directory/testsuite/mozillians-bulk-test-data.ldif
-# You must have run x-rebuild before these tests
-MOZILLIAN = dict(email='u000001@mozillians.org', uniq_id='7f3a67u000001')
-PENDING = dict(email='u000003@mozillians.org', uniq_id='7f3a67u000003')
-OTHER_MOZILLIAN = dict(email='u000098@mozillians.org', uniq_id='7f3a67u000098')
-AMANDEEP_NAME = 'Amandeep McIlrath'
-AMANDEEP_VOUCHER = '7f3a67u000001'
-AMANDA_NAME = 'Amanda Younger'
-PASSWORD = 'secret'
-
-
 call = lambda x: subprocess.Popen(x, stdout=subprocess.PIPE).communicate()
 
 
+# TODO: Remove when larper is gone.
 class LDAPTestCase(test_utils.TestCase):
     @classmethod
     def setup_class(cls):
