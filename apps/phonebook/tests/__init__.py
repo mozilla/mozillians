@@ -25,22 +25,3 @@ class LDAPTestCase(test_utils.TestCase):
     def setUp(self):
         """We'll use multiple clients at the same time."""
         cron.vouchify()
-
-
-def mozillian_client(email, password=PASSWORD):
-    """Create and return an authorized Mozillian test client."""
-    client = test.Client()
-
-    # We can't use c.login for these tests because of some LDAP strangeness,
-    # so we manually login with a POST request. (TODO: Fix this.)
-    data = dict(username=email, password=password)
-    user = authenticate(**data)
-    user.get_profile().is_confirmed = True
-    user.get_profile().save()
-    # This login never works
-    # TODO: deep-dive and find out why
-    client.post(reverse('login'), data)
-    r = client.post(reverse('login'), data, follow=True)
-    eq_(email, str(r.context['user']))
-
-    return client
