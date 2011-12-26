@@ -161,8 +161,8 @@ class TestViews(TestCase):
 
     def test_pending_edit_profile(self):
         # do all then reset
-        newbie_uniq_id, newbie_client = _create_new_user()
-        profile_url = reverse('profile', args=[newbie_uniq_id])
+        newbie, newbie_client = _create_new_user()
+        profile_url = reverse('profile', args=[newbie.username])
         edit_profile_url = reverse('phonebook.edit_profile')
         # original
         r = newbie_client.get(profile_url)
@@ -187,9 +187,8 @@ class TestViews(TestCase):
 
         # cleanup
         delete_url = reverse('phonebook.delete_profile')
-        data = dict(unique_id=newbie_uniq_id)
 
-        r = newbie_client.post(delete_url, data, follow=True)
+        r = newbie_client.post(delete_url, follow=True)
         eq_(200, r.status_code, 'A Mozillian can delete their own account')
 
     def test_profile_photo(self):

@@ -50,9 +50,6 @@ class ProfileForm(happyforms.Form):
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
     irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
                                    required=False)
-    irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
-                                             required=False)
-
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
     website = forms.URLField(label=_lazy(u'Website'), required=False)
 

@@ -106,7 +106,7 @@
         {% elif profile.voucher %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-            <a href="{{ url('profile', profile.voucher.unique_id) }}"
+            <a href="{{ url('profile', profile.user.username) }}"
                class="vouched">
               {{ profile.voucher.full_name }}
             </a>
