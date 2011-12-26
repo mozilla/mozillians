@@ -1,9 +1,5 @@
 import json
 
-from django.contrib.auth.models import User
-from django.conf import settings
-
-import test_utils
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -11,7 +7,6 @@ from pyquery import PyQuery as pq
 import common.tests
 from groups.helpers import stringify_groups
 from groups.models import Group
-from users.tests import get_profile
 
 
 class GroupTest(common.tests.TestCase):
@@ -75,7 +70,8 @@ class GroupTest(common.tests.TestCase):
 
         self.client.login(email=self.pending.email)
         self.client.post(reverse('phonebook.edit_profile'),
-                         dict(last_name='McAwesomepants', groups='Awesome foo Bar'),
+                         dict(last_name='McAwesomepants',
+                              groups='Awesome foo Bar'),
                          follow=True)
 
         assert profile.groups.all(), (
@@ -163,7 +159,8 @@ class GroupTest(common.tests.TestCase):
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
-                'User should not be in the "%s" group' % self.NORMAL_GROUP.name)
+                'User should not be in the "%s" group' %
+                self.NORMAL_GROUP.name)
         assert "Join Group" in response.content, (
                 '"Join Group" button should be present in the response.')
 
@@ -174,13 +171,15 @@ class GroupTest(common.tests.TestCase):
         assert "Leave Group" in r.content, (
                 '"Leave Group" button should be present in the response.')
         assert profile.groups.get(id=self.NORMAL_GROUP.id), (
-                'User should be part of the "%s" group' % self.NORMAL_GROUP.name)
+                'User should be part of the "%s" group' %
+                self.NORMAL_GROUP.name)
 
         # Do it again and they should leave the group.
         r = self.client.post(doc('#toggle-group').attr('action'), {},
                              xsfollow=True)
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
-                'User should not be in the "%s" group' % self.NORMAL_GROUP.name)
+                'User should not be in the "%s" group' %
+                self.NORMAL_GROUP.name)
 
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
@@ -189,7 +188,8 @@ class GroupTest(common.tests.TestCase):
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
-                'User should not be in the "%s" group' % self.SYSTEM_GROUP.name)
+                'User should not be in the "%s" group' %
+                self.SYSTEM_GROUP.name)
         assert not "Join Group" in response.content, (
                 '"Join Group" button should not be present in the response.')
 
@@ -197,4 +197,5 @@ class GroupTest(common.tests.TestCase):
         r = self.client.post(reverse('group_toggle', args=[
                 self.SYSTEM_GROUP.id, self.SYSTEM_GROUP.url]), follow=True)
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
-                'User should not be in the "%s" group' % self.SYSTEM_GROUP.name)
+                'User should not be in the "%s" group' %
+                self.SYSTEM_GROUP.name)

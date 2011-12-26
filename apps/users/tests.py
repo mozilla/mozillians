@@ -208,11 +208,6 @@ class TestThingsForPeople(TestCase):
         assert 'Vouch for me' not in r.content, errmsg
 
 
-def get_profile(email):
-    """Get a UserProfile for a particular user."""
-    return User.objects.get(email=email).get_profile()
-
-
 class VouchTest(ESTestCase):
 
     def test_vouch_method(self):

@@ -1,13 +1,7 @@
 import os
 import subprocess
 
-from django import test
-from django.contrib.auth import authenticate
-
 import test_utils
-from nose.tools import eq_
-
-from funfactory.urlresolvers import reverse
 from funfactory.manage import path
 
 from users import cron
