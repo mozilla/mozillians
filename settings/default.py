@@ -20,7 +20,8 @@ LOGGING = {
 LOCALE_PATHS = [path('locale')]
 
 # Accepted locales
-PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es-ES', 'hu', 'fr', 'ko', 'nl', 'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'zh-TW')
+PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es', 'hu', 'fr', 'ko', 'nl',
+                  'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'zh-TW')
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
