@@ -8,9 +8,6 @@ admin.autodiscover()
 from phonebook import views
 
 urlpatterns = patterns('',
-    url('^user/photo/(?P<unique_id>.*)$', views.photo,
-        name='phonebook.profile_photo'),
-
     url('^user/edit/$', views.edit_profile,
         name='phonebook.edit_profile'),
     url('^register/edit/$', views.edit_new_profile,

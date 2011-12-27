@@ -57,7 +57,7 @@
         {% if mode != 'new' %}
           <div id="photo-container"
                class="{{ 'error' if form.errors['photo'] }}">
-            {{ profile_photo(person) }}
+            {{ profile_photo(user.get_profile()) }}
 
             {{ form['photo'].label_tag() }}
             {{ form.errors['photo'] }}
@@ -79,7 +79,7 @@
             <div class="clear"></div>
           </div>
         {% endif %}
-        {% if photo %}
+        {% if user.get_profile().photo %}
           <div id="photo-delete-container" class="field">
             {{ form['photo_delete'].label_tag() }}
 
@@ -138,7 +138,7 @@
     {% if intent %} {# BrowserID Sign-up #}
       <a href="{{ url('home') }}" id="cancel">
     {% else %}
-      <a href="{{ url('profile', user.unique_id) }}" id="cancel">
+      <a href="{{ url('profile', user.username) }}" id="cancel">
     {% endif %}
       {{ _('Cancel') }}{# L10n: Cancel editing #}
     </a>

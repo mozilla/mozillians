@@ -1,10 +1,6 @@
-{# TODO We should reuse microformats like Domesday prototype #}
 <div class="result">
   <div class="avatar">
-  {# TODO: FIX
-    <img src="{{ url('phonebook.profile_photo', profile.user_id) }}"
-    alt="{{ _('Profile photo') }}" class="profile-photo">
-    #}
+  {{ profile_photo(profile) }}
   </div>
   <div class="details">
     <h2><a href="{{url('profile', profile.user.username) }}">

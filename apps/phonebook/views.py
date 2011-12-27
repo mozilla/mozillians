@@ -97,10 +97,7 @@ def edit_profile(request, new_account=False):
 
     d = dict(form=form,
              registration_flow=new_account,
-             user_groups=user_groups,
-             # TODO: photo!!
-#             photo=ldap.profile_photo(unique_id, use_master=True),
-            )
+             user_groups=user_groups)
     return render(request, 'phonebook/edit_profile.html', d)
 
 
@@ -164,18 +161,6 @@ def search_plugin(request):
     """Render an OpenSearch Plugin."""
     return render(request, 'phonebook/search_opensearch.xml',
                   content_type='application/opensearchdescription+xml')
-
-
-@login_required
-def photo(request, unique_id):
-    needs_master = (request.user.unique_id == unique_id)
-
-    ldap = UserSession.connect(request)
-    image = ldap.profile_photo(unique_id, use_master=needs_master)
-    if image:
-        return HttpResponse(image, mimetype="image/jpeg")
-    else:
-        return redirect('/media/img/unknown.png')
 
 
 @login_required

@@ -57,8 +57,7 @@
   <div class="clear"></div>
 
   <div class="blue-pastels vcard h-card">
-    {# TODO: we need to get this from the filesystem #}
-    {# {{ profile_photo(profile) }} #}
+    {{ profile_photo(profile) }}
 
     {% if user.username == request.user.username %}
       <a href="{{ url('phonebook.edit_profile') }}"

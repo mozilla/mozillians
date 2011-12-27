@@ -1,6 +1,8 @@
 import re
 import time
 
+from django.conf import settings
+
 import jinja2
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
@@ -20,18 +22,16 @@ def paragraphize(value):
 
 @register.inclusion_tag('phonebook/includes/photo.html')
 @jinja2.contextfunction
-def profile_photo(context, person):
+def profile_photo(context, profile):
     user = context['request'].user
-    me = bool(user.username == person.username)
-    url = reverse('phonebook.profile_photo', args=[person.unique_id])
+    cachebust = profile.photo and bool(user.pk == profile.user_id)
 
-    if me:
-        url += '?%d' % int(time.time())
-
-    return dict(image_url=url)
+    return dict(image_url=profile.get_photo_url(cachebust=cachebust))
 
 
 @register.inclusion_tag('phonebook/includes/search_result.html')
 @jinja2.contextfunction
 def search_result(context, profile):
-    return dict(profile=profile)
+    d = dict(context.items())
+    d.update(profile=profile)
+    return d

@@ -1,3 +1,4 @@
+import os
 import re
 import tempfile
 
@@ -7,6 +8,7 @@ from django.conf import settings
 import happyforms
 import Image
 from easy_thumbnails import processors
+from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
@@ -121,11 +123,21 @@ class ProfileForm(happyforms.Form):
         user.last_name = d['last_name']
 
         profile.bio = d['biography']
-        # TODO: save/delete photo data...
-        # photo
-        # photo_delete
         profile.ircname = d['irc_nickname']
         profile.website = d['website']
+
+        if d['photo']:
+            profile.photo = True
+            with open(profile.get_photo_file(), 'w') as f:
+                f.write(d['photo'].file.read())
+
+        if d['photo_delete']:
+            profile.photo = False
+            try:
+                os.remove(profile.get_photo_file())
+            except OSError:
+                statsd.incr('errors.photo.deletion')
+
         profile.save()
         user.save()
 

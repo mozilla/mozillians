@@ -1,3 +1,4 @@
+import time
 import urllib
 
 from django.conf import settings
@@ -76,6 +77,23 @@ class UserProfile(SearchMixin, models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
+    def get_photo_url(self, cachebust=False):
+        """Gets a user's userpic URL.  Appends cachebusting if requested."""
+
+        if self.photo:
+            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.user_id)
+
+            if cachebust:
+                url += '?%d' % int(time.time())
+        else:
+            url = settings.MEDIA_URL + 'img/unknown.png'
+
+        return url
+
+    def get_photo_file(self):
+        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.user_id)
+
+    # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):
         r = self.get_ldap_person()
         return r[1]['uniqueIdentifier'][0]

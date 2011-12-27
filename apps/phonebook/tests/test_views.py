@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 
 from django import test
+from django.conf import settings
 from django.contrib.auth.models import User
 
 import test_utils
@@ -197,26 +198,43 @@ class TestViews(TestCase):
         Test the upload, encoding, and removal of photo profiles. Also make
         sure edge cases (from naughty user input) and HTML elements work
         properly.
+
+        .. note::
+
+           This does not test that the web server is serving the files from
+           the filesystem properly.
         """
-        raise SkipTest
         client = self.mozillian_client
+
+        def assert_no_photo():
+            """This will assert that a user is in a proper no userpic state.
+
+            This means:
+                * Linking to ``unknown.jpg``.
+                * No "Remove Profile Photo" link.
+                * No file on the file system.
+            """
+            r = client.get(reverse('phonebook.edit_profile'))
+            doc = pq(r.content)
+            eq_(doc('#profile-photo').attr('src'),
+                settings.MEDIA_URL + 'img/unknown.png')
+            assert not doc('#id_photo_delete'), (
+                    '"Remove Profile Photo" control should not appear.')
+
+            # make sure no file is in the file system
+            f = self.mozillian.get_profile().get_photo_file()
+            assert not os.path.exists(f)
 
         # No photo exists by default, the delete photo form control shouldn't
         # be present, and trying to delete a non-existant photo shouldn't
         # do anything.
-        r = client.get(reverse('phonebook.edit_profile'))
-        doc = pq(r.content)
-        image = client.get(doc('#profile-photo').attr('src'))
+        assert_no_photo()
 
-        eq_(image.status_code, 302, (
-                'Profile image URL should redirect to "unknown" image.'))
-        assert not doc('#id_photo_delete'), (
-                '"Remove Profile Photo" control should not appear.')
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('phonebook.edit_profile'),
                         dict(last_name='foo', photo_delete=1))
-        eq_(r.status_code, 302, ('Trying to delete a non-existant photo '
-                                 "shouldn't result in an error."))
+        eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
+                                "shouldn't result in an error.")
 
         # Add a profile photo
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
@@ -228,25 +246,20 @@ class TestViews(TestCase):
 
         r = client.get(reverse('phonebook.edit_profile'))
         doc = pq(r.content)
-        image = client.get(doc('#profile-photo').attr('src'))
+        assert doc('#profile-photo').attr('src').startswith(
+                settings.USERPICS_URL + '/' + str(self.mozillian.id) + '.jpg?')
 
-        eq_(image.status_code, 200, 'Profile image URL should not redirect.')
         assert doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should appear.')
+
+        assert os.path.exists(self.mozillian.get_profile().get_photo_file())
 
         # Remove a profile photo
         r = client.post(reverse('phonebook.edit_profile'),
                         dict(last_name='foo', photo_delete='1'))
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
-        r = client.get(reverse('phonebook.edit_profile'))
-        doc = pq(r.content)
-        image = client.get(doc('#profile-photo').attr('src'))
-
-        eq_(image.status_code, 302, (
-                'Profile image URL should redirect to "unknown" image.'))
-        assert not doc('#id_photo_delete'), (
-                '"Remove Profile Photo" control should not appear.')
+        assert_no_photo()
 
     def test_has_website(self):
         """Verify a user's website appears in their profile (as a link)."""
@@ -278,6 +291,7 @@ class TestViews(TestCase):
         r = self.mozillian_client.get(profile)
         doc = pq(r.content)
         assert '?' in doc('#profile-photo').attr('src')
+
 
 
 class TestOpensearchViews(test_utils.TestCase):
