@@ -134,9 +134,11 @@ def generate_code(sender, instance, raw, using, **kwargs):
 @receiver(models.signals.pre_save, sender=UserProfile)
 def auto_vouch(sender, instance, raw, using, **kwargs):
     """Auto vouch mozilla.com users."""
-    username = instance.user.username
-    if any(username.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-        instance.vouch(None, system=True, commit=False)
+    if not instance.id:
+        username = instance.user.username
+        if any(username.endswith('@' + x) for x
+                                          in settings.AUTO_VOUCH_DOMAINS):
+            instance.vouch(None, system=True, commit=False)
 
 
 @receiver(models.signals.post_save, sender=UserProfile)
