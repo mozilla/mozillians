@@ -14,7 +14,7 @@
   <h1>{{ _('Search') }}</h1>
 
   <div class="blue-pastels">
-    <form method="GET" id="search-form" action="{{ url('phonebook.search') }}">
+    <form method="GET" id="search-form" action="{{ url('search') }}">
       <input type="search" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
@@ -60,7 +60,7 @@
             {% if page == people.number %}
               <span>{{ page }}</span>
             {% else %}
-              <a href="{{ url('phonebook.search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+              <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
             {% endif %}
           {% endfor %}
         </div>

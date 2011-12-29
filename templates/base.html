@@ -14,7 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
   <link rel="search" type="application/opensearchdescription+xml"
-        title="{{ _('Mozillians') }}" href="{{ url('phonebook.search_plugin') }}">
+        title="{{ _('Mozillians') }}" href="{{ url('search_plugin') }}">
 
   {% block site_css %}
     {{ css('common') }}
@@ -81,7 +81,7 @@
 
     {% if user.is_authenticated() and user.get_profile().is_vouched %}
       {% block search %}
-        <form id="quick-search" action="{{ url('phonebook.search') }}"
+        <form id="quick-search" action="{{ url('search') }}"
               method="GET">
           <input type="search" id="q" name="q"
                  placeholder="{{ _('Name, IRC Nick, or Email') }}">

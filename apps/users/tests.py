@@ -221,7 +221,7 @@ class VouchTest(ESTestCase):
         vouchee = self.mozillian.get_profile()
         profile = self.pending.get_profile()
         assert not profile.is_vouched, 'User should not yet be vouched.'
-        r = self.mozillian_client.get(reverse('phonebook.search'),
+        r = self.mozillian_client.get(reverse('search'),
                                       {'q': self.pending.email})
         assert 'Non-Vouched' in r.content, (
                 'User should not appear as a Mozillian in search.')
@@ -241,7 +241,7 @@ class VouchTest(ESTestCase):
                 'Pending profile div should not be in DOM.')
 
         # Make sure the user appears vouched in search results
-        r = self.mozillian_client.get(reverse('phonebook.search'),
+        r = self.mozillian_client.get(reverse('search'),
                                       {'q': self.pending.email})
         assert 'Mozillian' in r.content, (
                 'User should appear as a Mozillian in search.')

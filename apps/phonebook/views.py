@@ -64,13 +64,6 @@ def profile(request, username):
     return render(request, 'phonebook/profile.html', data)
 
 
-# TODO: consolidatify
-@never_cache
-@login_required
-def edit_new_profile(request):
-    return edit_profile(request, True)
-
-
 @never_cache
 @login_required
 def edit_profile(request, new_account=False):

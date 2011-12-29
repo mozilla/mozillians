@@ -37,7 +37,7 @@
         {% endtrans %}
 
         {% if vouch_form %}
-          <form action="{{ url('phonebook.vouch') }}" method="POST"
+          <form action="{{ url('vouch') }}" method="POST"
             id="vouch-form">
             {{ csrf() }}
 
@@ -60,7 +60,7 @@
     {{ profile_photo(profile) }}
 
     {% if user.username == request.user.username %}
-      <a href="{{ url('phonebook.edit_profile') }}"
+      <a href="{{ url('profile.edit') }}"
          class="button primary small" id="edit-profile">
         {{ _('Edit My Profile') }}
       </a>

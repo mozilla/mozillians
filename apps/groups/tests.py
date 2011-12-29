@@ -41,10 +41,9 @@ class GroupTest(common.tests.TestCase):
 
         self.client.login(email=self.mozillian.email)
 
-        self.client.post(reverse('phonebook.edit_profile'),
+        self.client.post(reverse('profile.edit'),
                          dict(last_name='tofumatt', groups='Awesome,foo,Bar'),
-                         follow=True
-                         )
+                         follow=True)
 
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
 
@@ -69,7 +68,7 @@ class GroupTest(common.tests.TestCase):
         assert not profile.groups.all(), 'User should have no groups.'
 
         self.client.login(email=self.pending.email)
-        self.client.post(reverse('phonebook.edit_profile'),
+        self.client.post(reverse('profile.edit'),
                          dict(last_name='McAwesomepants',
                               groups='Awesome foo Bar'),
                          follow=True)
@@ -85,7 +84,7 @@ class GroupTest(common.tests.TestCase):
                 'User has no groups at beginning of test.')
 
         self.client.login(email=self.pending.email)
-        self.client.post(reverse('phonebook.edit_profile'),
+        self.client.post(reverse('profile.edit'),
                          dict(
                               last_name='McAwesomepants',
                               # This should result in four groups
@@ -106,7 +105,7 @@ class GroupTest(common.tests.TestCase):
         profile = self.mozillian.get_profile()
 
         self.client.login(email=self.mozillian.email)
-        self.client.post(reverse('phonebook.edit_profile'),
+        self.client.post(reverse('profile.edit'),
                          dict(last_name='tofumatt',
                               groups='%s %s' % (self.NORMAL_GROUP.name,
                                                 self.SYSTEM_GROUP.name)),
@@ -133,7 +132,7 @@ class GroupTest(common.tests.TestCase):
 
         # Edit this user's profile and remove a group.
         self.client.login(email=self.mozillian.email)
-        response = self.client.post(reverse('phonebook.edit_profile'),
+        response = self.client.post(reverse('profile.edit'),
                                     dict(last_name="McLovin'", groups=''),
                                     follow=True)
 

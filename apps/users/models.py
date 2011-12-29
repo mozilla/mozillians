@@ -1,3 +1,4 @@
+import os
 import time
 import urllib
 
@@ -12,6 +13,7 @@ from elasticutils import S
 from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
+from statsd import statsd
 from tower import ugettext as _
 
 import larper
@@ -205,3 +207,12 @@ def update_search_index(sender, instance, **kw):
 def remove_from_search_index(sender, instance, **kw):
     from elasticutils import tasks
     tasks.unindex_objects.delay(sender, [instance.id])
+
+
+@receiver(dbsignals.post_delete, sender=UserProfile)
+def remove_photos(sender, instance, **kw):
+    """Deletes photo files."""
+    # TODO: if this gets slow, give it to celery.
+    with statsd.timer('photos.remove'):
+        if instance.photo:
+            os.remove(instance.get_photo_file())

@@ -1,3 +1,4 @@
+import hashlib
 import os
 from uuid import uuid4
 
@@ -39,14 +40,14 @@ class TestDeleteUser(TestCase):
         """Private method used to walk through account deletion flow."""
         self.client.login(email=user.email)
 
-        r = self.client.get(reverse('phonebook.edit_profile'))
+        r = self.client.get(reverse('profile.edit'))
         doc = pq(r.content)
 
         # Make sure there's a link to a confirm deletion page, and nothing
         # pointing directly to the delete URL.
-        eq_(reverse('confirm_delete'), doc('#delete-profile').attr('href'),
+        eq_(reverse('profile.delete_confirm'), doc('#delete-profile').attr('href'),
             'We see a link to a confirmation page.')
-        self.assertFalse(any((reverse('phonebook.delete_profile') in el.action)
+        self.assertFalse(any((reverse('profile.delete') in el.action)
                               for el in doc('#main form')),
             "We don't see a form posting to the account delete URL.")
 
@@ -55,7 +56,7 @@ class TestDeleteUser(TestCase):
 
         # Test that we can go back (i.e. cancel account deletion).
         doc = pq(r.content)
-        eq_(reverse('phonebook.edit_profile'),
+        eq_(reverse('profile.edit'),
             doc('#cancel-action').attr('href'))
 
         # Test that account deletion works.
@@ -69,7 +70,6 @@ class TestDeleteUser(TestCase):
 
 
 class TestViews(TestCase):
-
     def test_anonymous_home(self):
         r = self.client.get('/', follow=True)
         self.assertEquals(200, r.status_code)
@@ -99,7 +99,7 @@ class TestViews(TestCase):
             'We see a link to our profile')
 
     def test_anonymous_or_pending_search(self):
-        search = reverse('phonebook.search')
+        search = reverse('search')
 
         r = self.client.get(search, dict(q='Am'), follow=True)
         self.assertFalse('people' in r.context)
@@ -137,7 +137,7 @@ class TestViews(TestCase):
             'Regisration worked and we can see their profile')
         # test for vouch form...
         self.assertTrue(profile.context['vouch_form'], 'Newb needs a voucher')
-        vouch_url = reverse('phonebook.vouch')
+        vouch_url = reverse('vouch')
         data = dict(vouchee=newbie.pk)
         vouched_profile = moz_client.post(vouch_url, data, follow=True)
         eq_(200, vouched_profile.status_code)
@@ -151,7 +151,7 @@ class TestViews(TestCase):
         eq_(self.mozillian.pk, voucher.pk, 'Credit given')
         self.assertFalse(vouched_profile.context['vouch_form'],
                          'No need to vouch for this confirmed Mozillian')
-        delete_url = reverse('phonebook.delete_profile')
+        delete_url = reverse('profile.delete')
 
         delete = newbie_client.post(delete_url, follow=True)
         eq_(200, delete.status_code,
@@ -164,7 +164,7 @@ class TestViews(TestCase):
         # do all then reset
         newbie, newbie_client = _create_new_user()
         profile_url = reverse('profile', args=[newbie.username])
-        edit_profile_url = reverse('phonebook.edit_profile')
+        edit_profile_url = reverse('profile.edit')
         # original
         r = newbie_client.get(profile_url)
         newbie = r.context['profile']
@@ -187,7 +187,7 @@ class TestViews(TestCase):
         eq_(dn, newbie.display_name, 'Editing should update display name')
 
         # cleanup
-        delete_url = reverse('phonebook.delete_profile')
+        delete_url = reverse('profile.delete')
 
         r = newbie_client.post(delete_url, follow=True)
         eq_(200, r.status_code, 'A Mozillian can delete their own account')
@@ -214,7 +214,7 @@ class TestViews(TestCase):
                 * No "Remove Profile Photo" link.
                 * No file on the file system.
             """
-            r = client.get(reverse('phonebook.edit_profile'))
+            r = client.get(reverse('profile.edit'))
             doc = pq(r.content)
             eq_(doc('#profile-photo').attr('src'),
                 settings.MEDIA_URL + 'img/unknown.png')
@@ -231,7 +231,7 @@ class TestViews(TestCase):
         assert_no_photo()
 
         # Try to game the form -- it shouldn't do anything.
-        r = client.post(reverse('phonebook.edit_profile'),
+        r = client.post(reverse('profile.edit'),
                         dict(last_name='foo', photo_delete=1))
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
                                 "shouldn't result in an error.")
@@ -239,12 +239,12 @@ class TestViews(TestCase):
         # Add a profile photo
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
-        r = client.post(reverse('phonebook.edit_profile'),
+        r = client.post(reverse('profile.edit'),
                         dict(last_name='foo', photo=f))
         f.close()
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
-        r = client.get(reverse('phonebook.edit_profile'))
+        r = client.get(reverse('profile.edit'))
         doc = pq(r.content)
         assert doc('#profile-photo').attr('src').startswith(
                 settings.USERPICS_URL + '/' + str(self.mozillian.id) + '.jpg?')
@@ -255,7 +255,7 @@ class TestViews(TestCase):
         assert os.path.exists(self.mozillian.get_profile().get_photo_file())
 
         # Remove a profile photo
-        r = client.post(reverse('phonebook.edit_profile'),
+        r = client.post(reverse('profile.edit'),
                         dict(last_name='foo', photo_delete='1'))
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -268,14 +268,14 @@ class TestViews(TestCase):
         client = self.client
 
         # No website URL is present.
-        r = client.get(reverse('phonebook.edit_profile'))
+        r = client.get(reverse('profile.edit'))
         doc = pq(r.content)
 
         assert not doc('#dd.website'), (
                 "No website info appears on the user's profile.")
 
         # Add a URL sans protocol.
-        r = client.post(reverse('phonebook.edit_profile'),
+        r = client.post(reverse('profile.edit'),
                         dict(last_name='foo', website='tofumatt.com'))
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
         r = client.get(reverse('profile', args=[self.mozillian.username]))
@@ -286,40 +286,88 @@ class TestViews(TestCase):
 
     def test_my_profile(self):
         """Are we cachebusting our picture?"""
-        raise SkipTest
+        self.mozillian.get_profile().photo = True
+        self.mozillian.get_profile().save()
         profile = reverse('profile', args=[self.mozillian.username])
         r = self.mozillian_client.get(profile)
         doc = pq(r.content)
         assert '?' in doc('#profile-photo').attr('src')
 
+    def test_delete_user_delets_photo(self):
+        """If we delete a user with a photo, let's delete their images."""
+        u = User.objects.create(
+                email='mcbain@mozillians.org', username='mcbain',
+                first_name='Hans', last_name='McBain')
+        profile = u.get_profile()
+        profile.is_vouched = True
+        profile.photo = True
+        profile.save()
+
+        with open(profile.get_photo_file(), 'w') as f:
+            f.write('hi')
+
+        assert os.path.exists(profile.get_photo_file())
+
+        u.delete()
+
+        assert not os.path.exists(profile.get_photo_file()), "File not deleted"
+
+    def test_replace_photo(self):
+        """Ensure we can replace photos."""
+        u = User.objects.create(
+                email='mcbain@mozillians.org', username='mcbain',
+                first_name='Hans', last_name='McBain')
+        profile = u.get_profile()
+        profile.is_vouched = True
+        profile.photo = True
+        profile.save()
+
+        with open(profile.get_photo_file(), 'w') as f:
+            f.write('hi')
+
+        assert os.path.exists(profile.get_photo_file())
+
+        def get_md5():
+            with open(profile.get_photo_file(), 'rb') as f:
+                return hashlib.md5(f.read()).hexdigest()
+
+        oldmd5 = get_md5()
+        newfile = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
+        self.client.login(email='mcbain@mozillians.org')
+        with open(newfile, 'rb') as f:
+            r = self.client.post(reverse('profile.edit'),
+                                 dict(last_name='foo', photo=f))
+
+        assert oldmd5 != get_md5, "Files should have changed."
 
 
 class TestOpensearchViews(test_utils.TestCase):
     """Tests for the OpenSearch plugin, accessible to anonymous visitors"""
     def test_search_plugin(self):
         """The plugin loads with the correct mimetype."""
-        response = self.client.get(reverse('phonebook.search_plugin'))
+        response = self.client.get(reverse('search_plugin'))
         eq_(200, response.status_code)
         assert 'expires' in response
         eq_('application/opensearchdescription+xml', response['content-type'])
 
     def test_localized_search_plugin(self):
         """Every locale gets its own plugin!"""
-        response = self.client.get(reverse('phonebook.search_plugin'))
+        response = self.client.get(reverse('search_plugin'))
         assert '/en-US/search' in response.content
 
         # Prefixer and its locale are sticky; clear it before the next request
         set_url_prefix(None)
-        response = self.client.get(reverse('phonebook.search_plugin',
+        response = self.client.get(reverse('search_plugin',
                                    prefix='/fr/'))
         assert '/fr/search' in response.content
 
 
 class TestSearch(ESTestCase):
     def test_mozillian_search(self):
+        """Test our search."""
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
-        url = reverse('phonebook.search')
+        url = reverse('search')
         r = self.mozillian_client.get(url, dict(q='Am'))
         rs = self.mozillian_client.get(url, dict(q=' Am'))
         rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
@@ -349,14 +397,14 @@ class TestSearch(ESTestCase):
         assert all(not person.is_vouched for person in peeps_nv)
 
     def test_mozillian_search_pagination(self):
+        """Tests the pagination on search.
+
+        1. assumes no page is passed, but valid limit is passed
+        2. assumes invalid page is passed, no limit is passed
+        3. assumes valid page is passed, no limit is passed
+        4. assumes valid page is passed, valid limit is passed
         """
-        Tests the pagination on search.
-        First assumes no page is passed, but valid limit is passed
-        Second assumes invalid page is passed, no limit is passed
-        Third assumes valid page is passed, no limit is passed
-        Fourth assumes valid page is passed, valid limit is passed
-        """
-        url = reverse('phonebook.search')
+        url = reverse('search')
         r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 1)

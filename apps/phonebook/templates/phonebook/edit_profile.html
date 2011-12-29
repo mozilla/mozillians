@@ -5,7 +5,7 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
-  <form action="{{ url('phonebook.edit_profile') }}"
+  <form action="{{ url('profile.edit') }}"
         method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
@@ -148,7 +148,8 @@
 
   {% if request.user.id == user.id %}
     <div id="manage-profile">
-      <a class="button destructive small" href="{{ url('confirm_delete') }}"
+      <a class="button destructive small"
+         href="{{ url('profile.delete_confirm') }}"
          id="delete-profile">
         {{ _('Delete Profile') }}
       </a>
