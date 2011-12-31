@@ -55,7 +55,7 @@ class UserProfile(SearchMixin, models.Model):
         db_table = 'profile'
 
     def vouch(self, vouched_by, system=True, commit=True):
-        changed = system # have we changed anything?
+        changed = system  # do we need to do a vouch?
         if system:
             self.is_vouched = True
 
@@ -180,9 +180,8 @@ def generate_code(sender, instance, raw, using, **kwargs):
 def auto_vouch(sender, instance, raw, using, **kwargs):
     """Auto vouch mozilla.com users."""
     if not instance.id:
-        username = instance.user.username
-        if any(username.endswith('@' + x) for x
-                                          in settings.AUTO_VOUCH_DOMAINS):
+        email = instance.user.email
+        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
             instance.vouch(None, system=True, commit=False)
 
 
@@ -190,8 +189,8 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
 def add_to_staff_group(sender, instance, created, **kwargs):
     """Add all mozilla.com users to the "staff" group upon creation."""
     if created:
-        username = instance.user.username
-        if (any(username.endswith('@' + x) for x in
+        email = instance.user.email
+        if (any(email.endswith('@' + x) for x in
                                                settings.AUTO_VOUCH_DOMAINS)):
             instance.groups.add(Group.objects.get(name='staff', system=True))
 

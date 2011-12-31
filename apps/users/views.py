@@ -1,10 +1,8 @@
-import datetime
 import ldap
 
 from django import http
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.http import Http404
@@ -12,10 +10,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 import commonware.log
 from funfactory.urlresolvers import reverse
-from statsd import statsd
 from tower import ugettext as _
 
-from larper import RegistrarSession
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
 from users import forms
@@ -97,7 +93,7 @@ def register(request):
             try:
                 # TODO: offload this to form.save()
                 # Note: possible race condition on unique username/emails
-                user = _save_new_user(request, form)
+                user = form.save()
                 _send_confirmation_email(user)
 
                 msg = _(u'Your account has been created but needs to be '
@@ -161,40 +157,6 @@ def password_reset_confirm(request, uidb36=None, token=None):
 
 def password_reset_check_mail(request):
     return render(request, 'registration/password_reset_check_mail.html')
-
-
-def _save_new_user(request, form):
-    """
-    Save a new user.
-    """
-    # Email in the form is the "username" we'll use.
-    d = form.cleaned_data
-
-    voucher = None
-
-    if d['code']:
-        try:
-            invite = get_invite(d['code'])
-            voucher = invite.inviter
-        except Invite.DoesNotExist:
-            msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
-            log.warning(msg)
-
-    u = User.objects.create(username=d['email'], email=d['email'],
-                            first_name=d['first_name'],
-                            last_name=d['last_name'])
-    u.set_password(d['password'])
-    u.save()
-
-    profile = u.get_profile()
-
-    if voucher:
-        profile.vouch(invite.inviter)
-        invite.redeemed = datetime.datetime.now()
-        invite.redeemer = profile
-        invite.save()
-
-    return u
 
 
 def _set_already_exists_error(form):

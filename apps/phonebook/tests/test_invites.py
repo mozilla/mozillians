@@ -58,7 +58,6 @@ class InviteTest(common.tests.TestCase):
                 confirmp='tacoface',
                 optin=True
                 )
-
         r = self.client.post(invite.get_url(), d, follow=True)
         assert not r.context['form'].errors, r.context['form'].errors
         u = User.objects.filter(email=d['email'])[0].get_profile()
@@ -78,12 +77,12 @@ class InviteTest(common.tests.TestCase):
         r = self.get_register(invite)
         d = r.context['form'].initial
 
-        self.redeem_invite(invite, **d)
+        self.redeem_invite(invite, username='ad', **d)
         profile = Invite.objects.get(pk=invite.pk).redeemer
         eq_(profile.is_vouched, True)
 
         # Don't reuse codes.
-        self.redeem_invite(invite, email='mr2@gmail.com')
+        self.redeem_invite(invite, username='ad2', email='mr2@gmail.com')
         eq_(User.objects.get(email='mr2@gmail.com').get_profile().is_vouched,
             False)
 

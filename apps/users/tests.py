@@ -18,6 +18,7 @@ class ViewTest(TestCase):
     def test_confirmation_code(self):
         """Verify the confirm view accepts valid codes and 404s otherwise."""
         d = dict(
+                 username='ad',
                  email='mrfusion@gmail.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
@@ -54,6 +55,7 @@ class RegistrationTest(TestCase):
         """
         # Now let's register
         d = dict(
+                 username='ad',
                  email='mrfusion@gmail.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
@@ -77,7 +79,7 @@ class RegistrationTest(TestCase):
         r = self.client.post(reverse('login'),
                              dict(username=d['email'], password=d['password']),
                              follow=True)
-        eq_(d['email'], str(r.context['user']))
+        eq_(d['username'], str(r.context['user']))
 
         assert not (r.context['user'].get_profile().groups
                      .filter(name='staff')), (
@@ -86,6 +88,7 @@ class RegistrationTest(TestCase):
     def test_mozillacom_registration(self):
         """Verify @mozilla.com users are auto-vouched and marked "staff"."""
         d = dict(
+                 username='ad',
                  email='mrfusion@mozilla.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
@@ -111,7 +114,7 @@ class RegistrationTest(TestCase):
                              follow=True)
         doc = pq(r.content)
 
-        eq_(d['email'], str(r.context['user']))
+        eq_(d['username'], str(r.context['user']))
         assert r.context['user'].get_profile().is_vouched, (
                 "Moz.com should be auto-vouched")
 
@@ -125,6 +128,7 @@ class RegistrationTest(TestCase):
         """Verify @mozilla.com users can sign up only once with the same email.
         """
         d = dict(
+                 username='ad',
                  email='mRfUsIoN@mozilla.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
@@ -142,6 +146,7 @@ class RegistrationTest(TestCase):
 
     def test_plus_signs(self):
         d = dict(
+                 username='ad',
                  email='mrfusion+dotcom@mozilla.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
@@ -156,6 +161,58 @@ class RegistrationTest(TestCase):
 
         r = self.client.post(u.get_send_confirmation_url())
         eq_(r.status_code, 200)
+
+    def test_username(self):
+        """Test that we can submit a perfectly cromulent username.
+
+        We verify that /:username then works as well.
+        """
+        d = dict(
+                 email='mrfusion+dotcom@mozilla.com',
+                 username='mrfusion',
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+        )
+        r = self.client.post(reverse('register'), d)
+        eq_(r.status_code, 302, "Problems if we didn't redirect...")
+        u = User.objects.filter(email=d['email'])[0]
+        p = u.get_profile()
+        r = self.client.get(p.get_send_confirmation_url())
+        eq_(u.username, d['username'], "Username didn't get set.")
+        eq_(r.status_code, 200)
+
+        r = self.mozillian_client.get(reverse('profile', args=['mrfusion']),
+                                              follow=True)
+        eq_(r.status_code, 200)
+        eq_(r.context['profile'].user_id, u.id)
+
+    def test_bad_username(self):
+        """`about` is a terrible username, as are it's silly friends.
+
+        Let's make some stop words *and* analyze the routing system,
+        whenever someone sets their username and verify that they can't
+        be "about" or "help" or anything that is in use.
+        """
+        badnames = ('about', 'save', 'tag', 'group', 'username', 'register',
+                    'photo', 'media',)
+        for name in badnames:
+            d = dict(
+                    email='mrfusion+dotcom@mozilla.com',
+                    username=name,
+                    first_name='Akaaaaaaash',
+                    last_name='Desaaaaaaai',
+                    password='tacoface',
+                    confirmp='tacoface',
+                    optin=True
+            )
+            r = self.client.post(reverse('register'), d)
+            eq_(r.status_code, 200,
+                'This form should fail for "%s", and say so.' % name)
+            assert r.context['form'].errors, (
+                "Didn't raise errors for %s" % name)
 
 
 class TestThingsForPeople(TestCase):

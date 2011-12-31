@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 import test_utils
-from nose import SkipTest
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
@@ -45,7 +44,8 @@ class TestDeleteUser(TestCase):
 
         # Make sure there's a link to a confirm deletion page, and nothing
         # pointing directly to the delete URL.
-        eq_(reverse('profile.delete_confirm'), doc('#delete-profile').attr('href'),
+        eq_(reverse('profile.delete_confirm'),
+            doc('#delete-profile').attr('href'),
             'We see a link to a confirmation page.')
         self.assertFalse(any((reverse('profile.delete') in el.action)
                               for el in doc('#main form')),
@@ -310,7 +310,7 @@ class TestViews(TestCase):
 
         u.delete()
 
-        assert not os.path.exists(profile.get_photo_file()), "File not deleted"
+        assert not os.path.exists(profile.get_photo_file()), 'File not deleted'
 
     def test_replace_photo(self):
         """Ensure we can replace photos."""
@@ -335,8 +335,8 @@ class TestViews(TestCase):
         newfile = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
         self.client.login(email='mcbain@mozillians.org')
         with open(newfile, 'rb') as f:
-            r = self.client.post(reverse('profile.edit'),
-                                 dict(last_name='foo', photo=f))
+            self.client.post(reverse('profile.edit'),
+                             dict(last_name='foo', photo=f))
 
         assert oldmd5 != get_md5, "Files should have changed."
 
@@ -389,7 +389,8 @@ class TestSearch(ESTestCase):
                 saw_amanda = True
             if saw_amandeep and saw_amanda:
                 break
-        self.assertEqual(peeps[0].id, peeps_ws[0].id)
+
+        assert peeps[0].id in (peeps_ws[0].id, peeps_ws[1].id)
         self.assertEqual(peeps_nv[0].display_name, amanda)
         self.assertTrue(saw_amandeep, 'We see Mozillians')
         self.assertTrue(saw_amanda, 'We see Pending')
@@ -442,7 +443,8 @@ def _create_new_user():
     newbie_client = test.Client()
     newbie_email = '%s@test.net' % str(uuid4())[0:8]
     reg_url = reverse('register')
-    params = dict(email=newbie_email,
+    params = dict(username=str(uuid4())[0:8],
+                  email=newbie_email,
                   password='asdfasdf',
                   confirmp='asdfasdf',
                   first_name='Newbie',
