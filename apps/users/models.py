@@ -137,7 +137,6 @@ class UserProfile(SearchMixin, models.Model):
     @classmethod
     def search(cls, query, vouched=None):
         """Sensible default search for UserProfiles."""
-        # TODO: groups
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
                   'username__text', 'bio__text', 'website__text',

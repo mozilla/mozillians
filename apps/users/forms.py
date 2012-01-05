@@ -65,7 +65,6 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         return self.cleaned_data
 
 
-# TODO: This should be a ModelForm
 class RegistrationForm(happyforms.ModelForm):
     email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
     password = forms.CharField(min_length=8, max_length=255,
