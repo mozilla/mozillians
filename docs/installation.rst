@@ -63,7 +63,7 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
 
 8. Stay up to date
 
-   On your host machien do::
+   On your host machine do::
 
     git pull -q origin master
     git submodule update --recursive
