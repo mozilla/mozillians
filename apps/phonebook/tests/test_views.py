@@ -153,8 +153,9 @@ class TestViews(LDAPTestCase):
         """
         url = reverse('phonebook.search')
         r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 1)
+        # Check for redirect on one search result because we don't expect
+        # a search page.
+        assert r.status_code == 302
 
         r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
         peeps = r.context['people']
@@ -166,8 +167,9 @@ class TestViews(LDAPTestCase):
 
         r = self.mozillian_client.get(url, dict(q='Amand', page='test',
                                                 limit='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 1)
+        # Check for redirect on one search result because we don't expect
+        # a search page.
+        assert r.status_code == 302
 
         r = self.mozillian_client.get(url, dict(q='Amand', page='test',
                                                 limit='x'))
@@ -340,7 +342,7 @@ class TestViews(LDAPTestCase):
 
         assert not doc('#dd.website'), (
                 "No website info appears on the user's profile.")
-        
+
         # Add a URL sans protocol.
         r = client.post(reverse('phonebook.edit_profile'),
                         dict(last_name='foo', website='tofumatt.com'))

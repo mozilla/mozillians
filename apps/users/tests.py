@@ -89,8 +89,10 @@ class VouchTest(LDAPTestCase):
         profile = get_profile(PENDING['email'])
         assert not profile.is_vouched, 'User should not yet be vouched.'
         r = self.mozillian_client.get(reverse('phonebook.search'),
-                                      {'q': PENDING['email']})
-        assert 'Non-Vouched' in r.content, (
+                                      {'q': PENDING['email']},follow=True)
+
+
+        assert 'Pending Profile' in r.content, (
                 'User should not appear as a Mozillian in search.')
 
         profile.vouch(vouchee)
@@ -110,5 +112,5 @@ class VouchTest(LDAPTestCase):
         # Make sure the user appears vouched in search results
         r = self.mozillian_client.get(reverse('phonebook.search'),
                                       {'q': PENDING['email']})
-        assert 'Mozillian' in r.content, (
+        assert not 'Pending Profile' in r.content, (
                 'User should appear as a Mozillian in search.')
