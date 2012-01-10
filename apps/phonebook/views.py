@@ -264,13 +264,8 @@ def search(request):
             except SIZELIMIT_EXCEEDED:
                 size_exceeded = True
 
-<<<<<<< HEAD
             if len(people) == 1 and not show_pagination:
                 return redirect(reverse('profile', args=[people[0].unique_id]))
-=======
-            if len(people) == 1:
-                return profile_uid(request, people[0].unique_id)
->>>>>>> e3d7645... Fixes bug 694660 - if there is only one search result show that
 
     d = dict(people=people,
              form=form,
