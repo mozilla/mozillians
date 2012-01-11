@@ -294,12 +294,14 @@ def photo(request, unique_id):
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:
+        # If gravatar has no image, it will return this image
         default = 'http://' + request.get_host() + '/media/img/unknown.png'
         email = ldap.get_by_unique_id(unique_id, needs_master).username
         return redirect(_locate_gravatar(email, default))
 
 
 def _locate_gravatar(email, default):
+    # Size parameter refers to the size of image that gravitar will return
     size = 175
     gravatar_url = "http://www.gravatar.com/avatar/"
     gravatar_url += hashlib.md5(email.lower()).hexdigest() + "?"
