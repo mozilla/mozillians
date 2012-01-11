@@ -303,7 +303,7 @@ class TestViews(LDAPTestCase):
                                  "shouldn't result in an error."))
 
         #See if gravatar message is there
-        r = client.get(reverse('phonebook.profile'))
+        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
         assert 'This is your gravatar' in r.content
 
         # Add a profile photo
@@ -323,7 +323,7 @@ class TestViews(LDAPTestCase):
                 '"Remove Profile Photo" control should appear.')
 
         #See if gravatar message is no longer there
-        r = client.get(reverse('phonebook.profile'))
+        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
         assert not 'This is your gravatar' in r.content
 
         # Remove a profile photo
