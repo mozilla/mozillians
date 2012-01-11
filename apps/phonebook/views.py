@@ -1,5 +1,5 @@
-import urllib
 import hashlib
+import urllib
 from functools import wraps
 from ldap import SIZELIMIT_EXCEEDED
 from operator import attrgetter
@@ -294,18 +294,27 @@ def photo(request, unique_id):
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:
-        # If gravatar has no image, it will return this image
-        default = 'http://' + request.get_host() + '/media/img/unknown.png'
+        # If gravatar has no image, it will return this image.
+        default = 'http://%s/media/img/unknown.png' % request.get_host()
         email = ldap.get_by_unique_id(unique_id, needs_master).username
         return redirect(_locate_gravatar(email, default))
 
 
 def _locate_gravatar(email, default):
+    """Takes an email and returns a gravatar image
+
+    Passes parameters size, rating, and default image (for if there is no
+    match) and returns a url for the image.
+    """
     # Size parameter refers to the size of image that gravitar will return
     size = 175
+    # Sets maximum rating that we use to PG
+    rating = 'pg'
     gravatar_url = "http://www.gravatar.com/avatar/"
     gravatar_url += hashlib.md5(email.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+    gravatar_url += urllib.urlencode({'d': default,
+                                      's': str(size),
+                                      'r': rating})
     return gravatar_url
 
 

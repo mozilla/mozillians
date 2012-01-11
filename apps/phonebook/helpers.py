@@ -35,7 +35,7 @@ def profile_photo(context, person):
     ldap = UserSession.connect(context['request'])
     image = ldap.profile_photo(person.unique_id, use_master=needs_master)
 
-    return dict(image_url=url, gravatar=not bool(image))
+    return dict(image_url=url, gravatar=not image)
 
 
 @register.inclusion_tag('phonebook/includes/search_result.html')
