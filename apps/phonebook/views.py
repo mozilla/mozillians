@@ -1,3 +1,5 @@
+import urllib
+import hashlib
 from functools import wraps
 from ldap import SIZELIMIT_EXCEEDED
 from operator import attrgetter
@@ -292,7 +294,17 @@ def photo(request, unique_id):
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:
-        return redirect('/media/img/unknown.png')
+        default = 'http://' + request.get_host() + '/media/img/unknown.png'
+        email = ldap.get_by_unique_id(unique_id, needs_master).username
+        return redirect(_locate_gravatar(email, default))
+
+
+def _locate_gravatar(email, default):
+    size = 175
+    gravatar_url = "http://www.gravatar.com/avatar/"
+    gravatar_url += hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode({'d': default, 's': str(size)})
+    return gravatar_url
 
 
 @login_required

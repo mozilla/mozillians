@@ -6,6 +6,8 @@ from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from jingo import register
 
+from larper import UserSession
+
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -29,7 +31,11 @@ def profile_photo(context, person):
     if me:
         url += '?%d' % int(time.time())
 
-    return dict(image_url=url)
+    needs_master = (user.unique_id == person.unique_id)
+    ldap = UserSession.connect(context['request'])
+    image = ldap.profile_photo(person.unique_id, use_master=needs_master)
+
+    return dict(image_url=url, gravatar=not bool(image))
 
 
 @register.inclusion_tag('phonebook/includes/search_result.html')
