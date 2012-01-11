@@ -19,12 +19,12 @@ from tower import ugettext as _
 from browserid.decorators import login_required
 from groups.models import Group
 from groups.helpers import stringify_groups, users_from_groups
-from larper import UserSession, AdminSession, NO_SUCH_PERSON
-from larper import MOZILLA_IRC_SERVICE_URI
+from larper import (UserSession, AdminSession, NO_SUCH_PERSON,
+                    MOZILLA_IRC_SERVICE_URI)
 from phonebook import forms
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
-from users.models import Anonymous, UserProfile
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 
