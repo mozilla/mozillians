@@ -4,6 +4,17 @@
 #
 # Usage:
 # include elasticsearch
+
+
+define download_file($site="", $cwd="") {
+    exec { $name:
+           command => "wget ${site}/${name}",
+           cwd => $cwd,
+           creates => "${cwd}/${name}",
+           path => ["/bin", "/usr/bin"],
+    }
+}
+
 class sun_java_6 {
 
   $release = regsubst(generate("/usr/bin/lsb_release", "-s", "-c"), '(\w+)\s', '\1')
@@ -75,6 +86,19 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
 
       include sun_java_6
 
+      download_file {
+        ["${esName}.tar.gz"]:
+        site => "https://github.com/downloads/elasticsearch/elasticsearch",
+        cwd => "/tmp/",
+      }
+
+      download_file {
+        ["3e0b23d"]:
+        site => "https://github.com/elasticsearch/elasticsearch-servicewrapper/tarball",
+        cwd => "/tmp/",
+        alias => "download wrapper"
+      }
+
       # Ensure the elasticsearch user is present
       user { "$esBasename":
                ensure => "present",
@@ -92,14 +116,6 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
             group => root,
      }
 
-#     file { "/etc/init/${esBasename}.conf":
-#          content => template("elasticsearch/upstart.elasticsearch.conf.erb"),
-#          ensure => present,
-#          owner => root,
-#          group => root,
-#          mode => 644
-#     }
-
      exec { "mkdir-ebs-mongohome":
           path => "/bin:/usr/bin",
           command => "mkdir -p $ebs1/usr/local",
@@ -116,19 +132,12 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
              recurse    => true
       }
 
-      # Temp location
-      file { "/tmp/$esFile":
-             source  => "puppet:///elasticsearch/$esFile",
-             require => File["$esPath"],
-             owner => "$esBasename"
-      }
-
       # Remove old files and copy in latest
       exec { "elasticsearch-package":
              path => "/bin:/usr/bin",
              command => "mkdir -p $esPath && tar -xzf /tmp/$esFile -C /tmp && sudo -u$esBasename cp -rf /tmp/$esName/. $esPath/. && rm -rf /tmp/$esBasename*",
              unless  => "test -f $esPath/bin/elasticsearch",
-             require => File["/tmp/$esFile"],
+             require => Download_File["$esFile"],
              notify => Service["$esBasename"],
       }
 
@@ -181,15 +190,18 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
 
       # Stage the Service Package
       file { "/tmp/$esServiceFile":
-           source => "puppet:///elasticsearch/$esServiceFile",
-            require => Exec["elasticsearch-package"]
+           source => "/tmp/master",
+           require => [
+             Exec["elasticsearch-package"],
+             Download_File["download wrapper"]
+           ]
       }
 
       # Move the service wrapper into place
       exec { "elasticsearch-service":
              path => "/bin:/usr/bin",
              unless => "test -d $esPath/bin/service/lib",
-             command => "tar -xzf /tmp/$esServiceFile -C /tmp && mv /tmp/$esServiceName/service $esPath/bin && rm /tmp/$esServiceFile",
+             command => "tar -xzf /tmp/$esServiceFile -C /tmp && mv /tmp/elasticsearch-$esServiceName-3e0b23d/service $esPath/bin && rm /tmp/$esServiceFile",
              require => [File["/tmp/$esServiceFile"], User["$esBasename"]]
       }
 
@@ -210,7 +222,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
 
       # Add customized startup script (see: http://www.elasticsearch.org/tutorials/2011/02/22/running-elasticsearch-as-a-non-root-user.html)
       file { "$esPath/bin/service/elasticsearch":
-             source => "puppet:///elasticsearch/elasticsearch",
+             source => "puppet:///modules/elasticsearch/elasticsearch",
              require => File["$esPath/bin/service"]
       }
 
