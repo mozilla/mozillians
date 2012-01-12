@@ -4,12 +4,9 @@
             $('#id_groups').tagit({
                 allowSpaces: true,
                 caseSensitive: false,
-                onTagAdded: function(event, tag) {
-                    var name = tag.children('span').text();
-                    if (name.match(/^[a-zA-Z0-9 .:,-]*$/g) === null) {
-                        // HACK: Do this without dirty DOM manipulation.
-                        $(tag).children('a.tagit-close').click();
-                    }
+                onTagAdded: function(event, group) {
+                    app.validator.resetField('#groups-container');
+                    app.validator.validateGroup(group, $('#id_groups'));
                 },
                 singleField: true,
                 singleFieldDelimiter: ',',
