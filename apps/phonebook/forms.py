@@ -105,7 +105,7 @@ class ProfileForm(happyforms.Form):
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
-            raise forms.ValidationError(_(u'Tags can only contain '
+            raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 
