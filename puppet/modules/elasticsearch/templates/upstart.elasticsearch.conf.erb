@@ -1,0 +1,48 @@
+# managed by puppet!
+
+start on startup
+start on runlevel [2345]
+stop on runlevel [06]
+
+env ES_HOME=<%= esPath %>
+env ES_CLASSPATH=<%= esJarfile -%>:<%= esLibPath -%>/*
+
+script
+    JAVA=<%= jre6JavaHome %>
+
+    JAVA_OPTS="$JAVA_OPTS -Xms<%= esXms %>"
+    JAVA_OPTS="$JAVA_OPTS -Xmx<%= esXmx %>"
+
+    # reduce the per-thread stack size
+    JAVA_OPTS="$JAVA_OPTS -Xss128k"
+
+    JAVA_OPTS="$JAVA_OPTS -Djline.enabled=true"
+
+    # Enable reference compression, reducing memory overhead on 64bit JVMs
+    JAVA_OPTS="$JAVA_OPTS -XX:+UseCompressedOops"
+
+    JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC"
+    JAVA_OPTS="$JAVA_OPTS -XX:+UseConcMarkSweepGC"
+    JAVA_OPTS="$JAVA_OPTS -XX:+CMSParallelRemarkEnabled"
+    JAVA_OPTS="$JAVA_OPTS -XX:SurvivorRatio=8"
+    JAVA_OPTS="$JAVA_OPTS -XX:MaxTenuringThreshold=1"
+    JAVA_OPTS="$JAVA_OPTS -XX:CMSInitiatingOccupancyFraction=75"
+    JAVA_OPTS="$JAVA_OPTS -XX:+UseCMSInitiatingOccupancyOnly"
+
+    # GC logging options -- uncomment to enable
+    # JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCDetails"
+    # JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCTimeStamps"
+    # JAVA_OPTS="$JAVA_OPTS -XX:+PrintClassHistogram"
+    # JAVA_OPTS="$JAVA_OPTS -XX:+PrintTenuringDistribution"
+    # JAVA_OPTS="$JAVA_OPTS -XX:+PrintGCApplicationStoppedTime"
+    # JAVA_OPTS="$JAVA_OPTS -Xloggc:/var/log/elasticsearch/gc.log"
+
+    # Causes the JVM to dump its heap on OutOfMemory.
+    #JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError"
+    # The path to the heap dump location, note directory must exists and have enough
+    # space for a full heap dump.
+    #JAVA_OPTS="$JAVA_OPTS -XX:HeapDumpPath=$ES_HOME/logs/heapdump.hprof"
+
+    es_parms="-Delasticsearch -Des.path.home=$ES_HOME -Des-pidfile=<%= esPidfile %> -Des-daemon=yes"
+    start-stop-daemon --start --quiet --pidfile <%= esPidfile %> --chdir <%= esPath %> --chuid <%= esBasename %>:<% esBasename %> --exec $JAVA -- $JAVA_OPTS $es_parms -cp $ES_CLASSPATH org.elasticsearch.bootstrap.ElasticSearch
+end script

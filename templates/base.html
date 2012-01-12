@@ -14,7 +14,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
   <link rel="search" type="application/opensearchdescription+xml"
-        title="{{ _('Mozillians') }}" href="{{ url('phonebook.search_plugin') }}">
+        title="{{ _('Mozillians') }}" href="{{ url('search_plugin') }}">
 
   {% block site_css %}
     {{ css('common') }}
@@ -47,7 +47,7 @@
         </li>
         {% if user.is_authenticated() %}
           <li>
-            <a id="profile" href="{{ url('profile', user.unique_id) }}">
+            <a id="profile" href="{{ url('profile', user.username) }}">
               {{ _('Profile') }}
             </a>
           </li>
@@ -65,22 +65,23 @@
           {# User is currently registering, doesn't make sense to display
              the log in/sign up links. #}
         {% else %}
-          <li id="browserid-login">
-            <span>{{ _('Log In') }}</span>
-            <form id="browserid" action="{{ url('browserid_login') }}" method="POST">
-              {{ csrf() }}
-              {{ browserid_form }}
-              <input id="bid_mode" type="hidden" name="mode" value="">
-            </form>
+          <li>
+            <a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a>
           </li>
-          <li id="browserid-register"><span>{{ _('Join Us') }}</span></li>
+          {% block register_button %}
+            <li>
+              <a id="register" href="{{ url('register') }}">
+                {{ _('Join Us') }}
+              </a>
+            </li>
+          {% endblock %}
         {% endif %}
       </ul>
     </nav>
 
     {% if user.is_authenticated() and user.get_profile().is_vouched %}
       {% block search %}
-        <form id="quick-search" action="{{ url('phonebook.search') }}"
+        <form id="quick-search" action="{{ url('search') }}"
               method="GET">
           <input type="search" id="q" name="q"
                  placeholder="{{ _('Name, IRC Nick, or Email') }}">
@@ -167,6 +168,5 @@
 {% endblock %}
 {% block js %}{% endblock %}
 
-<script src="//browserid.org/include.js"></script>
 </body>
 </html>

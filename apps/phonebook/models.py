@@ -9,14 +9,15 @@ from tower import ugettext as _
 
 
 class Invite(models.Model):
-    #: The ``uid`` of the vouched Mozillian who is doing the inviting.
-    inviter = models.CharField(max_length=32, editable=False)
+    #: The person doing the inviting.
+    inviter = models.ForeignKey('users.UserProfile', related_name='invites',
+                                null=True)
 
     #: This is the email address of where the invitation is sent.
     recipient = models.EmailField()
 
-    #: The ``uid`` of the newly created user who has redeemed the invite.
-    redeemer = models.CharField(max_length=32, editable=False)
+    #: The person who redeemed this invite.
+    redeemer = models.OneToOneField('users.UserProfile', null=True)
 
     #: Randomly generated invite code.  This code is used in the
     #: :ref:`registration` system.
@@ -39,9 +40,9 @@ class Invite(models.Model):
         """
         if sender:
             # TODO: Return and use email attribute, not username.
-            sender = '%s %s (%s)' % (sender.first_name,
-                                     sender.last_name,
-                                     sender.username)
+            sender = '%s %s (%s)' % (sender.user.first_name,
+                                     sender.user.last_name,
+                                     sender.user.username)
 
         subject = _('Become a Mozillian')
         message = _('Hi there. %s has invited you to join mozillians.org, '

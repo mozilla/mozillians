@@ -12,6 +12,8 @@ $DB_PASS = "mozillians"
 $USE_YUM_CACHE_ON_HOST = 0
 $USE_SOUTH = 0
 
+Exec { path => [ "/bin/"] }
+
 class dev {
     class {
         dev_hacks: before => Class[repos];
@@ -22,7 +24,8 @@ class dev {
         python: before => Class[apache];
         apache: before => Class[playdoh_site];
         memcached:;
-        playdoh_site: ;
+        playdoh_site:;
+        elasticsearch: version => "0.18.6";
     }
 }
 

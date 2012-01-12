@@ -1,0 +1,18 @@
+# Managed by Puppet, DO NOT TOUCH!
+
+transport:
+        tcp:
+                port: <%= esTCPPortRange %>
+
+http:
+        port: <%= esHTTPPortRange %>
+
+cluster:
+        name: "<%= cluster %>"
+
+path:
+        logs: <%= esLogPath %>
+        data: <%= esDataPath %>
+
+boostrap:
+        mlockall: true

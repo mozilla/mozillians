@@ -16,14 +16,7 @@
 
   <form method="POST" action="{{ url('invite') }}">
     {{ csrf() }}
-
-    {% if form.errors['recipient'] %}
-      <ul class="errorlist">
-        {% for e in form.errors['recipient'] %}
-          <li>{{ e }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+    {{ form.errors }}
 
     {{ form.recipient }}
 
