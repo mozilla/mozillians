@@ -71,14 +71,14 @@ class ProfileForm(happyforms.Form):
     def clean_photo(self):
         """Let's make sure things are right.
 
-Cribbed from zamboni. Thanks Dave Dash!
+        Cribbed from zamboni. Thanks Dave Dash!
 
-TODO: this needs to go into celery
+        TODO: this needs to go into celery
 
-- File IT bug for celery
-- Ensure files aren't InMemory files
-- See zamboni.apps.users.forms
-"""
+        - File IT bug for celery
+        - Ensure files aren't InMemory files
+        - See zamboni.apps.users.forms
+        """
         photo = self.cleaned_data['photo']
 
         if not photo:
@@ -116,17 +116,33 @@ TODO: this needs to go into celery
                 if g and ',' not in g]
 
     def save(self, request):
-        """Save this form to both LDAP and RDBMS backends, as appropriate."""
-        # Save stuff in LDAP first...
-        # TODO: Find out why this breaks the larper tests
-        # ldap.update_person(request.user.unique_id, self.cleaned_data)
-        # ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
-
-        # ... then save other stuff in RDBMS.
+        """Save the data to profile."""
         self._save_groups(request)
-        profile = request.user.get_profile()
-        profile.website = self.cleaned_data['website']
+        user = request.user
+        profile = user.get_profile()
+        d = self.cleaned_data
+
+        user.first_name = d['first_name']
+        user.last_name = d['last_name']
+
+        profile.bio = d['biography']
+        profile.ircname = d['irc_nickname']
+        profile.website = d['website']
+
+        if d['photo']:
+            profile.photo = True
+            with open(profile.get_photo_file(), 'w') as f:
+                f.write(d['photo'].file.read())
+
+        if d['photo_delete']:
+            profile.photo = False
+            try:
+                os.remove(profile.get_photo_file())
+            except OSError:
+                statsd.incr('errors.photo.deletion')
+
         profile.save()
+        user.save()
 
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""
