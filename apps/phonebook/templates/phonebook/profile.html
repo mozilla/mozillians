@@ -43,7 +43,7 @@
 
             {{ vouch_form }}
 
-            {% trans name=profile.full_name %}
+            {% trans name=profile.display_name %}
               <button type="submit" class="button primary small">
                 Vouch for {{ name }}
               </button>
@@ -68,7 +68,7 @@
 
     <div id="profile-info">
       <h2 class="fn p-name">
-        {{ profile.full_name }}
+        {{ profile.display_name }}
       </h2>
 
       <dl>

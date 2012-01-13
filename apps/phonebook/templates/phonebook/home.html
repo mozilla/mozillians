@@ -4,16 +4,7 @@
 {% block body_id %}home{% endblock %}
 
 {% block main_content %}
-
-  {% if False %}
-    ======================= l10n ========================
-    {{ _('This website requires JavaScript to be enabled.') }}
-    {{ _('ID') }}{# L10n: Used in BrowserID button #}
-    {{ _('Sign In with BrowserID') }}
-    {{ _('What is BrowserID? Why are we using it?') }}
-    =====================================================
-  {% endif %}
-
+  <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
   {% trans %}
     <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
   {% endtrans %}
@@ -26,15 +17,21 @@
     {% endtrans %}
   </p>
 
-  <p id="call-to-action">
-    {% if not user.is_authenticated() %}
-      {% trans register=url('register') %}
-        Join the directory to share information about yourself and to learn
-        more about other Mozillians.
-
-        <br><a href="{{ register }}" class="button primary">Create Profile</a>
-      {% endtrans %}
-    {% elif user.get_profile().is_vouched %}
+  {% if not user.is_authenticated() %}
+    <p>
+      <button id="create_profile" class="browser_id_login">
+        <span class="id">
+          <span class="bid">{{ _('ID') }}</span><span class="arrow"></span>
+        </span>
+        <span class="signin">{{ _('Sign In with BrowserID') }}</span>
+      </button>
+      <br>
+      <a href="http://identity.mozilla.com/post/12950196039/deploying-browserid-at-mozilla">
+        {{ _('What is BrowserID? Why are we using it?') }}
+      </a>
+    </p>
+  {% elif user.get_profile().is_vouched %}
+    <p>
       {% trans invite=url('invite') %}
         Tell other contributors about this directory and ask them to create a
         profile.

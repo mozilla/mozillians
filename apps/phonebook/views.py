@@ -1,14 +1,11 @@
 from functools import wraps
 
-import django.contrib.auth
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import (Http404, HttpResponse, HttpResponseRedirect,
-                         HttpResponseForbidden)
+from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -18,8 +15,6 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from groups.helpers import stringify_groups
-from larper import UserSession, AdminSession, NO_SUCH_PERSON
-from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
 from users.models import UserProfile
@@ -53,7 +48,6 @@ def profile(request, username):
     profile = user.get_profile()
 
     if not profile.is_vouched and request.user.username != username:
-        voucher = request.user.username
         vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 
     # Get user groups from their profile.
@@ -66,7 +60,7 @@ def profile(request, username):
 
 @never_cache
 @login_required
-def edit_profile(request, new_account=False):
+def edit_profile(request):
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
@@ -75,9 +69,7 @@ def edit_profile(request, new_account=False):
         form = forms.ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             form.save(request)
-            next = (reverse('confirm_register') if new_account
-                    else reverse('profile', args=[request.user.username]))
-            return redirect(next)
+            return redirect(reverse('profile', args=[request.user.username]))
     else:
         initial = dict(first_name=request.user.first_name,
                        last_name=request.user.last_name,
@@ -88,9 +80,12 @@ def edit_profile(request, new_account=False):
 
         form = forms.ProfileForm(initial=initial)
 
+    # When changing this keep in mind that the same view is used for
+    # user.register.
     d = dict(form=form,
-             registration_flow=new_account,
-             user_groups=user_groups)
+             mode='edit',
+             user_groups=user_groups,
+             profile=profile)
     return render(request, 'phonebook/edit_profile.html', d)
 
 

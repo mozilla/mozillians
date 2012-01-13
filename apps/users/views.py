@@ -1,12 +1,8 @@
-import ldap
+import datetime
 
-from django import http
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
-from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -15,50 +11,10 @@ from tower import ugettext as _
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
 from users import forms
-from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
-
-
-def _send_confirmation_email(user):
-    """This sends a confirmation email to the user."""
-    subject = _('Confirm your account')
-    message = (_("Please confirm your Mozillians account:\n\n %s") %
-               user.get_profile().get_confirmation_url())
-    send_mail(subject, message, 'no-reply@mozillians.org', [user.username])
-
-
-def send_confirmation(request):
-    user = request.GET['user']
-    user = get_object_or_404(auth.models.User, username=user)
-    _send_confirmation_email(user)
-    return render(request, 'users/confirmation_sent.html')
-
-
-def confirm(request):
-    """Confirm a user's email address using a generated code.
-
-    1. Recognize the code or 404.
-    2. On recognition, mark user as confirmed.
-    """
-    code = request.GET.get('code')
-    if not code:
-        raise Http404
-
-    profile = get_object_or_404(UserProfile, confirmation_code=code)
-    profile.is_confirmed = True
-    profile.save()
-    return render(request, 'users/confirmed.html')
-
-
-@anonymous_csrf
-def login(request, **kwargs):
-    """Login view that wraps Django's login but redirects auth'd users."""
-    return (auth_views.login(request, **kwargs)
-            if request.user.is_anonymous()
-            else redirect(reverse('profile', args=[request.user.unique_id])))
 
 
 def logout(request, **kwargs):
@@ -71,14 +27,42 @@ def logout(request, **kwargs):
     return auth_views.logout(request, next_page=reverse('home'), **kwargs)
 
 
+def password_reset_confirm(request, uidb36=None, token=None):
+    """TODO: Legacy URL, keep around until 1.4 release."""
+    return redirect('home')
+
+
 @anonymous_csrf
 def register(request):
+    """
+    Single-purpose view.
+    Registers Users. Pulls out an invite code if it exists and auto validates
+    the user if so.
+    """
+    if 'code' in request.GET:
+        request.session['invite-code'] = request.GET['code']
+        return redirect('home')
+
     if request.user.is_authenticated():
         return redirect(reverse('profile', args=[request.user.username]))
 
+    assertion = request.session.get('assertion')
+    audience = request.session.get('audience')
+    if not (assertion and audience):
+        log.error('Browserid registration, but no verified email in session')
+        return redirect('home')
+
+    user = auth.authenticate(assertion=assertion,
+                             audience=audience)
+    if not user:
+        return redirect('home')
+
+    intent = 'register'
+
+    # Check for optional invite code
     initial = {}
-    if 'code' in request.GET:
-        code = request.GET['code']
+    if 'invite-code' in request.session:
+        code = request.session['invite-code']
         try:
             invite = get_invite(code)
             initial['email'] = invite.recipient
@@ -90,73 +74,45 @@ def register(request):
 
     if request.method == 'POST':
         if form.is_valid():
-            try:
-                # TODO: offload this to form.save()
-                # Note: possible race condition on unique username/emails
-                user = form.save()
-                _send_confirmation_email(user)
+            auth.login(request, user)
+            form.save(request)
+            _update_invites(request)
+            messages.info(request, _(u'Your account has been created.'))
+            return redirect('profile', user.username)
 
-                msg = _(u'Your account has been created but needs to be '
-                         'verified. Please check your email to verify '
-                         'your account.')
-                messages.info(request, msg)
-                auth.logout(request)
-
-                return redirect(reverse('login'))
-            except ldap.CONSTRAINT_VIOLATION:
-                _set_already_exists_error(form)
-    return render(request, 'registration/register.html', dict(form=form))
-
-
-def password_change(request):
-    """
-    View wraps django.auth.contrib's password_change view, so that
-    we can override the form as well as logout the user.
-    """
-    r = auth.views.password_change(request,
-                                   'registration/password_change_form.html',
-                                   reverse('login'),
-                                   forms.PasswordChangeForm)
-    # Our session has the old password.
-    if isinstance(r, http.HttpResponseRedirect):
-        auth.logout(request)
-    return r
+    # When changing this keep in mind that the same view is used for
+    # phonebook.edit_profile.
+    # 'user' object must be passed in because we are not logged in
+    return render(request, 'phonebook/edit_profile.html',
+                  dict(form=form,
+                       edit_form_action=reverse('register'),
+                       mode='new',
+                       profile=user.get_profile(),
+                       user=user,
+                       ))
 
 
-def password_reset(request):
-    """
-    View wraps django.auth.contrib's password_reset view, so that
-    we can override the form.
-    """
-    r = auth.views.password_reset(request,
-                                  False,
-                                  'registration/password_reset_form.html',
-                                  'registration/password_reset_email.html',
-                                  'registration/password_reset_subject.txt',
-                                  forms.PasswordResetForm,
-                                  default_token_generator,
-                                  reverse('password_reset_check_mail'))
-    return r
+def _update_invites(request):
+    # Email in the form is the "username" we'll use.
+    code = request.session.get('invite-code')
+    if code:
+        try:
+            invite = get_invite(code)
+            voucher = invite.inviter
+        except Invite.DoesNotExist:
+            msg = 'Invite code [%s], does not exist!' % code
+            log.warning(msg)
+            # If there is no invite, lets get out of here.
+            return
+    else:
+        # If there is no invite, lets get out of here.
+        return
 
-
-def password_reset_confirm(request, uidb36=None, token=None):
-    """
-    View wraps django.auth.contrib's password_reset_confirm view, so that
-    we can override the form.
-    """
-    r = auth.views.password_reset_confirm(
-        request,
-        uidb36,
-        token,
-        'registration/password_reset_confirm.html',
-        default_token_generator,
-        forms.SetPasswordForm,
-        reverse('login'))
-    return r
-
-
-def password_reset_check_mail(request):
-    return render(request, 'registration/password_reset_check_mail.html')
+    redeemer = request.user.get_profile()
+    redeemer.vouch(voucher)
+    invite.redeemed = datetime.datetime.now()
+    invite.redeemer = redeemer
+    invite.save()
 
 
 def _set_already_exists_error(form):

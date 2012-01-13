@@ -28,6 +28,12 @@ DATABASES = {
     },
 }
 
+# Disable BrowserID Cert Checking
+BROWSERID_DISABLE_CERT_CHECK = True
+
+#Serve Profile Photos from django
+UPLOAD_URL = '/media/uploads'
+
 #### OpenLDAP ####
 # Read/Write Master slapd
 LDAP_SYNC_PROVIDER_URI = "ldap://localhost:1389"
