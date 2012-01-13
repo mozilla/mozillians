@@ -16,13 +16,14 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
+from session_csrf import anonymous_csrf
 
 from groups.helpers import stringify_groups
 from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
-from users.models import UserProfile
+from users.models import UserProfile#, UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 

@@ -52,6 +52,9 @@ class ProfileForm(happyforms.Form):
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
     irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
                                    required=False)
+    irc_nickname_unique_id = forms.CharField(widget=forms.HiddenInput,
+                                             required=False)
+
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
     website = forms.URLField(label=_lazy(u'Website'), required=False)
 
@@ -68,14 +71,14 @@ class ProfileForm(happyforms.Form):
     def clean_photo(self):
         """Let's make sure things are right.
 
-        Cribbed from zamboni.  Thanks Dave Dash!
+Cribbed from zamboni. Thanks Dave Dash!
 
-        TODO: this needs to go into celery
+TODO: this needs to go into celery
 
-        - File IT bug for celery
-        - Ensure files aren't InMemory files
-        - See zamboni.apps.users.forms
-        """
+- File IT bug for celery
+- Ensure files aren't InMemory files
+- See zamboni.apps.users.forms
+"""
         photo = self.cleaned_data['photo']
 
         if not photo:
@@ -104,7 +107,7 @@ class ProfileForm(happyforms.Form):
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
-            raise forms.ValidationError(_(u'Tags can only contain '
+            raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 
@@ -113,33 +116,17 @@ class ProfileForm(happyforms.Form):
                 if g and ',' not in g]
 
     def save(self, request):
-        """Save the data to profile."""
+        """Save this form to both LDAP and RDBMS backends, as appropriate."""
+        # Save stuff in LDAP first...
+        # TODO: Find out why this breaks the larper tests
+        # ldap.update_person(request.user.unique_id, self.cleaned_data)
+        # ldap.update_profile_photo(request.user.unique_id, self.cleaned_data)
+
+        # ... then save other stuff in RDBMS.
         self._save_groups(request)
-        user = request.user
-        profile = user.get_profile()
-        d = self.cleaned_data
-
-        user.first_name = d['first_name']
-        user.last_name = d['last_name']
-
-        profile.bio = d['biography']
-        profile.ircname = d['irc_nickname']
-        profile.website = d['website']
-
-        if d['photo']:
-            profile.photo = True
-            with open(profile.get_photo_file(), 'w') as f:
-                f.write(d['photo'].file.read())
-
-        if d['photo_delete']:
-            profile.photo = False
-            try:
-                os.remove(profile.get_photo_file())
-            except OSError:
-                statsd.incr('errors.photo.deletion')
-
+        profile = request.user.get_profile()
+        profile.website = self.cleaned_data['website']
         profile.save()
-        user.save()
 
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""

@@ -54,6 +54,9 @@ class UserProfile(SearchMixin, models.Model):
     class Meta:
         db_table = 'profile'
 
+    def is_complete(self):
+        return not self.user.last_name == ''
+
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
         if system:
@@ -159,7 +162,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         u = UserProfile.objects.get(user=instance)
         u.display_name = dn
         u.save()
-
 
 @receiver(models.signals.pre_save, sender=UserProfile)
 def generate_code(sender, instance, raw, using, **kwargs):

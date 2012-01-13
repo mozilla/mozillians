@@ -17,5 +17,19 @@ var app = {}; // Let's namespace our app's functions in here.
         $('#language').change(function() {
             $('#language-switcher').submit();
         });
+
+
+$('#create_profile').bind('click', function(e) {
+  e.preventDefault();
+  navigator.id.getVerifiedEmail(function(assertion) {
+    if (assertion) {
+      var $e = $('#id_assertion');
+      $e.val(assertion.toString());
+      $e.parent().submit();
+    }
+  });
+});
+
+
     });
 })(jQuery);

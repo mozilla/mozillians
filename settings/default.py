@@ -44,6 +44,9 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS +
+    ('django_browserid.context_processors.browserid_form',))
+
 JINGO_EXCLUDE_APPS = [
     'admin',
 ]
@@ -96,6 +99,15 @@ AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
                               "voucher": "mozilliansVouchedBy"}
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
+AUTHENTICATION_BACKENDS = (
+    # ...
+    'django_browserid.auth.BrowserIDBackend',
+    # ...
+)
+
+BROWSERID_CREATE_USER = True
+
+LOGIN_REDIRECT_URL = '/register'
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
@@ -111,6 +123,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
 
     'django.contrib.admin',
     'django.contrib.auth',
+    'django_browserid',
 
     # DB migrations
     'south',

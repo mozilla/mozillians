@@ -3,7 +3,9 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
 from django.contrib import admin
-admin.autodiscover()
+admin.autodiscover
+
+from session_csrf import anonymous_csrf
 
 from phonebook import views
 
@@ -27,8 +29,8 @@ urlpatterns = patterns('',
     url('^confirm-register$', direct_to_template,
         {'template': 'phonebook/confirm_register.html'},
         name='confirm_register'),
-    url('^$', direct_to_template, {'template': 'phonebook/home.html'},
-        name='home'),
+    url('^$', anonymous_csrf(direct_to_template),
+        {'template': 'phonebook/home.html'}, name='home'),
 
     url(r'^(?P<username>.+)$', views.profile, name='profile'),
 )

@@ -66,7 +66,7 @@
              the log in/sign up links. #}
         {% else %}
           <li>
-            <a id="login" href="{{ url('login') }}">{{ _('Log In') }}</a>
+            <a id="login" href="#dont_do_that">{{ _('Log In') }}</a>
           </li>
           {% block register_button %}
             <li>
@@ -167,6 +167,6 @@
   {% include "includes/webtrends_desktop.html" %}
 {% endblock %}
 {% block js %}{% endblock %}
-
+<script src="https://browserid.org/include.js" type="text/javascript"></script>
 </body>
 </html>
