@@ -28,6 +28,9 @@ DATABASES = {
     },
 }
 
+# Disable BrowserID Cert Checking
+BROWSERID_DISABLE_CERT_CHECK = True
+
 #### OpenLDAP ####
 # Read/Write Master slapd
 LDAP_SYNC_PROVIDER_URI = "ldap://localhost:1389"

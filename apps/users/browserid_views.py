@@ -37,7 +37,7 @@ def verify(request, redirect_field_name=auth.REDIRECT_FIELD_NAME):
         if user is not None and user.is_active:
             if user.get_profile().is_complete():
                 auth.login(request, user)
-                return HttpResponseRedirect(redirect_to)
+                return redirect( reverse('profile', args=[user.username]))
             else:
                 _store_user_in_session(request,assertion,get_audience(request))
                 return redirect(reverse('register'))

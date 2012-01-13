@@ -76,9 +76,7 @@ def edit_profile(request, new_account=False):
         form = forms.ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             form.save(request)
-            next = (reverse('confirm_register') if new_account
-                    else reverse('profile', args=[request.user.username]))
-            return redirect(next)
+            return redirect(reverse('profile', args=[request.user.username]))
     else:
         initial = dict(first_name=request.user.first_name,
                        last_name=request.user.last_name,
@@ -91,7 +89,8 @@ def edit_profile(request, new_account=False):
 
     d = dict(form=form,
              registration_flow=new_account,
-             user_groups=user_groups)
+             user_groups=user_groups,
+             profile=profile)
     return render(request, 'phonebook/edit_profile.html', d)
 
 

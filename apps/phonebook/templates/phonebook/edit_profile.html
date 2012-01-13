@@ -63,7 +63,7 @@
         {% if mode != 'new' %}
           <div id="photo-container"
                class="{{ 'error' if form.errors['photo'] }}">
-            {{ profile_photo(person) }}
+            {{ profile_photo(profile) }}
 
             {{ form['photo'].label_tag() }}
             {{ form.errors['photo'] }}
@@ -124,7 +124,7 @@
 
         <dl id="email-container">
           <dt>{{ _('Primary Email:') }}</dt>
-          <dd>{{ email }}</dd>
+          <dd>{{ user.email }}</dd>
         </dl>
 
         <div class="clear"></div>
@@ -165,7 +165,7 @@
     {% if intent %} {# BrowserID Sign-up #}
       <a href="{{ url('home') }}" id="cancel">
     {% else %}
-      <a href="{{ url('profile', user.unique_id) }}" id="cancel">
+      <a href="{{ url('profile', user.username) }}" id="cancel">
     {% endif %}
       {{ _('Cancel') }}{# L10n: Cancel editing #}
     </a>
@@ -173,15 +173,13 @@
     <div class="clear"></div>
   </form>
 
-  {% if user.unique_id == person.unique_id %}
-    <div id="manage-profile">
-      <a class="button destructive small" href="{{ url('confirm_delete') }}"
-         id="delete-profile">
-        {{ _('Delete Profile') }}
-      </a>
+  <div id="manage-profile">
+    <a class="button destructive small" href="{{ url('profile.delete_confirm') }}"
+       id="delete-profile">
+      {{ _('Delete Profile') }}
+    </a>
 
-      <div class="clear"></div>
+    <div class="clear"></div>
 
-    </div>
-  {% endif %}
+  </div>
 {% endblock %}
