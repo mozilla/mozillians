@@ -67,6 +67,7 @@ MINIFY_BUNDLES = {
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
             'js/main.js',
+            'js/browserid.js',
             'js/groups.js',
         ),
     }
@@ -87,7 +88,13 @@ STS_SUBDOMAINS = True
 # OpenLDAP
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
+
+#BrowserID creates useer if one doesn't exist
+BROWSERID_CREATE_USER = True
+
+#On Login, we redirect through register
+LOGIN_REDIRECT_URL = '/register'
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                                    "(uid=%(user)s)")
@@ -98,16 +105,6 @@ AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
                               "phone": "telephoneNumber:",
                               "voucher": "mozilliansVouchedBy"}
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
-
-AUTHENTICATION_BACKENDS = (
-    # ...
-    'django_browserid.auth.BrowserIDBackend',
-    # ...
-)
-
-BROWSERID_CREATE_USER = True
-
-LOGIN_REDIRECT_URL = '/register'
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',

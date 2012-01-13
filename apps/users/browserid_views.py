@@ -12,7 +12,13 @@ from funfactory.urlresolvers import reverse
 
 from django.shortcuts import redirect
 
+'''
+This view exists because the way django_browserid does it automatically
+is not ideal.
 
+TODO: fork django_browserid and use a class based view system so you can
+sublcass and customize without borking everything
+'''
 
 
 

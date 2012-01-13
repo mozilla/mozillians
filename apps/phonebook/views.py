@@ -23,7 +23,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
-from users.models import UserProfile#, UserProfile
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 

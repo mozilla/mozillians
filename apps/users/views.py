@@ -54,7 +54,7 @@ def register(request):
         return redirect('home')
 
     if request.user.is_authenticated():
-        return redirect(reverse('profile', args=[request.user.unique_id]))
+        return redirect(reverse('profile', args=[request.user.username]))
 
     assertion = request.session.get('assertion')
     audience = request.session.get('audience')
