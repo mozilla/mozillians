@@ -322,7 +322,7 @@ class TestViews(LDAPTestCase):
         assert doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should appear.')
 
-        #See if gravatar message is no longer there
+        # See if gravatar message is no longer there
         r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
         assert not 'This is your gravatar' in r.content
 

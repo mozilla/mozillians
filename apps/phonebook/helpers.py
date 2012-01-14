@@ -1,5 +1,9 @@
 import re
 import time
+import hashlib
+import urllib
+
+from django.conf import settings
 
 import jinja2
 from funfactory.urlresolvers import reverse
@@ -42,3 +46,23 @@ def profile_photo(context, person):
 @jinja2.contextfunction
 def search_result(context, person):
     return dict(person=person)
+
+
+def gravatar(email, default=settings.MEDIA_URL+'/media/img/unknown.png',
+                     size=175,
+                     rating='pg'):
+    """Takes an email and returns a gravatar image
+
+    Passes parameters size, rating, and default image (for if there is no
+    match) and returns a url for the image.
+    Size parameter refers to the size of image that gravitar will return
+    Rating sets maximum rating that we use to PG
+    """
+
+
+    gravatar_url = "http://www.gravatar.com/avatar/"
+    gravatar_url += hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode({'d': default,
+                                      's': str(size),
+                                      'r': rating})
+    return gravatar_url

@@ -25,6 +25,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+from phonebook.helpers import gravatar
 from session_csrf import anonymous_csrf
 from users.models import Anonymous, UserProfile
 
@@ -297,25 +298,7 @@ def photo(request, unique_id):
         # If gravatar has no image, it will return this image.
         default = 'http://%s/media/img/unknown.png' % request.get_host()
         email = ldap.get_by_unique_id(unique_id, needs_master).username
-        return redirect(_locate_gravatar(email, default))
-
-
-def _locate_gravatar(email, default):
-    """Takes an email and returns a gravatar image
-
-    Passes parameters size, rating, and default image (for if there is no
-    match) and returns a url for the image.
-    """
-    # Size parameter refers to the size of image that gravitar will return
-    size = 175
-    # Sets maximum rating that we use to PG
-    rating = 'pg'
-    gravatar_url = "http://www.gravatar.com/avatar/"
-    gravatar_url += hashlib.md5(email.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'d': default,
-                                      's': str(size),
-                                      'r': rating})
-    return gravatar_url
+        return redirect(gravatar(email, default))
 
 
 @login_required
