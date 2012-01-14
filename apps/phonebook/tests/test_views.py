@@ -302,7 +302,7 @@ class TestViews(LDAPTestCase):
         eq_(r.status_code, 302, ('Trying to delete a non-existant photo '
                                  "shouldn't result in an error."))
 
-        #See if gravatar message is there
+        # See if gravatar message is there
         r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
         assert 'This is your gravatar' in r.content
 
