@@ -1,3 +1,5 @@
+import hashlib
+import urllib
 from functools import wraps
 from ldap import SIZELIMIT_EXCEEDED
 from operator import attrgetter
@@ -23,6 +25,7 @@ from larper import UserSession, AdminSession, NO_SUCH_PERSON
 from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
+from phonebook.helpers import gravatar
 from session_csrf import anonymous_csrf
 from users.models import Anonymous, UserProfile
 
@@ -292,7 +295,10 @@ def photo(request, unique_id):
     if image:
         return HttpResponse(image, mimetype="image/jpeg")
     else:
-        return redirect('/media/img/unknown.png')
+        # If gravatar has no image, it will return this image.
+        default = 'http://%s/media/img/unknown.png' % request.get_host()
+        email = ldap.get_by_unique_id(unique_id, needs_master).username
+        return redirect(gravatar(email, default))
 
 
 @login_required
