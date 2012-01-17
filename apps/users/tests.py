@@ -12,34 +12,6 @@ from users.models import UserProfile
 Group.objects.get_or_create(name='staff', system=True)
 
 
-class ViewTest(TestCase):
-    """Test views in the users app."""
-
-    def test_confirmation_code(self):
-        """Verify the confirm view accepts valid codes and 404s otherwise."""
-        d = dict(
-                 username='ad',
-                 email='mrfusion@gmail.com',
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
-                 optin=True
-                )
-        r = self.client.post(reverse('register'), d, follow=True)
-        user = User.objects.filter(email=d['email'])[0].get_profile()
-        user.get_confirmation_url()
-
-        r = self.client.get(reverse('confirm'))
-        eq_(r.status_code, 404, 'No confirmation code raises a 404.')
-
-        r = self.client.get(reverse('confirm') + '?code=badcode')
-        eq_(r.status_code, 404, 'A bad confirmation code raises a 404.')
-
-        r = self.client.get(user.get_confirmation_url())
-        eq_(r.status_code, 200, 'A good confirmation code works.')
-
-
 class RegistrationTest(TestCase):
     """Tests registration."""
 
@@ -188,31 +160,6 @@ class RegistrationTest(TestCase):
                                               follow=True)
         eq_(r.status_code, 200)
         eq_(r.context['profile'].user_id, u.id)
-
-    def test_bad_username(self):
-        """`about` is a terrible username, as are it's silly friends.
-
-        Let's make some stop words *and* analyze the routing system,
-        whenever someone sets their username and verify that they can't
-        be "about" or "help" or anything that is in use.
-        """
-        badnames = ('about', 'save', 'tag', 'group', 'username', 'register',
-                    'photo', 'media',)
-        for name in badnames:
-            d = dict(
-                    email='mrfusion+dotcom@mozilla.com',
-                    username=name,
-                    first_name='Akaaaaaaash',
-                    last_name='Desaaaaaaai',
-                    password='tacoface',
-                    confirmp='tacoface',
-                    optin=True
-            )
-            r = self.client.post(reverse('register'), d)
-            eq_(r.status_code, 200,
-                'This form should fail for "%s", and say so.' % name)
-            assert r.context['form'].errors, (
-                "Didn't raise errors for %s" % name)
 
 
 class TestThingsForPeople(TestCase):
