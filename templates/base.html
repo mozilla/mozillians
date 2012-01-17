@@ -66,7 +66,7 @@
              the log in/sign up links. #}
         {% else %}
           <li>
-            <a id="login" href="#dont_do_that">{{ _('Log In') }}</a>
+            <a id="login" class="browser_id_login" href="#login">{{ _('Log In') }}</a>
           </li>
           {% block register_button %}
             <li>
@@ -160,6 +160,12 @@
     <div class="clear"></div>
   </footer>
 </div>
+{% if not user.is_authenticated() %}
+{# To add browserid Login to something add the class .browser_id_login to an element #}
+<form method="POST" action="{{ url('browserid_verify') }}">{{ csrf() }}
+  {{ browserid_form.as_p() }}
+</form>
+{% endif %}
 
 {% block site_js %}
   <script src="{{ url('jsi18n') }}"></script>

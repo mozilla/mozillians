@@ -1,6 +1,6 @@
 (function($) {
     $().ready(function() {
-		$('#create_profile').bind('click', function(e) {
+		$('.browser_id_login').bind('click', function(e) {
 		  e.preventDefault();
 		  navigator.id.getVerifiedEmail(function(assertion) {
 		    if (assertion) {
