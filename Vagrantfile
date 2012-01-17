@@ -36,6 +36,10 @@ Vagrant::Config.run do |config|
         config.vm.share_folder("v-root", MOUNT_POINT, ".", :nfs => true)
     end
 
+    # This keeps it from pegging your CPU
+    # um, doesn't work... in .8.10...
+    # config.vm.customize ["modifyvm", :id, "--cpuexecutioncap", "90"]
+
     # Add to /etc/hosts: 33.33.33.24 dev.mozillians.org
     config.vm.network "33.33.33.24"
 

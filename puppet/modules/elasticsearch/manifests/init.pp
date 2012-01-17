@@ -61,7 +61,6 @@ class sun_java_6 {
 
 }
 
-
 class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       $esBasename       = "elasticsearch"
       $esName           = "${esBasename}-${version}"
@@ -83,6 +82,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       $esPidpath        = "/var/run"
       $esPidfile        = "${esPidpath}/${esBasename}.pid"
       $esJarfile        = "${esName}.jar"
+      $esServiceRev     = "3e0b23d"
 
       include sun_java_6
 
@@ -93,7 +93,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       }
 
       download_file {
-        ["3e0b23d"]:
+        ["$esServiceRev"]:
         site => "https://github.com/elasticsearch/elasticsearch-servicewrapper/tarball",
         cwd => "/tmp/",
         alias => "download wrapper"
@@ -133,11 +133,25 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       }
 
       # Remove old files and copy in latest
+      exec { "elasticsearch-mkpath":
+             path => "/bin:/usr/bin",
+             command => "mkdir -p $esPath",
+      }
+
+      exec { "elasticsearch-untar":
+             path => "/bin:/usr/bin",
+             command => "tar -xzf /tmp/$esFile -C /tmp",
+             require => Download_File["$esFile"]
+      }
+
       exec { "elasticsearch-package":
              path => "/bin:/usr/bin",
-             command => "mkdir -p $esPath && tar -xzf /tmp/$esFile -C /tmp && sudo -u$esBasename cp -rf /tmp/$esName/. $esPath/. && rm -rf /tmp/$esBasename*",
+             command => "sudo -u$esBasename cp -rf /tmp/$esName/. $esPath/.",
              unless  => "test -f $esPath/bin/elasticsearch",
-             require => Download_File["$esFile"],
+             require => [Exec["elasticsearch-mkpath"],
+                         Exec["elasticsearch-untar"],
+                         User["$esBasename"],
+                        ],
              notify => Service["$esBasename"],
       }
 
@@ -190,7 +204,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
 
       # Stage the Service Package
       file { "/tmp/$esServiceFile":
-           source => "/tmp/master",
+           source => "/tmp/$esServiceRev",
            require => [
              Exec["elasticsearch-package"],
              Download_File["download wrapper"]
@@ -201,7 +215,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       exec { "elasticsearch-service":
              path => "/bin:/usr/bin",
              unless => "test -d $esPath/bin/service/lib",
-             command => "tar -xzf /tmp/$esServiceFile -C /tmp && mv /tmp/elasticsearch-$esServiceName-3e0b23d/service $esPath/bin && rm /tmp/$esServiceFile",
+             command => "tar -xzf /tmp/$esServiceFile -C /tmp && mv /tmp/elasticsearch-$esServiceName-$esServiceRev/service $esPath/bin && rm /tmp/$esServiceFile",
              require => [File["/tmp/$esServiceFile"], User["$esBasename"]]
       }
 
