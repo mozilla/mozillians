@@ -173,6 +173,7 @@
     <div class="clear"></div>
   </form>
 
+  {% if mode != 'new' %} {# BrowserID Sign-up #}
   <div id="manage-profile">
     <a class="button destructive small" href="{{ url('profile.delete_confirm') }}"
        id="delete-profile">
@@ -182,4 +183,5 @@
     <div class="clear"></div>
 
   </div>
+  {% endif %}
 {% endblock %}
