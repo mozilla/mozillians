@@ -1,4 +1,5 @@
 import ldap
+import datetime
 
 from django import http
 from django.contrib import auth, messages
@@ -84,6 +85,7 @@ def register(request):
         if form.is_valid():
             auth.login(request, user)
             form.save(request)
+            _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
             return redirect('profile', user.username)
     else:
@@ -98,6 +100,30 @@ def register(request):
                        email=user.email,
                        intent=intent))
 
+def _update_invites(request):
+
+    # Email in the form is the "username" we'll use.
+
+    code = request.session.get('invite-code')
+    if code:
+        try:
+            invite = get_invite(code)
+            voucher = invite.inviter
+        except Invite.DoesNotExist:
+            msg = 'Invite code [%s], does not exist!' % code
+            log.warning(msg)
+            # If there is no invite, lets get out of here.
+            return
+    else:
+        # If there is no invite, lets get out of here.
+        return
+   
+    redeemer = request.user.get_profile()
+    redeemer.vouch(voucher)
+    print "vouched"+'\n'*5
+    invite.redeemed = datetime.datetime.now()
+    invite.redeemer = redeemer
+    invite.save()
 
 def _set_already_exists_error(form):
     msg = _('Someone has already registered an account with %(email)s.')

@@ -21,14 +21,13 @@ from groups.models import Group
 from phonebook.models import get_random_string
 
 
+#TODO: This should be deprecated
 class UserProfileManager(models.Manager):
     """Custom manager that can query via LDAP attributes."""
 
-    def get_by_unique_id(self, uid):
+    def get_by_unique_id(self, id):
         """Given an LDAP uniqueIdentifier, find a match."""
-        rs = larper.get_user_by_uid(uid)
-        mail = rs[1]['mail'][0]
-        return User.objects.get(email=mail).get_profile()
+        return User.objects.get(id=id).get_profile()
 
 
 class UserProfile(SearchMixin, models.Model):
