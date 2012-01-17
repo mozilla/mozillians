@@ -80,9 +80,12 @@ def edit_profile(request, new_account=False):
 
         form = forms.ProfileForm(initial=initial)
 
+    # We have to include email because we need it on the
+    # register view.
     d = dict(form=form,
              registration_flow=new_account,
              user_groups=user_groups,
+             email=request.user.email,
              profile=profile)
     return render(request, 'phonebook/edit_profile.html', d)
 
