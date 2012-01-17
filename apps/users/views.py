@@ -1,16 +1,8 @@
-import ldap
 import datetime
 
-from django import http
 from django.contrib import auth, messages
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render
-from django.http import (Http404, HttpResponse, HttpResponseRedirect,
-                         HttpResponseForbidden)
+from django.shortcuts import redirect, render
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -19,7 +11,6 @@ from tower import ugettext as _
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
 from users import forms
-from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 
@@ -100,10 +91,9 @@ def register(request):
                        email=user.email,
                        intent=intent))
 
+
 def _update_invites(request):
-
     # Email in the form is the "username" we'll use.
-
     code = request.session.get('invite-code')
     if code:
         try:
@@ -117,13 +107,13 @@ def _update_invites(request):
     else:
         # If there is no invite, lets get out of here.
         return
-   
+
     redeemer = request.user.get_profile()
     redeemer.vouch(voucher)
-    print "vouched"+'\n'*5
     invite.redeemed = datetime.datetime.now()
     invite.redeemer = redeemer
     invite.save()
+
 
 def _set_already_exists_error(form):
     msg = _('Someone has already registered an account with %(email)s.')

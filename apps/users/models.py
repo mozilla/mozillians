@@ -162,6 +162,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         u.display_name = dn
         u.save()
 
+
 @receiver(models.signals.pre_save, sender=UserProfile)
 def generate_code(sender, instance, raw, using, **kwargs):
     if instance.confirmation_code:

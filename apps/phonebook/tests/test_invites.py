@@ -21,7 +21,7 @@ class InviteTest(common.tests.TestCase):
         d = dict(recipient=email)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
-        assert ('%s has been invited to Mozillians.'%email in
+        assert ('%s has been invited to Mozillians.' % email in
                 pq(r.content)('div#main-content p').text())
 
         # See that the email was sent.
@@ -77,7 +77,7 @@ class InviteTest(common.tests.TestCase):
         assertion = 'mrfusionsomereallylongstring'
         invite = self.invite_someone(email)
         d = dict(assertion=assertion, email=email, mode='register')
-        
+
         r = self.get_register(invite)
         self.redeem_invite(invite, username='ad', **d)
 

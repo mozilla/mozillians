@@ -131,7 +131,6 @@ class ProfileForm(happyforms.Form):
 
         if d['photo']:
             profile.photo = True
-            print 'Photo in save'+'\n'*2
             with open(profile.get_photo_file(), 'w') as f:
                 f.write(d['photo'].file.read())
 

@@ -1,24 +1,14 @@
-import datetime
-from urlparse import urlparse
-
 from django import forms
-from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
-from django.core.urlresolvers import resolve
-from django.forms import ValidationError
-from django.forms.util import ErrorList
 from django.template import loader
 from django.utils.http import int_to_base36
 
 import commonware.log
-import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
-from phonebook.models import Invite
 from phonebook.forms import ProfileForm
 from users.models import UserProfile
 

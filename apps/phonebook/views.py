@@ -1,14 +1,11 @@
 from functools import wraps
 
-import django.contrib.auth
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import (Http404, HttpResponse, HttpResponseRedirect,
-                         HttpResponseForbidden)
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -16,11 +13,8 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
-from session_csrf import anonymous_csrf
 
 from groups.helpers import stringify_groups
-from larper import UserSession, AdminSession, NO_SUCH_PERSON
-from larper import MOZILLA_IRC_SERVICE_URI
 from phonebook import forms
 from phonebook.models import Invite
 from users.models import UserProfile
@@ -54,7 +48,6 @@ def profile(request, username):
     profile = user.get_profile()
 
     if not profile.is_vouched and request.user.username != username:
-        voucher = request.user.username
         vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 
     # Get user groups from their profile.

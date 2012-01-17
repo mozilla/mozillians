@@ -1,12 +1,10 @@
 from django.conf import settings
 from django.contrib import auth
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import require_POST
 
 from django_browserid.forms import BrowserIDForm
 from django_browserid.auth import get_audience
-
-from django.views.decorators.csrf import csrf_exempt
 
 from funfactory.urlresolvers import reverse
 
@@ -19,7 +17,6 @@ is not ideal.
 TODO: fork django_browserid and use a class based view system so you can
 sublcass and customize without borking everything
 '''
-
 
 
 @require_POST
@@ -37,11 +34,13 @@ def verify(request, redirect_field_name=auth.REDIRECT_FIELD_NAME):
         if user is not None and user.is_active:
             if user.get_profile().is_complete():
                 auth.login(request, user)
-                return redirect( reverse('profile', args=[user.username]))
+                return redirect(reverse('profile', args=[user.username]))
             else:
-                _store_user_in_session(request,assertion,get_audience(request))
+                _store_user_in_session(request, assertion,
+                                       get_audience(request))
                 return redirect(reverse('register'))
     return HttpResponseRedirect(redirect_to_failure)
+
 
 def _store_user_in_session(request, assertion, audience):
     '''

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
@@ -14,7 +13,8 @@ urlpatterns = patterns('',
         name='profile.edit'),
     url('^register/edit/$', views.edit_profile, {'new_account': True},
         name='profile.new'),
-    url('^confirm-delete$', views.confirm_delete, name='profile.delete_confirm'),
+    url('^confirm-delete$', views.confirm_delete,
+        name='profile.delete_confirm'),
     url('^delete$', views.delete, name='profile.delete'),
     url('^opensearch.xml$', views.search_plugin, name='search_plugin'),
     url('^search$', views.search, name='search'),
