@@ -44,6 +44,9 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS +
+    ('django_browserid.context_processors.browserid_form',))
+
 JINGO_EXCLUDE_APPS = [
     'admin',
 ]
@@ -64,6 +67,7 @@ MINIFY_BUNDLES = {
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
             'js/main.js',
+            'js/browserid.js',
             'js/groups.js',
         ),
     }
@@ -84,7 +88,13 @@ STS_SUBDOMAINS = True
 # OpenLDAP
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
+
+#BrowserID creates useer if one doesn't exist
+BROWSERID_CREATE_USER = True
+
+#On Login, we redirect through register
+LOGIN_REDIRECT_URL = '/register'
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                                    "(uid=%(user)s)")
@@ -96,10 +106,10 @@ AUTH_LDAP_PROFILE_ATTR_MAP = {"home_directory": "homeDirectory",
                               "voucher": "mozilliansVouchedBy"}
 AUTH_LDAP_ALWAYS_UPDATE_USER = False
 
-
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
-    'phonebook',
+    #These need to go in order of migration
     'users',
+    'phonebook',
     'groups',
     # 'locations',
     'larper',
@@ -111,6 +121,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
 
     'django.contrib.admin',
     'django.contrib.auth',
+    'django_browserid',
 
     # DB migrations
     'south',

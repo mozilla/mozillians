@@ -52,6 +52,7 @@ class ProfileForm(happyforms.Form):
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
     irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
                                    required=False)
+
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
     website = forms.URLField(label=_lazy(u'Website'), required=False)
 
@@ -68,7 +69,7 @@ class ProfileForm(happyforms.Form):
     def clean_photo(self):
         """Let's make sure things are right.
 
-        Cribbed from zamboni.  Thanks Dave Dash!
+        Cribbed from zamboni. Thanks Dave Dash!
 
         TODO: this needs to go into celery
 
@@ -104,7 +105,7 @@ class ProfileForm(happyforms.Form):
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
-            raise forms.ValidationError(_(u'Tags can only contain '
+            raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 

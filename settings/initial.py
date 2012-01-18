@@ -15,7 +15,7 @@ from funfactory.manage import path
 NETAPP_STORAGE = path('tmp')
 
 #: Base URL for uploaded files. Could be a CDN.
-UPLOAD_URL = '/uploads'
+UPLOAD_URL = '/media/uploads'
 
 #: This is the base URL for the current instance of the site.
 SITE_URL = 'http://mozillians.org'

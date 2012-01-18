@@ -21,14 +21,13 @@ from groups.models import Group
 from phonebook.models import get_random_string
 
 
+# TODO: This should be deprecated
 class UserProfileManager(models.Manager):
-    """Custom manager that can query via LDAP attributes."""
+    """Returns a user profile based on a user id"""
 
-    def get_by_unique_id(self, uid):
+    def get_by_unique_id(self, id):
         """Given an LDAP uniqueIdentifier, find a match."""
-        rs = larper.get_user_by_uid(uid)
-        mail = rs[1]['mail'][0]
-        return User.objects.get(email=mail).get_profile()
+        return User.objects.get(id=id).get_profile()
 
 
 class UserProfile(SearchMixin, models.Model):
@@ -53,6 +52,13 @@ class UserProfile(SearchMixin, models.Model):
 
     class Meta:
         db_table = 'profile'
+
+    def is_complete(self):
+        """
+        Tests if a user has all the information needed to move on past the
+        original registration view
+        """
+        return bool(self.user.last_name)
 
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
@@ -111,7 +117,7 @@ class UserProfile(SearchMixin, models.Model):
                      "You'll now be able to search, vouch "
                      "and invite other Mozillians onto the site.")
         send_mail(subject, message, 'no-reply@mozillians.org',
-                  [self.user.username])
+                  [self.user.email])
 
     @property
     def full_name(self):

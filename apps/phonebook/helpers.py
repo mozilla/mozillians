@@ -1,10 +1,6 @@
 import re
-import time
-
-from django.conf import settings
 
 import jinja2
-from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from jingo import register
 
