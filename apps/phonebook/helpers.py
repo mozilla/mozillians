@@ -1,16 +1,10 @@
 import re
 import time
-import hashlib
-import urllib
-
-from django.conf import settings
 
 import jinja2
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from jingo import register
-
-from larper import UserSession
 
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
@@ -35,24 +29,10 @@ def profile_photo(context, person):
     if me:
         url += '?%d' % int(time.time())
 
-    needs_master = (user.unique_id == person.unique_id)
-    ldap = UserSession.connect(context['request'])
-    image = ldap.profile_photo(person.unique_id, use_master=needs_master)
-
-    return dict(image_url=url, gravatar=not image)
+    return dict(image_url=url)
 
 
 @register.inclusion_tag('phonebook/includes/search_result.html')
 @jinja2.contextfunction
 def search_result(context, person):
     return dict(person=person)
-
-
-def gravatar(email, default=settings.MEDIA_URL + '/media/img/unknown.png',
-             size=175, rating='pg'):
-    """Takes an email and returns a gravatar image."""
-    return 'http://www.gravatar.com/avatar/%S?%S' % (
-            hashlib.md5(email.lower()).hexdigest(),
-            urllib.urlencode({'d': default,
-                              's': str(size),
-                              'r': rating}))

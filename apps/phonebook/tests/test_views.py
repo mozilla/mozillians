@@ -293,7 +293,7 @@ class TestViews(LDAPTestCase):
         image = client.get(doc('#profile-photo').attr('src'))
 
         eq_(image.status_code, 302, (
-                'Profile image URL should redirect to gravatar image.'))
+                'Profile image URL should redirect to "unknown" image.'))
         assert not doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should not appear.')
         # Try to game the form -- it shouldn't do anything.
@@ -301,10 +301,6 @@ class TestViews(LDAPTestCase):
                         dict(last_name='foo', photo_delete=1))
         eq_(r.status_code, 302, ('Trying to delete a non-existant photo '
                                  "shouldn't result in an error."))
-
-        # See if gravatar message is there
-        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
-        assert 'This is your gravatar' in r.content
 
         # Add a profile photo
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
@@ -321,10 +317,6 @@ class TestViews(LDAPTestCase):
         eq_(image.status_code, 200, 'Profile image URL should not redirect.')
         assert doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should appear.')
-
-        # See if gravatar message is no longer there
-        r = client.get(reverse('profile', args=[MOZILLIAN['uniq_id']]))
-        assert not 'This is your gravatar' in r.content
 
         # Remove a profile photo
         r = client.post(reverse('phonebook.edit_profile'),
