@@ -1,24 +1,15 @@
-import datetime
-from urlparse import urlparse
-
 from django import forms
-from django.conf import settings
 from django.contrib import auth
-from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.models import get_current_site
-from django.core.urlresolvers import resolve
-from django.forms import ValidationError
-from django.forms.util import ErrorList
 from django.template import loader
 from django.utils.http import int_to_base36
 
 import commonware.log
-import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
-from phonebook.models import Invite
+from phonebook.forms import ProfileForm
 from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
@@ -65,93 +56,20 @@ class AuthenticationForm(auth.forms.AuthenticationForm):
         return self.cleaned_data
 
 
-class RegistrationForm(happyforms.ModelForm):
-    email = forms.EmailField(label=_lazy(u'Primary Email'), required=True)
-    password = forms.CharField(min_length=8, max_length=255,
-                               label=_lazy(u'Password'), required=True,
-                               widget=forms.PasswordInput(render_value=False))
-    confirmp = forms.CharField(label=_lazy(u'Confirm Password'),
-                               widget=forms.PasswordInput(render_value=False),
-                               required=True)
-
-    first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
-    last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
+class RegistrationForm(ProfileForm):
     code = forms.CharField(widget=forms.HiddenInput, required=False)
 
-    #recaptcha = captcha.fields.ReCaptchaField()
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
                         u'explain in your privacy policy.'),
             widget=forms.CheckboxInput(attrs={'class': 'checkbox'}))
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password', 'first_name', 'last_name')
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-
-        if username not in settings.USERNAME_BLACKLIST:
-            # TODO: we really should use middleware to handle the extra slashes
-            r1 = resolve(urlparse('/' + username)[2])
-            r2 = resolve(urlparse('/' + username + '/')[2])
-
-            if all(r.url_name == 'profile' for r in (r1, r2)):
-                return username
-
-        raise ValidationError(_('This username is reserved, please choose '
-                                'another.'))
 
     def clean(self):
         super(RegistrationForm, self).clean()
 
         data = self.cleaned_data
 
-        # Passwords
-        p1 = data.get('password')
-        p2 = data.get('confirmp')
-
-        # Only check for matching passwords if the supplied password is valid
-        # in the first place; otherwise, extra errors seem redundant (see
-        # bug 680444 -- https://bugzilla.mozilla.org/show_bug.cgi?id=680444).
-        if not self.errors.get('password') and p1 != p2:
-            msg = _lazy(u'The passwords did not match.')
-            self._errors['confirmp'] = ErrorList([msg])
-            if p2:
-                del data['confirmp']
-
-        # TODO: check unique username as well
-        email = data.get('email')
-
-        # TODO: See if this can be validated via a builtin.
-        if User.objects.filter(email=email).count():
-            raise forms.ValidationError(_('Email address already in use.'))
-
         return data
-
-    def save(self):
-        d = self.cleaned_data
-        user = super(RegistrationForm, self).save(commit=False)
-        user.set_password(d["password"])
-        voucher = None
-
-        if d['code']:
-            try:
-                from users.views import get_invite
-                invite = get_invite(d['code'])
-                voucher = invite.inviter
-            except Invite.DoesNotExist:
-                msg = 'Bad code in form [%s], skipping pre-vouch' % d['code']
-                log.warning(msg)
-        user.save()
-        profile = user.get_profile()
-
-        if voucher:
-            profile.vouch(invite.inviter)
-            invite.redeemed = datetime.datetime.now()
-            invite.redeemer = profile
-            invite.save()
-        return user
 
 
 class PasswordChangeForm(auth.forms.PasswordChangeForm):

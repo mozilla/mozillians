@@ -10,7 +10,7 @@ $DB_USER = "mozillians"
 $DB_PASS = "mozillians"
 
 $USE_YUM_CACHE_ON_HOST = 0
-$USE_SOUTH = 0
+$USE_SOUTH = 1
 
 Exec { path => [ "/bin/"] }
 
