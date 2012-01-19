@@ -44,12 +44,22 @@ var Validator = function() {
                 this.resetField(field);
             }
         },
+        validateGroup: function(group, field) {
+            var name = group.children('span').text();
+            if (name.match(/^[a-zA-Z0-9 .:,-]*$/g) === null) {
+                displayError(field, gettext('Groups can only contain ' +
+                                            'alphanumeric characters, dashes, ' +
+                                            'spaces.'));
+                // HACK: Do this without dirty DOM manipulation.
+                group.children('a.tagit-close').click();
+            }
+        },
         resetField: function(field) {
             $(field).removeClass('error');
             $(field + ' .errorlist').remove();
             $(field).find('span.required').show();
             this.errors = false;
-        },
+        }
     };
 
     return self;
