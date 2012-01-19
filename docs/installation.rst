@@ -5,7 +5,7 @@ Installation
 ============
 
 .. note::
-    Installing Mozillians might be daunting.  Ask for help in #mozillians on 
+    Installing Mozillians might be daunting.  Ask for help in #mozillians on
     irc.mozilla.org.  tofumatt, ednapiranha or davedash will be happy to help.
 
 You'll need ruby, vagrant, Virtualbox and git.  The following steps will help you:
@@ -13,16 +13,16 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
 
 1. Install vagrant (requires ``ruby``)::
 
-    gem install vagrant
+    $ gem install vagrant
 
    .. seealso::
-      `Vagrant: Getting Started 
+      `Vagrant: Getting Started
        <http://vagrantup.com/docs/getting-started/index.html>`_
 
 2. Install virtualbox_ by Oracle.
 
    .. note::
-      If you run Linux, you'll need to make sure virtualization isn't disabled 
+      If you run Linux, you'll need to make sure virtualization isn't disabled
       in your kernel.
 
 .. _virtualbox: http://www.virtualbox.org/
@@ -30,17 +30,14 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
 
 3. Get a copy of Mozillians.org::
 
-    git clone --recursive git://github.com/mozilla/mozillians.git mozillians
+    $ git clone --recursive git://github.com/mozilla/mozillians.git mozillians
+    $ cd mozillians
 
-4. Get a copy of Mozillians.org's LDAP backend::
 
-    cd mozillians
-    git clone git://github.com/mozilla/mozillians-ldap.git directory
+4. Run a virtual dev environment::
 
-5. Run a virtual dev environment::
-
-    vagrant up
-    vagrant ssh # you will now enter the virtualized environment
+    $ vagrant up
+    $ vagrant ssh # you will now enter the virtualized environment
 
    .. note:: Run this in your working copy directory (i.e. ``mozillians/``)
 
@@ -48,9 +45,13 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
    show up under /home/vagrant/mozillians in the virtualbox.  This means you can edit
    in your favorite text-editor, yet run Mozillians from our virtualized environment.
 
+6. Setup the databases::
+
+    $ ./manage.py syncdb
+    $ ./manage.py migrate
+
 6. Run the development web server (in the virtualized environment)::
 
-    $ x-rebuild
     $ ./manage.py runserver 0.0.0.0:8001
 
 7. Point your web browser to http://localhost:8001
@@ -65,14 +66,14 @@ You'll need ruby, vagrant, Virtualbox and git.  The following steps will help yo
 
    On your host machine do::
 
-    git pull -q origin master
-    git submodule update --recursive
-    pushd vendor
-    git pull -q origin master
-    git submodule update --recursive
-    popd
-    vagrant destroy && vagrant up
-
+    $ git pull -q origin master
+    $ git submodule update --recursive
+    $ pushd vendor
+    $ git pull -q origin master
+    $ git submodule update --recursive
+    $ popd
+    $ vagrant destroy && vagrant up
+$
    Within your vagrant VM do::
 
     dj syncdb
