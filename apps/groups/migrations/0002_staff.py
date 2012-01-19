@@ -8,11 +8,11 @@ class Migration(SchemaMigration):
     no_dry_run = True
 
     def forwards(self, orm):
-        orm.Group.objects.get_or_create(name='staff', system=True)
+        orm.Group.objects.get_or_create(name='staff', system=True, url='staff')
 
 
     def backwards(self, orm):
-        pass
+        orm.Group.objects.filter(name='staff').delete()
 
 
     models = {
