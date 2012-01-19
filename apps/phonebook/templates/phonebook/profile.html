@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ person.full_name }}{% endblock %}
+{% block page_title %}{{ profile.full_name }}{% endblock %}
 {% block body_id %}profile{% endblock %}
 {% block body_classes %}
-    box-content {% if not person.voucher %}pending{% endif %}
+    box-content {% if not profile.is_vouched %}pending{% endif %}
 {% endblock %}
 
 {% block main_content %}
   <h1>
-    {% if user.unique_id == person.unique_id %}
+    {% if request.user.username == user.username %}
       {{ _('Your Profile') }}
-    {% elif person.get_profile().is_vouched %}
+    {% elif profile.is_vouched %}
       {{ _('Mozillian Profile') }}
     {% else %}
       {{ _('Pending Profile') }}
     {% endif %}
   </h1>
 
-  {% if not person.get_profile().is_vouched %}
-    {% if user.unique_id == person.unique_id %}
+  {% if not profile.is_vouched %}
+    {% if request.user.username == user.username %}
       <p id="pending-approval">
-        {% trans profile_url=absolutify(url('profile', user.unique_id)) %}
+        {% trans profile_url=absolutify(url('profile', user.username)) %}
           Your profile is waiting for approval. Send this link to someone who
           is familiar with your contributions and ask them to vouch for you:
           <br>
@@ -37,13 +37,13 @@
         {% endtrans %}
 
         {% if vouch_form %}
-          <form action="{{ url('phonebook.vouch') }}" method="POST"
+          <form action="{{ url('vouch') }}" method="POST"
             id="vouch-form">
             {{ csrf() }}
 
             {{ vouch_form }}
 
-            {% trans name=person.full_name %}
+            {% trans name=profile.display_name %}
               <button type="submit" class="button primary small">
                 Vouch for {{ name }}
               </button>
@@ -57,33 +57,32 @@
   <div class="clear"></div>
 
   <div class="blue-pastels vcard h-card">
-    {{ profile_photo(person) }}
+    {{ profile_photo(profile) }}
 
-    {% if user.unique_id == person.unique_id %}
-      <a href="{{ url('phonebook.edit_profile') }}"
-        class="button primary small" id="edit-profile">
+    {% if user.username == request.user.username %}
+      <a href="{{ url('profile.edit') }}"
+         class="button primary small" id="edit-profile">
         {{ _('Edit My Profile') }}
       </a>
     {% endif %}
 
     <div id="profile-info">
       <h2 class="fn p-name">
-        {{ person.full_name }}
+        {{ profile.display_name }}
       </h2>
 
       <dl>
-        {% if person.username %}
+        {% if user.email %}
           <dt>{{ _('Email') }}</dt>
-          <dd><a class="email u-email" href="mailto:{{ person.username }}">
-            {{ person.username }}
+          <dd><a class="email u-email" href="mailto:{{ user.email }}">
+            {{ user.email }}
           </a></dd>
         {% endif %}
 
-        {% if person.irc_nickname %}
+        {% if profile.ircname %}
           <dt>{{ _('IRC Nickname') }}</dt>
-          <dd><a class="nickname p-nickname"
-               href="{{ person.irc_nickname.service_uri }}">
-            {{ person.irc_nickname.service_id }}
+          <dd><a class="nickname p-nickname" href="irc://irc.mozilla.org/">
+            {{ profile.ircname }}
           </a></dd>
         {% endif %}
 
@@ -100,22 +99,15 @@
           <dd>{{ profile.location }}</dd>
         {% endif %}
 
-        {% for uri, service in services.items() %}
-          <dt>{{ service.service_uri }}</dt>
-          <dd><a class="url u-url" rel="me" href="{{ service.service_uri }}">
-            {{ service.service_id }}
-          </a></dd>
-        {% endfor %}
-
-        {% if person.voucher == "Unknown Voucher" %}
+        {% if not profile.voucher and profile.is_vouched %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>{{ _('No longer active') }}</dd>
-        {% elif person.voucher %}
+        {% elif profile.voucher %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-            <a href="{{ url('profile', person.voucher.unique_id) }}"
+            <a href="{{ url('profile', profile.user.username) }}"
                class="vouched">
-              {{ person.voucher.full_name }}
+              {{ profile.voucher.full_name }}
             </a>
           </dd>
         {% endif %}
@@ -124,10 +116,10 @@
 
     <div class="clear"></div>
 
-    {% if person.biography %}
+    {% if profile.bio %}
       <h3>{{ _('Bio:') }}{# L10n: Biography #}</h3>
       <div id="bio" class="note p-note">
-        {{ person.biography|paragraphize }}
+        {{ profile.bio|paragraphize }}
       </div>
     {% endif %}
 

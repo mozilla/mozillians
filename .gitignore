@@ -23,3 +23,4 @@ vagrantconfig_local.yaml
 docs/_build
 settings/*local.py
 directory
+media/uploads

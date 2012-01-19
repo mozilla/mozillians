@@ -23,11 +23,12 @@ handler500 = lambda r: error_page(r, 500)
 handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns('',
-    (r'', include('phonebook.urls')),
+    url('^browserid/verify/', 'users.browserid_views.verify', name='browserid_verify'),
     (r'', include('users.urls')),
-    (r'', include('browserid.urls')),
     (r'', include('groups.urls')),
+
     (r'^csp', include('csp.urls')),
+
     (r'^admin/', include(admin.site.urls)),
     url(r'^jsi18n/$', cache_page(60 * 60 * 24 * 365)(javascript_catalog),
         {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
@@ -46,3 +47,5 @@ if settings.DEBUG:
         (r'^500$', handler500),
         (r'^csrf$', handler_csrf),
     )
+
+urlpatterns += patterns('', (r'', include('phonebook.urls')),)

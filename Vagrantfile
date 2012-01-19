@@ -17,8 +17,8 @@ MOUNT_POINT = '/home/vagrant/mozillians'
 
 Vagrant::Config.run do |config|
 
-    config.vm.box = "mozillians-v8.box"
-    config.vm.box_url = "http://people.mozilla.com/~aking/mozillians/mozillians-v8.box"
+    config.vm.box = "mozillians-v9.box"
+    config.vm.box_url = "http://people.mozilla.com/~ddash/mozillians-v9.box"
 
     config.vm.forward_port("web", 8001, 8001)
     config.vm.forward_port("ldap", 1389, 1389)
@@ -36,12 +36,17 @@ Vagrant::Config.run do |config|
         config.vm.share_folder("v-root", MOUNT_POINT, ".", :nfs => true)
     end
 
+    # This keeps it from pegging your CPU
+    # um, doesn't work... in .8.10...
+    # config.vm.customize ["modifyvm", :id, "--cpuexecutioncap", "90"]
+
     # Add to /etc/hosts: 33.33.33.24 dev.mozillians.org
     config.vm.network "33.33.33.24"
 
     config.vm.provision :puppet do |puppet|
         puppet.manifests_path = "puppet/manifests"
         puppet.manifest_file  = "dev-vagrant.pp"
+        puppet.module_path = "puppet/modules"
     end
 
 end

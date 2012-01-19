@@ -14,7 +14,7 @@
   <h1>{{ _('Search') }}</h1>
 
   <div class="blue-pastels">
-    <form method="GET" id="search-form" action="{{ url('phonebook.search') }}">
+    <form method="GET" id="search-form" action="{{ url('search') }}">
       <input type="search" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
@@ -41,15 +41,6 @@
           nickname.
         </p>
       {% endtrans %}
-    {% elif size_exceeded_error %}
-      {% trans %}
-        <h2>Too Many Search Results</h2>
-
-        <p>
-          Sorry, but there were too many results to display.
-          Please make your search more specific.
-        </p>
-      {% endtrans %}
     {% else %}
       {% for person in people %}
         {{ search_result(person) }}
@@ -69,7 +60,7 @@
             {% if page == people.number %}
               <span>{{ page }}</span>
             {% else %}
-              <a href="{{ url('phonebook.search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+              <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
             {% endif %}
           {% endfor %}
         </div>

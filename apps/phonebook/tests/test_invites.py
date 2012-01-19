@@ -1,15 +1,21 @@
-from django.core import mail
 from django.contrib.auth.models import User
+from django.core import mail
 
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+import common.tests
 from funfactory.urlresolvers import reverse
 from phonebook.models import Invite
-from phonebook.tests import LDAPTestCase
+
+from browserid_mock import mock_browserid
 
 
-class InviteTest(LDAPTestCase):
+class InviteFlowTest(common.tests.TestCase):
+    fake_email = 'mr.fusion@gmail.com'
+    # Assertion doesn't matter since we monkey patched it for testing
+    fake_assertion = 'mrfusionsomereallylongstring'
+
     def invite_someone(self, email):
         """
         This method will invite a user.
@@ -21,7 +27,7 @@ class InviteTest(LDAPTestCase):
         d = dict(recipient=email)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
-        assert ('mr.fusion@gmail.com has been invited to Mozillians.' in
+        assert ('%s has been invited to Mozillians.' % email in
                 pq(r.content)('div#main-content p').text())
 
         # See that the email was sent.
@@ -39,35 +45,33 @@ class InviteTest(LDAPTestCase):
         eq_(self.client.session['invite-code'], invite.code)
         return r
 
-    def redeem_invite(self, invite, **kw):
+    def redeem_invite(self, invite, email):
         """Given an invite_url go to it and redeem an invite."""
-        # Now let's look at the register form.
+        # Lets make sure we have a clean slate
         self.client.logout()
-        d = kw
+        assert (not User.objects.filter(email=email),
+                    "User shouldn't be in database.")
 
-        # Login
-        login_d = dict(assertion=d['assertion'],
-                       email=d['email'],
-                       mode='register')
-
-        # first time we hit /register
+        # We need to store the invite code in the session
         self.client.get(invite.get_url(), follow=True)
-        self.client.post(reverse('browserid_login'), login_d, follow=True)
+
+        # BrowserID needs an assertion not to be whiney
+        d = dict(assertion=self.fake_assertion)
+        with mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
 
         # Now let's register
-        d.update(
-                first_name='Akaaaaaaash',
-                last_name='Desaaaaaaai',
-                optin=True
-                )
+        d = dict(
+            first_name='Akaaaaaaash',
+            last_name='Desaaaaaaai',
+            optin=True
+        )
+        with mock_browserid(email):
+            self.client.post(reverse('register'), d, follow=True)
 
-        r = self.client.post(reverse('register'), d, follow=True)
-
-        u = User.objects.filter(email=d['email'])[0].get_profile()
-        u.is_confirmed = True
-        u.save()
-
-        return r
+        # Return the New Users Profile
+        invited_user_profile = User.objects.get(email=email).get_profile()
+        return invited_user_profile
 
     def test_send_invite_flow(self):
         """
@@ -78,26 +82,29 @@ class InviteTest(LDAPTestCase):
         Verify that we can't reuse the invite_url
         Verify we can't reinvite a vouched user
         """
-        email = 'mr.fusion@gmail.com'
-        assertion = 'mrfusionsomereallylongstring'
-        invite = self.invite_someone(email)
-        d = dict(assertion=assertion, email=email, mode='register')
-
-        r = self.get_register(invite)
-        r = self.redeem_invite(invite, **d)
-
-        uniq_id = r.context['user'].unique_id
-        r = self.client.get(reverse('profile', args=[uniq_id]))
-
-        eq_(r.context['user'].unique_id,
-            Invite.objects.get(pk=invite.pk).redeemer)
-
-        eq_(r.context['user'].get_profile().is_vouched, True)
+        invite = self.invite_someone(self.fake_email)
+        self.get_register(invite)
+        invited_user_profile = self.redeem_invite(invite, self.fake_email)
+        assert(invited_user_profile.is_vouched)
+        assert(invite.inviter == invited_user_profile.vouched_by)
 
         # Don't reuse codes.
-        r = self.redeem_invite(invite, assertion='mr2reallylongstring',
-                               email='mr2@gmail.com')
-        eq_(r.context['user'].get_profile().is_vouched, False)
+        self.redeem_invite(invite, email='mr2@gmail.com')
+        eq_(User.objects.get(email='mr2@gmail.com').get_profile().is_vouched,
+            False)
+
+
+class InviteEdgeTest(common.tests.TestCase):
+    def test_no_reinvite(self):
+        """Don't reinvite a vouched user."""
+        vouched_email = 'mr.fusion@gmail.com'
+        create_vouched_user(vouched_email)
+        url = reverse('invite')
+        d = dict(recipient=vouched_email)
+        r = self.mozillian_client.post(url, d, follow=True)
+        eq_(r.status_code, 200)
+        assert ('You cannot invite someone who has already been vouched.' in
+                pq(r.content)('ul.errorlist li').text())
 
     def test_unvouched_cant_invite(self):
         """
@@ -107,5 +114,18 @@ class InviteTest(LDAPTestCase):
         """
         url = reverse('invite')
         d = dict(recipient='mr.fusion@gmail.com')
-        r = self.pending_client.post(url, d, follow=True)
+        self.client.login(email=self.pending.email)
+        r = self.client.post(url, d, follow=True)
         eq_(r.status_code, 403)
+
+
+def create_vouched_user(email):
+        user = User.objects.create(
+                email=email,
+                username=email,
+                first_name='Amandeep',
+                last_name='McIlrath')
+        profile = user.get_profile()
+        profile.is_vouched = True
+        profile.save()
+        return user

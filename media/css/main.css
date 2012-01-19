@@ -829,11 +829,11 @@ html[dir='rtl'] #body-group-show #toggle-group {
     background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
 
     background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(177,219,250)),
-	color-stop(0.73, rgb(58,170,255))
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(58,170,255))
     );
     border: 1px solid #3697E5;
     border-radius: 1px;
@@ -848,11 +848,11 @@ html[dir='rtl'] #body-group-show #toggle-group {
     background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
 
     background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(177,219,250)),
-	color-stop(0.73, rgb(89,180,254))
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(89,180,254))
     );
     border: 1px solid #3697E5;
 }
@@ -865,11 +865,11 @@ html[dir='rtl'] #body-group-show #toggle-group {
     background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
 
     background-image: -webkit-gradient(
-	linear,
-	left top,
-	left bottom,
-	color-stop(0.45, rgb(141,202,252)),
-	color-stop(0.73, rgb(58,170,255))
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(141,202,252)),
+    color-stop(0.73, rgb(58,170,255))
     );
     border: 1px solid #3697E5;
 }
