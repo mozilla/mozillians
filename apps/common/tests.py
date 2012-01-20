@@ -11,7 +11,6 @@ class TestCase(test_utils.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
-
         cls._AUTHENTICATION_BACKENDS = settings.AUTHENTICATION_BACKENDS
         settings.AUTHENTICATION_BACKENDS = ('common.backends.TestBackend',)
         # Create a Mozillian

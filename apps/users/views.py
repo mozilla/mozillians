@@ -57,8 +57,6 @@ def register(request):
     if not user:
         return redirect('home')
 
-    intent = 'register'
-
     # Check for optional invite code
     initial = {}
     if 'invite-code' in request.session:
@@ -83,7 +81,7 @@ def register(request):
     # When changing this keep in mind that the same view is used for
     # phonebook.edit_profile.
     # 'user' object must be passed in because we are not logged in
-    return render(request, 'phonebook/edit_profile.html',
+    return render(request, 'registration/register.html',
                   dict(form=form,
                        edit_form_action=reverse('register'),
                        mode='new',
