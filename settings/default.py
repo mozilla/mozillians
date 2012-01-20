@@ -143,7 +143,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Auth
-LOGIN_URL = '/login'
+LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/'
 
 CACHES = {
