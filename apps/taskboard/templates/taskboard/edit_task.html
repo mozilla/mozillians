@@ -1,0 +1,94 @@
+{% extends "taskboard/base.html" %}
+
+{% block page_title %}{{ _('Edit A Task') }}{% endblock %}
+{% block body_id %}edit-profile{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
+{% block main_content %}
+    <form action="" method="POST" enctype="multipart/form-data">
+        {{ csrf() }}
+
+        {% if task %}
+        <h1>{{ _('Edit Your Task') }}</h1>
+        {% else %}
+        <h1>{{ _('Create A Task') }}</h1>
+        {% endif %}
+
+        {% if form.errors %}
+            <p class="form-errors">
+                {{ _("Sorry, but there were problems with the info you submitted.
+              Please review the form, correct any errors, and try again.") }}
+            </p>
+        {% endif %}
+
+        <div class="blue-pastels">
+            {{ form.management_form }}
+
+            <div class="left-col">
+
+                {% for f in ['summary', 'instructions', 'contact', 'deadline'] %}
+                    <div id="{{ form[f].name }}-container"
+                         class="field {{ 'error' if form.errors[f] }}
+            {{ form[f].field.widget.attrs['class'] }}">
+
+                        {{ form[f].label_tag() }}
+
+                        {% if form[f].field.required %}
+                            <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+                        {% endif %}
+                        <span class="help_text">{{ form[f].help_text }}</span>
+
+                        {{ form.errors[f] }}
+                        {{ form[f] }}
+                    </div>
+                {% endfor %}
+
+                <div id="{{ form['groups'].name }}-container"
+                     class="field {{ 'error' if form.errors['groups'] }}
+                  {{ form['groups'].field.widget.attrs['class'] }}">
+
+                    {{ form['groups'].label_tag() }}
+
+                    {{ form.errors['groups'] }}
+
+                    <div class="clear"></div>
+
+                    {{ form['groups'] }}
+
+                    <div class="clear"></div>
+                </div>
+
+            </div>
+
+            <div class="right-col">
+                {#
+        <h2>{{ _('My Mozilla Info') }}</h2>
+        #}
+
+            </div>
+            <div class="clear"></div>
+
+        </div>
+
+        <button id="submit" class="button primary">
+            {% if task %}
+                {{ _('Update') }}
+            {% else %}
+                {{ _('Create Task') }}
+            {% endif %}
+        </button>
+
+        {% if task %} {# BrowserID Sign-up #}
+            <a href="{{ url('taskboard_task_detail', pk=task.pk) }}" id="cancel">
+        {% else %}
+            <a href="{{ url('taskboard_task_list') }}" id="cancel">
+        {% endif %}
+        {{ _('Cancel') }}{# L10n: Cancel editing #}
+        </a>
+
+        <div class="clear"></div>
+    </form>
+
+{% endblock %}
