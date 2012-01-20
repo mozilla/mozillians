@@ -557,8 +557,8 @@ em.underline {
 }
 
 #body-edit-profile #manage-profile {
-    float: left;
-    margin: -35px 0 0 15px;
+    float: right;
+    margin: -35px 15px 0 0;
 }
 
 #body-edit-profile .profile-action {
