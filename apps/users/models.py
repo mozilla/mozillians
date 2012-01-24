@@ -23,11 +23,15 @@ from phonebook.models import get_random_string
 
 # TODO: This should be deprecated
 class UserProfileManager(models.Manager):
-    """Returns a user profile based on a user id"""
+    """Custom manager that can query via LDAP attributes."""
 
-    def get_by_unique_id(self, id):
+    def get_by_unique_id(self, uid):
         """Given an LDAP uniqueIdentifier, find a match."""
-        return User.objects.get(id=id).get_profile()
+        rs = larper.get_user_by_uid(uid)
+        if not rs:
+            raise UserProfile.DoesNotExist
+        mail = rs[1]['mail'][0]
+        return User.objects.get(email=mail).get_profile()
 
 
 class UserProfile(SearchMixin, models.Model):

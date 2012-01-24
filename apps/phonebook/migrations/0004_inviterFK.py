@@ -1,6 +1,7 @@
 # encoding: utf-8
 import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.utils import IntegrityError
 
@@ -26,7 +27,7 @@ class Migration(DataMigration):
                             i.redeemer_old).id
                 i.save()
                 log.debug('Invite %d converted' % i.pk)
-            except UserProfile.DoesNotExist:
+            except ObjectDoesNotExist:
                 log.warning('Invite %d not converted' % i.pk)
             except IntegrityError as e:
                 if 'redeemer_id' in e.args[1]:
