@@ -854,6 +854,7 @@ html[dir='rtl'] #body-group-show #toggle-group {
     color-stop(0.45, rgb(177,219,250)),
     color-stop(0.73, rgb(89,180,254))
     );
+    cursor: pointer;
     border: 1px solid #3697E5;
 }
 
