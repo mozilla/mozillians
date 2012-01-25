@@ -795,6 +795,10 @@ html[dir='rtl'] #body-group-show #toggle-group {
     font-family: MetaBold,'Trebuchet MS',sans-serif;
 }
 
+#final-result {
+    display: none;
+}
+
 /** Confirm Profile Delete */
 #body-confirm-delete #are-you-sure {
     font-size: 24px;

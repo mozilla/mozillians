@@ -119,28 +119,32 @@ def search(request):
         query = form.cleaned_data.get('q', '')
         limit = form.cleaned_data['limit']
         vouched = False if form.cleaned_data['nonvouched_only'] else None
+        page = request.GET.get('page', 1)
 
-        if request.user.is_authenticated():
-            profiles = UserProfile.search(query, vouched=vouched)
+        profiles = UserProfile.search(query, vouched=vouched)
 
-            paginator = Paginator(profiles, limit)
-            page = request.GET.get('page', 1)
+        paginator = Paginator(profiles, limit)
 
-            try:
-                people = paginator.page(page)
-            except PageNotAnInteger:
-                people = paginator.page(1)
-            except EmptyPage:
-                people = paginator.page(paginator.num_pages)
+        try:
+            people = paginator.page(page)
+        except PageNotAnInteger:
+            people = paginator.page(1)
+        except EmptyPage:
+            people = paginator.page(paginator.num_pages)
 
-            if paginator.count > forms.PAGINATION_LIMIT:
-                show_pagination = True
+        if paginator.count > forms.PAGINATION_LIMIT:
+            show_pagination = True
 
     d = dict(people=people,
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
-             show_pagination=show_pagination)
+             show_pagination=show_pagination,
+             num_pages=len(people.paginator.page_range))
+
+    if request.is_ajax():
+        return render(request, 'phonebook/search_ajax.html', d)
+
     return render(request, 'phonebook/search.html', d)
 
 
