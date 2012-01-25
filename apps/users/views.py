@@ -5,6 +5,8 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 
 import commonware.log
+from django_browserid.auth import get_audience
+from django_browserid.views import Verify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
@@ -27,6 +29,18 @@ def logout(request, **kwargs):
     return auth_views.logout(request, next_page=reverse('home'), **kwargs)
 
 
+class Browserid(Verify):
+    """View for dealing with Browserid callback"""
+
+    def handle_user(self, request, user):
+        if user.get_profile().is_complete():
+            auth.login(request, user)
+            return redirect(reverse('profile', args=[user.username]))
+        else:
+            request.session['authenticated_email'] = user.email
+            return redirect(reverse('register'))
+
+
 def password_reset_confirm(request, uidb36=None, token=None):
     """TODO: Legacy URL, keep around until 1.4 release."""
     return redirect('home')
@@ -46,14 +60,12 @@ def register(request):
     if request.user.is_authenticated():
         return redirect(reverse('profile', args=[request.user.username]))
 
-    assertion = request.session.get('assertion')
-    audience = request.session.get('audience')
-    if not (assertion and audience):
+    authenticated_email = request.session.get('authenticated_email')
+    if not authenticated_email:
         log.error('Browserid registration, but no verified email in session')
         return redirect('home')
 
-    user = auth.authenticate(assertion=assertion,
-                             audience=audience)
+    user = auth.authenticate(authenticated_email=authenticated_email)
     if not user:
         return redirect('home')
 
