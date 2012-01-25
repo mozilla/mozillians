@@ -176,8 +176,8 @@ class TestViews(TestCase):
             """
             r = client.get(reverse('profile.edit'))
             doc = pq(r.content)
-            eq_(doc('#profile-photo').attr('src'),
-                settings.MEDIA_URL + 'img/unknown.png')
+            r = client.get(doc('#profile-photo').attr('src'))
+            eq_(r.status_code, 301)
             assert not doc('#id_photo_delete'), (
                     '"Remove Profile Photo" control should not appear.')
 
