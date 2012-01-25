@@ -120,6 +120,9 @@ def flee_ldap():
 
     for profile in profiles:
         person = profile.get_ldap_person()
+        if not person:
+            log.warning('No ldap data for %d' % profile.user_id)
+            continue
         username = person[1]['uniqueIdentifier'][0]
         if 'description' in person[1]:
             bio = person[1]['description'][0]
