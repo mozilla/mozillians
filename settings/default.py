@@ -64,11 +64,15 @@ MINIFY_BUNDLES = {
         'common': (
             'js/libs/jquery-1.4.4.min.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
+            'js/libs/jquery.endless-scroll.js',
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
             'js/main.js',
             'js/browserid.js',
             'js/groups.js',
+        ),
+        'search': (
+            'js/infinite.js',
         ),
     }
 }
