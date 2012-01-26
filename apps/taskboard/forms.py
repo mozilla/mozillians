@@ -8,10 +8,12 @@ from taskboard.models import Task
 
 class UserModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
+        """Use the user's full name in the select box."""
         return obj.get_full_name()
 
 
 class TaskForm(ModelForm):
+    # TODO - Make this autocomplete
     contact = UserModelChoiceField(User.objects.all())
     groups = GroupField(required=False)
 
@@ -19,6 +21,9 @@ class TaskForm(ModelForm):
         model = Task
 
     def save(self, commit=True):
+        """Sync the groups from the form and DB keeping system groups."""
+        # have to use commit=False to avoid it automatically adding and
+        # removing groups.
         task = super(TaskForm, self).save(commit=False)
         task.save()
         # not using task.save_m2m b/c that would blindly remove

@@ -6,8 +6,8 @@ from taskboard.models import Task
 
 
 class TaskTest(TestCase):
-
     def test_groups_added_to_new_task(self):
+        """Test that new groups are created and added to the task"""
         self.mozillian_client.post(
             reverse('taskboard_task_new'),
             data={
@@ -21,20 +21,21 @@ class TaskTest(TestCase):
         self.assertSetEqual(set(['stuff', 'whatnot']), t_groups)
 
     def test_saving_groups_no_delete_system_groups(self):
-        sys_group = Group.objects.create(
-            name="staff",
-            url="staff",
-            system=True,
-        )
+        """Test that system groups are not removed when not in the form."""
+        # another test may create the 'staff' group and not clean up.
+        sys_group, created = Group.objects.get_or_create(name='staff')
+        if not sys_group.system:
+            sys_group.system = True
+            sys_group.save()
         t = Task.objects.create(
-            summary="Testing",
+            summary='Testing',
             contact=self.mozillian,
         )
         t.groups.add(sys_group)
-        # sanity check
+        # make sure the system group is in there before submitting the post
         self.assertTrue(sys_group in t.groups.all())
         self.mozillian_client.post(
-            reverse('taskboard_task_edit', kwargs={'pk':t.pk}),
+            reverse('taskboard_task_edit', kwargs={'pk': t.pk}),
             data={
                 'summary': 'Testing',
                 'contact': self.mozillian.pk,

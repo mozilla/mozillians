@@ -20,4 +20,4 @@ class Task(models.Model):
     disabled = models.BooleanField(_(u'Disabled'), default=False)
 
     def __unicode__(self):
-        return u"{0} ({1})".format(self.summary, self.contact)
+        return u'{0} ({1})'.format(self.summary, self.contact)
