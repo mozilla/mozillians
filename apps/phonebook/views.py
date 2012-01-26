@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -76,7 +76,10 @@ def edit_profile(request):
                        biography=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
-                       groups=user_groups)
+                       groups=user_groups,)
+
+        if not request.user.username.startswith('u/'):
+            initial.update(username=request.user.username)
 
         form = forms.ProfileForm(initial=initial)
 

@@ -85,7 +85,7 @@
             <div class="clear"></div>
           </div>
         {% endif %}
-        
+
       </div>
 
       <div class="right-col">
@@ -94,7 +94,7 @@
         #}
 
         {% if mode != 'new' %}
-          {% for f in ['irc_nickname', 'website'] %}
+          {% for f in ['username', 'website'] %}
             <div id="{{ form[f].name }}-container"
               class="field {{ 'error' if form.errors[f] }}
               {{ form[f].field.widget.attrs['class'] }}">
