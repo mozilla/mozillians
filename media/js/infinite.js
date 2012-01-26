@@ -5,9 +5,16 @@
         var results = $('#final-result')
         var pages = paginator.attr('data-pages');
         // Variable to keep track of whether we've reached our max page
-        var cease = false;
+        var cease;
         paginator.hide();
         results.hide();
+
+        // If there is no paginator, don't do any scrolling
+        if (pages == undefined) {
+            cease = true;
+        } else {
+            cease = false;
+        }
 
         $(document).endlessScroll({
             // Number of pixels from the bottom at which callback is triggered

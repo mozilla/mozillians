@@ -109,6 +109,7 @@ def delete(request):
 
 @vouch_required
 def search(request):
+    num_pages = 0
     limit = None
     nonvouched_only = False
     people = []
@@ -134,13 +135,14 @@ def search(request):
 
         if paginator.count > forms.PAGINATION_LIMIT:
             show_pagination = True
+            num_pages = len(people.paginator.page_range)
 
     d = dict(people=people,
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
              show_pagination=show_pagination,
-             num_pages=len(people.paginator.page_range))
+             num_pages=num_pages)
 
     if request.is_ajax():
         return render(request, 'phonebook/search_ajax.html', d)
