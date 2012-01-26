@@ -167,6 +167,14 @@ em.underline {
         margin: 0 5px;
     }
 
+    .blue-pastels span.help_text {
+        color: #999;
+        float: right;
+        font-size: 14px;
+        font-style: italic;
+        margin-right: 2.5em;
+    }
+
     .blue-pastels .error .required,
     .blue-pastels .field.checkbox .required {
         left: -9999px;
