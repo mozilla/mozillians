@@ -66,7 +66,9 @@ class RegistrationForm(ProfileForm):
 
     def clean(self):
         super(RegistrationForm, self).clean()
+
         data = self.cleaned_data
+
         return data
 
 

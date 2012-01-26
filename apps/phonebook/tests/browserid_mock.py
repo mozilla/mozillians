@@ -24,11 +24,12 @@ class mock_browserid(object):
             patch.object(
                 settings, 'AUTHENTICATION_BACKENDS',
                 ('django_browserid.auth.BrowserIDBackend',),
-            ),
+                create=True),
             patch.object(
                 settings, 'SITE_URL',
                 'http://testserver',
-            ),
+                create=True,
+            )
         )
         self.patcher = patch(
             'django_browserid.auth.BrowserIDBackend._verify_http_request')
