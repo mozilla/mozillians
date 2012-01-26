@@ -3,87 +3,85 @@
 {% block page_title %}{{ _('Create Your Profile') }}{% endblock %}
 {% block body_id %}register{% endblock %}
 {% block body_classes %}box-content{% endblock %}
-{% block register_button %}{% endblock %}
 
-{# TODO move registration flow all into the phonebook app.
-   Currently spread across all three apps :( #}
 {% block main_content %}
-  <form method="post" action="{{ url('register') }}">
+  <form action="{{ edit_form_action }}"
+        method="POST" enctype="multipart/form-data">
     {{ csrf() }}
 
-    {#
-    TODO: Get these steps to reflect the mockups.
-    Step 1 of 3 [ <strong>register</strong> | profile | get vouched ]
-    #}
     <h1>{{ _('Create Your Profile') }}</h1>
+
+    {% if form.errors %}
+      <p class="form-errors">
+        {{ _("Sorry, but there were problems with the info you submitted.
+              Please review the form, correct any errors, and try again.") }}
+      </p>
+    {% endif %}
 
     <div class="blue-pastels">
       {{ form.management_form }}
 
-      {% if form.errors %}
-        <p class="errorlist">
-          {{ _("Sorry, but we couldn't create your account.
-                Please review the form, correct any errors, and try again.") }}
+      <div class="left-col">
+        <h2>{{ _('My Info') }}</h2>
+
+        {% for f in ['first_name', 'last_name', 'username', 'biography'] %}
+          <div id="{{ form[f].name }}-container"
+            class="field {{ 'error' if form.errors[f] }}
+            {{ form[f].field.widget.attrs['class'] }}">
+
+            {{ form[f].label_tag() }}
+
+            {% if form[f].field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">
+                *
+              </span>
+            {% endif %}
+
+            {{ form.errors[f] }}
+            {{ form[f] }}
+          </div>
+        {% endfor %}
+
+      </div>
+
+      <div class="right-col">
+
+        <h2>{{ _('My Login Info') }}</h2>
+
+        <dl id="email-container">
+          <dt>{{ _('Primary Email:') }}</dt>
+          <dd>{{ user.email }}</dd>
+        </dl>
+
+        <div class="clear"></div>
+
+      </div>
+        <p id="privacy-info">
+          {% trans %}
+            At this time, profiles are only viewable by other Mozillians.
+            Community members may use them to identify and contact you about
+            events, projects and other Mozilla-related activities.
+          {% endtrans %}
         </p>
-      {% endif %}
 
-      <p id="privacy-info">
-        {% trans %}
-          At this time, profiles are only viewable by other Mozillians.
-          Community members may use them to identify and contact you about
-          events, projects and other Mozilla-related activities.
-        {% endtrans %}
-      </p>
+        <div class="clear"></div>
 
-      {% for f in form.visible_fields() %}
-        {% if f.name != 'optin' %}
-          <div id="{{ f.name }}-container"
-               class="field {{ 'error' if form.errors[f.name] }}
-                            {{ f.field.widget.attrs['class'] }}">
-            {{ f.label_tag() }}
-
-            {% if f.field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
-                *
-              </span>
-            {% endif %}
-
-            {{ form.errors[f.name] }}
-            {{ f }}
-          </div>
-        {% else %}
-          <div id="{{ f.name }}-container"
-               class="field {{ 'error' if form.errors[f.name] }}
-                             {{ f.field.widget.attrs['class'] }}">
-              {% trans name=f.name,
-                       url='http://www.mozilla.org/%s/privacy-policy.html' %
-                            LANG %}
-                <label for="id_{{ name }}">
-                  I'm okay with you handling this info as you explain in your
-                  <a href="{{ url }}" target="_blank">privacy policy</a>.
-                </label>
-              {% endtrans %}
-
-            {% if f.field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
-                *
-              </span>
-            {% endif %}
-
-            {{ form.errors[f.name] }}
-            {{ f }}
-          </div>
-        {% endif %}
-      {% endfor %}
-
-      {{ form.code }}
-
+        <div id="optin-container">
+          {{ form.errors['optin'] }}
+          {{ form['optin'].label_tag() }}
+          <span class="required" title="{{ _('This field is required.') }}">*</span>
+          {{ form['optin'] }}
+        </div>
       <div class="clear"></div>
     </div>
 
     <button id="submit" class="button primary">
       {{ _('Create Account') }}
     </button>
+
+    <a href="{{ url('home') }}" id="cancel">
+    {{ _('Cancel') }}{# L10n: Cancel editing #}
+    </a>
 
     <div class="clear"></div>
   </form>
