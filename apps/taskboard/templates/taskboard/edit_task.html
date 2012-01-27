@@ -1,0 +1,58 @@
+{% extends "taskboard/base.html" %}
+
+{% block page_title %}{{ _('Edit A Task') }}{% endblock %}
+{% block body_id %}edit-profile{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
+{% block main_content %}
+  <form action="{{ request.get_full_path() }}" method="POST" enctype="multipart/form-data">
+    {{ csrf() }}
+
+    <h1>{% if task %}{{ _('Edit Your Task') }}{% else %}{{ _('Create A Task') }}{% endif %}</h1>
+
+    {% if form.errors %}
+        <p class="form-errors">
+          {% trans %}
+            Sorry, but there were problems with the info you submitted.
+            Please review the form, correct any errors, and try again.
+          {% endtrans %}
+        </p>
+    {% endif %}
+
+    <div class="blue-pastels">
+      {{ form.management_form }}
+      <div class="left-col">
+        {% for f in ['summary', 'instructions', 'contact', 'deadline'] %}
+          <div id="{{ form[f].name }}-container"
+               class="field {{ 'error' if form.errors[f] }} {{ form[f].field.widget.attrs['class'] }}">
+
+            {{ form[f].label_tag() }}
+            {% if form[f].field.required %}
+              <span class="required" title="{{ _('This field is required.') }}">*</span>
+            {% endif %}
+            <span class="help_text">{{ form[f].help_text }}</span>
+
+            {{ form.errors[f] }}
+            {{ form[f] }}
+           </div>
+        {% endfor %}
+        <div id="{{ form['groups'].name }}-container"
+             class="field {{ 'error' if form.errors['groups'] }} {{ form['groups'].field.widget.attrs['class'] }}">
+          {{ form['groups'].label_tag() }}
+          {{ form.errors['groups'] }}
+          <div class="clear"></div>
+          {{ form['groups'] }}
+          <div class="clear"></div>
+        </div>
+      </div>
+      <div class="right-col"></div>
+      <div class="clear"></div>
+    </div>
+
+    <button id="submit" class="button primary">
+      {% if task %}{{ _('Update') }}{% else %}{{ _('Create Task') }}{% endif %}
+    </button>
+    <a href="{{ cancel_url }}" id="cancel">{{ _('Cancel') }}</a>
+    <div class="clear"></div>
+  </form>
+{% endblock %}

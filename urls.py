@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url('^browserid/verify/', 'users.browserid_views.verify', name='browserid_verify'),
     (r'', include('users.urls')),
     (r'', include('groups.urls')),
+    (r'', include('taskboard.urls')),
 
     (r'^csp', include('csp.urls')),
 
