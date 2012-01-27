@@ -13,6 +13,9 @@ auth_views.render_to_response = jinja_for_django
 urlpatterns = patterns('',
     url(r'^logout$', views.logout, name='logout'),
     url(r'^confirm$', redirect_to, dict(url='/', name='home')),
+    url('^browserid/verify/', views.Browserid.as_view(),
+                              name='browserid_verify'),
+
     # This sucks: we should not have to do this, but a lot of people/libraries/
     # existing code is looking for this view.
     url(r'^login$', redirect_to, dict(url='/', name='home'), name='login'),

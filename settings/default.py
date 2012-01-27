@@ -92,7 +92,7 @@ STS_SUBDOMAINS = True
 # OpenLDAP
 LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
-AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
+AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
 #BrowserID creates useer if one doesn't exist
 BROWSERID_CREATE_USER = True

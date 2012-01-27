@@ -1,5 +1,21 @@
 from django.contrib.auth.models import User
 
+from django_browserid.auth import BrowserIDBackend
+
+class MozilliansBrowserID(BrowserIDBackend):
+    """
+    Special auth backend to allow registration to work without a current
+    assertion. This is dangerous. Don't use authenticated_email unless you've
+    just verified somebody.
+    """
+
+    def authenticate(self, assertion=None, audience=None, authenticated_email=None):
+        if authenticated_email:
+            return User.objects.get(email=authenticated_email)
+
+        return super(MozilliansBrowserID, self).authenticate(
+                                        assertion=assertion, audience=audience)
+
 
 class TestBackend(object):
     supports_inactive_user = True
