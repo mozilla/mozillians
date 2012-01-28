@@ -10,11 +10,7 @@
         results.hide();
 
         // If there is no paginator, don't do any scrolling
-        if (pages == undefined) {
-            cease = true;
-        } else {
-            cease = false;
-        }
+        cease =  (pages == undefined)
 
         $(document).endlessScroll({
             // Number of pixels from the bottom at which callback is triggered
