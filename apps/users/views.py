@@ -57,25 +57,13 @@ def register(request):
     if not user:
         return redirect('home')
 
-    intent = 'register'
-
-    # Check for optional invite code
-    initial = {}
-    if 'invite-code' in request.session:
-        code = request.session['invite-code']
-        try:
-            invite = get_invite(code)
-            initial['email'] = invite.recipient
-            initial['code'] = invite.code
-        except Invite.DoesNotExist:
-            log.warning('Bad register code [%s], skipping invite' % code)
-
-    form = forms.RegistrationForm(request.POST or None, initial=initial)
+    form = forms.RegistrationForm(request.POST or None,
+                                  instance=user.get_profile())
 
     if request.method == 'POST':
         if form.is_valid():
+            form.save(user)
             auth.login(request, user)
-            form.save(request)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
             return redirect('profile', user.username)
@@ -93,7 +81,6 @@ def register(request):
 
 
 def _update_invites(request):
-    # Email in the form is the "username" we'll use.
     code = request.session.get('invite-code')
     if code:
         try:

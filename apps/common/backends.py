@@ -2,9 +2,9 @@ from django.contrib.auth.models import User
 
 
 class TestBackend(object):
+    """Testing backend that does no real authentication. Great for gags."""
     supports_inactive_user = True
 
-    """Testing backend that does no real authentication.  Great for gags."""
     def authenticate(self, email=None, username=None, password=None):
         if not email:
             email = username

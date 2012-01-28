@@ -14,7 +14,7 @@ from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from statsd import statsd
-from tower import ugettext as _
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 import larper
 from groups.models import Group
@@ -44,15 +44,18 @@ class UserProfile(SearchMixin, models.Model):
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
-    website = models.URLField(max_length=200, null=True)
+    website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
+                                              blank=True, null=True)
 
     # Foreign Keys and Relationships
     vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
-    bio = models.CharField(max_length=255, default='')
+    bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
+                                           blank=True)
     photo = models.BooleanField(default=False)
-    display_name = models.CharField(max_length=30)
-    ircname = models.CharField(max_length=63, blank=True)
+    display_name = models.CharField(max_length=255)
+    ircname = models.CharField(max_length=63,
+                               verbose_name=_lazy(u'IRC Nickname'), blank=True)
     objects = UserProfileManager()
 
     class Meta:
