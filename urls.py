@@ -23,7 +23,6 @@ handler500 = lambda r: error_page(r, 500)
 handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns('',
-    url('^browserid/verify/', 'users.browserid_views.verify', name='browserid_verify'),
     (r'', include('users.urls')),
     (r'', include('groups.urls')),
     (r'', include('taskboard.urls')),
