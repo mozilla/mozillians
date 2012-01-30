@@ -12,7 +12,7 @@ class TaskTest(TestCase):
             reverse('taskboard_task_new'),
             data={
                 'summary': 'Testing',
-                'contact': self.mozillian.pk,
+                'contact': self.mozillian.get_profile().pk,
                 'groups': 'stuff,whatnot',
                 }
         )
@@ -29,7 +29,7 @@ class TaskTest(TestCase):
             sys_group.save()
         t = Task.objects.create(
             summary='Testing',
-            contact=self.mozillian,
+            contact=self.mozillian.get_profile(),
         )
         t.groups.add(sys_group)
         # make sure the system group is in there before submitting the post
@@ -38,7 +38,7 @@ class TaskTest(TestCase):
             reverse('taskboard_task_edit', kwargs={'pk': t.pk}),
             data={
                 'summary': 'Testing',
-                'contact': self.mozillian.pk,
+                'contact': self.mozillian.get_profile().pk,
                 'groups': 'stuff,whatnot',
             }
         )
