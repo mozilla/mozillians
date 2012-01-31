@@ -4,6 +4,7 @@ import tempfile
 
 from django import forms
 from django.conf import settings
+from django.forms import ModelForm
 
 import happyforms
 import Image
@@ -13,7 +14,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
 from groups.models import Group
-from users.models import User
+from users.models import User, UserProfile
 
 
 PAGINATION_LIMIT = 20
@@ -38,23 +39,19 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class ProfileForm(happyforms.Form):
-    first_name = forms.CharField(label=_lazy(u'First Name'), required=False)
-    last_name = forms.CharField(label=_lazy(u'Last Name'), required=True)
-    biography = forms.CharField(label=_lazy(u'Bio'),
-                                widget=forms.Textarea(),
-                                required=False)
+class ProfileForm(forms.ModelForm):
+    first_name = forms.CharField(label=_lazy(u'First Name'), max_length=30,
+                                                             required=False)
+    last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
+                                                           required=True)
+
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
     # Remote System Ids
     # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
-    irc_nickname = forms.CharField(label=_lazy(u'IRC Nickname'),
-                                   required=False)
-
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
-    website = forms.URLField(label=_lazy(u'Website'), required=False)
 
     #: L10n: Street address; not entire address
     street = forms.CharField(label=_lazy(u'Address'), required=False)
@@ -65,6 +62,13 @@ class ProfileForm(happyforms.Form):
     country = forms.CharField(label=_lazy(u'Country'), required=False)
     postal_code = forms.CharField(label=_lazy(u'Postal/Zip Code'),
                                   required=False)
+
+    class Meta:
+        model = UserProfile
+        fields = ('ircname', 'website', 'bio')
+        widgets = {
+            'bio': forms.Textarea(),
+        }
 
     def clean_photo(self):
         """Let's make sure things are right.
@@ -116,30 +120,13 @@ class ProfileForm(happyforms.Form):
     def save(self, request):
         """Save the data to profile."""
         self._save_groups(request)
-        user = request.user
-        profile = user.get_profile()
-        d = self.cleaned_data
+        self._save_photos(request)
 
+        d = self.cleaned_data
+        user = request.user
         user.first_name = d['first_name']
         user.last_name = d['last_name']
-
-        profile.bio = d['biography']
-        profile.ircname = d['irc_nickname']
-        profile.website = d['website']
-
-        if d['photo']:
-            profile.photo = True
-            with open(profile.get_photo_file(), 'w') as f:
-                f.write(d['photo'].file.read())
-
-        if d['photo_delete']:
-            profile.photo = False
-            try:
-                os.remove(profile.get_photo_file())
-            except OSError:
-                statsd.incr('errors.photo.deletion')
-
-        profile.save()
+        super(ModelForm, self).save()
         user.save()
 
     def _save_groups(self, request):
@@ -160,6 +147,23 @@ class ProfileForm(happyforms.Form):
                 groups_to_add.append(group)
 
         profile.groups.add(*groups_to_add)
+
+    def _save_photos(self, request):
+        d = self.cleaned_data
+        profile = request.user.get_profile()
+
+        if d['photo_delete']:
+            profile.photo = False
+            try:
+                os.remove(profile.get_photo_file())
+            except OSError:
+                statsd.incr('errors.photo.deletion')
+        elif d['photo']:
+            profile.photo = True
+            with open(profile.get_photo_file(), 'w') as f:
+                f.write(d['photo'].file.read())
+
+        profile.save()
 
 
 class VouchForm(happyforms.Form):

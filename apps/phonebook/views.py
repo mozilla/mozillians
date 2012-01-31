@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -65,20 +65,19 @@ def edit_profile(request):
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
     if request.method == 'POST':
-
-        form = forms.ProfileForm(request.POST, request.FILES)
+        form = forms.ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save(request)
             return redirect(reverse('profile', args=[request.user.username]))
     else:
         initial = dict(first_name=request.user.first_name,
                        last_name=request.user.last_name,
-                       biography=profile.bio,
+                       bio=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
                        groups=user_groups)
 
-        form = forms.ProfileForm(initial=initial)
+        form = forms.ProfileForm(instance=profile, initial=initial)
 
     # When changing this keep in mind that the same view is used for
     # user.register.
