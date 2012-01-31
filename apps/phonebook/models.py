@@ -42,7 +42,7 @@ class Invite(models.Model):
             # TODO: Return and use email attribute, not username.
             sender = '%s %s (%s)' % (sender.user.first_name,
                                      sender.user.last_name,
-                                     sender.user.username)
+                                     sender.user.email)
 
         subject = _('Become a Mozillian')
         message = _('Hi there. %s has invited you to join mozillians.org, '

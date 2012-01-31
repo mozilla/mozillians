@@ -16,7 +16,7 @@
 
   <form method="POST" action="{{ url('invite') }}">
     {{ csrf() }}
-    {{ form.errors }}
+    {{ form.errors.recipient }}
 
     {{ form.recipient }}
 
