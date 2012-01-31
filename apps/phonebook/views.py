@@ -173,7 +173,7 @@ def invite(request):
             return HttpResponseRedirect(reverse(invited, args=[invite.id]))
     else:
         f = forms.InviteForm()
-    data = dict(form=f, foo='bar')
+    data = dict(form=f)
 
     return render(request, 'phonebook/invite.html', data)
 
