@@ -12,9 +12,9 @@ class MozilliansBrowserID(BrowserIDBackend):
 
     def authenticate(self, assertion=None, audience=None, authenticated_email=None):
         if authenticated_email:
-            users = User.objects.filter(email=email)
+            users = User.objects.filter(email=authenticated_email)
             if len(users) > 1:
-                log.warn('%d users with email address %s.' % (len(users), email))
+                log.warn('%d users with email address %s.' % (len(users), authenticated_email))
                 return None
             if len(users) == 1:
                 return users[0]
