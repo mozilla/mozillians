@@ -18,7 +18,6 @@ from tower import ugettext as _
 
 import larper
 from groups.models import Group
-from phonebook.helpers import gravatar
 from phonebook.models import get_random_string
 
 
@@ -92,6 +91,8 @@ class UserProfile(SearchMixin, models.Model):
 
     def get_photo_url(self, cachebust=False):
         """Gets a user's userpic URL.  Appends cachebusting if requested."""
+        # Import this here to avoid circular imports because other apps are loading this file in init.py
+        from phonebook.helpers import gravatar
         if self.photo:
             url = '%s/%d.jpg' % (settings.USERPICS_URL, self.user_id)
 
