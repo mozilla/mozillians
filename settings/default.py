@@ -123,6 +123,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'jingo_minify',
     'tower',
     'cronjobs',
+    'elasticutils',
 
     'django.contrib.admin',
     'django.contrib.auth',
