@@ -18,7 +18,7 @@
   </h1>
 
   {% if not profile.is_vouched %}
-    {% if request.user.username == user.username %}
+    {% if request.user.username == shown_user.username %}
       <p id="pending-approval">
         {% trans profile_url=absolutify(url('profile', user.username)) %}
           Your profile is waiting for approval. Send this link to someone who
@@ -59,7 +59,7 @@
   <div class="blue-pastels vcard h-card">
     {{ profile_photo(profile) }}
 
-    {% if user.username == request.user.username %}
+    {% if shown_user.username == request.user.username %}
       <a href="{{ url('profile.edit') }}"
          class="button primary small" id="edit-profile">
         {{ _('Edit My Profile') }}
@@ -72,7 +72,7 @@
       </h2>
 
       <dl>
-        {% if user.email %}
+        {% if shown_user.email %}
           <dt>{{ _('Email') }}</dt>
           <dd><a class="email u-email" href="mailto:{{ user.email }}">
             {{ user.email }}
@@ -105,7 +105,7 @@
         {% elif profile.voucher %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-            <a href="{{ url('profile', profile.user.username) }}"
+            <a href="{{ url('profile', shown_user.username) }}"
                class="vouched">
               {{ profile.voucher.full_name }}
             </a>

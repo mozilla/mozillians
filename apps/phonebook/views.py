@@ -53,7 +53,7 @@ def profile(request, username):
     # Get user groups from their profile.
     groups = profile.groups.all()
 
-    data = dict(user=user, profile=profile, vouch_form=vouch_form,
+    data = dict(shown_user=user, profile=profile, vouch_form=vouch_form,
                 groups=groups)
     return render(request, 'phonebook/profile.html', data)
 
