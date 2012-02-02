@@ -83,7 +83,7 @@
       {% block search %}
         <form id="quick-search" action="{{ url('search') }}"
               method="GET">
-          <input type="search" id="q" name="q"
+          <input type="text" id="q" name="q"
                  placeholder="{{ _('Name, IRC Nick, or Email') }}">
           <button alt="{{ _('Search') }}" type="submit" id="quick-search-btn">{{ _('Search') }}</button>
         </form>
