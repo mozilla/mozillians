@@ -8,7 +8,7 @@
 
 {% block main_content %}
   <h1>
-    {% if request.user.username == user.username %}
+    {% if request.user.username == shown_user.username %}
       {{ _('Your Profile') }}
     {% elif profile.is_vouched %}
       {{ _('Mozillian Profile') }}
@@ -74,8 +74,8 @@
       <dl>
         {% if shown_user.email %}
           <dt>{{ _('Email') }}</dt>
-          <dd><a class="email u-email" href="mailto:{{ user.email }}">
-            {{ user.email }}
+          <dd><a class="email u-email" href="mailto:{{ shown_user.email }}">
+            {{ shown_user.email }}
           </a></dd>
         {% endif %}
 
