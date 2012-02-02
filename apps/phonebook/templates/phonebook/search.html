@@ -22,7 +22,7 @@
 
   <div class="blue-pastels">
     <form method="GET" id="search-form" action="{{ url('search') }}">
-      <input name="q" id="q"
+      <input type="text" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
