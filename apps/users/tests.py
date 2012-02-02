@@ -100,3 +100,22 @@ class VouchTest(ESTestCase):
                                       {'q': self.pending.email})
         assert 'Mozillian' in r.content, (
                 'User should appear as a Mozillian in search.')
+
+class TestUser(TestCase):
+    """Test User functionality"""
+
+    def test_userprofile(self):
+        url = reverse('home')
+        u = User.objects.create(username='tmp')
+
+        # Somehow the User lacks a UserProfile
+        u.get_profile().delete()
+
+        self.assertRaises(UserProfile.DoesNotExist,
+                          u.save)
+        self.client.login(email=u.email)
+
+        # Good to go
+        assert u.get_profile()
+
+

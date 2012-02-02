@@ -34,13 +34,13 @@ class Browserid(Verify):
     """View for dealing with Browserid callback"""
 
     def handle_user(self, request, user):
-        try:
-            if user.get_profile().is_complete():
-                auth.login(request, user)
-                return redirect(reverse('profile', args=[user.username]))
-        except UserProfile.DoesNotExist:
-            UserProfile.objects.create(user=user)
-            log.warning('UserProfile created')
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        if created:
+            log.info('Created profile for user with email %s' % user.email)
+
+        if profile.is_complete():
+            auth.login(request, user)
+            return redirect(reverse('profile', args=[user.username]))
 
         request.session['authenticated_email'] = user.email
         return redirect(reverse('register'))
