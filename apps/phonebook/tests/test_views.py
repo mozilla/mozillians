@@ -134,7 +134,7 @@ class TestViews(TestCase):
 
         # update
         data = dict(first_name='Hobo', last_name='LaRue',
-                    biography='Rides the rails')
+                    bio='Rides the rails')
         edit = newbie_client.post(edit_profile_url, data, follow=True)
         eq_(200, edit.status_code, 'Edits okay')
         r = newbie_client.get(profile_url)

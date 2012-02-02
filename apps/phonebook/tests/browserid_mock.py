@@ -23,7 +23,7 @@ class mock_browserid(object):
         self.settings_patches = (
             patch.object(
                 settings, 'AUTHENTICATION_BACKENDS',
-                ('django_browserid.auth.BrowserIDBackend',),
+                ('common.backends.MozilliansBrowserID',),
                 create=True),
             patch.object(
                 settings, 'SITE_URL',
@@ -32,7 +32,7 @@ class mock_browserid(object):
             )
         )
         self.patcher = patch(
-            'django_browserid.auth.BrowserIDBackend._verify_http_request')
+            'common.backends.MozilliansBrowserID._verify_http_request')
         if email is not None:
             self.return_value = {'status': 'okay', 'email': email}
         else:
