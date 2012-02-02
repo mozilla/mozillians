@@ -13,6 +13,7 @@ from tower import ugettext as _
 from phonebook.models import Invite
 from session_csrf import anonymous_csrf
 from users import forms
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 
@@ -33,12 +34,16 @@ class Browserid(Verify):
     """View for dealing with Browserid callback"""
 
     def handle_user(self, request, user):
-        if user.get_profile().is_complete():
-            auth.login(request, user)
-            return redirect(reverse('profile', args=[user.username]))
-        else:
-            request.session['authenticated_email'] = user.email
-            return redirect(reverse('register'))
+        try:
+            if user.get_profile().is_complete():
+                auth.login(request, user)
+                return redirect(reverse('profile', args=[user.username]))
+        except UserProfile.DoesNotExist:
+            UserProfile.objects.create(user=user)
+            log.warning('UserProfile created')
+
+        request.session['authenticated_email'] = user.email
+        return redirect(reverse('register'))
 
 
 def password_reset_confirm(request, uidb36=None, token=None):
