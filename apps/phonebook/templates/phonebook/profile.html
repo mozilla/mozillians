@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ profile.full_name }}{% endblock %}
+{% block page_title %}{{ profile.display_name }}{% endblock %}
 {% block body_id %}profile{% endblock %}
 {% block body_classes %}
     box-content {% if not profile.is_vouched %}pending{% endif %}
