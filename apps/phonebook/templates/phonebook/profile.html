@@ -99,15 +99,12 @@
           <dd>{{ profile.location }}</dd>
         {% endif %}
 
-        {% if not profile.voucher and profile.is_vouched %}
-          <dt>{{ _('Vouched by') }}</dt>
-          <dd>{{ _('No longer active') }}</dd>
-        {% elif profile.voucher %}
+        {% if profile.vouched_by %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-            <a href="{{ url('profile', shown_user.username) }}"
+            <a href="{{ url('profile', profile.vouched_by.user.username) }}"
                class="vouched">
-              {{ profile.voucher.full_name }}
+              {{ profile.vouched_by.display_name }}
             </a>
           </dd>
         {% endif %}
