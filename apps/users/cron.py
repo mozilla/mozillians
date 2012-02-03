@@ -151,7 +151,7 @@ def flee_ldap():
                 os.mkdir(settings.USERPICS_PATH)
 
             destination = os.path.join(settings.USERPICS_PATH, '%d.jpg' %
-                                       profile.user_id)
+                                       profile.id)
 
             md5 = lambda x: hashlib.md5(x).hexdigest()
 
@@ -164,17 +164,24 @@ def flee_ldap():
                 if ldap_hash == existing_hash:
                     # if same log debug
                     log.debug('File already dumped for user: %d' %
-                              profile.user_id)
+                              profile.id)
                     write_it = False
                 else:
                     # if different log warning and copy it
                     log.warning('Different file in place for user: %d' %
-                                profile.user_id)
+                                profile.id)
                     os.rename(destination, destination + '.' + existing_hash)
 
             if write_it:
                 with open(destination, 'w') as f:
                     f.write(photo)
+
+        # append underscore's until we find something unique
+        while True:
+            if not User.object.filter(username=username).count():
+                continue
+            log.warning('duplicat username found: %s' % username)
+            username = username + '_'
 
         profile.user.username = username
         profile.user.lastname = lastname

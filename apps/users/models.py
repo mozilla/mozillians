@@ -97,7 +97,7 @@ class UserProfile(SearchMixin, models.Model):
         # Import this here to avoid circular imports because other apps are loading this file in init.py
         from phonebook.helpers import gravatar
         if self.photo:
-            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.user_id)
+            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.id)
 
             if cachebust:
                 url += '?%d' % int(time.time())
