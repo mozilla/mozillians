@@ -8,6 +8,7 @@ from pyquery import PyQuery as pq
 from common.tests import ESTestCase, TestCase
 from groups.models import Group
 from users.models import UserProfile
+from phonebook.tests import browserid_mock
 
 Group.objects.get_or_create(name='staff', system=True)
 
@@ -105,15 +106,18 @@ class TestUser(TestCase):
     """Test User functionality"""
 
     def test_userprofile(self):
-        url = reverse('home')
-        u = User.objects.create(username='tmp')
+        u = User.objects.create(username='tmp', email='tmp@domain.com')
+
+        UserProfile.objects.all().delete()
 
         # Somehow the User lacks a UserProfile
-        u.get_profile().delete()
-
         self.assertRaises(UserProfile.DoesNotExist,
-                          u.save)
-        self.client.login(email=u.email)
+                          u.get_profile)
+
+        # Sign in
+        with browserid_mock.mock_browserid(u.email):
+            d = dict(assertion='qwer')
+            self.client.post(reverse('browserid_verify'), d, follow=True)
 
         # Good to go
         assert u.get_profile()

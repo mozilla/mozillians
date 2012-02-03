@@ -36,7 +36,7 @@ class Browserid(Verify):
     def handle_user(self, request, user):
         profile, created = UserProfile.objects.get_or_create(user=user)
         if created:
-            log.info('Created profile for user with email %s' % user.email)
+            log.warning('Created profile for user with email %s' % user.email)
 
         if profile.is_complete():
             auth.login(request, user)
