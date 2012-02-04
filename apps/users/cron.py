@@ -178,8 +178,8 @@ def flee_ldap():
 
         # append underscore's until we find something unique
         while True:
-            if not User.object.filter(username=username).count():
-                continue
+            if not User.objects.filter(username=username).count():
+                break
             log.warning('duplicat username found: %s' % username)
             username = username + '_'
 

@@ -43,6 +43,8 @@ class UserProfile(SearchMixin, models.Model):
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
+    # If vouched because of Mozilla.* email, make note of it
+    is_autovouched = models.BooleanField(default=False)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
                                               blank=True, null=True)
 
@@ -71,6 +73,7 @@ class UserProfile(SearchMixin, models.Model):
         changed = system  # do we need to do a vouch?
         if system:
             self.is_vouched = True
+            self.is_autovouched = True
 
         if vouched_by and vouched_by.is_vouched:
             changed = True
