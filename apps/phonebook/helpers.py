@@ -27,6 +27,7 @@ def profile_photo(context, profile):
     me = bool(user == profile.user)
     cachebust = profile.photo and bool(user.pk == profile.user_id)
     return dict(
+            profile=profile,
             image_url=profile.get_photo_url(cachebust=cachebust),
             show_gravatar_info=not profile.photo and me,
     )
