@@ -1,0 +1,82 @@
+/*!
+* Default Mozilla mobile stylesheet.
+*/
+body {
+    background-color: #fff;
+    background-image: url(../img/mozilla/dino.png), url(../img/mozilla/background.jpg);
+    background-position: 50% top, left top;
+    background-repeat: no-repeat;
+    color: #4b4740;
+}
+
+.navbar-inner, footer {
+    background: rgba(38, 38, 38, 0.95);
+    background-image: none;
+}
+
+.brand {
+    text-transform: lowercase;
+}
+
+#header h1 a, #header h1 span {
+    color: #fff;
+    font-family: MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+#header h1 a:hover {
+    color: #eee;
+    text-decoration: none;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4),
+                 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+#nav a, #nav span {
+    color: #ccc;
+}
+
+#nav a:hover, #nav a:focus {
+    color: #f59d56;
+}
+
+#nav .selected, #nav .on {
+    background: url(../img/mozilla/menu-divider.png) bottom right repeat-x;
+    color: #f59d56;
+}
+
+#quick-search {
+    white-space: nowrap;
+}
+
+#quick-search #q {
+    background: #fff url(../img/mozilla/search-icon.png) 2px 50% no-repeat;
+    color: #999;
+}
+
+#quick-search #q:focus {
+    color: #333;
+}
+
+
+
+/** Main content area */
+#main-content h1 {
+    color: #b91e27;
+}
+
+#language-switcher label {
+    color:#999;
+}
+#language-switcher button {
+    margin-bottom: 9px;
+}
+
+footer {
+    color: #999;
+    background: #2A2A2A;
+    border-top: 13px solid #A5151E;
+    padding: 18px 0;
+}
+

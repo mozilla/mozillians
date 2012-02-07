@@ -54,16 +54,29 @@ JINGO_EXCLUDE_APPS = [
 MINIFY_BUNDLES = {
     'css': {
         'common': (
+            'css/bootstrap.css',
             'css/jquery-ui-1.8.16.custom.css',
             'js/libs/tag-it/css/jquery.tagit.css',
-            'css/mozilla-base.css',
-            'css/main.css',
+            'css/base.css',
+            'css/bootstrap-responsive.css',
+            #'css/base-480px.css',
+            #'css/base-768px.css',
         ),
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.4.4.min.js',
+            'js/libs/jquery-1.7.1.min.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
+            'js/bootstrap-transition.js',
+            'js/bootstrap-alert.js',
+            'js/bootstrap-modal.js',
+            'js/bootstrap-dropdown.js',
+            'js/bootstrap-tooltip.js',
+            'js/bootstrap-popover.js',
+            'js/bootstrap-button.js',
+            'js/bootstrap-collapse.js',
+            'js/bootstrap-carousel.js',
+            'js/bootstrap-typeahead.js',
             'js/libs/jquery.endless-scroll.js',
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
