@@ -124,6 +124,9 @@ def flee_ldap():
             log.warning('No ldap data for %d' % profile.user_id)
             continue
         username = person[1]['uniqueIdentifier'][0]
+        bio = firstname = ircname = ''
+        photo = False
+
         if 'description' in person[1]:
             bio = person[1]['description'][0]
         if 'jpegPhoto' in person[1]:
@@ -135,7 +138,6 @@ def flee_ldap():
         displayname = person[1]['displayName'][0]
         service_data = larper.get_service_data(username)
 
-        ircname = ''
         if service_data:
             ircname = service_data['irc://irc.mozilla.org/'].service_id
 
