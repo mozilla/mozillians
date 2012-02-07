@@ -6,6 +6,12 @@
     box-content {% if not profile.is_vouched %}pending{% endif %}
 {% endblock %}
 
+{% set nav_profile = 'active' %}
+{% block nav %}
+  {{ super() }}
+{% endblock %}
+
+
 {% block main_content %}
   <h1>
     {% if request.user.username == shown_user.username %}
@@ -18,8 +24,8 @@
   </h1>
 
   {% if not profile.is_vouched %}
-    {% if request.user.username == shown_user.username %}
-      <p id="pending-approval">
+    {% if request.user == shown_user %}
+      <div class="alert" id="pending-approval">
         {% trans profile_url=absolutify(url('profile', user.username)) %}
           Your profile is waiting for approval. Send this link to someone who
           is familiar with your contributions and ask them to vouch for you:
@@ -28,12 +34,11 @@
             {{ profile_url }}
           </em>
         {% endtrans %}
-      </p>
+      </div>
     {% else %}
-      <div id="pending-approval">
-        {% trans vouch='#' %}
-          This profile is waiting for approval. If you can vouch for this
-          person's contributions, please do so.
+      <div class="alert" id="pending-approval">
+        {% trans %}
+          This profile is waiting for approval.
         {% endtrans %}
 
         {% if vouch_form %}

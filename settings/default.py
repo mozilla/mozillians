@@ -59,8 +59,8 @@ MINIFY_BUNDLES = {
             'js/libs/tag-it/css/jquery.tagit.css',
             'css/base.css',
             'css/bootstrap-responsive.css',
-            #'css/base-480px.css',
-            #'css/base-768px.css',
+            'css/base-480px.css',
+            'css/base-768px.css',
         ),
     },
     'js': {

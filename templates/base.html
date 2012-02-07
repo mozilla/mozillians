@@ -34,48 +34,43 @@
   <li><a href="#main">{{ _('Skip to Content') }}</a></li>
 </ul>
 
-<nav class="navbar navbar-fixed-top">
-  <div class="navbar-inner">
-    <div class="container">
-      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </a>
-      <a class="brand" href="{{ url('home') }}">{{ _('Mozillians') }}</a>
-      <div class="nav-collapse">
-        <ul class="nav">
-          <li class="active"><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></li>
-          <li><a href="{{ url('about') }}">About</a></li>
-          {% if user.is_authenticated() %}
-            <li><a href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
-            {% if user.get_profile().is_vouched %}
+{% block nav %}
+  <nav class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="{{ url('home') }}">{{ _('Mozillians') }}</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li class="{{ nav_home}}"><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></li>
+            <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
+            {% if user.is_authenticated() %}
+              <li class="{{nav_profile}}"><a href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
+              {% if user.get_profile().is_vouched %}
+                <li class="{{nav_invite}}">
+                  <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
+                </li>
+              {% endif %}
               <li>
-                <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
+                <a id="logout" href="{{ url('logout') }}"> {{ _('Log Out') }} </a>
               </li>
-            {% endif %}
-            <li>
-              <a id="logout" href="{{ url('logout') }}"> {{ _('Log Out') }} </a>
-            </li>
-        {% elif intent %}
-        {% else %}
-          <li>
-            <a id="login" class="browser_id_login" href="#login">{{ _('Log In') }}</a>
-          </li>
-          {% block register_button %}
-            <li>
-              <a id="register" class="browser_id_login" href="#join_us">
-                {{ _('Join Us') }}
-              </a>
-            </li>
-          {% endblock %}
-        {% endif %}
-        </ul>
-      </div><!--/.nav-collapse -->
+          {% else  %}
+              <li>
+                <a id="register" class="browser_id_login" href="#join_us">
+                  {{ _('Sign in with BrowserID') }}
+                </a>
+              </li>
+          {% endif %}
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
     </div>
-  </div>
-</nav>
-
+  </nav>
+{% endblock nav %}
 
     {% if user.is_authenticated() and user.get_profile().is_vouched %}
       {% block search %}
