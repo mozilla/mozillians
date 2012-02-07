@@ -14,6 +14,5 @@
   "installs_allowed_from": [
     "https://apps-preview.mozilla.org"
   ],
-  // Localization will come.
   "default_locale": "en"
 }
