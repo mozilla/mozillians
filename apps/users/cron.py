@@ -113,88 +113,102 @@ def fix_bad_ldap_vouch():
                 log.info('User is already vouched; no big.')
 
 
+def _populate_from_ldap(profile):
+    person = profile.get_ldap_person()
+    if not person:
+        log.warning('No ldap data for %d' % profile.user_id)
+        continue
+    username = person[1]['uniqueIdentifier'][0]
+    bio = firstname = ircname = ''
+    photo = False
+
+    if 'description' in person[1]:
+        bio = person[1]['description'][0]
+    if 'jpegPhoto' in person[1]:
+        photo = person[1]['jpegPhoto'][0]
+    lastname = person[1]['sn'][0]
+    firstname = ''
+    if 'givenName' in person[1]:
+        firstname = person[1]['givenName'][0]
+    displayname = person[1]['displayName'][0]
+    service_data = larper.get_service_data(username)
+
+    if service_data:
+        ircname = service_data['irc://irc.mozilla.org/'].service_id
+
+    if photo:
+        # ensure the netapp storage exists
+        if not os.path.exists(settings.NETAPP_STORAGE):
+            log.error('Netapp storage not found at %s'
+                       % settings.NETAPP_STORAGE)
+            sys.exit(1)
+
+        # if userpic dir doesn't exist make it
+        if not os.path.exists(settings.USERPICS_PATH):
+            os.mkdir(settings.USERPICS_PATH)
+
+        destination = os.path.join(settings.USERPICS_PATH, '%d.jpg' %
+                                   profile.id)
+
+        md5 = lambda x: hashlib.md5(x).hexdigest()
+
+        write_it = True
+        # see if file already exists for user
+        if os.path.exists(destination):
+            # if it does compare it
+            ldap_hash = md5(photo)
+            existing_hash = md5(open(destination).read())
+            if ldap_hash == existing_hash:
+                # if same log debug
+                log.debug('File already dumped for user: %d' %
+                          profile.id)
+                write_it = False
+            else:
+                # if different log warning and copy it
+                log.warning('Different file in place for user: %d' %
+                            profile.id)
+                os.rename(destination, destination + '.' + existing_hash)
+
+        if write_it:
+            with open(destination, 'w') as f:
+                f.write(photo)
+
+    # append underscore's until we find something unique
+    while True:
+        if not User.objects.filter(username=username).count():
+            break
+        log.warning('duplicat username found: %s' % username)
+        username = username + '_'
+
+    profile.user.username = username
+    profile.user.lastname = lastname
+    profile.user.firstname = firstname
+    profile.bio = bio
+    profile.photo = bool(photo)
+    profile.display_name = displayname
+    profile.ircname = ircname
+    profile.user.save()
+    profile.save()
+    log.debug('u:%d saved' % profile.user_id)
+
+
+@cronjobs.register
+def flee_ldap_nodisplay():
+    """Copies data from LDAP into UserProfile."""
+    profiles = UserProfile.objects.filter(display_name='')
+    log.info('%d profiles' % len(profiles))
+    for profile in profiles:
+        log.info('User: %d, %s' % (profile.user_id, profile.user.email))
+        _populate_from_ldap(profile)
+
+
 @cronjobs.register
 def flee_ldap():
     """Copies data from LDAP into UserProfile."""
     profiles = UserProfile.objects.all()
 
     for profile in profiles:
-        person = profile.get_ldap_person()
-        if not person:
-            log.warning('No ldap data for %d' % profile.user_id)
-            continue
-        username = person[1]['uniqueIdentifier'][0]
-        bio = firstname = ircname = ''
-        photo = False
-
-        if 'description' in person[1]:
-            bio = person[1]['description'][0]
-        if 'jpegPhoto' in person[1]:
-            photo = person[1]['jpegPhoto'][0]
-        lastname = person[1]['sn'][0]
-        firstname = ''
-        if 'givenName' in person[1]:
-            firstname = person[1]['givenName'][0]
-        displayname = person[1]['displayName'][0]
-        service_data = larper.get_service_data(username)
-
-        if service_data:
-            ircname = service_data['irc://irc.mozilla.org/'].service_id
-
-        if photo:
-            # ensure the netapp storage exists
-            if not os.path.exists(settings.NETAPP_STORAGE):
-                log.error('Netapp storage not found at %s'
-                           % settings.NETAPP_STORAGE)
-                sys.exit(1)
-
-            # if userpic dir doesn't exist make it
-            if not os.path.exists(settings.USERPICS_PATH):
-                os.mkdir(settings.USERPICS_PATH)
-
-            destination = os.path.join(settings.USERPICS_PATH, '%d.jpg' %
-                                       profile.id)
-
-            md5 = lambda x: hashlib.md5(x).hexdigest()
-
-            write_it = True
-            # see if file already exists for user
-            if os.path.exists(destination):
-                # if it does compare it
-                ldap_hash = md5(photo)
-                existing_hash = md5(open(destination).read())
-                if ldap_hash == existing_hash:
-                    # if same log debug
-                    log.debug('File already dumped for user: %d' %
-                              profile.id)
-                    write_it = False
-                else:
-                    # if different log warning and copy it
-                    log.warning('Different file in place for user: %d' %
-                                profile.id)
-                    os.rename(destination, destination + '.' + existing_hash)
-
-            if write_it:
-                with open(destination, 'w') as f:
-                    f.write(photo)
-
-        # append underscore's until we find something unique
-        while True:
-            if not User.objects.filter(username=username).count():
-                break
-            log.warning('duplicat username found: %s' % username)
-            username = username + '_'
-
-        profile.user.username = username
-        profile.user.lastname = lastname
-        profile.user.firstname = firstname
-        profile.bio = bio
-        profile.photo = bool(photo)
-        profile.display_name = displayname
-        profile.ircname = ircname
-        profile.user.save()
-        profile.save()
-        log.debug('u:%d saved' % profile.user_id)
+        _populate_from_ldap(profile)
 
 
 @cronjobs.register
