@@ -117,7 +117,7 @@ def _populate_from_ldap(profile):
     person = profile.get_ldap_person()
     if not person:
         log.warning('No ldap data for %d' % profile.user_id)
-        continue
+        return
     username = person[1]['uniqueIdentifier'][0]
     bio = firstname = ircname = ''
     photo = False
