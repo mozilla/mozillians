@@ -75,15 +75,17 @@
           </div>
         {% endif %}
 
-        {% if profile.photo %}
-          <div id="photo-delete-container" class="field">
-            {{ form['photo_delete'].label_tag() }}
+        {% if mode != 'new' %}
+          {% if profile.photo %}
+            <div id="photo-delete-container" class="field">
+              {{ form['photo_delete'].label_tag() }}
 
-            {{ form.errors['photo_delete'] }}
-            {{ form['photo_delete'] }}
+              {{ form.errors['photo_delete'] }}
+              {{ form['photo_delete'] }}
 
-            <div class="clear"></div>
-          </div>
+              <div class="clear"></div>
+            </div>
+          {% endif %}
         {% endif %}
 
       </div>

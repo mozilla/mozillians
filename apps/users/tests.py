@@ -20,13 +20,13 @@ class TestThingsForPeople(TestCase):
         url = reverse('home')
         r = self.client.get(url)
         doc = pq(r.content)
-        assert not doc('input[type=search]')
+        assert not doc('input[type=text]')
         r = self.pending_client.get(url)
         doc = pq(r.content)
-        assert not doc('input[type=search]')
+        assert not doc('input[type=text]')
         r = self.mozillian_client.get(url)
         doc = pq(r.content)
-        assert doc('input[type=search]')
+        assert doc('input[type=text]')
 
     def test_invitelink(self):
         url = reverse('home')
@@ -121,5 +121,44 @@ class TestUser(TestCase):
 
         # Good to go
         assert u.get_profile()
+
+class TestMigrateRegistration(TestCase):
+        """Test funky behavior of flee ldap"""
+        email = 'robot1337@domain.com'
+
+        def test_login(self):
+            """Given an invite_url go to it and redeem an invite."""
+            # Lets make sure we have a clean slate
+
+            info = dict(
+                first_name='Akaaaaaaash',
+                last_name='Desaaaaaaai',
+                optin=True
+            )
+
+            self.client.logout()
+            u = User.objects.create(username='robot1337', email=self.email)
+            p = u.get_profile()
+
+            u.first_name = info['first_name']
+            u.last_name = ''
+            u.save()
+            p.photo = True
+            p.save()
+
+
+            # BrowserID needs an assertion not to be whiney
+            d = dict(assertion='tofu')
+            with browserid_mock.mock_browserid(self.email):
+                r = self.client.post(reverse('browserid_verify'), d, follow=True)
+
+            eq_(r.status_code, 200)
+
+            # Now let's register
+
+            with browserid_mock.mock_browserid(self.email):
+                r = self.client.post(reverse('register'), info, follow=True)
+
+            eq_(r.status_code, 200)
 
 
