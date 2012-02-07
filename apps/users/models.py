@@ -43,6 +43,8 @@ class UserProfile(SearchMixin, models.Model):
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
+    # If vouched because of Mozilla.* email, make note of it
+    is_autovouched = models.BooleanField(default=False)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
                                               blank=True, null=True)
 
@@ -65,12 +67,13 @@ class UserProfile(SearchMixin, models.Model):
         Tests if a user has all the information needed to move on past the
         original registration view
         """
-        return bool(self.user.last_name)
+        return self.display_name and self.display_name != ' '
 
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
         if system:
             self.is_vouched = True
+            self.is_autovouched = True
 
         if vouched_by and vouched_by.is_vouched:
             changed = True
@@ -97,7 +100,7 @@ class UserProfile(SearchMixin, models.Model):
         # Import this here to avoid circular imports because other apps are loading this file in init.py
         from phonebook.helpers import gravatar
         if self.photo:
-            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.user_id)
+            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.id)
 
             if cachebust:
                 url += '?%d' % int(time.time())
@@ -107,7 +110,7 @@ class UserProfile(SearchMixin, models.Model):
         return url
 
     def get_photo_file(self):
-        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.user_id)
+        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.id)
 
     # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):

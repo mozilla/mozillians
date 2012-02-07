@@ -124,6 +124,9 @@ def flee_ldap():
             log.warning('No ldap data for %d' % profile.user_id)
             continue
         username = person[1]['uniqueIdentifier'][0]
+        bio = firstname = ircname = ''
+        photo = False
+
         if 'description' in person[1]:
             bio = person[1]['description'][0]
         if 'jpegPhoto' in person[1]:
@@ -135,7 +138,6 @@ def flee_ldap():
         displayname = person[1]['displayName'][0]
         service_data = larper.get_service_data(username)
 
-        ircname = ''
         if service_data:
             ircname = service_data['irc://irc.mozilla.org/'].service_id
 
@@ -151,7 +153,7 @@ def flee_ldap():
                 os.mkdir(settings.USERPICS_PATH)
 
             destination = os.path.join(settings.USERPICS_PATH, '%d.jpg' %
-                                       profile.user_id)
+                                       profile.id)
 
             md5 = lambda x: hashlib.md5(x).hexdigest()
 
@@ -164,17 +166,24 @@ def flee_ldap():
                 if ldap_hash == existing_hash:
                     # if same log debug
                     log.debug('File already dumped for user: %d' %
-                              profile.user_id)
+                              profile.id)
                     write_it = False
                 else:
                     # if different log warning and copy it
                     log.warning('Different file in place for user: %d' %
-                                profile.user_id)
+                                profile.id)
                     os.rename(destination, destination + '.' + existing_hash)
 
             if write_it:
                 with open(destination, 'w') as f:
                     f.write(photo)
+
+        # append underscore's until we find something unique
+        while True:
+            if not User.objects.filter(username=username).count():
+                break
+            log.warning('duplicat username found: %s' % username)
+            username = username + '_'
 
         profile.user.username = username
         profile.user.lastname = lastname
