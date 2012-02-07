@@ -60,8 +60,6 @@ body {
     color: #333;
 }
 
-
-
 /** Main content area */
 #main-content h1 {
     color: #b91e27;
@@ -81,59 +79,7 @@ footer {
     padding: 18px 0;
 }
 
-/*** BrowserID */
-
-.browserid-register {
-    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-
-    background-image: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    color-stop(0.45, rgb(177,219,250)),
-    color-stop(0.73, rgb(58,170,255))
-    );
-    border: 1px solid #3697E5;
-    border-radius: 1px;
-    white-space: nowrap;
+nav .nav a.browser_id_login {
+    line-height: 0;
+    padding-bottom: 0;
 }
-
-.browserid-register:hover {
-    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
-
-    background-image: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    color-stop(0.45, rgb(177,219,250)),
-    color-stop(0.73, rgb(89,180,254))
-    );
-    cursor: pointer;
-    border: 1px solid #3697E5;
-}
-
-.browserid-register:active {
-    background-image: linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -o-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -moz-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -webkit-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-    background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-
-    background-image: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    color-stop(0.45, rgb(141,202,252)),
-    color-stop(0.73, rgb(58,170,255))
-    );
-    border: 1px solid #3697E5;
-}
-

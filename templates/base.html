@@ -48,6 +48,8 @@
           <ul class="nav">
             <li class="{{ nav_home}}"><a href="{{ url('home') }}">{{ _('Mozillians') }}</a></li>
             <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
+          </ul>
+          <ul class="nav pull-right">
             {% if user.is_authenticated() %}
               <li class="{{nav_profile}}"><a href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
               {% if user.get_profile().is_vouched %}
@@ -58,10 +60,10 @@
               <li>
                 <a id="logout" href="{{ url('logout') }}"> {{ _('Log Out') }} </a>
               </li>
-          {% else  %}
-              <li>
-                <a id="register" class="browser_id_login" href="#join_us">
-                  {{ _('Sign in with BrowserID') }}
+            {% else  %}
+              <li class="pull-right">
+                <a class="browser_id_login" href="#join_us">
+                  <img alt="{{ _('Sign in with BrowserID') }}" src="{{ MEDIA_URL }}img/sign_in_blue.png">
                 </a>
               </li>
           {% endif %}
