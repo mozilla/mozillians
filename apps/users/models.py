@@ -67,7 +67,7 @@ class UserProfile(SearchMixin, models.Model):
         Tests if a user has all the information needed to move on past the
         original registration view
         """
-        return bool(self.user.last_name)
+        return self.display_name and self.display_name != ' '
 
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
