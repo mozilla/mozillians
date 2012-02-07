@@ -110,7 +110,7 @@ class UserProfile(SearchMixin, models.Model):
         return url
 
     def get_photo_file(self):
-        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.user_id)
+        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.id)
 
     # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):
