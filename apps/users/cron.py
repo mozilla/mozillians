@@ -183,8 +183,8 @@ def _populate_from_ldap(profile):
     user = profile.user
 
     user.username = username
-    user.lastname = lastname
-    user.firstname = firstname
+    user.last_name = lastname
+    user.first_name = firstname
     user.save()
 
     profile.bio = bio
