@@ -180,16 +180,29 @@ def _populate_from_ldap(profile):
         log.warning('duplicat username found: %s' % username)
         username = username + '_'
 
-    profile.user.username = username
-    profile.user.lastname = lastname
-    profile.user.firstname = firstname
+    user = profile.user
+
+    user.username = username
+    user.lastname = lastname
+    user.firstname = firstname
+    user.save()
+
     profile.bio = bio
     profile.photo = bool(photo)
     profile.display_name = displayname
     profile.ircname = ircname
-    profile.user.save()
     profile.save()
     log.debug('u:%d saved' % profile.user_id)
+
+
+@cronjobs.register
+def flee_ldap_noname():
+    """Copies data from LDAP into UserProfile."""
+    users = User.objects.filter(last_name='')
+    print '%d profiles' % len(users)
+    for user in users:
+        print 'User: %d, %s' % (user.id, user.email)
+        _populate_from_ldap(user.get_profile())
 
 
 @cronjobs.register
