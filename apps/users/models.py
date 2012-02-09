@@ -49,7 +49,8 @@ class UserProfile(SearchMixin, models.Model):
                                               blank=True, null=True)
 
     # Foreign Keys and Relationships
-    vouched_by = models.ForeignKey('UserProfile', null=True)
+    vouched_by = models.ForeignKey('UserProfile', null=True, 
+                                        on_delete=models.SET_NULL)
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
