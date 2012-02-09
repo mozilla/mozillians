@@ -188,6 +188,8 @@ def generate_code(sender, instance, raw, using, **kwargs):
         code = get_random_string(32)
         if UserProfile.objects.filter(confirmation_code=code).count():
             continue
+        # No need to keep making new codes
+        break
 
     instance.confirmation_code = code
 
