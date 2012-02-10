@@ -135,9 +135,12 @@ class UserProfile(SearchMixin, models.Model):
     def full_name(self):
         "%s %s" % (self.user.first_name, self.user.last_name)
 
+    def get_best_repr(self):
+        return self.display_name or self.ircname or self.user.get_full_name()
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return self.user.first_name
+        return self.get_best_repr()
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
