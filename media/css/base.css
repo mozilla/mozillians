@@ -49,15 +49,35 @@ body {
 
 #quick-search {
     white-space: nowrap;
+    margin-bottom:0px;
 }
 
 #quick-search #q {
     background: #fff url(../img/mozilla/search-icon.png) 2px 50% no-repeat;
     color: #999;
+    padding: 2px 4px 2px 20px;
+    position: relative;
+    z-index:4;
+    top:8px;
+    height:16px;
 }
 
 #quick-search #q:focus {
     color: #333;
+}
+
+#quick-search-btn {
+    background: url(../img/mozilla/search-submit.png) 2px 50% no-repeat;
+    left: -18px;
+    width: 42px;
+    height: 23px;
+    border: 0px;
+    font-size: 1px;
+    text-indent: -9999px;
+    position: relative;
+    vertical-align: top;
+    z-index: 1;
+    top:8px;
 }
 
 /** Main content area */
@@ -82,6 +102,11 @@ footer {
 nav .nav a.browser_id_login {
     line-height: 0;
     padding-bottom: 0;
+}
+
+/* This gets shown on small screens */
+#quick-search-link {
+    display:none;
 }
 
 

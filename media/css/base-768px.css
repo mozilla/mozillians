@@ -8,4 +8,10 @@
     body {
         background-image: none;
     }
+    #quick-search-link {
+    	display:block !important;
+	}
+	#quick-search {
+    	display:none;
+	}
 }

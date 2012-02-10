@@ -61,6 +61,7 @@ MINIFY_BUNDLES = {
             'css/bootstrap-responsive.css',
             'css/base-480px.css',
             'css/base-768px.css',
+            'css/base-980px.css',
         ),
     },
     'js': {

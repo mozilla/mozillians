@@ -51,6 +51,19 @@
           </ul>
           <ul class="nav pull-right">
             {% if user.is_authenticated() %}
+              {% if user.get_profile().is_vouched %}
+                {% block search %}
+                  <li>
+                    <form id="quick-search" action="{{ url('search') }}"
+                          method="GET">
+                      <input type="text" id="q" name="q"
+                             placeholder="{{ _('Name, IRC Nick, or Email') }}">
+                      <button alt="{{ _('Search') }}" type="submit" id="quick-search-btn">{{ _('Search') }}</button>
+                    </form>
+                  </li>
+                  <li id="quick-search-link" class="{{nav_profile}}"><a href="{{ url('search') }}">{{ _('Search') }}</a></li>
+                {% endblock %}
+              {% endif %}
               <li class="{{nav_profile}}"><a href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
               {% if user.get_profile().is_vouched %}
                 <li class="{{nav_invite}}">
@@ -74,16 +87,7 @@
   </nav>
 {% endblock nav %}
 
-    {% if user.is_authenticated() and user.get_profile().is_vouched %}
-      {% block search %}
-        <form id="quick-search" action="{{ url('search') }}"
-              method="GET">
-          <input type="text" id="q" name="q"
-                 placeholder="{{ _('Name, IRC Nick, or Email') }}">
-          <button alt="{{ _('Search') }}" type="submit" id="quick-search-btn">{{ _('Search') }}</button>
-        </form>
-      {% endblock %}
-    {% endif %}
+
 
   <div id="main" class="container">
       {% block messages %}
