@@ -7,8 +7,8 @@ from tower import ugettext_lazy as _
 
 
 class Task(models.Model):
-    contact = models.ForeignKey(User, verbose_name=_(u'Contact Person'),
-                                related_name="tasks")
+    contact = models.ForeignKey(User, verbose_name=_(u'Contact'),
+                                related_name="created_tasks")
     summary = models.CharField(_(u'Summary'), max_length=255)
     instructions = models.TextField(_(u'Instructions'), blank=True)
     groups = models.ManyToManyField('groups.Group', blank=True,
@@ -17,6 +17,11 @@ class Task(models.Model):
                                 help_text=_(u'yyyy-mm-dd'))
     created = models.DateTimeField(_(u'Created Date'), default=datetime.utcnow,
                                    editable=False)
+    assigned = models.DateField(_(u'Deadline'), blank=True, null=True,
+                                help_text=_(u'yyyy-mm-dd'))
+    accepted_by = models.ForeignKey(User,blank=True, null=True,
+                                    verbose_name=_(u'Accepted by'),
+                                    related_name='accepted_tasks')
     disabled = models.BooleanField(_(u'Disabled'), default=False)
 
     def __unicode__(self):

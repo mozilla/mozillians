@@ -8,7 +8,11 @@
             {% set img = thumbnail(task.contact.userprofile.photo, '100x100', default="img/unknown.png") %}
             <img src="{{ img.url }}"/>
             <h1>{{ task.summary }}</h1>
-            {{ task.groups.all() }}
+            <ul>
+            {% for group in task.groups.all() %}
+              <li> {{ group }}</li>
+            {% endfor %}
+          </ul>
           </section>
         </li>
       {% else %}
