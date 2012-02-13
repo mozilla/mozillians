@@ -15,6 +15,7 @@ from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
+from sorl.thumbnail import ImageField
 
 import larper
 from groups.models import Group
@@ -53,7 +54,8 @@ class UserProfile(SearchMixin, models.Model):
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
-    photo = models.BooleanField(default=False)
+
+    photo = ImageField(upload_to='userprofile', blank=True)
     display_name = models.CharField(max_length=255)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'), blank=True)
@@ -109,9 +111,6 @@ class UserProfile(SearchMixin, models.Model):
 
         return url
 
-    def get_photo_file(self):
-        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.id)
-
     # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):
         r = self.get_ldap_person()
@@ -140,7 +139,7 @@ class UserProfile(SearchMixin, models.Model):
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
-                 'bio', 'photo', 'display_name', 'ircname')
+                 'bio', 'display_name', 'ircname')
         d = dict((a, getattr(self, a)) for a in attrs)
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
@@ -225,11 +224,3 @@ def remove_from_search_index(sender, instance, **kw):
     from elasticutils import tasks
     tasks.unindex_objects.delay(sender, [instance.id])
 
-
-@receiver(dbsignals.post_delete, sender=UserProfile)
-def remove_photos(sender, instance, **kw):
-    """Deletes photo files."""
-    # TODO: if this gets slow, give it to celery.
-    with statsd.timer('photos.remove'):
-        if instance.photo:
-            os.remove(instance.get_photo_file())

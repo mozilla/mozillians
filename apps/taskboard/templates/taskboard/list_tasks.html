@@ -1,1 +1,18 @@
 {% extends "taskboard/base.html" %}
+
+{% block main_content %}
+  <ul>
+      {% for task in task_list %}
+        <li>
+          <section>
+            {% set img = thumbnail(task.contact.userprofile.photo, '100x100', default="img/unknown.png") %}
+            <img src="{{ img.url }}"/>
+            <h1>{{ task.summary }}</h1>
+            {{ task.groups.all() }}
+          </section>
+        </li>
+      {% else %}
+        <li>{% trans %}No Tasks{% endtrans %}</li>
+      {% endfor %}
+  </ul>
+{% endblock %}

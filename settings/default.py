@@ -116,6 +116,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
     'groups',
     'taskboard',
+    'common',
     # 'locations',
     'larper',
 
@@ -124,6 +125,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'tower',
     'cronjobs',
     'elasticutils',
+    'sorl.thumbnail',
 
     'django.contrib.admin',
     'django.contrib.auth',
