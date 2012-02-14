@@ -15,6 +15,7 @@ from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
+from sorl.thumbnail import ImageField
 
 import larper
 from groups.models import Group
@@ -49,12 +50,12 @@ class UserProfile(SearchMixin, models.Model):
                                               blank=True, null=True)
 
     # Foreign Keys and Relationships
-    vouched_by = models.ForeignKey('UserProfile', null=True, 
-                                        on_delete=models.SET_NULL)
+    vouched_by = models.ForeignKey('UserProfile', null=True)
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
-    photo = models.BooleanField(default=False)
+
+    photo = ImageField(upload_to='uploads/userprofile', blank=True)
     display_name = models.CharField(max_length=255)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'), blank=True)
@@ -96,23 +97,6 @@ class UserProfile(SearchMixin, models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
-    def get_photo_url(self, cachebust=False):
-        """Gets a user's userpic URL.  Appends cachebusting if requested."""
-        # Import this here to avoid circular imports because other apps are loading this file in init.py
-        from phonebook.helpers import gravatar
-        if self.photo:
-            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.id)
-
-            if cachebust:
-                url += '?%d' % int(time.time())
-        else:
-            url = gravatar(self.user.email)
-
-        return url
-
-    def get_photo_file(self):
-        return '%s/%d.jpg' % (settings.USERPICS_PATH, self.id)
-
     # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):
         r = self.get_ldap_person()
@@ -133,18 +117,16 @@ class UserProfile(SearchMixin, models.Model):
 
     @property
     def full_name(self):
-        "%s %s" % (self.user.first_name, self.user.last_name)
-
-    def get_best_repr(self):
-        return self.display_name or self.ircname or self.user.get_full_name()
+        return "%s %s" % (self.user.first_name, self.user.last_name)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return self.get_best_repr()
+        return "UserProfile for %s" % (self.user, )
+
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
-                 'bio', 'photo', 'display_name', 'ircname')
+                 'bio', 'display_name', 'ircname')
         d = dict((a, getattr(self, a)) for a in attrs)
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
@@ -192,6 +174,8 @@ def generate_code(sender, instance, raw, using, **kwargs):
         code = get_random_string(32)
         if UserProfile.objects.filter(confirmation_code=code).count():
             continue
+        # No need to keep making new codes
+        break
 
     instance.confirmation_code = code
 
@@ -227,11 +211,3 @@ def remove_from_search_index(sender, instance, **kw):
     from elasticutils import tasks
     tasks.unindex_objects.delay(sender, [instance.id])
 
-
-@receiver(dbsignals.post_delete, sender=UserProfile)
-def remove_photos(sender, instance, **kw):
-    """Deletes photo files."""
-    # TODO: if this gets slow, give it to celery.
-    with statsd.timer('photos.remove'):
-        if instance.photo:
-            os.remove(instance.get_photo_file())

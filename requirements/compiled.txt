@@ -11,3 +11,4 @@ python-ldap==2.4.0
 
 # Images
 PIL
+sorl-thumbnail
