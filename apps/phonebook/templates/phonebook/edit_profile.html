@@ -74,8 +74,10 @@
             {{ form['groups'] }}
 
             <div class="clear"></div>
-            <label for="photo-clear_id">Clear uploaded photo</label>
-            <input type="checkbox" name="photo-clear" id="photo-clear_id">
+            {% if profile.photo %}
+              <label for="photo-clear_id">Clear uploaded photo</label>
+              <input type="checkbox" name="photo-clear" id="photo-clear_id">
+            {% endif %}
           </div>
         {% endif %}
       </div>
