@@ -49,7 +49,8 @@
         {% if mode != 'new' %}
           <div id="photo-container"
                class="{{ 'error' if form.errors['photo'] }}">
-            {{ profile_photo(profile) }}
+          {% set img = thumbnail(profile.photo, '100x100', default="img/unknown.png") %}
+          <img src="{{ img.url }}"/>
 
             {{ form['photo'].label_tag() }}
             {{ form.errors['photo'] }}
@@ -74,20 +75,6 @@
             <div class="clear"></div>
           </div>
         {% endif %}
-
-        {% if mode != 'new' %}
-          {% if profile.photo %}
-            <div id="photo-delete-container" class="field">
-              {{ form['photo_delete'].label_tag() }}
-
-              {{ form.errors['photo_delete'] }}
-              {{ form['photo_delete'] }}
-
-              <div class="clear"></div>
-            </div>
-          {% endif %}
-        {% endif %}
-
       </div>
 
       <div class="right-col">

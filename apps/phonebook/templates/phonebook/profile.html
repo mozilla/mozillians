@@ -57,7 +57,8 @@
   <div class="clear"></div>
 
   <div class="blue-pastels vcard h-card">
-    {{ profile_photo(profile) }}
+    {% set img = thumbnail(profile.photo, '100x100', default="img/unknown.png") %}
+    <img src="{{ img.url }}"/>
 
     {% if shown_user.username == request.user.username %}
       <a href="{{ url('profile.edit') }}"

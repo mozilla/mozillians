@@ -55,7 +55,7 @@ class UserProfile(SearchMixin, models.Model):
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
 
-    photo = ImageField(upload_to='userprofile', blank=True)
+    photo = ImageField(upload_to='uploads/userprofile', blank=True)
     display_name = models.CharField(max_length=255)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'), blank=True)
@@ -97,20 +97,6 @@ class UserProfile(SearchMixin, models.Model):
                urllib.urlencode({'user': self.user.username}))
         return url
 
-    def get_photo_url(self, cachebust=False):
-        """Gets a user's userpic URL.  Appends cachebusting if requested."""
-        # Import this here to avoid circular imports because other apps are loading this file in init.py
-        from phonebook.helpers import gravatar
-        if self.photo:
-            url = '%s/%d.jpg' % (settings.USERPICS_URL, self.id)
-
-            if cachebust:
-                url += '?%d' % int(time.time())
-        else:
-            url = gravatar(self.user.email)
-
-        return url
-
     # TODO: get rid of this when larper is gone ETA Apr-2012
     def get_unique_id(self):
         r = self.get_ldap_person()
@@ -131,11 +117,12 @@ class UserProfile(SearchMixin, models.Model):
 
     @property
     def full_name(self):
-        "%s %s" % (self.user.first_name, self.user.last_name)
+        return "%s %s" % (self.user.first_name, self.user.last_name)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return self.user.first_name
+        return "UserProfile for %s" % (self.user, )
+
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',

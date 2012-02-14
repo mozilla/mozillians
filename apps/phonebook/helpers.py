@@ -20,19 +20,6 @@ def paragraphize(value):
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
-@register.inclusion_tag('phonebook/includes/photo.html')
-@jinja2.contextfunction
-def profile_photo(context, profile):
-    user = context['request'].user
-    me = bool(user == profile.user)
-    cachebust = profile.photo and bool(user.pk == profile.user_id)
-    return dict(
-            profile=profile,
-            image_url=profile.get_photo_url(cachebust=cachebust),
-            show_gravatar_info=not profile.photo and me,
-    )
-
-
 @register.inclusion_tag('phonebook/includes/search_result.html')
 @jinja2.contextfunction
 def search_result(context, profile):
