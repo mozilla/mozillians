@@ -143,7 +143,6 @@ class TestMigrateRegistration(TestCase):
             u.first_name = info['first_name']
             u.last_name = ''
             u.save()
-            p.photo = True
             p.save()
 
 

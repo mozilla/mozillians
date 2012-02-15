@@ -193,4 +193,4 @@ USERNAME_BLACKLIST = ('save', 'tofumatt', 'tag', 'group', 'groups', 'tags',
 
 # Sorl settings
 THUMBNAIL_DUMMY = True
-THUMBNAIL_PREFIX = 'uploads/cache/'
+THUMBNAIL_PREFIX = 'cache/'

@@ -50,8 +50,7 @@
           <div id="photo-container"
                class="{{ 'error' if form.errors['photo'] }}">
             {% set img = thumbnail(profile.photo, '100x100', crop="center", default="img/unknown.png") %}
-            <img src="{{ img.url }}"/>
-            <div class="clear"></div>
+            <img id="profile-photo" src="{{ img.url }}"/>
             <input type="file" name="photo" id="id_photo">
             <div class="clear"></div>
 
