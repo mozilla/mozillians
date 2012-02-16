@@ -128,7 +128,7 @@ class TestMigrateRegistration(TestCase):
 
         def test_login(self):
             """Given an invite_url go to it and redeem an invite."""
-            # Lets make sure we have a clean slate
+            # Lettuce make sure we have a clean slate.
 
             info = dict(
                 first_name='Akaaaaaaash',

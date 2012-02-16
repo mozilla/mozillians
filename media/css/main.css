@@ -761,6 +761,7 @@ html[dir='rtl'] #body-group-show #toggle-group {
     height: 70px;
     margin: 0 10px 0 35px;
     width: 70px;
+    text-align: center;
 }
 
 .search-page .result .details {
@@ -772,8 +773,7 @@ html[dir='rtl'] #body-group-show #toggle-group {
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
-    float: left;
-    width: 70px;
+    max-width: 70px;
     max-height: 70px;
 }
 
