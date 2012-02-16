@@ -11,6 +11,7 @@ import Image
 from easy_thumbnails import processors
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
+from bootstrap.forms import BootstrapModelForm, Fieldset
 
 from phonebook.models import Invite
 from groups.models import Group
@@ -39,7 +40,7 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class ProfileForm(forms.ModelForm):
+class ProfileForm(BootstrapModelForm):
     first_name = forms.CharField(label=_lazy(u'First Name'), max_length=30,
                                                              required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
@@ -64,10 +65,22 @@ class ProfileForm(forms.ModelForm):
                                   required=False)
 
     class Meta:
+        # Model form stuff
         model = UserProfile
         fields = ('ircname', 'website', 'bio')
         widgets = {
             'bio': forms.Textarea(),
+        }
+
+        # Bootstrap stuff
+        template_base = 'bootstrap'
+        layout = (
+            Fieldset(_('Personal Info'), 'first_name', 'last_name', 'bio'),
+            Fieldset(_('Contact Info'), 'ircname', 'website'),
+            Fieldset(_('Other'), 'groups', 'photo'),
+        )
+        custom_fields = {
+            'photo': os.path.join(template_base, 'field_photo.html')
         }
 
     def clean_photo(self):

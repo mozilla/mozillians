@@ -88,7 +88,7 @@ def register(request):
     # When changing this keep in mind that the same view is used for
     # phonebook.edit_profile.
     # 'user' object must be passed in because we are not logged in
-    return render(request, 'phonebook/edit_profile.html',
+    return render(request, 'registration/edit_profile.html',
                   dict(form=form,
                        edit_form_action=reverse('register'),
                        mode='new',
