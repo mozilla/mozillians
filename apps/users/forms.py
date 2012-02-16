@@ -1,11 +1,14 @@
+import os
+
 from django import forms
 
-from tower import ugettext_lazy as _lazy
+from bootstrap.forms import BootstrapModelForm, Fieldset
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 from users.models import UserProfile
 
 
-class RegistrationForm(forms.ModelForm):
+class RegistrationForm(BootstrapModelForm):
     first_name = forms.CharField(label=_lazy(u'First Name'), max_length=30,
                                                              required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
@@ -22,6 +25,20 @@ class RegistrationForm(forms.ModelForm):
         fields = ('bio',)
         widgets = {
             'bio': forms.Textarea(),
+        }
+
+        # Bootstrap stuff
+        template_base = 'bootstrap'
+        layout = (
+            Fieldset(_('Personal Info'),
+                     'first_name',
+                     'last_name',
+                     'bio',
+                     'optin'
+            ),
+        )
+        custom_fields = {
+            'optin': os.path.join(template_base, 'field_optin.html')
         }
 
     def save(self, user):
