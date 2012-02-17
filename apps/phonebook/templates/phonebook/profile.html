@@ -79,10 +79,10 @@
           </a></dd>
         {% endif %}
 
-        {% if profile.ircname %}
-          <dt>{{ _('IRC Nickname') }}</dt>
+        {% if not user.username.startswith('u/') %}
+          <dt>{{ _('Nickname') }}</dt>
           <dd><a class="nickname p-nickname" href="irc://irc.mozilla.org/">
-            {{ profile.ircname }}
+            {{ user.username }}
           </a></dd>
         {% endif %}
 

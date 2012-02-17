@@ -96,7 +96,7 @@
         #}
 
         {% if mode != 'new' %}
-          {% for f in ['ircname', 'website'] %}
+          {% for f in ['username', 'website'] %}
             <div id="{{ form[f].name }}-container"
               class="field {{ 'error' if form.errors[f] }}
               {{ form[f].field.widget.attrs['class'] }}">

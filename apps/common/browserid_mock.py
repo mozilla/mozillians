@@ -24,11 +24,10 @@ class mock_browserid(object):
             patch.object(
                 settings, 'AUTHENTICATION_BACKENDS',
                 ('common.backends.MozilliansBrowserID',),
-                create=True),
+            ),
             patch.object(
                 settings, 'SITE_URL',
                 'http://testserver',
-                create=True,
             )
         )
         self.patcher = patch(

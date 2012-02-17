@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Django settings for the mozillians project.
+import base64
+import hashlib
 import ldap
 import logging
 
@@ -94,11 +96,16 @@ LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
-#BrowserID creates useer if one doesn't exist
+# BrowserID creates useer if one doesn't exist
 BROWSERID_CREATE_USER = True
 
-#On Login, we redirect through register
+# On Login, we redirect through register
 LOGIN_REDIRECT_URL = '/register'
+
+# This dumb. We should be subclassing django-browserid-auth. Submitted a pull
+# request to the project, hopefully we can change this soon.
+BROWSERID_USERNAME_ALGO = lambda email: 'u/'+base64.urlsafe_b64encode(
+                          hashlib.sha1(email).digest()).rstrip('=')
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                                    "(uid=%(user)s)")
@@ -185,6 +192,6 @@ ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians')
 
 # Use this to reserve the URL namespace
-USERNAME_BLACKLIST = ('save', 'tofumatt', 'tag', 'group', 'groups', 'tags',
-                      'media', 'username', 'register', 'new', 'delete',
+USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
+                      'groups', 'tags', 'media', 'username', 'register', 'new', 'delete',
                       'help', 'photo', 'img', 'src', 'files')
