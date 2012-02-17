@@ -245,10 +245,56 @@ a.btn {
     margin: 5px 10px;
 }
 
-/* Edit controls */
+/* edit/register controls */
 
 #edit_controls {
     display: block;
     margin: 18px 20px;
     overflow: auto;
+}
+
+
+/* tagit overide */
+
+.control-group ul.tagit{
+    margin-left: 0px;
+}
+
+.search-page .result {
+    margin-bottom: 15px;
+}
+
+.search-page .result .avatar {
+    float: left;
+    height: 70px;
+    margin: 0 10px 0 35px;
+    width: 70px;
+    text-align: center;
+}
+
+.search-page .result .details {
+    float: left;
+}
+
+.search-page .result .profile-photo {
+    border: 1px solid #52adcc;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    max-width: 70px;
+    max-height: 70px;
+}
+
+.search-page .result h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.search-page .result h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.clear {
+    clear: both;
 }
