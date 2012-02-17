@@ -298,3 +298,7 @@ a.btn {
 .clear {
     clear: both;
 }
+
+#search-form button.btn {
+    margin-bottom:9px;
+}
