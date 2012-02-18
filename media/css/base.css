@@ -302,3 +302,46 @@ a.btn {
 #search-form button.btn {
     margin-bottom:9px;
 }
+
+.bump-button {
+    margin-bottom:9px;
+}
+
+/** Element styles */
+dl{
+    overflow: auto;
+}
+
+dt, dd {
+    color: #1e4262;
+}
+
+dt {
+    clear: both;
+    float: left;
+    font-weight: bold;
+    margin-right: 2%;
+    width: 30%;
+}
+
+dd {
+    float: left;
+    width: 66%;
+}
+
+.vouched {
+    background: url(../img/icon-person.png) center right no-repeat;
+    padding-right: 22px;
+}
+
+#profile-info #groups{
+    margin-left: 0px;
+}
+
+#profile-info{
+    margin-bottom: 15px;
+}
+
+#main h1{
+    padding-bottom: 15px;
+}
