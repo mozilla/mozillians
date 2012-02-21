@@ -23,52 +23,44 @@
     {% endif %}
   </h1>
 
-  {% if not profile.is_vouched %}
-    {% if request.user == shown_user %}
-      <div class="alert" id="pending-approval">
-        {% trans profile_url=absolutify(url('profile', user.username)) %}
-          Your profile is waiting for approval. Send this link to someone who
-          is familiar with your contributions and ask them to vouch for you:
-          <br>
-          <em class="underline" title="Your profile URL">
-            {{ profile_url }}
-          </em>
-        {% endtrans %}
-      </div>
-    {% else %}
-      <div class="alert" id="pending-approval">
-        {% trans %}
-          This profile is waiting for approval.
-        {% endtrans %}
-
-        {% if vouch_form %}
-          <form action="{{ url('vouch') }}" method="POST"
-            id="vouch-form">
-            {{ csrf() }}
-
-            {{ vouch_form }}
-
-            {% trans name=profile.display_name %}
-              <button type="submit" class="button primary small">
-                Vouch for {{ name }}
-              </button>
-            {% endtrans %}
-          </form>
-        {% endif %}
-      </div>
-    {% endif %}
-  {% endif %}
-
   <div class="clear"></div>
 
   <div class="row">
-    {% if shown_user.username == request.user.username %}
-      <a href="{{ url('profile.edit') }}"
-         class="button primary small" id="edit-profile">
-        {{ _('Edit My Profile') }}
-      </a>
-    {% endif %}
+    {% if not profile.is_vouched %}
+      <div class="alert offset1 span8" id="pending-approval">
+        {% if request.user == shown_user %}
+          {% trans profile_url=absolutify(url('profile', user.username)) %}
+            Your profile is waiting for approval. Send this link to someone who
+            is familiar with your contributions and ask them to vouch for you:
+            <br>
+            <em class="underline" title="Your profile URL">
+              {{ profile_url }}
+            </em>
+          {% endtrans %}
+        {% else %}
+          {% trans %}
+            <p class="pull-left">This profile is waiting for approval.</p>
+          {% endtrans %}
 
+          {% if vouch_form %}
+            <form action="{{ url('vouch') }}" method="POST"
+              id="vouch-form">
+              {{ csrf() }}
+
+              {{ vouch_form }}
+
+              {% trans name=profile.display_name %}
+                <div>
+                <button type="submit" class="btn btn-info pull-right">
+                  Vouch for {{ name }}
+                </button>
+                </div>
+              {% endtrans %}
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
     <div class="span6 offset1 well" id="profile-info">
       <h2 class="fn p-name">
         {{ profile.display_name }}
@@ -136,6 +128,13 @@
             </li>
           {% endfor %}
         </ul>
+      {% endif %}
+
+      {% if shown_user.username == request.user.username %}
+        <a href="{{ url('profile.edit') }}"
+           class="btn btn-primary pull-right" id="edit-profile">
+          {{ _('Edit My Profile') }}
+        </a>
       {% endif %}
     </div>
 
