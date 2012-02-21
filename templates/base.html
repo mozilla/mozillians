@@ -105,47 +105,44 @@
 
   <footer>
     <div class="container">
-      <a class="span2" id="logo-footer" href="http://mozilla.org/">
-        <img src="{{ MEDIA_URL }}img/mozilla/logo_footer.png" alt="Mozilla">
-      </a>
-      <div id="footer-text">
-        <p id="footer-links" class="span4">
-          {% block footer_links %}
-            <a href="{{ url('about') }}">
-              {{ _('About Mozillians') }}
-            </a>
-            &nbsp;|&nbsp;
-            <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">
-              {{ _('Get Involved') }}
-            </a>
-            <a href="http://www.mozilla.org/{{ LANG }}/privacy-policy.html">
-              {{ _('Privacy Policy') }}
-            </a>
-            &nbsp;|&nbsp;
-            <a href="http://mozilla.com/about/legal.html">
-              {{ _('Legal Notices') }}
-            </a>
-            &nbsp;|&nbsp;
-            <a href="http://mozilla.com/legal/fraud-report/index.html">
-              {{ _('Report Trademark Abuse') }}
-            </a>
-            {% block extra_footer_links %}{% endblock %}
-          {% endblock %}
-        </p>
-        <p class="span4">
-          {% trans %}
-            Except where otherwise
-            <a href="http://mozilla.com/about/legal.html#site">noted</a>,
-            content on this site is licensed under the
-            <a href="http://creativecommons.org/licenses/by-sa/3.0/">
-              Creative Commons Attribution Share-Alike License v3.0
-            </a> or any later version.
-          {% endtrans %}
-        </p>
+      <p class="span4">
+        {% trans %}
+          Except where otherwise
+          <a href="http://mozilla.com/about/legal.html#site">noted</a>,
+          content on this site is licensed under the
+          <a href="http://creativecommons.org/licenses/by-sa/3.0/">
+            Creative Commons Attribution Share-Alike License v3.0
+          </a> or any later version.
+        {% endtrans %}
+      </p>
+      <p id="footer-links" class="span4">
+        {% block footer_links %}
+          <a href="{{ url('about') }}">
+            {{ _('About Mozillians') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">
+            {{ _('Get Involved') }}
+          </a>
+          <a href="http://www.mozilla.org/{{ LANG }}/privacy-policy.html">
+            {{ _('Privacy Policy') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/about/legal.html">
+            {{ _('Legal Notices') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/legal/fraud-report/index.html">
+            {{ _('Report Trademark Abuse') }}
+          </a>
+          {% block extra_footer_links %}{% endblock %}
+        {% endblock %}
+      </p>
+      <div class="span2">
+        {% block lang_switcher %}
+          {% include 'includes/lang_switcher.html' %}
+        {% endblock %}
       </div>
-      {% block lang_switcher %}
-        {% include 'includes/lang_switcher.html' %}
-      {% endblock %}
   </footer>
 
 {% if not user.is_authenticated() %}

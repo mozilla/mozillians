@@ -1,6 +1,10 @@
 /*!
 * Default Mozilla mobile stylesheet.
 */
+html {
+    background: rgb(245,241,232);
+}
+
 body {
     background-color: #fff;
     background-image: url(../img/mozilla/dino.png);
@@ -8,11 +12,6 @@ body {
     background-repeat: no-repeat;
     color: #4b4740;
     padding-top: 60px;
-}
-
-.navbar-inner, footer {
-    background: rgba(38, 38, 38, 0.95);
-    background-image: none;
 }
 
 .brand {
@@ -85,17 +84,13 @@ body {
     color: #b91e27;
 }
 
-#language-switcher label {
-    color:#999;
-}
 #language-switcher button {
     margin-bottom: 9px;
 }
 
 footer {
-    color: #999;
-    background: #2A2A2A;
-    border-top: 13px solid #A5151E;
+    background: rgb(245,241,232);
+    border-top: 6px solid #000;
     padding: 18px 0;
 }
 
