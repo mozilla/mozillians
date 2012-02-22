@@ -5,7 +5,6 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 
 import commonware.log
-from django_browserid.auth import get_audience
 from django_browserid.views import Verify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
@@ -88,7 +87,7 @@ def register(request):
     # When changing this keep in mind that the same view is used for
     # phonebook.edit_profile.
     # 'user' object must be passed in because we are not logged in
-    return render(request, 'phonebook/edit_profile.html',
+    return render(request, 'registration/register.html',
                   dict(form=form,
                        edit_form_action=reverse('register'),
                        mode='new',

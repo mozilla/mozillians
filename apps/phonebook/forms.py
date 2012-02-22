@@ -1,10 +1,11 @@
 import os
 import re
 import tempfile
+from urlparse import urlparse
 
 from django import forms
 from django.conf import settings
-from django.forms import ModelForm
+from django.core.urlresolvers import resolve
 
 import happyforms
 import Image
@@ -39,12 +40,67 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class ProfileForm(forms.ModelForm):
+class UserForm(forms.ModelForm):
+    """
+    Instead of just inhereting form a UserProfile model form, this base class
+    allows us to also abstract over methods that have to do with the User
+    object that need to exist in both Registration and Profile.
+    """
+
     first_name = forms.CharField(label=_lazy(u'First Name'), max_length=30,
                                                              required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
                                                            required=True)
+    username = forms.CharField(label=_lazy(u'Nickname'), max_length=30,
+                                                         required=False)
 
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        # If you don't submit a username, you aren't changing it so you're cool
+        if not username:
+            return None
+
+        # Don't be jacking somebody's username
+        # This causes a potential race condition however the worst that can
+        # happen is bad UI.
+        if (User.objects.filter(username=username) and
+                username != self.instance.user.username):
+            raise forms.ValidationError(_('This username is in use. Please try'
+                                          ' another.'))
+
+        # No funky characters in username
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', username):
+            raise forms.ValidationError(_('Please use only leters, numbers,'
+                                          ' and basic punctuation.'))
+
+        if username not in settings.USERNAME_BLACKLIST:
+            # TODO: we really should use middleware to handle the extra slashes
+            # Check what can resolve the username (with/without trailing '/').
+            # The last thing this can match for is profile.
+            r1 = resolve(urlparse('/' + username)[2])
+            r2 = resolve(urlparse('/' + username + '/')[2])
+            # Check to make sure that only profile has been resolved for.
+            if all(r.url_name == 'profile' for r in (r1, r2)):
+                return username
+
+        raise forms.ValidationError(_('This username is reserved, please'
+                                      ' choose another.'))
+
+    def save(self, user):
+        # First save the profile info.
+        d = self.cleaned_data
+        super(forms.ModelForm, self).save()
+
+        # Then deal with the user info.
+        d = self.cleaned_data
+        user.first_name = d['first_name']
+        user.last_name = d['last_name']
+        if d['username']:
+            user.username = d['username']
+        user.save()
+
+
+class ProfileForm(UserForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
@@ -121,13 +177,7 @@ class ProfileForm(forms.ModelForm):
         """Save the data to profile."""
         self._save_groups(request)
         self._save_photos(request)
-
-        d = self.cleaned_data
-        user = request.user
-        user.first_name = d['first_name']
-        user.last_name = d['last_name']
-        super(ModelForm, self).save()
-        user.save()
+        super(ProfileForm, self).save(request.user)
 
     def _save_groups(self, request):
         """Parse a string of (usually comma-demilited) groups and save them."""

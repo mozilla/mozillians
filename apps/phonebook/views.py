@@ -75,7 +75,10 @@ def edit_profile(request):
                        bio=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
-                       groups=user_groups)
+                       groups=user_groups,)
+
+        if not request.user.username.startswith('u/'):
+            initial.update(username=request.user.username)
 
         form = forms.ProfileForm(instance=profile, initial=initial)
 
