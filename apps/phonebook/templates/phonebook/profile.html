@@ -80,6 +80,12 @@
             {{ profile.ircname }}
           </a></dd>
         {% endif %}
+        {% if not user.username.startswith('u/') %}
+          <dt>{{ _('Nickname') }}</dt>
+          <dd><a class="nickname p-nickname" href="irc://irc.mozilla.org/">
+            {{ user.username }}
+          </a></dd>
+        {% endif %}
 
         {% if profile.website %}
           <dt>{{ _('Website') }}</dt>

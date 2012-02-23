@@ -4,11 +4,10 @@ from django.core import mail
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+from common.browserid_mock import mock_browserid
 import common.tests
 from funfactory.urlresolvers import reverse
 from phonebook.models import Invite
-
-from browserid_mock import mock_browserid
 
 
 class InviteFlowTest(common.tests.TestCase):

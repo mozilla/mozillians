@@ -5,7 +5,6 @@ from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 
 import commonware.log
-from django_browserid.auth import get_audience
 from django_browserid.views import Verify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
