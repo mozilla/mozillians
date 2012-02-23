@@ -131,7 +131,7 @@ class ProfileForm(UserForm):
         # Bootstrap stuff
         template_base = 'bootstrap'
         layout = (
-            Fieldset(_('Personal Info'), 'first_name', 'last_name', 'bio'),
+            Fieldset(_('Personal Info'), 'first_name', 'last_name', 'username', 'bio'),
             Fieldset(_('Contact Info'), 'ircname', 'website'),
             Fieldset(_('Other'), 'groups', 'photo'),
         )

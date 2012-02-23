@@ -18,7 +18,7 @@ class RegistrationForm(UserForm):
 
     class Meta:
         model = UserProfile
-        fields = ('bio',)
+        fields = ('first_name', 'last_name', 'username', 'bio', 'optin')
         widgets = {
             'bio': forms.Textarea(),
         }
