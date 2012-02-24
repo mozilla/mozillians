@@ -8,7 +8,7 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         for user in orm['auth.User'].objects.all():
-            irc = user.get_profile().ircname
+            irc = user.userprofile.ircname
             user.username = 'u/'+user.username
             if irc and self.clean_username(irc, orm):
                     user.username = irc
@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
     def clean_username(self, username, orm):
         # Don't be jacking somebody's username
-        if orm.User.objects.filter(username=username):
+        if orm['auth.User'].objects.filter(username=username):
             return False
 
         # No funky characters in username
