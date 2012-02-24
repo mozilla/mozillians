@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         for user in orm['auth.User'].objects.all():
             irc = user.userprofile.ircname
-            user.username = 'u/'+user.username
+            user.username = u'u/%s' % user.username
             if irc and self.clean_username(irc, orm):
                     user.username = irc
             user.save()
