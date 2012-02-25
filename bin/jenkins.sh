@@ -61,6 +61,8 @@ SETTINGS
 echo "Creating database if we need it..."
 echo "CREATE DATABASE IF NOT EXISTS ${JOB_NAME}"|mysql -u $DB_USER -h $DB_HOST
 
+echo "Database name: ${JOB_NAME}"
+
 echo "Starting tests..."
 export FORCE_DB=1
 coverage run manage.py test --noinput --with-xunit
