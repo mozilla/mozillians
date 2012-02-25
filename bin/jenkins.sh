@@ -35,7 +35,7 @@ source $VENV/bin/activate
 # pip install -q -r requirements/dev.txt
 
 cat > settings/local.py <<SETTINGS
-from settings.base import *
+from settings import *
 
 ROOT_URLCONF = 'workspace.urls'
 LOG_LEVEL = logging.ERROR
