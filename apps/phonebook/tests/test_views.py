@@ -192,7 +192,7 @@ class TestViews(TestCase):
 
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('profile.edit'),
-                {'last_name':'foo', 'photo-clear':1})
+                        {'last_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
                                 "shouldn't result in an error.")
 
@@ -214,7 +214,7 @@ class TestViews(TestCase):
 
         # Remove a profile photo
         r = client.post(reverse('profile.edit'),
-                        {'last_name':'foo', 'photo-clear':1})
+                        {'last_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
         assert_no_photo()
@@ -242,7 +242,6 @@ class TestViews(TestCase):
         eq_(doc('dd.website a').attr('href'), 'http://tofumatt.com/', (
                 'User should have a URL with protocol added.'))
 
-
     def test_replace_photo(self):
         """Ensure we can replace photos."""
 
@@ -250,19 +249,19 @@ class TestViews(TestCase):
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
         r = client.post(reverse('profile.edit'),
-                             dict(last_name='foo', photo=f), follow=True)
+                        dict(last_name='foo', photo=f), follow=True)
         f.close()
 
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
         doc = pq(r.content)
-        old = doc('#profile-photo')[0].get('src')
+        old_photo = doc('#profile-photo').attr('src')
         r = client.post(reverse('profile.edit'),
-                             dict(last_name='foo', photo=f), follow=True)
+                        dict(last_name='foo', photo=f), follow=True)
         f.close()
         doc = pq(r.content)
-        new = doc('#profile-photo')[0].get('src')
-        assert new != old
+        new_photo = doc('#profile-photo').attr('src')
+        assert new_photo != old_photo
 
 
 class TestVouch(TestCase):

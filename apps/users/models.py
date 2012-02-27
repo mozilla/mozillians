@@ -13,9 +13,9 @@ from elasticutils import S
 from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
+from sorl.thumbnail import ImageField
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
-from sorl.thumbnail import ImageField
 
 import larper
 from groups.models import Group
@@ -50,7 +50,8 @@ class UserProfile(SearchMixin, models.Model):
                                               blank=True, null=True)
 
     # Foreign Keys and Relationships
-    vouched_by = models.ForeignKey('UserProfile', null=True)
+    vouched_by = models.ForeignKey('UserProfile', null=True,
+                                   on_delete=models.SET_NULL)
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
@@ -117,11 +118,11 @@ class UserProfile(SearchMixin, models.Model):
 
     @property
     def full_name(self):
-        return "%s %s" % (self.user.first_name, self.user.last_name)
+        return '%s %s' % (self.user.first_name, self.user.last_name)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return "UserProfile for %s" % (self.user, )
+        return 'UserProfile for %s' % (self.user, )
 
 
     def fields(self):
