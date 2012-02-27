@@ -244,7 +244,6 @@ class TestViews(TestCase):
 
     def test_replace_photo(self):
         """Ensure we can replace photos."""
-
         client = self.mozillian_client
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
