@@ -169,9 +169,14 @@ class ProfileForm(UserForm):
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 
-        return [g.strip() for g in (self.cleaned_data['groups']
-                                        .lower().split(','))
-                if g and ',' not in g]
+        system_groups = [g.name for g in self.instance.groups.all()
+                         if g.system]
+
+        new_groups = [g.strip()
+                      for g in self.cleaned_data['groups'].lower().split(',')
+                      if g and ',' not in g]
+
+        return system_groups + new_groups
 
     def save(self, request):
         """Save the data to profile."""
