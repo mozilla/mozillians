@@ -66,8 +66,8 @@ class TestDeleteUser(TestCase):
         eq_(200, r.status_code)
         self.assertFalse(_logged_in_html(r))
 
-        # Make sure the user can't login anymore
-        assert not self.client.login(email=user.email)
+        # Make sure the user data isn't there anymore
+        assert not User.objects.get(email=self.mozillian.email).first_name
 
 
 class TestViews(TestCase):

@@ -61,6 +61,9 @@ MINIFY_BUNDLES = {
             'css/mozilla-base.css',
             'css/main.css',
         ),
+        'test': (
+            'css/qunit.css',
+        ),
     },
     'js': {
         'common': (
@@ -75,6 +78,16 @@ MINIFY_BUNDLES = {
         ),
         'search': (
             'js/infinite.js',
+        ),
+        'backbone': (
+            'js/libs/underscore.js',
+            'js/libs/backbone.js',
+            'js/libs/backbone.localStorage.js',
+            'js/profiles.js',
+        ),
+        'test': (
+            'js/libs/qunit.js',
+            'js/tests/test.js',
         ),
     }
 }

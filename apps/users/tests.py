@@ -251,6 +251,7 @@ class VouchTest(ESTestCase):
         assert 'Mozillian' in r.content, (
                 'User should appear as a Mozillian in search.')
 
+
 class TestUser(TestCase):
     """Test User functionality"""
 
@@ -270,6 +271,7 @@ class TestUser(TestCase):
 
         # Good to go
         assert u.get_profile()
+
 
 class TestMigrateRegistration(TestCase):
         """Test funky behavior of flee ldap"""
@@ -295,11 +297,11 @@ class TestMigrateRegistration(TestCase):
             p.photo = True
             p.save()
 
-
             # BrowserID needs an assertion not to be whiney
             d = dict(assertion='tofu')
             with browserid_mock.mock_browserid(self.email):
-                r = self.client.post(reverse('browserid_verify'), d, follow=True)
+                r = self.client.post(reverse('browserid_verify'),
+                                     d, follow=True)
 
             eq_(r.status_code, 200)
 
@@ -310,4 +312,30 @@ class TestMigrateRegistration(TestCase):
 
             eq_(r.status_code, 200)
 
+class TestDeleteUser(TestCase):
+    """Tests that our UserProfile fields haven't changed.
+
+    This is important because if they have changed they need to be added to our
+    'clean' method on userprofile.
+    """
+    def test_delete(self):
+        accounted_fields = ['website',
+                            'bio',
+                            'first_name',
+                            'last_name',
+                            'display_name',
+                            'is_confirmed',
+                            'photo',
+                            'email',
+                            'username',
+                            'last_login',
+                            'groups',
+                            'date_joined',
+                            'id',
+                            'ircname',
+                            'is_vouched']
+
+        if self.mozillian.get_profile().fields().keys().sort() != accounted_fields.sort():
+            raise Exception('Field in UserProfile clean method not accounted'
+                            ' for.')
 

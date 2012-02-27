@@ -131,9 +131,10 @@ class GroupTest(common.tests.TestCase):
         eq_(2, profile.groups.count(), 'User should have both groups.')
 
         # Edit this user's profile and remove a group.
+        self.client.logout()
         self.client.login(email=self.mozillian.email)
         response = self.client.post(reverse('profile.edit'),
-                                    dict(last_name="McLovin'", groups=''),
+                                    dict(last_name="McLovin'", username='fo', groups=''),
                                     follow=True)
 
         doc = pq(response.content)
