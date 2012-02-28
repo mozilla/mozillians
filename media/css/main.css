@@ -471,6 +471,7 @@ em.underline {
     clear: left;
 }
 
+/* Override statement for label css  */
 #body-register .blue-pastels label:hover, .blue-pastels label:focus {
     text-decoration: none!important;
 }
