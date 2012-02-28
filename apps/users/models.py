@@ -17,22 +17,8 @@ from funfactory.urlresolvers import reverse
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-import larper
 from groups.models import Group
 from phonebook.models import get_random_string
-
-
-# TODO: This should be deprecated
-class UserProfileManager(models.Manager):
-    """Custom manager that can query via LDAP attributes."""
-
-    def get_by_unique_id(self, uid):
-        """Given an LDAP uniqueIdentifier, find a match."""
-        rs = larper.get_user_by_uid(uid)
-        if not rs:
-            raise UserProfile.DoesNotExist
-        mail = rs[1]['mail'][0]
-        return User.objects.get(email=mail).get_profile()
 
 
 class UserProfile(SearchMixin, models.Model):
@@ -117,15 +103,6 @@ class UserProfile(SearchMixin, models.Model):
 
     def get_photo_file(self):
         return '%s/%d.jpg' % (settings.USERPICS_PATH, self.id)
-
-    # TODO: get rid of this when larper is gone ETA Apr-2012
-    def get_unique_id(self):
-        r = self.get_ldap_person()
-        return r[1]['uniqueIdentifier'][0]
-
-    def get_ldap_person(self):
-        email = self.user.email or self.user.username
-        return larper.get_user_by_email(email)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""

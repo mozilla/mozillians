@@ -77,4 +77,4 @@ $
    Within your vagrant VM do::
 
     dj syncdb
-    dj manage
+    dj migrate

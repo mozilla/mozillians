@@ -45,11 +45,6 @@ class Browserid(Verify):
         return redirect(reverse('register'))
 
 
-def password_reset_confirm(request, uidb36=None, token=None):
-    """TODO: Legacy URL, keep around until 1.4 release."""
-    return redirect('home')
-
-
 @anonymous_csrf
 def register(request):
     """
