@@ -48,7 +48,6 @@ class UserProfile(SearchMixin, models.Model):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
-    objects = UserProfileManager()
 
     class Meta:
         db_table = 'profile'
