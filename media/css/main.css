@@ -471,6 +471,10 @@ em.underline {
     clear: left;
 }
 
+#body-register .blue-pastels label:hover, .blue-pastels label:focus {
+    text-decoration: none!important;
+}
+
 #body-edit-profile #privacy-info {
     float: right;
     margin-top: 20px;
