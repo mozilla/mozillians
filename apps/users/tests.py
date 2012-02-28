@@ -312,6 +312,7 @@ class TestMigrateRegistration(TestCase):
 
             eq_(r.status_code, 200)
 
+
 class TestDeleteUser(TestCase):
     """Tests that our UserProfile fields haven't changed.
 
@@ -338,4 +339,3 @@ class TestDeleteUser(TestCase):
         if self.mozillian.get_profile().fields().keys().sort() != accounted_fields.sort():
             raise Exception('Field in UserProfile clean method not accounted'
                             ' for.')
-

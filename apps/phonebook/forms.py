@@ -105,8 +105,6 @@ class ProfileForm(UserForm):
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
-    # Remote System Ids
-    # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
 
     #: L10n: Street address; not entire address

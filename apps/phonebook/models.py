@@ -39,7 +39,6 @@ class Invite(models.Model):
         Includes the name and email of the inviting person, if available.
         """
         if sender:
-            # TODO: Return and use email attribute, not username.
             sender = '%s %s (%s)' % (sender.user.first_name,
                                      sender.user.last_name,
                                      sender.user.email)
