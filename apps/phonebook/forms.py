@@ -147,7 +147,6 @@ class ProfileForm(UserForm):
         user = request.user
         user.first_name = d['first_name']
         user.last_name = d['last_name']
-        super(ModelForm, self).save()
         user.save()
         super(ProfileForm, self).save(request.user)
 
