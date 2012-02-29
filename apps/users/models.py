@@ -44,7 +44,7 @@ class UserProfile(SearchMixin, models.Model):
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            default='', blank=True)
-    photo = models.BooleanField(default=False)
+    photo = ImageField(default='', blank=True, upload_to='uploads/userprofile')
     display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),

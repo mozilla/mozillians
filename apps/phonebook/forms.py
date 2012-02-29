@@ -71,18 +71,17 @@ class UserForm(forms.ModelForm):
                                           ' another.'))
 
         # No funky characters in username
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', username):
-            raise forms.ValidationError(_('Please use only leters, numbers,'
-                                          ' and basic punctuation.'))
+        if not re.match(r'^\w+$', username):
+            raise forms.ValidationError(_('Please use only alphanumeric'
+                                          ' characters'))
 
         if username not in settings.USERNAME_BLACKLIST:
             # TODO: we really should use middleware to handle the extra slashes
             # Check what can resolve the username (with/without trailing '/').
             # The last thing this can match for is profile.
-            r1 = resolve(urlparse('/' + username)[2])
-            r2 = resolve(urlparse('/' + username + '/')[2])
+            r = resolve(urlparse('/' + username)[2])
             # Check to make sure that only profile has been resolved for.
-            if all(r.url_name == 'profile' for r in (r1, r2)):
+            if r.url_name == 'profile':
                 return username
 
         raise forms.ValidationError(_('This username is reserved, please'
