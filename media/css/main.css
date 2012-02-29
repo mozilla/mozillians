@@ -4,6 +4,11 @@
     top: 0;
 }
 
+.imgabout{
+    float: left;
+    margin-left: -110px;
+}
+
 html[dir='rtl'].js .js-hide, html[dir='rtl'] .hide {
     left: 0;
     right: -9999px;
@@ -457,13 +462,8 @@ em.underline {
     margin: 10px 0 0 200px;
 }
 
-#privacy {
-    background-image: url(../img/about-lock-icon.png);
+#aboutcontent {
     margin-left: -10px;
-}
-
-#get-involved {
-    background-image: url(../img/about-globe-icon.png);
 }
 
 /** Register Page (Step 1: Create a Profile) */
