@@ -183,8 +183,9 @@ ES_INDEXES = dict(default='mozillians')
 
 # Use this to reserve the URL namespace
 USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
-                      'groups', 'tags', 'media', 'username', 'register',
-                      'new', 'delete', 'help', 'photo', 'img', 'src', 'files')
+                      'about', 'groups', 'tags', 'media', 'username',
+                      'register', 'new', 'delete', 'help', 'photo', 'img',
+                      'src', 'files')
 
 # Sorl settings
 THUMBNAIL_DUMMY = True
