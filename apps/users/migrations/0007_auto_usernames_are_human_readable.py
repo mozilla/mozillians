@@ -1,6 +1,7 @@
 # encoding: utf-8
 import re
 from south.v2 import SchemaMigration
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Migration(SchemaMigration):
@@ -8,7 +9,11 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         for user in orm['auth.User'].objects.all():
-            irc = user.userprofile.ircname
+            try:
+                irc = user.userprofile.ircname
+            except ObjectDoesNotExist:
+                irc = None
+
             user.username = u'u/%s' % user.username
             if irc and self.clean_username(irc, orm):
                     user.username = irc

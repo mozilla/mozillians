@@ -1,7 +1,7 @@
 import datetime
+import json
 
 from django.contrib import auth, messages
-from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect, render
 
 import commonware.log
@@ -26,7 +26,7 @@ def logout(request, **kwargs):
     `next_page` argument is `None`, which we don't want. This view always
     returns an HTTP redirect instead.
     """
-    return auth_views.logout(request, next_page=reverse('home'), **kwargs)
+    return auth.views.logout(request, next_page=reverse('home'), **kwargs)
 
 
 class Browserid(Verify):
@@ -43,11 +43,6 @@ class Browserid(Verify):
 
         request.session['authenticated_email'] = user.email
         return redirect(reverse('register'))
-
-
-def password_reset_confirm(request, uidb36=None, token=None):
-    """TODO: Legacy URL, keep around until 1.4 release."""
-    return redirect('home')
 
 
 @anonymous_csrf

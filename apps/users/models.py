@@ -1,6 +1,7 @@
 import os
 import time
 import urllib
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -17,22 +18,8 @@ from sorl.thumbnail import ImageField
 from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-import larper
 from groups.models import Group
 from phonebook.models import get_random_string
-
-
-# TODO: This should be deprecated
-class UserProfileManager(models.Manager):
-    """Custom manager that can query via LDAP attributes."""
-
-    def get_by_unique_id(self, uid):
-        """Given an LDAP uniqueIdentifier, find a match."""
-        rs = larper.get_user_by_uid(uid)
-        if not rs:
-            raise UserProfile.DoesNotExist
-        mail = rs[1]['mail'][0]
-        return User.objects.get(email=mail).get_profile()
 
 
 class UserProfile(SearchMixin, models.Model):
@@ -44,23 +31,24 @@ class UserProfile(SearchMixin, models.Model):
                                          unique=True)
     is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     # If vouched because of Mozilla.* email, make note of it
     is_autovouched = models.BooleanField(default=False)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
-                                              blank=True, null=True)
+                              default='', blank=True, null=True)
 
     # Foreign Keys and Relationships
-    vouched_by = models.ForeignKey('UserProfile', null=True,
+    vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
                                    on_delete=models.SET_NULL)
+
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
-                                           blank=True)
-
-    photo = ImageField(upload_to='uploads/userprofile', blank=True)
-    display_name = models.CharField(max_length=255)
+                                           default='', blank=True)
+    photo = models.BooleanField(default=False)
+    display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
-                               verbose_name=_lazy(u'IRC Nickname'), blank=True)
-    objects = UserProfileManager()
+                               verbose_name=_lazy(u'IRC Nickname'),
+                               default='', blank=True)
 
     class Meta:
         db_table = 'profile'
@@ -97,15 +85,6 @@ class UserProfile(SearchMixin, models.Model):
         url = (reverse('send_confirmation') + '?' +
                urllib.urlencode({'user': self.user.username}))
         return url
-
-    # TODO: get rid of this when larper is gone ETA Apr-2012
-    def get_unique_id(self):
-        r = self.get_ldap_person()
-        return r[1]['uniqueIdentifier'][0]
-
-    def get_ldap_person(self):
-        email = self.user.email or self.user.username
-        return larper.get_user_by_email(email)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
@@ -151,6 +130,28 @@ class UserProfile(SearchMixin, models.Model):
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
         return s
+
+    def anonymize(self):
+        """Remove personal info from a user"""
+
+        for name in ['first_name', 'last_name']:
+            setattr(self.user, name, '')
+
+        self.user.save()
+
+        for f in self._meta.fields:
+            if not f.editable or f.name in ['id', 'user']:
+                continue
+
+            if f.default == models.fields.NOT_PROVIDED:
+                raise Exception('No default value for %s' % f.name)
+
+            setattr(self, f.name, f.default)
+
+        for f in self._meta.many_to_many:
+            getattr(self, f.name).clear()
+
+        self.save()
 
 
 @receiver(models.signals.post_save, sender=User)

@@ -107,8 +107,6 @@ class ProfileForm(UserForm):
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
-    # Remote System Ids
-    # Tightly coupled with larper.UserSession.form_to_service_ids_attrs
     groups = forms.CharField(label=_lazy(u'Groups'), required=False)
 
     #: L10n: Street address; not entire address
@@ -136,9 +134,14 @@ class ProfileForm(UserForm):
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 
-        return [g.strip() for g in (self.cleaned_data['groups']
-                                        .lower().split(','))
-                if g and ',' not in g]
+        system_groups = [g.name for g in self.instance.groups.all()
+                         if g.system]
+
+        new_groups = [g.strip()
+                      for g in self.cleaned_data['groups'].lower().split(',')
+                      if g and ',' not in g]
+
+        return system_groups + new_groups
 
     def save(self, request):
         """Save the data to profile."""

@@ -8,12 +8,10 @@ Mozillians
 
 Mozillians.org_ is the community phonebook for Mozilla.
 
-This application is a customized deployment
-of Domesday_ and is built on top of Playdoh_.
+This application is built on top of Playdoh_.
 
 .. _Mozillians.org: https://wiki.mozilla.org/Mozillians
 .. _Playdoh: https://github.com/mozilla/playdoh
-.. _Domesday: https://github.com/mozilla/domesday
 
 Contents:
 
@@ -22,13 +20,8 @@ Contents:
 
    installation
    settings
-   sessions
    registration
    invites
-   demo
-   ldap
-   ldap-developer-notes
-   ldap-design
    search
 
 Indices and tables

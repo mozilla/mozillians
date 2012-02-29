@@ -104,8 +104,10 @@ def confirm_delete(request):
 def delete(request):
     delete_me = request.user.pk
     logout(request)
-    User.objects.get(pk=delete_me).delete()
-    log.info('Deleting %d' % delete_me)
+    removed = User.objects.get(pk=delete_me)
+    removed.is_active = False
+    removed.get_profile().anonymize()
+    log.info('Deleting %d' % removed.id)
     return redirect(reverse('home'))
 
 
