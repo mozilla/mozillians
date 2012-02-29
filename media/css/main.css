@@ -182,11 +182,6 @@ em.underline {
         top: 0;
     }
 
-    .blue-pastels label:hover, .blue-pastels label:focus {
-        cursor: pointer;
-        text-decoration: underline;
-    }
-
     .blue-pastels input, .blue-pastels select, .blue-pastels textarea,
     .blue-pastels .ui-widget.tagit {
         border: 1px inset #d8d8d8;
