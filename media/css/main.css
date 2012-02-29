@@ -184,7 +184,7 @@ em.underline {
 
     .blue-pastels label:hover, .blue-pastels label:focus {
         cursor: pointer;
-        text-decoration: underline;
+        text-decoration: none;
     }
 
     .blue-pastels input, .blue-pastels select, .blue-pastels textarea,
@@ -469,11 +469,6 @@ em.underline {
 /** Register Page (Step 1: Create a Profile) */
 #body-register .blue-pastels input {
     clear: left;
-}
-
-/* Override statement for label css  */
-#body-register .blue-pastels label:hover, .blue-pastels label:focus {
-    text-decoration: none!important;
 }
 
 #body-edit-profile #privacy-info {
