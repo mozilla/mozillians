@@ -1,0 +1,11 @@
+/*!
+ * Responsive Mozilla mobile stylesheet.
+ * 768px and smaller
+ */
+@media (min-width: 480px) and (max-width: 768px) {
+}
+@media (max-width: 768px) {
+    body {
+        background-image: none;
+    }
+}
