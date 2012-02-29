@@ -40,8 +40,9 @@
 
   <div class="clear"></div>
 
-  <section id="privacy" class="key-info">
-    <h2>{{ _('Privacy First') }}</h2>
+  <section id="aboutcontent" class="key-info">
+    <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html"><img src="media/img/about-lock-icon.png" class="imgabout"></img></a>
+    <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html"><h2>{{ _('Privacy First') }}</h2></a>
 
     <p>
       {% trans locale=LANG %}
@@ -57,8 +58,9 @@
     </p>
   </section>
 
-  <section id="get-involved" class="key-info">
-    <h2>{{ _('Get Involved') }}</h2>
+  <section class="key-info">
+    <a href="http://groups.google.com/group/mozilla.mozillians/topics"><img src="media/img/about-globe-icon.png" class="imgabout"></img></a>
+    <a href="http://groups.google.com/group/mozilla.mozillians/topics"><h2>{{ _('Get Involved') }}</h2></a>
 
     <p>
       {% trans %}
