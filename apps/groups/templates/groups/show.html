@@ -34,5 +34,14 @@
     {% for profile in profiles %}
       {{ search_result(profile) }}
     {% endfor %}
-  </div>
+
+        {% if show_pagination %}
+        <div data-pages={{ num_pages }} class="pagination">
+          {% for page in profiles.paginator.page_range %}
+            {% if page == profiles.number %}
+              <span>{{ page }}</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
 {% endblock main_content %}
