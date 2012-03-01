@@ -31,14 +31,14 @@
   <div class="clear"></div>
 
   <div class="blue-pastels">
-    {% for profile in profiles %}
-      {{ search_result(profile) }}
+    {% for item in items %}
+      {{ search_result(item) }}
     {% endfor %}
 
         {% if show_pagination %}
         <div data-pages={{ num_pages }} class="pagination">
-          {% for page in profiles.paginator.page_range %}
-            {% if page == profiles.number %}
+          {% for page in items.paginator.page_range %}
+            {% if page == items.number %}
               <span>{{ page }}</span>
             {% endif %}
           {% endfor %}
