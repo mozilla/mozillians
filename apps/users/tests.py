@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
+from django.conf import settings
 
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.browserid_mock import mock_browserid
+from common import browserid_mock
 from common.tests import ESTestCase, TestCase
 from groups.models import Group
 from users.models import UserProfile
-from phonebook.tests import browserid_mock
 
 Group.objects.get_or_create(name='staff', system=True)
 
@@ -22,7 +22,7 @@ class RegistrationTest(TestCase):
         """Verify @mozilla.com users are auto-vouched and marked "staff"."""
 
         d = dict(assertion=self.fake_assertion)
-        with mock_browserid('mrfusion@mozilla.com'):
+        with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         d = dict(
@@ -34,7 +34,7 @@ class RegistrationTest(TestCase):
                  confirmp='tacoface',
                  optin=True
         )
-        with mock_browserid('mrfusion@mozilla.com'):
+        with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             r = self.client.post(reverse('register'), d, follow=True)
 
         doc = pq(r.content)
@@ -51,7 +51,7 @@ class RegistrationTest(TestCase):
     def test_plus_signs(self):
         email = 'mrfusion+dotcom@mozilla.com'
         d = dict(assertion=self.fake_assertion)
-        with mock_browserid(email):
+        with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         d = dict(
@@ -63,7 +63,7 @@ class RegistrationTest(TestCase):
                  confirmp='tacoface',
                  optin=True
         )
-        with mock_browserid(email):
+        with browserid_mock.mock_browserid(email):
             self.client.post(reverse('register'), d, follow=True)
 
         assert User.objects.filter(email=d['email'])
@@ -75,7 +75,7 @@ class RegistrationTest(TestCase):
         """
         email = 'mrfusion+dotcom@mozilla.com'
         d = dict(assertion=self.fake_assertion)
-        with mock_browserid(email):
+        with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
         d = dict(
                  email=email,
@@ -86,7 +86,7 @@ class RegistrationTest(TestCase):
                  confirmp='tacoface',
                  optin=True
         )
-        with mock_browserid(email):
+        with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
         eq_(r.status_code, 302, "Problems if we didn't redirect...")
         u = User.objects.filter(email=d['email'])[0]
@@ -105,12 +105,11 @@ class RegistrationTest(TestCase):
         be "about" or "help" or anything that is in use.
         """
         email = 'mrfusion+dotcom@mozilla.com'
-        badnames = ('about', 'save', 'tag', 'group', 'username', 'register',
-                    'photo', 'media', 'u/foobar', 'owen@coutts')
+        badnames = getattr(settings, 'USERNAME_BLACKLIST')
 
         # BrowserID needs an assertion not to be whiney
         d = dict(assertion=self.fake_assertion)
-        with mock_browserid(email):
+        with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         for name in badnames:
@@ -121,7 +120,7 @@ class RegistrationTest(TestCase):
                     last_name='Desaaaaaaai',
                     optin=True
             )
-            with mock_browserid(email):
+            with browserid_mock.mock_browserid(email):
                 r = self.client.post(reverse('register'), d)
 
             eq_(r.status_code, 200,
@@ -142,20 +141,20 @@ class RegistrationTest(TestCase):
         email1 = 'mRfUsIoN@mozilla.com'
         register.update(email=email1)
         d = dict(assertion=self.fake_assertion)
-        with mock_browserid(email1):
+        with browserid_mock.mock_browserid(email1):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        with mock_browserid(email1):
+        with browserid_mock.mock_browserid(email1):
             self.client.post(reverse('register'), register, follow=True)
 
         self.client.logout()
         # Create a different user
         email2 = 'coldfusion@gmail.com'
         register.update(email=email2)
-        with mock_browserid(email2):
+        with browserid_mock.mock_browserid(email2):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        with mock_browserid(email2):
+        with browserid_mock.mock_browserid(email2):
             r = self.client.post(reverse('register'), register, follow=True)
 
         # Make sure we can't use the same username twice
@@ -251,6 +250,7 @@ class VouchTest(ESTestCase):
         assert 'Mozillian' in r.content, (
                 'User should appear as a Mozillian in search.')
 
+
 class TestUser(TestCase):
     """Test User functionality"""
 
@@ -271,13 +271,14 @@ class TestUser(TestCase):
         # Good to go
         assert u.get_profile()
 
+
 class TestMigrateRegistration(TestCase):
         """Test funky behavior of flee ldap"""
         email = 'robot1337@domain.com'
 
         def test_login(self):
             """Given an invite_url go to it and redeem an invite."""
-            # Lettuce make sure we have a clean slate.
+            # Let's make sure we have a clean slate
 
             info = dict(
                 first_name='Akaaaaaaash',
@@ -292,14 +293,13 @@ class TestMigrateRegistration(TestCase):
             u.first_name = info['first_name']
             u.last_name = ''
             u.save()
-            p.photo = True
             p.save()
-
 
             # BrowserID needs an assertion not to be whiney
             d = dict(assertion='tofu')
             with browserid_mock.mock_browserid(self.email):
-                r = self.client.post(reverse('browserid_verify'), d, follow=True)
+                r = self.client.post(reverse('browserid_verify'),
+                                     d, follow=True)
 
             eq_(r.status_code, 200)
 
@@ -311,3 +311,29 @@ class TestMigrateRegistration(TestCase):
             eq_(r.status_code, 200)
 
 
+class TestDeleteUser(TestCase):
+    """Tests that our UserProfile fields haven't changed.
+
+    This is important because if they have changed they need to be added to our
+    'clean' method on userprofile.
+    """
+    def test_delete(self):
+        accounted_fields = ['website',
+                            'bio',
+                            'first_name',
+                            'last_name',
+                            'display_name',
+                            'is_confirmed',
+                            'photo',
+                            'email',
+                            'username',
+                            'last_login',
+                            'groups',
+                            'date_joined',
+                            'id',
+                            'ircname',
+                            'is_vouched']
+
+        if self.mozillian.get_profile().fields().keys().sort() != accounted_fields.sort():
+            raise Exception('Field in UserProfile clean method not accounted'
+                            ' for.')

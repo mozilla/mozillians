@@ -15,3 +15,7 @@ pyquery
 
 # L10n
 translate-toolkit==1.8.0
+
+# Debug tools
+django-extensions
+Werkzeug

@@ -20,7 +20,7 @@ class Task(models.Model):
                                    editable=False)
     assigned = models.DateField(_(u'Deadline'), blank=True, null=True,
                                 help_text=_(u'yyyy-mm-dd'))
-    accepted_by = models.ForeignKey(User,blank=True, null=True,
+    accepted_by = models.ForeignKey(UserProfile,blank=True, null=True,
                                     verbose_name=_(u'Accepted by'),
                                     related_name='accepted_tasks')
     disabled = models.BooleanField(_(u'Disabled'), default=False)

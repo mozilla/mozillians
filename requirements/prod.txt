@@ -1,7 +1,5 @@
--r ../vendor/src/funfactory/funfactory/requirements/prod.txt
-
 # Django stuff
--e git://github.com/django/django@36c82ac8#egg=django
+-e git://github.com/django/django@1.3.X#egg=django
 
 # Django Extensions
 -e git://github.com/mozilla/happyforms.git#egg=happyforms
@@ -27,14 +25,11 @@ Babel>=0.9.4
 -e git://github.com/clouserw/tower.git#egg=tower
 -e git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
 
-# Auth
-django-auth-ldap
-
 # Cache
 python-memcached==1.45
 
 # Multidb
--e https://github.com/jbalogh/django-multidb-router#egg=multidb
+-e git://github.com/jbalogh/django-multidb-router.git#egg=multidb
 
 # ElasticUtils
 -e git://github.com/davedash/elasticutils#egg=elasticutils

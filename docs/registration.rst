@@ -20,8 +20,6 @@ We are collecting the following fields:
 * Email Address
 * Password
 
-Password, Email and Last Name are required items that we need to send to LDAP.
-
 Photos
 ------
 
