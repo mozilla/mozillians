@@ -1,0 +1,342 @@
+/*!
+* Default Mozilla mobile stylesheet.
+*/
+html {
+    background: rgb(245,241,232);
+}
+
+body {
+    background-color: #fff;
+    background-image: url(../img/mozilla/dino.png);
+    background-position: right top;
+    background-repeat: no-repeat;
+    color: #4b4740;
+    padding-top: 60px;
+}
+
+.brand {
+    text-transform: lowercase;
+}
+
+#header h1 a, #header h1 span {
+    color: #fff;
+    font-family: MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.4);
+}
+
+#header h1 a:hover {
+    color: #eee;
+    text-decoration: none;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.4),
+                 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+#nav a, #nav span {
+    color: #ccc;
+}
+
+#nav a:hover, #nav a:focus {
+    color: #f59d56;
+}
+
+#nav .selected, #nav .on {
+    background: url(../img/mozilla/menu-divider.png) bottom right repeat-x;
+    color: #f59d56;
+}
+
+#quick-search {
+    white-space: nowrap;
+    margin-bottom:0px;
+}
+
+#quick-search #q {
+    background: #fff url(../img/mozilla/search-icon.png) 2px 50% no-repeat;
+    color: #999;
+    padding: 2px 4px 2px 20px;
+    position: relative;
+    z-index:4;
+    top:8px;
+    height:16px;
+}
+
+#quick-search #q:focus {
+    color: #333;
+}
+
+#quick-search-btn {
+    background: url(../img/mozilla/search-submit.png) 2px 50% no-repeat;
+    left: -18px;
+    width: 42px;
+    height: 23px;
+    border: 0px;
+    font-size: 1px;
+    text-indent: -9999px;
+    position: relative;
+    vertical-align: top;
+    z-index: 1;
+    top:8px;
+}
+
+/** Main content area */
+#main-content h1 {
+    color: #b91e27;
+}
+
+#language-switcher button {
+    margin-bottom: 9px;
+}
+
+footer {
+    background: rgb(245,241,232);
+    border-top: 6px solid #000;
+    padding: 18px 0;
+}
+
+nav .nav a.browser_id_login {
+    line-height: 0;
+    padding-bottom: 0;
+}
+
+/* This gets shown on small screens */
+#quick-search-link {
+    display:none;
+}
+
+
+/* TODO: I need other vendor prefixed gradients */
+#body-home #create_profile {
+    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(58,170,255))
+    );
+    border: 1px solid #3697E5;
+    border-radius: 1px;
+    white-space: nowrap;
+}
+
+#body-home #create_profile:hover {
+    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(89,180,254))
+    );
+    cursor: pointer;
+    border: 1px solid #3697E5;
+}
+
+#body-home #create_profile:active {
+    background-image: linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -o-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -moz-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(141,202,252)),
+    color-stop(0.73, rgb(58,170,255))
+    );
+    border: 1px solid #3697E5;
+}
+
+#body-home .id, #body-home .signin {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 21px;
+    padding: 1px 10px;
+}
+
+#body-home .id {
+    border-right: 1px solid #4DAFFE;
+    box-shadow: 1px 0 0 #ACDAFF;
+    display: inline-block;
+    padding-bottom: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#body-home .signin {
+    color: #FFFFFF;
+    text-shadow: 0 -0.7px 0 #3497E4, 0 1px 1px #3497E4;
+}
+
+#body-home .bid, #body-home .arrow {
+    font-size: 13px;
+    line-height: 9px;
+}
+
+#body-home .bid {
+    background-color: white;
+    color: #7DC4FC;
+    display: inline-block;
+    font-weight: bold;
+    padding: 2px 0 2px 2px;
+    text-shadow: 0 -0.5px 0 #499DF3;
+}
+
+/* TODO, do we need this? */
+#body-home .bid-webkit {
+    line-height: 11px;
+}
+
+#body-home .arrow {
+    border-color: transparent transparent transparent white;
+    border-style: outset;
+    border-width: 6px 0 7px 4px;
+    display: inline-block;
+    height: 0;
+    margin-bottom: 3px;
+    vertical-align: middle;
+    width: 0;
+}
+
+#body-home .arrow-webkit {
+    margin-bottom: 4px;
+}
+
+/* Fix a link buttons */
+
+a.btn {
+    vertical-align: middle;
+}
+
+/* Photo form element */
+
+.photo .controls img{
+    width: 70px;
+}
+
+.photo .controls .thumbnail{
+    float: left;
+}
+
+.photo #id_photo{
+    margin-bottom: 18px;
+}
+
+.photo .checkbox {
+    float: left;
+    margin: 5px 10px;
+}
+
+/* edit/register controls */
+
+#edit_controls {
+    display: block;
+    margin: 18px 20px;
+    overflow: auto;
+}
+
+
+/* tagit overide */
+
+.control-group ul.tagit{
+    margin-left: 0px;
+}
+
+.search-page .result {
+    margin-bottom: 15px;
+}
+
+.search-page .result .avatar {
+    float: left;
+    height: 70px;
+    margin: 0 10px 0 35px;
+    width: 70px;
+    text-align: center;
+}
+
+.search-page .result .details {
+    float: left;
+}
+
+.search-page .result .profile-photo {
+    border: 1px solid #52adcc;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    max-width: 70px;
+    max-height: 70px;
+}
+
+.search-page .result h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.search-page .result h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.clear {
+    clear: both;
+}
+
+#search-form button.btn {
+    margin-bottom:9px;
+}
+
+.bump-button {
+    margin-bottom:9px;
+}
+
+/** Element styles */
+dl{
+    overflow: auto;
+}
+
+dt, dd {
+    color: #1e4262;
+}
+
+dt {
+    clear: both;
+    float: left;
+    font-weight: bold;
+    margin-right: 2%;
+    width: 30%;
+}
+
+dd {
+    float: left;
+    width: 66%;
+}
+
+.vouched {
+    background: url(../img/icon-person.png) center right no-repeat;
+    padding-right: 22px;
+}
+
+#profile-info #groups{
+    margin-left: 0px;
+}
+
+#profile-info{
+    margin-bottom: 15px;
+}
+
+#main h1{
+    padding-bottom: 15px;
+}

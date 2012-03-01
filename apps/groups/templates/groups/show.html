@@ -18,7 +18,7 @@
           id="toggle-group" method="post">
       {{ csrf() }}
 
-      <button class="button small {{ ('destructive' if in_group else 'primary') }}">
+      <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
         {% if not in_group %}
           {{ _('Join Group') }}
         {% else %}
@@ -30,7 +30,7 @@
 
   <div class="clear"></div>
 
-  <div class="blue-pastels">
+  <div class="well">
     {% for profile in profiles %}
       {{ search_result(profile) }}
     {% endfor %}

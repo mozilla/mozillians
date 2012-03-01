@@ -1,0 +1,10 @@
+<div class="control-group{% if errors %} error{% endif %}">
+    {{ label }}
+    <div class="controls">
+        {{ bf }}
+        {% if errors %}
+        <span class="help-inline">{{ errors }}</span>
+        {% endif %}
+        <p class="help-block">{{ help_text }}</p>
+    </div>
+</div> <!-- /clearfix -->

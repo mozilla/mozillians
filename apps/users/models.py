@@ -50,7 +50,8 @@ class UserProfile(SearchMixin, models.Model):
                                               blank=True, null=True)
 
     # Foreign Keys and Relationships
-    vouched_by = models.ForeignKey('UserProfile', null=True)
+    vouched_by = models.ForeignKey('UserProfile', null=True,
+                                        on_delete=models.SET_NULL)
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            blank=True)
@@ -119,10 +120,12 @@ class UserProfile(SearchMixin, models.Model):
     def full_name(self):
         return "%s %s" % (self.user.first_name, self.user.last_name)
 
+    def get_best_repr(self):
+        return self.display_name or self.ircname or self.user.get_full_name()
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return "UserProfile for %s" % (self.user, )
-
+        return self.get_best_repr()
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',

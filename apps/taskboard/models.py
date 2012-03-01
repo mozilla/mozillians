@@ -1,14 +1,15 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.db import models
 
 from tower import ugettext_lazy as _
 
+from users.models import UserProfile
+
 
 class Task(models.Model):
-    contact = models.ForeignKey(User, verbose_name=_(u'Contact'),
-                                related_name="created_tasks")
+    contact = models.ForeignKey(UserProfile, verbose_name=_(u'Contact Person'),
+                                related_name="tasks")
     summary = models.CharField(_(u'Summary'), max_length=255)
     instructions = models.TextField(_(u'Instructions'), blank=True)
     groups = models.ManyToManyField('groups.Group', blank=True,

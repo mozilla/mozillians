@@ -2,15 +2,17 @@
 // Current Assumptions: All validated fields are required fields.
 var Validator = function() {
     var displayError = function(field, message) {
-        var error_list = $('<ul class="errorlist"><li></li></ul>');
+        var control_group = field.parents('.control-group')
+        var error_message = $('<span class="help-inline"></span>');
 
         // wipe out any existing error messages for this field so
         // we don't have duplicates
-        field.closest('.field').find('.errorlist').remove();
-        field.closest('.field').addClass('error');
-        field.closest('.field span.required').hide();
-        error_list.find('li').text(message);
-        field.before(error_list);
+
+        control_group.addClass('error')
+        control_group.children('span.help-inline').remove()
+        control_group.find('p.help-block').before(error_message.text(message))
+
+
         this.errors = true;
     }
 

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Django settings for the mozillians project.
+import base64
+import hashlib
 import ldap
 import logging
 
@@ -54,16 +56,30 @@ JINGO_EXCLUDE_APPS = [
 MINIFY_BUNDLES = {
     'css': {
         'common': (
+            'css/bootstrap.css',
             'css/jquery-ui-1.8.16.custom.css',
             'js/libs/tag-it/css/jquery.tagit.css',
-            'css/mozilla-base.css',
-            'css/main.css',
+            'css/base.css',
+            'css/bootstrap-responsive.css',
+            'css/base-480px.css',
+            'css/base-768px.css',
+            'css/base-980px.css',
         ),
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.4.4.min.js',
+            'js/libs/jquery-1.7.1.min.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
+            'js/libs/bootstrap/bootstrap-transition.js',
+            'js/libs/bootstrap/bootstrap-alert.js',
+            'js/libs/bootstrap/bootstrap-modal.js',
+            'js/libs/bootstrap/bootstrap-dropdown.js',
+            'js/libs/bootstrap/bootstrap-tooltip.js',
+            'js/libs/bootstrap/bootstrap-popover.js',
+            'js/libs/bootstrap/bootstrap-button.js',
+            'js/libs/bootstrap/bootstrap-collapse.js',
+            'js/libs/bootstrap/bootstrap-carousel.js',
+            'js/libs/bootstrap/bootstrap-typeahead.js',
             'js/libs/jquery.endless-scroll.js',
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
@@ -94,11 +110,16 @@ LDAP_USERS_GROUP = 'ou=people,dc=mozillians,dc=org'
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
-#BrowserID creates useer if one doesn't exist
+# BrowserID creates useer if one doesn't exist
 BROWSERID_CREATE_USER = True
 
-#On Login, we redirect through register
+# On Login, we redirect through register
 LOGIN_REDIRECT_URL = '/register'
+
+# This dumb. We should be subclassing django-browserid-auth. Submitted a pull
+# request to the project, hopefully we can change this soon.
+BROWSERID_USERNAME_ALGO = lambda email: 'u/'+base64.urlsafe_b64encode(
+                          hashlib.sha1(email).digest()).rstrip('=')
 
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USERS_GROUP, ldap.SCOPE_SUBTREE,
                                    "(uid=%(user)s)")
@@ -187,8 +208,8 @@ ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians')
 
 # Use this to reserve the URL namespace
-USERNAME_BLACKLIST = ('save', 'tofumatt', 'tag', 'group', 'groups', 'tags',
-                      'media', 'username', 'register', 'new', 'delete',
+USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
+                      'groups', 'tags', 'media', 'username', 'register', 'new', 'delete',
                       'help', 'photo', 'img', 'src', 'files')
 
 # Sorl settings

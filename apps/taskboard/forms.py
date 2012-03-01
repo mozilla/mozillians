@@ -1,20 +1,10 @@
-from django import forms
-from django.contrib.auth.models import User
-
 from groups.forms import GroupField
 from happyforms import ModelForm
 from taskboard.models import Task
 
 
-class UserModelChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        """Use the user's full name in the select box."""
-        return obj.get_full_name()
-
-
 class TaskForm(ModelForm):
-    # TODO - Make this autocomplete
-    contact = UserModelChoiceField(User.objects.all())
+    # TODO - Make contacts (users) autocomplete
     groups = GroupField(required=False)
 
     class Meta:

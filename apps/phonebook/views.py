@@ -65,7 +65,12 @@ def edit_profile(request):
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
     if request.method == 'POST':
-        form = forms.ProfileForm(request.POST, request.FILES, instance=profile)
+        form = forms.ProfileForm(
+                request.POST,
+                request.FILES,
+                instance=profile,
+                context=dict(request=request)
+        )
         if form.is_valid():
             form.save(request)
             return redirect(reverse('profile', args=[request.user.username]))
@@ -75,9 +80,16 @@ def edit_profile(request):
                        bio=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
-                       groups=user_groups)
+                       groups=user_groups,)
 
-        form = forms.ProfileForm(instance=profile, initial=initial)
+        if not request.user.username.startswith('u/'):
+            initial.update(username=request.user.username)
+
+        form = forms.ProfileForm(
+                instance=profile,
+                initial=initial,
+                context=dict(request=request)
+        )
 
     # When changing this keep in mind that the same view is used for
     # user.register.
