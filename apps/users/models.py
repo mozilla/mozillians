@@ -1,5 +1,3 @@
-import os
-import time
 import urllib
 from datetime import datetime
 
@@ -15,7 +13,6 @@ from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from sorl.thumbnail import ImageField
-from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from groups.models import Group
@@ -207,4 +204,3 @@ def update_search_index(sender, instance, **kw):
 def remove_from_search_index(sender, instance, **kw):
     from elasticutils import tasks
     tasks.unindex_objects.delay(sender, [instance.id])
-
