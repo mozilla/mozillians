@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from django.contrib import auth, messages
 from django.shortcuts import redirect, render

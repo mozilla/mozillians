@@ -1,22 +1,19 @@
 # encoding: utf-8
-import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Changing field 'UserProfile.photo'
         db.alter_column('profile', 'photo', self.gf('sorl.thumbnail.fields.ImageField')(max_length=100))
 
-
     def backwards(self, orm):
-        
+
         # Changing field 'UserProfile.photo'
         db.alter_column('profile', 'photo', self.gf('django.db.models.fields.BooleanField')())
-
 
     models = {
         'auth.group': {
