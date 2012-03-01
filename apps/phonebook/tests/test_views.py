@@ -15,7 +15,6 @@ from common.tests import TestCase, ESTestCase
 from funfactory.urlresolvers import set_url_prefix, reverse
 
 
-
 class TestDeleteUser(TestCase):
     """Separate test class used to test account deletion flow.
 

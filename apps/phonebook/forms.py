@@ -145,11 +145,6 @@ class ProfileForm(UserForm):
     def save(self, request):
         """Save the data to profile."""
         self._save_groups(request)
-        d = self.cleaned_data
-        user = request.user
-        user.first_name = d['first_name']
-        user.last_name = d['last_name']
-        user.save()
         super(ProfileForm, self).save(request.user)
 
     def _save_groups(self, request):

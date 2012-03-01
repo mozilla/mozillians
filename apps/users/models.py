@@ -101,8 +101,7 @@ class UserProfile(SearchMixin, models.Model):
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
-        return 'UserProfile for %s' % (self.user, )
-
+        return self.get_best_repr()
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
@@ -171,13 +170,9 @@ def generate_code(sender, instance, raw, using, **kwargs):
     if instance.confirmation_code:
         return
 
-    # 10 tries for uniqueness
-    for i in xrange(10):
+    code = get_random_string(32)
+    while UserProfile.objects.filter(confirmation_code=code).count():
         code = get_random_string(32)
-        if UserProfile.objects.filter(confirmation_code=code).count():
-            continue
-        # No need to keep making new codes
-        break
 
     instance.confirmation_code = code
 
