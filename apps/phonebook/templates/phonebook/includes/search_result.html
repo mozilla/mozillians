@@ -1,6 +1,7 @@
 <div class="result">
   <div class="avatar">
-  {{ profile_photo(profile) }}
+      {% set img = thumbnail(profile.photo, '100x100', default="img/unknown.png") %}
+      <img src="{{ img.url }}" alt="{{ _('Profile Photo') }}">
   </div>
   <div class="details">
     <h2><a href="{{ url('profile', profile.user.username) }}">

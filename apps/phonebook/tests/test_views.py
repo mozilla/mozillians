@@ -5,6 +5,7 @@ from uuid import uuid4
 from django import test
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 import test_utils
 from nose.tools import eq_
@@ -176,14 +177,12 @@ class TestViews(TestCase):
             """
             r = client.get(reverse('profile.edit'))
             doc = pq(r.content)
-            r = client.get(doc('#profile-photo').attr('src'))
-            eq_(r.status_code, 301)
-            assert not doc('#id_photo_delete'), (
+            assert not doc('#photo-clear_id'), (
                     '"Remove Profile Photo" control should not appear.')
 
             # make sure no file is in the file system
-            f = self.mozillian.get_profile().get_photo_file()
-            assert not os.path.exists(f)
+            f = self.mozillian.get_profile().photo
+            assert not f
 
         # No photo exists by default, the delete photo form control shouldn't
         # be present, and trying to delete a non-existant photo shouldn't
@@ -192,7 +191,7 @@ class TestViews(TestCase):
 
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo_delete=1))
+                        {'last_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
                                 "shouldn't result in an error.")
 
@@ -206,17 +205,15 @@ class TestViews(TestCase):
 
         r = client.get(reverse('profile.edit'))
         doc = pq(r.content)
-        assert doc('#profile-photo').attr('src').startswith(
-                settings.USERPICS_URL + '/' + str(self.mozillian.id) + '.jpg?')
 
-        assert doc('#id_photo_delete'), (
+        assert doc('#photo-clear_id'), (
                 '"Remove Profile Photo" control should appear.')
 
-        assert os.path.exists(self.mozillian.get_profile().get_photo_file())
+        assert self.mozillian.userprofile.photo
 
         # Remove a profile photo
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo_delete='1'))
+                        {'last_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
         assert_no_photo()
@@ -244,61 +241,25 @@ class TestViews(TestCase):
         eq_(doc('dd.website a').attr('href'), 'http://tofumatt.com/', (
                 'User should have a URL with protocol added.'))
 
-    def test_my_profile(self):
-        """Are we cachebusting our picture?"""
-        self.mozillian.get_profile().photo = True
-        self.mozillian.get_profile().save()
-        profile = reverse('profile', args=[self.mozillian.username])
-        r = self.mozillian_client.get(profile)
-        doc = pq(r.content)
-        assert '?' in doc('#profile-photo').attr('src')
-
-    def test_delete_user_delets_photo(self):
-        """If we delete a user with a photo, let's delete their images."""
-        u = User.objects.create(
-                email='mcbain@mozillians.org', username='mcbain',
-                first_name='Hans', last_name='McBain')
-        profile = u.get_profile()
-        profile.is_vouched = True
-        profile.photo = True
-        profile.save()
-
-        with open(profile.get_photo_file(), 'w') as f:
-            f.write('hi')
-
-        assert os.path.exists(profile.get_photo_file())
-
-        u.delete()
-
-        assert not os.path.exists(profile.get_photo_file()), 'File not deleted'
-
     def test_replace_photo(self):
         """Ensure we can replace photos."""
-        u = User.objects.create(
-                email='mcbain@mozillians.org', username='mcbain',
-                first_name='Hans', last_name='McBain')
-        profile = u.get_profile()
-        profile.is_vouched = True
-        profile.photo = True
-        profile.save()
+        client = self.mozillian_client
+        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
+                 'rb')
+        r = client.post(reverse('profile.edit'),
+                        dict(last_name='foo', photo=f), follow=True)
+        f.close()
 
-        with open(profile.get_photo_file(), 'w') as f:
-            f.write('hi')
-
-        assert os.path.exists(profile.get_photo_file())
-
-        def get_md5():
-            with open(profile.get_photo_file(), 'rb') as f:
-                return hashlib.md5(f.read()).hexdigest()
-
-        oldmd5 = get_md5()
-        newfile = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
-        self.client.login(email='mcbain@mozillians.org')
-        with open(newfile, 'rb') as f:
-            self.client.post(reverse('profile.edit'),
-                             dict(last_name='foo', photo=f))
-
-        assert oldmd5 != get_md5, "Files should have changed."
+        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
+                 'rb')
+        doc = pq(r.content)
+        old_photo = doc('#profile-photo').attr('src')
+        r = client.post(reverse('profile.edit'),
+                        dict(last_name='foo', photo=f), follow=True)
+        f.close()
+        doc = pq(r.content)
+        new_photo = doc('#profile-photo').attr('src')
+        assert new_photo != old_photo
 
 
 class TestVouch(TestCase):
