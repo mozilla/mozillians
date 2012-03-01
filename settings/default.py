@@ -112,6 +112,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
     'groups',
     'taskboard',
+    'common',
     # 'locations',
 
     'csp',
@@ -119,6 +120,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'tower',
     'cronjobs',
     'elasticutils',
+    'sorl.thumbnail',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -181,5 +183,10 @@ ES_INDEXES = dict(default='mozillians')
 
 # Use this to reserve the URL namespace
 USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
-                      'groups', 'tags', 'media', 'username', 'register',
-                      'new', 'delete', 'help', 'photo', 'img', 'src', 'files')
+                      'about', 'groups', 'tags', 'media', 'username',
+                      'register', 'new', 'delete', 'help', 'photo', 'img',
+                      'src', 'files')
+
+# Sorl settings
+THUMBNAIL_DUMMY = True
+THUMBNAIL_PREFIX = 'cache/'
