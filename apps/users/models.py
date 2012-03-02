@@ -13,10 +13,6 @@ from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from sorl.thumbnail import ImageField
-<<<<<<< HEAD
-from statsd import statsd
-=======
->>>>>>> 6fb4713d83848ae3e954807810fa9ed989380d50
 from tower import ugettext as _, ugettext_lazy as _lazy
 from sorl.thumbnail import ImageField
 
@@ -99,14 +95,10 @@ class UserProfile(SearchMixin, models.Model):
 
     @property
     def full_name(self):
-<<<<<<< HEAD
         return "%s %s" % (self.user.first_name, self.user.last_name)
 
     def get_best_repr(self):
         return self.display_name or self.ircname or self.user.get_full_name()
-=======
-        return '%s %s' % (self.user.first_name, self.user.last_name)
->>>>>>> 6fb4713d83848ae3e954807810fa9ed989380d50
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""

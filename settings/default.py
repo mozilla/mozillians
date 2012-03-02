@@ -135,6 +135,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
+    'bootstrap',
 
     'django.contrib.admin',
     'django.contrib.auth',
