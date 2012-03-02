@@ -25,7 +25,6 @@
 
   <div class="clear"></div>
 
-<<<<<<< HEAD
   <div class="row">
     {% if not profile.is_vouched %}
       <div class="alert offset1 span8" id="pending-approval">
@@ -61,17 +60,6 @@
           {% endif %}
         {% endif %}
       </div>
-=======
-  <div class="blue-pastels vcard h-card">
-    {% set img = thumbnail(profile.photo, '200x200', crop="center", default="img/unknown.png") %}
-    <img id="profile-photo" src="{{ img.url }}" alt="{{ _('Profile Picture') }}">
-
-    {% if shown_user.username == request.user.username %}
-      <a href="{{ url('profile.edit') }}"
-         class="button primary small" id="edit-profile">
-        {{ _('Edit My Profile') }}
-      </a>
->>>>>>> 6fb4713d83848ae3e954807810fa9ed989380d50
     {% endif %}
     <div class="span6 offset1 well" id="profile-info">
       <h2 class="fn p-name">
@@ -158,7 +146,8 @@
 
     <div class="span2">
       <div class="thumbnail">
-      {{ profile_photo(profile) }}
+        {% set img = thumbnail(profile.photo, '400x400', crop="center", default="img/unknown.png") %}
+        <img id="profile-photo" src="{{ img.url }}" alt="{{ _('Profile photo') }}">
       </div>
     </div>
   </div>

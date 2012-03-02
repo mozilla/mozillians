@@ -42,7 +42,11 @@ def vouch_required(f):
 @login_required
 def profile(request, username):
     """View a profile by username."""
-    user = get_object_or_404(User, username=username)
+    # Try to match a view if it exists with a slash.
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return redirect(request.path + r'/')
 
     vouch_form = None
     profile = user.get_profile()
@@ -69,7 +73,6 @@ def edit_profile(request):
                 request.POST,
                 request.FILES,
                 instance=profile,
-                context=dict(request=request)
         )
         if form.is_valid():
             form.save(request)
@@ -88,7 +91,6 @@ def edit_profile(request):
         form = forms.ProfileForm(
                 instance=profile,
                 initial=initial,
-                context=dict(request=request)
         )
 
     # When changing this keep in mind that the same view is used for

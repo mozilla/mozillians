@@ -130,6 +130,9 @@ class ProfileForm(UserForm):
             Fieldset(_('Contact Info'), 'ircname', 'website'),
             Fieldset(_('Other'), 'groups', 'photo'),
         )
+        custom_fields = {
+            'photo': 'bootstrap/profile_photo.html'
+        }
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
