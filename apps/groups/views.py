@@ -11,7 +11,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 
 from .models import Group
-from phonebook.forms import PAGINATION_LIMIT
+from phonebook import forms
 from phonebook.views import vouch_required
 
 log = commonware.log.getLogger('m.groups')
@@ -57,41 +57,60 @@ def search(request):
 @vouch_required
 def show(request, id, url=None):
     num_pages = 0
+    nonvouched_only = False
+    people = []
     show_pagination = False
-    members = []
-    """This defines the amount of items shown through the ajax_search."""
-    limit = 1500 
+    form = forms.SearchForm(request.GET)
+    limit = forms.PAGINATION_LIMIT
     group = get_object_or_404(Group, id=id)
+
+    if form.is_valid():
+        limit = form.cleaned_data['limit']
+        page = request.GET.get('page', 1)
+
+        in_group = (request.user.get_profile().groups.filter(id=group.id).count())
+        profiles = group.userprofile_set.all()
+        paginator = Paginator(profiles, limit)
+
+        try:
+            people = paginator.page(page)
+        except PageNotAnInteger:
+            people = paginator.page(1)
+        except EmptyPage:
+            people = paginator.page(paginator.num_pages)
+
+        if paginator.count > forms.PAGINATION_LIMIT:
+            show_pagination = True
+            num_pages = len(people.paginator.page_range)
+
     page = request.GET.get('page', 1)
 
-    # Redirect to the full URL if it wasn't supplied
-    if not url:
-        redirect(reverse('group', args=[group.id, group.url]))
-
-    in_group = (request.user.get_profile()
-                            .groups.filter(id=group.id).count())
+    in_group = (request.user.get_profile().groups.filter(id=group.id).count())
     profiles = group.userprofile_set.all()
-
     paginator = Paginator(profiles, limit)
 
     try:
-        members = paginator.page(page)
+        people = paginator.page(page)
     except PageNotAnInteger:
-        members = paginator.page(1)
+        people = paginator.page(1)
     except EmptyPage:
-        members = paginator.page(paginator.num_pages)
+        people = paginator.page(paginator.num_pages)
 
-    if paginator.count > 20:
-            show_pagination = True
-            num_pages = len(members.paginator.page_range)
+    if paginator.count > forms.PAGINATION_LIMIT:
+        show_pagination = True
+        num_pages = len(people.paginator.page_range)        
 
-    data = dict(group=group, 
-                in_group=in_group, 
-                items=members)
+    d = dict(items=people,
+             form=form,
+             group=group,
+             limit=limit,
+             show_pagination=show_pagination,
+             num_pages=num_pages)
+
     if request.is_ajax():
-        return render(request, 'search_ajax.html', data)
+        return render(request, 'search_ajax.html', d)
 
-    return render(request, 'groups/show.html', data)
+    return render(request, 'groups/show.html', d)
 
 
 @require_POST
@@ -109,3 +128,4 @@ def toggle(request, id, url):
             profile.groups.add(group)
 
     return redirect(reverse('group', args=[group.id, group.url]))
+

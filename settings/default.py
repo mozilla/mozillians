@@ -184,3 +184,4 @@ ES_INDEXES = dict(default='mozillians')
 USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
                       'groups', 'tags', 'media', 'username', 'register',
                       'new', 'delete', 'help', 'photo', 'img', 'src', 'files')
+

@@ -7,6 +7,12 @@
 {% block body_classes %}
   box-content search-page group-name-{{ group.name }}
 {% endblock %}
+{% block site_js %}
+  <script src="{{ url('jsi18n') }}"></script>
+  {{ js('common') }}
+  {{ js('search') }}
+  {% include "includes/webtrends_desktop.html" %}
+{% endblock %}
 
 {% block main_content %}
   {% trans name=group.name %}
@@ -31,6 +37,9 @@
   <div class="clear"></div>
 
   <div class="blue-pastels">
+  <form method="GET" id="search-form" action="">
+  <input type="hidden" name="limit" id="limit" value="{{ limit }}">
+  </form>
     {% for item in items %}
       {{ search_result(item) }}
     {% endfor %}
@@ -43,5 +52,10 @@
             {% endif %}
           {% endfor %}
         </div>
+        <div id="final-result">
+          <span>Showing all {{ items.paginator.count }} results.</span>
+        </div>
       {% endif %}
+  </div>
 {% endblock main_content %}
+
