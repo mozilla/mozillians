@@ -141,7 +141,7 @@ def search(request):
             show_pagination = True
             num_pages = len(people.paginator.page_range)
 
-    d = dict(people=people,
+    d = dict(items=people,
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
@@ -149,7 +149,7 @@ def search(request):
              num_pages=num_pages)
 
     if request.is_ajax():
-        return render(request, 'phonebook/search_ajax.html', d)
+        return render(request, 'search_ajax.html', d)
 
     return render(request, 'phonebook/search.html', d)
 

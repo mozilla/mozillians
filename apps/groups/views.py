@@ -56,8 +56,13 @@ def search(request):
 
 @vouch_required
 def show(request, id, url=None):
-    """List all users with this group."""
+    num_pages = 0
+    show_pagination = False
+    members = []
+    """This defines the amount of items shown through the ajax_search."""
+    limit = 1500 
     group = get_object_or_404(Group, id=id)
+    page = request.GET.get('page', 1)
 
     # Redirect to the full URL if it wasn't supplied
     if not url:
@@ -67,7 +72,25 @@ def show(request, id, url=None):
                             .groups.filter(id=group.id).count())
     profiles = group.userprofile_set.all()
 
-    data = dict(group=group, in_group=in_group, profiles=profiles)
+    paginator = Paginator(profiles, limit)
+
+    try:
+        members = paginator.page(page)
+    except PageNotAnInteger:
+        members = paginator.page(1)
+    except EmptyPage:
+        members = paginator.page(paginator.num_pages)
+
+    if paginator.count > 20:
+            show_pagination = True
+            num_pages = len(members.paginator.page_range)
+
+    data = dict(group=group, 
+                in_group=in_group, 
+                items=members)
+    if request.is_ajax():
+        return render(request, 'search_ajax.html', data)
+
     return render(request, 'groups/show.html', data)
 
 
