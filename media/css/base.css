@@ -18,6 +18,22 @@ body {
     text-transform: lowercase;
 }
 
+.welcome {
+  background: url(../img/home-anon-bg.png) top center no-repeat;
+  height: 350px;
+  padding: 85px 125px 50px 175px;
+  text-align: center;
+  width: 445px;
+  margin: auto;
+}
+
+.welcome h1 {
+  color: #B91E27;
+  font-size: 45px;
+  line-height: 1;
+  margin: 10px 6% 15px 0;
+  padding: 0;
+}
 #header h1 a, #header h1 span {
     color: #fff;
     font-family: MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
