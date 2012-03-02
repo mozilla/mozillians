@@ -1,6 +1,4 @@
-import os
 import re
-import tempfile
 from urlparse import urlparse
 
 from django import forms
@@ -8,12 +6,10 @@ from django.conf import settings
 from django.core.urlresolvers import resolve
 
 import happyforms
-import Image
 from bootstrap.forms import BootstrapModelForm, Fieldset
-from easy_thumbnails import processors
-from statsd import statsd
 from tower import ugettext as _, ugettext_lazy as _lazy
 from sorl.thumbnail import delete
+
 
 
 from phonebook.models import Invite

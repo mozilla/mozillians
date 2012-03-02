@@ -1,5 +1,3 @@
-import os
-import time
 import urllib
 from datetime import datetime
 
@@ -15,7 +13,10 @@ from elasticutils.models import SearchMixin
 from funfactory.utils import absolutify
 from funfactory.urlresolvers import reverse
 from sorl.thumbnail import ImageField
+<<<<<<< HEAD
 from statsd import statsd
+=======
+>>>>>>> 6fb4713d83848ae3e954807810fa9ed989380d50
 from tower import ugettext as _, ugettext_lazy as _lazy
 from sorl.thumbnail import ImageField
 
@@ -98,10 +99,14 @@ class UserProfile(SearchMixin, models.Model):
 
     @property
     def full_name(self):
+<<<<<<< HEAD
         return "%s %s" % (self.user.first_name, self.user.last_name)
 
     def get_best_repr(self):
         return self.display_name or self.ircname or self.user.get_full_name()
+=======
+        return '%s %s' % (self.user.first_name, self.user.last_name)
+>>>>>>> 6fb4713d83848ae3e954807810fa9ed989380d50
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -175,13 +180,9 @@ def generate_code(sender, instance, raw, using, **kwargs):
     if instance.confirmation_code:
         return
 
-    # 10 tries for uniqueness
-    for i in xrange(10):
+    code = get_random_string(32)
+    while UserProfile.objects.filter(confirmation_code=code).count():
         code = get_random_string(32)
-        if UserProfile.objects.filter(confirmation_code=code).count():
-            continue
-        # No need to keep making new codes
-        break
 
     instance.confirmation_code = code
 
@@ -216,4 +217,3 @@ def update_search_index(sender, instance, **kw):
 def remove_from_search_index(sender, instance, **kw):
     from elasticutils import tasks
     tasks.unindex_objects.delay(sender, [instance.id])
-

@@ -1,6 +1,3 @@
-from django.conf import settings
-from django.contrib.auth.models import User
-
 import commonware.log
 import cronjobs
 from celery.task.sets import TaskSet

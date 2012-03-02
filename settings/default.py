@@ -202,9 +202,5 @@ USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
                       'src', 'files')
 
 # Sorl settings
-THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'uploads/cache/'
-
-# Sorl settings
 THUMBNAIL_DUMMY = True
-THUMBNAIL_PREFIX = 'cache/'
