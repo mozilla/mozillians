@@ -22,18 +22,20 @@
                 return cease;
             },
             callback: function(i) {
-                cease = (pages <= i);
-                $.ajax({
-                    data:{'page': i + 1},
-                    dataType: 'html',
-                    success: function(data) {
-                        paginator.before($(data));
-                    }
-                });
+                cease = (pages < i);
                 if (cease) {
                     // Show the user that we have stopped scrolling on purpose.
                     results.show()
+                } else {
+                    $.ajax({
+                        data:{'page': i + 1},
+                        dataType: 'html',
+                        success: function(data) {
+                            paginator.before($(data));
+                        }
+                    });
                 }
+                
             }
         });
     });

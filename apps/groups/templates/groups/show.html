@@ -8,6 +8,13 @@
   box-content search-page group-name-{{ group.name }}
 {% endblock %}
 
+{% block site_js %}
+  <script src="{{ url('jsi18n') }}"></script>
+  {{ js('common') }}
+  {{ js('search') }}
+  {% include "includes/webtrends_desktop.html" %}
+{% endblock %}
+
 {% block main_content %}
   {% trans name=group.name %}
     <h1>Users in Group "{{ name }}"</h1>
@@ -31,8 +38,25 @@
   <div class="clear"></div>
 
   <div class="blue-pastels">
-    {% for profile in profiles %}
-      {{ search_result(profile) }}
+    <form method="GET" id="search-form" action="#">
+      <input type="hidden" name="limit" id="limit" value="{{ limit }}">
+    </form>
+    {% for person in people %}
+      {{ search_result(person) }}
     {% endfor %}
+    {% if show_pagination %}
+      <div data-pages={{ num_pages }} class="pagination">
+        {% for page in people.paginator.page_range %}
+          {% if page == people.number %}
+            <span>{{ page }}</span>
+          {% else %}
+            <a href="#">{{ page }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div id="final-result">
+        <span>Showing all {{ people.paginator.count }} results.</span>
+      </div>
+    {% endif %}
   </div>
 {% endblock main_content %}

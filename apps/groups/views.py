@@ -11,7 +11,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 
 from .models import Group
-from phonebook.forms import PAGINATION_LIMIT
+from phonebook import forms
 from phonebook.views import vouch_required
 
 log = commonware.log.getLogger('m.groups')
@@ -20,7 +20,7 @@ log = commonware.log.getLogger('m.groups')
 @login_required
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
-    paginator = Paginator(Group.objects.all(), PAGINATION_LIMIT)
+    paginator = Paginator(Group.objects.all(), forms.PAGINATION_LIMIT)
 
     page = request.GET.get('page')
     try:
@@ -56,19 +56,52 @@ def search(request):
 
 @vouch_required
 def show(request, id, url=None):
-    """List all users with this group."""
+    """ List all users with this group."""
+    if not url:
+    	redirect(reverse('group', args=[group.id, group.url]))
+
+    
+    form = forms.SearchForm(request.GET)
     group = get_object_or_404(Group, id=id)
 
-    # Redirect to the full URL if it wasn't supplied
-    if not url:
-        redirect(reverse('group', args=[group.id, group.url]))
+    limit = forms.PAGINATION_LIMIT
+    if form.is_valid():
+        limit = form.cleaned_data['limit']
+
+    page = request.GET.get('page', 1)
 
     in_group = (request.user.get_profile()
                             .groups.filter(id=group.id).count())
     profiles = group.userprofile_set.all()
 
-    data = dict(group=group, in_group=in_group, profiles=profiles)
-    return render(request, 'groups/show.html', data)
+    paginator = Paginator(profiles, limit)
+
+    people = []
+    try:
+        people = paginator.page(page)
+    except PageNotAnInteger:
+        people = paginator.page(1)
+    except EmptyPage:
+        people = paginator.page(paginator.num_pages)
+
+    show_pagination = False
+    num_pages = 0
+    if paginator.count > forms.PAGINATION_LIMIT:
+        show_pagination = True
+        num_pages = len(people.paginator.page_range)
+
+    d = dict(people=people,
+             group=group,
+             in_group=in_group,
+             form=form,
+             limit=limit,
+             show_pagination=show_pagination,
+             num_pages=num_pages)
+
+    if request.is_ajax():
+        return render(request, 'search_ajax.html', d)
+
+    return render(request, 'groups/show.html', d)
 
 
 @require_POST
