@@ -67,7 +67,9 @@
 
         <div id="optin-container">
           {{ form.errors['optin'] }}
-          {{ form['optin'].label_tag() }}
+      	  {% trans %}
+            <label for="id_optin">I'm okay with you handling this info as you explain in your <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html" target="_blank">privacy policy</a>.</label>
+	        {% endtrans %}
           <span class="required" title="{{ _('This field is required.') }}">*</span>
           {{ form['optin'] }}
         </div>
