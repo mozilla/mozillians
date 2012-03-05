@@ -149,7 +149,7 @@ def search(request):
              num_pages=num_pages)
 
     if request.is_ajax():
-        return render(request, 'phonebook/search_ajax.html', d)
+        return render(request, 'search_ajax.html', d)
 
     return render(request, 'phonebook/search.html', d)
 
