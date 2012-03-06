@@ -14,14 +14,12 @@ echo "Starting build on executor $EXECUTOR_NUMBER..."
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;
 
-if [ ! -d "$VENV/bin" ]; then
-  echo "No virtualenv found.  Making one..."
-  virtualenv $VENV --no-site-packages
-  source $VENV/bin/activate
-  pip install --upgrade pip
-  pip install coverage
-  pip install PyQuery
-fi
+echo "Making Virtualenv"
+virtualenv $VENV --no-site-packages
+source $VENV/bin/activate
+pip install --upgrade pip
+pip install coverage
+pip install PyQuery
 
 git submodule sync -q
 git submodule update --init --recursive
