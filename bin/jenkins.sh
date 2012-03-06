@@ -20,6 +20,7 @@ if [ ! -d "$VENV/bin" ]; then
   source $VENV/bin/activate
   pip install --upgrade pip
   pip install coverage
+  pip install lxml
 fi
 
 git submodule sync -q
