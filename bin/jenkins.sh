@@ -22,8 +22,6 @@ pip install coverage
 pip install PyQuery
 pip install mock
 
-echo $(pwd)
-
 git submodule sync -q
 git submodule update --init --recursive
 
@@ -38,6 +36,8 @@ source $VENV/bin/activate
 
 cat > settings/local.py <<SETTINGS
 from settings import *
+
+ROOT_URLCONF = 'workspace.urls'
 
 LOG_LEVEL = logging.ERROR
 # Database name has to be set because of sphinx
