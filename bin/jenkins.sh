@@ -20,6 +20,7 @@ source $VENV/bin/activate
 pip install --upgrade pip
 pip install coverage
 pip install PyQuery
+pip install mock
 
 git submodule sync -q
 git submodule update --init --recursive
