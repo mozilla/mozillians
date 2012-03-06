@@ -22,6 +22,8 @@ pip install coverage
 pip install PyQuery
 pip install mock
 
+echo $(pwd)
+
 git submodule sync -q
 git submodule update --init --recursive
 
