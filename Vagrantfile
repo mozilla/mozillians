@@ -16,12 +16,10 @@ CONF = _config
 MOUNT_POINT = '/home/vagrant/mozillians'
 
 Vagrant::Config.run do |config|
+    config.vm.box = "mozillians-v1.0"
+    config.vm.box_url = "http://people.mozilla.org/~mmacpherson/mozillians-v1.0.box"
 
-    config.vm.box = "mozillians-v9.box"
-    config.vm.box_url = "http://people.mozilla.com/~ddash/mozillians-v9.box"
-
-    config.vm.forward_port("web", 8001, 8001)
-    config.vm.forward_port("ldap", 1389, 1389)
+    config.vm.forward_port 8000, 8000
 
     # Increase vagrant's patience during hang-y CentOS bootup
     # see: https://github.com/jedi4ever/veewee/issues/14
@@ -29,7 +27,6 @@ Vagrant::Config.run do |config|
     config.ssh.timeout   = 300
 
     # nfs needs to be explicitly enabled to run.
-
     if CONF['nfs'] == false or RUBY_PLATFORM =~ /mswin(32|64)/
         config.vm.share_folder("v-root", MOUNT_POINT, ".")
     else
@@ -41,12 +38,11 @@ Vagrant::Config.run do |config|
     # config.vm.customize ["modifyvm", :id, "--cpuexecutioncap", "90"]
 
     # Add to /etc/hosts: 33.33.33.24 dev.mozillians.org
-    config.vm.network "33.33.33.24"
+    config.vm.network :hostonly, "33.33.33.24"
 
     config.vm.provision :puppet do |puppet|
         puppet.manifests_path = "puppet/manifests"
         puppet.manifest_file  = "dev-vagrant.pp"
         puppet.module_path = "puppet/modules"
     end
-
 end

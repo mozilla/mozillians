@@ -18,7 +18,7 @@ class playdoh_site {
     # TODO: make this support centos or ubuntu (#centos)
     exec { "sql_migrate":
         cwd => "$PROJ_DIR", 
-        command => "/usr/bin/python2.6 ./vendor/src/schematic/schematic migrations/",
+        command => "/usr/bin/python2.6 manage.py syncdb --noinput",
         require => [
             Service["mysql"],
             Package["python2.6-dev", "libapache2-mod-wsgi", "python-wsgi-intercept" ],
