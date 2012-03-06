@@ -36,7 +36,7 @@ source $VENV/bin/activate
 
 cat > settings/local.py <<SETTINGS
 import logging
-from settings.initial import INSTALLED_APPS
+from settings.default import INSTALLED_APPS
 
 ROOT_URLCONF = 'workspace.urls'
 
