@@ -23,10 +23,6 @@ if [ ! -d "$VENV/bin" ]; then
   pip install PyQuery
 fi
 
-# TODO Remove these:
-pip install PyQuery
-echo "installed PyQuery"
-
 git submodule sync -q
 git submodule update --init --recursive
 
