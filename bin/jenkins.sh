@@ -40,7 +40,12 @@ from settings import *
 
 ROOT_URLCONF = 'workspace.urls'
 
-LOG_LEVEL = logging.ERROR
+# For absoluate urls
+DOMAIN = "localhost"
+PROTOCOL = "http://"
+PORT = 8001
+
+SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 # Database name has to be set because of sphinx
 DATABASES = {
     'default': {
@@ -56,8 +61,33 @@ DATABASES = {
     }
 }
 
-INSTALLED_APPS += ('django_nose',)
-CELERY_ALWAYS_EAGER = True
+# Disable BrowserID Cert Checking
+BROWSERID_DISABLE_CERT_CHECK = True
+
+#Serve Profile Photos from django
+UPLOAD_URL = '/media/uploads'
+
+# Statsd Defaults -- adjust as needed
+STATSD_HOST = 'localhost'
+STATSD_PORT = 8125
+STATSD_PREFIX = 'mozillians'
+
+## Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+DEBUG = TEMPLATE_DEBUG = True
+
+# ElasticSearch
+ES_DISABLED = False
+ES_HOSTS = ['127.0.0.1:9200']
+ES_INDEXES = dict(default='mozillians_dev')
 SETTINGS
 
 echo "Creating database if we need it..."
