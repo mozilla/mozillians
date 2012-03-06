@@ -37,7 +37,7 @@ source $VENV/bin/activate
 cat > settings/local.py <<SETTINGS
 from settings import *
 
-ROOT_URLCONF = 'workspace.urls'
+ROOT_URLCONF = 'urls'
 LOG_LEVEL = logging.ERROR
 # Database name has to be set because of sphinx
 DATABASES = {
