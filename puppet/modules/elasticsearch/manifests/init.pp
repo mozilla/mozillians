@@ -17,47 +17,54 @@ define download_file($site="", $cwd="") {
 
 class sun_java_6 {
 
-  $release = regsubst(generate("/usr/bin/lsb_release", "-s", "-c"), '(\w+)\s', '\1')
+  # $release = regsubst(generate("/usr/bin/lsb_release", "-s", "-c"), '(\w+)\s', '\1')
 
-  file { "partner.list":
-    path => "/etc/apt/sources.list.d/partner.list",
-    ensure => file,
-    owner => "root",
-    group => "root",
-    content => "deb http://archive.canonical.com/ $release partner\ndeb-src http://archive.canonical.com/ $release partner\n",
-    notify => Exec["apt-get-update"],
-  }
+  # file { "partner.list":
+  #   path => "/etc/apt/sources.list.d/partner.list",
+  #   ensure => file,
+  #   owner => "root",
+  #   group => "root",
+  #   content => "deb http://archive.canonical.com/ $release partner\ndeb-src http://archive.canonical.com/ $release partner\n",
+  #   notify => Exec["apt-get-update"],
+  #   require => Exec['add-java'],
+  # }
+
+  # exec { "add-java":
+  #   command => "sudo add-apt-repository ppa:ferramroberto/java",
+  #   #path => "/usr/bin:/usr/sbin:/bin:/usr/local/bin",
+  #   #refreshonly => true,
+  # }
 
   exec { "apt-get-update":
     command => "/usr/bin/apt-get update",
     refreshonly => true,
   }
 
-  package { "debconf-utils":
+  package { ["debconf-utils", "openjdk-6-jre-headless"]:
     ensure => installed
   }
 
-  exec { "agree-to-jdk-license":
-    command => "/bin/echo -e sun-java6-jdk shared/accepted-sun-dlj-v1-1 select true | debconf-set-selections",
-    unless => "debconf-get-selections | grep 'sun-java6-jdk.*shared/accepted-sun-dlj-v1-1.*true'",
-    path => ["/bin", "/usr/bin"], require => Package["debconf-utils"],
-  }
+  # exec { "agree-to-jdk-license":
+  #   command => "/bin/echo -e sun-java6-jdk shared/accepted-sun-dlj-v1-1 select true | debconf-set-selections",
+  #   unless => "debconf-get-selections | grep 'sun-java6-jdk.*shared/accepted-sun-dlj-v1-1.*true'",
+  #   path => ["/bin", "/usr/bin"], require => Package["debconf-utils"],
+  # }
 
-  exec { "agree-to-jre-license":
-    command => "/bin/echo -e sun-java6-jre shared/accepted-sun-dlj-v1-1 select true | debconf-set-selections",
-    unless => "debconf-get-selections | grep 'sun-java6-jre.*shared/accepted-sun-dlj-v1-1.*true'",
-    path => ["/bin", "/usr/bin"], require => Package["debconf-utils"],
-  }
+  # exec { "agree-to-jre-license":
+  #   command => "/bin/echo -e sun-java6-jre shared/accepted-sun-dlj-v1-1 select true | debconf-set-selections",
+  #   unless => "debconf-get-selections | grep 'sun-java6-jre.*shared/accepted-sun-dlj-v1-1.*true'",
+  #   path => ["/bin", "/usr/bin"], require => Package["debconf-utils"],
+  # }
 
-  package { "sun-java6-jdk":
-    ensure => latest,
-    require => [ File["partner.list"], Exec["agree-to-jdk-license"], Exec["apt-get-update"] ],
-  }
+  # package { "sun-java6-jdk":
+  #   ensure => latest,
+  #   require => [ File["partner.list"], Exec["agree-to-jdk-license"], Exec["apt-get-update"] ],
+  # }
 
-  package { "sun-java6-jre":
-    ensure => latest,
-    require => [ File["partner.list"], Exec["agree-to-jre-license"], Exec["apt-get-update"] ],
-  }
+  # package { "sun-java6-jre":
+  #   ensure => latest,
+  #   require => [ File["partner.list"], Exec["agree-to-jre-license"], Exec["apt-get-update"] ],
+  # }
 
 }
 
@@ -84,7 +91,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
       $esJarfile        = "${esName}.jar"
       $esServiceRev     = "3e0b23d"
 
-      include sun_java_6
+      # include sun_java_6
 
       download_file {
         ["${esName}.tar.gz"]:
@@ -105,7 +112,7 @@ class elasticsearch($version = "0.15.2", $xmx = "2048m") {
                comment => "Elasticsearch user created by puppet",
                managehome => true,
                shell   => "/bin/false",
-               require => [Package["sun-java6-jre"]],
+               #require => [Package["sun-java6-jre"]],
                uid => 901
      }
 
