@@ -39,6 +39,20 @@ if $DONT_REPROVISION == 1 {
         ensure => file,
         source => "$PROJ_DIR/settings/local.py-dist";
     }
+
+    # TODO: make this support centos or ubuntu (#centos)
+    exec { "sql_migrate":
+        cwd => "$PROJ_DIR", 
+        command => "/usr/bin/python2.6 manage.py syncdb --noinput",
+    }
+
+    if $USE_SOUTH == 1 {
+        exec { "south_migrate":
+            cwd => "$PROJ_DIR", 
+            command => "/usr/bin/python2.6 manage.py migrate",
+            require => Exec["sql_migrate"],
+        }
+    }
 } else {
     include dev
 }
