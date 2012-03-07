@@ -1,12 +1,14 @@
+import os
+
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
                          HttpResponseRedirect)
 
 import commonware.log
+from funfactory.manage import ROOT
 from funfactory.urlresolvers import reverse
 
-from mozillians.urls import error_page
-
-
+# TODO: this is hackish. Once we update mozillians to the newest playdoh layout
+error_page = __import__(os.path.basename(ROOT)).urls.error_page
 log = commonware.log.getLogger('m.phonebook')
 
 
