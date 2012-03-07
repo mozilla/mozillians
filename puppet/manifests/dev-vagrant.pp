@@ -40,6 +40,12 @@ if $DONT_REPROVISION == 1 {
         source => "$PROJ_DIR/settings/local.py-dist";
     }
 
+    file { "/home/vagrant/.zshrc":
+        ensure => file,
+        source => "$PROJ_DIR/puppet/files/home/vagrant/zshrc",
+        owner => "vagrant", group => "vagrant", mode => 0644;
+    }
+
     # TODO: make this support centos or ubuntu (#centos)
     exec { "sql_migrate":
         cwd => "$PROJ_DIR", 
