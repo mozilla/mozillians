@@ -1,4 +1,5 @@
 import urllib
+import os
 from datetime import datetime
 
 from django.conf import settings
@@ -41,7 +42,9 @@ class UserProfile(SearchMixin, models.Model):
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            default='', blank=True)
-    photo = ImageField(default='', blank=True, upload_to='uploads/userprofile')
+    photo = ImageField(default='', blank=True,
+                       upload_to=os.path.join(settings.UPLOAD_ROOT,
+                                             'userprofile'))
     display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),

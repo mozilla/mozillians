@@ -5,16 +5,24 @@ from south.v2 import DataMigration
 class Migration(DataMigration):
 
     def forwards(self, orm):
+        """Copy userpics to the UPLOAD_ROOT and update the photo field."""
         if not db.dry_run:
             import shutil, os
             from django.core.files import File
             from django.conf import settings
+
+            def ensure_dir(f):
+                d = os.path.dirname(f)
+                if not os.path.exists(d):
+                    os.makedirs(d)
+
             for p in orm.UserProfile.objects.all():
                 try:
-                    new_path = os.path.join(settings.MEDIA_ROOT,
-                                            p.photo.field.upload_to)
+                    new_path = os.path.join(settings.UPLOAD_ROOT,
+                                            'userprofile/')
                     old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
                     new_pic = '%s/profile-%d' % (new_path, p.id)
+                    ensure_dir(new_pic)
                     shutil.copy(old_pic, new_pic)
                     p.photo.save(new_pic, File(file(old_pic)))
                     p.photo.file = file(new_pic)
@@ -23,21 +31,9 @@ class Migration(DataMigration):
                 except Exception as e:
                     print e
 
-
     def backwards(self, orm):
-        if not db.dry_run:
-            import shutil
-            from django.conf import settings
-            for p in orm.UserProfile.objects.all():
-                if p.photo:
-                    try:
-                        old_pic = '%s/%d.jpg' % (settings.USERPICS_URL, p.id)
-                        shutil.copy(p.photo.path, old_pic)
-                        p.photo = True
-                        p.save()
-                    except Exception as e:
-                        print e
-
+        """Not needed since old pics are not deleted"""
+        pass
 
     models = {
         'auth.group': {

@@ -97,6 +97,58 @@ class RegistrationTest(TestCase):
         eq_(r.status_code, 200)
         eq_(r.context['profile'].user_id, u.id)
 
+    def test_username_characters(self):
+        """Verify usernames can have digits/symbols, but nothing too insane."""
+        email = 'mrfusion+dotcom@mozilla.com'
+        username = 'mr.fu+s_i-on@246'
+        d = dict(assertion=self.fake_assertion)
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+
+        d = dict(
+                 email=email,
+                 username=username,
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+        )
+        with browserid_mock.mock_browserid(email):
+            r = self.client.post(reverse('register'), d)
+        eq_(r.status_code, 302, (
+                'Registration flow should finish with a redirect.'))
+        u = User.objects.get(email=d['email'])
+        eq_(u.username, username, 'Username should be set to "%s".' % username)
+
+        r = self.mozillian_client.get(reverse('profile', args=[username]),
+                                              follow=True)
+        eq_(r.status_code, 200)
+        eq_(r.context['profile'].user_id, u.id)
+
+        # Now test a username with even weirder characters that we don't allow.
+        bad_user_email = 'mrfusion+coolbeans@mozilla.com'
+        bad_username = 'mr.we*rd'
+        d = dict(assertion=self.fake_assertion)
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+
+        d = dict(
+                 email=bad_user_email,
+                 username=bad_username,
+                 first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 password='tacoface',
+                 confirmp='tacoface',
+                 optin=True
+        )
+        with browserid_mock.mock_browserid(email):
+            r = self.client.post(reverse('register'), d)
+        eq_(r.status_code, 302, (
+                'Registration flow should fail; username is bad.'))
+        assert not User.objects.filter(email=d['email']), (
+                "User shouldn't exist; username was bad.")
+
     def test_bad_username(self):
         """`about` is a terrible username, as are its silly friends.
 
