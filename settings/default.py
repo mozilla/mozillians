@@ -190,3 +190,7 @@ USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
 # Sorl settings
 THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'cache/'
+
+# This is for the commons/helper.py thumbnail.
+# This path is relative to MEDIA_ROO
+DEFAULT_IMAGE_SRC = 'img/unknown.png'
