@@ -2,7 +2,6 @@
 
 # Django settings for the mozillians project.
 import logging
-import os
 
 from funfactory.manage import path
 from funfactory import settings_base as base
