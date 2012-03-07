@@ -26,14 +26,19 @@
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-      {#
+      
       <div class="search-options-wrapper">
+        <a href="javascript:void(0);" id="advanced">Show Advanced Options</a>
         <div class="search-options">
-          <input type="checkbox" name="nonvouched_only" id="nonvouched_only" {% if nonvouched_only %}checked="checked"{% endif %}>
-          <span>{{ _('Show non-vouched members only') }}</span>
+        <table width="690px" border="0" cellspacing="1" cellpadding="3">
+            <tr>
+              <td width="250px"><input type="checkbox" name="nonvouched_only" id="nonvouched_only"><span>{{ _('Show non-vouched members only') }}</span></td>
+              <td width="250px"><input type="checkbox" name="picture_only" id="picture_only"><span>{{ _('Profile pictures only') }}</span></td>
+            </tr>
+          </table>
         </div>
       </div>
-      #}
+      
       <button type="submit" class="button primary small">
         {{ _('Search') }}
       </button>

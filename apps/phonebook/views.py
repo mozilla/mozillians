@@ -115,6 +115,7 @@ def delete(request):
 def search(request):
     num_pages = 0
     limit = None
+    profilepic_only = False
     nonvouched_only = False
     people = []
     show_pagination = False
@@ -123,10 +124,11 @@ def search(request):
     if form.is_valid():
         query = form.cleaned_data.get('q', '')
         limit = form.cleaned_data['limit']
+        profilepic = True if form.cleaned_data['picture_only'] else None
         vouched = False if form.cleaned_data['nonvouched_only'] else None
         page = request.GET.get('page', 1)
 
-        profiles = UserProfile.search(query, vouched=vouched)
+        profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
 
         paginator = Paginator(profiles, limit)
 
@@ -145,14 +147,14 @@ def search(request):
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
+             profilepic_only=profilepic_only,
              show_pagination=show_pagination,
              num_pages=num_pages)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
-
+        
     return render(request, 'phonebook/search.html', d)
-
 
 @cache_page(60 * 60 * 168)  # 1 week.
 def search_plugin(request):

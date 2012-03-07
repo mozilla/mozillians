@@ -114,7 +114,7 @@ class UserProfile(SearchMixin, models.Model):
         return d
 
     @classmethod
-    def search(cls, query, vouched=None):
+    def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
@@ -125,6 +125,10 @@ class UserProfile(SearchMixin, models.Model):
         s = S(cls).query(or_=q)
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
+
+        if photo is not None:
+            s = s.filter(photo=photo)
+            
         return s
 
     def anonymize(self):
