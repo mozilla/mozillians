@@ -1,6 +1,12 @@
+import base64
+import hashlib
+
 from django.contrib.auth.models import User
 
+import commonware.log
 from django_browserid.auth import BrowserIDBackend
+
+log = commonware.log.getLogger('b.common')
 
 
 class MozilliansBrowserID(BrowserIDBackend):
@@ -14,13 +20,20 @@ class MozilliansBrowserID(BrowserIDBackend):
         if authenticated_email:
             users = User.objects.filter(email=authenticated_email)
             if len(users) > 1:
-                log.warn('%d users with email address %s.' % (len(users), authenticated_email))
+                log.warn('%d users with email address %s.' % (
+                        len(users), authenticated_email))
                 return None
             if len(users) == 1:
                 return users[0]
 
         return super(MozilliansBrowserID, self).authenticate(
                                         assertion=assertion, audience=audience)
+
+    def create_user(self, email):
+        """Return object for a newly created user account."""
+        username = 'u/%s' % base64.urlsafe_b64encode(
+                        hashlib.sha1(email).digest()).rstrip('=')
+        return User.objects.create_user(username, email)
 
 
 class TestBackend(object):
