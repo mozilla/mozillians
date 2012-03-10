@@ -64,8 +64,8 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError(_('This username is in use. Please try'
                                           ' another.'))
 
-        # No funky characters in username
-        if not re.match(r'^\w+$', username):
+        # No funky characters in username.
+        if not re.match(r'^[\w.@+-]+$', username):
             raise forms.ValidationError(_('Please use only alphanumeric'
                                           ' characters'))
 
