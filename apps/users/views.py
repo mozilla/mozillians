@@ -14,7 +14,6 @@ from users import forms
 from users.models import UserProfile
 
 log = commonware.log.getLogger('m.users')
-
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
 
@@ -30,17 +29,20 @@ def logout(request, **kwargs):
 
 class Browserid(Verify):
     """View for dealing with Browserid callback"""
+    def handle_user(self, *args):
+        pass
 
-    def handle_user(self, request, user):
+    def login_success(self):
+        user = self.user
         profile, created = UserProfile.objects.get_or_create(user=user)
         if created:
             log.warning('Created profile for user with email %s' % user.email)
 
         if profile.is_complete():
-            auth.login(request, user)
+            auth.login(self.request, self.user)
             return redirect(reverse('profile', args=[user.username]))
 
-        request.session['authenticated_email'] = user.email
+        self.request.session['authenticated_email'] = user.email
         return redirect(reverse('register'))
 
 

@@ -10,7 +10,7 @@ class dev_tools {
 
         ubuntu: {
             package {
-                [ "git-core", "vim", "emacs" ]:
+                [ "git-core", "vim", "emacs", "zsh" ]:
                 ensure => installed;
             }
         }

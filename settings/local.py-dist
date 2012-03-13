@@ -6,7 +6,7 @@ from settings import *
 # For absoluate urls
 DOMAIN = "localhost"
 PROTOCOL = "http://"
-PORT = 8001
+PORT = 8000
 
 SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
@@ -55,3 +55,5 @@ DEBUG = TEMPLATE_DEBUG = True
 ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians_dev')
+
+CELERY_ALWAYS_EAGER = True
