@@ -5,7 +5,7 @@ from south.v2 import DataMigration
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        '''Copy userpics to the UPLOAD_ROOT and update the photo field.'''
+        """Copy userpics to the UPLOAD_ROOT and update the photo field."""
         if not db.dry_run:
             import shutil, os
             from django.core.files import File
@@ -32,7 +32,7 @@ class Migration(DataMigration):
                     print e
 
     def backwards(self, orm):
-        '''Not needed since old pics are not deleted'''
+        """Not needed since old pics are not deleted"""
         pass
 
     models = {

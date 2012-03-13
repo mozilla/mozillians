@@ -43,7 +43,7 @@ class UserProfile(SearchMixin, models.Model):
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            default='', blank=True)
     photo = ImageField(default='', blank=True,
-                      upload_to=os.path.join(settings.UPLOAD_ROOT,
+                       upload_to=os.path.join(settings.UPLOAD_ROOT,
                                              'userprofile'))
     display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
