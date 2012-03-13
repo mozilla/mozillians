@@ -32,6 +32,7 @@ PORT = 443
 
 ## Media and templates.
 TEMPLATE_DIRS = (path('apps/users/templates'), )
+STATICFILES_DIRS = (path(pre.NETAPP_STORAGE),)
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -159,7 +160,11 @@ CACHES = {
 #: Userpics will be uploaded here.
 USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
 
-#: Userpics will accessed here.
+# Django 1.4
+# TODO fix all templates so this works.
+# MEDIA_ROOT = pre.NETAPP_STORAGE
+
+# Userpics will accessed here.
 USERPICS_URL = pre.UPLOAD_URL + '/userpics'
 
 AUTH_PROFILE_MODULE = 'users.UserProfile'
