@@ -19,6 +19,12 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from groups.models import Group
 from phonebook.models import get_random_string
 
+# This is because we are using MEDIA_ROOT wrong in 1.4
+from django.core.files.storage import FileSystemStorage
+fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
+                       base_url='/media/uploads')
+
+
 
 class UserProfile(SearchMixin, models.Model):
     # This field is required.
@@ -42,9 +48,8 @@ class UserProfile(SearchMixin, models.Model):
     groups = models.ManyToManyField('groups.Group')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            default='', blank=True)
-    photo = ImageField(default='', blank=True,
-                       upload_to=os.path.join(settings.UPLOAD_ROOT,
-                                             'userprofile'))
+    photo = ImageField(default='', blank=True, storage=fs,
+                       upload_to='userprofile')
     display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),

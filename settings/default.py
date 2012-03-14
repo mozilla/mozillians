@@ -33,7 +33,9 @@ PORT = 443
 
 ## Media and templates.
 TEMPLATE_DIRS = (path('apps/users/templates'), )
-STATICFILES_DIRS = (path(pre.NETAPP_STORAGE),)
+STATICFILES_DIRS = (
+    pre.UPLOAD_ROOT,
+)
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -195,7 +197,7 @@ USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
 
 # Sorl settings
 THUMBNAIL_DUMMY = True
-THUMBNAIL_PREFIX = os.path.join(pre.UPLOAD_ROOT, 'sorl-cache/')
+THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 # This path is relative to MEDIA_ROO

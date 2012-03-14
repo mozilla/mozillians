@@ -21,7 +21,7 @@ class Migration(DataMigration):
                     new_path = os.path.join(settings.UPLOAD_ROOT,
                                             'userprofile/')
                     old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
-                    new_pic = '%sprofile-%d.jpg' % (new_path, p.id)
+                    new_pic = '%s/profile-%d.jpg' % (new_path, p.id)
                     ensure_dir(new_pic)
                     shutil.copy(old_pic, new_pic)
                     p.photo.save(new_pic, File(file(old_pic)))
