@@ -24,7 +24,7 @@ class Migration(DataMigration):
             for p in orm.UserProfile.objects.all():
                 try:
                     old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
-                    p.photo.save('%d.jpg' % p.id , File(file(old_pic)))
+                    p.photo.save('userprofile/%d.jpg' % p.id , File(file(old_pic)))
                     p.photo.file = file(new_pic)
                     p.save()
                     print p.id
