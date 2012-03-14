@@ -2,6 +2,7 @@
 
 # Django settings for the mozillians project.
 import logging
+import os
 
 from funfactory.manage import path
 from funfactory import settings_base as base
@@ -194,7 +195,7 @@ USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
 
 # Sorl settings
 THUMBNAIL_DUMMY = True
-THUMBNAIL_PREFIX = 'cache/'
+THUMBNAIL_PREFIX = os.path.join(pre.UPLOAD_ROOT, 'sorl-cache/')
 
 # This is for the commons/helper.py thumbnail.
 # This path is relative to MEDIA_ROO
