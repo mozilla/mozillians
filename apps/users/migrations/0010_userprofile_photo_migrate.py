@@ -7,24 +7,24 @@ class Migration(DataMigration):
     def forwards(self, orm):
         """Copy userpics to the UPLOAD_ROOT and update the photo field."""
         if not db.dry_run:
+            from django.core import management
             import shutil, os
             from django.core.files import File
             from django.conf import settings
+            management.call_command('thumbnail', 'clear', verbosity=0)
+            management.call_command('thumbnail', 'cleanup', verbosity=0)
+
 
             def ensure_dir(f):
                 d = os.path.dirname(f)
                 if not os.path.exists(d):
                     os.makedirs(d)
-
+            new_path = os.path.join(settings.UPLOAD_ROOT, 'userprofile/')
+            ensure_dir(new_path)
             for p in orm.UserProfile.objects.all():
                 try:
-                    new_path = os.path.join(settings.UPLOAD_ROOT,
-                                            'userprofile/')
                     old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
-                    new_pic = '%s/profile-%d.jpg' % (new_path, p.id)
-                    ensure_dir(new_pic)
-                    shutil.copy(old_pic, new_pic)
-                    p.photo.save(new_pic, File(file(old_pic)))
+                    p.photo.save('%d.jpg' % p.id , File(file(old_pic)))
                     p.photo.file = file(new_pic)
                     p.save()
                     print p.id
