@@ -14,7 +14,6 @@ class Migration(DataMigration):
             management.call_command('thumbnail', 'clear', verbosity=0)
             management.call_command('thumbnail', 'cleanup', verbosity=0)
 
-
             def ensure_dir(f):
                 d = os.path.dirname(f)
                 if not os.path.exists(d):
@@ -24,10 +23,13 @@ class Migration(DataMigration):
             for p in orm.UserProfile.objects.all():
                 try:
                     old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
-                    p.photo.save('userprofile/%d.jpg' % p.id , File(file(old_pic)))
+                    new_pic = '%s/profile-%d.jpg' % (new_path, p.id)
+                    shutil.copy(old_pic, new_pic)
                     p.photo.file = file(new_pic)
+                    p.photo.name = 'userprofile/profile-%d.jpg' % p.id
                     p.save()
-                    print p.id
+                    print new_pic
+                    print p.photo.url
                 except Exception as e:
                     print e
 
