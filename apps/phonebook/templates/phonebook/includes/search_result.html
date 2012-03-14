@@ -1,12 +1,14 @@
 <div class="result">
   <div class="avatar">
-      {% set img = thumbnail(profile.photo, '100x100', default="img/unknown.png") %}
-      <img src="{{ img.url }}" alt="{{ _('Profile Photo') }}">
+    {% set img = thumbnail(profile.photo, '100x100', crop='center', default="img/unknown.png") %}
+    <img class="profile-photo" src="{{ img.url }}" alt="{{ _('Profile Photo') }}">
   </div>
   <div class="details">
-    <h2><a href="{{ url('profile', profile.user.username) }}">
-      {{ profile.display_name }}
-    </a></h2>
+    <h2>
+      <a href="{{ url('profile', profile.user.username) }}">
+        {{ profile.display_name }}
+      </a>
+    </h2>
 
     {% if profile.is_vouched %}
       <h3 title="{{ _('This user is a vouched Mozillian.') }}">
