@@ -6,162 +6,20 @@
 
 {% block main_content %}
   <form action="{{ edit_form_action }}"
-        method="POST" enctype="multipart/form-data">
+        method="POST" enctype="multipart/form-data"
+        class="form-horizontal">
     {{ csrf() }}
+    <h1>{{ _('Edit Your Profile') }}</h1>
 
-    {% if mode == 'new' %}
-      <h1>{{ _('Complete Your Profile') }}</h1>
-    {% else %}
-      <h1>{{ _('Edit Your Profile') }}</h1>
-    {% endif %}
-
-    {% if form.errors %}
-      <p class="form-errors">
-        {{ _("Sorry, but there were problems with the info you submitted.
-              Please review the form, correct any errors, and try again.") }}
-      </p>
-    {% endif %}
-
-    <div class="blue-pastels">
-      {{ form.management_form }}
-
-      <div class="left-col">
-        <h2>{{ _('My Info') }}</h2>
-
-        {% for f in ['first_name', 'last_name', 'bio'] %}
-          <div id="{{ form[f].name }}-container"
-            class="field {{ 'error' if form.errors[f] }}
-            {{ form[f].field.widget.attrs['class'] }}">
-
-            {{ form[f].label_tag() }}
-
-            {% if form[f].field.required %}
-              <span class="required" title="{{ _('This field is required.') }}">
-                *
-              </span>
-            {% endif %}
-
-            {{ form.errors[f] }}
-            {{ form[f] }}
-          </div>
-        {% endfor %}
-
-        {% if mode != 'new' %}
-          <div id="photo-container"
-               class="{{ 'error' if form.errors['photo'] }}">
-            {{ form['photo'].label_tag() }}
-            <div class="clear"></div>
-            {% set img = thumbnail(profile.photo, '100x100', crop="center", default="img/unknown.png") %}
-            <img id="profile-photo" src="{{ img.url }}" alt="{{ _('Profile photo') }}">
-            <input type="file" name="photo" id="id_photo">
-            <div class="clear"></div>
-
-            {{ form.errors['photo'] }}
-            <div class="clear"></div>
-          </div>
-        {% endif %}
-
-        {% if mode != 'new' %}
-          <div id="{{ form['groups'].name }}-container"
-               class="field {{ 'error' if form.errors['groups'] }}
-                      {{ form['groups'].field.widget.attrs['class'] }}">
-
-            {{ form['groups'].label_tag() }}
-
-            {{ form.errors['groups'] }}
-
-            <div class="clear"></div>
-
-            {{ form['groups'] }}
-
-            <div class="clear"></div>
-            {% if profile.photo %}
-            <label for="photo-clear_id">{% trans %}Remove uploaded photo{% endtrans %}</label>
-              <input type="checkbox" name="photo-clear" id="photo-clear_id">
-            {% endif %}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="right-col">
-        {#
-        <h2>{{ _('My Mozilla Info') }}</h2>
-        #}
-
-        {% if mode != 'new' %}
-          {% for f in ['username', 'website'] %}
-            <div id="{{ form[f].name }}-container"
-              class="field {{ 'error' if form.errors[f] }}
-              {{ form[f].field.widget.attrs['class'] }}">
-
-              {{ form[f].label_tag() }}
-
-              {{ form.errors[f] }}
-              {{ form[f] }}
-            </div>
-          {% endfor %}
-        {% endif %}
-
-        <h2>{{ _('My Login Info') }}</h2>
-
-        <dl id="email-container">
-          <dt>{{ _('Primary Email:') }}</dt>
-          <dd>{{ user.email }}</dd>
-        </dl>
-
-        <div class="clear"></div>
-
-      </div>
-      {% if mode == 'new' %}
-        <p id="privacy-info">
-          {% trans %}
-            At this time, profiles are only viewable by other Mozillians.
-            Community members may use them to identify and contact you about
-            events, projects and other Mozilla-related activities.
-          {% endtrans %}
-        </p>
-
-        <div class="clear"></div>
-
-        <div id="optin-container">
-          {{ form.errors['optin'] }}
-          {{ form['optin'].label_tag() }}
-          <span class="required" title="{{ _('This field is required.') }}">*</span>
-          {{ form['optin'] }}
-        </div>
-      {% endif %}
-      <div class="clear"></div>
-
+    {{ form }}
+    <div id="edit_controls">
+      <button type="submit" class="span2 btn btn-primary">{{ _('Update') }}</button>
+      <a href="{{ url('profile', user.username) }}" class="span2 btn">
+        {{ _('Cancel') }}{# L10n: Cancel editing #}
+      </a>
+      <a class="span2 offset2" id="delete_profile" href="{{ url('profile.delete_confirm') }}">
+        {{ _('Delete Profile') }}
+      </a>
     </div>
-
-    <button id="submit" class="button primary">
-      {% if mode == 'new' %}
-        {{ _('Create Account') }}
-      {% else %}
-        {{ _('Update') }}
-      {% endif %}
-    </button>
-
-    {% if mode == 'new' %} {# BrowserID Sign-up #}
-      <a href="{{ url('home') }}" id="cancel">
-    {% else %}
-      <a href="{{ url('profile', user.username) }}" id="cancel">
-    {% endif %}
-      {{ _('Cancel') }}{# L10n: Cancel editing #}
-    </a>
-
-    <div class="clear"></div>
   </form>
-
-  {% if mode != 'new' %} {# BrowserID Sign-up #}
-  <div id="manage-profile">
-    <a class="button destructive small" href="{{ url('profile.delete_confirm') }}"
-       id="delete-profile">
-      {{ _('Delete Profile') }}
-    </a>
-
-    <div class="clear"></div>
-
-  </div>
-  {% endif %}
 {% endblock %}

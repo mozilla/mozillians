@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -42,7 +42,13 @@ def vouch_required(f):
 @login_required
 def profile(request, username):
     """View a profile by username."""
-    user = get_object_or_404(User, username=username)
+    # Try to match a view if it exists with a slash.
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        # This is so that something like localhost:8000/tasks redirects
+        # to localhost:8000/tasks/ correctly.
+        return redirect(request.path + r'/')
 
     vouch_form = None
     profile = user.get_profile()
@@ -65,7 +71,11 @@ def edit_profile(request):
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
 
     if request.method == 'POST':
-        form = forms.ProfileForm(request.POST, request.FILES, instance=profile)
+        form = forms.ProfileForm(
+                request.POST,
+                request.FILES,
+                instance=profile,
+        )
         if form.is_valid():
             form.save(request)
             return redirect(reverse('profile', args=[request.user.username]))
@@ -80,7 +90,10 @@ def edit_profile(request):
         if not request.user.username.startswith('u/'):
             initial.update(username=request.user.username)
 
-        form = forms.ProfileForm(instance=profile, initial=initial)
+        form = forms.ProfileForm(
+                instance=profile,
+                initial=initial,
+        )
 
     # When changing this keep in mind that the same view is used for
     # user.register.

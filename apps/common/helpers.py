@@ -8,6 +8,7 @@ from sorl.thumbnail import get_thumbnail
 
 logger = logging.getLogger('common.helpers')
 
+
 @register.function
 def thumbnail(source, *args, **kwargs):
     """ Wraps sorl thumbnail with an additional 'default' keyword"""
@@ -15,11 +16,12 @@ def thumbnail(source, *args, **kwargs):
     # Templates should never return an exception
     try:
         if not source:
-            source = kwargs.get('default')
-        if not source:
-            source = getattr(settings, 'DEFAULT_IMAGE_SRC')
-        return get_thumbnail(source, *args, **kwargs)
+            f = kwargs.get('default', None)
+            if not f:
+                f = getattr(settings, 'DEFAULT_IMAGE_SRC')
+            return get_thumbnail(f, *args, **kwargs)
+        return get_thumbnail(source.file, *args, **kwargs)
+
     except Exception as e:
         logger.error('Thumbnail had Exception: %s' % (e,))
         return None
-
