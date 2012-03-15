@@ -19,62 +19,52 @@
 
 {% block main_content %}
   <h1>{{ _('Search') }}</h1>
-
-  <div class="blue-pastels">
     <form method="GET" id="search-form" action="{{ url('search') }}">
       <input type="text" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-      {#
-      <div class="search-options-wrapper">
-        <div class="search-options">
-          <input type="checkbox" name="nonvouched_only" id="nonvouched_only" {% if nonvouched_only %}checked="checked"{% endif %}>
-          <span>{{ _('Show non-vouched members only') }}</span>
-        </div>
-      </div>
-      #}
-      <button type="submit" class="button primary small">
+      <button type="submit" class="btn primary">
         {{ _('Search') }}
       </button>
     </form>
+    <div class="well">
+      {% if not form.cleaned_data %}
+        {% trans %}
+          <h2>Search For a Mozillian</h2>
 
-    {% if not form.cleaned_data %}
-      {% trans %}
-        <h2>Search For a Mozillian</h2>
-
-        <p>
-          You can search for another Mozillian using their name, email, or
-          nickname.
-        </p>
-      {% endtrans %}
-    {% else %}
-      {% for person in people %}
-        {{ search_result(person) }}
+          <p>
+            You can search for another Mozillian using their name, email, or
+            nickname.
+          </p>
+        {% endtrans %}
       {% else %}
-        <p id="not-found">
-          {% trans invite=url('invite') %}
-            The Mozillian you are looking for is not in the directory.
-            Please check your spelling or
-            <a href="{{ invite }}">invite this person</a> to create a profile.
-          {% endtrans %}
-        </p>
-      {% endfor %}
+        {% for person in people %}
+          {{ search_result(person) }}
+        {% else %}
+          <p id="not-found">
+            {% trans invite=url('invite') %}
+              The Mozillian you are looking for is not in the directory.
+              Please check your spelling or
+              <a href="{{ invite }}">invite this person</a> to create a profile.
+            {% endtrans %}
+          </p>
+        {% endfor %}
 
-      {% if show_pagination %}
-        <div data-pages={{ num_pages }} class="pagination">
-          {% for page in people.paginator.page_range %}
-            {% if page == people.number %}
-              <span>{{ page }}</span>
-            {% else %}
-              <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
-            {% endif %}
-          {% endfor %}
-        </div>
-        <div id="final-result">
-          <span>Showing all {{ people.paginator.count }} results.</span>
-        </div>
+        {% if show_pagination %}
+          <div data-pages={{ num_pages }} class="pagination">
+            {% for page in people.paginator.page_range %}
+              {% if page == people.number %}
+                <span>{{ page }}</span>
+              {% else %}
+                <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div id="final-result">
+            <span>Showing all {{ people.paginator.count }} results.</span>
+          </div>
+        {% endif %}
       {% endif %}
-    {% endif %}
-  </div>
+    </div>
 {% endblock %}

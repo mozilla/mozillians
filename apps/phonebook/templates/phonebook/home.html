@@ -3,41 +3,49 @@
 {% block page_title %}{{ _('Mozilla Community Directory') }}{% endblock %}
 {% block body_id %}home{% endblock %}
 
+{% set nav_home = 'active' %}
+{% block nav %}
+  {{ super() }}
+{% endblock %}
+
+
 {% block main_content %}
-  <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
-  {% trans %}
-    <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
-  {% endtrans %}
-
-  <p>
-    {% trans about=url('about') %}
-      If you're looking for information on your fellow contributors, what they
-      do and how to connect with them, you've come to right place.
-      <a href="{{ about }}">Learn more</a>
+  <div class="welcome">
+    <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
+    {% trans %}
+      <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
     {% endtrans %}
-  </p>
 
-  {% if not user.is_authenticated() %}
     <p>
-      <button id="create_profile" class="browser_id_login">
-        <span class="id">
-          <span class="bid">{{ _('ID') }}</span><span class="arrow"></span>
-        </span>
-        <span class="signin">{{ _('Sign In with BrowserID') }}</span>
-      </button>
-      <br>
-      <a href="http://identity.mozilla.com/post/12950196039/deploying-browserid-at-mozilla">
-        {{ _('What is BrowserID? Why are we using it?') }}
-      </a>
-    </p>
-  {% elif user.get_profile().is_vouched %}
-    <p>
-      {% trans invite=url('invite') %}
-        Tell other contributors about this directory and ask them to create a
-        profile.
-
-        <br><a href="{{ invite }}" class="button primary">Invite a Mozillian</a>
+      {% trans about=url('about') %}
+        If you're looking for information on your fellow contributors, what they
+        do and how to connect with them, you've come to right place.
+        <a href="{{ about }}">Learn more</a>
       {% endtrans %}
     </p>
-  {% endif %}
+
+    {% if not user.is_authenticated() %}
+      <p>
+        <button id="create_profile" class="browser_id_login">
+          <span class="id">
+            <span class="bid">{{ _('ID') }}</span><span class="arrow"></span>
+          </span>
+          <span class="signin">{{ _('Sign In with BrowserID') }}</span>
+        </button>
+        <br>
+        <a href="http://identity.mozilla.com/post/12950196039/deploying-browserid-at-mozilla">
+          {{ _('What is BrowserID? Why are we using it?') }}
+        </a>
+      </p>
+      {% elif user.get_profile().is_vouched %}
+        <p>
+          {% trans invite=url('invite') %}
+            Tell other contributors about this directory and ask them to create a
+            profile.
+
+            <br><a href="{{ invite }}" class="button primary">Invite a Mozillian</a>
+          {% endtrans %}
+        </p>
+    {% endif %}
+  </div>
 {% endblock main_content %}

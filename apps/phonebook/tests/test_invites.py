@@ -27,7 +27,7 @@ class InviteFlowTest(common.tests.TestCase):
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('%s has been invited to Mozillians.' % email in
-                pq(r.content)('div#main-content p').text())
+                pq(r.content)('div#main p').text())
 
         # See that the email was sent.
         eq_(len(mail.outbox), 1)
