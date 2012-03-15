@@ -32,6 +32,5 @@ urlpatterns = patterns('',
         name='confirm_register'),
     url('^$', anonymous_csrf(direct_to_template),
         {'template': 'phonebook/home.html'}, name='home'),
-
     url(r'^(?P<username>(u\/)?[\w.@+-]{1,30})$', views.profile, name='profile'),
 )

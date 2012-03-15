@@ -52,13 +52,19 @@ JINGO_EXCLUDE_APPS = [
     'admin',
 ]
 
+DEFAULT_IMAGE_SRC = 'img/unknown.png'
+
 MINIFY_BUNDLES = {
     'css': {
         'common': (
+            'css/bootstrap.css',
             'css/jquery-ui-1.8.16.custom.css',
             'js/libs/tag-it/css/jquery.tagit.css',
-            'css/mozilla-base.css',
-            'css/main.css',
+            'css/base.css',
+            'css/bootstrap-responsive.css',
+            'css/base-480px.css',
+            'css/base-768px.css',
+            'css/base-980px.css',
         ),
         'test': (
             'css/qunit.css',
@@ -66,8 +72,18 @@ MINIFY_BUNDLES = {
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.4.4.min.js',
+            'js/libs/jquery-1.7.1.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
+            'js/libs/bootstrap/bootstrap-transition.js',
+            'js/libs/bootstrap/bootstrap-alert.js',
+            'js/libs/bootstrap/bootstrap-modal.js',
+            'js/libs/bootstrap/bootstrap-dropdown.js',
+            'js/libs/bootstrap/bootstrap-tooltip.js',
+            'js/libs/bootstrap/bootstrap-popover.js',
+            'js/libs/bootstrap/bootstrap-button.js',
+            'js/libs/bootstrap/bootstrap-collapse.js',
+            'js/libs/bootstrap/bootstrap-carousel.js',
+            'js/libs/bootstrap/bootstrap-typeahead.js',
             'js/libs/jquery.endless-scroll.js',
             'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
@@ -125,6 +141,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
+    'bootstrap',
 
     'django.contrib.admin',
     'django.contrib.auth',

@@ -1,5 +1,4 @@
 import urllib
-import os
 from datetime import datetime
 
 from django.conf import settings
@@ -23,7 +22,6 @@ from phonebook.models import get_random_string
 from django.core.files.storage import FileSystemStorage
 fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
                        base_url='/media/uploads')
-
 
 
 class UserProfile(SearchMixin, models.Model):

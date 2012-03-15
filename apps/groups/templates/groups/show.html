@@ -25,7 +25,7 @@
           id="toggle-group" method="post">
       {{ csrf() }}
 
-      <button class="button small {{ ('destructive' if in_group else 'primary') }}">
+      <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
         {% if not in_group %}
           {{ _('Join Group') }}
         {% else %}
@@ -37,10 +37,7 @@
 
   <div class="clear"></div>
 
-  <div class="blue-pastels">
-    <form method="GET" id="search-form" action="#">
-      <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-    </form>
+  <div class="well">
     {% for person in people %}
       {{ search_result(person) }}
     {% endfor %}

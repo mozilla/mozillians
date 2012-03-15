@@ -1,0 +1,10 @@
+<div class="control-group{% if errors %} error{% endif %}">
+  {% trans %}
+    <label for="id_optin">I'm okay with you handling this info as you explain in your <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html" target="_blank">privacy policy</a>.</label>
+  {% endtrans %}
+  <div class="controls">
+    {{ bf }}
+    <span class="help-inline"></span>
+    <p class="help-block">{{ errors }}</p>
+  </div>
+</div> <!-- /clearfix -->
