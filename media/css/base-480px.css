@@ -1,0 +1,10 @@
+/*!
+ * Responsive Mozilla mobile stylesheet.
+ * 480px and smaller
+ */
+@media (max-width: 480px) {
+	#language-switcher select{
+		width: auto;
+		display: inline;
+	}
+}

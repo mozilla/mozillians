@@ -1,0 +1,14 @@
+/*!
+ * Responsive Mozilla mobile stylesheet.
+ * 768px and smaller
+ */
+@media (min-width: 7680px) and (max-width: 980px) {
+}
+@media (max-width: 980px) {
+    #quick-search-link {
+	display:block;
+	}
+	#quick-search {
+	display:none;
+	}
+}
