@@ -6,8 +6,8 @@ from django.conf import settings
 from django.core.urlresolvers import resolve
 
 import happyforms
+from bootstrap.forms import BootstrapModelForm, Fieldset
 from tower import ugettext as _, ugettext_lazy as _lazy
-
 
 from phonebook.models import Invite
 from groups.models import Group
@@ -36,7 +36,7 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class UserForm(forms.ModelForm):
+class UserForm(BootstrapModelForm):
     """
     Instead of just inhereting form a UserProfile model form, this base class
     allows us to also abstract over methods that have to do with the User
@@ -113,10 +113,22 @@ class ProfileForm(UserForm):
                                   required=False)
 
     class Meta:
+        # Model form stuff
         model = UserProfile
         fields = ('ircname', 'website', 'bio', 'photo')
         widgets = {
             'bio': forms.Textarea(),
+        }
+
+        # Bootstrap stuff
+        template_base = 'bootstrap'
+        layout = (
+            Fieldset(_('Personal Info'), 'first_name', 'last_name', 'username', 'bio'),
+            Fieldset(_('Contact Info'), 'ircname', 'website'),
+            Fieldset(_('Other'), 'groups', 'photo'),
+        )
+        custom_fields = {
+            'photo': 'bootstrap/profile_photo.html'
         }
 
     def clean_groups(self):

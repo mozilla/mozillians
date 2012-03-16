@@ -39,7 +39,7 @@ class EditTask(UpdateView):
 
 class ViewTask(DetailView):
     model = Task
-    template_name = 'taskboard/list_tasks.html'
+    template_name = 'taskboard/task_detail.html'
 
 
 class ListTasks(ListView):

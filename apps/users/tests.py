@@ -30,8 +30,6 @@ class RegistrationTest(TestCase):
                  email='mrfusion@mozilla.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
                  optin=True
         )
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
@@ -330,7 +328,7 @@ class TestMigrateRegistration(TestCase):
 
         def test_login(self):
             """Given an invite_url go to it and redeem an invite."""
-            # Let's make sure we have a clean slate
+            # Lettuce make sure we have a clean slate
 
             info = dict(
                 first_name='Akaaaaaaash',

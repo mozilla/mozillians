@@ -1,11 +1,8 @@
-import hashlib
 import os
 from uuid import uuid4
 
 from django import test
-from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 import test_utils
 from nose.tools import eq_
@@ -34,8 +31,11 @@ class TestDeleteUser(TestCase):
         we can test both non-vouched and vouched user's ability to delete
         their own profile.
         """
+
         for user in [self.mozillian, self.pending]:
             self._delete_flow(user)
+
+        pass
 
     def _delete_flow(self, user):
         """Private method used to walk through account deletion flow."""
@@ -47,14 +47,14 @@ class TestDeleteUser(TestCase):
         # Make sure there's a link to a confirm deletion page, and nothing
         # pointing directly to the delete URL.
         eq_(reverse('profile.delete_confirm'),
-            doc('#delete-profile').attr('href'),
+            doc('#delete_profile').attr('href'),
             'We see a link to a confirmation page.')
         self.assertFalse(any((reverse('profile.delete') in el.action)
                               for el in doc('#main form')),
             "We don't see a form posting to the account delete URL.")
 
         # Follow the link to the deletion confirmation page.
-        r = self.client.get(doc('#delete-profile').attr('href'))
+        r = self.client.get(doc('#delete_profile').attr('href'))
 
         # Test that we can go back (i.e. cancel account deletion).
         doc = pq(r.content)
@@ -177,7 +177,7 @@ class TestViews(TestCase):
             """
             r = client.get(reverse('profile.edit'))
             doc = pq(r.content)
-            assert not doc('#photo-clear_id'), (
+            assert not doc('#id_photo_delete'), (
                     '"Remove Profile Photo" control should not appear.')
 
             # make sure no file is in the file system
@@ -191,7 +191,7 @@ class TestViews(TestCase):
 
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('profile.edit'),
-                        {'last_name': 'foo', 'photo-clear': 1})
+                {'last_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
                                 "shouldn't result in an error.")
 
@@ -206,14 +206,15 @@ class TestViews(TestCase):
         r = client.get(reverse('profile.edit'))
         doc = pq(r.content)
 
-        assert doc('#photo-clear_id'), (
+        assert doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should appear.')
 
         assert self.mozillian.userprofile.photo
 
         # Remove a profile photo
         r = client.post(reverse('profile.edit'),
-                        {'last_name': 'foo', 'photo-clear': 1})
+                {'last_name': 'foo', 'photo-clear': 1})
+
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
         assert_no_photo()
@@ -238,7 +239,7 @@ class TestViews(TestCase):
         r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
 
-        eq_(doc('dd.website a').attr('href'), 'http://tofumatt.com/', (
+        assert('http://tofumatt.com/' in [a.get('href') for a in doc('#profile-info dd a')], (
                 'User should have a URL with protocol added.'))
 
     def test_replace_photo(self):
@@ -247,7 +248,8 @@ class TestViews(TestCase):
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo=f), follow=True)
+                dict(last_name='foo', photo=f), follow=True)
+
         f.close()
 
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
@@ -393,7 +395,7 @@ class TestSearch(ESTestCase):
 
 def _logged_in_html(response):
     doc = pq(response.content)
-    return doc('a#logout') and doc('a#profile')
+    return doc('a#logout')
 
 
 def _create_new_user():
