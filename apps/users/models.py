@@ -25,7 +25,6 @@ fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
                        base_url='/media/uploads')
 
 
-
 class UserProfile(SearchMixin, models.Model):
     # This field is required.
     user = models.OneToOneField(User)
