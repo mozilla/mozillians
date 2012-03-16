@@ -77,6 +77,7 @@ MINIFY_BUNDLES = {
         ),
         'search': (
             'js/infinite.js',
+            'js/expand.js',
         ),
         'backbone': (
             'js/libs/underscore.js',

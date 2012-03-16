@@ -743,7 +743,8 @@ html[dir='rtl'] #body-group-show #toggle-group {
     font-size: 13px;
     margin: 0 auto;
     text-align: center;
-    width: 400px;
+    width: 710px;
+    display: none;
 }
 
 .search-options input, .search-options span {
