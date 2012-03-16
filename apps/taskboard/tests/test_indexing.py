@@ -9,7 +9,7 @@ class SearchTest(ESTestCase):
         Create some tasks, try searching for them with direct matches
         close matches and capitalization errors.
 
-        Montreal is puposley miscapitalized.
+        Montreal is purposefully miscapitalized.
         """
         tasky_task = {
             'contact': self.mozillian.get_profile(),
