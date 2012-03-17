@@ -9,6 +9,11 @@ from django_browserid.auth import BrowserIDBackend
 log = commonware.log.getLogger('b.common')
 
 
+def get_username(email):
+    return 'u/{0}'.format(base64.urlsafe_b64encode(
+            hashlib.sha1(email).digest()).rstrip('='))
+
+
 class MozilliansBrowserID(BrowserIDBackend):
     """
     Special auth backend to allow registration to work without a current
@@ -30,10 +35,7 @@ class MozilliansBrowserID(BrowserIDBackend):
                                         assertion=assertion, audience=audience)
 
     def create_user(self, email):
-        """Return object for a newly created user account."""
-        username = 'u/%s' % base64.urlsafe_b64encode(
-                        hashlib.sha1(email).digest()).rstrip('=')
-        return User.objects.create_user(username, email)
+        return User.objects.create_user(get_username(email), email)
 
 
 class TestBackend(object):

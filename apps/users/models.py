@@ -1,4 +1,5 @@
 import urllib
+import uuid
 from datetime import datetime
 
 from django.conf import settings
@@ -136,8 +137,12 @@ class UserProfile(SearchMixin, models.Model):
     def anonymize(self):
         """Remove personal info from a user"""
 
-        for name in ['first_name', 'last_name']:
+        for name in ['first_name', 'last_name', 'email']:
             setattr(self.user, name, '')
+
+        # Give a random username
+        self.user.username = uuid.uuid4().hex[:30]
+        self.user.is_active = False
 
         self.user.save()
 

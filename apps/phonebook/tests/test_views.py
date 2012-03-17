@@ -40,6 +40,7 @@ class TestDeleteUser(TestCase):
     def _delete_flow(self, user):
         """Private method used to walk through account deletion flow."""
         self.client.login(email=user.email)
+        user_id = User.objects.get(email=user.email).id
 
         r = self.client.get(reverse('profile.edit'))
         doc = pq(r.content)
@@ -68,7 +69,9 @@ class TestDeleteUser(TestCase):
         self.assertFalse(_logged_in_html(r))
 
         # Make sure the user data isn't there anymore
-        assert not User.objects.get(email=self.mozillian.email).first_name
+        assert not User.objects.get(id=user_id).first_name
+        assert not User.objects.get(id=user_id).email
+        assert not User.objects.get(id=user_id).is_active
 
 
 class TestViews(TestCase):
