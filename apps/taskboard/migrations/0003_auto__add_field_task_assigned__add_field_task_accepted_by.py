@@ -7,16 +7,16 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-
+        
         # Adding field 'Task.assigned'
         db.add_column('taskboard_task', 'assigned', self.gf('django.db.models.fields.DateField')(null=True, blank=True), keep_default=False)
 
         # Adding field 'Task.accepted_by'
-        db.add_column('taskboard_task', 'accepted_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='accepted_tasks', null=True, to=orm['auth.User']), keep_default=False)
+        db.add_column('taskboard_task', 'accepted_by', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='accepted_tasks', null=True, to=orm['users.UserProfile']), keep_default=False)
 
 
     def backwards(self, orm):
-
+        
         # Deleting field 'Task.assigned'
         db.delete_column('taskboard_task', 'assigned')
 
@@ -72,9 +72,9 @@ class Migration(SchemaMigration):
         },
         'taskboard.task': {
             'Meta': {'object_name': 'Task'},
-            'accepted_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'accepted_tasks'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'accepted_by': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'accepted_tasks'", 'null': 'True', 'to': "orm['users.UserProfile']"}),
             'assigned': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'contact': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_tasks'", 'to': "orm['auth.User']"}),
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'created_tasks'", 'to': "orm['users.UserProfile']"}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.utcnow'}),
             'deadline': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'disabled': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -82,6 +82,23 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'instructions': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'summary': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'users.userprofile': {
+            'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},
+            'bio': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
+            'confirmation_code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
+            'display_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['groups.Group']", 'symmetrical': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
+            'is_autovouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_confirmed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'is_vouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'last_updated': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'auto_now': 'True', 'blank': 'True'}),
+            'photo': ('sorl.thumbnail.fields.ImageField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
+            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['users.UserProfile']", 'null': 'True'}),
+            'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'null': 'True', 'blank': 'True'})
         }
     }
 
