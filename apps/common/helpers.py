@@ -1,4 +1,5 @@
 import logging
+import os
 
 from django.conf import settings
 
@@ -14,12 +15,9 @@ def thumbnail(source, *args, **kwargs):
 
     # Templates should never return an exception
     try:
-        if not source:
+        if not source.path:
             source = kwargs.get('default')
-        if not source:
-            source = getattr(settings, 'DEFAULT_IMAGE_SRC')
         return get_thumbnail(source, *args, **kwargs)
-    except Exception as e:
-        logger.error('Thumbnail had Exception: %s' % (e,))
-        return None
-
+    except:
+        source = getattr(settings, 'DEFAULT_IMAGE_SRC')
+        return get_thumbnail(source, *args, **kwargs)
