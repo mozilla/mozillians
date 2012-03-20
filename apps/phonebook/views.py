@@ -77,7 +77,16 @@ def edit_profile(request):
                 instance=profile,
         )
         if form.is_valid():
+            old_username = request.user.username
             form.save(request)
+
+            # Notify the user that their old profile URL won't work.
+            if (not profile.is_vouched and
+                request.user.username != old_username):
+                messages.info(request, _(u'You changed your username; please '
+                                          'note your profile URL has also '
+                                          'changed.'))
+
             return redirect(reverse('profile', args=[request.user.username]))
     else:
         initial = dict(first_name=request.user.first_name,

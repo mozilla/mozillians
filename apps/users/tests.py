@@ -178,6 +178,38 @@ class RegistrationTest(TestCase):
             assert r.context['form'].errors, (
                 "Didn't raise errors for %s" % name)
 
+    def test_nickname_changes_before_vouch(self):
+        """Notify pre-vouched users of URL change from nickname changes.
+
+        See: https://bugzilla.mozilla.org/show_bug.cgi?id=736556"""
+        d = dict(assertion=self.fake_assertion)
+        email = 'soy@latte.net'
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+
+        # Note: No username supplied.
+        d = dict(
+                 email=email,
+                 first_name='Tofu',
+                 last_name='Matt',
+                 optin=True
+        )
+        with browserid_mock.mock_browserid(email):
+            r = self.client.post(reverse('register'), d, follow=True)
+
+        doc = pq(r.content)
+
+        assert r.context['user'].id, 'User should be created'
+        assert not r.context['user'].get_profile().is_vouched, (
+                'User should not be vouched')
+
+        d['username'] = 'testatron'
+        r = self.client.post(reverse('profile.edit'), d, follow=True)
+
+        assert 'You changed your username;' in r.content, (
+                'User should know that changing their username changes '
+                'their URL.')
+
     def test_repeat_username(self):
         """Verify one cannot repeat email adresses."""
         register = dict(
