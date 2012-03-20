@@ -9,7 +9,7 @@ class oh_my_zsh {
     }
 
     exec { "change-shell":
-        command => "sudo chsh vagrant /usr/bin/zsh",
+        command => "sudo chsh vagrant -s /usr/bin/zsh",
         require => Exec['oh-my-zsh'];
     }
 }
