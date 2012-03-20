@@ -46,12 +46,12 @@ you:
 
 5. Setup the database::
 
-     $ ./manage.py syncdb --noinput
-     $ ./manage.py migrate
+    $ ./manage.py syncdb --noinput
+    $ ./manage.py migrate
 
 6. Run the development web server (in the virtualized environment)::
 
-     $ ./manage.py runserver 0.0.0.0:8000
+    $ ./manage.py runserver 0.0.0.0:8000
 
   .. note::
       ``rs`` is one of the many handy Django aliases included in the
