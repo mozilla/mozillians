@@ -31,7 +31,10 @@ class Migration(DataMigration):
                     print new_pic
                     print p.photo.url
                 except Exception as e:
+                    # Something happened, assume no pic and log it.
                     print e
+                    p.photo = ''
+                    p.save()
 
     def backwards(self, orm):
         """Not needed since old pics are not deleted"""
