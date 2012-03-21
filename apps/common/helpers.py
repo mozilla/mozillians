@@ -18,6 +18,7 @@ def thumbnail(source, *args, **kwargs):
         if not source.path:
             source = kwargs.get('default')
         return get_thumbnail(source, *args, **kwargs)
-    except:
+    except Exception as e:
+        logger.error('Thumbnail had Exception: %s' % (e,))
         source = getattr(settings, 'DEFAULT_IMAGE_SRC')
         return get_thumbnail(source, *args, **kwargs)
