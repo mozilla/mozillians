@@ -200,5 +200,4 @@ THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
-# This path is relative to MEDIA_ROO
-DEFAULT_IMAGE_SRC = 'img/unknown.png'
+DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')

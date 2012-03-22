@@ -26,7 +26,7 @@ class Migration(DataMigration):
                     new_pic = '%s/profile-%d.jpg' % (new_path, p.id)
                     shutil.copy(old_pic, new_pic)
                     p.photo.file = file(new_pic)
-                    p.photo.name = 'userprofile/profile-%d.jpg' % p.id
+                    p.photo.name = './userprofile/profile-%d.jpg' % p.id
                     p.save()
                     print new_pic
                     print p.photo.url
