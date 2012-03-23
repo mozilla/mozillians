@@ -223,7 +223,7 @@ def resize_photo(sender, instance, **kwargs):
     if instance.photo:
         path = str(instance.photo.path)
         img = Image.open(path)
-        img = ImageOps.fit(img, (300, 300), Image.ANTIALIAS, 0, (0.5, 0.5))
+        img = ImageOps.fit(img, (600, 600), Image.ANTIALIAS, 0, (0.5, 0.5))
         img.save(path)
 
 @receiver(dbsignals.post_delete, sender=UserProfile)
