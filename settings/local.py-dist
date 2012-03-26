@@ -28,9 +28,6 @@ DATABASES = {
     },
 }
 
-# Disable BrowserID Cert Checking
-BROWSERID_DISABLE_CERT_CHECK = True
-
 #Serve Profile Photos from django
 UPLOAD_URL = '/media/uploads'
 
@@ -57,3 +54,5 @@ ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians_dev')
 
 CELERY_ALWAYS_EAGER = True
+
+JAVA_BIN = '/usr/bin/java'
