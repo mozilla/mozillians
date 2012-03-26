@@ -72,7 +72,7 @@ MINIFY_BUNDLES = {
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.7.1.js',
+            'js/libs/jquery-1.7.2.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
             'js/libs/bootstrap/bootstrap-transition.js',
             'js/libs/bootstrap/bootstrap-alert.js',
@@ -84,14 +84,16 @@ MINIFY_BUNDLES = {
             'js/libs/bootstrap/bootstrap-collapse.js',
             'js/libs/bootstrap/bootstrap-carousel.js',
             'js/libs/bootstrap/bootstrap-typeahead.js',
-            'js/libs/jquery.endless-scroll.js',
-            'js/libs/tag-it/js/tag-it.js',
             'js/libs/validation/validation.js',
             'js/main.js',
             'js/browserid.js',
             'js/groups.js',
         ),
+        'edit_profile': (
+            'js/libs/tag-it/js/tag-it.js',
+        ),
         'search': (
+            'js/libs/jquery.endless-scroll.js',
             'js/infinite.js',
         ),
         'backbone': (
