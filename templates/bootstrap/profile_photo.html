@@ -7,8 +7,7 @@
     {% endif %}
     <p class="help-block">
       <div class="thumbnail">
-        {% set img = thumbnail(bf_raw.form.initial['photo'] , '400x400', crop="center", default="img/unknown.png") %}
-        <img id="profile-photo" src="{{ img.url }}" alt="{{ _('Profile photo') }}">
+        <img id="profile-photo" src="{{ bf_raw.form.instance.photo_url() }}" alt="{{ _('Profile photo') }}">
       </div>
     </p>
     {% if bf_raw.form.initial['photo'] %}

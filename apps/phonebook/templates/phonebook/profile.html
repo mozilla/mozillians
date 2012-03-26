@@ -149,8 +149,7 @@
 
     <div class="span2">
       <div class="thumbnail">
-        {% set img = thumbnail(profile.photo, '400x400', crop="center", default="img/unknown.png") %}
-        <img id="profile-photo" src="{{ img.url }}" alt="{{ _('Profile photo') }}">
+        <img id="profile-photo" src="{{ profile.photo_url() }}" width="600" alt="{{ _('Profile photo') }}">
       </div>
     </div>
   </div>

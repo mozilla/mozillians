@@ -1,7 +1,6 @@
 <div class="result">
   <div class="avatar">
-    {% set img = thumbnail(profile.photo, '100x100', crop='center', default="img/unknown.png") %}
-    <img class="profile-photo" src="{{ img.url }}" alt="{{ _('Profile Photo') }}">
+    <img class="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile Photo') }}">
   </div>
   <div class="details">
     <h2>
