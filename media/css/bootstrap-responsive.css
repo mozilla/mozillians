@@ -101,6 +101,9 @@
     width: auto;
     margin: 0;
   }
+  .well {
+    padding: 19px 19px 39px 19px;
+  }
 }
 @media (min-width: 768px) and (max-width: 980px) {
   .row {
