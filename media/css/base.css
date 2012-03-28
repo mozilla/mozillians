@@ -155,10 +155,6 @@ nav .nav a.browser_id_login {
     padding-bottom:0;
 }
 
-#quick-search-link {
-    display:none;
-}
-
 #body-home #create_profile {
     background-image:0 color-stop(0.73,rgb(58,170,255)) );
     border:1px solid #3697E5;
