@@ -4,21 +4,24 @@
  */
 @media (min-width: 480px) and (max-width: 768px) {
 }
+
 @media (max-width: 768px) {
     body {
         background-image: none;
     }
+
     .welcome {
         background-image: none;
         width: auto;
         text-align: initial;
         padding: initial;
-
     }
-    #quick-search-link {
-	display:block !important;
-	}
-	#quick-search {
-	display:none;
-	}
+
+    #profile-info {
+        overflow: hidden;
+    }
+
+    #quick-search {
+        display:none;
+    }
 }
