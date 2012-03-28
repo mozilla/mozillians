@@ -9,18 +9,18 @@
     body {
         background-image: none;
     }
+
     .welcome {
         background-image: none;
         width: auto;
         text-align: initial;
         padding: initial;
     }
+
     #profile-info {
         overflow: hidden;
     }
-    #quick-search-link {
-        display:block !important;
-    }
+
     #quick-search {
         display:none;
     }
