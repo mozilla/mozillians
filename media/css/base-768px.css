@@ -4,6 +4,7 @@
  */
 @media (min-width: 480px) and (max-width: 768px) {
 }
+
 @media (max-width: 768px) {
     body {
         background-image: none;
@@ -13,12 +14,14 @@
         width: auto;
         text-align: initial;
         padding: initial;
-
+    }
+    #profile-info {
+        overflow: hidden;
     }
     #quick-search-link {
-	display:block !important;
-	}
-	#quick-search {
-	display:none;
-	}
+        display:block !important;
+    }
+    #quick-search {
+        display:none;
+    }
 }
