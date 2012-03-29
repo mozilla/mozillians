@@ -268,7 +268,7 @@ a.btn {
 }
 
 .search-page .result h2 {
-    font-size:19px;
+    font-size:16px;
     margin:0;
 }
 
@@ -282,7 +282,7 @@ a.btn {
 }
 
 dl {
-    overflow:auto;
+    overflow: hidden;
 }
 
 dt,dd {
@@ -294,7 +294,7 @@ dt {
     float:left;
     font-weight:700;
     margin-right:2%;
-    width:30%;
+    width:50%;
 }
 
 dd {
