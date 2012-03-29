@@ -19,6 +19,3 @@ class RegistrationForm(UserForm):
         widgets = {
             'bio': forms.Textarea(),
         }
-        custom_fields = {
-            'optin': 'bootstrap/field_optin.html'
-        }

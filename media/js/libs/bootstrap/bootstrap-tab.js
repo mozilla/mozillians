@@ -122,7 +122,7 @@
 
   $(function () {
     $('body').on('click.tab.data-api', '[data-toggle="tab"], [data-toggle="pill"]', function (e) {
-      e.preventDefault()
+      // Don't prevent default to allow us to keep tab state accross a refresh
       $(this).tab('show')
     })
   })

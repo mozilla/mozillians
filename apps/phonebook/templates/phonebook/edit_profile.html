@@ -10,18 +10,100 @@
 {% block main_content %}
   <form action="{{ edit_form_action }}"
         method="POST" enctype="multipart/form-data"
-        class="form-horizontal">
+        class="form-horizontal edit-profile">
     {{ csrf() }}
     <h1>{{ _('Edit Your Profile') }}</h1>
-
-    {{ form }}
+    <div class="tabbable">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
+        <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
+        <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="1">
+          {% include 'phonebook/includes/photo_form.html' %}
+          {{ bootstrap(form.first_name) }}
+          {{ bootstrap(form.last_name) }}
+          {{ bootstrap(form.bio) }}
+        </div>
+        <div class="tab-pane" id="skills">
+          <p class="field_description">
+            {% trans %}
+              Groups are a community of Mozillians with some relation to each
+              other. This can be an interest, team, project, product or
+              sub-community.
+            {% endtrans %}
+          </p>
+          {{ form.groups.label_tag() }}
+          {{ form.groups }}
+        </div>
+        <div class="tab-pane" id="vouches">
+          <div class="control-group">
+            <label class="control-label">{{ _('Vouched By') }}</label>
+            <div class="controls">
+              <span class="label-text">
+                {% if profile.vouched_by %}
+                  <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
+                    {{ profile.vouched_by.display_name }}
+                  </a>
+                {% elif profile.is_autovouched %}
+                  {{ _('You are automatically vouched!') }}
+                {% else %}
+                  {% trans profile_url=absolutify(url('profile', user.username)) %}
+                    You aren't vouched! Send this link to a mozillian who can
+                    vouch for your contributions:
+                    <em class="underline" title="Your profile URL">
+                      {{ profile_url }}
+                    </em>
+                  {% endtrans %}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="account">
+          {{ bootstrap(form.username) }}
+          <div class="control-group">
+            <label class="control-label">{{ _('BrowserID Email') }}</label>
+            <div class="controls">
+              <span class="label-text">{{ user.email }}</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{ _('Password') }}</label>
+            <div class="controls">
+              <span class="label-text">
+                {% trans browserid='https://browserid.org/' %}
+                  Change your password at <a href={{ browserid }}>BrowserID</a>
+                {% endtrans %}
+              </span>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label">{{ _('Delete Account') }}</label>
+            <div class="controls">
+              <span class="label-text">
+                {% trans %}
+                  If you delete your account it'll make it tougher for us to
+                  find you as a member of the Mozilla Community. You won't get
+                  to track your contributions over different sub-communities,
+                  and you'll need to regester all over with new information.
+                  Please don't go?
+                {% endtrans %}
+              </span>
+              <a class="span2" id="delete_profile" href="{{ url('profile.delete_confirm') }}">
+                {{ _('Delete Profile') }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="edit_controls">
       <button type="submit" class="span2 btn btn-primary">{{ _('Update') }}</button>
       <a href="{{ url('profile', user.username) }}" class="span2 btn">
         {{ _('Cancel') }}{# L10n: Cancel editing #}
-      </a>
-      <a class="span2 offset2" id="delete_profile" href="{{ url('profile.delete_confirm') }}">
-        {{ _('Delete Profile') }}
       </a>
     </div>
   </form>
