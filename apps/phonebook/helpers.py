@@ -3,6 +3,9 @@ import re
 import urllib
 
 from django.conf import settings
+from django.template import Context
+from django.template.loader import get_template
+from django.utils.safestring import mark_safe
 
 import jinja2
 from funfactory.utils import absolutify
@@ -43,3 +46,22 @@ def gravatar(
                 'r': rating,
             })
     )
+
+
+@register.function
+def bootstrap(element):
+    """
+    Renders bootstrap forms in jinja2.
+
+    Takes an element that is either a field or an entire form and renders
+    the appropriate bootstrap elements
+    """
+    element_type = element.__class__.__name__.lower()
+    if element_type == 'boundfield':
+        template = get_template("bootstrapform/field.html")
+        context = Context({'field': element})
+    else:
+        template = get_template("bootstrapform/form.html")
+        context = Context({'form': element})
+
+    return mark_safe(template.render(context))

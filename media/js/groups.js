@@ -1,5 +1,6 @@
 (function($) {
     $().ready(function() {
+        $('a[href=' + location.hash + ']').tab('show');
         if ($('#body-edit-profile').length) {
             $('#id_groups').tagit({
                 allowSpaces: true,

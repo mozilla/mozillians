@@ -7,10 +7,10 @@
 {% block main_content %}
   <form action="{{ url('register') }}"
         method="POST" enctype="multipart/form-data"
-        class="form-horizontal">
+        class="well form-horizontal">
     {{ csrf() }}
     <h1>{{ _('Create Your Profile') }}</h1>
-    {{form}}
+    {{ bootstrap(form) }}
     <div id="edit_controls">
       <button type="submit" class="span2 btn btn-primary">{{ _('Create Profile') }}</button>
       <a href="{{ url('profile', user.username) }}" class="span2 btn">

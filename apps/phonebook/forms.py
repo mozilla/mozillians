@@ -4,9 +4,9 @@ from urlparse import urlparse
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import resolve
+from django.utils.safestring import mark_safe
 
 import happyforms
-from bootstrap.forms import BootstrapModelForm, Fieldset
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
@@ -36,7 +36,16 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class UserForm(BootstrapModelForm):
+class UsernameWidget(forms.widgets.Input):
+    type = 'text'
+
+    def render(self, *args, **kwargs):
+        return mark_safe(u'<span class="label-text">'
+                          'http://mozillians.org/ </span>%s' %
+                super(UsernameWidget, self).render(*args, **kwargs))
+
+
+class UserForm(forms.ModelForm):
     """
     Instead of just inhereting form a UserProfile model form, this base class
     allows us to also abstract over methods that have to do with the User
@@ -47,7 +56,7 @@ class UserForm(BootstrapModelForm):
                                                              required=False)
     last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
                                                            required=True)
-    username = forms.CharField(label=_lazy(u'Nickname'), max_length=30,
+    username = forms.CharField(label=_lazy(u'Username'), max_length=30,
                                                          required=False)
 
     def clean_username(self):
@@ -100,7 +109,14 @@ class ProfileForm(UserForm):
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
-    groups = forms.CharField(label=_lazy(u'Groups'), required=False)
+    groups = forms.CharField(
+        label=_lazy(u'Start typing to add a group (example: Marketing, '
+                     'Support, WebDev, Thunderbird)'),
+        required=False)
+
+    username = forms.CharField(label=_lazy(u'Username'), max_length=30,
+                                                         required=False,
+                                                         widget=UsernameWidget)
 
     #: L10n: Street address; not entire address
     street = forms.CharField(label=_lazy(u'Address'), required=False)
@@ -117,18 +133,7 @@ class ProfileForm(UserForm):
         model = UserProfile
         fields = ('ircname', 'website', 'bio', 'photo')
         widgets = {
-            'bio': forms.Textarea(),
-        }
-
-        # Bootstrap stuff
-        template_base = 'bootstrap'
-        layout = (
-            Fieldset(_('Personal Info'), 'first_name', 'last_name', 'username', 'bio'),
-            Fieldset(_('Contact Info'), 'ircname', 'website'),
-            Fieldset(_('Other'), 'groups', 'photo'),
-        )
-        custom_fields = {
-            'photo': 'bootstrap/profile_photo.html'
+            'bio': forms.Textarea()
         }
 
     def clean_groups(self):
