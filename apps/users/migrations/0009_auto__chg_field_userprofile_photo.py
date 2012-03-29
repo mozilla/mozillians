@@ -13,8 +13,27 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
 
         # Changing field 'UserProfile.photo'
-        db.alter_column('profile', 'photo', self.gf('django.db.models.fields.BooleanField')())
+        try:
+            db.alter_column('profile', 'photo', self.gf('django.db.models.fields.BooleanField')())
+        except:
+            db.alter_column('profile', 'photo', self.gf('django.db.models.fields.BooleanField')())
 
+        if not db.dry_run:
+            import os
+            from django.conf import settings
+            for p in orm.UserProfile.objects.all():
+                try:
+                    old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
+                    if os.exists(old_pic):
+                        p.photo = True
+                        p.save()
+                    else:
+                        p.photo = False
+                        p.save()
+                except Exception as e:
+                    # Something happened, assume no pic and log it.
+                    p.photo = False
+                    p.save()
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
