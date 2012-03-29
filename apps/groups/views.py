@@ -57,25 +57,19 @@ def search(request):
 @vouch_required
 def show(request, id, url=None):
     """ List all users with this group."""
-    if not url:
-    	redirect(reverse('group', args=[group.id, group.url]))
-
-    
-    form = forms.SearchForm(request.GET)
     group = get_object_or_404(Group, id=id)
-
+    if not url:
+        redirect(reverse('group', args=[group.id, group.url]))
+    form = forms.SearchForm(request.GET)
     limit = forms.PAGINATION_LIMIT
     if form.is_valid():
         limit = form.cleaned_data['limit']
 
-    page = request.GET.get('page', 1)
-
     in_group = (request.user.get_profile()
                             .groups.filter(id=group.id).count())
     profiles = group.userprofile_set.all()
-
+    page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
-
     people = []
     try:
         people = paginator.page(page)
