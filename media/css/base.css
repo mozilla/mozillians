@@ -235,13 +235,26 @@ a.btn {
     width:70px;
 }
 
+.photo ul.photo_controls {
+    list-style: none;
+    float: left;
+}
+
+.photo ul.photo_controls li {
+    margin-bottom: 10px;
+}
+
+#id_photo_delete {
+    margin: 2px 5px 2px 0;
+}
+
 .photo #id_photo {
-    margin-bottom:18px;
+
 }
 
 .photo .checkbox {
-    float:left;
-    margin:5px 10px;
+    margin: 0;
+    padding: 0;
 }
 
 #edit_controls {
@@ -323,8 +336,17 @@ dd {
     margin-left:0;
 }
 
-.search-page .result,#profile-info {
+.tab-content .field_description {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.search-page .result, #profile-info {
     margin-bottom:15px;
+}
+
+.edit-profile {
+    max-width: 700px;
 }
 
 .well {
@@ -333,4 +355,15 @@ dd {
 
 .browserid_action_form {
     display: none;
+}
+
+.label-text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 18px;
+}
+
+#delete_profile {
+    margin-left: 0;
 }
