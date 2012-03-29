@@ -2,8 +2,6 @@
 import re
 from south.v2 import SchemaMigration
 from django.core.exceptions import ObjectDoesNotExist
-import random
-import string
 
 
 class Migration(SchemaMigration):
@@ -15,25 +13,19 @@ class Migration(SchemaMigration):
                 irc = user.userprofile.ircname
             except ObjectDoesNotExist:
                 irc = None
-            if user.username[:2] != u'u/':
-                # Only prepend if it's not there.
-                user.username = u'u/%s' % user.username
+
+            user.username = u'u/%s' % user.username
             if irc and self.clean_username(irc, orm):
-                user.username = irc
-            while not self.clean_username(user.username, orm):
-                # Let's make sure it's unique and move on.
-                user.username = ''.join(random.sample(string.ascii_lowercase,10))
+                    user.username = irc
             user.save()
 
     def clean_username(self, username, orm):
         # Don't be jacking somebody's username
-        if orm['auth.User'].objects.filter(username=username).count():
-            print "not unique"
+        if orm['auth.User'].objects.filter(username=username):
             return False
 
         # No funky characters in username
-        if not re.match(r'^(u/)?[a-zA-Z0-9 .:,_-]*$', username):
-            print "funky chars"
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', username):
             return False
 
         return True
