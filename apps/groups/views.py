@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.cache import cache_control
@@ -36,22 +36,19 @@ def index(request):
 
 @login_required
 @cache_control(must_revalidate=True, max_age=3600)
-def search(request):
+def search(request, searched_object=Group):
     """Simple wildcard search for a group using a GET parameter."""
-    data = dict(groups=[], search=True)
-    search_term = request.GET.get('term')
-
-    if search_term:
-        data['groups'] = list(Group.objects
-                                   .filter(name__istartswith=search_term,
-                                           auto_complete=True)
-                                   .values_list('name', flat=True))
+    data = dict(search=True)
+    data['groups'] = searched_object.search(request.GET.get('term'))
 
     if request.is_ajax():
         return HttpResponse(json.dumps(data['groups']),
                             mimetype='application/json')
-    else:
+
+    if searched_object == Group:
         return render(request, 'groups/index.html', data)
+    # Raise a 404 if this is a Skill page that isn't ajax
+    raise Http404
 
 
 @vouch_required
