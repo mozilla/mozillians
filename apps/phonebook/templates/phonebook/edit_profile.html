@@ -69,6 +69,22 @@
               </span>
             </div>
           </div>
+          {% if my_vouches %}
+            <div class="control-group">
+              <label class="control-label">{{ _('Vouchees') }}</label>
+              <div class="controls">
+                <ul class="vouchees">
+                  {% for vouchee in my_vouches %}
+                    <li class="label-text">
+                      <a href="{{ url('profile', vouchee.user.username) }}" class="vouched">
+                        {{ vouchee.display_name }}
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          {% endif %}
         </div>
         <div class="tab-pane" id="account">
           {{ bootstrap(form.username) }}
@@ -93,11 +109,9 @@
             <div class="controls">
               <span class="label-text">
                 {% trans %}
-                  If you delete your account it'll make it tougher for us to
-                  find you as a member of the Mozilla Community. You won't get
-                  to track your contributions over different sub-communities,
-                  and you'll need to regester all over with new information.
-                  Please don't go?
+                  I acknowledge that deleting my account will make it tougher
+                  for me to show off my contributions and easily be found by
+                  other members of the Mozilla community.
                 {% endtrans %}
               </span>
               <a class="span2" id="delete_profile" href="{{ url('profile.delete_confirm') }}">
