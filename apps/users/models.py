@@ -115,16 +115,6 @@ class UserProfile(SearchMixin, models.Model):
 
         m2mfield.add(*groups_to_add)
 
-    def get_confirmation_url(self):
-        url = (absolutify(reverse('confirm')) + '?code=' +
-               self.confirmation_code)
-        return url
-
-    def get_send_confirmation_url(self):
-        url = (reverse('send_confirmation') + '?' +
-               urllib.urlencode({'user': self.user.username}))
-        return url
-
     def is_complete(self):
         """
         Tests if a user has all the information needed to move on past the
