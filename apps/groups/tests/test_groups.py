@@ -1,12 +1,15 @@
 import json
 
+from django.contrib.auth.models import User
+
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 import common.tests
+from groups.cron import assign_autocomplete_to_groups
 from groups.helpers import stringify_groups
-from groups.models import Group
+from groups.models import AUTO_COMPLETE_COUNT, Group
 
 
 class GroupTest(common.tests.TestCase):
@@ -21,6 +24,31 @@ class GroupTest(common.tests.TestCase):
 
         assert not self.mozillian.get_profile().groups.all(), (
                 'User should have no groups by default.')
+
+    def test_autocomplete_api(self):
+        self.client.login(email=self.mozillian.email)
+
+        r = self.client.get(reverse('group_search'), dict(term='daft'),
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        eq_(r['Content-Type'], 'application/json', 'api uses json header')
+        assert not 'daft_punk' in json.loads(r.content)
+
+        # Make enough users in a group to trigger the autocomplete
+        robots = Group.objects.create(name='daft_punk')
+        for i in range(0, AUTO_COMPLETE_COUNT + 1):
+            email = 'tallowen%s@example.com' % (str(i))
+            user = User.objects.create_user(email.split('@')[0], email)
+            user.is_active = True
+            user.save()
+            profile = user.get_profile()
+            profile.groups.add(robots)
+
+        assign_autocomplete_to_groups()
+        r = self.client.get(reverse('group_search'), dict(term='daft'),
+                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
+        assert 'daft_punk' in json.loads(r.content)
 
     def test_groups_are_always_lowercase(self):
         """Ensure all groups are saved with lowercase names only."""

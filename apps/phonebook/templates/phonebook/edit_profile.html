@@ -37,6 +37,14 @@
           </p>
           {{ form.groups.label_tag() }}
           {{ form.groups }}
+          <p class="field_description">
+            {% trans %}
+              A skill is the learned capacity to carry out pre-determined
+              results often with the minimum outlay of time, energy, or both.
+            {% endtrans %}
+          </p>
+          {{ form.skills.label_tag() }}
+          {{ form.skills }}
         </div>
         <div class="tab-pane" id="vouches">
           <div class="control-group">

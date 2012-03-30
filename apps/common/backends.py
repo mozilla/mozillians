@@ -20,6 +20,7 @@ class MozilliansBrowserID(BrowserIDBackend):
     assertion. This is dangerous. Don't use authenticated_email unless you've
     just verified somebody.
     """
+    supports_inactive_user = False
 
     def authenticate(self, assertion=None, audience=None, authenticated_email=None):
         if authenticated_email:
