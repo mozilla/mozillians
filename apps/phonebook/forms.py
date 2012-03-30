@@ -10,7 +10,7 @@ import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
-from groups.models import Group
+from groups.models import Group, Skill
 from users.models import User, UserProfile
 
 
@@ -109,10 +109,12 @@ class ProfileForm(UserForm):
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
-    groups = forms.CharField(
-        label=_lazy(u'Start typing to add a group (example: Marketing, '
-                     'Support, WebDev, Thunderbird)'),
-        required=False)
+    groups = forms.CharField(label=_lazy(
+            u'Start typing to add a group (example: Marketing, '
+            'Support, WebDev, Thunderbird)'), required=False)
+    skills = forms.CharField(label=_lazy(
+            u'Start typing to add a skill (example: Python, javascript, '
+            'Graphic Design, User Research)'), required=False)
 
     username = forms.CharField(label=_lazy(u'Username'), max_length=30,
                                                          required=False,
@@ -152,29 +154,20 @@ class ProfileForm(UserForm):
 
         return system_groups + new_groups
 
+    def clean_skills(self):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+            raise forms.ValidationError(_(u'Skills can only contain '
+                                           'alphanumeric characters, dashes, '
+                                           'spaces.'))
+        return [s.strip()
+                for s in self.cleaned_data['skills'].lower().split(',')
+                if s and ',' not in s]
+
     def save(self, request):
         """Save the data to profile."""
-        self._save_groups(request)
+        self.instance.set_membership(Group, self.cleaned_data['groups'])
+        self.instance.set_membership(Skill, self.cleaned_data['skills'])
         super(ProfileForm, self).save(request.user)
-
-    def _save_groups(self, request):
-        """Parse a string of (usually comma-demilited) groups and save them."""
-        profile = request.user.get_profile()
-
-        # Remove any non-system groups that weren't supplied in this list.
-        profile.groups.remove(*[g for g in profile.groups.all()
-                                if g.name not in self.cleaned_data['groups']
-                                and not g.system])
-
-        # Add/create the rest of the groups
-        groups_to_add = []
-        for g in self.cleaned_data['groups']:
-            (group, created) = Group.objects.get_or_create(name=g)
-
-            if not group.system:
-                groups_to_add.append(group)
-
-        profile.groups.add(*groups_to_add)
 
 
 class VouchForm(happyforms.Form):

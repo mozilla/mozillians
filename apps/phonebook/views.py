@@ -53,14 +53,10 @@ def profile(request, username):
     vouch_form = None
     profile = user.get_profile()
 
-    if not profile.is_vouched and request.user.username != username:
+    if not profile.is_vouched and request.user.get_profile().is_vouched:
         vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 
-    # Get user groups from their profile.
-    groups = profile.groups.all()
-
-    data = dict(shown_user=user, profile=profile, vouch_form=vouch_form,
-                groups=groups)
+    data = dict(shown_user=user, profile=profile, vouch_form=vouch_form)
     return render(request, 'phonebook/profile.html', data)
 
 
@@ -69,6 +65,7 @@ def profile(request, username):
 def edit_profile(request):
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
+    user_skills = stringify_groups(profile.skills.all().order_by('name'))
 
     if request.method == 'POST':
         form = forms.ProfileForm(
@@ -94,7 +91,8 @@ def edit_profile(request):
                        bio=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
-                       groups=user_groups,)
+                       groups=user_groups,
+                       skills=user_skills)
 
         if not request.user.username.startswith('u/'):
             initial.update(username=request.user.username)

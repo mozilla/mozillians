@@ -17,7 +17,7 @@ from sorl.thumbnail import ImageField
 from PIL import Image, ImageOps
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from groups.models import Group
+from groups.models import Group, Skill
 from phonebook.models import get_random_string
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
@@ -46,6 +46,7 @@ class UserProfile(SearchMixin, models.Model):
                                    on_delete=models.SET_NULL)
 
     groups = models.ManyToManyField('groups.Group')
+    skills = models.ManyToManyField('groups.Skill')
     bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
                                            default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
@@ -55,13 +56,64 @@ class UserProfile(SearchMixin, models.Model):
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
 
+    @property
+    def full_name(self):
+        return '%s %s' % (self.user.first_name, self.user.last_name)
+
     class Meta:
         db_table = 'profile'
 
-    def photo_url(self):
-        if self.photo:
-            return self.photo.url
-        return '/media/img/unknown.png'
+    def __unicode__(self):
+        """Return this user's name when their profile is called."""
+        return self.display_name
+
+    def anonymize(self):
+        """Remove personal info from a user"""
+
+        for name in ['first_name', 'last_name', 'email']:
+            setattr(self.user, name, '')
+
+        # Give a random username
+        self.user.username = uuid.uuid4().hex[:30]
+        self.user.is_active = False
+
+        self.user.save()
+
+        for f in self._meta.fields:
+            if not f.editable or f.name in ['id', 'user']:
+                continue
+
+            if f.default == models.fields.NOT_PROVIDED:
+                raise Exception('No default value for %s' % f.name)
+
+            setattr(self, f.name, f.default)
+
+        for f in self._meta.many_to_many:
+            getattr(self, f.name).clear()
+
+        self.save()
+
+    def set_membership(self, model, membership_list):
+        """ Alters membership to Groups and Skillz """
+        if model is Group:
+            m2mfield = self.groups
+        elif model is Skill:
+            m2mfield = self.skills
+
+        # Remove any non-system groups that weren't supplied in this list.
+        m2mfield.remove(*[g for g in m2mfield.all()
+                                if g.name not in membership_list
+                                and not getattr(g, 'system', False)])
+
+        # Add/create the rest of the groups
+        groups_to_add = []
+        for g in membership_list:
+            (group, created) = model.objects.get_or_create(name=g)
+
+            if not getattr(g, 'system', False):
+                groups_to_add.append(group)
+
+        m2mfield.add(*groups_to_add)
 
     def is_complete(self):
         """
@@ -69,6 +121,11 @@ class UserProfile(SearchMixin, models.Model):
         original registration view
         """
         return self.display_name and self.display_name != ' '
+
+    def photo_url(self):
+        if self.photo:
+            return self.photo.url
+        return '/media/img/unknown.png'
 
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
@@ -86,16 +143,6 @@ class UserProfile(SearchMixin, models.Model):
             # Email the user and tell them they were vouched.
             self._email_now_vouched()
 
-    def get_confirmation_url(self):
-        url = (absolutify(reverse('confirm')) + '?code=' +
-               self.confirmation_code)
-        return url
-
-    def get_send_confirmation_url(self):
-        url = (reverse('send_confirmation') + '?' +
-               urllib.urlencode({'user': self.user.username}))
-        return url
-
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
@@ -104,14 +151,6 @@ class UserProfile(SearchMixin, models.Model):
                      "and invite other Mozillians onto the site.")
         send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.user.email])
-
-    @property
-    def full_name(self):
-        return '%s %s' % (self.user.first_name, self.user.last_name)
-
-    def __unicode__(self):
-        """Return this user's name when their profile is called."""
-        return self.display_name
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
@@ -139,32 +178,6 @@ class UserProfile(SearchMixin, models.Model):
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
         return s
-
-    def anonymize(self):
-        """Remove personal info from a user"""
-
-        for name in ['first_name', 'last_name', 'email']:
-            setattr(self.user, name, '')
-
-        # Give a random username
-        self.user.username = uuid.uuid4().hex[:30]
-        self.user.is_active = False
-
-        self.user.save()
-
-        for f in self._meta.fields:
-            if not f.editable or f.name in ['id', 'user']:
-                continue
-
-            if f.default == models.fields.NOT_PROVIDED:
-                raise Exception('No default value for %s' % f.name)
-
-            setattr(self, f.name, f.default)
-
-        for f in self._meta.many_to_many:
-            getattr(self, f.name).clear()
-
-        self.save()
 
 
 @receiver(models.signals.post_save, sender=User)
@@ -210,13 +223,6 @@ def add_to_staff_group(sender, instance, created, **kwargs):
             instance.groups.add(Group.objects.get(name='staff', system=True))
 
 
-@receiver(dbsignals.post_save, sender=User)
-@receiver(dbsignals.post_save, sender=UserProfile)
-def update_search_index(sender, instance, **kw):
-    from elasticutils import tasks
-    tasks.index_objects.delay(UserProfile, [instance.id])
-
-
 @receiver(dbsignals.post_save, sender=UserProfile)
 def resize_photo(sender, instance, **kwargs):
     if instance.photo:
@@ -224,6 +230,13 @@ def resize_photo(sender, instance, **kwargs):
         img = Image.open(path)
         img = ImageOps.fit(img, (300, 300), Image.ANTIALIAS, 0, (0.5, 0.5))
         img.save(path)
+
+
+@receiver(dbsignals.post_save, sender=User)
+@receiver(dbsignals.post_save, sender=UserProfile)
+def update_search_index(sender, instance, **kw):
+    from elasticutils import tasks
+    tasks.index_objects.delay(UserProfile, [instance.id])
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile)

@@ -120,11 +120,11 @@
         </div>
       {% endif %}
 
-      {% if groups %}
+      {% if profile.groups.count() %}
         <h3>{{ _('Groups') }}</h3>
 
         <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in groups %}
+          {% for group in profile.groups.all() %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
               {% if request.user.get_profile().is_vouched %}
@@ -134,6 +134,19 @@
               {% else %}
                 {{ group.name }}
               {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if profile.skills.count() %}
+        <h3>{{ _('Skills') }}</h3>
+
+        <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+          {% for group in profile.skills.all() %}
+            <li class="tagit-choice ui-widget-content ui-state-default
+                       ui-corner-all p-category category">
+              {{ group.name }}
             </li>
           {% endfor %}
         </ul>
