@@ -107,6 +107,7 @@ def edit_profile(request):
     d = dict(form=form,
              mode='edit',
              user_groups=user_groups,
+             my_vouches=UserProfile.objects.filter(vouched_by=profile),
              profile=profile)
     return render(request, 'phonebook/edit_profile.html', d)
 

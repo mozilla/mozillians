@@ -408,3 +408,9 @@ footer div.container {
     margin-left: auto;
     margin-right: auto;
 }
+
+.vouchees {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
