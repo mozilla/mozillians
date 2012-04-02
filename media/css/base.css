@@ -368,8 +368,22 @@ dd {
     float:left;
 }
 
-.control-group ul.tagit,#profile-info #groups {
+#skills ul.tagit, #profile-info #groups, #profile-info #skills {
     margin-left:0;
+    background: none;
+    border: 0;
+}
+
+#skills li.tagit-new input {
+    background: #fff;
+    border: 1px solid #CCC;
+    border-radius: 3px;
+    color: #555;
+    font-size: 13px;
+    height: 26px;
+    line-height: 18px;
+    padding: 4px;
+    width: 210px;
 }
 
 .tab-content .field_description {
