@@ -332,8 +332,13 @@ dd {
     float:left;
 }
 
-.control-group ul.tagit,#profile-info #groups {
+.control-group ul.tagit,#profile-info #groups, #profile-info #skills {
     margin-left:0;
+}
+
+#profile-info #groups, #profile-info #skills {
+    background: none;
+    border: 0;
 }
 
 .tab-content .field_description {
