@@ -156,21 +156,57 @@ nav .nav a.browser_id_login {
 }
 
 #body-home #create_profile {
-    background-image:0 color-stop(0.73,rgb(58,170,255)) );
-    border:1px solid #3697E5;
-    border-radius:1px;
-    white-space:nowrap;
+    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(58,170,255))
+    );
+    border: 1px solid #3697E5;
+    border-radius: 1px;
+    white-space: nowrap;
 }
 
 #body-home #create_profile:hover {
-    background-image:0 color-stop(0.73,rgb(89,180,254)) );
-    cursor:pointer;
-    border:1px solid #3697E5;
+    background-image: linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -o-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+    background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(89,180,254) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(177,219,250)),
+    color-stop(0.73, rgb(89,180,254))
+    );
+    cursor: pointer;
+    border: 1px solid #3697E5;
 }
 
 #body-home #create_profile:active {
-    background-image:0 color-stop(0.73,rgb(58,170,255)) );
-    border:1px solid #3697E5;
+    background-image: linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -o-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -moz-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+    background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
+
+    background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.45, rgb(141,202,252)),
+    color-stop(0.73, rgb(58,170,255))
+    );
+    border: 1px solid #3697E5;
 }
 
 #body-home .id,#body-home .signin {
