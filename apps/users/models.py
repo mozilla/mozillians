@@ -1,4 +1,3 @@
-import urllib
 import uuid
 from datetime import datetime
 
@@ -11,8 +10,6 @@ from django.dispatch import receiver
 
 from elasticutils import S
 from elasticutils.models import SearchMixin
-from funfactory.utils import absolutify
-from funfactory.urlresolvers import reverse
 from sorl.thumbnail import ImageField
 from PIL import Image, ImageOps
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -47,8 +44,7 @@ class UserProfile(SearchMixin, models.Model):
 
     groups = models.ManyToManyField('groups.Group')
     skills = models.ManyToManyField('groups.Skill')
-    bio = models.CharField(max_length=255, verbose_name=_lazy(u'Bio'),
-                                           default='', blank=True)
+    bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
     display_name = models.CharField(max_length=255, default='', blank=True)
