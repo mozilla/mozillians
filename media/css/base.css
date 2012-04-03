@@ -450,10 +450,16 @@ footer div.container {
     text-decoration: underline;
 }
 
-.group-options .underline {
-    margin-right: 10px;
-}
-
 .group-options p {
     font-size: 16px;
+}
+
+.group-skills ul {
+    list-style: none;
+    padding-left: 20px;
+}
+
+.group-skills li {
+    float: left;
+    padding-right: 10px;
 }

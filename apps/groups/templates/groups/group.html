@@ -82,13 +82,15 @@
       </div>
       <div class="spag6 group-skills">
         <h3>{{ _('Which skills members have in common') }}</h3>
-          <p>
-            {% for skill in skills %}<span class="underline">{{ skill }}</span>{% endfor %}
-          </p>
+          <ul>
+            {% for skill in skills %}
+              <li><span class="underline">{{ skill }}</span></li>
+            {% endfor %}
+          </ul>
       </div>
     {% elif not group.system %}
       <form action="{{ url('group_toggle', group.id, group.url) }}"
-            id="toggle-group" method="post">
+            class="span2" id="toggle-group" method="post">
         {{ csrf() }}
 
         <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
