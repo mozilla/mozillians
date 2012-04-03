@@ -151,13 +151,12 @@
 <form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">{{ csrf() }}
   {{ browserid_form.as_p() }}
 </form>
-
 {% block site_js %}
   <script src="{{ url('jsi18n') }}"></script>
   {{ js('common') }}
   {% include "includes/webtrends_desktop.html" %}
 {% endblock %}
-{% block js %}{% endblock %}
+{% block page_js %}{% endblock %}
 <script src="https://browserid.org/include.js" type="text/javascript"></script>
 </body>
 </html>
