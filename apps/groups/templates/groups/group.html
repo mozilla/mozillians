@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {% trans name=group.name %}Users in Group "{{ name }}"{% endtrans %}
+{% endblock %}
+{% block body_id %}group-show{% endblock %}
+{% block body_classes %}
+  box-content search-page group-name-{{ group.name }}
+{% endblock %}
+
+{% block page_js %}
+  {{ js('search') }}
+{% endblock %}
+
+{% block main_content %}
+  <div class="row group-options">
+    {% trans name=group.name %}
+      <h1 class="span12">Users in Group "{{ name }}"</h1>
+    {% endtrans %}
+
+    {% if group.steward %}
+      <div class="span12">
+        <p class="span6">{{ group.description }}</p>
+        <form class="curated-toggle span2 offset3"
+              action="{{ url('group_toggle', group.id, group.url) }}"
+              id="toggle-group" method="post">
+          {{ csrf() }}
+
+          <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
+            {% if not in_group %}
+              {{ _('Join Group') }}
+            {% else %}
+              {{ _('Leave Group') }}
+            {% endif %}
+          </button>
+        </form>
+      </div>
+      <div class="span12">
+        <dl class="span12">
+          {% if group.irc_channel %}
+            {% if irc_channels|length > 1 %}
+              <dt>{{ _('IRC Channels') }}</dt>
+            {% else %}
+              <dt>{{ _('IRC Channel') }}</dt>
+            {% endif %}
+            <dd>
+              {% for irc in irc_channels %}
+                <a href="irc://irc.mozilla.org/{{ irc }}">
+                  {{ irc }}
+                </a>
+              {% endfor %}
+            </dd>
+          {% endif %}
+
+          {% if group.website %}
+            <dt>{{ _('Website') }}</dt>
+            <dd>{{ group.website|urlize }}</dd>
+          {% endif %}
+
+          {% if group.wiki %}
+            <dt>{{ _('Wiki') }}</dt>
+            <dd>{{ group.wiki|urlize }}</dd>
+          {% endif %}
+
+          <dt>{{ _('Members') }}</dt>
+          <dd>{{ members }}</dd>
+        </dl>
+      </div>
+      <div class="span6 steward">
+        <h3>{{ _('Community Steward') }}</h3>
+        <div class="avatar">
+          <img class="profile-photo" src="{{ group.steward.photo_url() }}" alt="{{ _('Profile Photo') }}">
+        </div>
+        <ul>
+          <li><span>{{ group.steward.display_name }}</span></li>
+          <li>
+            <a href="mailto:{{ group.steward.user.email }}">
+              {{ group.steward.user.email }}
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="spag6 group-skills">
+        <h3>{{ _('Skills members have in common') }}</h3>
+          <ul>
+            {% for skill in skills %}
+              <li><span class="underline">{{ skill }}</span></li>
+            {% endfor %}
+          </ul>
+      </div>
+    {% elif not group.system %}
+      <form action="{{ url('group_toggle', group.id, group.url) }}"
+            class="span2" id="toggle-group" method="post">
+        {{ csrf() }}
+
+        <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
+          {% if not in_group %}
+            {{ _('Join Group') }}
+          {% else %}
+            {{ _('Leave Group') }}
+          {% endif %}
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="well">
+    {% for person in people %}
+      {{ search_result(person) }}
+    {% endfor %}
+    {% if show_pagination %}
+      <div data-pages={{ num_pages }} class="pagination">
+        {% for page in people.paginator.page_range %}
+          {% if page == people.number %}
+            <span>{{ page }}</span>
+          {% else %}
+            <a href="#">{{ page }}</a>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div id="final-result">
+        <span>
+          {% trans count = people.paginator.count %}
+            Showing all {{ count }} results.
+          {% endtrans %}
+        </span>
+      </div>
+    {% endif %}
+  </div>
+{% endblock main_content %}

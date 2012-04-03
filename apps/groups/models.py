@@ -2,6 +2,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.template.defaultfilters import slugify
 
+from tower import ugettext_lazy as _lazy
 
 # If ten or more users use a group, it will get auto-completed.
 AUTO_COMPLETE_COUNT = 10
@@ -41,6 +42,17 @@ class GroupBase(models.Model):
 class Group(GroupBase):
     url = models.SlugField()
     system = models.BooleanField(db_index=True, default=False)
+    # Has a steward taken ownership of this group?
+    description = models.TextField(max_length=255,
+            verbose_name=_lazy(u'Description'), default='', blank=True)
+    steward = models.ForeignKey('users.UserProfile',
+            blank=True, null=True, on_delete=models.SET_NULL)
+    irc_channel = models.CharField(max_length=63,
+            verbose_name=_lazy(u'IRC Channel'), default='', blank=True)
+    website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
+            default='', blank=True)
+    wiki = models.URLField(max_length=200, verbose_name=_lazy(u'Wiki'),
+            default='', blank=True)
 
     class Meta:
         db_table = 'group'

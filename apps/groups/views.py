@@ -1,18 +1,20 @@
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
 
-from .models import Group
+from groups.models import Group, Skill
 from phonebook import forms
 from phonebook.views import vouch_required
+from users.models import UserProfile
 
 log = commonware.log.getLogger('m.groups')
 
@@ -87,12 +89,22 @@ def show(request, id, url=None):
              form=form,
              limit=limit,
              show_pagination=show_pagination,
-             num_pages=num_pages)
+             num_pages=num_pages,
+             members=UserProfile.objects.filter(group=group).count())
+
+    if group.steward:
+        # Get the 15 most globally popular skills that apear in the group
+        skills = [s.name for s in Skill.objects
+                                       .filter(userprofile__group__id=group.id)
+                                       .annotate(users=Count('userprofile'))
+                                       .order_by('users')][:15]
+        d.update(skills=skills)
+        d.update(irc_channels=group.irc_channel.split(' '))
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
 
-    return render(request, 'groups/show.html', d)
+    return render(request, 'groups/group.html', d)
 
 
 @require_POST
