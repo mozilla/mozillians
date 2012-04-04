@@ -416,7 +416,6 @@ def _create_new_user():
     eq_('registration/login.html', r.templates[0].name)
 
     u = User.objects.filter(email=params['email'])[0].get_profile()
-    u.is_confirmed = True
     u.save()
 
     r = newbie_client.login(email=newbie_email)

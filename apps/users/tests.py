@@ -391,31 +391,3 @@ class TestMigrateRegistration(TestCase):
                 r = self.client.post(reverse('register'), info, follow=True)
 
             eq_(r.status_code, 200)
-
-
-class TestDeleteUser(TestCase):
-    """Tests that our UserProfile fields haven't changed.
-
-    This is important because if they have changed they need to be added to our
-    'clean' method on userprofile.
-    """
-    def test_delete(self):
-        accounted_fields = ['website',
-                            'bio',
-                            'first_name',
-                            'last_name',
-                            'display_name',
-                            'is_confirmed',
-                            'photo',
-                            'email',
-                            'username',
-                            'last_login',
-                            'groups',
-                            'date_joined',
-                            'id',
-                            'ircname',
-                            'is_vouched']
-
-        if self.mozillian.get_profile().fields().keys().sort() != accounted_fields.sort():
-            raise Exception('Field in UserProfile clean method not accounted'
-                            ' for.')
