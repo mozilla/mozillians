@@ -6,6 +6,17 @@ class dev_hacks {
         source => "$PROJ_DIR/settings/local.py-dist";
     }
 
+    file { "/home/vagrant/.bashrc_vagrant":
+        ensure => file,
+        source => "$PROJ_DIR/puppet/files/home/vagrant/bashrc_vagrant",
+        owner => "vagrant", group => "vagrant", mode => 0644;
+    }
+
+    # Put our custom bash commands in a separate file.
+    exec { "amend_rc":
+        command => "echo 'if [ -f /home/vagrant/.bashrc_vagrant ] && ! shopt -oq posix; then . /home/vagrant/.bashrc_vagrant; fi' >> /home/vagrant/.bashrc"
+    }
+
     file { "/home/vagrant/.zshrc":
         ensure => file,
         source => "$PROJ_DIR/puppet/files/home/vagrant/zshrc",

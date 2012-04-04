@@ -1,0 +1,20 @@
+# You can customize this file however you like; it won't be overwritten by
+# vagrant/puppet/git.
+
+# TODO: Have this file have a bunch of variables that are currently in
+# dev-vagrant.pp so you can toggle provisioning steps locally.
+class local {
+
+    # Example: use bash as the default shell instead of zsh with oh-my-zsh.
+    exec { "use_bash":
+        command => "sudo chsh vagrant -s /bin/bash",
+    }
+
+    # Put our custom bash commands in a separate file.
+    # TODO: This is only here because the box wasn't provisioned with this
+    # inside its .bashrc. Next box provision you can remove this.
+    exec { "amend_rc":
+        command => "echo 'if [ -f /home/vagrant/.bashrc_vagrant ] && ! shopt -oq posix; then . /home/vagrant/.bashrc_vagrant; fi' >> /home/vagrant/.bashrc"
+    }
+
+}

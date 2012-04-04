@@ -12,10 +12,23 @@ $DB_PASS = "mozillians"
 $USE_YUM_CACHE_ON_HOST = 0
 $USE_SOUTH = 1
 
+# Set this to zero to reprovision a box from scatch. It will take awhile.
 $DONT_REPROVISION = 1
 
 Exec {
     path => "/usr/local/bin:/usr/bin:/usr/sbin:/sbin:/bin",
+}
+
+# You can define custom puppet commands to tailor your local development
+# environment to your taste in classes/local.pp. See local.py-dist for an
+# example.
+#
+# When provisioning a new box, don't include your local customizations.
+# TODO: Disable provisioning if local class is defined.
+if defined(local) {
+    include local
+} else {
+    notice("No local.pp found; use classes/local.pp for customizations.")
 }
 
 class dev {
@@ -40,24 +53,16 @@ if $DONT_REPROVISION == 1 {
         source => "$PROJ_DIR/settings/local.py-dist";
     }
 
+    file { "/home/vagrant/.bashrc_vagrant":
+        ensure => file,
+        source => "$PROJ_DIR/puppet/files/home/vagrant/bashrc_vagrant",
+        owner => "vagrant", group => "vagrant", mode => 0644;
+    }
+
     file { "/home/vagrant/.zshrc":
         ensure => file,
         source => "$PROJ_DIR/puppet/files/home/vagrant/zshrc",
         owner => "vagrant", group => "vagrant", mode => 0644;
-    }
-
-    # TODO: make this support centos or ubuntu (#centos)
-    exec { "sql_migrate":
-        cwd => "$PROJ_DIR", 
-        command => "/usr/bin/python2.6 manage.py syncdb --noinput",
-    }
-
-    if $USE_SOUTH == 1 {
-        exec { "south_migrate":
-            cwd => "$PROJ_DIR", 
-            command => "/usr/bin/python2.6 manage.py migrate",
-            require => Exec["sql_migrate"],
-        }
     }
 } else {
     include dev
