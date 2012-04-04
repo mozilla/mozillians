@@ -15,7 +15,6 @@ from PIL import Image, ImageOps
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from groups.models import Group, Skill
-from phonebook.models import get_random_string
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage
@@ -28,13 +27,8 @@ class UserProfile(SearchMixin, models.Model):
     user = models.OneToOneField(User)
 
     # Other fields here
-    confirmation_code = models.CharField(max_length=32, editable=False,
-                                         unique=True)
-    is_confirmed = models.BooleanField(default=False)
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
-    # If vouched because of Mozilla.* email, make note of it
-    is_autovouched = models.BooleanField(default=False)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
                               default='', blank=True, null=True)
 
@@ -127,7 +121,6 @@ class UserProfile(SearchMixin, models.Model):
         changed = system  # do we need to do a vouch?
         if system:
             self.is_vouched = True
-            self.is_autovouched = True
 
         if vouched_by and vouched_by.is_vouched:
             changed = True
@@ -149,8 +142,9 @@ class UserProfile(SearchMixin, models.Model):
                   [self.user.email])
 
     def fields(self):
-        attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
-                 'bio', 'display_name', 'ircname')
+        """Method used by elasticutils."""
+        attrs = (
+            'id', 'is_vouched', 'website', 'bio', 'display_name', 'ircname')
         d = dict((a, getattr(self, a)) for a in attrs)
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
@@ -186,18 +180,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         u = UserProfile.objects.get(user=instance)
         u.display_name = dn
         u.save()
-
-
-@receiver(models.signals.pre_save, sender=UserProfile)
-def generate_code(sender, instance, raw, using, **kwargs):
-    if instance.confirmation_code:
-        return
-
-    code = get_random_string(32)
-    while UserProfile.objects.filter(confirmation_code=code).count():
-        code = get_random_string(32)
-
-    instance.confirmation_code = code
 
 
 @receiver(models.signals.pre_save, sender=UserProfile)
