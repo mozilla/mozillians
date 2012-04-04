@@ -15,26 +15,4 @@ class playdoh_site {
         require => Exec["create_mysql_database"]
     }
 
-    # TODO: make this support centos or ubuntu (#centos)
-    exec { "sql_migrate":
-        cwd => "$PROJ_DIR", 
-        command => "/usr/bin/python2.6 manage.py syncdb --noinput",
-        require => [
-            Service["mysql"],
-            Package["python2.6-dev", "libapache2-mod-wsgi", "python-wsgi-intercept" ],
-
-            #centos Service["mysqld"],
-            #centos Package["python26-devel", "python26-mod_wsgi" ],
-            Exec["grant_mysql_database"]
-        ];
-    }
-
-    if $USE_SOUTH == 1 {
-        exec { "south_migrate":
-            cwd => "$PROJ_DIR", 
-            command => "/usr/bin/python2.6 manage.py migrate",
-            require => [ Exec["sql_migrate"] ];
-        }
-    }
-
 }
