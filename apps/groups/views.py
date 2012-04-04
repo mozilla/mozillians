@@ -89,8 +89,7 @@ def show(request, id, url=None):
              form=form,
              limit=limit,
              show_pagination=show_pagination,
-             num_pages=num_pages,
-             members=UserProfile.objects.filter(group=group).count())
+             num_pages=num_pages)
 
     if group.steward:
         # Get the 15 most globally popular skills that apear in the group
@@ -100,6 +99,7 @@ def show(request, id, url=None):
                                        .order_by('users')][:15]
         d.update(skills=skills)
         d.update(irc_channels=group.irc_channel.split(' '))
+        d.update(members=UserProfile.objects.filter(groups=group).count())
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
