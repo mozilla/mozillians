@@ -15,7 +15,7 @@ alias dj="./manage.py"
 alias runserver="dj runserver 0.0.0.0:8000"
 alias rs="runserver"
 alias t="dj test -x --logging-clear-handlers --with-nicedots"
-alias td="FORCE_DB=True t"
+alias td="FORCE_DB=True t --noinput"
 alias tf="dj test --logging-clear-handlers --with-nicedots --failed"
 alias tp="t --pdb --pdb-failure"
 
