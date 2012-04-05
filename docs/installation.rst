@@ -34,7 +34,9 @@ you:
     $ cd mozillians
 
 4. Run a virtual dev environment::
-
+    
+    $ vagrant box add base http://files.vagrantup.com/lucid32.box
+    $ vagrant init
     $ vagrant up
     $ vagrant ssh # you will now enter the virtualized environment
 
