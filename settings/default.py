@@ -2,7 +2,6 @@
 
 # Django settings for the mozillians project.
 import logging
-import os
 
 from funfactory.manage import path
 from funfactory import settings_base as base
@@ -32,10 +31,14 @@ PROTOCOL = "https://"
 PORT = 443
 
 ## Media and templates.
-TEMPLATE_DIRS = (path('apps/users/templates'), )
 STATICFILES_DIRS = (
     pre.UPLOAD_ROOT,
 )
+
+STATIC_URL = '/admin-media/'
+
+# Deprecated with django 1.4
+ADMIN_MEDIA_PREFIX = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -130,8 +133,20 @@ BROWSERID_CREATE_USER = True
 # On Login, we redirect through register.
 LOGIN_REDIRECT_URL = '/register'
 
-INSTALLED_APPS = list(base.INSTALLED_APPS) + [
-    # These need to go in order of migration.
+INSTALLED_APPS = (
+    # Local apps
+    'funfactory',  # Content common to most playdoh-based apps.
+    'jingo_minify',
+    'tower',  # for ./manage.py extract (L10n)
+    'cronjobs',  # for ./manage.py cron * cmd line tasks
+
+    # Django contrib apps
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.admin',
+
+    # Our apps. These need to go in order of migration.
     'users',
     'phonebook',
     'groups',
@@ -139,30 +154,24 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'common',
     # 'locations',
 
+    # Third party apps
+    'bootstrapform',
     'csp',
-    'jingo_minify',
-    'tower',
-    'cronjobs',
+    'commonware.response.cookies',
+    'django_browserid',
+    'django_nose',
+    'djcelery',
     'elasticutils',
     'sorl.thumbnail',
-
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django_browserid',
-    'bootstrapform',
-
-    # DB migrations
     'south',
-    # re-assert dominance of 'django_nose'
-    'django_nose',
+)
 
-]
-
-## Auth
-PWD_ALGORITHM = 'bcrypt'
-HMAC_KEYS = {
-    '2011-01-01': 'cheesecake',
-}
+PASSWORD_HASHERS = (
+    'users.hashers.SHA256PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+)
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
