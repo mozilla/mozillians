@@ -48,14 +48,14 @@ class TestDeleteUser(TestCase):
         # Make sure there's a link to a confirm deletion page, and nothing
         # pointing directly to the delete URL.
         eq_(reverse('profile.delete_confirm'),
-            doc('#delete_profile').attr('href'),
+            doc('a.btn-danger').attr('href'),
             'We see a link to a confirmation page.')
         self.assertFalse(any((reverse('profile.delete') in el.action)
                               for el in doc('#main form')),
             "We don't see a form posting to the account delete URL.")
 
         # Follow the link to the deletion confirmation page.
-        r = self.client.get(doc('#delete_profile').attr('href'))
+        r = self.client.get(doc('a.btn-danger').attr('href'))
 
         # Test that we can go back (i.e. cancel account deletion).
         doc = pq(r.content)
