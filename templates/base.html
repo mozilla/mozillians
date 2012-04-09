@@ -46,18 +46,16 @@
         <a class="brand" href="{{ url('home') }}">{{ _('Mozillians') }}</a>
         <div class="nav-collapse">
           <ul class="nav">
-            {% if user.is_authenticated() and user.userprofile.is_complete() %}
-              {% if user.get_profile().is_vouched %}
-                {% block search %}
-                  <li>
-                    <form class="navbar-search pull-left"
-                        action="{{ url('search') }}" method="GET">
-                      <input type="text" name="q" class="search-query"
-                          placeholder="{{ _('Name, IRC Nick, or Email') }}">
-                    </form>
-                  </li>
-                {% endblock %}
-              {% endif %}
+            {% if user.is_authenticated() and user.userprofile.is_complete() and user.get_profile().is_vouched %}
+              {% block search %}
+                <li>
+                  <form class="navbar-search pull-left"
+                      action="{{ url('search') }}" method="GET">
+                    <input type="text" name="q" class="search-query"
+                        placeholder="{{ _('Name, IRC Nick, or Email') }}">
+                  </form>
+                </li>
+              {% endblock %}
 	    {% endif %}
           </ul>
           <ul class="nav pull-right">
