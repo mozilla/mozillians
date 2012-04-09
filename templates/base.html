@@ -62,7 +62,16 @@
                   </li>
                 {% endblock %}
               {% endif %}
-              <li class="{{nav_profile}}"><a id="profile" href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
+              <li class="dropdown" id="profile_menu">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#profile_menu">
+                  {{ _(user.username) }}
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a id="profile" href="{{ url('profile', user.username) }}">{{ _('View Profile') }}</a></li>
+                  <li><a id="edit_profile" href="{{ url('profile.edit') }}">{{ _('Edit Profile') }}</a></li>
+                </ul>
+              </li>
               {% if user.get_profile().is_vouched %}
                 <li class="{{nav_invite}}">
                   <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
