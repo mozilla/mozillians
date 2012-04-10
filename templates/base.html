@@ -46,38 +46,43 @@
         <a class="brand" href="{{ url('home') }}">{{ _('Mozillians') }}</a>
         <div class="nav-collapse">
           <ul class="nav">
-            <li class="{{ nav_home}}"><a href="{{ url('home') }}">{{ _('Home') }}</a></li>
-            <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
+            {% if user.is_authenticated() and user.userprofile.is_complete() and user.get_profile().is_vouched %}
+              {% block search %}
+                <li>
+                  <form class="navbar-search pull-left"
+                      action="{{ url('search') }}" method="GET">
+                    <input type="text" name="q" class="search-query"
+                        placeholder="{{ _('Name, IRC Nick, or Email') }}">
+                  </form>
+                </li>
+              {% endblock %}
+	    {% endif %}
           </ul>
           <ul class="nav pull-right">
             {% if user.is_authenticated() and user.userprofile.is_complete() %}
-              {% if user.get_profile().is_vouched %}
-                {% block search %}
-                  <li>
-                    <form class="navbar-search pull-left"
-                        action="{{ url('search') }}" method="GET">
-                      <input type="text" name="q" class="search-query"
-                          placeholder="{{ _('Name, IRC Nick, or Email') }}">
-                    </form>
-                  </li>
-                {% endblock %}
-              {% endif %}
-              <li class="{{nav_profile}}"><a id="profile" href="{{ url('profile', user.username) }}">{{ _('Profile') }}</a></li>
-              {% if user.get_profile().is_vouched %}
-                <li class="{{nav_invite}}">
-                  <a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a>
-                </li>
-              {% endif %}
-              <li>
-                <a id="logout" href="{{ url('logout') }}"> {{ _('Log Out') }} </a>
+              <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
+              <li class="dropdown" id="profile_menu">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#profile_menu">
+                  {{ _(user.username) }}
+                  <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a id="profile" href="{{ url('profile', user.username) }}">{{ _('View Profile') }}</a></li>
+                  {% if user.get_profile().is_vouched %}
+                    <li class="{{nav_invite}}"><a id="invite" href="{{ url('invite') }}">{{ _('Invite') }}</a></li>
+                  {% endif %}
+                  <li class="divider"></li>
+                  <li><a id="edit_profile" href="{{ url('profile.edit') }}">{{ _('Settings') }}</a></li>
+                  <li><a id="logout" href="{{ url('logout') }}"> {{ _('Log Out') }} </a></li>
+                </ul>
               </li>
             {% else  %}
-              <li class="pull-right">
-                <a class="browser_id_login" href="#join_us">
-                  <img alt="{{ _('Sign in with BrowserID') }}" src="{{ MEDIA_URL }}img/sign_in_blue.png">
-                </a>
-              </li>
-          {% endif %}
+                <li class="pull-right">
+                  <a class="browser_id_login" href="#join_us">
+                    <img alt="{{ _('Sign in with BrowserID') }}" src="{{ MEDIA_URL }}img/sign_in_blue.png">
+                  </a>
+                </li>
+            {% endif %}
           </ul>
         </div><!--/.nav-collapse -->
       </div>
