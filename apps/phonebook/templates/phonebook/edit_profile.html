@@ -29,21 +29,23 @@
           {{ bootstrap(form.bio) }}
         </div>
         <div class="tab-pane" id="skills">
-          <p class="field_description">
-            {% trans %}
-              Groups are a community of Mozillians with some relation to each
-              other. This can be an interest, team, project, product or
-              sub-community.
-            {% endtrans %}
-          </p>
+          <legend>Groups</legend>
+            <p class="field_description">
+              {% trans %}
+                Groups are a community of Mozillians with some relation to each
+                other. This can be an interest, team, project, product or
+                sub-community.
+              {% endtrans %}
+            </p>
           {{ form.groups.label_tag() }}
           {{ form.groups }}
-          <p class="field_description">
-            {% trans %}
-              A skill is the learned capacity to carry out pre-determined
-              results often with the minimum outlay of time, energy, or both.
-            {% endtrans %}
-          </p>
+          <legend>Skills</legend>
+            <p class="field_description">
+              {% trans %}
+                A skill is the learned capacity to carry out pre-determined
+                results often with the minimum outlay of time, energy, or both.
+              {% endtrans %}
+            </p>
           {{ form.skills.label_tag() }}
           {{ form.skills }}
         </div>

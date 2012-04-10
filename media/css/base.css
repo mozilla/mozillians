@@ -375,6 +375,10 @@ dd {
     width:66%;
 }
 
+legend {
+    border-bottom: 1px solid #000;
+}
+
 .vouched {
     background:url(../img/icon-person.png) center right no-repeat;
     padding-right:22px;
@@ -411,7 +415,6 @@ dd {
 }
 
 .tab-content .field_description {
-    font-size: 20px;
     margin-bottom: 20px;
 }
 
