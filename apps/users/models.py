@@ -46,6 +46,7 @@ class UserProfile(SearchMixin, models.Model):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
+    has_photo = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'profile'
@@ -102,8 +103,9 @@ class UserProfile(SearchMixin, models.Model):
 
     def fields(self):
         attrs = ('id', 'is_confirmed', 'is_vouched', 'website',
-                 'bio', 'display_name', 'ircname')
+                 'bio', 'display_name', 'ircname', 'has_photo')
         d = dict((a, getattr(self, a)) for a in attrs)
+        d.update(has_photo=bool(self.photo))
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
                  'date_joined')
@@ -114,17 +116,19 @@ class UserProfile(SearchMixin, models.Model):
         return d
 
     @classmethod
-    def search(cls, query, vouched=None):
+    def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
                   'username__text', 'bio__text', 'website__text',
                   'email__text', 'groups__text', 'first_name__startswith',
-                  'last_name__startswith', 'ircname')
+                  'last_name__startswith', 'ircname', 'has_photo')
         q = dict((field, query) for field in fields)
         s = S(cls).query(or_=q)
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
+        if photo is not None:
+            s = s.filter(has_photo=photo)
         return s
 
     def anonymize(self):

@@ -115,7 +115,6 @@ def delete(request):
 def search(request):
     num_pages = 0
     limit = None
-    profilepic_only = False
     nonvouched_only = False
     people = []
     show_pagination = False
@@ -128,10 +127,7 @@ def search(request):
         vouched = False if form.cleaned_data['nonvouched_only'] else None
         page = request.GET.get('page', 1)
 
-        if profilepic == True:
-            profiles = UserProfile.objects.exclude(photo="")
-        else:
-            profiles = UserProfile.search(query, vouched=vouched)
+        profiles = UserProfile.search(query, vouched=vouched, has_photo=profilepic)
 
         paginator = Paginator(profiles, limit)
 
@@ -150,7 +146,7 @@ def search(request):
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
-             profilepic_only=profilepic_only,
+             profilepic_only=profilepic,
              show_pagination=show_pagination,
              num_pages=num_pages)
 
