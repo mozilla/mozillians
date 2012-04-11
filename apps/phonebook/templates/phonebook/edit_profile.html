@@ -58,7 +58,7 @@
                   <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
                     {{ profile.vouched_by.display_name }}
                   </a>
-                {% elif profile.is_autovouched %}
+                {% elif profile.is_vouched %}
                   {{ _('You are automatically vouched!') }}
                 {% else %}
                   {% trans profile_url=absolutify(url('profile', user.username)) %}
