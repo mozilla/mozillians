@@ -419,6 +419,20 @@ dd {
     margin-bottom:15px;
 }
 
+.search-options {
+    display: none;
+}
+
+.search-options input, .search-options span {
+    display: block;
+    float: left;
+}
+
+.search-options input {
+    margin-left: 40px;
+    margin-right: 10px;
+}
+
 .edit-profile {
     max-width: 700px;
 }

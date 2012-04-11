@@ -19,14 +19,29 @@
 
 {% block main_content %}
   <h1>{{ _('Search') }}</h1>
-    <form method="GET" id="search-form" action="{{ url('search') }}">
+    <form method="GET" id="search-form" action="{{ url('search') }}"
+          class="">
       <input type="text" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
       <button type="submit" class="btn primary">
+        <i class="icon-search"></i>
         {{ _('Search') }}
       </button>
+      <button type="button" id="advanced" class="btn primary">
+        <i class="icon-chevron-down"></i>
+        {{ _('Advanced Options') }}
+      </button>
+      <div class="search-options">
+        {% for f in ['nonvouched_only', 'picture_only'] %}
+          <div id="{{ form[f].name }}-container"
+               class="field {{ form[f].field.widget.attrs['class'] }}">
+            {{ form[f] }}
+            {{ form[f].label_tag() }}
+          </div>
+        {% endfor %}
+      </div>
     </form>
     <div class="well">
       {% if not form.cleaned_data %}
