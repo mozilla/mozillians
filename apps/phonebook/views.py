@@ -14,7 +14,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
-from groups.helpers import stringify_groups
+from locations.forms import AddressForm
 from phonebook import forms
 from phonebook.models import Invite
 from users.models import UserProfile
@@ -64,8 +64,6 @@ def profile(request, username):
 @login_required
 def edit_profile(request):
     profile = request.user.get_profile()
-    user_groups = stringify_groups(profile.groups.all().order_by('name'))
-    user_skills = stringify_groups(profile.skills.all().order_by('name'))
 
     if request.method == 'POST':
         form = forms.ProfileForm(
@@ -73,8 +71,14 @@ def edit_profile(request):
                 request.FILES,
                 instance=profile,
         )
-        if form.is_valid():
+        address_form = AddressForm(
+                request.POST,
+                request.FILES,
+                instance=profile.address,
+        )
+        if form.is_valid() and address_form.is_valid():
             old_username = request.user.username
+            address_form.save()
             form.save(request)
 
             # Notify the user that their old profile URL won't work.
@@ -86,27 +90,13 @@ def edit_profile(request):
 
             return redirect(reverse('profile', args=[request.user.username]))
     else:
-        initial = dict(first_name=request.user.first_name,
-                       last_name=request.user.last_name,
-                       bio=profile.bio,
-                       website=profile.website,
-                       irc_nickname=profile.ircname,
-                       groups=user_groups,
-                       skills=user_skills)
-
-        if not request.user.username.startswith('u/'):
-            initial.update(username=request.user.username)
-
-        form = forms.ProfileForm(
-                instance=profile,
-                initial=initial,
-        )
+        form = forms.ProfileForm(instance=profile)
+        address_form = AddressForm(instance=profile.address)
 
     # When changing this keep in mind that the same view is used for
     # user.register.
     d = dict(form=form,
-             mode='edit',
-             user_groups=user_groups,
+             address_form=address_form,
              my_vouches=UserProfile.objects.filter(vouched_by=profile),
              profile=profile)
     return render(request, 'phonebook/edit_profile.html', d)

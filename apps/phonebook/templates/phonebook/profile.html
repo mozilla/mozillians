@@ -76,6 +76,15 @@
       </h2>
 
       <dl>
+        {% if profile.address.formatted() %}
+          <dt>{{ _('Location') }}</dt>
+          <dd>
+            <a href="http://maps.google.com/maps?q={{ profile.address.formatted('city', 'province', 'country', locale=LANG)|urlencode }}" class="location-text">
+              {{ profile.address.formatted('city', 'province', 'country', locale=LANG) }}
+            </a>
+          </dd>
+        {% endif %}
+
         {% if shown_user.email %}
           <dt>{{ _('Email') }}</dt>
           <dd><a href="mailto:{{ shown_user.email }}">
@@ -102,11 +111,6 @@
           </dd>
         {% endif %}
 
-        {% if profile.location %}
-          <dt>{{ _('Location') }}</dt>
-          <dd>{{ profile.location }}</dd>
-        {% endif %}
-
         {% if profile.vouched_by %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
@@ -117,7 +121,6 @@
           </dd>
         {% endif %}
       </dl>
-
       {% if profile.bio %}
         <h3>{{ _('Bio:') }}{# L10n: Biography #}</h3>
         <div id="bio" class="note p-note">
@@ -143,7 +146,6 @@
           {% endfor %}
         </ul>
       {% endif %}
-
       {% if profile.skills.count() %}
         <h3>{{ _('Skills') }}</h3>
 

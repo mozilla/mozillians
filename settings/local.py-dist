@@ -12,7 +12,7 @@ SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.contrib.gis.db.backends.mysql',
         'NAME': 'mozillians',
         'USER': 'root',
         'PASSWORD': '',

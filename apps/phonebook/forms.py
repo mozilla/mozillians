@@ -9,8 +9,9 @@ from django.utils.safestring import mark_safe
 import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from phonebook.models import Invite
 from groups.models import Group, Skill
+from groups.helpers import stringify_groups
+from phonebook.models import Invite
 from users.models import User, UserProfile
 
 
@@ -58,6 +59,21 @@ class UserForm(forms.ModelForm):
                                                            required=True)
     username = forms.CharField(label=_lazy(u'Username'), max_length=30,
                                                          required=False)
+
+    def __init__(self, *args, **kwargs):
+        """Add in initial values"""
+        instance = kwargs.get('instance')
+        if instance:
+            user = instance.user
+            initial = kwargs.get('initial', {})
+            initial.update(
+                first_name=user.first_name,
+                last_name=user.last_name)
+            if not user.username.startswith('u/'):
+                initial.update(username=user.username)
+            kwargs['initial'] = initial
+
+        super(UserForm, self).__init__(*args, **kwargs)
 
     def clean_username(self):
         username = self.cleaned_data['username']
@@ -120,16 +136,6 @@ class ProfileForm(UserForm):
                                                          required=False,
                                                          widget=UsernameWidget)
 
-    #: L10n: Street address; not entire address
-    street = forms.CharField(label=_lazy(u'Address'), required=False)
-    city = forms.CharField(label=_lazy(u'City'), required=False)
-    # TODO: Add validation of states/provinces/etc. for known/large countries.
-    province = forms.CharField(label=_lazy(u'Province/State'), required=False)
-    # TODO: Add list of countries.
-    country = forms.CharField(label=_lazy(u'Country'), required=False)
-    postal_code = forms.CharField(label=_lazy(u'Postal/Zip Code'),
-                                  required=False)
-
     class Meta:
         # Model form stuff
         model = UserProfile
@@ -137,6 +143,18 @@ class ProfileForm(UserForm):
         widgets = {
             'bio': forms.Textarea()
         }
+
+    def __init__(self, *args, **kwargs):
+        """Add in initial values"""
+        instance = kwargs.get('instance')
+        if instance:
+            initial = kwargs.get('initial', {})
+            initial.update(
+                groups=stringify(instance, 'groups'),
+                skills=stringify(instance, 'skills'),)
+            kwargs['initial'] = initial
+
+        super(ProfileForm, self).__init__(*args, **kwargs)
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and consistent."""
@@ -194,3 +212,10 @@ class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite
         exclude = ('redeemer', 'inviter')
+
+def stringify(profile, obj_name):
+    """
+    Takes a profile and a type (probably skill or group) and returns its
+    stringified objects
+    """
+    return stringify_groups(getattr(profile, obj_name).all().order_by('name'))

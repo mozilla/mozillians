@@ -13,8 +13,9 @@ from elasticutils.models import SearchMixin
 from sorl.thumbnail import ImageField
 from PIL import Image, ImageOps
 from tower import ugettext as _, ugettext_lazy as _lazy
-
 from groups.models import Group, Skill
+from locations.models import Address
+
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage
@@ -25,6 +26,7 @@ fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
 class UserProfile(SearchMixin, models.Model):
     # This field is required.
     user = models.OneToOneField(User)
+    address = models.OneToOneField(Address, null=True)
 
     # Other fields here
     is_vouched = models.BooleanField(default=False)
@@ -70,6 +72,12 @@ class UserProfile(SearchMixin, models.Model):
         self.user.save()
 
         for f in self._meta.fields:
+            if f.name == 'address':
+                old_address = self.address
+                self.address = Address()
+                old_address.delete()
+                continue
+
             if not f.editable or f.name in ['id', 'user']:
                 continue
 
@@ -175,7 +183,9 @@ def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
 
     if created:
-        UserProfile.objects.create(user=instance, display_name=dn)
+        profile = UserProfile.objects.create(user=instance, display_name=dn)
+        profile.address = Address.objects.create()
+        profile.save()
     else:
         u = UserProfile.objects.get(user=instance)
         u.display_name = dn
