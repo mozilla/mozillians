@@ -15,6 +15,7 @@ from PIL import Image, ImageOps
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from groups.models import Group, Skill
+from phonebook.helpers import gravatar
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage
@@ -115,7 +116,8 @@ class UserProfile(SearchMixin, models.Model):
     def photo_url(self):
         if self.photo:
             return self.photo.url
-        return '/media/img/unknown.png'
+
+        return gravatar(self.user.email)
 
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?

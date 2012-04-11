@@ -170,27 +170,10 @@ class TestViews(TestCase):
         """
         client = self.mozillian_client
 
-        def assert_no_photo():
-            """This will assert that a user is in a proper no userpic state.
-
-            This means:
-                * Linking to ``unknown.jpg``.
-                * No "Remove Profile Photo" link.
-                * No file on the file system.
-            """
-            r = client.get(reverse('profile.edit'))
-            doc = pq(r.content)
-            assert not doc('#id_photo_delete'), (
-                    '"Remove Profile Photo" control should not appear.')
-
-            # make sure no file is in the file system
-            f = self.mozillian.get_profile().photo
-            assert not f
-
         # No photo exists by default, the delete photo form control shouldn't
         # be present, and trying to delete a non-existant photo shouldn't
         # do anything.
-        assert_no_photo()
+        self.assert_no_photo(client)
 
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('profile.edit'),
@@ -220,7 +203,33 @@ class TestViews(TestCase):
 
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
-        assert_no_photo()
+        self.assert_no_photo(client)
+
+    def assert_no_photo(self, client):
+        """This will assert that a user is in a proper no userpic state.
+
+        This means:
+            * Linking to ``unknown.jpg``.
+            * No "Remove Profile Photo" link.
+            * No file on the file system.
+        """
+        r = client.get(reverse('profile.edit'))
+        doc = pq(r.content)
+        assert not doc('#id_photo_delete'), (
+                '"Remove Profile Photo" control should not appear.')
+
+        # make sure no file is in the file system
+        f = self.mozillian.get_profile().photo
+        assert not f
+
+    def test_default_picture_is_gravatar(self):
+        self.client.login(email=self.pending.email)
+        self.assert_no_photo(self.client)
+        doc = pq(self.client.get(
+                 reverse('profile', args=[self.pending.username])).content)
+
+        img = doc('#profile-photo')[0]
+        assert 'gravatar' in img.attrib['src']
 
     def test_has_website(self):
         """Verify a user's website appears in their profile (as a link)."""
