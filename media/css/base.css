@@ -72,6 +72,11 @@ h4 {
     line-height:100%;
 }
 
+/* Override bootstrap css */
+p {
+    font-family: 'Open Sans',sans-serif!important;
+}
+
 .small,small {
     font-size:12px;
     line-height:100%;
