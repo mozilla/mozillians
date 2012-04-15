@@ -30,6 +30,23 @@ body {
     font:16px/24px Georgia, serif;
 }
 
+.skip{
+	left:-999em;
+	position:absolute;
+}
+
+.skip:focus{
+	background:rgb(255,255,255);
+	color:rgb(44,44,44);
+	height:35px;
+	left:0;
+	padding-top:5px;
+	right:0;
+	text-align:center;
+	top:0;
+	z-index:1031; /* One more than .nav-bar-fixed-top */
+}
+
 .huge,.large,h1,h2,h3,h4 {
     font-family:OpenSans, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
     font-weight:400;
