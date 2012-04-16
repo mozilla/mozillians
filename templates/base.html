@@ -30,9 +30,7 @@
   {{ 'auth' if user.is_authenticated() else 'anon' }}"
   data-locale="{{ LANG }}">
 
-<ul id="skip" class="hide">
-  <li><a href="#main">{{ _('Skip to Content') }}</a></li>
-</ul>
+<a class="skip" href="#main">{{ _('Skip to Content') }}</a>
 {% block nav %}
   <nav class="navbar navbar-fixed-top">
     <div class="navbar-inner">
