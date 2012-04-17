@@ -19,18 +19,17 @@
 
 {% block main_content %}
   <h1>{{ _('Search') }}</h1>
-    <form method="GET" id="search-form" action="{{ url('search') }}"
-          class="">
+    <form method="GET" id="search-form" action="{{ url('search') }}">
       <input type="text" name="q" id="q"
         placeholder="{{ _('Name, IRC Nick, or Email') }}" autofocus
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
       <button type="submit" class="btn primary">
-        <i class="icon-search"></i>
+        <span class="icon-search"></span>
         {{ _('Search') }}
       </button>
       <button type="button" id="advanced" class="btn primary">
-        <i class="icon-chevron-down"></i>
+        <span class="icon-chevron-down"></span>
         {{ _('Advanced Options') }}
       </button>
       <div class="search-options">

@@ -22,8 +22,10 @@ REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 class SearchForm(happyforms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=True)
     limit = forms.CharField(widget=forms.HiddenInput, required=False)
-    nonvouched_only = forms.BooleanField(label=_lazy(u'Non Vouched Only'), required=False)
-    picture_only = forms.BooleanField(label=_lazy(u'Picture Only'), required=False)
+    nonvouched_only = forms.BooleanField(label=_lazy(u'Non Vouched Only'),
+                                         required=False)
+    picture_only = forms.BooleanField(label=_lazy(u'Only users with photos'),
+                                      required=False)
 
     def clean_limit(self):
         """Validate that this limit is numeric and greater than 1"""

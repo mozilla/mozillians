@@ -1,15 +1,15 @@
 import os
 
+from django.conf import settings
+
 from nose.tools import eq_
 
 from common.tests import ESTestCase
-from django.conf import settings
-from funfactory.urlresolvers import reverse
 from elasticutils import get_es
+from funfactory.urlresolvers import reverse
 
 
 class TestSearch(ESTestCase):
-    """Test Search"""
     def test_search_with_space(self):
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
@@ -53,7 +53,7 @@ class TestSearch(ESTestCase):
                 saw_amandeep = True
             elif person.display_name == amanda:
                 if person.is_vouched:
-                        self.fail('Amandeep should have pending status')
+                    self.fail('Amandeep should have pending status')
                 saw_amanda = True
             if saw_amanda and saw_amandeep:
                 break
@@ -86,7 +86,7 @@ class TestSearch(ESTestCase):
         for person in peeps:
             if person.display_name == amanda:
                 if bool(person.photo):
-                        self.fail('Amanda doesnt have a profile pic')
+                    self.fail('Amanda doesnt have a profile pic')
                 saw_amanda = True
 
         # Make sure amanda shows up in peeps
@@ -131,7 +131,3 @@ class TestSearch(ESTestCase):
                                                 limit='-3'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
-
-    def test_single_user(self):
-        url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Owen'))
