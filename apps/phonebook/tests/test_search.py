@@ -11,6 +11,7 @@ from funfactory.urlresolvers import reverse
 
 class TestSearch(ESTestCase):
     def test_search_with_space(self):
+        """Extra spaces should not impact search queries."""
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
         url = reverse('search')
@@ -35,6 +36,7 @@ class TestSearch(ESTestCase):
         self.assertTrue(saw_amandeep, 'We see another person')
 
     def test_nonvouched_search(self):
+        """Make sure that only non vouched users are returned on search."""
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
         url = reverse('search')
@@ -64,6 +66,7 @@ class TestSearch(ESTestCase):
         assert all(not person.is_vouched for person in peeps_nv)
 
     def test_profilepic_search(self):
+        """Make sure searching for only users with profile pics works."""
         with open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')) as f:
             r = self.mozillian_client.post(reverse('profile.edit'),
                 dict(first_name='Aman', last_name='Withapic', photo=f))
