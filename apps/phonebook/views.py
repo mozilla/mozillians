@@ -142,26 +142,28 @@ def search(request):
     form = forms.SearchForm(request.GET)
 
     if form.is_valid():
-        query = form.cleaned_data.get('q', '')
+        query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
         vouched = False if form.cleaned_data['nonvouched_only'] else None
         profilepic = True if form.cleaned_data['picture_only'] else None
         page = request.GET.get('page', 1)
 
-        profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
+        # if nothing has been entered don't load any searches.
+        if not (not query and vouched is None and profilepic is None):
+            profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
 
-        paginator = Paginator(profiles, limit)
+            paginator = Paginator(profiles, limit)
 
-        try:
-            people = paginator.page(page)
-        except PageNotAnInteger:
-            people = paginator.page(1)
-        except EmptyPage:
-            people = paginator.page(paginator.num_pages)
+            try:
+                people = paginator.page(page)
+            except PageNotAnInteger:
+                people = paginator.page(1)
+            except EmptyPage:
+                people = paginator.page(paginator.num_pages)
 
-        if paginator.count > forms.PAGINATION_LIMIT:
-            show_pagination = True
-            num_pages = len(people.paginator.page_range)
+            if paginator.count > forms.PAGINATION_LIMIT:
+                show_pagination = True
+                num_pages = len(people.paginator.page_range)
 
     d = dict(people=people,
              form=form,
