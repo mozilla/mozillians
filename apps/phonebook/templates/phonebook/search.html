@@ -25,8 +25,22 @@
         value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
       <input type="hidden" name="limit" id="limit" value="{{ limit }}">
       <button type="submit" class="btn primary">
+        <span class="icon-search"></span>
         {{ _('Search') }}
       </button>
+      <button type="button" id="advanced" class="btn primary">
+        <span class="icon-chevron-down"></span>
+        {{ _('Advanced Options') }}
+      </button>
+      <div class="search-options">
+        {% for f in ['nonvouched_only', 'picture_only'] %}
+          <div id="{{ form[f].name }}-container"
+               class="field {{ form[f].field.widget.attrs['class'] }}">
+            {{ form[f] }}
+            {{ form[f].label_tag() }}
+          </div>
+        {% endfor %}
+      </div>
     </form>
     <div class="well">
       {% if not form.cleaned_data %}
