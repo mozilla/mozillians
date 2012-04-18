@@ -3,10 +3,13 @@ import os
 from django.conf import settings
 
 from nose.tools import eq_
+from pyquery import PyQuery as pq
 
 from common.tests import ESTestCase
 from elasticutils import get_es
 from funfactory.urlresolvers import reverse
+
+from users.models import UserProfile
 
 
 class TestSearch(ESTestCase):
@@ -134,3 +137,16 @@ class TestSearch(ESTestCase):
                                                 limit='-3'))
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
+
+    def test_empty_query_search(self):
+        """Make sure the search method works with an empty query"""
+        assert UserProfile.search('').count()
+
+    def test_proper_url_arg_handling(self):
+        search_url = reverse('search')
+        r = self.mozillian_client.get(search_url)
+        assert not pq(r.content)('.result')
+
+        r = self.mozillian_client.get(search_url,
+                                      dict(q=u'', nonvouched_only=1))
+        assert pq(r.content)('.result')
