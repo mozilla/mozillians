@@ -148,7 +148,7 @@ def search(request):
         profilepic = True if form.cleaned_data['picture_only'] else None
         page = request.GET.get('page', 1)
 
-        # if nothing has been entered don't load any searches.
+        # If nothing has been entered don't load any searches.
         if not (not query and vouched is None and profilepic is None):
             profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
 
