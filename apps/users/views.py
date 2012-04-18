@@ -84,8 +84,6 @@ def register(request):
             messages.info(request, _(u'Your account has been created.'))
             return redirect('profile', user.username)
 
-    # When changing this keep in mind that the same view is used for
-    # phonebook.edit_profile.
     # 'user' object must be passed in because we are not logged in
     return render(request, 'registration/register.html',
                   dict(form=form,
