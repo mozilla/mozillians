@@ -37,7 +37,14 @@ class Migration(SchemaMigration):
         # Adding unique constraint on 'Group', fields ['url']
         db.create_unique('group', ['url'])
 
+        # Rename url to slug
+        db.rename_column('group', 'url', 'slug')
+
+
     def backwards(self, orm):
+
+        # Reverse renaming.
+        db.rename_column('group', 'slug', 'url')
 
         # Removing unique constraint on 'Group', fields ['url']
         db.delete_unique('group', ['url'])

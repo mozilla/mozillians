@@ -54,9 +54,9 @@ def search(request, searched_object=Group):
 
 
 @vouch_required
-def show(request, url):
+def show(request, slug):
     """List all users with this group."""
-    group = get_object_or_404(Group, url=url)
+    group = get_object_or_404(Group, slug=slug)
     form = forms.SearchForm(request.GET)
     limit = forms.PAGINATION_LIMIT
     if form.is_valid():
@@ -107,9 +107,9 @@ def show(request, url):
 
 @require_POST
 @vouch_required
-def toggle(request, url):
+def toggle(request, slug):
     """Toggle the current user's membership of a group."""
-    group = get_object_or_404(Group, url=url)
+    group = get_object_or_404(Group, slug=slug)
     profile = request.user.get_profile()
 
     # We don't operate on system groups using this view.
@@ -119,4 +119,4 @@ def toggle(request, url):
         else:
             profile.groups.add(group)
 
-    return redirect(reverse('group', args=[group.url]))
+    return redirect(reverse('group', args=[group.slug]))

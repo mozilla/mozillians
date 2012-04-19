@@ -10,6 +10,6 @@ urlpatterns = patterns('',
     url('^groups$', views.index, name='group_index'),
     url('^groups/search$', views.search, dict(searched_object=Group), name='group_search'),
     url('^skills/search$', views.search, dict(searched_object=Skill), name='skill_search'),
-    url('^groups/(?P<url>[^/]+)$', views.show, name='group'),
-    url('^groups/(?P<url>[^/]+)/toggle$', views.toggle, name='group_toggle'),
+    url('^groups/(?P<slug>[^/]+)$', views.show, name='group'),
+    url('^groups/(?P<slug>[^/]+)/toggle$', views.toggle, name='group_toggle'),
 )

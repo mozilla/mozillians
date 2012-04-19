@@ -156,7 +156,7 @@ class ProfileForm(UserForm):
                   if g and ',' not in g]
 
         def handle_group(name):
-            existing_group = Group.objects.filter(url=slugify(name))[:1]
+            existing_group = Group.objects.filter(slug=slugify(name))[:1]
 
             if not existing_group:
                 return Group.objects.create(name=name)

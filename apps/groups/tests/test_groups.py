@@ -184,7 +184,7 @@ class GroupTest(common.tests.TestCase):
 
         self.client.login(email=self.mozillian.email)
         response = self.client.get(reverse('group', args=[
-                                   self.NORMAL_GROUP.url]))
+                                   self.NORMAL_GROUP.slug]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
@@ -213,7 +213,7 @@ class GroupTest(common.tests.TestCase):
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
         response = self.client.get(reverse('group',
-                                           args=[self.SYSTEM_GROUP.url]))
+                                           args=[self.SYSTEM_GROUP.slug]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
@@ -224,7 +224,7 @@ class GroupTest(common.tests.TestCase):
 
         # Attempt to manually toggle the group membership
         r = self.client.post(reverse('group_toggle',
-                             args=[self.SYSTEM_GROUP.url]), follow=True)
+                             args=[self.SYSTEM_GROUP.slug]), follow=True)
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
                 'User should not be in the "%s" group' %
                 self.SYSTEM_GROUP.name)
