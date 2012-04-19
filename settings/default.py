@@ -207,7 +207,8 @@ SOUTH_TESTS_MIGRATE = False
 # Django-CSP
 CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
                'https://statse.webtrendslive.com',
-               'http://www.gravatar.com',)
+               'http://www.gravatar.com',
+               'https://secure.gravatar.com',)
 CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
                   'https://statse.webtrendslive.com',
                   'https://browserid.org',)
