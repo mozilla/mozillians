@@ -14,25 +14,24 @@ echo "Starting build on executor $EXECUTOR_NUMBER..."
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;
 
-echo "Making Virtualenv"
-virtualenv $VENV --no-site-packages
-source $VENV/bin/activate
-pip install --upgrade pip
-pip install coverage
-pip install PyQuery
-pip install mock
 
-git submodule sync -q
+if [ ! -d "$VENV" ]; then
+    echo "Making virtualenv..."
+    virtualenv $VENV --no-site-packages
+    pip install --upgrade pip
+fi
+source $VENV/bin/activate
+pip install coverage
+pip install -r requirements/compiled.txt
+pip install -r requirements/dev.txt
+
+git submodule sync
 git submodule update --init --recursive
 
 if [ ! -d "$WORKSPACE/vendor" ]; then
     echo "No /vendor... crap."
     exit 1
 fi
-
-source $VENV/bin/activate
-# pip install -q -r requirements/compiled.txt
-# pip install -q -r requirements/dev.txt
 
 cat > settings/local.py <<SETTINGS
 import logging
@@ -97,7 +96,12 @@ echo "Database name: ${JOB_NAME}"
 
 echo "Starting tests..."
 export FORCE_DB=1
-coverage run manage.py test --noinput --with-xunit
-coverage xml $(find apps lib -name '*.py')
+
+if [ -z $COVERAGE ]; then
+    python manage.py test --noinput --with-xunit --logging-clear-handlers
+else
+    coverage run manage.py test --noinput --with-xunit --logging-clear-handlers
+    coverage xml --omit='*migrations*' $(find apps lib -name '*.py')
+fi
 
 echo "FIN"
