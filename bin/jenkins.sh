@@ -100,7 +100,7 @@ export FORCE_DB=1
 if [ -z $COVERAGE ]; then
     python manage.py test --noinput --with-xunit --logging-clear-handlers
 else
-    coverage run manage.py test --noinput --with-xunit --logging-clear-handlers
+    coverage run --omit='*migrations*' manage.py test --noinput --with-xunit --logging-clear-handlers
     coverage xml --omit='*migrations*' $(find apps lib -name '*.py')
 fi
 
