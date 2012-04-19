@@ -1,8 +1,8 @@
 [submodule "vendor"]
-        ignore = dirty
+    ignore = dirty
 	path = vendor
 	url = git://github.com/mozilla/mozillians-lib.git
-[submodule "media/js/libs/tag-it"]
-        ignore = dirty
-	path = media/js/libs/tag-it
+[submodule "staticfiles/js/libs/tag-it"]
+    ignore = dirty
+	path = staticfiles/js/libs/tag-it
 	url = git://github.com/aehlke/tag-it.git

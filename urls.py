@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.views.generic.base import TemplateView
@@ -38,11 +39,16 @@ urlpatterns = patterns('',
 # In DEBUG mode, serve media files through Django, and serve error pages
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
-    # Remove leading and trailing slashes so the regex matches.
+    # Serve media (i.e. uploads).
     media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
     urlpatterns += patterns('',
         (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
          {'document_root': settings.MEDIA_ROOT}),
+    )
+    # Serve the static files.
+    urlpatterns += staticfiles_urlpatterns()
+    # Serve the error pages.
+    urlpatterns += patterns('',
         # Add the 404, 500, and csrf pages for testing
         (r'^404$', handler404),
         (r'^500$', handler500),

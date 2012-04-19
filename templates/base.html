@@ -12,7 +12,7 @@
   <meta name="author" content="Mozilla">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="apple-touch-icon" href="{{ MEDIA_URL }}apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="{{ STATIC_URL }}apple-touch-icon.png">
   <link rel="search" type="application/opensearchdescription+xml"
         title="{{ _('Mozillians') }}" href="{{ url('search_plugin') }}">
 
@@ -20,7 +20,7 @@
     {{ css('common') }}
   {% endblock %}
 
-  <link rel="shortcut icon" type="image/ico" href="{{ MEDIA_URL }}favicon.ico">
+  <link rel="shortcut icon" type="image/ico" href="{{ STATIC_URL }}favicon.ico">
   {% block feeds %}{% endblock %}
   {% block extra_headers %}{% endblock %}
 </head>
@@ -95,7 +95,7 @@
               <li class="pull-right">
                 <a class="browser_id_login" href="#join_us">
                   <img alt="{{ _('Sign in with BrowserID') }}"
-                       src="{{ MEDIA_URL }}img/sign_in_blue.png">
+                       src="{{ STATIC_URL }}img/sign_in_blue.png">
                 </a>
               </li>
             {% endif %}

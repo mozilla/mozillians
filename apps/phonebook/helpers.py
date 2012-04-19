@@ -33,7 +33,7 @@ def search_result(context, profile):
 
 def gravatar(
             email,
-            default='%simg/unknown.png' % (settings.MEDIA_URL),
+            default='%simg/unknown.png' % (settings.STATIC_URL),
             size=175,
             rating='pg'):
     """Return the Gravatar URL for an email address."""

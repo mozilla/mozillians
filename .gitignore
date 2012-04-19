@@ -23,5 +23,6 @@ vagrantconfig_local.yaml
 docs/_build
 settings/*local.py
 directory
-media/uploads
-media/cache
+media
+staticfiles/uploads
+staticfiles/cache

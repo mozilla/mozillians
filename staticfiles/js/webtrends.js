@@ -1,5 +1,5 @@
 // WebTrends SmartSource Data Collector Tag
-// Version: 9.4.0     
+// Version: 9.4.0
 // Tag Builder Version: 3.2
 // Created: 5/24/2011 11:49:08 PM
 
@@ -340,7 +340,7 @@ WebTrends.prototype.dcsVar=function(){
 	})();
 	WT.slv=(function(){
 		var slv="Not enabled";
-		try{     
+		try{
 			if (navigator.userAgent.indexOf('MSIE')!=-1){
 				var sli = new ActiveXObject('AgControl.AgControl');
 				if (sli){
@@ -382,7 +382,7 @@ WebTrends.prototype.dcsVar=function(){
 	if (this.i18n){
 		if (typeof(document.defaultCharset)=="string"){
 			WT.le=document.defaultCharset;
-		} 
+		}
 		else if (typeof(document.characterSet)=="string"){
 			WT.le=document.characterSet;
 		}
@@ -421,9 +421,9 @@ WebTrends.prototype.dcsEscape=function(S, REL){
 	if (REL!=""){
 		S=S.toString();
 		for (var R in REL){
- 			if (REL[R] instanceof RegExp){
+			if (REL[R] instanceof RegExp){
 				S=S.replace(REL[R],R);
- 			}
+			}
 		}
 		return S;
 	}
@@ -507,7 +507,7 @@ WebTrends.prototype.dcsTag=function(){
 		WT.dep="";
 	}
 	for (var N in DCS){
- 		if (DCS[N]&&(typeof DCS[N]!="function")){
+		if (DCS[N]&&(typeof DCS[N]!="function")){
 			P+=this.dcsA(N,DCS[N]);
 		}
 	}
