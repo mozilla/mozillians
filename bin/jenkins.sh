@@ -86,7 +86,7 @@ DEBUG = TEMPLATE_DEBUG = True
 # ElasticSearch
 ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
-ES_INDEXES = dict(default='mozillians_dev')
+ES_INDEXES = dict(default='test_${JOB_NAME}')
 SETTINGS
 
 echo "Creating database if we need it..."
@@ -100,7 +100,7 @@ export FORCE_DB=1
 if [ -z $COVERAGE ]; then
     python manage.py test --noinput --with-xunit --logging-clear-handlers
 else
-    coverage run manage.py test --noinput --with-xunit --logging-clear-handlers
+    coverage run --omit='*migrations*' manage.py test --noinput --with-xunit --logging-clear-handlers
     coverage xml --omit='*migrations*' $(find apps lib -name '*.py')
 fi
 
