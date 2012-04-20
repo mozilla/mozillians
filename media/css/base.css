@@ -47,7 +47,7 @@ body {
 	z-index:1031; /* One more than .nav-bar-fixed-top */
 }
 
-.huge,.large,h1,h2,h3,h4 {
+.huge, .large, h1, h2, h3, h4, #profile-info dt {
     font-family:OpenSans, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
     font-weight:400;
     text-shadow:0 1px 0 rgba(255,255,255,0.75);
@@ -77,7 +77,7 @@ h2 {
     line-height:100%;
 }
 
-h3 {
+h3, #profile-info dt {
     font-size:28px;
     letter-spacing:-.5px;
     line-height:100%;
@@ -89,7 +89,7 @@ h4 {
     line-height:100%;
 }
 
-footer p, #main p { 
+footer p, #main p {
     font-family: 'Open Sans',sans-serif;
 }
 
@@ -379,10 +379,6 @@ dl {
     overflow: hidden;
 }
 
-dt,dd {
-    color:#1e4262;
-}
-
 dt {
     clear:both;
     float:left;
@@ -441,6 +437,10 @@ legend {
 
 .search-page .result, #profile-info {
     margin-bottom:15px;
+}
+
+#profile-info h3, #profile-info dt {
+    margin: 20px 0 10px 0;
 }
 
 .search-options {
