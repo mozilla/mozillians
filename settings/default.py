@@ -97,6 +97,7 @@ MINIFY_BUNDLES = {
         'search': (
             'js/libs/jquery.endless-scroll.js',
             'js/infinite.js',
+            'js/expand.js',
         ),
         'backbone': (
             'js/libs/underscore.js',
@@ -121,6 +122,11 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
 
 # StrictTransport
 STS_SUBDOMAINS = True
+
+# Not all URLs need locale.
+SUPPORTED_NONLOCALES = list(base.SUPPORTED_NONLOCALES) + [
+    'csp',
+]
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
@@ -200,9 +206,12 @@ SOUTH_TESTS_MIGRATE = False
 
 # Django-CSP
 CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
-               'https://statse.webtrendslive.com',)
+               'https://statse.webtrendslive.com',
+               'http://www.gravatar.com',
+               'https://secure.gravatar.com',)
 CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
-                  'https://statse.webtrendslive.com',)
+                  'https://statse.webtrendslive.com',
+                  'https://browserid.org',)
 CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report'
 
@@ -222,3 +231,7 @@ THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
+
+# TEMPORARY
+# TODO: Remove this
+KEYNOTE_FILE = None

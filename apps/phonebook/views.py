@@ -8,7 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -136,35 +136,40 @@ def search(request):
     num_pages = 0
     limit = None
     nonvouched_only = False
+    picture_only = False
     people = []
     show_pagination = False
     form = forms.SearchForm(request.GET)
 
     if form.is_valid():
-        query = form.cleaned_data.get('q', '')
+        query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
         vouched = False if form.cleaned_data['nonvouched_only'] else None
+        profilepic = True if form.cleaned_data['picture_only'] else None
         page = request.GET.get('page', 1)
 
-        profiles = UserProfile.search(query, vouched=vouched)
+        # If nothing has been entered don't load any searches.
+        if not (not query and vouched is None and profilepic is None):
+            profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
 
-        paginator = Paginator(profiles, limit)
+            paginator = Paginator(profiles, limit)
 
-        try:
-            people = paginator.page(page)
-        except PageNotAnInteger:
-            people = paginator.page(1)
-        except EmptyPage:
-            people = paginator.page(paginator.num_pages)
+            try:
+                people = paginator.page(page)
+            except PageNotAnInteger:
+                people = paginator.page(1)
+            except EmptyPage:
+                people = paginator.page(paginator.num_pages)
 
-        if paginator.count > forms.PAGINATION_LIMIT:
-            show_pagination = True
-            num_pages = len(people.paginator.page_range)
+            if paginator.count > forms.PAGINATION_LIMIT:
+                show_pagination = True
+                num_pages = len(people.paginator.page_range)
 
     d = dict(people=people,
              form=form,
              limit=limit,
              nonvouched_only=nonvouched_only,
+             picture_only=picture_only,
              show_pagination=show_pagination,
              num_pages=num_pages)
 
@@ -221,3 +226,9 @@ def vouch(request):
         return redirect(reverse('profile', args=[p.user.username]))
 
     return HttpResponseForbidden
+
+
+@require_GET
+@vouch_required
+def keynote(request):
+    return render(request, 'phonebook/keynote.html')

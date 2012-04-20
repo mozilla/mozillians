@@ -152,23 +152,29 @@ class UserProfile(SearchMixin, models.Model):
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
                  'date_joined')
         d.update(dict((a, getattr(self.user, a)) for a in attrs))
-        # Index group ids... for fun.
-        groups = list(self.groups.values_list('name', flat=True))
-        d.update(dict(groups=groups))
+        d.update(dict(has_photo=bool(self.photo)))
+        # Index groups and skills ... for fun.
+        d.update(dict(groups=list(self.groups.values_list('name', flat=True))))
         return d
 
     @classmethod
-    def search(cls, query, vouched=None):
+    def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
                   'username__text', 'bio__text', 'website__text',
                   'email__text', 'groups__text', 'first_name__startswith',
                   'last_name__startswith', 'ircname')
-        q = dict((field, query) for field in fields)
-        s = S(cls).query(or_=q)
+        if query:
+            q = dict((field, query) for field in fields)
+            s = S(cls).query(or_=q)
+        else:
+            s = S(cls)
+
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
+        if photo is not None:
+            s = s.filter(has_photo=photo)
         return s
 
 

@@ -72,7 +72,13 @@
           <img class="profile-photo" src="{{ group.steward.photo_url() }}" alt="{{ _('Profile Photo') }}">
         </div>
         <ul>
-          <li><span>{{ group.steward.display_name }}</span></li>
+          <li>
+            <span>
+              <a href="{{ url('profile', group.steward.user.username) }}">
+                {{ group.steward.display_name }}
+              </a>
+            </span>
+          </li>
           <li>
             <a href="mailto:{{ group.steward.user.email }}">
               {{ group.steward.user.email }}

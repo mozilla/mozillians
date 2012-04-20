@@ -8,7 +8,7 @@ import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import TestCase, ESTestCase
+from common.tests import TestCase
 from funfactory.urlresolvers import set_url_prefix, reverse
 
 
@@ -331,78 +331,6 @@ class TestOpensearchViews(test_utils.TestCase):
         response = self.client.get(reverse('search_plugin',
                                    prefix='/fr/'))
         assert '/fr/search' in response.content
-
-
-class TestSearch(ESTestCase):
-    def test_mozillian_search(self):
-        """Test our search."""
-        amanda = 'Amanda Younger'
-        amandeep = 'Amandeep McIlrath'
-        url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Am'))
-        rs = self.mozillian_client.get(url, dict(q=' Am'))
-        rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
-
-        eq_(r.status_code, 200)
-        peeps = r.context['people']
-        peeps_ws = rs.context['people']
-        peeps_nv = rnv.context['people']
-
-        saw_amandeep = saw_amanda = False
-
-        for person in peeps:
-            if person.display_name == amandeep:
-                assert person.is_vouched, 'Amandeep is a Mozillian'
-                saw_amandeep = True
-            elif person.display_name == amanda:
-                if person.is_vouched:
-                    self.fail('Amanda is pending status')
-                saw_amanda = True
-            if saw_amandeep and saw_amanda:
-                break
-
-        assert peeps[0].id in (peeps_ws[0].id, peeps_ws[1].id)
-        self.assertEqual(peeps_nv[0].display_name, amanda)
-        self.assertTrue(saw_amandeep, 'We see Mozillians')
-        self.assertTrue(saw_amanda, 'We see Pending')
-
-        assert all(not person.is_vouched for person in peeps_nv)
-
-    def test_mozillian_search_pagination(self):
-        """Tests the pagination on search.
-
-        1. assumes no page is passed, but valid limit is passed
-        2. assumes invalid page is passed, no limit is passed
-        3. assumes valid page is passed, no limit is passed
-        4. assumes valid page is passed, valid limit is passed
-        """
-        url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 1)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='1'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 1)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='x'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
-
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='-3'))
-        peeps = r.context['people']
-        self.assertEqual(len(peeps), 2)
 
 
 def _logged_in_html(response):
