@@ -10,10 +10,22 @@ from django.utils.safestring import mark_safe
 import jinja2
 from funfactory.utils import absolutify
 from jingo import register
+from tower import ugettext_lazy as _lazy
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
 absolutify = register.function(absolutify)
+
+# Order sensitive list of permissions. Permissions that get more
+# access go higher.
+
+VOUCHED = 20
+PUBLIC = 0
+
+PERMISSION_LEVELS = (
+    (VOUCHED, _lazy('Vouched')),
+    (PUBLIC, _lazy('Public')),
+)
 
 
 @register.filter

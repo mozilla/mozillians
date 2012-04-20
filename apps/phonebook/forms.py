@@ -9,8 +9,8 @@ from django.utils.safestring import mark_safe
 import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from phonebook.models import Invite
 from groups.models import Group, Skill
+from phonebook.models import Invite
 from users.models import User, UserProfile
 
 
@@ -136,7 +136,8 @@ class ProfileForm(UserForm):
     class Meta:
         # Model form stuff
         model = UserProfile
-        fields = ('ircname', 'website', 'bio', 'photo')
+        fields = ('ircname', 'website', 'bio', 'photo', 'basic_info_privacy',
+                  'contact_info_privacy', 'tags_privacy')
         widgets = {
             'bio': forms.Textarea()
         }

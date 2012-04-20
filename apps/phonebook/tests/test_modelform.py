@@ -1,5 +1,6 @@
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
+from django.contrib.auth.models import User
 
 from common.tests import TestCase
 
@@ -13,12 +14,12 @@ class ModelForms(TestCase):
 
         edit_profile_url = reverse('profile.edit')
 
-        bad_data = dict(first_name='BadHobo', last_name='BadLaRue',
-                        bio='Rides the rails', is_vouched=True)
+        bad_data = dict(self.privacy_dict, first_name='BadHobo',
+                        last_name='BadLaRue', bio='Rides the rails',
+                        is_vouched=True)
 
         bad_edit = newbie_client.post(edit_profile_url, bad_data, follow=True)
         eq_(bad_edit.status_code, 200)
-
-        newbie_profile = bad_edit.context['profile']
-        assert not newbie_profile.is_vouched
-        eq_(newbie_profile.user.first_name, bad_data['first_name'])
+        assert not bad_edit.context['shown_is_vouched']
+        assert not User.objects.get(username=newbie.username) \
+                               .get_profile().is_vouched

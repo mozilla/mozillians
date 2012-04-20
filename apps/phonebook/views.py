@@ -5,7 +5,8 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import (HttpResponseRedirect, HttpResponseForbidden,
+                         HttpResponseNotFound)
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -39,25 +40,30 @@ def vouch_required(f):
 
 
 @never_cache
-@login_required
 def profile(request, username):
     """View a profile by username."""
     # Try to match a view if it exists with a slash.
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
-        # This is so that something like localhost:8000/tasks redirects
-        # to localhost:8000/tasks/ correctly.
-        return redirect(request.path + r'/')
+        return HttpResponseNotFound()
+
+    profile = user.get_profile()
+    profile_info = profile.get_profile_info(request.user)
+    if not any([profile_info[k] for k in profile_info.keys()]):
+        return HttpResponseNotFound()
 
     vouch_form = None
-    profile = user.get_profile()
+    is_vouched = profile.is_vouched if profile else False
+    is_me = (request.user.is_authenticated() and
+             (request.user.username == user.username))
 
     if not profile.is_vouched and request.user.get_profile().is_vouched:
         vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 
-    data = dict(shown_user=user, profile=profile, vouch_form=vouch_form)
-    return render(request, 'phonebook/profile.html', data)
+    d = dict(is_me=is_me, profile_info=profile_info,
+             vouch_form=vouch_form, shown_is_vouched=is_vouched)
+    return render(request, 'phonebook/profile.html', d)
 
 
 @never_cache

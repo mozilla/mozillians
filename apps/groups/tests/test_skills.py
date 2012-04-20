@@ -42,10 +42,9 @@ class SkillsTest(common.tests.TestCase):
         assert not profile.skills.all(), 'User should have no skills.'
 
         self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(last_name='McAwesomepants',
-                              skills='Awesome foo Bar'),
-                         follow=True)
+        d = dict(self.privacy_dict, last_name='McAwesomepants',
+                 skills='Awesome foo Bar')
+        self.client.post(reverse('profile.edit'), d, follow=True)
 
         assert profile.skills.all(), (
                 "Pending user should be able to edit skills.")

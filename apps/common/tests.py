@@ -6,6 +6,8 @@ import elasticutils.tests
 import test_utils
 from elasticutils import get_es
 
+from phonebook.helpers import VOUCHED
+
 
 class TestCase(test_utils.TestCase):
     @classmethod
@@ -33,6 +35,11 @@ class TestCase(test_utils.TestCase):
         self.mozillian_client.login(email=self.mozillian.email)
         self.pending_client = test.Client()
         self.pending_client.login(email=self.pending.email)
+        # Basic privacy options to include with tests that post to edit profile
+        self.privacy_dict = dict(
+                basic_info_privacy=VOUCHED,
+                contact_info_privacy=VOUCHED,
+                tags_privacy=VOUCHED)
 
     @classmethod
     def tearDownClass(cls):

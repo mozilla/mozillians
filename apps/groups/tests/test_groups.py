@@ -69,9 +69,9 @@ class GroupTest(common.tests.TestCase):
 
         self.client.login(email=self.mozillian.email)
 
-        self.client.post(reverse('profile.edit'),
-                         dict(last_name='tofumatt', groups='Awesome,foo,Bar'),
-                         follow=True)
+        d = dict(self.privacy_dict, last_name='tofumatt',
+                 groups='Awesome,foo,Bar')
+        self.client.post(reverse('profile.edit'), d, follow=True)
 
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
 
@@ -96,10 +96,9 @@ class GroupTest(common.tests.TestCase):
         assert not profile.groups.all(), 'User should have no groups.'
 
         self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(last_name='McAwesomepants',
-                              groups='Awesome foo Bar'),
-                         follow=True)
+        d = dict(self.privacy_dict, last_name='McAwesomepants',
+                 groups='Awesome foo Bar')
+        self.client.post(reverse('profile.edit'), d, follow=True)
 
         assert profile.groups.all(), (
                 "Pending user should be able to edit groups.")
@@ -112,12 +111,10 @@ class GroupTest(common.tests.TestCase):
                 'User has no groups at beginning of test.')
 
         self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(
-                              last_name='McAwesomepants',
-                              # This should result in four groups
-                              groups='Awesome,,foo bar,  Bar,g '),
-                         follow=True)
+        d = dict(self.privacy_dict, last_name='McAwesomepants',
+                 # This should result in four groups
+                 groups='Awesome,,foo bar,  Bar,g ')
+        self.client.post(reverse('profile.edit'), d, follow=True)
 
         eq_(4, profile.groups.count(), 'User should have four groups.')
         assert profile.groups.get(name='foo bar'), (
@@ -133,11 +130,10 @@ class GroupTest(common.tests.TestCase):
         profile = self.mozillian.get_profile()
 
         self.client.login(email=self.mozillian.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(last_name='tofumatt',
-                              groups='%s %s' % (self.NORMAL_GROUP.name,
-                                                self.SYSTEM_GROUP.name)),
-                         follow=True)
+        d = dict(self.privacy_dict, last_name='tofumatt',
+                 groups='%s %s' % (self.NORMAL_GROUP.name,
+                                   self.SYSTEM_GROUP.name))
+        self.client.post(reverse('profile.edit'), d, follow=True)
 
         groups = profile.groups.all()
 
@@ -161,9 +157,9 @@ class GroupTest(common.tests.TestCase):
         # Edit this user's profile and remove a group.
         self.client.logout()
         self.client.login(email=self.mozillian.email)
-        response = self.client.post(reverse('profile.edit'),
-                                    dict(last_name="McLovin'", username='fo', groups=''),
-                                    follow=True)
+        d = dict(self.privacy_dict, last_name="McLovin'", username='fo',
+                 groups='')
+        response = self.client.post(reverse('profile.edit'), d, follow=True)
 
         doc = pq(response.content)
         assert not doc('#id_groups').attr('value'), (

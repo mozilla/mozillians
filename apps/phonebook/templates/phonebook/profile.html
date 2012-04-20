@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ profile.display_name }}{% endblock %}
+{% block page_title %}{{ profile_info['display_name'] }}{% endblock %}
 {% block body_id %}profile{% endblock %}
 {% block body_classes %}
-    box-content {% if not profile.is_vouched %}pending{% endif %}
+    box-content {% if not shown_is_vouched %}pending{% endif %}
 {% endblock %}
 
 {% set nav_profile = 'active' %}
@@ -15,9 +15,9 @@
 
 {% block main_content %}
   <h1>
-    {% if request.user.username == shown_user.username %}
+    {% if is_me %}
       {{ _('Your Profile') }}
-    {% elif profile.is_vouched %}
+    {% elif shown_is_vouched %}
       {{ _('Mozillian Profile') }}
     {% else %}
       {{ _('Pending Profile') }}
@@ -27,9 +27,9 @@
   <div class="clear"></div>
 
   <div class="row">
-    {% if not profile.is_vouched %}
+    {% if not shown_is_vouched %}
       <div class="alert alert alert-info offset1 span8" id="pending-approval">
-        {% if request.user == shown_user %}
+        {% if is_me %}
           {% trans profile_url=absolutify(url('profile', user.username)) %}
             Your profile is waiting for approval. Send this link to someone who
             is familiar with your contributions and ask them to vouch for you:
@@ -50,7 +50,7 @@
 
               {{ vouch_form }}
 
-              {% trans name=profile.display_name %}
+              {% trans name=profile_info['display_name'] %}
                 <div>
                   <button type="submit" class="btn btn-info pull-right">
                     Vouch for {{ name }}
@@ -72,67 +72,63 @@
     {% endif %}
     <div class="span6 offset1 well" id="profile-info">
       <h2 class="fn p-name">
-        {{ profile.display_name }}
+        {{ profile_info['display_name'] }}
       </h2>
 
       <dl>
-        {% if shown_user.email %}
+        {% if profile_info['email'] %}
           <dt>{{ _('Email') }}</dt>
-          <dd><a href="mailto:{{ shown_user.email }}">
-            {{ shown_user.email }}
+          <dd><a href="mailto:{{ profile_info['email'] }}">
+            {{ profile_info['email'] }}
           </a></dd>
         {% endif %}
 
-        {% if not shown_user.username.startswith('u/') %}
+        {% if not profile_info['username'].startswith('u/') %}
           <dt>{{ _('Username') }}</dt>
-          <dd>{{ shown_user.username }}</dd>
+          <dd>{{ profile_info['username'] }}</dd>
         {% endif %}
 
-        {% if profile.ircname %}
+        {% if profile_info['ircname'] %}
           <dt>{{ _('IRC Nickname') }}</dt>
           <dd><a href="irc://irc.mozilla.org/">
-            {{ profile.ircname }}
+            {{ profile_info['ircname'] }}
           </a></dd>
         {% endif %}
 
-        {% if profile.website %}
+        {% if profile_info['website'] %}
           <dt>{{ _('Website') }}</dt>
-          <dd><a rel="me" href="{{ profile.website }}">
-            {{ profile.website }}</a>
+          <dd><a rel="me" href="{{ profile_info['website'] }}">
+            {{ profile_info['website'] }}</a>
           </dd>
         {% endif %}
 
-        {% if profile.location %}
-          <dt>{{ _('Location') }}</dt>
-          <dd>{{ profile.location }}</dd>
-        {% endif %}
-
-        {% if profile.vouched_by %}
+        {% if profile_info['vouched_by'] %}
           <dt>{{ _('Vouched by') }}</dt>
           <dd>
-            <a href="{{ url('profile', profile.vouched_by.user.username) }}"
+            <a href="{{ url('profile',
+                            profile_info['vouched_by'].user.username) }}"
                class="vouched">
-              {{ profile.vouched_by.display_name }}
+              {{ profile_info['vouched_by'].display_name }}
             </a>
           </dd>
         {% endif %}
       </dl>
 
-      {% if profile.bio %}
+      {% if profile_info['bio'] %}
         <h3>{{ _('Bio:') }}{# L10n: Biography #}</h3>
         <div id="bio" class="note p-note">
-          {{ profile.bio|paragraphize }}
+          {{ profile_info['bio']|paragraphize }}
         </div>
       {% endif %}
 
-      {% if profile.groups.count() %}
+      {% if profile_info['groups'] and profile_info['groups'].count()%}
         <h3>{{ _('Groups') }}</h3>
 
         <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in profile.groups.all() %}
+          {% for group in profile_info['groups'].all() %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
-              {% if request.user.get_profile().is_vouched %}
+              {% if user.is_authenticated() and user.get_profile().is_vouched %}
                 <a href="{{ url('group', group.id, group.url) }}">
                   {{ group.name }}
                 </a>
@@ -144,11 +140,11 @@
         </ul>
       {% endif %}
 
-      {% if profile.skills.count() %}
+      {% if profile_info['skills'] and profile_info['skills'].count()%}
         <h3>{{ _('Skills') }}</h3>
 
         <ul id="skills" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in profile.skills.all() %}
+          {% for group in profile_info['skills'].all() %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
               {{ group.name }}
@@ -157,7 +153,7 @@
         </ul>
       {% endif %}
 
-      {% if shown_user.username == request.user.username %}
+      {% if is_me %}
         <a href="{{ url('profile.edit') }}"
            class="btn btn-primary pull-right" id="edit-profile">
           {{ _('Edit My Profile') }}
@@ -167,7 +163,7 @@
 
     <div class="span2">
       <div class="thumbnail">
-        <img id="profile-photo" src="{{ profile.photo_url() }}" width="600" alt="{{ _('Profile photo') }}">
+        <img id="profile-photo" src="{{ profile_info['photo_url'] }}" width="600" alt="{{ _('Profile photo') }}">
       </div>
     </div>
   </div>

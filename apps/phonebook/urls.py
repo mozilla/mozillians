@@ -23,10 +23,9 @@ urlpatterns = patterns('',
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
-    # Static pages
     # Static pages need csrf for browserID post to work
-    url('^about$', anonymous_csrf(direct_to_template), {'template': 'phonebook/about.html'},
-        name='about'),
+    url('^about$', anonymous_csrf(direct_to_template),
+        dict(template='phonebook/about.html'), name='about'),
     url('^confirm-register$', direct_to_template,
         {'template': 'phonebook/confirm_register.html'},
         name='confirm_register'),

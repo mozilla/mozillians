@@ -1,3 +1,5 @@
+from copy import copy
+
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -93,7 +95,7 @@ class RegistrationTest(TestCase):
         r = self.mozillian_client.get(reverse('profile', args=['mrfusion']),
                                               follow=True)
         eq_(r.status_code, 200)
-        eq_(r.context['profile'].user_id, u.id)
+        eq_(r.context['profile_info']['username'], u.username)
 
     def test_username_characters(self):
         """Verify usernames can have digits/symbols, but nothing too insane."""
@@ -122,7 +124,7 @@ class RegistrationTest(TestCase):
         r = self.mozillian_client.get(reverse('profile', args=[username]),
                                               follow=True)
         eq_(r.status_code, 200)
-        eq_(r.context['profile'].user_id, u.id)
+        eq_(r.context['profile_info']['username'], u.username)
 
         # Now test a username with even weirder characters that we don't allow.
         bad_user_email = 'mrfusion+coolbeans@mozilla.com'
@@ -189,6 +191,7 @@ class RegistrationTest(TestCase):
 
         # Note: No username supplied.
         d = dict(
+                 copy(self.privacy_dict),
                  email=email,
                  first_name='Tofu',
                  last_name='Matt',
@@ -196,8 +199,6 @@ class RegistrationTest(TestCase):
         )
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d, follow=True)
-
-        doc = pq(r.content)
 
         assert r.context['user'].id, 'User should be created'
         assert not r.context['user'].get_profile().is_vouched, (

@@ -1,4 +1,5 @@
 import os
+from copy import copy
 from uuid import uuid4
 
 from django import test
@@ -116,11 +117,14 @@ class TestViews(TestCase):
     def test_mozillian_sees_mozillian_profile(self):
         user = User.objects.create(
                 username='other', email='whatever@whatver.man')
+        profile = user.get_profile()
+        profile.is_vouched = True
+        profile.save()
 
         url = reverse('profile', args=['other'])
         r = self.mozillian_client.get(url)
         eq_(r.status_code, 200)
-        eq_(r.context['profile'].user, user)
+        eq_(r.context['profile_info']['username'], user.username)
 
     def test_pending_edit_profile(self):
         # do all then reset
@@ -131,18 +135,20 @@ class TestViews(TestCase):
         edit_profile_url = reverse('profile.edit')
         # original
         r = newbie_client.get(profile_url)
-        newbie = r.context['profile']
+        newbie = User.objects.get(
+                username=r.context['profile_info']['username']).get_profile()
         first = newbie.user.first_name
         last = newbie.user.last_name
         bio = newbie.bio
 
         # update
-        data = dict(first_name='Hobo', last_name='LaRue',
+        data = dict(self.privacy_dict, first_name='Hobo', last_name='LaRue',
                     bio='Rides the rails')
         edit = newbie_client.post(edit_profile_url, data, follow=True)
         eq_(200, edit.status_code, 'Edits okay')
         r = newbie_client.get(profile_url)
-        newbie = r.context['profile']
+        newbie = User.objects.get(
+                username=r.context['profile_info']['username']).get_profile()
         self.assertNotEqual(first, newbie.user.first_name)
         self.assertNotEqual(last,  newbie.user.last_name)
         self.assertNotEqual(bio,   newbie.bio)
@@ -176,16 +182,17 @@ class TestViews(TestCase):
         self.assert_no_photo(client)
 
         # Try to game the form -- it shouldn't do anything.
-        r = client.post(reverse('profile.edit'),
-                {'last_name': 'foo', 'photo-clear': 1})
-        eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
+        d = copy(self.privacy_dict)
+        d.update({'last_name': 'foo', 'photo-clear': 1})
+        r = client.post(reverse('profile.edit'), d)
+        eq_(r.status_code, 302, 'Trying to delete a non-existant photo '
                                 "shouldn't result in an error.")
 
         # Add a profile photo
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
-        r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo=f))
+        d = dict(copy(self.privacy_dict), last_name='foo', photo=f)
+        r = client.post(reverse('profile.edit'), d)
         f.close()
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -198,8 +205,9 @@ class TestViews(TestCase):
         assert self.mozillian.userprofile.photo
 
         # Remove a profile photo
-        r = client.post(reverse('profile.edit'),
-                {'last_name': 'foo', 'photo-clear': 1})
+        d = copy(self.privacy_dict)
+        d.update({'last_name': 'foo', 'photo-clear': 1})
+        r = client.post(reverse('profile.edit'), d)
 
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -245,8 +253,8 @@ class TestViews(TestCase):
                 "No website info appears on the user's profile.")
 
         # Add a URL sans protocol.
-        r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', website='tofumatt.com'))
+        self.privacy_dict.update(last_name='foo', website='tofumatt.com')
+        r = client.post(reverse('profile.edit'), self.privacy_dict)
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
         r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
@@ -269,7 +277,8 @@ class TestViews(TestCase):
         doc = pq(r.content)
         old_photo = doc('#profile-photo').attr('src')
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo=f), follow=True)
+                        dict(copy(self.privacy_dict), last_name='foo',
+                        photo=f), follow=True)
         f.close()
         doc = pq(r.content)
         new_photo = doc('#profile-photo').attr('src')

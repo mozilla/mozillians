@@ -18,6 +18,7 @@
         <li class="active"><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
+        <li><a href="#privacy" data-toggle="tab">{{ _('Privacy') }}</a></li>
         <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
       </ul>
       <div class="tab-content">
@@ -88,6 +89,36 @@
               </div>
             </div>
           {% endif %}
+        </div>
+        <div class="tab-pane" id="privacy">
+          <div>
+            <legend>{{ _('Basic Info') }}</legend>
+            {{ bootstrap(form.basic_info_privacy) }}
+            <p class="field_description">
+              {% trans %}
+                Includes your bio, photo, name and username.
+              {% endtrans %}
+            </p>
+          </div>
+          <div>
+            <legend>{{ _('Contact Info') }}</legend>
+            {{ bootstrap(form.contact_info_privacy) }}
+            <p class="field_description">
+              {% trans %}
+                Includes e-mail, IRC nickname, and who
+                vouched for you.
+              {% endtrans %}
+            </p>
+          </div>
+          <div>
+            <legend>{{ _('Skills and Groups') }}</legend>
+            {{ bootstrap(form.tags_privacy) }}
+            <p class="field_description">
+              {% trans %}
+                Includes your skills and the groups you categorize yourself to.
+              {% endtrans %}
+            </p>
+          </div>
         </div>
         <div class="tab-pane" id="account">
           {{ bootstrap(form.username) }}
