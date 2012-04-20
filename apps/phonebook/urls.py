@@ -9,10 +9,8 @@ from session_csrf import anonymous_csrf
 from phonebook import views
 
 urlpatterns = patterns('',
-    url('^user/edit/$', views.edit_profile,
+    url('^user/edit$', views.edit_profile,
         name='profile.edit'),
-    url('^register/edit/$', views.edit_profile, {'new_account': True},
-        name='profile.new'),
     url('^confirm-delete$', views.confirm_delete,
         name='profile.delete_confirm'),
     url('^delete$', views.delete, name='profile.delete'),
@@ -23,7 +21,6 @@ urlpatterns = patterns('',
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
-    # Static pages
     # Static pages need csrf for browserID post to work
     url('^about$', anonymous_csrf(direct_to_template), {'template': 'phonebook/about.html'},
         name='about'),

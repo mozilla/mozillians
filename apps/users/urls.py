@@ -5,7 +5,7 @@ from django.views.generic.simple import redirect_to
 from jinjautils import jinja_for_django
 from tastypie.api import Api
 
-from . import api, views
+from users import api, views
 
 # So we can use the contrib logic for password resets, etc.
 auth_views.render_to_response = jinja_for_django

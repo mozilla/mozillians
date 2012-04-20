@@ -117,7 +117,8 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.GraphiteMiddleware',
     'commonware.response.middleware.GraphiteRequestTimingMiddleware',
     'csp.middleware.CSPMiddleware',
-    'phonebook.middleware.PermissionDeniedMiddleware',
+    'common.middleware.PermissionDeniedMiddleware',
+    'common.middleware.RemoveSlashMiddleware',
 ]
 
 # StrictTransport
