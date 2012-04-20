@@ -447,6 +447,10 @@ legend {
     margin: 20px 0 10px 0;
 }
 
+#profile-info dt {
+    color: #333;	
+}
+
 .search-options {
     display: none;
 }
