@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('MozCamp LATAM: Keynote') }}{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
+{% block page_js %}
+  <script type='text/javascript' src='http://videos.mozilla.org/serv/air_mozilla/jwplayer.js'></script>
+  <script>
+    jwplayer('player').setup({
+      'flashplayer': 'http://videos.mozilla.org/serv/air_mozilla/player.swf',
+      'file': '{{ settings.KEYNOTE_FILE }}',
+      'provider': 'rtmp',
+      'streamer': 'rtmp://fml.1237.edgecastcdn.net/201237/',
+      'rtmp.subscribe': 'true',
+      'controlbar': 'over',
+      'playlist': 'none',
+      'dock': 'true',
+      'icons': 'true',
+      'quality': 'true',
+      'autostart': 'true',
+      'width': '620',
+      'height': '350'
+    });
+  </script>
+{% endblock %}
+
+{% block main_content %}
+  <div style="margin: 30px auto; width: 620px;">
+    <div id="player">Do not adjust your television...</div>
+  </div>
+{% endblock %}
