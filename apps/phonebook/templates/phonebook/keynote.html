@@ -4,10 +4,10 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block page_js %}
-  <script type='text/javascript' src='http://videos.mozilla.org/serv/air_mozilla/jwplayer.js'></script>
+  <script type='text/javascript' src='https://videos-cdn.mozilla.net/serv/air_mozilla/jwplayer.js'></script>
   <script>
     jwplayer('player').setup({
-      'flashplayer': 'http://videos.mozilla.org/serv/air_mozilla/player.swf',
+      'flashplayer': 'https://videos-cdn.mozilla.net/serv/air_mozilla/player.swf',
       'file': '{{ settings.KEYNOTE_FILE }}',
       'provider': 'rtmp',
       'streamer': 'rtmp://fml.1237.edgecastcdn.net/201237/',
