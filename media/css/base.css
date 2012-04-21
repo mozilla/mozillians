@@ -1,4 +1,15 @@
 @font-face{
+    font-family:'Open Sans Light';
+    src:url('../fonts/OpenSans-Light-webfont.eot');
+    src:url('../fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/OpenSans-Light-webfont.woff') format('woff'),
+        url('../fonts/OpenSans-Light-webfont.ttf') format('truetype'),
+        url('../fonts/OpenSans-Light-webfont.svg#OpenSansLight') format('svg');
+    font-weight:300;
+    font-style:normal
+}
+
+@font-face{
     font-family:'Open Sans';
     src:url('../fonts/OpenSans-Regular-webfont.eot');
     src:url('../fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
@@ -6,7 +17,8 @@
         url('../fonts/OpenSans-Regular-webfont.ttf') format('truetype'),
         url('../fonts/OpenSans-Regular-webfont.svg#OpenSansRegular') format('svg');
     font-weight:normal;
-    font-style:normal}
+    font-style:normal
+}
 
 @font-face{
     font-family:'Open Sans';
@@ -48,8 +60,8 @@ body {
 }
 
 .huge, .large, h1, h2, h3, h4, #profile-info dt {
-    font-family:OpenSans, "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
-    font-weight:400;
+    font-family:'Open Sans Light', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
+    font-weight:normal;
     text-shadow:0 1px 0 rgba(255,255,255,0.75);
 }
 
@@ -90,7 +102,7 @@ h4 {
 }
 
 footer p, #main p {
-    font-family: 'Open Sans',sans-serif;
+    font-family:'Open Sans',sans-serif;
 }
 
 .small,small {
@@ -114,9 +126,15 @@ footer p, #main p {
 .welcome h1 {
     color:#B91E27;
     font-size:45px;
-    line-height:1;
+    line-height:0.8;
     margin:10px 6% 15px 0;
     padding:0;
+}
+
+.welcome h1 small {
+    font-size:24px;
+    letter-spacing:-0.25px;
+    font-weight: 300;
 }
 
 #header h1 a,#header h1 span {
@@ -134,7 +152,7 @@ footer p, #main p {
 }
 
 .nav, .brand {
-    font-family: 'Open Sans',sans-serif;
+    font-family:'Open Sans',sans-serif;
 }
 
 #nav a,#nav span {
@@ -206,7 +224,6 @@ nav .nav a.browser_id_login {
     background-image: -moz-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
     background-image: -webkit-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
     background-image: -ms-linear-gradient(top, rgb(177,219,250) 45%, rgb(58,170,255) 73%);
-
     background-image: -webkit-gradient(
     linear,
     left top,
@@ -215,7 +232,10 @@ nav .nav a.browser_id_login {
     color-stop(0.73, rgb(58,170,255))
     );
     border: 1px solid #3697E5;
-    border-radius: 1px;
+    border-radius: 0.25em;
+    -webkit-border-radius: 0.25em;
+    -moz-border-radius: 0.25em;
+    -o-border-radius: 0.25em;
     white-space: nowrap;
 }
 
@@ -243,7 +263,6 @@ nav .nav a.browser_id_login {
     background-image: -moz-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
     background-image: -webkit-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
     background-image: -ms-linear-gradient(top, rgb(141,202,252) 45%, rgb(58,170,255) 73%);
-
     background-image: -webkit-gradient(
     linear,
     left top,
@@ -255,7 +274,7 @@ nav .nav a.browser_id_login {
 }
 
 #body-home .id,#body-home .signin {
-    font-size:12px;
+    font-size:14px;
     font-weight:700;
     line-height:21px;
     padding:1px 10px;
@@ -310,6 +329,7 @@ nav .nav a.browser_id_login {
 
 a.btn {
     vertical-align:middle;
+    font-family:'Open Sans', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
 }
 
 .photo .controls img {
@@ -520,4 +540,8 @@ footer div.container {
 .group-skills li {
     float: left;
     padding-right: 10px;
+}
+
+label, input, button, select, textarea {
+    font-family:'Open Sans', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
 }
