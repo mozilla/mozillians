@@ -161,6 +161,9 @@ def search(request):
             except EmptyPage:
                 people = paginator.page(paginator.num_pages)
 
+            if len(profiles) == 1:
+                return redirect(reverse('profile', args=[people[0].user.username]))
+
             if paginator.count > forms.PAGINATION_LIMIT:
                 show_pagination = True
                 num_pages = len(people.paginator.page_range)
