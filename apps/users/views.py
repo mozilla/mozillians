@@ -9,7 +9,6 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from phonebook.models import Invite
-from session_csrf import anonymous_csrf
 from users import forms
 from users.models import UserProfile
 
@@ -50,7 +49,6 @@ class Browserid(Verify):
         return self.failure_url
 
 
-@anonymous_csrf
 def register(request):
     """
     Single-purpose view.
