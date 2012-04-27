@@ -22,7 +22,7 @@
       <div class="span12">
         <p class="span6">{{ group.description }}</p>
         <form class="curated-toggle span2 offset3"
-              action="{{ url('group_toggle', group.slug) }}"
+              action="{{ url('group_toggle', group.id, group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
 
@@ -95,7 +95,7 @@
           </ul>
       </div>
     {% elif not group.system %}
-      <form action="{{ url('group_toggle', group.slug) }}"
+      <form action="{{ url('group_toggle', group.id, group.url) }}"
             class="span2" id="toggle-group" method="post">
         {{ csrf() }}
 

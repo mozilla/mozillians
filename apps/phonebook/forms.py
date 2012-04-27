@@ -5,7 +5,6 @@ from django import forms
 from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.utils.safestring import mark_safe
-from django.template.defaultfilters import slugify
 
 import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -149,33 +148,23 @@ class ProfileForm(UserForm):
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
 
-        system_groups = list(self.instance.groups.filter(system=True))
+        system_groups = [g.name for g in self.instance.groups.all()
+                         if g.system]
 
-        groups = [g.strip()
-                  for g in self.cleaned_data['groups'].lower().split(',')
-                  if g and ',' not in g]
+        new_groups = [g.strip()
+                      for g in self.cleaned_data['groups'].lower().split(',')
+                      if g and ',' not in g]
 
-        def handle_group(name):
-            existing_group = Group.objects.filter(slug=slugify(name))[:1]
-
-            if not existing_group:
-                return Group.objects.create(name=name)
-            return existing_group[0]
-
-        return system_groups + map(handle_group, groups)
+        return system_groups + new_groups
 
     def clean_skills(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
-
-        # Get the name of the skills we need to find.
-        skills_names = [s for s in
-                        self.cleaned_data['skills'].lower().split(',') if s]
-
-        get_or_create = lambda n: Skill.objects.get_or_create(name=n)[0]
-        return map(get_or_create, skills_names)
+        return [s.strip()
+                for s in self.cleaned_data['skills'].lower().split(',')
+                if s and ',' not in s]
 
     def save(self, request):
         """Save the data to profile."""

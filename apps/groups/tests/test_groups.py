@@ -18,7 +18,6 @@ class GroupTest(common.tests.TestCase):
         super(GroupTest, self).setUp()
         self.NORMAL_GROUP = Group.objects.create(name='cheesezilla')
         self.SYSTEM_GROUP = Group.objects.create(name='ghost', system=True)
-        Group.objects.create(name='daft', system=True)
 
     def test_default_groups(self):
         """Ensure the user has the proper amount of groups upon creation."""
@@ -184,7 +183,7 @@ class GroupTest(common.tests.TestCase):
 
         self.client.login(email=self.mozillian.email)
         response = self.client.get(reverse('group', args=[
-                                   self.NORMAL_GROUP.slug]))
+                self.NORMAL_GROUP.id, self.NORMAL_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
@@ -212,8 +211,8 @@ class GroupTest(common.tests.TestCase):
 
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
-        response = self.client.get(reverse('group',
-                                           args=[self.SYSTEM_GROUP.slug]))
+        response = self.client.get(reverse('group', args=[self.SYSTEM_GROUP.id,
+                                                     self.SYSTEM_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
@@ -223,8 +222,8 @@ class GroupTest(common.tests.TestCase):
                 '"Join Group" button should not be present in the response.')
 
         # Attempt to manually toggle the group membership
-        r = self.client.post(reverse('group_toggle',
-                             args=[self.SYSTEM_GROUP.slug]), follow=True)
+        r = self.client.post(reverse('group_toggle', args=[
+                self.SYSTEM_GROUP.id, self.SYSTEM_GROUP.url]), follow=True)
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
                 'User should not be in the "%s" group' %
                 self.SYSTEM_GROUP.name)

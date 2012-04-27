@@ -92,12 +92,19 @@ class UserProfile(SearchMixin, models.Model):
             m2mfield = self.skills
 
         # Remove any non-system groups that weren't supplied in this list.
-        m2mfield.remove(*[m for m in m2mfield.all()
-                                if m not in membership_list
-                                and not getattr(m, 'system', False)])
+        m2mfield.remove(*[g for g in m2mfield.all()
+                                if g.name not in membership_list
+                                and not getattr(g, 'system', False)])
 
-        m2mfield.add(*[m for m in membership_list if not
-                       getattr(m, 'system', False)])
+        # Add/create the rest of the groups
+        groups_to_add = []
+        for g in membership_list:
+            (group, created) = model.objects.get_or_create(name=g)
+
+            if not getattr(g, 'system', False):
+                groups_to_add.append(group)
+
+        m2mfield.add(*groups_to_add)
 
     def is_complete(self):
         """

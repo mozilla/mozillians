@@ -40,7 +40,7 @@ class GroupBase(models.Model):
 
 
 class Group(GroupBase):
-    slug = models.SlugField(unique=True)
+    url = models.SlugField()
     system = models.BooleanField(db_index=True, default=False)
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=255,
@@ -71,7 +71,7 @@ class Skill(GroupBase):
 def _create_url_slug(sender, instance, raw, using, **kwargs):
     """Create a Group's URL slug when it's first saved."""
     if not instance.pk:
-        instance.slug = slugify(instance.name)
+        instance.url = slugify(instance.name.lower())
 
 
 @receiver(models.signals.pre_save, sender=Skill)
