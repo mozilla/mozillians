@@ -15,8 +15,8 @@ class TestSearch(ESTestCase):
         amandeep = 'Amandeep McIlrath'
 
         url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Am'))
-        rs = self.mozillian_client.get(url, dict(q=' Am'))
+        r = self.mozillian_client.get(url, {'q': 'Am'})
+        rs = self.mozillian_client.get(url, {'q': 'Am'})
 
         eq_(r.status_code, 200)
         peeps = r.context['people']
@@ -43,8 +43,8 @@ class TestSearch(ESTestCase):
         user(first_name='Amanda', last_name='Unvouched')
 
         url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Am'))
-        rnv = self.mozillian_client.get(url, dict(q='Am', nonvouched_only=1))
+        r = self.mozillian_client.get(url, {'q': 'Am'})
+        rnv = self.mozillian_client.get(url, {'q': 'Am', 'nonvouched_only': 1})
 
         eq_(r.status_code, 200)
         peeps = r.context['people']
@@ -79,13 +79,13 @@ class TestSearch(ESTestCase):
 
         url = reverse('search')
 
-        r_pics_only = self.client.get(url, dict(q='Am', picture_only=1))
+        r_pics_only = self.client.get(url, {'q': 'Am', 'picture_only': 1})
         eq_(r_pics_only.status_code, 200)
         pics_only_peeps = r_pics_only.context['people']
         for person in pics_only_peeps:
             assert person.photo, 'Every person should have a photo'
 
-        r = self.client.get(url, dict(q='Am'))
+        r = self.client.get(url, {'q': 'Am'})
         eq_(r.status_code, 200)
         peeps = r.context['people']
         # Make sure u shows up in normal search
@@ -102,30 +102,30 @@ class TestSearch(ESTestCase):
         4. assumes valid page is passed, valid limit is passed
         """
         url = reverse('search')
-        r = self.mozillian_client.get(url, dict(q='Amand', limit='1'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'limit': '1'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 1)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'page': 'test'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='1'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'page': '1'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='1'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'page': 'test',
+                                                'limit': '1'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 1)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='x'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'page': 'test',
+                                                'limit': 'x'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
-        r = self.mozillian_client.get(url, dict(q='Amand', page='test',
-                                                limit='-3'))
+        r = self.mozillian_client.get(url, {'q': 'Amand', 'page': 'test',
+                                                'limit': '-3'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 
@@ -143,7 +143,7 @@ class TestSearch(ESTestCase):
         assert not pq(r.content)('.result')
 
         r = self.mozillian_client.get(search_url,
-                                      dict(q=u'', nonvouched_only=1))
+                                      {'q': u'', 'nonvouched_only': 1})
 
         assert pq(r.content)('.result')
 
@@ -154,7 +154,7 @@ class TestSearch(ESTestCase):
         u = user(first_name='Findme', last_name='Ifyoucan')
 
         r = create_client(vouched=True).get(reverse('search'),
-        dict(q='Fin', nonvouched_only=True), follow=True)
+        {'q': 'Fin', 'nonvouched_only': 1}, follow=True)
 
         eq_(r.status_code, 200, 'Search view query should return 200')
 
