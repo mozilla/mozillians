@@ -19,7 +19,7 @@ Vagrant::Config.run do |config|
     config.vm.box = "mozillians-v1.0"
     config.vm.box_url = "http://people.mozilla.org/~mmacpherson/mozillians-v1.0.box"
 
-    config.vm.forward_port 8000, 8000
+    config.vm.forward_port 8001, 8001
 
     # Increase vagrant's patience during hang-y CentOS bootup
     # see: https://github.com/jedi4ever/veewee/issues/14
