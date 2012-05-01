@@ -210,7 +210,7 @@ def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
 
     if created:
-        UserProfile.objects.create(user=instance, display_name=dn)
+        UserProfile.objects.create(user=instance)
     else:
         u = UserProfile.objects.get(user=instance)
         u.display_name = dn

@@ -7,6 +7,10 @@ from phonebook.forms import UserForm
 
 
 class RegistrationForm(UserForm):
+    username = forms.CharField(
+                label=_lazy(u'Username'), max_length=30, required=False,
+                widget=forms.TextInput(attrs={'placeholder': 'Example: IRC Nickname'}))
+
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
                         u'explain in your privacy policy.'),
@@ -19,3 +23,9 @@ class RegistrationForm(UserForm):
         widgets = {
             'bio': forms.Textarea(),
         }
+
+    def save(self, user):
+        d = self.cleaned_data
+        if 'username' in d:
+            d['ircname'] = d['username']
+        super(RegistrationForm, self).save(user)

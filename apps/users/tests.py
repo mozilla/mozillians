@@ -243,6 +243,25 @@ class RegistrationTest(TestCase):
         # Make sure we can't use the same username twice
         assert r.context['form'].errors, "Form should throw errors."
 
+    def test_ircnick(self):
+        username = 'thisisatest'
+        email = 'test@example.com'
+        register = dict(
+                username=username,
+                first_name='David',
+                last_name='Teststhings',
+                optin=True
+        )
+        d = {'assertion': self.fake_assertion}
+
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('register'), register, follow=True)
+
+        u = User.objects.filter(email=email)[0]
+        p = u.get_profile()
+        eq_(p.ircname, username, 'IRCname should equal username')
+
 
 class TestThingsForPeople(TestCase):
     """Verify that the wrong users don't see things."""
@@ -367,6 +386,26 @@ class TestUser(TestCase):
 
         # get_api_key will always return a key, creating one if needed.
         eq_(p.get_api_key(), u.api_key.key)
+
+    def test_blank_ircname(self):
+        username = 'thisisatest'
+        email = 'test@example.com'
+        register = dict(
+                username=username,
+                first_name='David',
+                last_name='Teststhings',
+                optin=True
+        )
+        d = {'assertion': 'rarrr'}
+
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('register'), register, follow=True)
+
+        u = User.objects.filter(email=email)[0]
+        p = u.get_profile()
+        p.ircname = ''
+        eq_(p.ircname, '', 'We need to allow IRCname to be blank')
 
 
 class TestMigrateRegistration(TestCase):
