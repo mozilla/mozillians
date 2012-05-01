@@ -154,7 +154,8 @@ class TestSearch(ESTestCase):
         u = user(first_name='Findme', last_name='Ifyoucan')
 
         r = create_client(vouched=True).get(reverse('search'),
-        {'q': 'Fin', 'nonvouched_only': 1}, follow=True)
+                                            {'q': 'Fin', 'nonvouched_only': 1},
+                                                 follow=True)
 
         eq_(r.status_code, 200, 'Search view query should return 200')
 
