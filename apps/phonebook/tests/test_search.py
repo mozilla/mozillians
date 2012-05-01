@@ -96,11 +96,11 @@ class TestSearch(ESTestCase):
     def test_mozillian_search_pagination(self):
         """Tests the pagination on search.
 
-1. assumes no page is passed, but valid limit is passed
-2. assumes invalid page is passed, no limit is passed
-3. assumes valid page is passed, no limit is passed
-4. assumes valid page is passed, valid limit is passed
-"""
+        1. assumes no page is passed, but valid limit is passed
+        2. assumes invalid page is passed, no limit is passed
+        3. assumes valid page is passed, no limit is passed
+        4. assumes valid page is passed, valid limit is passed
+        """
         url = reverse('search')
         r = self.mozillian_client.get(url, {'q': 'Amand', 'limit': '1'})
         peeps = r.context['people']
@@ -149,8 +149,8 @@ class TestSearch(ESTestCase):
 
     def test_single_result(self):
         """Makes sure the client is redirected to the users page
-if they are the only result returned by the query.
-"""
+        if they are the only result returned by the query.
+        """
         u = user(first_name='Findme', last_name='Ifyoucan')
 
         r = create_client(vouched=True).get(reverse('search'),
