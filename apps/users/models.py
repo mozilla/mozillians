@@ -177,13 +177,17 @@ class UserProfile(SearchMixin, models.Model):
             s = s.filter(has_photo=photo)
         return s
 
+    def set_ircname(self, ircnick):
+        if ircnick:
+            self.ircname = ircnick
+
 
 @receiver(models.signals.post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
 
     if created:
-        UserProfile.objects.create(user=instance, display_name=dn)
+        UserProfile.objects.create(user=instance)
     else:
         u = UserProfile.objects.get(user=instance)
         u.display_name = dn
