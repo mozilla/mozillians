@@ -60,7 +60,8 @@ class UserForm(forms.ModelForm):
     last_name = forms.CharField(label=_lazy(u'Last Name'), max_length=30,
                                                            required=True)
     username = forms.CharField(label=_lazy(u'Username'), max_length=30,
-                                                         required=False)
+                                                         required=False,
+							 widget=forms.TextInput(attrs={'placeholder':'Tip: Use your IRC Nickname.'}))
 
     def clean_username(self):
         username = self.cleaned_data['username']
