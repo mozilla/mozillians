@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 
-{% block page_title %}
-  {% trans name=group.name %}Users in Group "{{ name }}"{% endtrans %}
-{% endblock %}
+{% block page_title %}{{ _('Group: {name}')|f(name=group.name) }}{% endblock %}
+
 {% block body_id %}group-show{% endblock %}
 {% block body_classes %}
   box-content search-page group-name-{{ group.name }}
@@ -14,9 +13,7 @@
 
 {% block main_content %}
   <div class="row group-options">
-    {% trans name=group.name %}
-      <h1 class="span12">Users in Group "{{ name }}"</h1>
-    {% endtrans %}
+    <h1 class="span12">{{ _('Group: {name}')|f(name=group.name) }}</h1>
 
     {% if group.steward %}
       <div class="span12">
