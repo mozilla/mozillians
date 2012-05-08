@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block page_title %}
-  {% trans name=group.name %}Users in Group "{{ name }}"{% endtrans %}
+  {% trans name=group.name %}Group: {{ name }}{% endtrans %}
 {% endblock %}
 {% block body_id %}group-show{% endblock %}
 {% block body_classes %}
@@ -15,7 +15,7 @@
 {% block main_content %}
   <div class="row group-options">
     {% trans name=group.name %}
-      <h1 class="span12">Users in Group "{{ name }}"</h1>
+      <h1 class="span12">Group: {{ name }}</h1>
     {% endtrans %}
 
     {% if group.steward %}
