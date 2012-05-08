@@ -2,7 +2,6 @@
 
 # Django settings for the mozillians project.
 import logging
-import os
 
 from funfactory.manage import path
 from funfactory import settings_base as base
@@ -142,9 +141,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'users',
     'phonebook',
     'groups',
-    'taskboard',
     'common',
-    # 'locations',
 
     'csp',
     'jingo_minify',
