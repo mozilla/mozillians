@@ -276,6 +276,32 @@ class TestViews(TestCase):
         new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
 
+    def test_api_key(self):
+        """Assert that the Api key will be created and displayed"""
+        client = self.mozillian_client
+        r = client.get(reverse('profile.edit'), follow=True)
+
+        doc = pq(r.content)
+        api_key = doc('#api-key').attr('value')
+
+        p = self.mozillian.get_profile()
+        assert p.get_api_key() == api_key
+
+    def test_reset_api_key(self):
+        """Assert that resetingthe aPI key changes it."""
+        client = self.mozillian_client
+        r = client.get(reverse('profile.edit'), follow=True)
+
+        doc = pq(r.content)
+        original_api_key = doc('#api-key').attr('value')
+
+        data = {'reset_api_key': True}
+        r = client.post(reverse('profile.edit'), data, follow=True)
+
+        doc = pq(r.content)
+        new_api_key = doc('#api-key').attr('value')
+        assert original_api_key != new_api_key
+
 
 class TestVouch(TestCase):
     """

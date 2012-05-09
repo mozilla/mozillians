@@ -69,6 +69,9 @@ MINIFY_BUNDLES = {
         'test': (
             'css/qunit.css',
         ),
+        'edit_profile': (
+            'css/user.css',
+        ),
     },
     'js': {
         'common': (
@@ -149,6 +152,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
+    'tastypie',
 
     'django.contrib.admin',
     'django.contrib.auth',
