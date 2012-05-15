@@ -18,7 +18,9 @@
     {{ csrf() }}
     {{ form.errors.recipient }}
 
-    {{ form.recipient }}
+    {{ bootstrap(form.recipient) }}
+
+    {{ bootstrap(form.message) }}
 
     <button type="submit" class="btn bump-button">
       {{ _('Send invite') }}
