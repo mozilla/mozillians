@@ -46,6 +46,13 @@
             <br><a href="{{ invite }}" class="button primary">Invite a Mozillian</a>
           {% endtrans %}
         </p>
+      {% elif not user.get_profile().is_vouched %}
+        <p>
+          {% trans %}
+            You need to be vouched by a core or active contributor in the Mozilla community.
+            To do this, find ways to <a href="http://mozilla.org/contribute">get involved</a>.
+          {% endtrans %}
+        </p>
     {% endif %}
   </div>
 {% endblock main_content %}
