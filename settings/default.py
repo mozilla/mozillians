@@ -211,6 +211,7 @@ CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
 CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
                   'https://statse.webtrendslive.com',
                   'https://browserid.org',)
+CSP_FRAME_SRC = ("'self'", 'https://browserid.org',)
 CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report'
 
