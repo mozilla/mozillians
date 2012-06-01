@@ -1,0 +1,18 @@
+<!doctype html>
+<html class="no-js" lang="{{ LANG }}" dir="{{ DIR }}">
+  <head>
+    <meta charset="utf-8">
+
+    <title>{{ _('Mozillians API') }}</title>
+    {{ css('api') }}
+    {{ js('common') }}
+    {{ js('api') }}
+  </head>
+  <body>
+    {% block content %}
+       <a id="json_url" href=""></a>
+      <pre id="json" class="prettyprint">
+      </pre>
+    {% endblock %}
+  </body>
+</html>
