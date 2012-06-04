@@ -58,6 +58,12 @@ class UserProfile(SearchMixin, models.Model):
         """Return this user's name when their profile is called."""
         return self.display_name
 
+    def user_email(self):
+        return self.user.email
+
+    def user_username(self):
+        return self.user.username
+
     def anonymize(self):
         """Remove personal info from a user"""
 
