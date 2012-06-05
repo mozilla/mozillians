@@ -201,12 +201,14 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
 
 @receiver(models.signals.post_save, sender=UserProfile)
 def add_to_staff_group(sender, instance, created, **kwargs):
-    """Add all mozilla.com users to the "staff" group upon creation."""
-    if created:
-        email = instance.user.email
-        if (any(email.endswith('@' + x) for x in
-                                               settings.AUTO_VOUCH_DOMAINS)):
-            instance.groups.add(Group.objects.get(name='staff', system=True))
+    """Keep users in the staff group if they're autovouchable."""
+    email = instance.user.email
+    staff = Group.objects.get(name='staff', system=True)
+    if any(email.endswith('@' + x) for x in
+           settings.AUTO_VOUCH_DOMAINS):
+        instance.groups.add(staff)
+    elif staff in instance.groups.all():
+        instance.groups.remove(staff)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile)

@@ -1,12 +1,13 @@
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.test.utils import override_settings
 
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 from common import browserid_mock
-from common.tests import ESTestCase, TestCase
+from common.tests import ESTestCase, TestCase, user
 from groups.models import Group
 from users.models import UserProfile
 
@@ -391,3 +392,47 @@ class TestMigrateRegistration(TestCase):
                 r = self.client.post(reverse('register'), info, follow=True)
 
             eq_(r.status_code, 200)
+
+
+@override_settings(AUTO_VOUCH_DOMAINS=('mozilla.com',))
+class AutoVouchTests(TestCase):
+
+    def test_only_autovouch_in_staff(self):
+        """Restrict the staff group to emails in AUTO_VOUCH_DOMAINS."""
+        staff = Group.objects.get_or_create(name='staff', system=True)[0]
+        staff_user = user(email='abcd@mozilla.com')
+        staff_profile = staff_user.get_profile()
+        staff_profile.save()
+        assert staff in staff_profile.groups.all(), (
+            'Auto-vouched email in staff group by default.')
+
+        staff_profile.groups.remove(staff)
+        staff_profile.save()
+        assert staff in staff_profile.groups.all(), (
+            'Auto-vouched email cannot be removed from staff group.')
+
+        community_user = user()
+        community_profile = community_user.get_profile()
+        community_profile.save()
+        assert staff not in community_profile.groups.all(), (
+            'Non-auto-vouched email not automatically in staff group.')
+
+        community_profile.groups.add(staff)
+        community_profile.save()
+        assert staff not in community_profile.groups.all(), (
+            'Non-auto-vouched email cannot be added to staff group.')
+
+    def test_autovouch_email(self):
+        """Users with emails in AUTO_VOUCH_DOMAINS should be vouched."""
+        auto_user = user(email='abcd@mozilla.com')
+        auto_profile = auto_user.get_profile()
+        auto_profile.save()
+        assert auto_profile.is_vouched, 'Profile should be vouched.'
+        assert auto_profile.vouched_by is None, (
+            'Profile should not have a voucher.')
+
+        non_auto_user = user()
+        non_auto_profile = non_auto_user.get_profile()
+        non_auto_profile.save()
+        assert not non_auto_profile.is_vouched, (
+            'Profile should not be vouched.')
