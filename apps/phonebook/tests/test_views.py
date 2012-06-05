@@ -251,8 +251,9 @@ class TestViews(TestCase):
         r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
 
-        assert('http://tofumatt.com/' in [a.get('href') for a in doc('#profile-info dd a')], (
-                'User should have a URL with protocol added.'))
+        assert ('http://tofumatt.com/' in
+                doc('#profile-info dd a[rel=me]')[0].get('href')), (
+            'User should have a URL with protocol added.')
 
     def test_replace_photo(self):
         """Ensure we can replace photos."""
