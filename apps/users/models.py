@@ -10,8 +10,9 @@ from django.dispatch import receiver
 
 from elasticutils import S
 from elasticutils.models import SearchMixin
-from sorl.thumbnail import ImageField
+from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
+from sorl.thumbnail import ImageField
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from groups.models import Group, Skill
@@ -57,6 +58,9 @@ class UserProfile(SearchMixin, models.Model):
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
+
+    def get_absolute_url(self):
+        return reverse('profile', args=[self.user.username])
 
     def user_email(self):
         return self.user.email

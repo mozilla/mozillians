@@ -45,7 +45,8 @@ class Browserid(Verify):
         return redirect(reverse('register'))
 
     def get_failure_url(self):
-        messages.error(self.request, _('Ooops, something went wrong. Please try again.'))
+        messages.error(self.request,
+                       _('Ooops, something went wrong. Please try again.'))
         return self.failure_url
 
 
