@@ -19,4 +19,8 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
         """No one should be creating UserProfiles from the admin."""
         return False
 
+    def has_delete_permission(self, *a, **kw):
+        """Delete the User, not the UserProfile."""
+        return False
+
 admin.site.register(UserProfile, UserProfileAdmin)
