@@ -36,10 +36,10 @@ class UserProfile(SearchMixin, models.Model):
 
     # Foreign Keys and Relationships
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
-                                   on_delete=models.SET_NULL)
+                                   on_delete=models.SET_NULL, blank=True)
 
-    groups = models.ManyToManyField('groups.Group')
-    skills = models.ManyToManyField('groups.Skill')
+    groups = models.ManyToManyField(Group, blank=True)
+    skills = models.ManyToManyField(Skill, blank=True)
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
