@@ -27,7 +27,7 @@
 
 <body id="body-{% block body_id %}mozillians{% endblock %}"
   class="{% block body_classes %}{% endblock %}
-  {{ 'auth' if user.is_authenticated() else 'anon' }}"
+  {{ 'auth' if (user and user.is_authenticated()) else 'anon' }}"
   data-locale="{{ LANG }}">
 
 <a class="skip" href="#main">{{ _('Skip to Content') }}</a>

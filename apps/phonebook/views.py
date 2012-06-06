@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
+from tastypie.models import ApiKey
 from tower import ugettext as _
 
 from groups.helpers import stringify_groups
@@ -69,6 +70,12 @@ def edit_profile(request):
         if form.is_valid():
             old_username = request.user.username
             form.save(request)
+            if 'reset_api_key' in request.POST:
+                try:
+                    request.user.api_key.delete()
+                except ApiKey.DoesNotExist:
+                    pass
+                return redirect(reverse('profile.edit'))
 
             # Notify the user that their old profile URL won't work.
             if (not profile.is_vouched and
@@ -78,22 +85,22 @@ def edit_profile(request):
                                           'changed.'))
 
             return redirect(reverse('profile', args=[request.user.username]))
-    else:
-        initial = dict(first_name=request.user.first_name,
-                       last_name=request.user.last_name,
-                       bio=profile.bio,
-                       website=profile.website,
-                       irc_nickname=profile.ircname,
-                       groups=user_groups,
-                       skills=user_skills)
 
-        if not request.user.username.startswith('u/'):
-            initial.update(username=request.user.username)
+    initial = dict(first_name=request.user.first_name,
+                   last_name=request.user.last_name,
+                   bio=profile.bio,
+                   website=profile.website,
+                   irc_nickname=profile.ircname,
+                   groups=user_groups,
+                   skills=user_skills)
 
-        form = forms.ProfileForm(
-                instance=profile,
-                initial=initial,
-        )
+    if not request.user.username.startswith('u/'):
+        initial.update(username=request.user.username)
+
+    form = forms.ProfileForm(
+            instance=profile,
+            initial=initial,
+    )
 
     # When changing this keep in mind that the same view is used for
     # user.register.
@@ -143,7 +150,9 @@ def search(request):
 
         # If nothing has been entered don't load any searches.
         if not (not query and vouched is None and profilepic is None):
-            profiles = UserProfile.search(query, vouched=vouched, photo=profilepic)
+            profiles = UserProfile.search(query,
+                                          vouched=vouched,
+                                          photo=profilepic)
 
             paginator = Paginator(profiles, limit)
 
@@ -155,7 +164,8 @@ def search(request):
                 people = paginator.page(paginator.num_pages)
 
             if len(profiles) == 1:
-                return redirect(reverse('profile', args=[people[0].user.username]))
+                return redirect(reverse('profile',
+                                        args=[people[0].user.username]))
 
             if paginator.count > forms.PAGINATION_LIMIT:
                 show_pagination = True

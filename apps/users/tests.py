@@ -354,6 +354,16 @@ class TestUser(TestCase):
         # Good to go
         assert u.get_profile()
 
+    def test_apikey(self):
+        """Test that get_api_key() will create a key if missing."""
+        # A new user will not have a key created.
+        u = User.objects.create(username='tmp', email='tmp@domain.com')
+        p = u.get_profile()
+        from tastypie.models import ApiKey
+        # assertRaises needs a callable
+        self.assertRaises(ApiKey.DoesNotExist, lambda: u.api_key)
+        eq_(p.get_api_key(), u.api_key)
+
 
 class TestMigrateRegistration(TestCase):
         """Test funky behavior of flee ldap"""

@@ -66,8 +66,14 @@ MINIFY_BUNDLES = {
             'css/base-768px.css',
             'css/base-980px.css',
         ),
+        'api': (
+            'css/prettify.css',
+        ),
         'test': (
             'css/qunit.css',
+        ),
+        'edit_profile': (
+            'css/user.css',
         ),
     },
     'js': {
@@ -89,6 +95,9 @@ MINIFY_BUNDLES = {
             'js/main.js',
             'js/browserid.js',
             'js/groups.js',
+        ),
+        'api': (
+            'js/libs/prettify.js',
         ),
         'edit_profile': (
             'js/libs/tag-it/js/tag-it.js',
@@ -149,6 +158,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
+    'tastypie',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -231,3 +241,5 @@ THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
+
+USE_TZ = False

@@ -1,0 +1,41 @@
+<!doctype html>
+<html class="no-js" lang="{{ LANG }}" dir="{{ DIR }}">
+  <head>
+    <meta charset="utf-8">
+
+    <title>{{ _('Mozillians') }}: {% block page_title %}
+      {{ _('Welcome') }}{% endblock %}</title>
+    <meta name="description" content="{{ _("Mozilla's contributor phonebook") }}">
+    {{ css('api') }}
+    {{ js('common') }}
+    {{ js('api') }}
+
+    <script>
+      $(function(){
+
+        var queryParameters = {}, queryString = location.search.substring(1), re = /([^&=]+)=([^&]*)/g, m;
+        while (m = re.exec(queryString)) {
+            queryParameters[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+        };
+        queryParameters['format'] = 'json';
+        $.ajax({
+          url: window.location.pathname,
+          data: queryParameters
+          }).done(function(msg) {
+          $("#json").html(JSON.stringify(msg, undefined, 2));
+          $("#json_url").attr("href", this.url).html(this.url);
+          prettyPrint();
+        });
+      })
+    </script>
+  </head>
+  <body>
+    {% block content %}
+ <a id="json_url" href=""></a>
+      <pre id="json" style="border: 1px solid #888;padding: 2px; display: block" class="prettyprint">
+
+
+      </pre>
+    {% endblock %}
+  </body>
+</html>
