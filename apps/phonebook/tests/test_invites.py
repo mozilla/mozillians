@@ -12,10 +12,13 @@ from phonebook.models import Invite
 
 class InviteFlowTest(common.tests.TestCase):
     fake_email = 'mr.fusion@gmail.com'
+    fake_email2 = 'mrs.fusion@gmail.com'
+
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
+    fake_invite_message = 'Join Mozilla'
 
-    def invite_someone(self, email):
+    def invite_someone(self, email, invite_message):
         """
         This method will invite a user.
 
@@ -23,7 +26,7 @@ class InviteFlowTest(common.tests.TestCase):
         """
         # Send an invite.
         url = reverse('invite')
-        d = dict(recipient=email)
+        d = dict(recipient=email, message=invite_message)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('%s has been invited to Mozillians.' % email in
@@ -72,6 +75,27 @@ class InviteFlowTest(common.tests.TestCase):
         invited_user_profile = User.objects.get(email=email).get_profile()
         return invited_user_profile
 
+    def invite_without_message(self, email):
+        """
+        Make sure we can send an invite without the optional personal
+        message and that the template doesn't use Personal message:
+        when there's no personal message.
+        """
+        # Send an invite without a personal message.
+        url = reverse('invite')
+        d = dict(recipient=email)
+        r = self.mozillian_client.post(url, d, follow=True)
+        eq_(r.status_code, 200)
+        assert ('%s has been invited to Mozillians.' % email in
+                pq(r.content)('div#main p').text())
+
+        # See that the email was sent.
+        eq_(len(mail.outbox), 2)
+
+        # Note it's mail.outbox[1] here because we're sending another
+        # message in a previous test.
+        assert not ("Personal message" in mail.outbox[1].body)
+
     def test_send_invite_flow(self):
         """
         Test the invitation flow.
@@ -81,7 +105,8 @@ class InviteFlowTest(common.tests.TestCase):
         Verify that we can't reuse the invite_url
         Verify we can't reinvite a vouched user
         """
-        invite = self.invite_someone(self.fake_email)
+        invite = self.invite_someone(self.fake_email, self.fake_invite_message)
+        self.invite_without_message(self.fake_email)
         self.get_register(invite)
         invited_user_profile = self.redeem_invite(invite, self.fake_email)
         assert(invited_user_profile.is_vouched)
@@ -94,6 +119,7 @@ class InviteFlowTest(common.tests.TestCase):
 
 
 class InviteEdgeTest(common.tests.TestCase):
+
     def test_no_reinvite(self):
         """Don't reinvite a vouched user."""
         vouched_email = 'mr.fusion@gmail.com'

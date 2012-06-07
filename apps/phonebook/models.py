@@ -2,6 +2,7 @@ from django.contrib.auth.utils import get_random_string
 from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
+from django.template.loader import get_template
 
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
@@ -15,6 +16,9 @@ class Invite(models.Model):
 
     #: This is the email address of where the invitation is sent.
     recipient = models.EmailField()
+
+    # This is the message sent alongside the invite. "Hey you're cool."
+    message = models.TextField(blank=True)
 
     #: The person who redeemed this invite.
     redeemer = models.OneToOneField('users.UserProfile', null=True)
@@ -44,16 +48,19 @@ class Invite(models.Model):
                                      sender.user.email)
 
         subject = _('Become a Mozillian')
-        message = _('Hi there. %s has invited you to join mozillians.org, '
-                    'the community directory for Mozilla contributors. You '
-                    'can create a community profile for yourself and search '
-                    'for other contributors to learn more about them or get '
-                    'in touch.' % (sender or _('A fellow Mozillian')))
-        # l10n: %s is the registration link.
-        link = _("Join Mozillians: %s") % self.get_url()
-        message = "%s\n\n%s" % (message, link)
 
-        send_mail(subject, message, 'no-reply@mozillians.org',
+        template = get_template('phonebook/invite_email.txt')
+
+        message = template.render({
+            'personal_message': self.message,
+            'sender': sender or _('A fellow Mozillian'),
+            'link': self.get_url()})
+
+        # Manually replace quotes and double-quotes as these get
+        # escaped by the template and this makes the message look bad.
+        filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
+
+        send_mail(subject, filtered_message, 'no-reply@mozillians.org',
                   [self.recipient])
 
     class Meta:
