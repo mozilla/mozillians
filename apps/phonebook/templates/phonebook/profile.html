@@ -89,11 +89,6 @@
           </a></dd>
         {% endif %}
 
-        {% if not shown_user.username.startswith('u/') %}
-          <dt>{{ _('Username') }}</dt>
-          <dd>{{ shown_user.username }}</dd>
-        {% endif %}
-
         {% if profile.ircname %}
           <dt>{{ _('IRC Nickname') }}</dt>
           <dd><a href="irc://irc.mozilla.org/">
