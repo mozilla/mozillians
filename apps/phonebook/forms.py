@@ -96,7 +96,8 @@ class UserForm(forms.ModelForm):
     def save(self, user):
         # First save the profile info.
         d = self.cleaned_data
-        self.instance.set_ircname(d['ircname'])
+        if d['ircname']:
+            self.instance.ircname = d['ircname']
         super(forms.ModelForm, self).save()
 
         # Then deal with the user info.
