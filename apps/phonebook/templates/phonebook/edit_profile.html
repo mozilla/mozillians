@@ -22,11 +22,23 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
+          <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           {{ bootstrap(form.first_name) }}
           {{ bootstrap(form.last_name) }}
           {{ bootstrap(form.website) }}
           {{ bootstrap(form.bio) }}
+
+          <h2>{{ _('Location') }}</h2>
+          <p>
+            {% trans %}
+              Let us know where in the world you are. Other vouched Mozillians
+              will be able to contact you easier and vice-versa.
+            {% endtrans %}
+          </p>
+          {{ bootstrap(form.country) }}
+          {{ bootstrap(form.region) }}
+          {{ bootstrap(form.city) }}
         </div>
         <div class="tab-pane" id="skills">
           <legend>Groups</legend>

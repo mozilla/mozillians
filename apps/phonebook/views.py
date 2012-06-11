@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
+from product_details import product_details
 from tower import ugettext as _
 
 from groups.helpers import stringify_groups
@@ -56,6 +57,10 @@ def profile(request, username):
 @never_cache
 @login_required
 def edit_profile(request):
+    COUNTRIES = product_details.get_regions(request.locale).items()
+    COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
+    COUNTRIES.insert(0, ('', '----'))
+
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
@@ -66,6 +71,7 @@ def edit_profile(request):
                 request.FILES,
                 instance=profile,
         )
+        form.fields['region'].choices = COUNTRIES
         if form.is_valid():
             old_username = request.user.username
             form.save(request)
@@ -94,6 +100,7 @@ def edit_profile(request):
                 instance=profile,
                 initial=initial,
         )
+        form.fields['country'].choices = COUNTRIES
 
     # When changing this keep in mind that the same view is used for
     # user.register.
@@ -102,7 +109,9 @@ def edit_profile(request):
              user_groups=user_groups,
              my_vouches=UserProfile.objects.filter(vouched_by=profile),
              profile=profile)
-    return render(request, 'phonebook/edit_profile.html', d)
+    # If there are form errors, don't send a 200 OK.
+    status = 400 if form.errors else 200
+    return render(request, 'phonebook/edit_profile.html', d, status=status)
 
 
 @never_cache

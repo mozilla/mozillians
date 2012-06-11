@@ -123,20 +123,11 @@ class ProfileForm(UserForm):
                                                          required=False,
                                                          widget=UsernameWidget)
 
-    #: L10n: Street address; not entire address
-    street = forms.CharField(label=_lazy(u'Address'), required=False)
-    city = forms.CharField(label=_lazy(u'City'), required=False)
-    # TODO: Add validation of states/provinces/etc. for known/large countries.
-    province = forms.CharField(label=_lazy(u'Province/State'), required=False)
-    # TODO: Add list of countries.
-    country = forms.CharField(label=_lazy(u'Country'), required=False)
-    postal_code = forms.CharField(label=_lazy(u'Postal/Zip Code'),
-                                  required=False)
-
     class Meta:
         # Model form stuff
         model = UserProfile
-        fields = ('ircname', 'website', 'bio', 'photo')
+        fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
+                  'city')
         widgets = {
             'bio': forms.Textarea()
         }
@@ -165,6 +156,19 @@ class ProfileForm(UserForm):
         return [s.strip()
                 for s in self.cleaned_data['skills'].lower().split(',')
                 if s and ',' not in s]
+
+    def clean(self):
+        """Make sure geographic fields aren't underspecified."""
+        cleaned_data = super(ProfileForm, self).clean()
+        # Rather than raising ValidationErrors for the whole form, we can
+        # add errors to specific fields.
+        if cleaned_data['city'] and not cleaned_data['region']:
+            self._errors['region'] = [_(u'You must specify a region to '
+                                         'specify a city.')]
+        if cleaned_data['region'] and not cleaned_data['country']:
+            self._errors['country'] = [_(u'You must specify a country to '
+                                         'specify a district.')]
+        return cleaned_data
 
     def save(self, request):
         """Save the data to profile."""
