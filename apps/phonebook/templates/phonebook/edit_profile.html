@@ -41,7 +41,7 @@
           {{ bootstrap(form.city) }}
         </div>
         <div class="tab-pane" id="skills">
-          <legend>Groups</legend>
+          <h2>{{ _('Groups') }}</h2>
             <p class="field_description">
               {% trans %}
                 Groups are a community of Mozillians with some relation to each
@@ -51,7 +51,7 @@
             </p>
           {{ form.groups.label_tag() }}
           {{ form.groups }}
-          <legend>Skills</legend>
+          <h2>{{ _('Skills') }}</h2>
             <p class="field_description">
               {% trans %}
                 A skill is the learned capacity to carry out pre-determined
