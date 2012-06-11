@@ -94,6 +94,10 @@ echo "CREATE DATABASE IF NOT EXISTS ${JOB_NAME}"|mysql -u $DB_USER -h $DB_HOST
 
 echo "Database name: ${JOB_NAME}"
 
+echo "Updating product details."
+
+python manage.py update_product_details
+
 echo "Starting tests..."
 export FORCE_DB=1
 
