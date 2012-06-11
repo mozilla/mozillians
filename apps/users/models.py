@@ -12,6 +12,7 @@ from elasticutils import S
 from elasticutils.models import SearchMixin
 from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
+from product_details import product_details
 from sorl.thumbnail import ImageField
 from tower import ugettext as _, ugettext_lazy as _lazy
 
@@ -22,6 +23,8 @@ from phonebook.helpers import gravatar
 from django.core.files.storage import FileSystemStorage
 fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
                        base_url='/media/uploads/')
+
+COUNTRIES = product_details.get_regions('en-US').items()
 
 
 class UserProfile(SearchMixin, models.Model):
@@ -40,6 +43,8 @@ class UserProfile(SearchMixin, models.Model):
 
     groups = models.ManyToManyField(Group, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
+
+    # Personal info
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
@@ -47,6 +52,13 @@ class UserProfile(SearchMixin, models.Model):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
+    country = models.CharField(max_length=5, default='', blank=True,
+                               choices=COUNTRIES,
+                               verbose_name=_lazy(u'Country'))
+    region = models.CharField(max_length=255, default='', blank=True,
+                              verbose_name=_lazy(u'Region'))
+    city = models.CharField(max_length=255, default='', blank=True,
+                            verbose_name=_lazy(u'City'))
 
     @property
     def full_name(self):

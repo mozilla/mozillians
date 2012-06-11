@@ -159,7 +159,6 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'south',
     # re-assert dominance of 'django_nose'
     'django_nose',
-
 ]
 
 ## Auth

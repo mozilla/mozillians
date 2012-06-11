@@ -451,6 +451,12 @@ legend {
     width: 210px;
 }
 
+.tab-content h2 {
+    border-bottom: 1px solid #000;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+}
+
 .tab-content .field_description {
     margin-bottom: 20px;
 }
