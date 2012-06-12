@@ -338,7 +338,7 @@ class TestUser(TestCase):
     """Test User functionality"""
 
     def test_userprofile(self):
-        u = User.objects.create(username='tmp', email='tmp@domain.com')
+        u = user()
 
         UserProfile.objects.all().delete()
 
@@ -353,6 +353,19 @@ class TestUser(TestCase):
 
         # Good to go
         assert u.get_profile()
+
+    def test_apikey(self):
+        """Test that get_api_key() will create a key if missing."""
+        # A new user will not have a key created.
+        u = user()
+        p = u.get_profile()
+        from tastypie.models import ApiKey
+
+        # A new key is not generated automatically on a user.
+        self.assertRaises(ApiKey.DoesNotExist, lambda: u.api_key)
+
+        # get_api_key will always return a key, creating one if needed.
+        eq_(p.get_api_key(), u.api_key.key)
 
 
 class TestMigrateRegistration(TestCase):

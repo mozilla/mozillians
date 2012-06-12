@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 
-{% block page_title %}{{ _('Edit Your Profile') }}{% endblock %}
-{% block body_id %}edit-profile{% endblock %}
-{% block body_classes %}box-content{% endblock %}
-{% block page_js %}
+{% block site_js %}
+  {{ super() }}
   {{ js('edit_profile') }}
 {% endblock %}
 
+{% block site_css %}
+  {{ super() }}
+  {{ css('edit_profile') }}
+{% endblock %}
+
+{% block page_title %}{{ _('Edit Your Profile') }}{% endblock %}
+{% block body_id %}edit-profile{% endblock %}
+{% block body_classes %}box-content{% endblock %}
+
 {% block main_content %}
-  <form action="{{ edit_form_action }}"
-        method="POST" enctype="multipart/form-data"
+  <form action="{{ url('profile.edit') }}"
+        method="POST"
+        enctype="multipart/form-data"
         class="form-horizontal edit-profile">
     {{ csrf() }}
     <h1>{{ _('Edit Your Profile') }}</h1>
@@ -19,6 +27,7 @@
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
         <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
+        <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
@@ -42,22 +51,22 @@
         </div>
         <div class="tab-pane" id="skills">
           <h2>{{ _('Groups') }}</h2>
-            <p class="field_description">
-              {% trans %}
-                Groups are a community of Mozillians with some relation to each
-                other. This can be an interest, team, project, product or
-                sub-community.
-              {% endtrans %}
-            </p>
+          <p class="field_description">
+            {% trans %}
+              Groups are a community of Mozillians with some relation to each
+              other. This can be an interest, team, project, product or
+              sub-community.
+            {% endtrans %}
+          </p>
           {{ form.groups.label_tag() }}
           {{ form.groups }}
           <h2>{{ _('Skills') }}</h2>
-            <p class="field_description">
-              {% trans %}
-                A skill is the learned capacity to carry out pre-determined
-                results often with the minimum outlay of time, energy, or both.
-              {% endtrans %}
-            </p>
+          <p class="field_description">
+            {% trans %}
+              A skill is the learned capacity to carry out pre-determined
+              results often with the minimum outlay of time, energy, or both.
+            {% endtrans %}
+          </p>
           {{ form.skills.label_tag() }}
           {{ form.skills }}
         </div>
@@ -132,6 +141,27 @@
               <a href="{{ url('profile.delete_confirm') }}" class="btn btn-danger">
                 {{ _('Delete Profile') }}
               </a>
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" id="services">
+          <div class="control-group">
+            <h2>{{ _("API") }}</h2>
+            <p class="field_description">
+              {% trans %}
+                The Mozillians' Phonebook offers an API to Vouched Mozillians to help share profile data to other tools and sites
+              {% endtrans %}
+            </p>
+            <label class="control-label">{{ _("Api Key") }}</label>
+            <div class="controls">
+              <span class="label-text">
+                <div class="input-append">
+                  <input id="api-key" type="text" class="span4" autocomplete="off" data-value="{{ profile.get_api_key() }}" value="{{ profile.get_api_key() }}">
+                  <button type="submit" name="reset_api_key" class="btn btn-mini btn-danger">
+                    {{ _("Generate new API Key") }}
+                  </button>
+                </div>
+              </span>
             </div>
           </div>
         </div>
