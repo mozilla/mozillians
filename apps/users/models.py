@@ -14,6 +14,7 @@ from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
 from sorl.thumbnail import ImageField
+from tastypie.models import ApiKey
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from groups.models import Group, Skill
@@ -155,6 +156,10 @@ class UserProfile(SearchMixin, models.Model):
             self.save()
             # Email the user and tell them they were vouched.
             self._email_now_vouched()
+
+    def get_api_key(self):
+        api_key, created = ApiKey.objects.get_or_create(user=self.user)
+        return api_key.key
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
