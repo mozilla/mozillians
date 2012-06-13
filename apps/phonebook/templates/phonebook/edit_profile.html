@@ -146,12 +146,17 @@
         </div>
         <div class="tab-pane" id="services">
           <div class="control-group">
-            <h2>{{ _("API") }}</h2>
             <p class="field_description">
               {% trans %}
-                The Mozillians' Phonebook offers an API to Vouched Mozillians to help share profile data to other tools and sites
+                The Mozillians' Phonebook offers an API to Vouched Mozillians to help authorize
+                contributors and share profile data to other tools and sites. This means that sites
+                like <a href="http://bugzilla.mozilla.org">Bugzilla</a> and the
+                <a href="http://reps.mozilla.org">Mozilla Reps Portal</a> can give you greater access
+                to features and functionality as a Vouched Mozillian as well as populate your Mozillian
+                profile data automatically.
               {% endtrans %}
             </p>
+            <h2>{{ _("API") }}</h2>
             <label class="control-label">{{ _("Api Key") }}</label>
             <div class="controls">
               <span class="label-text">
