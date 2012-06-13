@@ -75,10 +75,10 @@ class UserProfile(SearchMixin, models.Model):
     def get_absolute_url(self):
         return reverse('profile', args=[self.user.username])
 
-    def user_email(self):
+    def user__email(self):
         return self.user.email
 
-    def user_username(self):
+    def user__username(self):
         return self.user.username
 
     def anonymize(self):
