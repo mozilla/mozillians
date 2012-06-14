@@ -6,12 +6,12 @@ from users.models import UserProfile
 
 
 class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
-    fields = ['user', 'user__email', 'display_name', 'photo', 'ircname',
+    fields = ['user', 'user_email', 'display_name', 'photo', 'ircname',
               'is_vouched', 'vouched_by', 'bio', 'website', 'groups', 'skills']
-    list_display = ['display_name', 'user__email', 'user__username', 'ircname',
+    list_display = ['display_name', 'user_email', 'user_username', 'ircname',
                     'is_vouched', 'vouched_by']
-    list_display_links = ['display_name', 'user__email', 'user__username']
-    readonly_fields = ['user', 'user__email']
+    list_display_links = ['display_name', 'user_email', 'user_username']
+    readonly_fields = ['user', 'user_email']
     save_on_top = True
     search_fields = ['display_name', 'user__email', 'user__username',
                      'ircname']
