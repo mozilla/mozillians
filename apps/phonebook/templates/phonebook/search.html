@@ -42,7 +42,7 @@
         {% endfor %}
       </div>
     </form>
-    <div class="well">
+    <div class="row">
       {% if not form.cleaned_data %}
         {% trans %}
           <h2>Search For a Mozillian</h2>
@@ -54,7 +54,7 @@
         {% endtrans %}
       {% else %}
         {% for person in people %}
-          {{ search_result(person) }}
+          <div class="span6">{{ search_result(person) }}</div>
         {% else %}
           <p id="not-found">
             {% trans invite=url('invite') %}
