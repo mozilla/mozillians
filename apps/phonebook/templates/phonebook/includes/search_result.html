@@ -1,23 +1,36 @@
 <div class="result">
-  <div class="avatar">
-    <img class="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile Photo') }}">
-  </div>
-  <div class="details">
-    <h2>
-      <a href="{{ url('profile', profile.user.username) }}">
-        {{ profile.display_name }}
-      </a>
-    </h2>
-
-    {% if profile.is_vouched %}
-      <h3 title="{{ _('This user is a vouched Mozillian.') }}">
-        {{ _('Mozillian') }}
-      </h3>
-    {% else %}
-      <h3 title="{{ _('This user has not yet been vouched.') }}">
-        {{ _('Non-Vouched') }}
-      </h3>
-    {% endif %}
-  </div>
-  <div class="clear"></div>
+  <a class="btn js-btn" href="{{ url('profile', profile.user.username) }}">
+    <div class="avatar">
+      <img class="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile Photo') }}">
+    </div>
+    <div class="details">
+      <ul>
+        <li>
+          <h2>
+            {{ profile.display_name }}
+          </h2>
+        </li>
+        {% if profile.is_vouched %}
+          <li title="{{ _('This user is a vouched Mozillian.') }}">
+            {{ _('Mozillian') }}
+          </li>
+        {% else %}
+          <li title="{{ _('This user has not yet been vouched.') }}">
+            {{ _('Non-Vouched') }}
+          </li>
+        {% endif %}
+        {% if profile.user.email %}
+          <li>
+            {{ _('Email: ') }}{{ profile.user.email }}
+          </li>
+        {% endif %}
+        {% if profile.user.username %}
+          <li>
+            {{_('Username: ') }}{{ profile.user.username }}
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="clear"></div>
+  </a>
 </div>

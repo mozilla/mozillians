@@ -364,12 +364,19 @@ a.btn {
     margin:18px 20px;
 }
 
-.search-page .result .avatar {
+.search-page .result {
+    margin-bottom:25px;
+}
+
+.search-page .result a{
+    width:340px;
+}
+
+.search-page .result .avatar img{
     float:left;
     height:70px;
     width:70px;
-    text-align:center;
-    margin:0 10px 0 35px;
+    margin: 0 15px 0 0;
 }
 
 .avatar .profile-photo {
@@ -382,13 +389,14 @@ a.btn {
 }
 
 .search-page .result h2 {
-    font-size:16px;
+    font-size:20px;
     margin:0;
 }
 
-.search-page .result h3 {
-    font-size:16px;
-    margin:0;
+.details ul {
+    font-size: 12px;
+    list-style: none;
+    text-align: left;
 }
 
 .clear {
