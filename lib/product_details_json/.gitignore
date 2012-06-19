@@ -1,2 +1,4 @@
+# We leave regions/en_US.json as a bootstrap or
+# update_product_details will at the model validation step.
 *.json
 .last_update
