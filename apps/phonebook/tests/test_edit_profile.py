@@ -3,7 +3,6 @@ from django.test.utils import override_settings
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
-from common import browserid_mock
 from common.tests import TestCase, user
 
 ASSERTION = 'asldkfjasldfka'
