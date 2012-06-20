@@ -551,3 +551,21 @@ footer div.container {
 label, input, button, select, textarea {
     font-family:'Open Sans', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
 }
+
+/* Micro-clearfix */
+.location:before,
+.location:after {
+    content: "";
+    display: table;
+}
+
+.location:after {
+    clear: both;
+}
+
+/* TODO: Add rtl support here. */
+.location div {
+    float: left;
+    width: 33%;
+    margin: 0;
+}

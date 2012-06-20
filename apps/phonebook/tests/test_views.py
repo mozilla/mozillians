@@ -8,7 +8,7 @@ import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import TestCase
+from common.tests import TestCase, user
 from funfactory.urlresolvers import set_url_prefix, reverse
 
 
@@ -254,6 +254,45 @@ class TestViews(TestCase):
         assert ('http://tofumatt.com/' in
                 doc('#profile-info dd a[rel=me]')[0].get('href')), (
             'User should have a URL with protocol added.')
+
+    def test_has_country(self):
+        u = user(username='sam')
+        p = u.get_profile()
+        p.country = 'us'
+        p.save()
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile', args=[u.username]), follow=True)
+        self.assertContains(r, '<h3>Country</h3>')
+        self.assertNotContains(r, '<h3>Province/State</h3>')
+        self.assertNotContains(r, '<h3>City</h3>')
+
+    def test_has_region(self):
+        u = user(username='sam')
+        p = u.get_profile()
+        p.country = 'us'
+        p.region = 'New York'
+        p.save()
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile', args=[u.username]), follow=True)
+        self.assertContains(r, '<h3>Country</h3>')
+        self.assertContains(r, '<h3>Province/State</h3>')
+        self.assertContains(r, p.region)
+        self.assertNotContains(r, '<h3>City</h3>')
+
+    def test_has_city(self):
+        u = user(username='sam')
+        p = u.get_profile()
+        p.country = 'us'
+        p.region = 'New York'
+        p.city = 'Brooklyn'
+        p.save()
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile', args=[u.username]), follow=True)
+        self.assertContains(r, '<h3>Country</h3>')
+        self.assertContains(r, '<h3>Province/State</h3>')
+        self.assertContains(r, p.region)
+        self.assertContains(r, '<h3>City</h3>')
+        self.assertContains(r, p.city)
 
     def test_replace_photo(self):
         """Ensure we can replace photos."""

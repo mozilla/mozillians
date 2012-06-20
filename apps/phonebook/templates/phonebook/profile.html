@@ -163,6 +163,29 @@
         </ul>
       {% endif %}
 
+      {% if profile.country %}
+        <div class="location">
+          <div class="country">
+            <h3>{{ _('Country') }}</h3>
+            <p>{{ profile.get_country_display() }}</p>
+          </div>
+
+          {% if profile.region %}
+            <div class="region">
+              <h3>{{ _('Province/State') }}</h3>
+              <p>{{ profile.region }}</p>
+            </div>
+
+            {% if profile.city %}
+              <div class="city">
+                <h3>{{ _('City') }}</h3>
+                <p>{{ profile.city }}</p>
+              </div>
+            {% endif %}{# city #}
+          {% endif %}{# region #}
+        </div>
+      {% endif %}{# country #}
+
       {% if shown_user.username == request.user.username %}
         <a href="{{ url('profile.edit') }}"
            class="btn btn-primary pull-right" id="edit-profile">
