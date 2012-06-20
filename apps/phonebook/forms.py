@@ -39,9 +39,8 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class UsernameWidget(forms.widgets.Input):
-    type = 'text'
-
+class UsernameWidget(forms.widgets.TextInput):
+    """A TextInput with some special markup to indicate a URL."""
     def render(self, *args, **kwargs):
         return mark_safe(u'<span class="label-text">'
                           'http://mozillians.org/ </span>%s' %
