@@ -98,6 +98,7 @@ def edit_profile(request):
     else:
         initial = dict(first_name=request.user.first_name,
                        last_name=request.user.last_name,
+                       username=request.user.username,
                        bio=profile.bio,
                        website=profile.website,
                        irc_nickname=profile.ircname,
