@@ -364,15 +364,13 @@ a.btn {
     margin:18px 20px;
 }
 
-.search-page .result {
-    margin-bottom:25px;
+.search-page .result a {
+    width: 340px;
+    height: 75px;
+    margin-bottom: 25px;
 }
 
-.search-page .result a{
-    width:340px;
-}
-
-.search-page .result .avatar img{
+.search-page .result .avatar img {
     float:left;
     height:70px;
     width:70px;
@@ -397,6 +395,8 @@ a.btn {
     font-size: 12px;
     list-style: none;
     text-align: left;
+    overflow: hidden;
+    width: 200px;
 }
 
 .clear {
