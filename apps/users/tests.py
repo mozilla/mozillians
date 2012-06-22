@@ -343,8 +343,9 @@ class TestUser(TestCase):
         UserProfile.objects.all().delete()
 
         # Somehow the User lacks a UserProfile
+        # Note that u.get_profile() caches in memory.
         self.assertRaises(UserProfile.DoesNotExist,
-                          u.get_profile)
+                          lambda: u.userprofile)
 
         # Sign in
         with browserid_mock.mock_browserid(u.email):

@@ -68,6 +68,8 @@ def user(**kwargs):
 
     """
     save = kwargs.pop('save', True)
+    is_vouched = kwargs.pop('is_vouched', None)
+    vouched_by = kwargs.pop('vouched_by', None)
     defaults = {}
     if 'username' not in kwargs:
         defaults['username'] = ''.join(random.choice(letters)
@@ -76,8 +78,14 @@ def user(**kwargs):
         defaults['email'] = ''.join(
             random.choice(letters) for x in xrange(10)) + '@example.com'
     defaults.update(kwargs)
-    user = User(**defaults)
-    user.set_password(kwargs.get('password', 'testpass'))
+    u = User(**defaults)
+    u.set_password(kwargs.get('password', 'testpass'))
     if save:
-        user.save()
-    return user
+        u.save()
+        profile = u.get_profile()
+        if is_vouched is not None:
+            profile.is_vouched = is_vouched
+        if vouched_by is not None:
+            profile.vouched_by = vouched_by
+        profile.save()
+    return u
