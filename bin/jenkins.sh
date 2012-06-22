@@ -18,12 +18,10 @@ find . -name '*.pyc' -exec rm {} \;
 if [ ! -d "$VENV" ]; then
     echo "Making virtualenv..."
     virtualenv $VENV --no-site-packages
-    pip install --upgrade pip
 fi
 source $VENV/bin/activate
-pip install coverage
+pip install -r requirements/tests-compiled.txt
 pip install -r requirements/compiled.txt
-pip install -r requirements/dev.txt
 
 git submodule sync
 git submodule update --init --recursive
