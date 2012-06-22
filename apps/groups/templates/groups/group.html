@@ -107,7 +107,8 @@
     {% endif %}
   </div>
 
-  <div class="well">
+  <h3>{{ _('Group Members') }}</h3>
+  <div class="row">
     {% for person in people %}
       {{ search_result(person) }}
     {% endfor %}

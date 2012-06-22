@@ -54,7 +54,7 @@
         {% endtrans %}
       {% else %}
         {% for person in people %}
-          <div class="span6">{{ search_result(person) }}</div>
+          {{ search_result(person) }}
         {% else %}
           <p id="not-found">
             {% trans invite=url('invite') %}
