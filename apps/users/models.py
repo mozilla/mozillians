@@ -57,7 +57,7 @@ class UserProfile(SearchMixin, models.Model):
                                choices=COUNTRIES,
                                verbose_name=_lazy(u'Country'))
     region = models.CharField(max_length=255, default='', blank=True,
-                              verbose_name=_lazy(u'Region'))
+                              verbose_name=_lazy(u'Province/State'))
     city = models.CharField(max_length=255, default='', blank=True,
                             verbose_name=_lazy(u'City'))
 
