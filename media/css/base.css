@@ -393,14 +393,20 @@ a.btn {
 .search-page .result h2 {
     font-size:20px;
     margin:0;
+    width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .details ul {
     font-size: 12px;
     list-style: none;
     text-align: left;
+    width: 220px;
+    white-space: nowrap;
     overflow: hidden;
-    width: 200px;
+    text-overflow: ellipsis;
 }
 
 .clear {
