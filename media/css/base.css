@@ -137,6 +137,10 @@ footer p, #main p {
     font-weight: 300;
 }
 
+.welcome p {
+    margin-top: 30px;
+}
+
 #header h1 a,#header h1 span {
     color:#fff;
     font-family:MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
