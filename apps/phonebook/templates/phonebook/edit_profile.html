@@ -27,7 +27,9 @@
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
         <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
-        <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
+        {% if user.get_profile().groups.filter(name='staff') and user.get_profile().is_vouched %}
+          <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
+        {% endif %}
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
@@ -145,32 +147,40 @@
             </div>
           </div>
         </div>
-        <div class="tab-pane" id="services">
-          <div class="control-group">
-            <p class="field_description">
-              {% trans %}
-                The Mozillians' Phonebook offers an API to Vouched Mozillians to help authorize
-                contributors and share profile data to other tools and sites. This means that sites
-                like <a href="http://bugzilla.mozilla.org">Bugzilla</a> and the
-                <a href="http://reps.mozilla.org">Mozilla Reps Portal</a> can give you greater access
-                to features and functionality as a Vouched Mozillian as well as populate your Mozillian
-                profile data automatically.
-              {% endtrans %}
-            </p>
-            <h2>{{ _("API") }}</h2>
-            <label class="control-label">{{ _("Api Key") }}</label>
-            <div class="controls">
-              <span class="label-text">
-                <div class="input-append">
-                  <input id="api-key" type="text" class="span4" autocomplete="off" data-value="{{ profile.get_api_key() }}" value="{{ profile.get_api_key() }}">
-                  <button type="submit" name="reset_api_key" class="btn btn-mini btn-danger">
-                    {{ _("Generate new API Key") }}
-                  </button>
-                </div>
-              </span>
+        {% if user.get_profile().groups.filter(name='staff') and user.get_profile().is_vouched %}
+          <div class="tab-pane" id="services">
+            <div class="control-group">
+              <p class="field_description">
+                {% trans %}
+                  The Phonebook offers an API to help authorize contributors and share profile
+                  data to other tools and sites like <a href="http://bugzilla.mozilla.org">Bugzilla</a>
+                  and the <a href="http://reps.mozilla.org">Mozilla Reps Portal</a>.
+                {% endtrans %}
+              </p>
+              <h2>{{ _("Developers") }}</h2>
+              <p class="field_description">
+                {% trans %}
+                Take a look at the list of the <a href="/api/v1/">API methods we've made available</a>. To use this API,
+                you'll need to get approval from the Privacy team. To get started,
+                <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Data%20Safety">file a bug</a>.
+                If you have any questions, talk to us in our <a href="http://groups.google.com/group/mozilla-dev-community-tools/">
+                development forum</a>.
+                {% endtrans %}
+              </p>
+              <label class="control-label">{{ _("Api Key") }}</label>
+              <div class="controls">
+                <span class="label-text">
+                  <div class="input-append">
+                    <input id="api-key" type="text" class="span4" autocomplete="off" data-value="{{ profile.get_api_key() }}" value="{{ profile.get_api_key() }}">
+                    <button type="submit" name="reset_api_key" class="btn btn-mini btn-danger">
+                      {{ _("Generate new API Key") }}
+                    </button>
+                  </div>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        {% endif %}
       </div>
     </div>
     <div id="edit_controls">

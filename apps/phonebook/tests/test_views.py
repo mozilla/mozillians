@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from django import test
 from django.contrib.auth.models import User
+from django.test.utils import override_settings
 
 import test_utils
 from nose.tools import eq_
@@ -315,27 +316,44 @@ class TestViews(TestCase):
         new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
 
+    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
     def test_api_key(self):
         """Assert that the Api key will be created and displayed"""
-        client = self.mozillian_client
-        r = client.get(reverse('profile.edit'), follow=True)
+        u = user(email='test@example.com')
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile.edit'), follow=True)
+        eq_(200, r.status_code)
 
         doc = pq(r.content)
         api_key = doc('#api-key').attr('value')
 
-        p = self.mozillian.get_profile()
+        p = u.get_profile()
         assert p.get_api_key() == api_key
 
+    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
+    def test_non_staff_api_kei(self):
+        """Assert that non-auto-vouched users don't have an API key."""
+        u = user(email='test@another.com', is_vouched=True)
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile.edit'), follow=True)
+        eq_(200, r.status_code)
+
+        doc = pq(r.content)
+        eq_(0, len(doc('#api-key')))
+
+    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
     def test_reset_api_key(self):
         """Assert that resetingthe aPI key changes it."""
-        client = self.mozillian_client
-        r = client.get(reverse('profile.edit'), follow=True)
+        u = user(email='test@example.com')
+        assert self.client.login(email=u.email)
+        r = self.client.get(reverse('profile.edit'), follow=True)
+        eq_(200, r.status_code)
 
         doc = pq(r.content)
         original_api_key = doc('#api-key').attr('value')
 
         data = {'reset_api_key': True}
-        r = client.post(reverse('profile.edit'), data, follow=True)
+        r = self.client.post(reverse('profile.edit'), data, follow=True)
 
         doc = pq(r.content)
         new_api_key = doc('#api-key').attr('value')
