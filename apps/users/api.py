@@ -23,13 +23,27 @@ class VouchedAuthentication(Authentication):
     def get_identifier(self, request):
         return request.user.username
 
+class PaidStaffAuthentication(Authentication):
+    """
+    API Authentication that only lets in paid staff users
+    """
+    def is_authenticated(self, request, **kwargs):
+        user = request.user
+        if (user.is_authenticated() and
+                user.get_profile().groups.filter(name='staff')):
+            return True
+
+        return False
+
+    def get_identifier(self,request):
+        return request.user.username
 
 class UserProfileResource(ModelResource):
     email = fields.CharField(attribute='email', null=True, readonly=True)
 
     class Meta:
         queryset = UserProfile.objects.select_related()
-        authentication = VouchedAuthentication()
+        authentication = PaidStaffAuthentication()
         authorization = ReadOnlyAuthorization()
         serializer = HTMLSerializer()
         list_allowed_methods = ['get']
