@@ -39,7 +39,7 @@ html {
 body {
     background:#f5f1e8 url(../img/mozorg-gradient.png) repeat-x top center;
     padding-top:60px;
-    font:16px/24px Georgia, serif;
+    font:16px/24px 'Open Sans', 'Lucida Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
 }
 
 .skip{
@@ -59,8 +59,8 @@ body {
 	z-index:1031; /* One more than .nav-bar-fixed-top */
 }
 
-.huge, .large, h1, h2, h3, h4, #profile-info dt {
-    font-family:'Open Sans Light', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
+.huge, .large, h1, h2, h3, h4, #profile-info dt, #profile-info dd {
+    font-family:'Open Sans Light', 'Lucida Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
     font-weight:normal;
     text-shadow:0 1px 0 rgba(255,255,255,0.75);
 }
@@ -101,10 +101,6 @@ h4 {
     line-height:100%;
 }
 
-footer p, #main p {
-    font-family:'Open Sans',sans-serif;
-}
-
 .small,small {
     font-size:12px;
     line-height:100%;
@@ -143,7 +139,6 @@ footer p, #main p {
 
 #header h1 a,#header h1 span {
     color:#fff;
-    font-family:MetaBold, 'Trebuchet MS', Helvetica, Arial, "DejaVu Sans", sans-serif;
     font-weight:700;
     text-decoration:none;
     text-shadow:0 1px 5px rgba(0,0,0,0.4);
@@ -153,10 +148,6 @@ footer p, #main p {
     color:#eee;
     text-decoration:none;
     text-shadow:0 1px 5px rgba(0,0,0,0.4), 0 0 10px rgba(255,255,255,0.4);
-}
-
-.nav, .brand {
-    font-family:'Open Sans',sans-serif;
 }
 
 #nav a,#nav span {
@@ -333,7 +324,6 @@ nav .nav a.browser_id_login {
 
 a.btn {
     vertical-align:middle;
-    font-family:'Open Sans', "Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
 }
 
 .photo .controls img {
@@ -514,7 +504,6 @@ legend {
 }
 
 .label-text {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 13px;
     font-weight: normal;
     line-height: 18px;
