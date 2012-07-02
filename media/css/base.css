@@ -369,7 +369,7 @@ a.btn {
 }
 
 .search-page .result a {
-    width: 340px;
+    min-width: 340px;
     height: 75px;
     margin-bottom: 25px;
 }
@@ -378,7 +378,7 @@ a.btn {
     float:left;
     height:70px;
     width:70px;
-    margin: 0 15px 0 0;
+    margin: 0 10px 0 0;
 }
 
 .avatar .profile-photo {
@@ -447,7 +447,7 @@ legend {
     margin-bottom:9px;
 }
 
-.photo .controls .thumbnail,.search-page .result .details {
+.photo .controls .thumbnail {
     float:left;
 }
 
