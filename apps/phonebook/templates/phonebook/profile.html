@@ -103,9 +103,23 @@
           </dd>
         {% endif %}
 
-        {% if profile.location %}
-          <dt>{{ _('Location') }}</dt>
-          <dd>{{ profile.location }}</dd>
+        {% if profile.country %}
+          <div class="location">
+            <dt>
+              {{ _('Location') }}
+              {% if profile.region %}
+                <dd>
+                  {% if profile.city %}
+                    {{ profile.city }},
+                  {% endif %}
+                  {{ profile.region }}
+                </dd>
+              {% endif %}
+              <dd>
+                {{ profile.get_country_display() }}
+              </dd>
+            </dt>
+          </div>
         {% endif %}
 
         {% if profile.vouched_by %}
@@ -157,29 +171,6 @@
           {% endfor %}
         </ul>
       {% endif %}
-
-      {% if profile.country %}
-        <div class="location">
-          <div class="country">
-            <h3>{{ _('Country') }}</h3>
-            <p>{{ profile.get_country_display() }}</p>
-          </div>
-
-          {% if profile.region %}
-            <div class="region">
-              <h3>{{ _('Province/State') }}</h3>
-              <p>{{ profile.region }}</p>
-            </div>
-
-            {% if profile.city %}
-              <div class="city">
-                <h3>{{ _('City') }}</h3>
-                <p>{{ profile.city }}</p>
-              </div>
-            {% endif %}{# city #}
-          {% endif %}{# region #}
-        </div>
-      {% endif %}{# country #}
 
       {% if shown_user.username == request.user.username %}
         <a href="{{ url('profile.edit') }}"
