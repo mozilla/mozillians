@@ -3,8 +3,12 @@
  * 480px and smaller
  */
 @media (max-width: 480px) {
-	#language-switcher select{
-		width: auto;
-		display: inline;
-	}
+    #language-switcher select{
+        width: auto;
+        display: inline;
+    }
+
+    .search-page .result a {
+        min-width: 270px;
+    }
 }
