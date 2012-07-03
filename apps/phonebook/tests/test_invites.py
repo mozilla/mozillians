@@ -51,8 +51,8 @@ class InviteFlowTest(common.tests.TestCase):
         """Given an invite_url go to it and redeem an invite."""
         # Lets make sure we have a clean slate
         self.client.logout()
-        assert (not User.objects.filter(email=email),
-                    "User shouldn't be in database.")
+        assert not User.objects.filter(email=email), (
+            "User shouldn't be in database.")
 
         # We need to store the invite code in the session
         self.client.get(invite.get_url(), follow=True)
