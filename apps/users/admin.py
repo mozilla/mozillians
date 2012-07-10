@@ -15,6 +15,7 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
     save_on_top = True
     search_fields = ['display_name', 'user__email', 'user__username',
                      'ircname']
+    list_filter = ['is_vouched']
 
     def has_add_permission(self, *a, **kw):
         """No one should be creating UserProfiles from the admin."""
