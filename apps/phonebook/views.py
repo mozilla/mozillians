@@ -18,6 +18,7 @@ from tastypie.models import ApiKey
 from tower import ugettext as _
 
 from groups.helpers import stringify_groups
+from groups.models import Group
 from phonebook import forms
 from phonebook.models import Invite
 from users.models import UserProfile
@@ -167,7 +168,8 @@ def search(request):
             profiles = UserProfile.search(query,
                                           vouched=vouched,
                                           photo=profilepic)
-
+            if not profiles:
+                groups = Group.get_curated()
             paginator = Paginator(profiles, limit)
 
             try:
@@ -184,6 +186,8 @@ def search(request):
             if paginator.count > forms.PAGINATION_LIMIT:
                 show_pagination = True
                 num_pages = len(people.paginator.page_range)
+        else:
+            groups = Group.get_curated()
 
     d = dict(people=people,
              form=form,
@@ -191,7 +195,8 @@ def search(request):
              nonvouched_only=nonvouched_only,
              picture_only=picture_only,
              show_pagination=show_pagination,
-             num_pages=num_pages)
+             num_pages=num_pages,
+             groups=groups)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
