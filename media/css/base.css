@@ -587,3 +587,7 @@ label, input, button, select, textarea {
     width: 33%;
     margin: 0;
 }
+
+.popular-groups {
+    padding: 10px 0;
+}
