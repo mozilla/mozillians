@@ -155,6 +155,7 @@ def search(request):
     people = []
     show_pagination = False
     form = forms.SearchForm(request.GET)
+    groups = None
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
@@ -196,7 +197,7 @@ def search(request):
              picture_only=picture_only,
              show_pagination=show_pagination,
              num_pages=num_pages,
-             groups=groups or None)
+             groups=groups)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
