@@ -196,7 +196,7 @@ def search(request):
              picture_only=picture_only,
              show_pagination=show_pagination,
              num_pages=num_pages,
-             groups=groups)
+             groups=groups or None)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
