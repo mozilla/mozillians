@@ -14,6 +14,10 @@ class TestSearch(ESTestCase):
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
 
+        # Create a group to test searching for groups
+        cls.group = Group.objects.create(name='spam')
+        cls.group = Group.objects.create(name='beans')
+
         url = reverse('search')
         r = self.mozillian_client.get(url, {'q': 'Am'})
         rs = self.mozillian_client.get(url, {'q': 'Am'})
@@ -31,9 +35,21 @@ class TestSearch(ESTestCase):
             if saw_amanda and saw_amandeep:
                 break
 
+        quorum = r.context['groups']
+        quorum_ws = r.context['groups']
+        saw_spam = saw_beans = False
+
+        for group in groups:
+            if group.name == spam:
+                saw_spam = True
+            if group.name == beans:
+                saw_beans = True
+
         assert peeps[0].id in (peeps_ws[0].id, peeps_ws[1].id)
         self.assertTrue(saw_amanda, 'We see first person')
         self.assertTrue(saw_amandeep, 'We see another person')
+        self.assertTrue(saw_amps, 'We see the group')
+        self.assertFalse(saw_beans, 'We did not see beans')
 
     def test_nonvouched_search(self):
         """Make sure that only non vouched users are returned on search."""
