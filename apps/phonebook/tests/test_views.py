@@ -263,9 +263,7 @@ class TestViews(TestCase):
         p.save()
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile', args=[u.username]), follow=True)
-        self.assertContains(r, '<h3>Country</h3>')
-        self.assertNotContains(r, '<h3>Province/State</h3>')
-        self.assertNotContains(r, '<h3>City</h3>')
+        self.assertContains(r, '<dt>Location</dt>')
 
     def test_has_region(self):
         u = user(username='sam')
@@ -275,10 +273,8 @@ class TestViews(TestCase):
         p.save()
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile', args=[u.username]), follow=True)
-        self.assertContains(r, '<h3>Country</h3>')
-        self.assertContains(r, '<h3>Province/State</h3>')
+        self.assertContains(r, '<dt>Location</dt>')
         self.assertContains(r, p.region)
-        self.assertNotContains(r, '<h3>City</h3>')
 
     def test_has_city(self):
         u = user(username='sam')
@@ -289,10 +285,8 @@ class TestViews(TestCase):
         p.save()
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile', args=[u.username]), follow=True)
-        self.assertContains(r, '<h3>Country</h3>')
-        self.assertContains(r, '<h3>Province/State</h3>')
+        self.assertContains(r, '<dt>Location</dt>')
         self.assertContains(r, p.region)
-        self.assertContains(r, '<h3>City</h3>')
         self.assertContains(r, p.city)
 
     def test_replace_photo(self):
