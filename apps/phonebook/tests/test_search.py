@@ -136,14 +136,14 @@ class TestSearch(ESTestCase):
     def test_proper_url_arg_handling(self):
         """Make sure URL arguments are handled correctly"""
         # Create a new unvouched user to ensure results show up in search view
-        user()
+        user(first_name='Findme', last_name='Ifyoucan')
 
         search_url = reverse('search')
         r = self.mozillian_client.get(search_url)
         assert not pq(r.content)('.result')
 
         r = self.mozillian_client.get(search_url,
-                                      {'q': u'', 'nonvouched_only': 1})
+                                      {'q': u'Findme', 'nonvouched_only': 1})
 
         assert pq(r.content)('.result')
 
