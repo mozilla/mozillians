@@ -41,7 +41,8 @@ def index(request):
 def search(request, searched_object=Group):
     """Simple wildcard search for a group using a GET parameter."""
     data = dict(search=True)
-    data['groups'] = searched_object.search(request.GET.get('term'))
+    data['groups'] = list(searched_object.search(request.GET
+                          .get('term')).values_list('name', flat=True))
 
     if request.is_ajax():
         return HttpResponse(json.dumps(data['groups']),

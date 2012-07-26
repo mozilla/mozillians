@@ -156,6 +156,7 @@ def search(request):
     show_pagination = False
     form = forms.SearchForm(request.GET)
     groups = None
+    curated_groups = None
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
@@ -163,14 +164,15 @@ def search(request):
         vouched = False if form.cleaned_data['nonvouched_only'] else None
         profilepic = True if form.cleaned_data['picture_only'] else None
         page = request.GET.get('page', 1)
+        curated_groups = Group.get_curated()
 
         # If nothing has been entered don't load any searches.
         if not (not query and vouched is None and profilepic is None):
             profiles = UserProfile.search(query,
                                           vouched=vouched,
                                           photo=profilepic)
-            if not profiles:
-                groups = Group.get_curated()
+            groups = Group.search(query)
+
             paginator = Paginator(profiles, limit)
 
             try:
@@ -180,15 +182,13 @@ def search(request):
             except EmptyPage:
                 people = paginator.page(paginator.num_pages)
 
-            if len(profiles) == 1:
+            if len(profiles) == 1 and not groups:
                 return redirect(reverse('profile',
                                         args=[people[0].user.username]))
 
             if paginator.count > forms.PAGINATION_LIMIT:
                 show_pagination = True
                 num_pages = len(people.paginator.page_range)
-        else:
-            groups = Group.get_curated()
 
     d = dict(people=people,
              form=form,
@@ -197,7 +197,8 @@ def search(request):
              picture_only=picture_only,
              show_pagination=show_pagination,
              num_pages=num_pages,
-             groups=groups)
+             groups=groups,
+             curated_groups=curated_groups)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
