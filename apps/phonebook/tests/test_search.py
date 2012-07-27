@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -5,6 +7,7 @@ from pyquery import PyQuery as pq
 from common.tests import ESTestCase
 from phonebook.tests import user, create_client
 from users.models import UserProfile
+from groups.models import Group, AUTO_COMPLETE_COUNT
 
 
 class TestSearch(ESTestCase):
@@ -14,9 +17,14 @@ class TestSearch(ESTestCase):
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
 
+        # Create a group to test searching for groups
+        Group.objects.create(name='spam', auto_complete=True)
+        Group.objects.create(name='jam', auto_complete=True)
+        Group.objects.create(name='bread', auto_complete=True)
+
         url = reverse('search')
-        r = self.mozillian_client.get(url, {'q': 'Am'})
-        rs = self.mozillian_client.get(url, {'q': 'Am'})
+        r = self.mozillian_client.get(url, {'q': 'am'})
+        rs = self.mozillian_client.get(url, {'q': 'am'})
 
         eq_(r.status_code, 200)
         peeps = r.context['people']
@@ -31,9 +39,13 @@ class TestSearch(ESTestCase):
             if saw_amanda and saw_amandeep:
                 break
 
-        assert peeps[0].id in (peeps_ws[0].id, peeps_ws[1].id)
         self.assertTrue(saw_amanda, 'We see first person')
         self.assertTrue(saw_amandeep, 'We see another person')
+
+        # Assert appropriate group names are found in the document
+        self.assertContains(r, 'spam')
+        self.assertContains(r, 'jam')
+        self.assertNotContains(r, 'bread')
 
     def test_nonvouched_search(self):
         """Make sure that only non vouched users are returned on search."""

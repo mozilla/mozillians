@@ -4,8 +4,8 @@ from django.template.defaultfilters import slugify
 
 from tower import ugettext_lazy as _lazy
 
-# If ten or more users use a group, it will get auto-completed.
-AUTO_COMPLETE_COUNT = 10
+# If three or more users use a group, it will get auto-completed.
+AUTO_COMPLETE_COUNT = 3
 
 
 class GroupBase(models.Model):
@@ -26,12 +26,10 @@ class GroupBase(models.Model):
     @classmethod
     def search(cls, query, auto_complete_only=True):
         if query:
-            return list(
-                cls.objects.filter(
-                    name__istartswith=query,
+            return cls.objects.filter(
+                    name__icontains=query,
                     auto_complete=auto_complete_only
-                ).values_list('name', flat=True)
-            )
+                )
         return []
 
     def __unicode__(self):

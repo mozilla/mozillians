@@ -81,12 +81,14 @@ h1 {
     font-size:48px;
     letter-spacing:-2px;
     line-height:100%;
+    margin-bottom:5px;
 }
 
 h2 {
     font-size:32px;
     letter-spacing:-1px;
     line-height:100%;
+    margin-bottom:5px;
 }
 
 h3, #profile-info dt {
@@ -441,10 +443,14 @@ legend {
     float:left;
 }
 
-#skills ul.tagit, #profile-info #groups, #profile-info #skills {
+#skills ul.tagit, #groups, #profile-info #skills {
     margin-left:0;
     background: none;
     border: 0;
+}
+
+#search_groups {
+    margin-bottom: 50px;
 }
 
 #skills li.tagit-new input {
