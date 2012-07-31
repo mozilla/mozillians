@@ -38,8 +38,9 @@ class PaidStaffAuthentication(Authentication):
     def get_identifier(self,request):
         return request.user.username
 
+"""
 class UserProfileResource(ModelResource):
-    email = fields.CharField(attribute='email', null=True, readonly=True)
+    email = fields.CharField(attribute='user__email', null=True, readonly=True)
 
     class Meta:
         queryset = UserProfile.objects.select_related()
@@ -49,8 +50,8 @@ class UserProfileResource(ModelResource):
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
         resource_name = 'users'
-        fields = ['display_name', 'id', 'website', 'ircname', 'last_updated']
         filtering = {
+		    'email': ('exact'),
                     'display_name': ('exact', 'contains', 'startswith'),
                     'ircname': ('exact', 'contains', 'startswith'),
                 }
@@ -67,3 +68,20 @@ class UserProfileResource(ModelResource):
                         .filter(last_updated__gt=time))
 
         return super(UserProfileResource, self).get_object_list(request)
+"""
+
+class VouchedResource(ModelResource):
+    email = fields.CharField(attribute='user__email', null=True, readonly=True)
+
+    class Meta:
+        queryset = UserProfile.objects.all()
+        authentication = VouchedAuthentication()
+        authorization = ReadOnlyAuthorization()
+        serializer = HTMLSerializer()
+        list_allowed_methods = ['get']
+        detail_allowed_methods = ['get']
+        resource_name = 'vouched'
+        fields = ['is_vouched']
+        filtering = {
+                    'email' : ('exact'),
+	        }
