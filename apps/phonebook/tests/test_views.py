@@ -325,9 +325,9 @@ class TestViews(TestCase):
         assert p.get_api_key() == api_key
 
     @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
-    def test_non_staff_api_kei(self):
-        """Assert that non-auto-vouched users don't have an API key."""
-        u = user(email='test@another.com', is_vouched=True)
+    def test_non_vouched_api_key(self):
+        """Assert that non-vouched users don't have an API key."""
+        u = user(email='test@another.com', is_vouched=False)
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile.edit'), follow=True)
         eq_(200, r.status_code)

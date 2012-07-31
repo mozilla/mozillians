@@ -27,7 +27,7 @@
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
         <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
-        {% if user.get_profile().groups.filter(name='staff') and user.get_profile().is_vouched %}
+        {% if user.get_profile().is_vouched %}
           <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
         {% endif %}
       </ul>
@@ -147,7 +147,7 @@
             </div>
           </div>
         </div>
-        {% if user.get_profile().groups.filter(name='staff') and user.get_profile().is_vouched %}
+        {% if user.get_profile().is_vouched %}
           <div class="tab-pane" id="services">
             <div class="control-group">
               <p class="field_description">
