@@ -15,7 +15,8 @@ admin.autodiscover()
 # Monkey patch the default serializer to also provide a to_html view.
 api.Serializer = common.api.HTMLSerializer
 
-# v1_api = Api(api_name='v1')
+v1_api = Api(api_name='v1')
+v1_api.register(users.api.VouchedResource())
 # v1_api.register(users.api.UserProfileResource())
 
 
@@ -35,7 +36,7 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 
 urlpatterns = patterns('',
-    # url(r'^api/', include(v1_api.urls)),
+    url(r'^api/', include(v1_api.urls)),
     (r'', include('users.urls')),
     (r'', include('groups.urls')),
 
