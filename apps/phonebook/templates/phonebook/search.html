@@ -71,11 +71,25 @@
       {% endif %}
       {% if people %}
         <h2>{{ _('Mozillians') }}</h2>
-          <div class="row">
-            {% for person in people %}
-              {{ search_result(person) }}
-            {% endfor %}
-          </div>
+        <div class="row">
+          {% for person in people %}
+            {{ search_result(person) }}
+          {% endfor %}
+          {% if show_pagination %}
+            <div data-pages={{ num_pages }} class="pagination">
+              {% for page in people.paginator.page_range %}
+                {% if page == people.number %}
+                  <span>{{ page }}</span>
+                {% else %}
+                  <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <div id="final-result">
+              <span>Showing all {{ people.paginator.count }} results.</span>
+            </div>
+          {% endif %}
+        </div>
       {% endif %}
       {% if not people and not groups %}
         <div class="well">
@@ -84,7 +98,7 @@
               Sorry, we cannot find a group or person with "{{ query }}" in their names.
             </p>
             <p>
-              Maybe they're not a Mozillian yet? 
+              Maybe they're not a Mozillian yet?
               <a href="{{ invite }}">Invite this person</a> to create a profile.
             </p>
           {% endtrans %}
@@ -104,21 +118,6 @@
               </ul>
             </div>
           {% endif %}
-        </div>
-      {% endif %}
-
-      {% if show_pagination %}
-        <div data-pages={{ num_pages }} class="pagination">
-          {% for page in people.paginator.page_range %}
-            {% if page == people.number %}
-              <span>{{ page }}</span>
-            {% else %}
-              <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
-            {% endif %}
-          {% endfor %}
-        </div>
-        <div id="final-result">
-          <span>Showing all {{ people.paginator.count }} results.</span>
         </div>
       {% endif %}
     {% endif %}
