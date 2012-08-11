@@ -19,10 +19,9 @@ Contents:
    :maxdepth: 2
 
    installation
+   workflow
    settings
-   registration
    invites
-   search
 
 Indices and tables
 ------------------

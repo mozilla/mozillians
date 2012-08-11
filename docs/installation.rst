@@ -49,6 +49,12 @@ you:
     $ ./manage.py syncdb --noinput
     $ ./manage.py migrate
 
+    .. note::
+    Some people have run into issues with existing south migrations that
+    have note run. To remedy this run ``mysql -u root`` to get into the mysql
+    shell. From there run ``drop database mozillians;`` and ``create database mozillians;``
+    and quit with ``\q``. Run the ``syncdb`` and ``migrate`` commands as above again.
+
 6. Run the development web server (in the virtualized environment)::
 
     $ ./manage.py runserver 0.0.0.0:8000
