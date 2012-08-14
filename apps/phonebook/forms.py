@@ -10,7 +10,7 @@ import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
-from groups.models import Group, Skill
+from groups.models import Group, Skill, Language
 from users.models import User, UserProfile
 
 
@@ -119,6 +119,9 @@ class ProfileForm(UserForm):
     skills = forms.CharField(label=_lazy(
             u'Start typing to add a skill (example: Python, javascript, '
             'Graphic Design, User Research)'), required=False)
+    languages = forms.CharField(label=_lazy(
+            u'Start typing to add a language you speak (example: English, '
+            'French, German)'), required=False)
 
     username = forms.CharField(label=_lazy(u'Username'), max_length=30,
                                                          required=False,
@@ -158,6 +161,16 @@ class ProfileForm(UserForm):
                 for s in self.cleaned_data['skills'].lower().split(',')
                 if s and ',' not in s]
 
+    def clean_languages(self):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['languages']):
+            raise forms.ValidationError(_(u'Languages can only contain '
+                                           'alphanumeric characters, dashes, '
+                                           'spaces.'))
+        return [s.strip()
+                for s in self.cleaned_data['languages'].lower().split(',')
+                if s and ',' not in s]
+
+
     def clean(self):
         """Make sure geographic fields aren't underspecified."""
         cleaned_data = super(ProfileForm, self).clean()
@@ -175,6 +188,7 @@ class ProfileForm(UserForm):
         """Save the data to profile."""
         self.instance.set_membership(Group, self.cleaned_data['groups'])
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
+        self.instance.set_membership(Language, self.cleaned_data['languages'])
         super(ProfileForm, self).save(request.user)
 
 

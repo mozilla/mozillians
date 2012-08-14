@@ -17,7 +17,7 @@ from sorl.thumbnail import ImageField
 from tastypie.models import ApiKey
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from groups.models import Group, Skill
+from groups.models import Group, Skill, Language
 from phonebook.helpers import gravatar
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
@@ -44,6 +44,7 @@ class UserProfile(SearchMixin, models.Model):
 
     groups = models.ManyToManyField(Group, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
+    languages = models.ManyToManyField(Language, blank=True)
 
     # Personal info
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
@@ -108,11 +109,13 @@ class UserProfile(SearchMixin, models.Model):
         self.save()
 
     def set_membership(self, model, membership_list):
-        """ Alters membership to Groups and Skillz """
+        """ Alters membership to Groups, Skills and Languages """
         if model is Group:
             m2mfield = self.groups
         elif model is Skill:
             m2mfield = self.skills
+        elif model is Language:
+            m2mfield = self.languages
 
         # Remove any non-system groups that weren't supplied in this list.
         m2mfield.remove(*[g for g in m2mfield.all()
@@ -180,8 +183,10 @@ class UserProfile(SearchMixin, models.Model):
                  'date_joined')
         d.update(dict((a, getattr(self.user, a)) for a in attrs))
         d.update(dict(has_photo=bool(self.photo)))
-        # Index groups and skills ... for fun.
+        # Index groups, skills, and languages ... for fun.
         d.update(dict(groups=list(self.groups.values_list('name', flat=True))))
+        d.update(dict(skills=list(self.skills.values_list('name', flat=True))))
+        d.update(dict(languages=list(self.languages.values_list('name', flat=True))))
         return d
 
     @classmethod
@@ -190,8 +195,8 @@ class UserProfile(SearchMixin, models.Model):
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
                   'username__text', 'bio__text', 'website__text',
-                  'email__text', 'groups__text', 'first_name__startswith',
-                  'last_name__startswith', 'ircname')
+                  'email__text', 'groups__text', 'skills__text', 'languages__text',
+                  'first_name__startswith', 'last_name__startswith', 'ircname')
         if query:
             q = dict((field, query) for field in fields)
             s = S(cls).query(or_=q)

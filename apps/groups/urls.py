@@ -4,7 +4,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 from . import views
-from groups.models import Group, Skill
+from groups.models import Group, Skill, Language
 
 urlpatterns = patterns('',
     url('^groups$', views.index, name='group_index'),
@@ -13,4 +13,5 @@ urlpatterns = patterns('',
          name='group_toggle'),
     url('^groups/search$', views.search, dict(searched_object=Group), name='group_search'),
     url('^skills/search$', views.search, dict(searched_object=Skill), name='skill_search'),
+    url('^languages/search$', views.search, dict(searched_object=Language), name='language_search'),
 )

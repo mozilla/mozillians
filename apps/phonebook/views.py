@@ -67,6 +67,7 @@ def edit_profile(request):
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
+    user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     if request.method == 'POST':
         form = forms.ProfileForm(
@@ -104,7 +105,8 @@ def edit_profile(request):
                        website=profile.website,
                        irc_nickname=profile.ircname,
                        groups=user_groups,
-                       skills=user_skills)
+                       skills=user_skills,
+                       languages=user_languages)
 
         form = forms.ProfileForm(
                 instance=profile,

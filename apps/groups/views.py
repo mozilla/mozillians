@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 
-from groups.models import Group, Skill
+from groups.models import Group, Skill, Language
 from phonebook import forms
 from phonebook.views import vouch_required
 from users.models import UserProfile

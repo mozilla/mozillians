@@ -443,7 +443,7 @@ legend {
     float:left;
 }
 
-#skills ul.tagit, #groups, #profile-info #skills {
+#skills ul.tagit, #groups, #profile-info #skills, #languages {
     margin-left:0;
     background: none;
     border: 0;
