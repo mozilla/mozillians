@@ -10,13 +10,16 @@ AUTO_COMPLETE_COUNT = 3
 
 class GroupBase(models.Model):
     """
-    Base model for Skills and Groups
+    Base model for Languages, Skills and Groups
 
     Think of tags on a user profile.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
 
-    # If this is true, this Group/Skill will appear in the autocomplete list.
+    """
+    If this is true, this Group/Skill/Language will appear in the
+    autocomplete list.
+    """
     auto_complete = models.BooleanField(db_index=True, default=False)
     always_auto_complete = models.BooleanField(default=False)
 
@@ -70,6 +73,14 @@ class Skill(GroupBase):
     """
     pass
 
+class Language(GroupBase):
+    """
+    Model to hold languages spoken tags
+
+    Like groups but without system prefs or pages/urls
+    """
+    pass
+
 
 @receiver(models.signals.pre_save, sender=Group)
 def _create_url_slug(sender, instance, raw, using, **kwargs):
@@ -78,6 +89,7 @@ def _create_url_slug(sender, instance, raw, using, **kwargs):
         instance.url = slugify(instance.name.lower())
 
 
+@receiver(models.signals.pre_save, sender=Language)
 @receiver(models.signals.pre_save, sender=Skill)
 @receiver(models.signals.pre_save, sender=Group)
 def _lowercase_name(sender, instance, raw, using, **kwargs):

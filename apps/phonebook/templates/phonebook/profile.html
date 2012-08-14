@@ -167,6 +167,20 @@
         </ul>
       {% endif %}
 
+      {% if profile.languages.count() %}
+        <h3>{{ _('Languages') }}</h3>
+
+        <ul id="languages" class="tagit ui-widget ui-widget-content ui-corner-all">
+          {% for group in profile.languages.all() %}
+            <li class="tagit-choice ui-widget-content ui-state-default
+                       ui-corner-all p-category category">
+              {{ group.name }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+
       {% if shown_user.username == request.user.username %}
         <a href="{{ url('profile.edit') }}"
            class="btn btn-primary pull-right" id="edit-profile">

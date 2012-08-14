@@ -72,6 +72,16 @@
           </p>
           {{ form.skills.label_tag() }}
           {{ form.skills }}
+          <h2>{{ _('Languages') }}</h2>
+          <p class="field_description">
+            {% trans %}
+              The Mozilla Project spans over many countries and languages.
+              Share the languages you speak to be found easily by other
+              Mozillians.
+            {% endtrans %}
+          </p>
+          {{ form.languages.label_tag() }}
+          {{ form.languages }}
         </div>
         <div class="tab-pane" id="vouches">
           <div class="control-group">
