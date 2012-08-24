@@ -59,7 +59,7 @@ body {
 	z-index:1031; /* One more than .nav-bar-fixed-top */
 }
 
-.huge, .large, h1, h2, h3, h4, #profile-info dt, #profile-info dd {
+.huge, .large, h1, h2, h3, h4, #profile-info dt, #profile-info dd, #bio {
     font-family:'Open Sans Light', 'Lucida Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
     font-weight:normal;
     text-shadow:0 1px 0 rgba(255,255,255,0.75);
