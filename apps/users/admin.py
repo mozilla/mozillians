@@ -8,8 +8,8 @@ from users.models import UserProfile
 class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
     fields = ['user', 'user_email', 'display_name', 'photo', 'ircname',
               'is_vouched', 'vouched_by', 'bio', 'website', 'groups', 'skills',
-              'languages']
-    list_display = ['display_name', 'user_email', 'user_username', 'ircname',
+              'languages', 'country', 'region', 'city']
+    list_display = ['display_name', 'user_email', 'user_username', 'country',
                     'is_vouched', 'vouched_by']
     list_display_links = ['display_name', 'user_email', 'user_username']
     readonly_fields = ['user', 'user_email']
