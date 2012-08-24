@@ -1,3 +1,5 @@
 See mozillians.rtfd.org or build the docs/
 
-If you want to file a bug, go to bugzilla.mozilla.org and file it under Community Tools > Phonebook. If you then want to give a Pull Request, mention the bug number in the pull request to help with tracking.
+If you want to file a bug, go to bugzilla.mozilla.org and file it under
+Community Tools > Phonebook. If you then want to give a Pull Request, mention
+the bug number in the pull request to help with tracking.
