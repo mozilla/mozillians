@@ -1,21 +1,84 @@
 {% extends "base.html" %}
 
+{% block site_js %}
+  {{ super() }}
+  {{ js('register') }}
+{% endblock %}
+
+{% block site_css %}
+  {{ super() }}
+  {{ css('register') }}
+{% endblock %}
+
 {% block page_title %}{{ _('Create Your Profile') }}{% endblock %}
 {% block body_id %}register{% endblock %}
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
+
+  {% if form.errors %}
+    <div class="alert alert-error">
+      The following fields are required (optin is the checkbox in the last panel):
+      <ol>
+      {% for error in form.errors %}
+        <li>{{ error|escape }}</li>
+      {% endfor %}
+      </ol>
+    </div>
+  {% endif %}
   <form action="{{ url('register') }}"
         method="POST" enctype="multipart/form-data"
-        class="well form-horizontal">
+        class="form-horizontal well">
     {{ csrf() }}
     <h1>{{ _('Create Your Profile') }}</h1>
-    {{ bootstrap(form) }}
-    <div id="edit_controls">
-      <button type="submit" class="span2 btn btn-primary">{{ _('Create Profile') }}</button>
-      <a href="{{ url('profile', user.username) }}" class="span2 btn">
-        {{ _('Cancel') }}{# L10n: Cancel editing #}
-      </a>
+    <div class="tabbable">
+      <ul class="nav nav-pills">
+        <li class="active"><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        <li><a href="#skills" id="2" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
+        <li><a href="#finish" id="3" data-toggle="tab">{{ _('Location & Finish') }}</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="start">
+          <h2>{{ _('Profile') }}</h2>
+          {{ bootstrap(form.first_name) }}
+          {{ bootstrap(form.last_name) }}
+          {{ bootstrap(form.ircname) }}
+          {{ bootstrap(form.website) }}
+          {{ bootstrap(form.bio) }}
+          <button type="button" class="span2 btn btn-primary" onclick="document.getElementById('2').click()">Next</button>
+        </div>
+        <div class="tab-pane" id="skills">
+          <h2>{{ _('Skills & Groups') }}</h2>
+          <div class="register-groups">
+            {{ form.groups.label_tag() }}
+            {{ form.groups }}
+          </div>
+          <div class="register-skills">
+            {{ form.skills.label_tag() }}
+            {{ form.skills }}
+            {{ form.languages.label_tag() }}
+            {{ form.languages }}
+          </div>
+          <button type="button" class="span2 btn btn-primary" onclick="document.getElementById('3').click()">Next</button>
+          <button type="button" class="span2 btn" onclick="document.getElementById('1').click()">Previous</button>
+        </div>
+        <div class="tab-pane" id="finish">
+          <h2>{{ _('Location') }}</h2>
+          <p>
+            {% trans %}
+              Let us know where in the world you are. Other vouched Mozillians
+              will be able to contact you easier and vice-versa.
+            {% endtrans %}
+          </p>
+          {{ bootstrap(form.country) }}
+          {{ bootstrap(form.region) }}
+          {{ bootstrap(form.city) }}
+          {{ bootstrap(form.optin) }}
+          <div id="edit_controls">
+            <button type="submit" class="span2 btn btn-primary">{{ _('Create Profile') }}</button>
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 {% endblock %}
