@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 
 import commonware.log
 from django_browserid.views import Verify
+from product_details import product_details
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
@@ -56,6 +57,10 @@ def register(request):
     Registers Users. Pulls out an invite code if it exists and auto validates
     the user if so.
     """
+    COUNTRIES = product_details.get_regions(request.locale).items()
+    COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
+    COUNTRIES.insert(0, ('', '----'))
+
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
         return redirect('home')
@@ -75,9 +80,15 @@ def register(request):
     form = forms.RegistrationForm(request.POST or None,
                                   instance=user.get_profile())
 
+    form.fields['country'].choices = COUNTRIES
+
     if request.method == 'POST':
         if form.is_valid():
             form.save(user)
+            userProfile = user.get_profile()
+            for group in request.POST.getlist('groups'):
+                userProfile.groups.add(group)
+            userProfile.save()
             auth.login(request, user)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))

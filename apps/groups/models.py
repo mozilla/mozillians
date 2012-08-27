@@ -59,7 +59,7 @@ class Group(GroupBase):
     def get_curated(cls):
         """Return all the groups with a steward assigned"""
         return cls.objects.exclude(steward=None).annotate(
-            num_users=models.Count('userprofile')).order_by('-num_users')
+            num_users=models.Count('userprofile'))
 
     class Meta:
         db_table = 'group'

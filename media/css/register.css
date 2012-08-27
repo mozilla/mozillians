@@ -1,0 +1,12 @@
+.register-skills {
+    margin-top: 35px;
+}
+
+.register-groups ul {
+    margin-top: 20px;
+    list-style: none;
+}
+
+.register-groups ul li {
+    text-transform: capitalize;
+}

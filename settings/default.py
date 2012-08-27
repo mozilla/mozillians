@@ -75,6 +75,9 @@ MINIFY_BUNDLES = {
         'edit_profile': (
             'css/user.css',
         ),
+        'register': (
+            'css/register.css',
+        ),
     },
     'js': {
         'common': (
@@ -101,6 +104,9 @@ MINIFY_BUNDLES = {
             'js/api.js',
         ),
         'edit_profile': (
+            'js/libs/tag-it/js/tag-it.js',
+        ),
+        'register': (
             'js/libs/tag-it/js/tag-it.js',
         ),
         'search': (
