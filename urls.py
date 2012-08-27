@@ -17,8 +17,6 @@ api.Serializer = common.api.HTMLSerializer
 
 v1_api = Api(api_name='v1')
 v1_api.register(users.api.VouchedResource())
-# v1_api.register(users.api.UserProfileResource())
-
 
 def error_page(request, template, status=None):
     """Render error templates, found in the root /templates directory.
@@ -39,7 +37,7 @@ urlpatterns = patterns('',
     url(r'^api/', include(v1_api.urls)),
     (r'', include('users.urls')),
     (r'', include('groups.urls')),
-
+    (r'', include('phonebook.urls')),
 
     (r'^csp', include('csp.urls')),
 
@@ -64,5 +62,3 @@ if settings.DEBUG:
         url(r'^test/qunit/$', TemplateView.as_view(template_name='qunit.html'),
             name="qunit_test"),
     )
-
-urlpatterns += patterns('', (r'', include('phonebook.urls')),)
