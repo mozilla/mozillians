@@ -93,7 +93,7 @@ def show(request, id, url=None):
              num_pages=num_pages)
 
     if group.steward:
-        # Get the 15 most globally popular skills that apear in the group
+        # Get the 15 most globally popular skills that appear in the group
         skills = [s.name for s in Skill.objects
                                        .filter(userprofile__group__id=group.id)
                                        .annotate(users=Count('userprofile'))

@@ -40,7 +40,7 @@ class Browserid(Verify):
 
         if profile.is_complete():
             auth.login(self.request, self.user)
-            return redirect(reverse('profile', args=[user.username]))
+            return redirect(reverse('home'))
 
         self.request.session['authenticated_email'] = user.email
         return redirect(reverse('register'))
@@ -92,7 +92,7 @@ def register(request):
             auth.login(request, user)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
-            return redirect('profile', user.username)
+            return redirect('home')
 
     # 'user' object must be passed in because we are not logged in
     return render(request, 'registration/register.html',

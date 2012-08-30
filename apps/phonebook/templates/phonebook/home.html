@@ -10,21 +10,21 @@
 
 
 {% block main_content %}
-  <div class="welcome">
-    <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
-    {% trans %}
-      <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
-    {% endtrans %}
-
-    <p>
-      {% trans about=url('about') %}
-        If you're looking for information on your fellow contributors, what they
-        do and how to connect with them, you've come to right place.
-        <a href="{{ about }}">Learn more</a>
+  {% if not user.is_authenticated() %}
+    <div class="welcome">
+      <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
+      {% trans %}
+        <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
       {% endtrans %}
-    </p>
 
-    {% if not user.is_authenticated() %}
+      <p>
+        {% trans about=url('about') %}
+          If you're looking for information on your fellow contributors, what they
+          do and how to connect with them, you've come to right place.
+          <a href="{{ about }}">Learn more</a>
+        {% endtrans %}
+      </p>
+
       <p>
         <button id="create_profile" class="browser_id_login">
           <span class="id">
@@ -37,22 +37,59 @@
           {{ _('What is BrowserID? Why are we using it?') }}
         </a>
       </p>
-      {% elif user.get_profile().is_vouched %}
-        <p>
-          {% trans invite=url('invite') %}
-            Tell other contributors about this directory and ask them to create a
-            profile.
-
-            <br><a href="{{ invite }}" class="btn btn-large btn-primary">Invite a Mozillian</a>
-          {% endtrans %}
-        </p>
-      {% elif not user.get_profile().is_vouched %}
-        <p>
-          {% trans %}
-            You need to be vouched by a core or active contributor in the Mozilla community.
-            To do this, find ways to <a href="http://mozilla.org/contribute">get involved</a>.
-          {% endtrans %}
-        </p>
-    {% endif %}
-  </div>
+    </div>
+  {% elif user.get_profile().is_vouched %}
+    <h1>Welcome to Mozillians!</h1>
+    <div id="home-options">
+      <ul class="well">
+        <li>
+          <a href="{{ url('invite') }}" class="btn">Invite a Mozillian</a>
+          {{ _('Invite other contributors to create a profile') }}
+        </li>
+        <li>
+          <a href="{{ url('profile.edit') }}" class="btn btn-primary">Edit your Profile</a>
+          {{ _('Edit your profile, account settings or view developer info') }}
+        </li>
+        <li>
+          <a href="{{ url('group_index') }}" class="btn btn-info">View Groups</a>
+          {{ _('View all groups in the Phonebook') }}
+        </li>
+        <li>
+          <a href="{{ url('about') }}" class="btn btn-info">Read the About Page</a>
+          {{ _('Learn more about the Phonebook and why its built') }}
+        </li>
+      </ul>
+    </div>
+  {% elif not user.get_profile().is_vouched %}
+    {% trans profile=url('profile', user.username) %}
+      <h1> Welcome </h1>
+      Your Non-Vouched account has been created!
+      <a href="http://mozilla.org/contribute">Get involved</a> to
+      <a href="{{ profile }}">get vouched.</a> Below is info that can help you get involved in
+      your selected groups.
+    {% endtrans %}
+    <div class="row">
+      {% for group in groups %}
+        <div class="span6" id="home-group">
+          <h2>{{ group.name }}</h2>
+	  <dl>
+            <dt>{{ _('Steward') }}</dt>
+            <dd>{{ group.steward.display_name }}</dd>
+            {% if group.website %}
+              <dt>{{ _('Website') }}</dt>
+              <dd>{{ group.website|urlize }}</dd>
+            {% endif %}
+            {% if group.wiki %}
+              <dt>{{ _('Wiki') }}</dt>
+              <dd> {{ group.wiki|urlize }}</dd>
+            {% endif %}
+            {% if group.irc_channel %}
+              <dt>{{ _('IRC') }}</dt>
+              <dd>{{ group.irc_channel }}</dd>
+            {% endif %}
+          </dl>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endblock main_content %}
