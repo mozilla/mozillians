@@ -41,12 +41,14 @@
     </div>
   {% elif user.get_profile().is_vouched %}
     <h1>Welcome to Mozillians!</h1>
-    <h3>Stewards in your Functional Area</h3>
-    <div class="row">
-      {% for my_group in groups %}
-        {{ search_result(my_group.steward) }}
-      {% endfor %}
-    </div>
+    {% if groups %}
+      <h3>Stewards in your Functional Area</h3>
+      <div class="row">
+        {% for my_group in groups %}
+          {{ search_result(my_group.steward) }}
+        {% endfor %}
+      </div>
+    {% endif %}
     <div class="popular-groups">
       <h3>Browse Functional Areas</h3>
       <ul id="groups" class="tagit ui-widget ui-corner-all">
