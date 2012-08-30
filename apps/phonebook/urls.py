@@ -7,6 +7,7 @@ admin.autodiscover()
 from phonebook import views
 
 urlpatterns = patterns('',
+    url('^$', views.home, name='home'),
     url('^user/edit$', views.edit_profile,
         name='profile.edit'),
     url('^confirm-delete$', views.confirm_delete,
@@ -15,7 +16,6 @@ urlpatterns = patterns('',
     url('^opensearch.xml$', views.search_plugin, name='search_plugin'),
     url('^search$', views.search, name='search'),
     url('^vouch$', views.vouch, name='vouch'),
-
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 
@@ -25,7 +25,5 @@ urlpatterns = patterns('',
     url('^confirm-register$', direct_to_template,
         {'template': 'phonebook/confirm_register.html'},
         name='confirm_register'),
-    url('^$', direct_to_template,
-        {'template': 'phonebook/home.html'}, name='home'),
     url(r'^(?P<username>(u\/)?[\w.@+-]{1,30})$', views.profile, name='profile'),
 )

@@ -43,6 +43,17 @@ def vouch_required(f):
 
 
 @never_cache
+def home(request):
+    if request.user.is_authenticated():
+        profile = request.user.get_profile()
+        curated_groups = profile.groups.exclude(steward=None).order_by('name')
+        data = dict(groups=curated_groups)
+        return render(request, 'phonebook/home.html', data)
+    else:
+        return render(request, 'phonebook/home.html')
+
+
+@never_cache
 @login_required
 def profile(request, username):
     """View a profile by username."""

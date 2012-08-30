@@ -139,6 +139,35 @@ h4 {
     margin-top: 30px;
 }
 
+#home-options ul {
+    list-style: none;
+}
+
+#home-options li {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+#home-options .btn {
+    width: 175px;
+    margin-right: 15px;
+}
+
+#home-group {
+    height: 220px;
+    margin: 10px 4px;
+    background-color: #DBD6CC;
+    border: 1px solid #999999;
+}
+
+#home-group h2 {
+    margin: 5px 0 0 10px;
+}
+
+#home-group dl {
+    margin: 20px;
+}
+
 #header h1 a,#header h1 span {
     color:#fff;
     font-weight:700;

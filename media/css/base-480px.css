@@ -11,4 +11,20 @@
     .search-page .result a {
         min-width: 270px;
     }
+
+    #home-options .well {
+        padding-bottom: 60px;
+    }
+
+    #home-options li {
+        padding: 25px 0px;
+    }
+
+    #home-options li a {
+        margin: 15px 0px;
+    }
+
+    #home-group {
+        height: 260px;
+    }
 }

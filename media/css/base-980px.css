@@ -8,4 +8,8 @@
     #quick-search {
         display:none;
     }
+
+    #home-group {
+        height: 260px;
+    }
 }
