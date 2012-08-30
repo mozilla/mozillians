@@ -26,13 +26,11 @@ class RegistrationTest(TestCase):
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        d = dict(
-                 username='ad',
+        d = dict(username='ad',
                  email='mrfusion@mozilla.com',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             r = self.client.post(reverse('register'), d, follow=True)
 
@@ -53,15 +51,13 @@ class RegistrationTest(TestCase):
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        d = dict(
-                 username='ad',
+        d = dict(username='ad',
                  email=email,
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
                  password='tacoface',
                  confirmp='tacoface',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('register'), d, follow=True)
 
@@ -71,20 +67,19 @@ class RegistrationTest(TestCase):
         """Test that we can submit a perfectly cromulent username.
 
         We verify that /:username then works as well.
+
         """
         email = 'mrfusion+dotcom@mozilla.com'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
-        d = dict(
-                 email=email,
+        d = dict(email=email,
                  username='mrfusion',
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
                  password='tacoface',
                  confirmp='tacoface',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
         eq_(r.status_code, 302, "Problems if we didn't redirect...")
@@ -97,22 +92,23 @@ class RegistrationTest(TestCase):
         eq_(r.context['profile'].user_id, u.id)
 
     def test_username_characters(self):
-        """Verify usernames can have digits/symbols, but nothing too insane."""
+        """Verify usernames can have digits/symbols, but nothing too
+        insane.
+
+        """
         email = 'mrfusion+dotcom@mozilla.com'
         username = 'mr.fu+s_i-on@246'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        d = dict(
-                 email=email,
+        d = dict(email=email,
                  username=username,
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
                  password='tacoface',
                  confirmp='tacoface',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
         eq_(r.status_code, 302, (
@@ -132,15 +128,13 @@ class RegistrationTest(TestCase):
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
-        d = dict(
-                 email=bad_user_email,
+        d = dict(email=bad_user_email,
                  username=bad_username,
                  first_name='Akaaaaaaash',
                  last_name='Desaaaaaaai',
                  password='tacoface',
                  confirmp='tacoface',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
         eq_(r.status_code, 302, (
@@ -149,11 +143,11 @@ class RegistrationTest(TestCase):
                 "User shouldn't exist; username was bad.")
 
     def test_bad_username(self):
-        """`about` is a terrible username, as are its silly friends.
+        """'about' is a terrible username, as are its silly friends.
 
         Let's make some stop words *and* analyze the routing system,
         whenever someone sets their username and verify that they can't
-        be "about" or "help" or anything that is in use.
+        be 'about' or 'help' or anything that is in use.
         """
         email = 'mrfusion+dotcom@mozilla.com'
         badnames = getattr(settings, 'USERNAME_BLACKLIST')
@@ -164,13 +158,11 @@ class RegistrationTest(TestCase):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         for name in badnames:
-            d = dict(
-                    email=email,
-                    username=name,
-                    first_name='Akaaaaaaash',
-                    last_name='Desaaaaaaai',
-                    optin=True
-            )
+            d = dict(email=email,
+                     username=name,
+                     first_name='Akaaaaaaash',
+                     last_name='Desaaaaaaai',
+                     optin=True)
             with browserid_mock.mock_browserid(email):
                 r = self.client.post(reverse('register'), d)
 
@@ -180,25 +172,24 @@ class RegistrationTest(TestCase):
                 "Didn't raise errors for %s" % name)
 
     def test_nickname_changes_before_vouch(self):
-        """Notify pre-vouched users of URL change from nickname changes.
+        """Notify pre-vouched users of URL change from nickname
+        changes.
 
-        See: https://bugzilla.mozilla.org/show_bug.cgi?id=736556"""
+        See: https://bugzilla.mozilla.org/show_bug.cgi?id=736556
+
+        """
         d = dict(assertion=self.fake_assertion)
         email = 'soy@latte.net'
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         # Note: No username supplied.
-        d = dict(
-                 email=email,
+        d = dict(email=email,
                  first_name='Tofu',
                  last_name='Matt',
-                 optin=True
-        )
+                 optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d, follow=True)
-
-        doc = pq(r.content)
 
         assert r.context['user'].id, 'User should be created'
         assert not r.context['user'].get_profile().is_vouched, (
@@ -213,12 +204,10 @@ class RegistrationTest(TestCase):
 
     def test_repeat_username(self):
         """Verify one cannot repeat email adresses."""
-        register = dict(
-                 username='repeatedun',
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 optin=True
-        )
+        register = dict(username='repeatedun',
+                        first_name='Akaaaaaaash',
+                        last_name='Desaaaaaaai',
+                        optin=True)
 
         # Create first user
         email1 = 'mRfUsIoN@mozilla.com'
@@ -246,12 +235,10 @@ class RegistrationTest(TestCase):
     def test_ircnick(self):
         username = 'thisisatest'
         email = 'test@example.com'
-        register = dict(
-                username=username,
-                first_name='David',
-                last_name='Teststhings',
-                optin=True
-        )
+        register = dict(username=username,
+                        first_name='David',
+                        last_name='Teststhings',
+                        optin=True)
         d = {'assertion': self.fake_assertion}
 
         with browserid_mock.mock_browserid(email):
@@ -319,8 +306,8 @@ class VouchTest(ESTestCase):
     def test_vouch_method(self):
         """Test UserProfile.vouch()
 
-        Assert that a previously unvouched user shows up as unvouched in the
-        database.
+        Assert that a previously unvouched user shows up as unvouched
+        in the database.
 
         Assert that when vouched they are listed as vouched.
         """
@@ -354,7 +341,7 @@ class VouchTest(ESTestCase):
 
 
 class TestUser(TestCase):
-    """Test User functionality"""
+    """Test User functionality."""
 
     def test_userprofile(self):
         u = user()
@@ -390,12 +377,10 @@ class TestUser(TestCase):
     def test_blank_ircname(self):
         username = 'thisisatest'
         email = 'test@example.com'
-        register = dict(
-                username=username,
-                first_name='David',
-                last_name='Teststhings',
-                optin=True
-        )
+        register = dict(username=username,
+                        first_name='David',
+                        last_name='Teststhings',
+                        optin=True)
         d = {'assertion': 'rarrr'}
 
         with browserid_mock.mock_browserid(email):
@@ -409,18 +394,16 @@ class TestUser(TestCase):
 
 
 class TestMigrateRegistration(TestCase):
-        """Test funky behavior of flee ldap"""
+        """Test funky behavior of flee ldap."""
         email = 'robot1337@domain.com'
 
         def test_login(self):
             """Given an invite_url go to it and redeem an invite."""
             # Lettuce make sure we have a clean slate
 
-            info = dict(
-                first_name='Akaaaaaaash',
-                last_name='Desaaaaaaai',
-                optin=True
-            )
+            info = dict(first_name='Akaaaaaaash',
+                        last_name='Desaaaaaaai',
+                        optin=True)
 
             self.client.logout()
             u = User.objects.create(username='robot1337', email=self.email)
@@ -447,7 +430,7 @@ class TestMigrateRegistration(TestCase):
             eq_(r.status_code, 200)
 
 
-@override_settings(AUTO_VOUCH_DOMAINS=('mozilla.com',))
+@override_settings(AUTO_VOUCH_DOMAINS=['mozilla.com'])
 class AutoVouchTests(TestCase):
 
     def test_only_autovouch_in_staff(self):

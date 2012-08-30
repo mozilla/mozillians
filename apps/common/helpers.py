@@ -1,5 +1,4 @@
 import logging
-import os
 
 from django.conf import settings
 
@@ -9,9 +8,10 @@ from sorl.thumbnail import get_thumbnail
 
 logger = logging.getLogger('common.helpers')
 
+
 @register.function
 def thumbnail(source, *args, **kwargs):
-    """ Wraps sorl thumbnail with an additional 'default' keyword"""
+    """Wraps sorl thumbnail with an additional 'default' keyword."""
 
     # Templates should never return an exception
     try:
@@ -19,6 +19,6 @@ def thumbnail(source, *args, **kwargs):
             source = kwargs.get('default')
         return get_thumbnail(source, *args, **kwargs)
     except Exception as e:
-        logger.error('Thumbnail had Exception: %s' % (e,))
+        logger.error('Thumbnail had Exception: %s' % e)
         source = getattr(settings, 'DEFAULT_IMAGE_SRC')
         return get_thumbnail(source, *args, **kwargs)

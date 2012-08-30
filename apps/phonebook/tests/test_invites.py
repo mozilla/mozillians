@@ -19,8 +19,7 @@ class InviteFlowTest(common.tests.TestCase):
     fake_invite_message = 'Join Mozilla'
 
     def invite_someone(self, email, invite_message):
-        """
-        This method will invite a user.
+        """This method will invite a user.
 
         This will verify that an email with link has been sent.
         """
@@ -63,11 +62,9 @@ class InviteFlowTest(common.tests.TestCase):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         # Now let's register
-        d = dict(
-            first_name='Akaaaaaaash',
-            last_name='Desaaaaaaai',
-            optin=True
-        )
+        d = dict(first_name='Akaaaaaaash',
+                 last_name='Desaaaaaaai',
+                 optin=True)
         with mock_browserid(email):
             self.client.post(reverse('register'), d, follow=True)
 
@@ -132,8 +129,7 @@ class InviteEdgeTest(common.tests.TestCase):
                 pq(r.content)('ul.errorlist li').text())
 
     def test_unvouched_cant_invite(self):
-        """
-        Let's make sure the unvouched don't let in their friends...
+        """Let's make sure the unvouched don't let in their friends.
 
         Their stupid friends...
         """
@@ -145,11 +141,8 @@ class InviteEdgeTest(common.tests.TestCase):
 
 
 def create_vouched_user(email):
-        user = User.objects.create(
-                email=email,
-                username=email,
-                first_name='Amandeep',
-                last_name='McIlrath')
+        user = User.objects.create(email=email, username=email,
+                                   first_name='Amandeep', last_name='McIlrath')
         profile = user.get_profile()
         profile.is_vouched = True
         profile.save()

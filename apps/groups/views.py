@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 
-from groups.models import Group, Skill, Language
+from groups.models import Group, Skill
 from phonebook import forms
 from phonebook.views import vouch_required
 from users.models import UserProfile

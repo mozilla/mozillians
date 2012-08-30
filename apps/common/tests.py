@@ -11,11 +11,13 @@ from elasticutils import get_es
 
 
 class TestCase(test_utils.TestCase):
+    """Tests for common package."""
+
     @classmethod
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
         cls._AUTHENTICATION_BACKENDS = settings.AUTHENTICATION_BACKENDS
-        settings.AUTHENTICATION_BACKENDS = ('common.backends.TestBackend',)
+        settings.AUTHENTICATION_BACKENDS = ['common.backends.TestBackend']
         # Create a Mozillian
         cls.mozillian = User.objects.create(
                 email='u000001@mozillians.org', username='7f3a67u000001',
@@ -45,11 +47,14 @@ class TestCase(test_utils.TestCase):
 
 
 class ESTestCase(TestCase, elasticutils.tests.ESTestCase):
+
     @classmethod
     def setUpClass(cls):
         """Runs the :class:`TestCase` setup to add some data.
 
-        Also flushes and refreshes the data so it's searchable via computer.
+        Also flushes and refreshes the data so it's searchable via
+        computer.
+
         """
         elasticutils.tests.ESTestCase.setUpClass()
         TestCase.setUpClass()
@@ -64,7 +69,8 @@ class ESTestCase(TestCase, elasticutils.tests.ESTestCase):
 def user(**kwargs):
     """Return a user with all necessary defaults filled in.
 
-    Default password is 'testpass' unless you say otherwise in a kwarg.
+    Default password is 'testpass' unless you say otherwise in a
+    kwarg.
 
     """
     save = kwargs.pop('save', True)

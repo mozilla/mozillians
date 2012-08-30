@@ -28,7 +28,7 @@ class SearchForm(happyforms.Form):
                                       required=False)
 
     def clean_limit(self):
-        """Validate that this limit is numeric and greater than 1"""
+        """Validate that this limit is numeric and greater than 1."""
         limit = self.cleaned_data['limit']
 
         if not limit:
@@ -41,6 +41,7 @@ class SearchForm(happyforms.Form):
 
 class UsernameWidget(forms.widgets.TextInput):
     """A TextInput with some special markup to indicate a URL."""
+
     def render(self, *args, **kwargs):
         return mark_safe(u'<span class="label-text">'
                           'http://mozillians.org/ </span>%s' %
@@ -48,10 +49,11 @@ class UsernameWidget(forms.widgets.TextInput):
 
 
 class UserForm(forms.ModelForm):
-    """
-    Instead of just inhereting form a UserProfile model form, this base class
-    allows us to also abstract over methods that have to do with the User
-    object that need to exist in both Registration and Profile.
+    """Instead of just inhereting form a UserProfile model form, this
+    base class allows us to also abstract over methods that have to do
+    with the User object that need to exist in both Registration and
+    Profile.
+
     """
 
     first_name = forms.CharField(label=_lazy(u'First Name'), max_length=30,
@@ -132,12 +134,13 @@ class ProfileForm(UserForm):
         model = UserProfile
         fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
                   'city')
-        widgets = {
-            'bio': forms.Textarea()
-        }
+        widgets = {'bio': forms.Textarea()}
 
     def clean_groups(self):
-        """Groups are saved in lowercase because it's easy and consistent."""
+        """Groups are saved in lowercase because it's easy and
+        consistent.
+
+        """
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
             raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
@@ -162,14 +165,14 @@ class ProfileForm(UserForm):
                 if s and ',' not in s]
 
     def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['languages']):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
+                        self.cleaned_data['languages']):
             raise forms.ValidationError(_(u'Languages can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
         return [s.strip()
                 for s in self.cleaned_data['languages'].lower().split(',')
                 if s and ',' not in s]
-
 
     def clean(self):
         """Make sure geographic fields aren't underspecified."""

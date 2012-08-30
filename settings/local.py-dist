@@ -56,3 +56,4 @@ ES_INDEXES = dict(default='mozillians_dev')
 CELERY_ALWAYS_EAGER = True
 
 JAVA_BIN = '/usr/bin/java'
+

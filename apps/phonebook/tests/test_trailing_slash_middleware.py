@@ -5,6 +5,7 @@ from funfactory.urlresolvers import reverse
 
 
 class TrailingSlashMiddlewareTestCase(TestCase):
+
     def test_strip_trailing_slash(self):
         url = reverse('about')
         r = self.client.get(url + '/')

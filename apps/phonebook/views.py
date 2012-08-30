@@ -30,6 +30,7 @@ BAD_VOUCHER = 'Unknown Voucher'
 
 def vouch_required(f):
     """If a user is not vouched they get a 403."""
+
     @login_required
     @wraps(f)
     def wrapped(request, *args, **kwargs):
@@ -144,7 +145,10 @@ def edit_profile(request):
 @never_cache
 @login_required
 def confirm_delete(request):
-    """Display a confirmation page asking the user if they want to leave."""
+    """Display a confirmation page asking the user if they want to
+    leave.
+
+    """
     return render(request, 'phonebook/confirm_delete.html')
 
 

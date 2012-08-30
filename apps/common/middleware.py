@@ -16,16 +16,19 @@ log = commonware.log.getLogger('m.phonebook')
 
 
 class PermissionDeniedMiddleware(object):
-    """Add a generic 40x "not allowed" handler.
+    """Add a generic 40x 'not allowed' handler.
 
-    TODO: Currently uses the 500.html error template, but in the future should
-    display a more tailored-to-the-actual-error "not allowed" page."""
+    TODO: Currently uses the 500.html error template, but in the
+    future should display a more tailored-to-the-actual-error 'not
+    allowed' page.
+    """
+
     def process_response(self, request, response):
         if isinstance(response, (HttpResponseForbidden,
                                  HttpResponseNotAllowed)):
             if request.user.is_authenticated():
                 log.debug('Permission denied middleware, user was '
-                         'authenticated, sending 500')
+                          'authenticated, sending 500')
                 return error_page(request, 500, status=response.status_code)
             else:
                 if isinstance(response, (HttpResponseForbidden)):
@@ -38,14 +41,14 @@ class PermissionDeniedMiddleware(object):
 
 
 class RemoveSlashMiddleware(object):
-    """
-    Middleware that tries to remove a trailing slash if there was a 404.
+    """Middleware that tries to remove a trailing slash if there was a 404.
 
-    If the response is a 404 because url resolution failed, we'll look for a
-    better url without a trailing slash.
+    If the response is a 404 because url resolution failed, we'll look
+    for a better url without a trailing slash.
 
     Cribbed from kitsune:
     https://github.com/mozilla/kitsune/blob/master/apps/sumo/middleware.py
+
     """
 
     def process_response(self, request, response):
@@ -64,11 +67,11 @@ class RemoveSlashMiddleware(object):
 
 @contextmanager
 def safe_query_string(request):
-    """
-    Turn the QUERY_STRING into a unicode- and ascii-safe string.
+    """Turn the QUERY_STRING into a unicode- and ascii-safe string.
 
-    We need unicode so it can be combined with a reversed URL, but it has to be
-    ascii to go in a Location header. iri_to_uri seems like a good compromise.
+    We need unicode so it can be combined with a reversed URL, but it
+    has to be ascii to go in a Location header. iri_to_uri seems like
+    a good compromise.
     """
     qs = request.META['QUERY_STRING']
     try:
