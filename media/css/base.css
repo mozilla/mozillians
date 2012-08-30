@@ -141,16 +141,17 @@ h4 {
 
 #home-options ul {
     list-style: none;
+    margin-left: 0;
 }
 
 #home-options li {
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding: 15px 0;
+    margin-left: 11px;
 }
 
 #home-options .btn {
     width: 175px;
-    margin-right: 15px;
+    margin-right: 11px;
 }
 
 #home-group {
