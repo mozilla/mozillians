@@ -139,13 +139,17 @@ h4 {
     margin-top: 30px;
 }
 
+#body-home h3 {
+    margin-bottom: 10px;
+}
+
 #home-options ul {
     list-style: none;
     margin-left: 0;
 }
 
 #home-options li {
-    padding: 15px 0;
+    padding: 15px 7px;
     margin-left: 11px;
 }
 
@@ -390,6 +394,10 @@ a.btn {
     margin:18px 20px;
 }
 
+.search-page .result {
+    margin-top: 15px;
+}
+
 .search-page .result a {
     min-width: 340px;
     height: 75px;
@@ -505,7 +513,7 @@ legend {
     margin-bottom: 20px;
 }
 
-.search-page .result, #profile-info {
+#profile-info {
     margin-bottom:15px;
 }
 

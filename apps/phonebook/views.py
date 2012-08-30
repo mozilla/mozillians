@@ -46,8 +46,9 @@ def vouch_required(f):
 def home(request):
     if request.user.is_authenticated():
         profile = request.user.get_profile()
-        curated_groups = profile.groups.exclude(steward=None).order_by('name')
-        data = dict(groups=curated_groups)
+        my_groups = profile.groups.exclude(steward=None).order_by('name')
+        curated_groups = Group.get_curated()
+        data = dict(groups=my_groups, curated_groups=curated_groups)
         return render(request, 'phonebook/home.html', data)
     else:
         return render(request, 'phonebook/home.html')

@@ -2,6 +2,7 @@
 
 {% block page_title %}{{ _('Mozilla Community Directory') }}{% endblock %}
 {% block body_id %}home{% endblock %}
+{% block body_classes %}box-content search-page{% endblock %}
 
 {% set nav_home = 'active' %}
 {% block nav %}
@@ -40,8 +41,28 @@
     </div>
   {% elif user.get_profile().is_vouched %}
     <h1>Welcome to Mozillians!</h1>
+    <h3>Stewards in your Functional Area</h3>
+    <div class="row">
+      {% for my_group in groups %}
+        {{ search_result(my_group.steward) }}
+      {% endfor %}
+    </div>
+    <div class="popular-groups">
+      <h3>Browse Functional Areas</h3>
+      <ul id="groups" class="tagit ui-widget ui-corner-all">
+        {% for group in curated_groups %}
+          <li class="tagit-choice ui-widget-content ui-state-default
+                     ui-corner-all p-category category">
+            <a href="{{ url('group', group.id, group.url) }}">
+              {{ group.name }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
     <div id="home-options">
       <ul class="well">
+        <h3>Options</h3>
         <li>
           <a href="{{ url('invite') }}" class="btn">Invite a Mozillian</a>
           {{ _('Invite other contributors to create a profile') }}
