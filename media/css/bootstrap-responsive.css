@@ -104,6 +104,7 @@
 }
 @media (min-width: 768px) and (max-width: 980px) {
   .row {
+    margin-left: -20px;
     *zoom: 1;
   }
   .row:before, .row:after {
@@ -395,7 +396,7 @@
   }
   [class*="span"] {
     float: left;
-    margin-left: 30px;
+    margin-left: 20px;
   }
   .span1 {
     width: 70px;

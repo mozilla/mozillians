@@ -9,7 +9,7 @@
     }
 
     .search-page .result a {
-        min-width: 270px;
+        min-width: 250px;
     }
 
     #home-options .well {
@@ -17,7 +17,7 @@
     }
 
     #home-options li a {
-        margin: 15px 0px;
+        margin: 15px 0;
     }
 
     #home-group {
