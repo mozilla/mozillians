@@ -20,6 +20,8 @@ you:
       `Vagrant: Getting Started
        <http://vagrantup.com/docs/getting-started/index.html>`_
 
+   .. note:: you don't need to install the lucid32 box, one will be installed automatically with mozillians)
+
 2. Install virtualbox_ by Oracle.
 
    .. note::
@@ -45,7 +47,10 @@ you:
    in your favorite text-editor, yet run Mozillians from our virtualized environment.
 
 5. Setup the database::
-
+    $ ./manage.py update_product_details -f
+    $ mysql -u root
+    > create database mozilians;
+    > exit;
     $ ./manage.py syncdb --noinput
     $ ./manage.py migrate
 
