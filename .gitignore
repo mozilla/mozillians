@@ -25,3 +25,5 @@ settings/*local.py
 directory
 media/uploads
 media/cache
+venv/
+mozillians.db

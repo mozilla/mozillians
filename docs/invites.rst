@@ -6,15 +6,6 @@ Mozillians has an inivitation system that let's vouched users invite others to
 join Mozillians.  These users who join are automatically vouched.
 
 
-The Model
----------
-
-The invite model stores the following:
-
-.. autoclass:: phonebook.models.Invite
-   :members:
-
-
 Inviting en-masse
 -----------------
 
