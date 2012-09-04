@@ -14,13 +14,17 @@ from groups.models import AUTO_COMPLETE_COUNT, Group
 
 class GroupTest(common.tests.TestCase):
     """Test the group/grouping system."""
+
     def setUp(self):
         super(GroupTest, self).setUp()
         self.NORMAL_GROUP = Group.objects.create(name='cheesezilla')
         self.SYSTEM_GROUP = Group.objects.create(name='ghost', system=True)
 
     def test_default_groups(self):
-        """Ensure the user has the proper amount of groups upon creation."""
+        """Ensure the user has the proper amount of groups upon
+        creation.
+
+        """
 
         assert not self.mozillian.get_profile().groups.all(), (
                 'User should have no groups by default.')
@@ -105,7 +109,10 @@ class GroupTest(common.tests.TestCase):
                 "Pending user should be able to edit groups.")
 
     def test_string_split_works_properly(self):
-        """Ensure groups are saved correctly from a comma-delimited string."""
+        """Ensure groups are saved correctly from a comma-delimited
+        string.
+
+        """
         profile = self.pending.get_profile()
         profile.groups.clear()
         assert not profile.groups.all(), (
@@ -148,10 +155,12 @@ class GroupTest(common.tests.TestCase):
                     "None of this user's groups should be system groups.")
 
     def test_users_cant_remove_system_groups(self):
-        """Make sure removing groups in a profile doesn't delete system groups.
+        """Make sure removing groups in a profile doesn't delete
+        system groups.
 
         When a user deletes their (visible) groups in the edit profile page,
         they shouldn't delete any system groups.
+
         """
         profile = self.mozillian.get_profile()
 
@@ -161,9 +170,10 @@ class GroupTest(common.tests.TestCase):
         # Edit this user's profile and remove a group.
         self.client.logout()
         self.client.login(email=self.mozillian.email)
-        response = self.client.post(reverse('profile.edit'),
-                                    dict(last_name="McLovin'", username='fo', groups=''),
-                                    follow=True)
+        response = self.client.post(
+            reverse('profile.edit'),
+            dict(last_name="McLovin'", username='fo', groups=''),
+            follow=True)
 
         doc = pq(response.content)
         assert not doc('#id_groups').attr('value'), (
@@ -176,9 +186,12 @@ class GroupTest(common.tests.TestCase):
     def test_toggle_membership_on_group_page(self):
         """Verify a user can join/leave a group on its page.
 
-        Make sure the Join/Leave Group buttons appear on group listings for
-        authorized users. Make sure system groups cannot be joined via the
-        toggle view and that the buttons don't appear there."""
+        Make sure the Join/Leave Group buttons appear on group
+        listings for authorized users. Make sure system groups cannot
+        be joined via the toggle view and that the buttons don't
+        appear there.
+
+        """
         profile = self.mozillian.get_profile()
 
         self.client.login(email=self.mozillian.email)

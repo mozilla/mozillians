@@ -40,7 +40,9 @@ class Invite(models.Model):
     def send(self, sender=None):
         """Mail this invite to the specified user.
 
-        Includes the name and email of the inviting person, if available.
+        Includes the name and email of the inviting person, if
+        available.
+
         """
         if sender:
             sender = '%s %s (%s)' % (sender.user.first_name,

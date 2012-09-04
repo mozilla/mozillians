@@ -20,15 +20,17 @@ get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 def logout(request, **kwargs):
     """Logout view that wraps Django's logout but always redirects.
 
-    Django's contrib.auth.views logout method renders a template if the
-    `next_page` argument is `None`, which we don't want. This view always
-    returns an HTTP redirect instead.
+    Django's contrib.auth.views logout method renders a template if
+    the `next_page` argument is `None`, which we don't want. This view
+    always returns an HTTP redirect instead.
+
     """
     return auth.views.logout(request, next_page=reverse('home'), **kwargs)
 
 
 class Browserid(Verify):
-    """View for dealing with Browserid callback"""
+    """View for dealing with Browserid callback."""
+
     def handle_user(self, *args):
         pass
 
@@ -52,10 +54,10 @@ class Browserid(Verify):
 
 
 def register(request):
-    """
-    Single-purpose view.
-    Registers Users. Pulls out an invite code if it exists and auto validates
-    the user if so.
+    """Registers Users.
+
+    Pulls out an invite code if it exists and auto validates the user
+    if so. Single-purpose view.
     """
     COUNTRIES = product_details.get_regions(request.locale).items()
     COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])

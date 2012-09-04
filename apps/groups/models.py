@@ -9,17 +9,14 @@ AUTO_COMPLETE_COUNT = 3
 
 
 class GroupBase(models.Model):
-    """
-    Base model for Languages, Skills and Groups
+    """Base model for Languages, Skills and Groups.
 
     Think of tags on a user profile.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
 
-    """
-    If this is true, this Group/Skill/Language will appear in the
-    autocomplete list.
-    """
+    # If this is true, this Group/Skill/Language will appear in the
+    # autocomplete list.
     auto_complete = models.BooleanField(db_index=True, default=False)
     always_auto_complete = models.BooleanField(default=False)
 
@@ -29,14 +26,15 @@ class GroupBase(models.Model):
     @classmethod
     def search(cls, query, auto_complete_only=True):
         if query:
-            return cls.objects.filter(
-                    name__icontains=query,
-                    auto_complete=auto_complete_only
-                )
+            return cls.objects.filter(name__icontains=query,
+                                      auto_complete=auto_complete_only)
         return []
 
     def __unicode__(self):
-        """Return the name of this group, unless it doesn't have one yet."""
+        """Return the name of this group, unless it doesn't have one
+        yet.
+
+        """
         return getattr(self, 'name', u'Unnamed')
 
 
@@ -57,7 +55,7 @@ class Group(GroupBase):
 
     @classmethod
     def get_curated(cls):
-        """Return all the groups with a steward assigned"""
+        """Return all the groups with a steward assigned."""
         return cls.objects.exclude(steward=None).annotate(
             num_users=models.Count('userprofile'))
 
@@ -66,18 +64,18 @@ class Group(GroupBase):
 
 
 class Skill(GroupBase):
-    """
-    Model to hold skill tags
+    """Model to hold skill tags.
 
-    Like groups but without system prefs or pages/urls
+    Like groups but without system prefs or pages/urls.
+
     """
     pass
 
-class Language(GroupBase):
-    """
-    Model to hold languages spoken tags
 
-    Like groups but without system prefs or pages/urls
+class Language(GroupBase):
+    """Model to hold languages spoken tags.
+
+    Like groups but without system prefs or pages/urls.
     """
     pass
 

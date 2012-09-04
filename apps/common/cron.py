@@ -8,12 +8,13 @@ from django.conf import settings
 from django.db import models
 from django.db.models.loading import cache
 
+
 @cronjobs.register
 def find_orphaned_files(path=''):
-    '''
-    Prints a list of all files in the path that are not
-    referenced in the database by all apps
-    '''
+    """Prints a list of all files in the path that are not referenced
+    in the database by all apps.
+
+    """
     if not getattr(settings, 'MEDIA_ROOT', None):
         sys.stdout.write('MEDIA_ROOT is not set, nothing to do')
         return

@@ -7,7 +7,8 @@ from common.tests import TestCase, user
 
 ASSERTION = 'asldkfjasldfka'
 
-@override_settings(AUTHENTICATION_BACKENDS=('common.backends.TestBackend',))
+
+@override_settings(AUTHENTICATION_BACKENDS=['common.backends.TestBackend'])
 class EditProfileTests(TestCase):
 
     def test_geographic_fields_increasing(self):

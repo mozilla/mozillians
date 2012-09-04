@@ -13,9 +13,9 @@ log = commonware.log.getLogger('m.cron')
 
 @cronjobs.register
 def assign_autocomplete_to_groups():
-    """
-    Hourly job to assign autocomplete status to Mozillian popular groups,
-    languages, and skills.
+    """Hourly job to assign autocomplete status to Mozillian popular
+    groups, languages, and skills.
+
     """
     # Only assign status to non-system groups.
     # TODO: add stats.d timer here
@@ -36,9 +36,10 @@ def assign_autocomplete_to_groups():
         g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
 
+
 @cronjobs.register
 def assign_staff_to_early_users():
-    """Add "staff" group to all auto-vouched users."""
+    """Add 'staff' group to all auto-vouched users."""
     staff = Group.objects.get(name='staff')
     staff_users = []
 

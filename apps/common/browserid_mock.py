@@ -5,11 +5,13 @@ from mock import patch
 
 
 class mock_browserid(object):
+    """Mock BrowserID."""
+
     def __init__(self, email=None):
         self.settings_patches = (
             patch.object(
                 settings, 'AUTHENTICATION_BACKENDS',
-                ('common.backends.MozilliansBrowserID',),
+                ['common.backends.MozilliansBrowserID'],
             ),
             patch.object(
                 settings, 'SITE_URL',
@@ -33,6 +35,7 @@ class mock_browserid(object):
         self.patcher.stop()
 
     def __call__(self, func):
+
         @wraps(func)
         def inner(*args, **kwargs):
             with self:

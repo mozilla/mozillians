@@ -11,6 +11,7 @@ from groups.models import AUTO_COMPLETE_COUNT, Language
 
 
 class LanguagesTest(common.tests.TestCase):
+
     def test_autocomplete_api(self):
         self.client.login(email=self.mozillian.email)
 
