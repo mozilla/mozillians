@@ -31,30 +31,23 @@ def search_result(context, profile):
     return d
 
 
-def gravatar(
-            email,
-            default='%simg/unknown.png' % (settings.MEDIA_URL),
-            size=175,
-            rating='pg'):
+def gravatar(email, default='%simg/unknown.png' % (settings.MEDIA_URL),
+             size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
 
     return 'http://www.gravatar.com/avatar/%s?%s' % (
             hashlib.md5(email.lower()).hexdigest(),
-            urllib.urlencode({
-                'd': absolutify(default),
-                's': str(size),
-                'r': rating,
-            })
-    )
+            urllib.urlencode({'d': absolutify(default),
+                              's': str(size),
+                              'r': rating}))
 
 
 @register.function
 def bootstrap(element):
-    """
-    Renders bootstrap forms in jinja2.
+    """Renders bootstrap forms in jinja2.
 
-    Takes an element that is either a field or an entire form and renders
-    the appropriate bootstrap elements
+    Takes an element that is either a field or an entire form and
+    renders the appropriate bootstrap elements.
     """
     element_type = element.__class__.__name__.lower()
     if element_type == 'boundfield':

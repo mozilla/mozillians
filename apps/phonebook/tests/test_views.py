@@ -16,25 +16,27 @@ from funfactory.urlresolvers import set_url_prefix, reverse
 class TestDeleteUser(TestCase):
     """Separate test class used to test account deletion flow.
 
-    We create a separate class to delete a user because other tests depend
-    on Mozillian users existing.
+    We create a separate class to delete a user because other tests
+    depend on Mozillian users existing.
     """
 
     def test_confirm_delete(self):
         """Test the account deletion flow, including confirmation.
 
-        A user should not be presented with a form/link that allows them to
-        delete their account without a confirmation page. Once they access that
-        page, they should be presented with a link to "go back" to their
-        profile or to permanently delete their account.
+        A user should not be presented with a form/link that allows
+        them to delete their account without a confirmation page. Once
+        they access that page, they should be presented with a link to
+        'go back' to their profile or to permanently delete their
+        account.
 
-        This test is abstracted away to a generic user deletion flow so
-        we can test both non-vouched and vouched user's ability to delete
-        their own profile.
+        This test is abstracted away to a generic user deletion flow
+        so we can test both non-vouched and vouched user's ability to
+        delete their own profile.
+
         """
 
-        for user in [self.mozillian, self.pending]:
-            self._delete_flow(user)
+        for _user in [self.mozillian, self.pending]:
+            self._delete_flow(_user)
 
         pass
 
@@ -76,6 +78,7 @@ class TestDeleteUser(TestCase):
 
 
 class TestViews(TestCase):
+
     def test_anonymous_home(self):
         r = self.client.get('/', follow=True)
         self.assertEquals(200, r.status_code)
@@ -115,13 +118,13 @@ class TestViews(TestCase):
         eq_(r.context.get('people', []), [])
 
     def test_mozillian_sees_mozillian_profile(self):
-        user = User.objects.create(
-                username='other', email='whatever@whatver.man')
+        _user = User.objects.create(username='other',
+                                    email='whatever@whatver.man')
 
         url = reverse('profile', args=['other'])
         r = self.mozillian_client.get(url)
         eq_(r.status_code, 200)
-        eq_(r.context['profile'].user, user)
+        eq_(r.context['profile'].user, _user)
 
     def test_pending_edit_profile(self):
         # do all then reset
@@ -145,8 +148,8 @@ class TestViews(TestCase):
         r = newbie_client.get(profile_url)
         newbie = r.context['profile']
         self.assertNotEqual(first, newbie.user.first_name)
-        self.assertNotEqual(last,  newbie.user.last_name)
-        self.assertNotEqual(bio,   newbie.bio)
+        self.assertNotEqual(last, newbie.user.last_name)
+        self.assertNotEqual(bio, newbie.bio)
 
         dn = "%s %s" % (newbie.user.first_name, newbie.user.last_name)
         eq_(dn, newbie.display_name, 'Editing should update display name')
@@ -160,14 +163,14 @@ class TestViews(TestCase):
     def test_profile_photo(self):
         """Make sure profile photo uploads and removals work.
 
-        Test the upload, encoding, and removal of photo profiles. Also make
-        sure edge cases (from naughty user input) and HTML elements work
-        properly.
+        Test the upload, encoding, and removal of photo profiles. Also
+        make sure edge cases (from naughty user input) and HTML
+        elements work properly.
 
         .. note::
 
-           This does not test that the web server is serving the files from
-           the filesystem properly.
+           This does not test that the web server is serving the files
+           from the filesystem properly.
         """
         client = self.mozillian_client
 
@@ -210,8 +213,8 @@ class TestViews(TestCase):
         """This will assert that a user is in a proper no userpic state.
 
         This means:
-            * Linking to ``unknown.jpg``.
-            * No "Remove Profile Photo" link.
+            * Linking to 'unknown.jpg'.
+            * No 'Remove Profile Photo' link.
             * No file on the file system.
         """
         r = client.get(reverse('profile.edit'))
@@ -243,7 +246,7 @@ class TestViews(TestCase):
         doc = pq(r.content)
 
         assert not doc('#dd.website'), (
-                "No website info appears on the user's profile.")
+                'No website info appears on the user\'s profile.')
 
         # Add a URL sans protocol.
         r = client.post(reverse('profile.edit'),
@@ -310,9 +313,9 @@ class TestViews(TestCase):
         new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
 
-    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
+    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_api_key(self):
-        """Assert that the Api key will be created and displayed"""
+        """Assert that the Api key will be created and displayed."""
         u = user(email='test@example.com')
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile.edit'), follow=True)
@@ -324,7 +327,7 @@ class TestViews(TestCase):
         p = u.get_profile()
         assert p.get_api_key() == api_key
 
-    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
+    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_non_vouched_api_key(self):
         """Assert that non-vouched users don't have an API key."""
         u = user(email='test@another.com', is_vouched=False)
@@ -335,9 +338,9 @@ class TestViews(TestCase):
         doc = pq(r.content)
         eq_(0, len(doc('#api-key')))
 
-    @override_settings(AUTO_VOUCH_DOMAINS=('example.com',))
+    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_reset_api_key(self):
-        """Assert that resetingthe aPI key changes it."""
+        """Assert that resetting the API key changes it."""
         u = user(email='test@example.com')
         assert self.client.login(email=u.email)
         r = self.client.get(reverse('profile.edit'), follow=True)
@@ -355,11 +358,11 @@ class TestViews(TestCase):
 
 
 class TestVouch(TestCase):
+    """This is implemented as its own class so that we can avoid
+    mucking up the included users.
+
     """
-    This is implemented as its own class
-    so that we can avoid mucking up the included
-    users
-    """
+
     def test_mozillian_can_vouch(self):
         """
         Tests the vouching system's happy path.
@@ -391,7 +394,8 @@ class TestVouch(TestCase):
 
 
 class TestOpensearchViews(test_utils.TestCase):
-    """Tests for the OpenSearch plugin, accessible to anonymous visitors"""
+    """Tests for the OpenSearch plugin, accessible to anonymous visitors."""
+
     def test_search_plugin(self):
         """The plugin loads with the correct mimetype."""
         response = self.client.get(reverse('search_plugin'))
@@ -400,7 +404,7 @@ class TestOpensearchViews(test_utils.TestCase):
         eq_('application/opensearchdescription+xml', response['content-type'])
 
     def test_localized_search_plugin(self):
-        """Every locale gets its own plugin!"""
+        """Every locale gets its own plugin."""
         response = self.client.get(reverse('search_plugin'))
         assert '/en-US/search' in response.content
 

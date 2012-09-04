@@ -1,5 +1,3 @@
-from django.contrib.auth.models import User
-
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -7,7 +5,7 @@ from pyquery import PyQuery as pq
 from common.tests import ESTestCase
 from phonebook.tests import user, create_client
 from users.models import UserProfile
-from groups.models import Group, AUTO_COMPLETE_COUNT
+from groups.models import Group
 
 
 class TestSearch(ESTestCase):
@@ -24,11 +22,9 @@ class TestSearch(ESTestCase):
 
         url = reverse('search')
         r = self.mozillian_client.get(url, {'q': 'am'})
-        rs = self.mozillian_client.get(url, {'q': 'am'})
 
         eq_(r.status_code, 200)
         peeps = r.context['people']
-        peeps_ws = rs.context['people']
         saw_amanda = saw_amandeep = False
 
         for person in peeps:
@@ -48,7 +44,10 @@ class TestSearch(ESTestCase):
         self.assertNotContains(r, 'bread')
 
     def test_nonvouched_search(self):
-        """Make sure that only non vouched users are returned on search."""
+        """Make sure that only non vouched users are returned on
+        search.
+
+        """
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
 
@@ -142,11 +141,11 @@ class TestSearch(ESTestCase):
         self.assertEqual(len(peeps), 2)
 
     def test_empty_query_search(self):
-        """Make sure the search method works with an empty query"""
+        """Make sure the search method works with an empty query."""
         assert UserProfile.search('').count()
 
     def test_proper_url_arg_handling(self):
-        """Make sure URL arguments are handled correctly"""
+        """Make sure URL arguments are handled correctly."""
         # Create a new unvouched user to ensure results show up in search view
         user()
 
@@ -160,8 +159,9 @@ class TestSearch(ESTestCase):
         assert pq(r.content)('.result')
 
     def test_single_result(self):
-        """Makes sure the client is redirected to the users page
-        if they are the only result returned by the query.
+        """Makes sure the client is redirected to the users page if
+        they are the only result returned by the query.
+
         """
         u = user(first_name='Findme', last_name='Ifyoucan')
 

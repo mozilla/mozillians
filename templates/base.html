@@ -54,7 +54,7 @@
                 </li>
                 </ul>
             {% endblock %}
-	       {% endif %}
+          {% endif %}
           <ul class="nav pull-right">
             {% if user.is_authenticated() and user.userprofile.is_complete() %}
               <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
@@ -168,9 +168,11 @@
   </footer>
 
 {# To add browserid Login to something add the class .browser_id_login to an element #}
-<form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">{{ csrf() }}
-  {{ browserid_form.as_p() }}
+<form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
+  {{ csrf() }}
+  {{ browserid_form }}
 </form>
+
 {% block site_js %}
   <script src="{{ url('jsi18n') }}"></script>
   {{ js('common') }}

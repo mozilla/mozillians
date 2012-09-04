@@ -109,7 +109,7 @@ class UserProfile(SearchMixin, models.Model):
         self.save()
 
     def set_membership(self, model, membership_list):
-        """ Alters membership to Groups, Skills and Languages """
+        """Alters membership to Groups, Skills and Languages."""
         if model is Group:
             m2mfield = self.groups
         elif model is Skill:
@@ -133,9 +133,9 @@ class UserProfile(SearchMixin, models.Model):
         m2mfield.add(*groups_to_add)
 
     def is_complete(self):
-        """
-        Tests if a user has all the information needed to move on past the
-        original registration view
+        """Tests if a user has all the information needed to move on
+        past the original registration view.
+
         """
         return self.display_name and self.display_name != ' '
 
@@ -186,7 +186,8 @@ class UserProfile(SearchMixin, models.Model):
         # Index groups, skills, and languages ... for fun.
         d.update(dict(groups=list(self.groups.values_list('name', flat=True))))
         d.update(dict(skills=list(self.skills.values_list('name', flat=True))))
-        d.update(dict(languages=list(self.languages.values_list('name', flat=True))))
+        d.update(dict(languages=list(
+            self.languages.values_list('name', flat=True))))
         return d
 
     @classmethod
@@ -195,8 +196,9 @@ class UserProfile(SearchMixin, models.Model):
         query = query.lower().strip()
         fields = ('first_name__text', 'last_name__text', 'display_name__text',
                   'username__text', 'bio__text', 'website__text',
-                  'email__text', 'groups__text', 'skills__text', 'languages__text',
-                  'first_name__startswith', 'last_name__startswith', 'ircname')
+                  'email__text', 'groups__text', 'skills__text',
+                  'languages__text', 'first_name__startswith',
+                  'last_name__startswith', 'ircname')
         if query:
             q = dict((field, query) for field in fields)
             s = S(cls).query(or_=q)

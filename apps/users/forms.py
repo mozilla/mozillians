@@ -1,8 +1,6 @@
 import re
 
 from django import forms
-from django.forms.fields import MultipleChoiceField
-from django.forms.widgets import CheckboxSelectMultiple
 
 from tower import ugettext as _, ugettext_lazy as _lazy
 
@@ -10,26 +8,25 @@ from users.models import UserProfile
 from phonebook.forms import UserForm
 
 from groups.models import Group, Skill, Language
-from groups.helpers import stringify_groups
 
 
 class RegistrationForm(UserForm):
     username = forms.CharField(
-                label=_lazy(u'Username'), max_length=30, required=False,
-                widget=forms.TextInput(attrs={'placeholder': 'Example: IRC Nickname'}))
-
-    groups = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple, label=_lazy(
-             u'Do you know which functional areas you would like to help or already helping? '
-             'Choose from the ones below to get started.'), queryset=Group.get_curated(),
-             required=False)
-    skills = forms.CharField(label=_lazy(
-             u'Enter your skills (e.g. Python, Photoshop'
-             ') below:'), required=False)
-    languages = forms.CharField(label=_lazy(
-                u'Mozillians speak many languages (e.g. English, French). Find and be '
-                'found by others who speak the same languages as you.'), required=False)
-
-
+        label=_lazy(u'Username'), max_length=30, required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Example: IRC Nickname'}))
+    groups = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple,
+        label=_lazy(u'Do you know which functional areas you would like '
+                    'to help or already helping? Choose from the ones '
+                    'below to get started.'),
+        queryset=Group.get_curated(), required=False)
+    skills = forms.CharField(
+        label=_lazy(u'Enter your skills (e.g. Python, Photoshop'
+                    ') below:'), required=False)
+    languages = forms.CharField(
+        label=_lazy(u'Mozillians speak many languages (e.g. English, French). '
+                    'Find and be found by others who speak the same '
+                    'languages as you.'), required=False)
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
                         u'explain in your privacy policy.'),
@@ -40,9 +37,7 @@ class RegistrationForm(UserForm):
         model = UserProfile
         fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
                   'city')
-        widgets = {
-            'bio': forms.Textarea()
-        }
+        widgets = {'bio': forms.Textarea()}
 
     def clean_skills(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
@@ -54,7 +49,8 @@ class RegistrationForm(UserForm):
                 if s and ',' not in s]
 
     def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['languages']):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
+                        self.cleaned_data['languages']):
             raise forms.ValidationError(_(u'Languages can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))

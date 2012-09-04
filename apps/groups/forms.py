@@ -9,6 +9,7 @@ from .models import Group
 
 
 class GroupWidget(forms.TextInput):
+
     def render(self, name, value, attrs=None):
         if not (value is None or isinstance(value, basestring)):
             value = stringify_groups(Group.objects.get(pk=v) for v in value)
@@ -20,7 +21,10 @@ class GroupField(forms.CharField):
     widget = GroupWidget
 
     def clean(self, value):
-        """Groups are saved in lowercase because it's easy and consistent."""
+        """Groups are saved in lowercase because it's easy and
+        consistent.
+
+        """
         value = super(GroupField, self).clean(value)
 
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', value):

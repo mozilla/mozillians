@@ -6,6 +6,7 @@ from common.tests import TestCase, user
 
 
 class ModelForms(TestCase):
+
     def test_edit_unavailable_form_field(self):
         newbie_client = self.pending_client
         newbie = self.pending
