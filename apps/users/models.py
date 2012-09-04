@@ -17,7 +17,6 @@ from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
 from sorl.thumbnail import ImageField
-from tastypie.models import ApiKey
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from apps.groups.models import Group, Skill, Language
@@ -68,6 +67,17 @@ class UserProfile(models.Model, SearchMixin):
                               verbose_name=_lazy(u'Province/State'))
     city = models.CharField(max_length=255, default='', blank=True,
                             verbose_name=_lazy(u'City'))
+
+    # Privacy Settings
+    allows_community_sites = models.BooleanField(
+        default=True,
+        verbose_name=_lazy(u'Sites that can determine my vouched status'),
+        choices=((True, _lazy(u'All Community Sites')),
+                 (False, _lazy(u'Only Mozilla Properties'))))
+    allows_mozilla_sites = models.BooleanField(
+        default=True,
+        verbose_name=_lazy(u'Mozilla sites can access all my Phonebook data.'),
+        choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
 
     @property
     def full_name(self):
@@ -168,10 +178,6 @@ class UserProfile(models.Model, SearchMixin):
             # Email the user and tell them they were vouched.
             self._email_now_vouched()
 
-    def get_api_key(self):
-        api_key, created = ApiKey.objects.get_or_create(user=self.user)
-        return api_key.key
-
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
@@ -190,7 +196,8 @@ class UserProfile(models.Model, SearchMixin):
         d = {}
 
         attrs = ('id', 'is_vouched', 'website', 'ircname', 'country',
-                 'region', 'city')
+                 'region', 'city', 'allows_mozilla_sites',
+                 'allows_community_sites')
         for a in attrs:
             data = getattr(obj, a)
             if isinstance(data, basestring):
@@ -241,6 +248,8 @@ class UserProfile(models.Model, SearchMixin):
                 'bio': {'type': 'string', 'analyzer': 'snowball'},
 
                 'is_vouched': {'type': 'boolean'},
+                'allows_mozilla_sites': {'type': 'boolean'},
+                'allows_community_sites': {'type': 'boolean'},
                 'photo': {'type': 'boolean'},
 
                 # The website also shouldn't be analyzed.

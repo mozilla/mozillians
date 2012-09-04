@@ -13,8 +13,6 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 from product_details import product_details
-from funfactory.helpers import urlparams
-from tastypie.models import ApiKey
 from tower import ugettext as _
 
 from apps.groups.helpers import stringify_groups
@@ -92,14 +90,6 @@ def edit_profile(request):
                 instance=profile,
         )
         form.fields['region'].choices = COUNTRIES
-
-        if 'reset_api_key' in request.POST:
-            # The rest of the form is irrelevant.
-            try:
-                request.user.api_key.delete()
-            except ApiKey.DoesNotExist:
-                pass
-            return redirect(urlparams(reverse('profile.edit'), 'services'))
 
         if form.is_valid():
             old_username = request.user.username

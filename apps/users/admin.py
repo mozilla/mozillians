@@ -9,7 +9,8 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
     """UserProfile Admin."""
     fields = ['user', 'user_email', 'display_name', 'photo', 'ircname',
               'is_vouched', 'vouched_by', 'bio', 'website', 'groups', 'skills',
-              'languages', 'country', 'region', 'city']
+              'languages', 'country', 'region', 'city',
+              'allows_mozilla_sites', 'allows_community_sites']
     list_display = ['display_name', 'user_email', 'user_username', 'country',
                     'is_vouched', 'vouched_by']
     list_display_links = ['display_name', 'user_email', 'user_username']

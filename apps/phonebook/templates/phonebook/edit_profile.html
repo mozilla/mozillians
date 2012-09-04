@@ -178,6 +178,11 @@
                   and the <a href="http://reps.mozilla.org">Mozilla Reps Portal</a>.
                 {% endtrans %}
               </p>
+              <h2>{{ _("Privacy Settings") }}</h2>
+              <p class="field_description">
+                {{ bootstrap(form.allows_community_sites) }}
+                {{ bootstrap(form.allows_mozilla_sites) }}
+              </p>
               <h2>{{ _("Developers") }}</h2>
               <p class="field_description">
                 {% trans %}
@@ -188,17 +193,6 @@
                 development forum</a>.
                 {% endtrans %}
               </p>
-              <label class="control-label">{{ _("Api Key") }}</label>
-              <div class="controls">
-                <span class="label-text">
-                  <div class="input-append">
-                    <input id="api-key" type="text" class="span4" autocomplete="off" data-value="{{ profile.get_api_key() }}" value="{{ profile.get_api_key() }}">
-                    <button type="submit" name="reset_api_key" class="btn btn-mini btn-danger">
-                      {{ _("Generate new API Key") }}
-                    </button>
-                  </div>
-                </span>
-              </div>
             </div>
           </div>
         {% endif %}

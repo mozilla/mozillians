@@ -5,41 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    """Convert countries from two letter representation to full name.
 
-    Do the update using SQL Queries and not through the ORM to
-    prevent issues with newer versions of the UserProfile model.
-    Create the query in a string first, as South freaks out when
-    you have %s in your query.
-
-    """
     def forwards(self, orm):
-        # Translate country code to full country names
-        from product_details import product_details
-        from ..models import UserProfile
-        COUNTRIES = product_details.get_regions('en-US')
 
-        for id, country in UserProfile.objects.values_list('id', 'country'):
-            if country:
-                country = COUNTRIES.get(country)
-                query = ("UPDATE profile SET country = '%s' WHERE id = %d" %
-                         (country, id))
-                db.execute(query)
+        # Adding field 'UserProfile.allows_community_sites'
+        db.add_column('profile', 'allows_community_sites', self.gf('django.db.models.fields.BooleanField')(default=True), keep_default=False)
+
+        # Adding field 'UserProfile.allows_mozilla_sites'
+        db.add_column('profile', 'allows_mozilla_sites', self.gf('django.db.models.fields.BooleanField')(default=True), keep_default=False)
+
 
     def backwards(self, orm):
-        from product_details import product_details
-        COUNTRIES = product_details.get_regions('en-US')
 
-        # Reverse dictionary mapping
-        COUNTRIES = dict((v,k) for k, v in COUNTRIES.iteritems())
+        # Deleting field 'UserProfile.allows_community_sites'
+        db.delete_column('profile', 'allows_community_sites')
 
-        from apps.users.models import UserProfile
-        for id, country in UserProfile.objects.values_list('id', 'country'):
-            if country:
-                country = COUNTRIES.get(country)
-                query = ("UPDATE profile SET country = '%s' WHERE id = %d" %
-                         (country, id))
-                db.execute(query)
+        # Deleting field 'UserProfile.allows_mozilla_sites'
+        db.delete_column('profile', 'allows_mozilla_sites')
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -56,7 +40,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 10, 25, 4, 3, 36, 467048)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -64,7 +48,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 10, 25, 4, 3, 36, 466963)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -104,6 +88,12 @@ class Migration(SchemaMigration):
             'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'})
+        },
+        'users.usernameblacklist': {
+            'Meta': {'ordering': "['value']", 'object_name': 'UsernameBlacklist'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_regex': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'value': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
         'users.userprofile': {
             'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},

@@ -52,10 +52,9 @@ you:
 5. Setup the database::
     $ ./manage.py update_product_details -f
     $ mysql -u root
-    > create database mozilians;
+    > create database mozilians character set utf8;
     > exit;
     $ ./manage.py syncdb --noinput
-    $ ./manage.py migrate
 
 6. Run the development web server (in the virtualized environment)::
 

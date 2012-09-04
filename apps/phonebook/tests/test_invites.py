@@ -5,13 +5,13 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-import common.tests
-from common.browserid_mock import mock_browserid
+import apps.common.tests
+from apps.common.browserid_mock import mock_browserid
 
 from ..models import Invite
 
 
-class InviteFlowTest(common.tests.ESTestCase):
+class InviteFlowTest(apps.common.tests.ESTestCase):
     fake_email = 'mr.fusion@gmail.com'
     fake_email2 = 'mrs.fusion@gmail.com'
 
@@ -117,7 +117,7 @@ class InviteFlowTest(common.tests.ESTestCase):
             False)
 
 
-class InviteEdgeTest(common.tests.ESTestCase):
+class InviteEdgeTest(apps.common.tests.ESTestCase):
 
     def test_no_reinvite(self):
         """Don't reinvite a vouched user."""

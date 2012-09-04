@@ -3,12 +3,11 @@ from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 from apps.common.tests import ESTestCase
-from apps.phonebook.tests import user, create_client
 from apps.users.models import UserProfile
 from apps.groups.models import Group
 
-
 from ..tests import user, create_client
+
 
 class TestSearch(ESTestCase):
 

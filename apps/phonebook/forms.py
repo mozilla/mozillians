@@ -120,7 +120,7 @@ class ProfileForm(UserForm):
         # Model form stuff
         model = UserProfile
         fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
-                  'city')
+                  'city', 'allows_community_sites', 'allows_mozilla_sites')
         widgets = {'bio': forms.Textarea()}
 
     def clean_groups(self):
