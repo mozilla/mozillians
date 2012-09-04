@@ -5,11 +5,11 @@ from django import test
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
+from funfactory.urlresolvers import set_url_prefix, reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import ESTestCase, user
-from funfactory.urlresolvers import set_url_prefix, reverse
+from apps.common.tests import ESTestCase, user
 
 
 class TestDeleteUser(ESTestCase):

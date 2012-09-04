@@ -1,7 +1,7 @@
+from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
-from common.tests import ESTestCase
-from funfactory.urlresolvers import reverse
+from apps.common.tests import ESTestCase
 
 
 class TrailingSlashMiddlewareTestCase(ESTestCase):

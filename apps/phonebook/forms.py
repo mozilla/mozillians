@@ -6,11 +6,11 @@ from django.utils.safestring import mark_safe
 import happyforms
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from phonebook.models import Invite
-from groups.models import Group, Skill, Language
-from users.helpers import validate_username
-from users.models import User, UserProfile
+from apps.groups.models import Group, Skill, Language
+from apps.users.helpers import validate_username
+from apps.users.models import User, UserProfile
 
+from models import Invite
 
 PAGINATION_LIMIT = 20
 

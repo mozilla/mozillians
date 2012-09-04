@@ -2,7 +2,7 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import ESTestCase, user
+from apps.common.tests import ESTestCase, user
 
 
 class ModelForms(ESTestCase):

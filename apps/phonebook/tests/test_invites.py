@@ -1,13 +1,14 @@
 from django.contrib.auth.models import User
 from django.core import mail
 
+from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.browserid_mock import mock_browserid
 import common.tests
-from funfactory.urlresolvers import reverse
-from phonebook.models import Invite
+from common.browserid_mock import mock_browserid
+
+from ..models import Invite
 
 
 class InviteFlowTest(common.tests.ESTestCase):

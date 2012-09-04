@@ -3,8 +3,8 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 admin.autodiscover()
 
-from . import views
-from groups.models import Group, Skill, Language
+import views
+from models import Group, Skill, Language
 
 urlpatterns = patterns('',
     url('^groups$', views.index, name='group_index'),

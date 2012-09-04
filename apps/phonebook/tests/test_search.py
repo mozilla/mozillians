@@ -2,11 +2,13 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import ESTestCase
-from phonebook.tests import user, create_client
-from users.models import UserProfile
-from groups.models import Group
+from apps.common.tests import ESTestCase
+from apps.phonebook.tests import user, create_client
+from apps.users.models import UserProfile
+from apps.groups.models import Group
 
+
+from ..tests import user, create_client
 
 class TestSearch(ESTestCase):
 

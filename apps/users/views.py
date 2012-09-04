@@ -9,9 +9,10 @@ from product_details import product_details
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
-from phonebook.models import Invite
-from users import forms
-from users.models import UserProfile
+from apps.phonebook.models import Invite
+
+import forms
+from models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)

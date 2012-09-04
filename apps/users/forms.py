@@ -7,7 +7,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from users.models import UserProfile
 from phonebook.forms import UserForm
 
-from groups.models import Group, Skill, Language
+from apps.groups.models import Group, Skill, Language
 
 
 class RegistrationForm(UserForm):

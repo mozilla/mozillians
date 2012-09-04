@@ -13,7 +13,6 @@ from django.dispatch import receiver
 from elasticutils.contrib.django import S
 from elasticutils.contrib.django.models import SearchMixin
 from elasticutils.contrib.django import tasks
-
 from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
@@ -21,8 +20,8 @@ from sorl.thumbnail import ImageField
 from tastypie.models import ApiKey
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from groups.models import Group, Skill, Language
-from phonebook.helpers import gravatar
+from apps.groups.models import Group, Skill, Language
+from apps.phonebook.helpers import gravatar
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage

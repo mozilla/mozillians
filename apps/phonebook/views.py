@@ -17,11 +17,13 @@ from funfactory.helpers import urlparams
 from tastypie.models import ApiKey
 from tower import ugettext as _
 
-from groups.helpers import stringify_groups
-from groups.models import Group
-from phonebook import forms
-from phonebook.models import Invite
-from users.models import UserProfile
+from apps.groups.helpers import stringify_groups
+from apps.groups.models import Group
+from apps.users.models import UserProfile
+
+import forms
+from models import Invite
+
 
 log = commonware.log.getLogger('m.phonebook')
 

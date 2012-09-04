@@ -4,8 +4,8 @@ from django import forms
 
 from tower import ugettext_lazy as _
 
-from .helpers import stringify_groups
-from .models import Group
+from helpers import stringify_groups
+from models import Group
 
 
 class GroupWidget(forms.TextInput):
