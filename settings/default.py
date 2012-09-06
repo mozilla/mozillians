@@ -108,6 +108,7 @@ MINIFY_BUNDLES = {
         ),
         'register': (
             'js/libs/tag-it/js/tag-it.js',
+            'js/register.js',
         ),
         'search': (
             'js/libs/jquery.endless-scroll.js',

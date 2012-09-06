@@ -94,7 +94,7 @@ def register(request):
             auth.login(request, user)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
-            return redirect('home')
+            return redirect(reverse('profile', args=[request.user.username]))
 
     # 'user' object must be passed in because we are not logged in
     return render(request, 'registration/register.html',

@@ -35,7 +35,7 @@
       <ul class="nav nav-pills">
         <li class="active"><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
         <li><a href="#skills" id="2" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
-        <li><a href="#finish" id="3" data-toggle="tab">{{ _('Location & Finish') }}</a></li>
+        <li><a href="#location" id="3" data-toggle="tab">{{ _('Location') }}</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="start">
@@ -45,7 +45,7 @@
           {{ bootstrap(form.ircname) }}
           {{ bootstrap(form.website) }}
           {{ bootstrap(form.bio) }}
-          <button type="button" class="span2 btn btn-primary" onclick="document.getElementById('2').click()">Next</button>
+          <button type="button" id="page2button" class="span2 btn btn-primary">{{ _('Next') }}</button>
         </div>
         <div class="tab-pane" id="skills">
           <h2>{{ _('Skills & Groups') }}</h2>
@@ -59,10 +59,10 @@
             {{ form.languages.label_tag() }}
             {{ form.languages }}
           </div>
-          <button type="button" class="span2 btn btn-primary" onclick="document.getElementById('3').click()">Next</button>
-          <button type="button" class="span2 btn" onclick="document.getElementById('1').click()">Previous</button>
+          <button type="button" id="page3button" class="span2 btn btn-primary">{{ _('Next') }}</button>
+          <button type="button" id="page1button" class="span2 btn">{{ _('Previous') }}</button>
         </div>
-        <div class="tab-pane" id="finish">
+        <div class="tab-pane" id="location">
           <h2>{{ _('Location') }}</h2>
           <p>
             {% trans %}
@@ -76,6 +76,7 @@
           {{ bootstrap(form.optin) }}
           <div id="edit_controls">
             <button type="submit" class="span2 btn btn-primary">{{ _('Create Profile') }}</button>
+            <button type="submit" class="span2 btn-large btn-primary">{{ _('Create Profile') }}</button>
           </div>
         </div>
       </div>
