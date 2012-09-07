@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url('^opensearch.xml$', views.search_plugin, name='search_plugin'),
     url('^search$', views.search, name='search'),
     url('^vouch$', views.vouch, name='vouch'),
-
+    url('^mozcamp$', views.keynote, name='keynote'),
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
 

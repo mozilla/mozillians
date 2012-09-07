@@ -8,7 +8,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import cache_page, never_cache
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -255,3 +255,8 @@ def vouch(request):
         return redirect(reverse('profile', args=[p.user.username]))
 
     return HttpResponseForbidden
+
+@require_GET
+@vouch_required
+def keynote(request):
+    return render(request, 'phonebook/keynote.html')
