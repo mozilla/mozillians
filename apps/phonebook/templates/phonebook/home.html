@@ -11,7 +11,7 @@
 
 
 {% block main_content %}
-  {% if not user.is_authenticated() %}
+  {% if user.is_anonymous() or not user.get_profile().is_vouched %}
     <div class="welcome">
       <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
       {% trans %}
@@ -26,18 +26,27 @@
         {% endtrans %}
       </p>
 
-      <p>
-        <button id="create_profile" class="browser_id_login">
-          <span class="id">
-            <span class="bid">{{ _('ID') }}</span><span class="arrow"></span>
-          </span>
-          <span class="signin">{{ _('Sign In with BrowserID') }}</span>
-        </button>
-        <br>
-        <a href="http://identity.mozilla.com/post/12950196039/deploying-browserid-at-mozilla">
-          {{ _('What is BrowserID? Why are we using it?') }}
-        </a>
-      </p>
+      {% if not user.is_authenticated() %}
+        <p>
+          <button id="create_profile" class="browser_id_login">
+            <span class="id">
+              <span class="bid">{{ _('ID') }}</span><span class="arrow"></span>
+            </span>
+            <span class="signin">{{ _('Sign In with BrowserID') }}</span>
+          </button>
+          <br>
+          <a href="http://identity.mozilla.com/post/12950196039/deploying-browserid-at-mozilla">
+            {{ _('What is BrowserID? Why are we using it?') }}
+          </a>
+        </p>
+      {% elif not user.get_profile().is_vouched %}
+        <p>
+          {% trans %}
+            You need to be vouched by a core or active contributor in the Mozilla community.
+            To do this, find ways to <a href="http://mozilla.org/contribute">get involved</a>.
+          {% endtrans %}
+        </p>
+      {% endif %}
     </div>
   {% elif user.get_profile().is_vouched %}
     <h1>Welcome to Mozillians!</h1>
@@ -82,37 +91,6 @@
           {{ _('Learn more about the Phonebook and why its built') }}
         </li>
       </ul>
-    </div>
-  {% elif not user.get_profile().is_vouched %}
-    {% trans profile=url('profile', user.username) %}
-      <h1> Welcome </h1>
-      Your Non-Vouched account has been created!
-      <a href="http://mozilla.org/contribute">Get involved</a> to
-      <a href="{{ profile }}">get vouched.</a> Below is info that can help you get involved in
-      your selected groups.
-    {% endtrans %}
-    <div class="row">
-      {% for group in groups %}
-        <div class="span6" id="home-group">
-          <h2>{{ group.name }}</h2>
-	  <dl>
-            <dt>{{ _('Steward') }}</dt>
-            <dd>{{ group.steward.display_name }}</dd>
-            {% if group.website %}
-              <dt>{{ _('Website') }}</dt>
-              <dd>{{ group.website|urlize }}</dd>
-            {% endif %}
-            {% if group.wiki %}
-              <dt>{{ _('Wiki') }}</dt>
-              <dd> {{ group.wiki|urlize }}</dd>
-            {% endif %}
-            {% if group.irc_channel %}
-              <dt>{{ _('IRC') }}</dt>
-              <dd>{{ group.irc_channel }}</dd>
-            {% endif %}
-          </dl>
-        </div>
-      {% endfor %}
     </div>
   {% endif %}
 {% endblock main_content %}
