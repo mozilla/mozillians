@@ -39,8 +39,8 @@ class RegistrationTest(TestCase):
         assert r.context['user'].get_profile().is_vouched, (
                 "Moz.com should be auto-vouched")
 
-        assert doc('#home-options'), (
-                'Vouched Mozillian home page view should be seen.')
+        assert not doc('#pending-approval'), (
+                'Moz.com profile page should not having pending vouch div.')
 
         assert r.context['user'].get_profile().groups.filter(name='staff'), (
                 'Moz.com should belong to the "staff" group.')
