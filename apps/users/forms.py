@@ -16,9 +16,8 @@ class RegistrationForm(UserForm):
         widget=forms.TextInput(attrs={'placeholder': 'Example: IRC Nickname'}))
     groups = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
-        label=_lazy(u'Do you know which functional areas you would like '
-                    'to help or already helping? Choose from the ones '
-                    'below to get started.'),
+        label=_lazy(u'Please indicate the functional areas you are currently '
+                    'contributing to or would like to contribute to:'),
         queryset=Group.get_curated(), required=False)
     skills = forms.CharField(
         label=_lazy(u'Enter your skills (e.g. Python, Photoshop'
@@ -29,7 +28,7 @@ class RegistrationForm(UserForm):
                     'languages as you.'), required=False)
     optin = forms.BooleanField(
             label=_lazy(u"I'm okay with you handling this info as you "
-                        u'explain in your privacy policy.'),
+                        u"explain in Mozilla's privacy policy."),
             widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
             required=True)
 
