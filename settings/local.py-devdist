@@ -12,19 +12,12 @@ SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mozillians',
-        'USER': 'root',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mozillians.db',
+        'USER': '',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
-        'OPTIONS': {
-            'init_command': 'SET storage_engine=InnoDB',
-            'charset': 'utf8',
-            'use_unicode': True,
-        },
-        'TEST_CHARSET': 'utf8',
-        'TEST_COLLATION': 'utf8_general_ci',
     },
 }
 
@@ -52,8 +45,18 @@ DEBUG = TEMPLATE_DEBUG = True
 ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians_dev')
+ES_TIMEOUT = 60
 
 CELERY_ALWAYS_EAGER = True
 
 JAVA_BIN = '/usr/bin/java'
+
+SESSION_COOKIE_SECURE = False
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-pastry-chef'
+        }
+}
 
