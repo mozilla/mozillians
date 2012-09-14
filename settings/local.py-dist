@@ -3,8 +3,8 @@
 
 from settings import *
 
-# For absoluate urls
-DOMAIN = "localhost"
+# For absolute urls
+DOMAIN = "127.0.0.1"
 PROTOCOL = "http://"
 PORT = 8000
 
