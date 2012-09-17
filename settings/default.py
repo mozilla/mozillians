@@ -240,10 +240,10 @@ ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians')
 
 # Use this to reserve the URL namespace
-USERNAME_BLACKLIST = ('save', 'tofumatt', 'lonelyvegan', 'tag', 'group',
-                      'about', 'groups', 'tags', 'media', 'username',
-                      'register', 'new', 'delete', 'help', 'photo', 'img',
-                      'src', 'files')
+USERNAME_BLACKLIST = ('save', 'lonelyvegan', 'tag', 'group', 'about',
+                      'groups', 'tags', 'media', 'username', 'register',
+                      'new', 'delete', 'help', 'photo', 'img', 'src',
+                      'files')
 
 # Sorl settings
 THUMBNAIL_DUMMY = True
