@@ -25,7 +25,8 @@ from django.core.files.storage import FileSystemStorage
 fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
                        base_url='/media/uploads/')
 
-COUNTRIES = product_details.get_regions('en-US').items()
+COUNTRIES = zip(product_details.get_regions('en-US').values(),
+                product_details.get_regions('en-US').values())
 
 
 class UserProfile(SearchMixin, models.Model):
@@ -54,7 +55,7 @@ class UserProfile(SearchMixin, models.Model):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
-    country = models.CharField(max_length=5, default='', blank=True,
+    country = models.CharField(max_length=50, default='', blank=True,
                                choices=COUNTRIES,
                                verbose_name=_lazy(u'Country'))
     region = models.CharField(max_length=255, default='', blank=True,
@@ -176,7 +177,8 @@ class UserProfile(SearchMixin, models.Model):
     def fields(self):
         """Method used by elasticutils."""
         attrs = (
-            'id', 'is_vouched', 'website', 'bio', 'display_name', 'ircname')
+            'id', 'is_vouched', 'website', 'bio', 'display_name', 'ircname',
+            'country', 'region', 'city')
         d = dict((a, getattr(self, a)) for a in attrs)
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
@@ -194,11 +196,11 @@ class UserProfile(SearchMixin, models.Model):
     def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
-        fields = ('first_name__text', 'last_name__text', 'display_name__text',
-                  'username__text', 'bio__text', 'website__text',
-                  'email__text', 'groups__text', 'skills__text',
-                  'languages__text', 'first_name__startswith',
-                  'last_name__startswith', 'ircname')
+        fields = ('display_name__text', 'username__text', 'bio__text',
+                  'website__text', 'email__text', 'groups__text',
+                  'skills__text', 'languages__text', 'first_name__startswith',
+                  'last_name__startswith', 'ircname',
+                  'country__text', 'region__text', 'city__text')
         if query:
             q = dict((field, query) for field in fields)
             s = S(cls).query(or_=q)
