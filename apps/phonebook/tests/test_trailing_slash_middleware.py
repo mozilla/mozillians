@@ -1,10 +1,10 @@
 from nose.tools import eq_
 
-from common.tests import TestCase
+from common.tests import ESTestCase
 from funfactory.urlresolvers import reverse
 
 
-class TrailingSlashMiddlewareTestCase(TestCase):
+class TrailingSlashMiddlewareTestCase(ESTestCase):
 
     def test_strip_trailing_slash(self):
         url = reverse('about')

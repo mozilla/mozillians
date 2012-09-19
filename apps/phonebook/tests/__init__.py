@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
 
-from elasticutils import get_es
+from elasticutils.contrib.django import get_es
 
 
 def user(**kwargs):

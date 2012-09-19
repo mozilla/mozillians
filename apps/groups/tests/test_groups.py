@@ -12,7 +12,7 @@ from groups.helpers import stringify_groups
 from groups.models import AUTO_COMPLETE_COUNT, Group
 
 
-class GroupTest(common.tests.TestCase):
+class GroupTest(common.tests.ESTestCase):
     """Test the group/grouping system."""
 
     def setUp(self):

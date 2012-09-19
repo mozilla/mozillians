@@ -7,14 +7,14 @@ from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 from common import browserid_mock
-from common.tests import ESTestCase, TestCase, user
+from common.tests import ESTestCase, user
 from groups.models import Group
 from users.models import UserProfile
 
 Group.objects.get_or_create(name='staff', system=True)
 
 
-class RegistrationTest(TestCase):
+class RegistrationTest(ESTestCase):
     """Tests registration."""
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
@@ -250,7 +250,7 @@ class RegistrationTest(TestCase):
         eq_(p.ircname, username, 'IRCname should equal username')
 
 
-class TestThingsForPeople(TestCase):
+class TestThingsForPeople(ESTestCase):
     """Verify that the wrong users don't see things."""
 
     def test_searchbox(self):
@@ -340,7 +340,7 @@ class VouchTest(ESTestCase):
                 'User should appear as a Mozillian in search.')
 
 
-class TestUser(TestCase):
+class TestUser(ESTestCase):
     """Test User functionality."""
 
     def test_userprofile(self):
@@ -393,7 +393,7 @@ class TestUser(TestCase):
         eq_(p.ircname, '', 'We need to allow IRCname to be blank')
 
 
-class TestMigrateRegistration(TestCase):
+class TestMigrateRegistration(ESTestCase):
         """Test funky behavior of flee ldap."""
         email = 'robot1337@domain.com'
 
@@ -431,7 +431,7 @@ class TestMigrateRegistration(TestCase):
 
 
 @override_settings(AUTO_VOUCH_DOMAINS=['mozilla.com'])
-class AutoVouchTests(TestCase):
+class AutoVouchTests(ESTestCase):
 
     def test_only_autovouch_in_staff(self):
         """Restrict the staff group to emails in AUTO_VOUCH_DOMAINS."""

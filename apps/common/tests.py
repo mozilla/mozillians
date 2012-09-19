@@ -7,7 +7,8 @@ from django.contrib.auth.models import User
 
 import elasticutils.tests
 import test_utils
-from elasticutils import get_es
+from elasticutils.contrib.django import get_es
+import elasticutils.contrib.django.estestcase as estestcase
 
 
 class TestCase(test_utils.TestCase):
@@ -18,6 +19,7 @@ class TestCase(test_utils.TestCase):
         super(TestCase, cls).setUpClass()
         cls._AUTHENTICATION_BACKENDS = settings.AUTHENTICATION_BACKENDS
         settings.AUTHENTICATION_BACKENDS = ['common.backends.TestBackend']
+
         # Create a Mozillian
         cls.mozillian = User.objects.create(
                 email='u000001@mozillians.org', username='7f3a67u000001',
@@ -46,7 +48,7 @@ class TestCase(test_utils.TestCase):
         User.objects.all().delete()
 
 
-class ESTestCase(TestCase, elasticutils.tests.ESTestCase):
+class ESTestCase(TestCase, estestcase.ESTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -56,14 +58,14 @@ class ESTestCase(TestCase, elasticutils.tests.ESTestCase):
         computer.
 
         """
-        elasticutils.tests.ESTestCase.setUpClass()
+        estestcase.ESTestCase.setUpClass()
         TestCase.setUpClass()
         get_es().flush(refresh=True)
 
     @classmethod
     def tearDownClass(cls):
         TestCase.tearDownClass()
-        elasticutils.tests.ESTestCase.tearDownClass()
+        estestcase.ESTestCase.tearDownClass()
 
 
 def user(**kwargs):

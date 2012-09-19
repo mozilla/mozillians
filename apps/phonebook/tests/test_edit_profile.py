@@ -3,13 +3,13 @@ from django.test.utils import override_settings
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
-from common.tests import TestCase, user
+from common.tests import ESTestCase, user
 
 ASSERTION = 'asldkfjasldfka'
 
 
 @override_settings(AUTHENTICATION_BACKENDS=['common.backends.TestBackend'])
-class EditProfileTests(TestCase):
+class EditProfileTests(ESTestCase):
 
     def test_geographic_fields_increasing(self):
         """Geographic fields exist and require increasing specificity."""

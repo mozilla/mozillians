@@ -2,10 +2,10 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import TestCase, user
+from common.tests import ESTestCase, user
 
 
-class ModelForms(TestCase):
+class ModelForms(ESTestCase):
 
     def test_edit_unavailable_form_field(self):
         newbie_client = self.pending_client
