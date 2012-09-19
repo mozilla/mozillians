@@ -10,7 +10,7 @@ from groups.cron import assign_autocomplete_to_groups
 from groups.models import AUTO_COMPLETE_COUNT, Language
 
 
-class LanguagesTest(common.tests.TestCase):
+class LanguagesTest(common.tests.ESTestCase):
 
     def test_autocomplete_api(self):
         self.client.login(email=self.mozillian.email)

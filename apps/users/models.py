@@ -1,6 +1,8 @@
 import uuid
 from datetime import datetime
 
+import pyes
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -8,8 +10,10 @@ from django.db import models
 from django.db.models import signals as dbsignals
 from django.dispatch import receiver
 
-from elasticutils import S
-from elasticutils.models import SearchMixin
+from elasticutils.contrib.django import S
+from elasticutils.contrib.django.models import SearchMixin
+from elasticutils.contrib.django import tasks
+
 from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
@@ -254,14 +258,21 @@ def resize_photo(sender, instance, **kwargs):
         img.save(path)
 
 
-@receiver(dbsignals.post_save, sender=User)
 @receiver(dbsignals.post_save, sender=UserProfile)
 def update_search_index(sender, instance, **kw):
-    from elasticutils import tasks
-    tasks.index_objects.delay(UserProfile, [instance.id])
+    tasks.index_objects.delay(sender, [instance.id])
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile)
 def remove_from_search_index(sender, instance, **kw):
-    from elasticutils import tasks
-    tasks.unindex_objects.delay(sender, [instance.id])
+    try:
+        tasks.unindex_objects.delay(sender, [instance.id])
+    except pyes.exceptions.ElasticSearchException, e:
+        # Patch pyes
+        if (e.status == 404 and
+            isinstance(e.result, dict) and 'error' not in e.result):
+            # Item was not found, but command did not return an error.
+            # Do not worry.
+            return
+        else:
+            raise e
