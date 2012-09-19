@@ -10,7 +10,7 @@ from funfactory.urlresolvers import reverse
 from phonebook.models import Invite
 
 
-class InviteFlowTest(common.tests.TestCase):
+class InviteFlowTest(common.tests.ESTestCase):
     fake_email = 'mr.fusion@gmail.com'
     fake_email2 = 'mrs.fusion@gmail.com'
 
@@ -115,7 +115,7 @@ class InviteFlowTest(common.tests.TestCase):
             False)
 
 
-class InviteEdgeTest(common.tests.TestCase):
+class InviteEdgeTest(common.tests.ESTestCase):
 
     def test_no_reinvite(self):
         """Don't reinvite a vouched user."""

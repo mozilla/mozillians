@@ -5,15 +5,14 @@ from django import test
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
-import test_utils
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.tests import TestCase, user
+from common.tests import ESTestCase, user
 from funfactory.urlresolvers import set_url_prefix, reverse
 
 
-class TestDeleteUser(TestCase):
+class TestDeleteUser(ESTestCase):
     """Separate test class used to test account deletion flow.
 
     We create a separate class to delete a user because other tests
@@ -77,7 +76,7 @@ class TestDeleteUser(TestCase):
         assert not User.objects.get(id=user_id).is_active
 
 
-class TestViews(TestCase):
+class TestViews(ESTestCase):
 
     def test_anonymous_home(self):
         r = self.client.get('/', follow=True)
@@ -357,7 +356,7 @@ class TestViews(TestCase):
         assert original_api_key != new_api_key
 
 
-class TestVouch(TestCase):
+class TestVouch(ESTestCase):
     """This is implemented as its own class so that we can avoid
     mucking up the included users.
 
@@ -393,7 +392,7 @@ class TestVouch(TestCase):
             'Credit given')
 
 
-class TestOpensearchViews(test_utils.TestCase):
+class TestOpensearchViews(ESTestCase):
     """Tests for the OpenSearch plugin, accessible to anonymous visitors."""
 
     def test_search_plugin(self):
