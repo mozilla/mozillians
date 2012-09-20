@@ -25,7 +25,7 @@ class EditProfileTests(ESTestCase):
         response = self.client.post(url, data)
         eq_(400, response.status_code)
 
-        data.update({'country': 'us'})
+        data.update({'country': 'United States'})
         response = self.client.post(url, data, follow=True)
         eq_(200, response.status_code)
 

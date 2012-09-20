@@ -59,7 +59,8 @@ def register(request):
     Pulls out an invite code if it exists and auto validates the user
     if so. Single-purpose view.
     """
-    COUNTRIES = product_details.get_regions(request.locale).items()
+    COUNTRIES = zip(product_details.get_regions('en-US').values(),
+                    product_details.get_regions(request.locale).values())
     COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
     COUNTRIES.insert(0, ('', '----'))
 
