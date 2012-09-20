@@ -73,7 +73,8 @@ def profile(request, username):
 @never_cache
 @login_required
 def edit_profile(request):
-    COUNTRIES = product_details.get_regions(request.locale).items()
+    COUNTRIES = zip(product_details.get_regions(request.locale).values(),
+                    product_details.get_regions(request.locale).values())
     COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
     COUNTRIES.insert(0, ('', '----'))
 
