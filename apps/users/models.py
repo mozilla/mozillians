@@ -204,13 +204,10 @@ class UserProfile(SearchMixin, models.Model):
         fields = ('display_name__text', 'username__text', 'bio__text',
                   'website__text', 'email__text', 'groups__text',
                   'skills__text', 'languages__text', 'first_name__prefix',
-                  'last_name__prefix', 'ircname')
+                  'last_name__prefix', 'ircname', 'country__text_phrase',
+                  'region__text_phrase', 'city__text_phrase')
         if query:
             q = dict((field, query) for field in fields)
-            q.update(dict((field, '"%s"' % query)
-                           for field in ('country__query_string',
-                                         'region__query_string',
-                                         'city__query_string')))
             s = S(cls).query(or_=q)
         else:
             s = S(cls)
