@@ -9,7 +9,8 @@ from pyquery import PyQuery as pq
 from common import browserid_mock
 from common.tests import ESTestCase, user
 from groups.models import Group
-from users.models import UserProfile
+from users.helpers import validate_username
+from users.models import UserProfile, UsernameBlacklist
 
 Group.objects.get_or_create(name='staff', system=True)
 
@@ -18,6 +19,22 @@ class RegistrationTest(ESTestCase):
     """Tests registration."""
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
+
+    def test_validate_username(self):
+        """Test validate_username helper."""
+        valid_usernames = ['giorgos', 'aakash',
+                           'nikos', 'bat-man']
+
+        invalid_usernames = ['administrator', 'test',
+                             'no-reply', 'noreply', 'spam']
+
+        for name in valid_usernames:
+            self.assertTrue(validate_username(name),
+                            'Username: %s did not pass test' % name)
+
+        for name in invalid_usernames:
+            self.assertFalse(validate_username(name),
+                            'Username: %s did not pass test' % name)
 
     def test_mozillacom_registration(self):
         """Verify @mozilla.com users are auto-vouched and marked "staff"."""
@@ -150,8 +167,8 @@ class RegistrationTest(ESTestCase):
         be 'about' or 'help' or anything that is in use.
         """
         email = 'mrfusion+dotcom@mozilla.com'
-        badnames = getattr(settings, 'USERNAME_BLACKLIST')
-
+        badnames = UsernameBlacklist.objects.all().values_list('value',
+                                                               flat=True)
         # BrowserID needs an assertion not to be whiney
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
@@ -195,7 +212,7 @@ class RegistrationTest(ESTestCase):
         assert not r.context['user'].get_profile().is_vouched, (
                 'User should not be vouched')
 
-        d['username'] = 'testatron'
+        d['username'] = 'foobar'
         r = self.client.post(reverse('profile.edit'), d, follow=True)
 
         assert 'You changed your username;' in r.content, (

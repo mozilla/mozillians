@@ -11,6 +11,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
 from groups.models import Group, Skill, Language
+from users.helpers import validate_username
 from users.models import User, UserProfile
 
 
@@ -82,7 +83,7 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError(_('Please use only alphanumeric'
                                           ' characters'))
 
-        if username not in settings.USERNAME_BLACKLIST:
+        if validate_username(username):
             # TODO: we really should use middleware to handle the extra slashes
             # Check what can resolve the username (with/without trailing '/').
             # The last thing this can match for is profile.

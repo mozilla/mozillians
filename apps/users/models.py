@@ -279,3 +279,14 @@ def remove_from_search_index(sender, instance, **kw):
             return
         else:
             raise e
+
+
+class UsernameBlacklist(models.Model):
+    value = models.CharField(max_length=30, unique=True)
+    is_regex = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.value
+
+    class Meta:
+        ordering = ['value']
