@@ -12,7 +12,6 @@ from funfactory.manage import ROOT
 from funfactory.urlresolvers import reverse
 
 
-
 # TODO: this is hackish. Once we update mozillians to the newest playdoh layout
 error_page = __import__('%s.urls' % os.path.basename(ROOT)).urls.error_page
 log = commonware.log.getLogger('m.phonebook')

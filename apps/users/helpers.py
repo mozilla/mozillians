@@ -1,9 +1,14 @@
+import hashlib
 import re
-
-from models import UsernameBlacklist
 
 
 def validate_username(username):
+    """Validate username.
+
+    Import modules here to prevent dependency breaking.
+
+    """
+    from models import UsernameBlacklist
     username = username.lower()
 
     if (UsernameBlacklist.
@@ -15,3 +20,27 @@ def validate_username(username):
             return False
 
     return True
+
+
+def calculate_username(email):
+    """Calculate username from email address.
+
+    Import modules here to prevent dependency breaking.
+
+    """
+    from models import USERNAME_MAX_LENGTH
+    from django.contrib.auth.models import User
+
+    email = email.split('@')[0]
+    username = re.sub(r'[^\w.@+-]', '-', email)
+    username = username[:USERNAME_MAX_LENGTH]
+
+    while User.objects.filter(username=username).exists():
+        username += '_'
+
+        if username > USERNAME_MAX_LENGTH:
+            # We failed to calculate a name for you, default to a
+            # email digest.
+            username = hashlib.sha1(email).hexdigest()
+
+    return username

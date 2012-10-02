@@ -33,6 +33,8 @@ COUNTRIES = zip(product_details.get_regions('en-US').values(),
                 product_details.get_regions('en-US').values())
 COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
 
+USERNAME_MAX_LENGTH = 30
+
 
 class UserProfile(SearchMixin, models.Model):
     # This field is required.

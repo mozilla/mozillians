@@ -7,7 +7,7 @@ from funfactory.manage import path
 from funfactory import settings_base as base
 from settings import initial as pre
 
-from common.browserid import get_username
+from apps.users.helpers import calculate_username
 
 ## Log settings
 SYSLOG_TAG = "http_app_mozillians"
@@ -155,7 +155,7 @@ AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
 # BrowserID creates a user if one doesn't exist.
 BROWSERID_CREATE_USER = True
-BROWSERID_USERNAME_ALGO = get_username
+BROWSERID_USERNAME_ALGO = calculate_username
 
 # On Login, we redirect through register.
 LOGIN_REDIRECT_URL = '/register'
