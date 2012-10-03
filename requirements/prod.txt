@@ -1,8 +1,11 @@
-# Django stuff
--e git://github.com/django/django@1.3.X#egg=django
+# Uncomment this line when we upgrade playdoh
+#-r ../vendor/src/funfactory/funfactory/requirements/prod.txt
 
-# Django Extensions
--e git://github.com/mozilla/happyforms.git#egg=happyforms
+
+## [START] Remove the following lines when we upgrade playdoh
+
+# Django stuff
+-e git://github.com/django/django.git@origin/stable/1.3.x#egg=django
 
 # Templates
 -e git://github.com/jbalogh/jingo.git#egg=jingo
@@ -15,6 +18,8 @@ GitPython==0.1.7
 
 # Security
 -e git://github.com/fwenzel/django-sha2.git#egg=django-sha2
+-e git://github.com/jsocol/bleach.git#egg=bleach
+-e git://github.com/mozilla/django-session-csrf.git#egg=django-session-csrf
 
 # Celery: Message queue
 celery
@@ -24,6 +29,14 @@ django-celery
 Babel>=0.9.4
 -e git://github.com/clouserw/tower.git#egg=tower
 -e git://github.com/fwenzel/django-mozilla-product-details#egg=django-mozilla-product-details
+
+# Mobile
+-e git://github.com/jbalogh/django-mobility@644e0c1c58#egg=django-mobility
+
+## [END] Remove the following lines when we upgrade playdoh
+
+# Django Extensions
+-e git://github.com/mozilla/happyforms.git#egg=happyforms
 
 # Cache
 python-memcached==1.45
