@@ -19,6 +19,7 @@ Contents:
    :maxdepth: 2
 
    installation
+   testing
    invites
 
 Indices and tables

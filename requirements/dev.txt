@@ -20,3 +20,5 @@ translate-toolkit==1.8.0
 # Debug tools
 django-extensions
 Werkzeug
+
+coverage
