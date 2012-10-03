@@ -225,6 +225,7 @@ SOUTH_TESTS_MIGRATE = False
 CSP_IMG_SRC = ("'self'", 'http://statse.webtrendslive.com',
                'https://statse.webtrendslive.com',
                'http://www.gravatar.com',
+               'https://i1.wp.com',
                'https://secure.gravatar.com',)
 CSP_SCRIPT_SRC = ("'self'", 'http://statse.webtrendslive.com',
                   'https://statse.webtrendslive.com',
