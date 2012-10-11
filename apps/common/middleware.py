@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
                          HttpResponseRedirect, HttpResponsePermanentRedirect)
-from django.middleware import common
+from django.core.urlresolvers import is_valid_path
 from django.utils.encoding import iri_to_uri
 
 import commonware.log
@@ -54,8 +54,8 @@ class RemoveSlashMiddleware(object):
     def process_response(self, request, response):
         if (response.status_code == 404
             and request.path_info.endswith('/')
-            and not common._is_valid_path(request.path_info)
-            and common._is_valid_path(request.path_info[:-1])):
+            and not is_valid_path(request.path_info)
+            and is_valid_path(request.path_info[:-1])):
             # Use request.path because we munged app/locale in path_info.
             newurl = request.path[:-1]
             if request.GET:

@@ -1,4 +1,4 @@
-from django.contrib.auth.utils import get_random_string
+from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
 from django.db import models
 from django.dispatch import receiver
