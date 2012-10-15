@@ -1,6 +1,7 @@
 import os
 from contextlib import contextmanager
 
+from django.contrib.auth.models import User
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
                          HttpResponseRedirect, HttpResponsePermanentRedirect)
 from django.core.urlresolvers import is_valid_path
@@ -9,6 +10,7 @@ from django.utils.encoding import iri_to_uri
 import commonware.log
 from funfactory.manage import ROOT
 from funfactory.urlresolvers import reverse
+
 
 # TODO: this is hackish. Once we update mozillians to the newest playdoh layout
 error_page = __import__('%s.urls' % os.path.basename(ROOT)).urls.error_page
@@ -62,6 +64,29 @@ class RemoveSlashMiddleware(object):
                 with safe_query_string(request):
                     newurl += '?' + request.META['QUERY_STRING']
             return HttpResponsePermanentRedirect(newurl)
+        return response
+
+
+class UsernameRedirectionMiddleware(object):
+    """
+    Redirect requests for user profiles from /<username> to
+    /u/<username to avoid breaking profile urls with the new url
+    schema.
+
+    """
+
+    def process_response(self, request, response):
+        if (response.status_code == 404
+            and not request.path_info.startswith('/u/')
+            and not is_valid_path(request.path_info)
+            and User.objects.filter(
+                username__iexact=request.path_info[1:].strip('/')).exists()):
+
+            newurl = '/u' + request.path_info
+            if request.GET:
+                with safe_query_string(request):
+                    newurl += '?' + request.META['QUERY_STRING']
+            return HttpResponseRedirect(newurl)
         return response
 
 

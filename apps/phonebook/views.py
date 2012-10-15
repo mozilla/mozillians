@@ -101,7 +101,7 @@ def edit_profile(request):
 
         if form.is_valid():
             old_username = request.user.username
-            form.save(request)
+            form.save()
 
             # Notify the user that their old profile URL won't work.
             if (not profile.is_vouched and

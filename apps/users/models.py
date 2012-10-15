@@ -33,6 +33,8 @@ COUNTRIES = zip(product_details.get_regions('en-US').values(),
                 product_details.get_regions('en-US').values())
 COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
 
+USERNAME_MAX_LENGTH = 30
+
 
 class UserProfile(SearchMixin, models.Model):
     # This field is required.
@@ -143,7 +145,7 @@ class UserProfile(SearchMixin, models.Model):
         past the original registration view.
 
         """
-        return self.display_name and self.display_name != ' '
+        return self.display_name.strip() != ''
 
     def photo_url(self):
         if self.photo:
@@ -154,6 +156,7 @@ class UserProfile(SearchMixin, models.Model):
     def vouch(self, vouched_by, system=True, commit=True):
         changed = system  # do we need to do a vouch?
         if system:
+            changed = True
             self.is_vouched = True
 
         if vouched_by and vouched_by.is_vouched:
@@ -219,7 +222,8 @@ class UserProfile(SearchMixin, models.Model):
         return s
 
 
-@receiver(models.signals.post_save, sender=User)
+@receiver(models.signals.post_save, sender=User,
+          dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
 
@@ -231,7 +235,8 @@ def create_user_profile(sender, instance, created, **kwargs):
         u.save()
 
 
-@receiver(models.signals.pre_save, sender=UserProfile)
+@receiver(models.signals.pre_save, sender=UserProfile,
+          dispatch_uid='auto_vouch_sig')
 def auto_vouch(sender, instance, raw, using, **kwargs):
     """Auto vouch mozilla.com users."""
     if not instance.id:
@@ -240,7 +245,8 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
             instance.vouch(None, system=True, commit=False)
 
 
-@receiver(models.signals.post_save, sender=UserProfile)
+@receiver(models.signals.post_save, sender=UserProfile,
+          dispatch_uid='add_to_staff_group_sig')
 def add_to_staff_group(sender, instance, created, **kwargs):
     """Keep users in the staff group if they're autovouchable."""
     email = instance.user.email
@@ -252,7 +258,8 @@ def add_to_staff_group(sender, instance, created, **kwargs):
         instance.groups.remove(staff)
 
 
-@receiver(dbsignals.post_save, sender=UserProfile)
+@receiver(dbsignals.post_save, sender=UserProfile,
+          dispatch_uid='resize_photo_sig')
 def resize_photo(sender, instance, **kwargs):
     if instance.photo:
         path = str(instance.photo.path)
@@ -261,12 +268,14 @@ def resize_photo(sender, instance, **kwargs):
         img.save(path)
 
 
-@receiver(dbsignals.post_save, sender=UserProfile)
+@receiver(dbsignals.post_save, sender=UserProfile,
+          dispatch_uid='update_search_index_sig')
 def update_search_index(sender, instance, **kw):
     tasks.index_objects.delay(sender, [instance.id])
 
 
-@receiver(dbsignals.post_delete, sender=UserProfile)
+@receiver(dbsignals.post_delete, sender=UserProfile,
+          dispatch_uid='remove_from_search_index_sig')
 def remove_from_search_index(sender, instance, **kw):
     try:
         tasks.unindex_objects.delay(sender, [instance.id])
@@ -279,3 +288,14 @@ def remove_from_search_index(sender, instance, **kw):
             return
         else:
             raise e
+
+
+class UsernameBlacklist(models.Model):
+    value = models.CharField(max_length=30, unique=True)
+    is_regex = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.value
+
+    class Meta:
+        ordering = ['value']
