@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
@@ -9,7 +8,8 @@ from pyquery import PyQuery as pq
 from common import browserid_mock
 from common.tests import ESTestCase, user
 from groups.models import Group
-from users.models import UserProfile
+from users.helpers import validate_username
+from users.models import UserProfile, UsernameBlacklist
 
 Group.objects.get_or_create(name='staff', system=True)
 
@@ -18,6 +18,22 @@ class RegistrationTest(ESTestCase):
     """Tests registration."""
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
+
+    def test_validate_username(self):
+        """Test validate_username helper."""
+        valid_usernames = ['giorgos', 'aakash',
+                           'nikos', 'bat-man']
+
+        invalid_usernames = ['administrator', 'test',
+                             'no-reply', 'noreply', 'spam']
+
+        for name in valid_usernames:
+            self.assertTrue(validate_username(name),
+                            'Username: %s did not pass test' % name)
+
+        for name in invalid_usernames:
+            self.assertFalse(validate_username(name),
+                            'Username: %s did not pass test' % name)
 
     def test_mozillacom_registration(self):
         """Verify @mozilla.com users are auto-vouched and marked "staff"."""
@@ -150,8 +166,8 @@ class RegistrationTest(ESTestCase):
         be 'about' or 'help' or anything that is in use.
         """
         email = 'mrfusion+dotcom@mozilla.com'
-        badnames = getattr(settings, 'USERNAME_BLACKLIST')
-
+        badnames = UsernameBlacklist.objects.all().values_list('value',
+                                                               flat=True)
         # BrowserID needs an assertion not to be whiney
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
@@ -195,9 +211,8 @@ class RegistrationTest(ESTestCase):
         assert not r.context['user'].get_profile().is_vouched, (
                 'User should not be vouched')
 
-        d['username'] = 'testatron'
+        d['username'] = 'foobar'
         r = self.client.post(reverse('profile.edit'), d, follow=True)
-
         assert 'You changed your username;' in r.content, (
                 'User should know that changing their username changes '
                 'their URL.')
@@ -231,23 +246,6 @@ class RegistrationTest(ESTestCase):
 
         # Make sure we can't use the same username twice
         assert r.context['form'].errors, "Form should throw errors."
-
-    def test_ircnick(self):
-        username = 'thisisatest'
-        email = 'test@example.com'
-        register = dict(username=username,
-                        first_name='David',
-                        last_name='Teststhings',
-                        optin=True)
-        d = {'assertion': self.fake_assertion}
-
-        with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
-            self.client.post(reverse('register'), register, follow=True)
-
-        u = User.objects.filter(email=email)[0]
-        p = u.get_profile()
-        eq_(p.ircname, username, 'IRCname should equal username')
 
 
 class TestThingsForPeople(ESTestCase):
@@ -472,3 +470,19 @@ class AutoVouchTests(ESTestCase):
         non_auto_profile.save()
         assert not non_auto_profile.is_vouched, (
             'Profile should not be vouched.')
+
+
+@override_settings(
+    AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
+class UsernameRedirectionMiddlewareTests(ESTestCase):
+    # Assertion doesn't matter since we monkey patched it for testing
+    def test_username_redirection_middleware(self):
+        """Test the username redirection middleware."""
+
+        auto_user = user(username='lalala')
+        self.client.login(username=auto_user.username, password='testpass')
+        response = self.client.get('/%s' % auto_user.username, follow=True)
+        self.assertTemplateUsed(response, 'phonebook/profile.html')
+
+        response = self.client.get('/%s' % 'invaliduser', follow=True)
+        self.assertTemplateUsed(response, '404.html')

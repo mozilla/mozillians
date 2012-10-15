@@ -1,9 +1,6 @@
 import re
-from urlparse import urlparse
 
 from django import forms
-from django.conf import settings
-from django.core.urlresolvers import resolve
 from django.utils.safestring import mark_safe
 
 import happyforms
@@ -11,6 +8,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from phonebook.models import Invite
 from groups.models import Group, Skill, Language
+from users.helpers import validate_username
 from users.models import User, UserProfile
 
 
@@ -65,15 +63,14 @@ class UserForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data['username']
-        # If you don't submit a username, you aren't changing it so you're cool
         if not username:
-            return None
+            return self.instance.user.username
 
         # Don't be jacking somebody's username
         # This causes a potential race condition however the worst that can
         # happen is bad UI.
-        if (User.objects.filter(username=username) and
-                username != self.instance.user.username):
+        if (User.objects.filter(username=username).
+            exclude(pk=self.instance.user.id).exists()):
             raise forms.ValidationError(_('This username is in use. Please try'
                                           ' another.'))
 
@@ -82,31 +79,21 @@ class UserForm(forms.ModelForm):
             raise forms.ValidationError(_('Please use only alphanumeric'
                                           ' characters'))
 
-        if username not in settings.USERNAME_BLACKLIST:
-            # TODO: we really should use middleware to handle the extra slashes
-            # Check what can resolve the username (with/without trailing '/').
-            # The last thing this can match for is profile.
-            r = resolve(urlparse('/' + username)[2])
-            # Check to make sure that only profile has been resolved for.
-            if r.url_name == 'profile':
-                return username
+        if not validate_username(username):
+            raise forms.ValidationError(_('This username is not allowed, '
+                                          'please choose another.'))
+        return username
 
-        raise forms.ValidationError(_('This username is reserved, please'
-                                      ' choose another.'))
-
-    def save(self, user):
+    def save(self):
         # First save the profile info.
-        d = self.cleaned_data
-        if d['ircname']:
-            self.instance.ircname = d['ircname']
         super(forms.ModelForm, self).save()
 
         # Then deal with the user info.
-        d = self.cleaned_data
-        user.first_name = d['first_name']
-        user.last_name = d['last_name']
-        if d['username']:
-            user.username = d['username']
+        user = self.instance.user
+        user.first_name = (self.cleaned_data.get('first_name') or
+                           user.first_name)
+        user.last_name = self.cleaned_data.get('last_name') or user.last_name
+        user.username = self.cleaned_data.get('username') or user.username
         user.save()
 
 
@@ -187,12 +174,12 @@ class ProfileForm(UserForm):
                                          'specify a district.')]
         return cleaned_data
 
-    def save(self, request):
+    def save(self):
         """Save the data to profile."""
         self.instance.set_membership(Group, self.cleaned_data['groups'])
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
         self.instance.set_membership(Language, self.cleaned_data['languages'])
-        super(ProfileForm, self).save(request.user)
+        super(ProfileForm, self).save()
 
 
 class VouchForm(happyforms.Form):

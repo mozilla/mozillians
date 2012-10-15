@@ -60,11 +60,7 @@
               <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
               <li class="dropdown" id="profile_menu">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#profile_menu">
-                  {% if user.username.startswith('u/') %}
-                    {{ _('Options') }}
-                  {% else %}
-                    {{ user.username }}
-                  {% endif %}
+                  {{ user.username }}
                   <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">

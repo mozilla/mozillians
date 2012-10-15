@@ -28,11 +28,8 @@ def logout(request, **kwargs):
     return auth.views.logout(request, next_page=reverse('home'), **kwargs)
 
 
-class Browserid(Verify):
+class BrowserID(Verify):
     """View for dealing with Browserid callback."""
-
-    def handle_user(self, *args):
-        pass
 
     def login_success(self):
         user = self.user
@@ -81,17 +78,14 @@ def register(request):
         return redirect('home')
 
     form = forms.RegistrationForm(request.POST or None,
+                                  initial={'username': user.username},
                                   instance=user.get_profile())
 
     form.fields['country'].choices = COUNTRIES
 
     if request.method == 'POST':
         if form.is_valid():
-            form.save(user)
-            userProfile = user.get_profile()
-            for group in request.POST.getlist('groups'):
-                userProfile.groups.add(group)
-            userProfile.save()
+            form.save()
             auth.login(request, user)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
@@ -123,7 +117,7 @@ def _update_invites(request):
         return
 
     redeemer = request.user.get_profile()
-    redeemer.vouch(voucher)
+    redeemer.vouch(voucher, system=False)
     invite.redeemed = datetime.datetime.now()
     invite.redeemer = redeemer
     invite.save()

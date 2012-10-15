@@ -15,12 +15,23 @@
 {% block body_classes %}box-content{% endblock %}
 
 {% block main_content %}
+  <h1>{{ _('Edit Your Profile') }}</h1>
+
+  {% if form.errors %}
+    <div class="alert alert-error">
+      Please correct the following errors:
+      <ol>
+      {% for error in form.errors %}
+        <li>{{ error|escape }}</li>
+      {% endfor %}
+      </ol>
+    </div>
+  {% endif %}
   <form action="{{ url('profile.edit') }}"
         method="POST"
         enctype="multipart/form-data"
         class="form-horizontal edit-profile">
     {{ csrf() }}
-    <h1>{{ _('Edit Your Profile') }}</h1>
     <div class="tabbable">
       <ul class="nav nav-pills">
         <li class="active"><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>

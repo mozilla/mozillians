@@ -2,10 +2,11 @@ from django.contrib import admin
 
 from sorl.thumbnail.admin import AdminImageMixin
 
-from users.models import UserProfile
+from users.models import UserProfile, UsernameBlacklist
 
 
 class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
+    """UserProfile Admin."""
     fields = ['user', 'user_email', 'display_name', 'photo', 'ircname',
               'is_vouched', 'vouched_by', 'bio', 'website', 'groups', 'skills',
               'languages', 'country', 'region', 'city']
@@ -27,3 +28,13 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
         return False
 
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+class UsernameBlacklistAdmin(admin.ModelAdmin):
+    """UsernameBlacklist Admin."""
+    save_on_top = True
+    search_fields = ['value']
+    list_filter = ['is_regex']
+    list_display = ['value', 'is_regex']
+
+admin.site.register(UsernameBlacklist, UsernameBlacklistAdmin)

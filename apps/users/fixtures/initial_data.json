@@ -1,0 +1,1082 @@
+[
+    {
+        "pk": 1,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "(no)*spam$"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "666"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "about(us)?$"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "account(s)?$"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "add(-)?ons$"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "admin(.)*$"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "affiliate(s)?$"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "amo"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "anonymous"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "author"
+        }
+    },
+    {
+        "pk": 11,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "auto((-)|(_))?reply$"
+        }
+    },
+    {
+        "pk": 12,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "autoresponse"
+        }
+    },
+    {
+        "pk": 13,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "beta"
+        }
+    },
+    {
+        "pk": 14,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "blog"
+        }
+    },
+    {
+        "pk": 15,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "blogger"
+        }
+    },
+    {
+        "pk": 16,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "browserid"
+        }
+    },
+    {
+        "pk": 17,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "coding"
+        }
+    },
+    {
+        "pk": 18,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "contact(-)?(us)?$"
+        }
+    },
+    {
+        "pk": 19,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "contributor"
+        }
+    },
+    {
+        "pk": 20,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "delete"
+        }
+    },
+    {
+        "pk": 21,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "director"
+        }
+    },
+    {
+        "pk": 22,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "domain(s)?$"
+        }
+    },
+    {
+        "pk": 23,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "donotreply(tothis)?$"
+        }
+    },
+    {
+        "pk": 24,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "editor"
+        }
+    },
+    {
+        "pk": 25,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "email"
+        }
+    },
+    {
+        "pk": 26,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "engagement"
+        }
+    },
+    {
+        "pk": 27,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "extensions"
+        }
+    },
+    {
+        "pk": 28,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "fennec"
+        }
+    },
+    {
+        "pk": 29,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "file(s)?$"
+        }
+    },
+    {
+        "pk": 30,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "firefox"
+        }
+    },
+    {
+        "pk": 31,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "ftp"
+        }
+    },
+    {
+        "pk": 32,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "group(s)?$"
+        }
+    },
+    {
+        "pk": 33,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "guest"
+        }
+    },
+    {
+        "pk": 34,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "help"
+        }
+    },
+    {
+        "pk": 35,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "hosts"
+        }
+    },
+    {
+        "pk": 36,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "img"
+        }
+    },
+    {
+        "pk": 37,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "info"
+        }
+    },
+    {
+        "pk": 38,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "information"
+        }
+    },
+    {
+        "pk": 39,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "intern"
+        }
+    },
+    {
+        "pk": 40,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "internet"
+        }
+    },
+    {
+        "pk": 41,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "interns"
+        }
+    },
+    {
+        "pk": 42,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "language"
+        }
+    },
+    {
+        "pk": 43,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "languages"
+        }
+    },
+    {
+        "pk": 44,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "linux"
+        }
+    },
+    {
+        "pk": 45,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "list"
+        }
+    },
+    {
+        "pk": 46,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "listserv"
+        }
+    },
+    {
+        "pk": 47,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "loggedin"
+        }
+    },
+    {
+        "pk": 48,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "loggedout"
+        }
+    },
+    {
+        "pk": 49,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "login"
+        }
+    },
+    {
+        "pk": 50,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "logout"
+        }
+    },
+    {
+        "pk": 51,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mail"
+        }
+    },
+    {
+        "pk": 52,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mail-daemon"
+        }
+    },
+    {
+        "pk": 53,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mail-security"
+        }
+    },
+    {
+        "pk": 54,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mailbox"
+        }
+    },
+    {
+        "pk": 55,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mailfilter"
+        }
+    },
+    {
+        "pk": 56,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "marketing"
+        }
+    },
+    {
+        "pk": 57,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "media"
+        }
+    },
+    {
+        "pk": 58,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mobile"
+        }
+    },
+    {
+        "pk": 59,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "moderator"
+        }
+    },
+    {
+        "pk": 60,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozilla"
+        }
+    },
+    {
+        "pk": 61,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozillacorporation"
+        }
+    },
+    {
+        "pk": 62,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozillafoundation"
+        }
+    },
+    {
+        "pk": 63,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozillaorg"
+        }
+    },
+    {
+        "pk": 64,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozillareps"
+        }
+    },
+    {
+        "pk": 65,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozillians"
+        }
+    },
+    {
+        "pk": 66,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozilliansorg"
+        }
+    },
+    {
+        "pk": 67,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "moztrap"
+        }
+    },
+    {
+        "pk": 68,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mozwebqa"
+        }
+    },
+    {
+        "pk": 69,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "mysql"
+        }
+    },
+    {
+        "pk": 70,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "new"
+        }
+    },
+    {
+        "pk": 71,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "nightlies"
+        }
+    },
+    {
+        "pk": 72,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "nightly"
+        }
+    },
+    {
+        "pk": 73,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "no(-)?reply$"
+        }
+    },
+    {
+        "pk": 74,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "nobody"
+        }
+    },
+    {
+        "pk": 75,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "null"
+        }
+    },
+    {
+        "pk": 76,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "operator"
+        }
+    },
+    {
+        "pk": 77,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "owner"
+        }
+    },
+    {
+        "pk": 78,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "persona"
+        }
+    },
+    {
+        "pk": 79,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "phonebook"
+        }
+    },
+    {
+        "pk": 80,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "photo"
+        }
+    },
+    {
+        "pk": 81,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "qa"
+        }
+    },
+    {
+        "pk": 82,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "quality"
+        }
+    },
+    {
+        "pk": 83,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "qualityassurance"
+        }
+    },
+    {
+        "pk": 84,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "register"
+        }
+    },
+    {
+        "pk": 85,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "registrar"
+        }
+    },
+    {
+        "pk": 86,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "remo"
+        }
+    },
+    {
+        "pk": 87,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "reps"
+        }
+    },
+    {
+        "pk": 88,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "root"
+        }
+    },
+    {
+        "pk": 89,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "sale"
+        }
+    },
+    {
+        "pk": 90,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "sales"
+        }
+    },
+    {
+        "pk": 91,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "save"
+        }
+    },
+    {
+        "pk": 92,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "scam"
+        }
+    },
+    {
+        "pk": 93,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "school"
+        }
+    },
+    {
+        "pk": 94,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "schools"
+        }
+    },
+    {
+        "pk": 95,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "secretary"
+        }
+    },
+    {
+        "pk": 96,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "security"
+        }
+    },
+    {
+        "pk": 97,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "service"
+        }
+    },
+    {
+        "pk": 98,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "services"
+        }
+    },
+    {
+        "pk": 99,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "signout"
+        }
+    },
+    {
+        "pk": 100,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "skill(s)?$"
+        }
+    },
+    {
+        "pk": 101,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "src"
+        }
+    },
+    {
+        "pk": 102,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "staff"
+        }
+    },
+    {
+        "pk": 103,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "submission(s)?$"
+        }
+    },
+    {
+        "pk": 104,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "submit"
+        }
+    },
+    {
+        "pk": 105,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "subscribe"
+        }
+    },
+    {
+        "pk": 106,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "subscription(s)?$"
+        }
+    },
+    {
+        "pk": 107,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "sumo"
+        }
+    },
+    {
+        "pk": 108,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "support"
+        }
+    },
+    {
+        "pk": 109,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "sysadmin"
+        }
+    },
+    {
+        "pk": 110,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "sysop"
+        }
+    },
+    {
+        "pk": 111,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "tag(s)?$"
+        }
+    },
+    {
+        "pk": 112,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "techsupport"
+        }
+    },
+    {
+        "pk": 113,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "test((er)|(ing)|(s))?$"
+        }
+    },
+    {
+        "pk": 115,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "trap"
+        }
+    },
+    {
+        "pk": 116,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "trash"
+        }
+    },
+    {
+        "pk": 117,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "travel"
+        }
+    },
+    {
+        "pk": 118,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "trouble"
+        }
+    },
+    {
+        "pk": 119,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "undeliverable"
+        }
+    },
+    {
+        "pk": 120,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "undisclosed-recipients"
+        }
+    },
+    {
+        "pk": 121,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "unknown"
+        }
+    },
+    {
+        "pk": 122,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "unplug"
+        }
+    },
+    {
+        "pk": 123,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "unsub"
+        }
+    },
+    {
+        "pk": 124,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "unsubscribe"
+        }
+    },
+    {
+        "pk": 125,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "usenet"
+        }
+    },
+    {
+        "pk": 126,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": true,
+            "value": "user(s)?$"
+        }
+    },
+    {
+        "pk": 127,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "username"
+        }
+    },
+    {
+        "pk": 128,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "verify"
+        }
+    },
+    {
+        "pk": 129,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "virus"
+        }
+    },
+    {
+        "pk": 130,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "web"
+        }
+    },
+    {
+        "pk": 131,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "webadmin"
+        }
+    },
+    {
+        "pk": 132,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "webdev"
+        }
+    },
+    {
+        "pk": 133,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "webmaster"
+        }
+    },
+    {
+        "pk": 134,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "webprod"
+        }
+    },
+    {
+        "pk": 135,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "www"
+        }
+    },
+    {
+        "pk": 136,
+        "model": "users.usernameblacklist",
+        "fields": {
+            "is_regex": false,
+            "value": "yahoogroups"
+        }
+    }
+]

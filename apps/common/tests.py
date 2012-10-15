@@ -5,7 +5,6 @@ from django import test
 from django.conf import settings
 from django.contrib.auth.models import User
 
-import elasticutils.tests
 import test_utils
 from elasticutils.contrib.django import get_es
 import elasticutils.contrib.django.estestcase as estestcase
