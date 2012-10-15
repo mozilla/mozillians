@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from funfactory.urlresolvers import reverse
-from nose.tools import eq_
+from nose.tools import eq_, nottest
 from pyquery import PyQuery as pq
 
 from common import browserid_mock
@@ -301,6 +301,10 @@ class TestThingsForPeople(ESTestCase):
 
 class VouchTest(ESTestCase):
 
+    # TODO
+    # Mark this as nottest until we decide the policy in search
+    # page. Then fix accordingly.
+    @nottest
     def test_vouch_method(self):
         """Test UserProfile.vouch()
 
@@ -486,3 +490,46 @@ class UsernameRedirectionMiddlewareTests(ESTestCase):
 
         response = self.client.get('/%s' % 'invaliduser', follow=True)
         self.assertTemplateUsed(response, '404.html')
+
+
+class SearchTests(ESTestCase):
+    def setUp(self):
+        self.data = {'country': 'United States',
+                     'region': 'California',
+                     'city': 'Mountain View',
+                     'ircname': 'hax0r',
+                     'bio': 'I love ice cream. I code. I tweet.',
+                     'website': 'http://www.example.com'}
+        self.auto_user = user()
+        self.auto_user.first_name = 'Nikos'
+        self.auto_user.last_name = 'Koukos'
+        self.auto_user.save()
+        up = self.auto_user.userprofile
+        for key, value in self.data.iteritems():
+            setattr(up, key, value)
+        up.save()
+
+    def test_search_generic(self):
+        for key, value in self.data.iteritems():
+            results = UserProfile.search(value)
+            self.assertEqual(len(results), 1)
+
+        results = UserProfile.search(self.auto_user.first_name)
+        self.assertEqual(len(results), 1)
+
+        results = UserProfile.search(self.auto_user.last_name)
+        self.assertEqual(len(results), 1)
+
+        results = UserProfile.search('mountain')
+        self.assertEqual(len(results), 0)
+
+        results = UserProfile.search(self.auto_user.first_name[:3])
+        self.assertEqual(len(results), 1)
+
+        results = UserProfile.search(self.auto_user.last_name[:2])
+        self.assertEqual(len(results), 1)
+
+        results = UserProfile.search(
+            self.auto_user.userprofile.bio.split(' ')[3])
+        self.assertEqual(len(results), 1)
+
