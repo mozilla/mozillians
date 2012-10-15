@@ -36,7 +36,7 @@ COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
 USERNAME_MAX_LENGTH = 30
 
 
-class UserProfile(SearchMixin, models.Model):
+class UserProfile(models.Model, SearchMixin):
     # This field is required.
     user = models.OneToOneField(User)
 
@@ -182,33 +182,83 @@ class UserProfile(SearchMixin, models.Model):
         send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.user.email])
 
-    def fields(self):
+    @classmethod
+    def extract_document(cls, obj_id, obj=None):
         """Method used by elasticutils."""
-        attrs = ('id', 'is_vouched', 'website',
-                 'bio', 'display_name', 'ircname',
-                 'country', 'region', 'city')
-        d = dict((a, getattr(self, a)) for a in attrs)
+        if obj is None:
+            obj = cls.objects.get(pk=obj_id)
+
+        d = {}
+
+        attrs = ('id', 'is_vouched', 'website', 'ircname', 'country',
+                 'region', 'city')
+        for a in attrs:
+            data = getattr(obj, a)
+            if isinstance(data, basestring):
+                data = data.lower()
+            d.update({a: data})
+
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
                  'date_joined')
-        d.update(dict((a, getattr(self.user, a)) for a in attrs))
-        d.update(dict(has_photo=bool(self.photo)))
+        for a in attrs:
+            data = getattr(obj.user, a)
+            if isinstance(data, basestring):
+                data = data.lower()
+            d.update({a: data})
+
+        d.update(dict(bio=obj.bio))
+        d.update(dict(has_photo=bool(obj.photo)))
         # Index groups, skills, and languages ... for fun.
-        d.update(dict(groups=list(self.groups.values_list('name', flat=True))))
-        d.update(dict(skills=list(self.skills.values_list('name', flat=True))))
-        d.update(dict(languages=list(
-            self.languages.values_list('name', flat=True))))
+        d.update(dict(groups=list(obj.groups.values_list('name', flat=True))))
+        d.update(dict(skills=list(obj.skills.values_list('name', flat=True))))
+        d.update(dict(languages=list(obj.languages.values_list('name',
+                                                               flat=True))))
+
         return d
+
+    @classmethod
+    def get_mapping(cls):
+        """Returns an ElasticSearch mapping."""
+        return {
+            'properties': {
+                'id': {'type': 'integer'},
+                # The name is a name---so we shouldn't analyze it
+                # (de-stem, tokenize, parse, etc).
+                'first_name': {'type': 'string', 'index': 'not_analyzed'},
+                'last_name': {'type': 'string', 'index': 'not_analyzed'},
+                'email': {'type': 'string', 'index': 'not_analyzed'},
+                'ircname': {'type': 'string', 'index': 'not_analyzed'},
+                'username': {'type': 'string', 'index': 'not_analyzed'},
+                'country': {'type': 'string', 'index': 'not_analyzed'},
+                'region': {'type': 'string', 'index': 'not_analyzed'},
+                'city': {'type': 'string', 'index': 'not_analyzed'},
+                'skills': {'type': 'string', 'index': 'not_analyzed'},
+                'groups': {'type': 'string', 'index': 'not_analyzed'},
+                'languages': {'type': 'string', 'index': 'not_analyzed'},
+
+                # The bio has free-form text in it, so analyze it with
+                # snowball.
+                'bio': {'type': 'string', 'analyzer': 'snowball'},
+
+                'is_vouched': {'type': 'boolean'},
+                'photo': {'type': 'boolean'},
+
+                # The website also shouldn't be analyzed.
+                'website': {'type': 'string', 'index': 'not_analyzed'},
+
+                # The last_updated field is a date.
+                'last_updated': {'type': 'date'},
+                'date_joined': {'type': 'date'}}}
 
     @classmethod
     def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
-        fields = ('display_name__text', 'username__text', 'bio__text',
-                  'website__text', 'email__text', 'groups__text',
-                  'skills__text', 'languages__text', 'first_name__prefix',
-                  'last_name__prefix', 'ircname', 'country__text_phrase',
-                  'region__text_phrase', 'city__text_phrase')
+        fields = ('username', 'bio__text', 'website', 'email', 'groups',
+                  'skills', 'languages', 'first_name__prefix',
+                  'last_name__prefix', 'ircname', 'country', 'region', 'city')
+
         if query:
             q = dict((field, query) for field in fields)
             s = S(cls).query(or_=q)
@@ -227,12 +277,9 @@ class UserProfile(SearchMixin, models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
 
-    if created:
-        UserProfile.objects.create(user=instance)
-    else:
-        u = UserProfile.objects.get(user=instance)
-        u.display_name = dn
-        u.save()
+    up, created = UserProfile.objects.get_or_create(user=instance)
+    up.display_name = dn
+    up.save()
 
 
 @receiver(models.signals.pre_save, sender=UserProfile,

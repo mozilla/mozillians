@@ -1,14 +1,19 @@
 import random
 from string import letters
 
+import pyes.exceptions
+
 from django import test
 from django.conf import settings
 from django.contrib.auth.models import User
 
 import test_utils
-from elasticutils.contrib.django import get_es
 import elasticutils.contrib.django.estestcase as estestcase
 
+from elasticutils.contrib.django import get_es
+
+from apps.users.cron import index_all_profiles
+from apps.users.models import UserProfile
 
 class TestCase(test_utils.TestCase):
     """Tests for common package."""
@@ -53,13 +58,18 @@ class ESTestCase(TestCase, estestcase.ESTestCase):
     def setUpClass(cls):
         """Runs the :class:`TestCase` setup to add some data.
 
-        Also flushes and refreshes the data so it's searchable via
-        computer.
+        Also re-creates indexes respecting data mappings, flushes and
+        refreshes the data so it's searchable via computer.
 
         """
         estestcase.ESTestCase.setUpClass()
         TestCase.setUpClass()
-        get_es().flush(refresh=True)
+        es = get_es()
+
+        # Add on demand more models here.
+        index_all_profiles()
+
+        es.flush(refresh=True)
 
     @classmethod
     def tearDownClass(cls):
