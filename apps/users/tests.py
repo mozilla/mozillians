@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
@@ -214,7 +213,6 @@ class RegistrationTest(ESTestCase):
 
         d['username'] = 'foobar'
         r = self.client.post(reverse('profile.edit'), d, follow=True)
-
         assert 'You changed your username;' in r.content, (
                 'User should know that changing their username changes '
                 'their URL.')
@@ -248,23 +246,6 @@ class RegistrationTest(ESTestCase):
 
         # Make sure we can't use the same username twice
         assert r.context['form'].errors, "Form should throw errors."
-
-    def test_ircnick(self):
-        username = 'thisisatest'
-        email = 'test@example.com'
-        register = dict(username=username,
-                        first_name='David',
-                        last_name='Teststhings',
-                        optin=True)
-        d = {'assertion': self.fake_assertion}
-
-        with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
-            self.client.post(reverse('register'), register, follow=True)
-
-        u = User.objects.filter(email=email)[0]
-        p = u.get_profile()
-        eq_(p.ircname, username, 'IRCname should equal username')
 
 
 class TestThingsForPeople(ESTestCase):
@@ -489,3 +470,19 @@ class AutoVouchTests(ESTestCase):
         non_auto_profile.save()
         assert not non_auto_profile.is_vouched, (
             'Profile should not be vouched.')
+
+
+@override_settings(
+    AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
+class UsernameRedirectionMiddlewareTests(ESTestCase):
+    # Assertion doesn't matter since we monkey patched it for testing
+    def test_username_redirection_middleware(self):
+        """Test the username redirection middleware."""
+
+        auto_user = user(username='lalala')
+        self.client.login(username=auto_user.username, password='testpass')
+        response = self.client.get('/%s' % auto_user.username, follow=True)
+        self.assertTemplateUsed(response, 'phonebook/profile.html')
+
+        response = self.client.get('/%s' % 'invaliduser', follow=True)
+        self.assertTemplateUsed(response, '404.html')

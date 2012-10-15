@@ -40,6 +40,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="start">
           <h2>{{ _('Profile') }}</h2>
+          {{ bootstrap(form.username) }}
           {{ bootstrap(form.first_name) }}
           {{ bootstrap(form.last_name) }}
           {{ bootstrap(form.ircname) }}

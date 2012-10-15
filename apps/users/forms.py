@@ -11,9 +11,8 @@ from groups.models import Group, Skill, Language
 
 
 class RegistrationForm(UserForm):
-    username = forms.CharField(
-        label=_lazy(u'Username'), max_length=30, required=False,
-        widget=forms.TextInput(attrs={'placeholder': 'Example: IRC Nickname'}))
+    username = forms.CharField(required=False,
+        label=_lazy(u'Username'), max_length=30, widget=forms.TextInput())
     groups = forms.ModelMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         label=_lazy(u'Please indicate the functional areas you are currently '
@@ -70,10 +69,8 @@ class RegistrationForm(UserForm):
                                          'specify a district.')]
         return cleaned_data
 
-    def save(self, user):
-        d = self.cleaned_data
-        if 'username' in d:
-            d['ircname'] = d['username']
+    def save(self):
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
         self.instance.set_membership(Language, self.cleaned_data['languages'])
-        super(RegistrationForm, self).save(user)
+        self.instance.set_membership(Group, self.cleaned_data['groups'])
+        super(RegistrationForm, self).save()

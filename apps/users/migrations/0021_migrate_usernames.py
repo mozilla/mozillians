@@ -7,7 +7,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from common.browserid import USERNAME_MAX_LENGTH
+from ..models import USERNAME_MAX_LENGTH
 
 class Migration(SchemaMigration):
 

@@ -2,6 +2,7 @@ import re
 
 from models import UsernameBlacklist
 
+
 def validate_username(username):
     username = username.lower()
 
@@ -14,5 +15,3 @@ def validate_username(username):
             return False
 
     return True
-
-

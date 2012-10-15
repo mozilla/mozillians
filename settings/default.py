@@ -7,6 +7,8 @@ from funfactory.manage import path
 from funfactory import settings_base as base
 from settings import initial as pre
 
+from common.browserid import get_username
+
 ## Log settings
 SYSLOG_TAG = "http_app_mozillians"
 LOGGING = {
@@ -135,6 +137,7 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'csp.middleware.CSPMiddleware',
     'common.middleware.PermissionDeniedMiddleware',
     'common.middleware.RemoveSlashMiddleware',
+    'common.middleware.UsernameRedirectionMiddleware'
 ]
 
 # StrictTransport
@@ -144,12 +147,15 @@ STS_SUBDOMAINS = True
 SUPPORTED_NONLOCALES = list(base.SUPPORTED_NONLOCALES) + [
     'csp',
     'api',
+    'browserid',
+    'admin'
 ]
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
 
 # BrowserID creates a user if one doesn't exist.
 BROWSERID_CREATE_USER = True
+BROWSERID_USERNAME_ALGO = get_username
 
 # On Login, we redirect through register.
 LOGIN_REDIRECT_URL = '/register'
@@ -240,12 +246,6 @@ CSP_REPORT_URI = '/csp/report'
 ES_DISABLED = True
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians')
-
-# Use this to reserve the URL namespace
-USERNAME_BLACKLIST = ('save', 'lonelyvegan', 'tag', 'group', 'about',
-                      'groups', 'tags', 'media', 'username', 'register',
-                      'new', 'delete', 'help', 'photo', 'img', 'src',
-                      'files')
 
 # Sorl settings
 THUMBNAIL_DUMMY = True

@@ -22,6 +22,6 @@ urlpatterns = patterns('',
     url('^confirm-register$', direct_to_template,
         {'template': 'phonebook/confirm_register.html'},
         name='confirm_register'),
-    url(r'^(?P<username>(u\/)?[\w.@+-]{1,30})$',
+    url(r'^u/(?P<username>[\w.@+-]{1,30})$',
         views.profile, name='profile'),
 )

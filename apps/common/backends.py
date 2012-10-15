@@ -38,9 +38,6 @@ class MozilliansBrowserID(BrowserIDBackend):
         return super(MozilliansBrowserID, self).authenticate(
                                         assertion=assertion, audience=audience)
 
-    def create_user(self, email):
-        return User.objects.create_user(get_username(email), email)
-
 
 class TestBackend(object):
     """Testing backend that does no real authentication. Great for

@@ -4,7 +4,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "(no)*spam"
+            "value": "(no)*spam$"
         }
     },
     {
@@ -20,7 +20,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "about(us)?"
+            "value": "about(us)?$"
         }
     },
     {
@@ -28,7 +28,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "account(s)?"
+            "value": "account(s)?$"
         }
     },
     {
@@ -36,7 +36,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "add(-)?ons"
+            "value": "add(-)?ons$"
         }
     },
     {
@@ -44,7 +44,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "admin(.)*"
+            "value": "admin(.)*$"
         }
     },
     {
@@ -52,7 +52,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "affiliate(s)?"
+            "value": "affiliate(s)?$"
         }
     },
     {
@@ -84,7 +84,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "auto((-)|(_))?reply"
+            "value": "auto((-)|(_))?reply$"
         }
     },
     {
@@ -140,7 +140,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "contact(-)?(us)?"
+            "value": "contact(-)?(us)?$"
         }
     },
     {
@@ -172,7 +172,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "domain(s)?"
+            "value": "domain(s)?$"
         }
     },
     {
@@ -180,7 +180,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "donotreply(tothis)?"
+            "value": "donotreply(tothis)?$"
         }
     },
     {
@@ -228,7 +228,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "file(s)?"
+            "value": "file(s)?$"
         }
     },
     {
@@ -252,7 +252,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "group(s)?"
+            "value": "group(s)?$"
         }
     },
     {
@@ -580,7 +580,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "no(-)?reply"
+            "value": "no(-)?reply$"
         }
     },
     {
@@ -796,7 +796,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "skill(s)?"
+            "value": "skill(s)?$"
         }
     },
     {
@@ -820,7 +820,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "submission(s)?"
+            "value": "submission(s)?$"
         }
     },
     {
@@ -844,7 +844,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "subscription(s)?"
+            "value": "subscription(s)?$"
         }
     },
     {
@@ -884,7 +884,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "tag(s)?"
+            "value": "tag(s)?$"
         }
     },
     {
@@ -900,15 +900,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "test((er)|(ing)|(s))?"
-        }
-    },
-    {
-        "pk": 114,
-        "model": "users.usernameblacklist",
-        "fields": {
-            "is_regex": false,
-            "value": "tester"
+            "value": "test((er)|(ing)|(s))?$"
         }
     },
     {
@@ -1004,7 +996,7 @@
         "model": "users.usernameblacklist",
         "fields": {
             "is_regex": true,
-            "value": "user(s)?"
+            "value": "user(s)?$"
         }
     },
     {
