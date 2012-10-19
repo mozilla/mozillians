@@ -75,7 +75,7 @@ You 'll need python, virtualenv and pip.
 
 	  ./manage.py runserver 127.0.0.1:8000
 
-     #. Load http://127.0.0.1:800 and sign in with BrowserID, then create your profile.
+     #. Load http://127.0.0.1:8000 and sign in with BrowserID, then create your profile.
      #. Run::
 
 	  ./scripts/su.sh
