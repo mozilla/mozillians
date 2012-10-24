@@ -27,3 +27,4 @@ media/uploads
 media/cache
 venv/
 mozillians.db
+media/static

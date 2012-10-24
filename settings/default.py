@@ -6,6 +6,7 @@ import logging
 from funfactory.manage import path
 from funfactory import settings_base as base
 from settings import initial as pre
+from settings import MEDIA_URL
 
 from apps.users.helpers import calculate_username
 
@@ -34,9 +35,9 @@ PORT = 443
 
 ## Media and templates.
 TEMPLATE_DIRS = (path('apps/users/templates'), )
-STATICFILES_DIRS = (
-    pre.UPLOAD_ROOT,
-)
+
+STATIC_ROOT = path('media/static')
+STATIC_URL = MEDIA_URL + 'static/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -177,6 +178,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
 
     'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.staticfiles',
     'django_browserid',
     'bootstrapform',
 
