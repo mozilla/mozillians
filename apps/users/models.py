@@ -284,7 +284,6 @@ class UserProfile(models.Model, SearchMixin):
           dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, **kwargs):
     dn = '%s %s' % (instance.first_name, instance.last_name)
-
     up, created = UserProfile.objects.get_or_create(user=instance)
     up.display_name = dn
     up.save()
@@ -305,7 +304,7 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
 def add_to_staff_group(sender, instance, created, **kwargs):
     """Keep users in the staff group if they're autovouchable."""
     email = instance.user.email
-    staff = Group.objects.get(name='staff', system=True)
+    staff, created = Group.objects.get_or_create(name='staff', system=True)
     if any(email.endswith('@' + x) for x in
            settings.AUTO_VOUCH_DOMAINS):
         instance.groups.add(staff)

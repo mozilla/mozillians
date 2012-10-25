@@ -9,6 +9,7 @@ from product_details import product_details
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
+from apps.phonebook.forms import RegisterForm, UserForm
 from apps.phonebook.models import Invite
 
 import forms
@@ -57,11 +58,6 @@ def register(request):
     Pulls out an invite code if it exists and auto validates the user
     if so. Single-purpose view.
     """
-    COUNTRIES = zip(product_details.get_regions('en-US').values(),
-                    product_details.get_regions(request.locale).values())
-    COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
-    COUNTRIES.insert(0, ('', '----'))
-
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
         return redirect('home')
@@ -78,15 +74,14 @@ def register(request):
     if not user:
         return redirect('home')
 
-    form = forms.RegistrationForm(request.POST or None,
-                                  initial={'username': user.username},
-                                  instance=user.get_profile())
-
-    form.fields['country'].choices = COUNTRIES
+    user_form = UserForm(request.POST or None, instance=user)
+    profile_form = RegisterForm(request.POST or None,
+                                instance=user.get_profile())
 
     if request.method == 'POST':
-        if form.is_valid():
-            form.save()
+        if (user_form.is_valid() and profile_form.is_valid()):
+            user_form.save()
+            profile_form.save()
             auth.login(request, user)
             _update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
@@ -94,7 +89,8 @@ def register(request):
 
     # 'user' object must be passed in because we are not logged in
     return render(request, 'registration/register.html',
-                  dict(form=form,
+                  dict(profile_form=profile_form,
+                       user_form=user_form,
                        edit_form_action=reverse('register'),
                        mode='new',
                        profile=user.get_profile(),

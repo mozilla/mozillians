@@ -12,7 +12,6 @@ from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
-from product_details import product_details
 from tower import ugettext as _
 
 from apps.groups.helpers import stringify_groups
@@ -73,27 +72,23 @@ def profile(request, username):
 @never_cache
 @login_required
 def edit_profile(request):
-    COUNTRIES = zip(product_details.get_regions(request.locale).values(),
-                    product_details.get_regions(request.locale).values())
-    COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
-    COUNTRIES.insert(0, ('', '----'))
-
     profile = request.user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
-    if request.method == 'POST':
-        form = forms.ProfileForm(
-                request.POST,
-                request.FILES,
-                instance=profile,
-        )
-        form.fields['region'].choices = COUNTRIES
+    user_form = forms.UserForm(request.POST or None, instance=request.user)
+    profile_form = forms.ProfileForm(
+        request.POST or None, request.FILES or None, instance=profile,
+        initial=dict(groups=user_groups, skills=user_skills,
+                     languages=user_languages),
+        locale=request.locale)
 
-        if form.is_valid():
+    if request.method == 'POST':
+        if (user_form.is_valid() and profile_form.is_valid()):
             old_username = request.user.username
-            form.save()
+            user_form.save()
+            profile_form.save()
 
             # Notify the user that their old profile URL won't work.
             if (not profile.is_vouched and
@@ -103,35 +98,16 @@ def edit_profile(request):
                                           'changed.'))
 
             return redirect(reverse('profile', args=[request.user.username]))
-    else:
-        initial = dict(first_name=request.user.first_name,
-                       last_name=request.user.last_name,
-                       username=request.user.username,
-                       bio=profile.bio,
-                       website=profile.website,
-                       irc_nickname=profile.ircname,
-                       groups=user_groups,
-                       skills=user_skills,
-                       languages=user_languages)
 
-        form = forms.ProfileForm(
-                instance=profile,
-                initial=initial,
-        )
-        form.fields['country'].choices = COUNTRIES
-
-        if not request.user.username.startswith('u/'):
-            initial.update(username=request.user.username)
-
-    # When changing this keep in mind that the same view is used for
-    # user.register.
-    d = dict(form=form,
+    d = dict(profile_form=profile_form,
+             user_form=user_form,
              mode='edit',
              user_groups=user_groups,
              my_vouches=UserProfile.objects.filter(vouched_by=profile),
              profile=profile)
+
     # If there are form errors, don't send a 200 OK.
-    status = 400 if form.errors else 200
+    status = 400 if (profile_form.errors or user_form.errors) else 200
     return render(request, 'phonebook/edit_profile.html', d, status=status)
 
 
