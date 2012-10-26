@@ -1,34 +1,38 @@
 from django.contrib import admin
-
-from sorl.thumbnail.admin import AdminImageMixin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 
 from models import UserProfile, UsernameBlacklist
 
+admin.site.unregister(User)
 
-class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
-    """UserProfile Admin."""
-    fields = ['user', 'user_email', 'display_name', 'photo', 'ircname',
-              'is_vouched', 'vouched_by', 'bio', 'website', 'groups', 'skills',
-              'languages', 'country', 'region', 'city',
-              'allows_mozilla_sites', 'allows_community_sites']
-    list_display = ['display_name', 'user_email', 'user_username', 'country',
-                    'is_vouched', 'vouched_by']
-    list_display_links = ['display_name', 'user_email', 'user_username']
-    readonly_fields = ['user', 'user_email']
+
+class UserProfileInline(admin.StackedInline):
+    """UserProfile Inline model for UserAdmin."""
+    model = UserProfile
+
+
+class UserAdmin(UserAdmin):
+    """User Admin."""
+    inlines = [UserProfileInline]
+    search_fields = ['first_name', 'last_name', 'email', 'username',
+                     'userprofile__ircname']
+    list_filter = ['userprofile__is_vouched']
     save_on_top = True
-    search_fields = ['display_name', 'user__email', 'user__username',
-                     'ircname']
-    list_filter = ['is_vouched']
+    list_display = ['first_name', 'last_name', 'email', 'username', 'country',
+                    'is_vouched', 'vouched_by']
+    list_display_links = ['first_name', 'last_name', 'email', 'username']
 
-    def has_add_permission(self, *a, **kw):
-        """No one should be creating UserProfiles from the admin."""
-        return False
+    def country(self, obj):
+        return obj.userprofile.country
 
-    def has_delete_permission(self, *a, **kw):
-        """Delete the User, not the UserProfile."""
-        return False
+    def is_vouched(self, obj):
+        return obj.userprofile.is_vouched
 
-admin.site.register(UserProfile, UserProfileAdmin)
+    def vouched_by(self, obj):
+        return obj.userprofile.vouched_by
+
+admin.site.register(User, UserAdmin)
 
 
 class UsernameBlacklistAdmin(admin.ModelAdmin):

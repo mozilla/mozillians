@@ -56,7 +56,6 @@ class UserProfile(models.Model, SearchMixin):
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
-    display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
@@ -80,7 +79,7 @@ class UserProfile(models.Model, SearchMixin):
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
 
     @property
-    def full_name(self):
+    def display_name(self):
         return '%s %s' % (self.user.first_name, self.user.last_name)
 
     class Meta:
@@ -92,12 +91,6 @@ class UserProfile(models.Model, SearchMixin):
 
     def get_absolute_url(self):
         return reverse('profile', args=[self.user.username])
-
-    def user_email(self):
-        return self.user.email
-
-    def user_username(self):
-        return self.user.username
 
     def anonymize(self):
         """Remove personal info from a user"""
@@ -283,10 +276,9 @@ class UserProfile(models.Model, SearchMixin):
 @receiver(models.signals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, **kwargs):
-    dn = '%s %s' % (instance.first_name, instance.last_name)
     up, created = UserProfile.objects.get_or_create(user=instance)
-    up.display_name = dn
-    up.save()
+    if created:
+        up.save()
 
 
 @receiver(models.signals.pre_save, sender=UserProfile,

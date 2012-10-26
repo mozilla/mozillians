@@ -191,7 +191,7 @@ class RegistrationTest(ESTestCase):
 
             eq_(r.status_code, 200,
                 'This form should fail for "%s", and say so.' % name)
-            assert r.context['form'].errors, (
+            assert r.context['user_form'].errors, (
                 "Didn't raise errors for %s" % name)
 
     def test_nickname_changes_before_vouch(self):
@@ -252,7 +252,7 @@ class RegistrationTest(ESTestCase):
             r = self.client.post(reverse('register'), register, follow=True)
 
         # Make sure we can't use the same username twice
-        assert r.context['form'].errors, "Form should throw errors."
+        assert r.context['user_form'].errors, "Form should throw errors."
 
 
 class TestThingsForPeople(ESTestCase):
@@ -1032,4 +1032,3 @@ class APITests(ESTestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertEqual(len(data['objects']), 0)
-

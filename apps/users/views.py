@@ -5,14 +5,12 @@ from django.shortcuts import redirect, render
 
 import commonware.log
 from django_browserid.views import Verify
-from product_details import product_details
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from apps.phonebook.forms import RegisterForm, UserForm
 from apps.phonebook.models import Invite
 
-import forms
 from models import UserProfile
 
 log = commonware.log.getLogger('m.users')

@@ -1,13 +1,9 @@
-import re
-
 from django import forms
 
-from tower import ugettext as _, ugettext_lazy as _lazy
+from tower import ugettext_lazy as _lazy
 
 from users.models import UserProfile
 from phonebook.forms import ProfileForm
-
-from apps.groups.models import Group, Skill, Language
 
 
 class RegistrationForm(ProfileForm):

@@ -97,6 +97,8 @@ class Migration(SchemaMigration):
         },
         'users.userprofile': {
             'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},
+            'allows_community_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'allows_mozilla_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'bio': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'city': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'country': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '50', 'blank': 'True'}),

@@ -189,13 +189,22 @@
               <h2>{{ _("Developers") }}</h2>
               <p class="field_description">
                 {% trans %}
-                Take a look at the list of the <a href="/api/v1/">API methods we've made available</a>. To use this API,
+                Take a look at the list of the <a href="/api/v1/?format=json">API methods we've made available</a>. To use this API,
                 you'll need to get approval from the Privacy team. To get started,
                 <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Data%20Safety">file a bug</a>.
                 If you have any questions, talk to us in our <a href="http://groups.google.com/group/mozilla-dev-community-tools/">
                 development forum</a>.
                 {% endtrans %}
               </p>
+              <h4>Your approved apps:</h4>
+              <br/>
+              <ul>
+              {% for app in apps %}
+                <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
+                  <small>Key: {{ app.key }}</small>
+                </li>
+              {% endfor %}
+              </ul>
             </div>
           </div>
         {% endif %}

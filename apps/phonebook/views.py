@@ -72,12 +72,15 @@ def profile(request, username):
 @never_cache
 @login_required
 def edit_profile(request):
-    profile = request.user.get_profile()
+    """Edit user profile view."""
+    # Don't user request.user
+    user = User.objects.get(pk=request.user.id)
+    profile = user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
-    user_form = forms.UserForm(request.POST or None, instance=request.user)
+    user_form = forms.UserForm(request.POST or None, instance=user)
     profile_form = forms.ProfileForm(
         request.POST or None, request.FILES or None, instance=profile,
         initial=dict(groups=user_groups, skills=user_skills,
@@ -91,20 +94,20 @@ def edit_profile(request):
             profile_form.save()
 
             # Notify the user that their old profile URL won't work.
-            if (not profile.is_vouched and
-                request.user.username != old_username):
+            if user.username != old_username:
                 messages.info(request, _(u'You changed your username; please '
-                                          'note your profile URL has also '
-                                          'changed.'))
+                                         'note your profile URL has also '
+                                         'changed.'))
 
-            return redirect(reverse('profile', args=[request.user.username]))
+            return redirect(reverse('profile', args=[user.username]))
 
     d = dict(profile_form=profile_form,
              user_form=user_form,
              mode='edit',
              user_groups=user_groups,
              my_vouches=UserProfile.objects.filter(vouched_by=profile),
-             profile=profile)
+             profile=profile,
+             apps=user.apiapp_set.filter(is_active=True))
 
     # If there are form errors, don't send a 200 OK.
     status = 400 if (profile_form.errors or user_form.errors) else 200

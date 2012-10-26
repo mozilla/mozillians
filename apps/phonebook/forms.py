@@ -16,6 +16,7 @@ from models import Invite
 PAGINATION_LIMIT = 20
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 
+
 class SearchForm(happyforms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=False)
     limit = forms.CharField(widget=forms.HiddenInput, required=False)
@@ -88,6 +89,7 @@ class UserForm(forms.ModelForm):
                                           'please choose another.'))
         return username
 
+
 class BaseProfileForm(forms.ModelForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
@@ -124,9 +126,10 @@ class BaseProfileForm(forms.ModelForm):
             raise forms.ValidationError(_(u'Skills can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
-        return [s.strip()
-                for s in self.cleaned_data['skills'].lower().split(',')
-                if s]
+        skills = self.cleaned_data['skills']
+        return filter(lambda x: x,
+                      map(lambda x: x.strip() or False,
+                          skills.lower().split(',')))
 
     def clean_languages(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
@@ -134,9 +137,11 @@ class BaseProfileForm(forms.ModelForm):
             raise forms.ValidationError(_(u'Languages can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
-        return [s.strip()
-                for s in self.cleaned_data['languages'].lower().split(',')
-                if s]
+        languages = self.cleaned_data['languages']
+
+        return filter(lambda x: x,
+                      map(lambda x: x.strip() or False,
+                          languages.lower().split(',')))
 
     def clean(self):
         """Make sure geographic fields aren't underspecified."""
@@ -174,15 +179,15 @@ class ProfileForm(BaseProfileForm):
             raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
-
         system_groups = [g.name for g in self.instance.groups.all()
                          if g.system]
-
-        new_groups = [g.strip()
-                      for g in self.cleaned_data['groups'].lower().split(',')
-                      if g]
+        groups = self.cleaned_data['groups']
+        new_groups = filter(lambda x: x,
+                            map(lambda x: x.strip() or False,
+                                groups.lower().split(',')))
 
         return system_groups + new_groups
+
 
 class RegisterForm(BaseProfileForm):
     optin = forms.BooleanField(
@@ -222,4 +227,3 @@ class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite
         exclude = ('redeemer', 'inviter')
-
