@@ -46,7 +46,6 @@ ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='mozillians_dev')
 ES_TIMEOUT = 60
-ES_INDEXING_TIMEOUT = 60
 
 CELERY_ALWAYS_EAGER = True
 
@@ -60,3 +59,4 @@ CACHES = {
         'LOCATION': 'unique-pastry-chef'
         }
 }
+

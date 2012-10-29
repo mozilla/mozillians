@@ -255,8 +255,3 @@ THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
-
-# Timeout for querying requests
-ES_TIMEOUT = 5
-# Timeout for indexing requests
-ES_INDEXING_TIMEOUT = 30
