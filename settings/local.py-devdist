@@ -53,10 +53,4 @@ JAVA_BIN = '/usr/bin/java'
 
 SESSION_COOKIE_SECURE = False
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-pastry-chef'
-        }
-}
-
+CACHES = {}
