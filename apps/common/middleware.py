@@ -31,14 +31,12 @@ class PermissionDeniedMiddleware(object):
             if request.user.is_authenticated():
                 log.debug('Permission denied middleware, user was '
                           'authenticated, sending 500')
-                return error_page(request, 500, status=response.status_code)
             else:
                 if isinstance(response, (HttpResponseForbidden)):
                     log.debug('Response was forbidden')
                 elif isinstance(response, (HttpResponseNotAllowed)):
                     log.debug('Response was not allowed')
-                log.debug('Permission denied middleware, redirecting home')
-                return HttpResponseRedirect(reverse('home'))
+            return error_page(request, 500, status=response.status_code)
         return response
 
 
