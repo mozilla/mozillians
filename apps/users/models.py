@@ -153,21 +153,17 @@ class UserProfile(models.Model, SearchMixin):
 
         return gravatar(self.user.email)
 
-    def vouch(self, vouched_by, system=True, commit=True):
-        changed = system  # do we need to do a vouch?
-        if system:
-            changed = True
-            self.is_vouched = True
+    def vouch(self, vouched_by, commit=True):
+        if self.is_vouched:
+            return
 
-        if vouched_by and vouched_by.is_vouched:
-            changed = True
-            self.is_vouched = True
-            self.vouched_by = vouched_by
+        self.is_vouched = True
+        self.vouched_by = vouched_by
 
-        if commit and changed:
+        if commit:
             self.save()
-            # Email the user and tell them they were vouched.
-            self._email_now_vouched()
+
+        self._email_now_vouched()
 
     def get_api_key(self):
         api_key, created = ApiKey.objects.get_or_create(user=self.user)
@@ -289,7 +285,7 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
     if not instance.id:
         email = instance.user.email
         if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            instance.vouch(None, system=True, commit=False)
+            instance.vouch(None, commit=False)
 
 
 @receiver(models.signals.post_save, sender=UserProfile,
