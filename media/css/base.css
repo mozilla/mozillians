@@ -427,6 +427,7 @@ a.btn {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    padding-bottom: 3px;
 }
 
 .details ul {
