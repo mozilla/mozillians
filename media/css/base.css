@@ -445,6 +445,7 @@ a.btn {
 
 dl {
     overflow: hidden;
+    padding-bottom:.2em;
 }
 
 dt {
