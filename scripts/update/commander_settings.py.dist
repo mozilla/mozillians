@@ -1,0 +1,17 @@
+SRC_DIR = '/data/genericrhel6-stage/src/mozillians.allizom.org/mozillians'
+WWW_DIR = '/data/genericrhel6-stage/www/mozillians.allizom.org/mozillians'
+
+#CRON_NAME = 'mozillians.allizom.org-gencron'
+
+DEPLOY_SCRIPT = "/data/genericrhel6-stage/deploy -n mozillians.allizom.org"
+REMOTE_UPDATE_SCRIPT = "/data/bin/update-www.sh mozillians.allizom.org"
+
+WEB_HOSTGROUP = 'genericrhel6-stage'
+CELERY_HOSTGROUP = 'genericrhel6-celery-stage'
+CELERY_SERVICE = 'celeryd-mozillians-stage'
+
+UPDATE_REF = 'origin/master'
+SSH_KEY = None
+
+REMOTE_WSGI = '/data/www/mozillians.allizom.org/mozillians/wsgi/playdoh.wsgi'
+REMOTE_HOSTNAME = 'mozillians.allizom.org'
