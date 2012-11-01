@@ -12,16 +12,15 @@ from django.views.decorators.http import require_POST
 
 import commonware.log
 from funfactory.urlresolvers import reverse
-from product_details import product_details
-from funfactory.helpers import urlparams
-from tastypie.models import ApiKey
 from tower import ugettext as _
 
-from groups.helpers import stringify_groups
-from groups.models import Group
-from phonebook import forms
-from phonebook.models import Invite
-from users.models import UserProfile
+from apps.groups.helpers import stringify_groups
+from apps.groups.models import Group
+from apps.users.models import UserProfile
+
+import forms
+from models import Invite
+
 
 log = commonware.log.getLogger('m.phonebook')
 
@@ -73,73 +72,45 @@ def profile(request, username):
 @never_cache
 @login_required
 def edit_profile(request):
-    COUNTRIES = zip(product_details.get_regions(request.locale).values(),
-                    product_details.get_regions(request.locale).values())
-    COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
-    COUNTRIES.insert(0, ('', '----'))
-
-    profile = request.user.get_profile()
+    """Edit user profile view."""
+    # Don't user request.user
+    user = User.objects.get(pk=request.user.id)
+    profile = user.get_profile()
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
+    user_form = forms.UserForm(request.POST or None, instance=user)
+    profile_form = forms.ProfileForm(
+        request.POST or None, request.FILES or None, instance=profile,
+        initial=dict(groups=user_groups, skills=user_skills,
+                     languages=user_languages),
+        locale=request.locale)
+
     if request.method == 'POST':
-        form = forms.ProfileForm(
-                request.POST,
-                request.FILES,
-                instance=profile,
-        )
-        form.fields['region'].choices = COUNTRIES
-
-        if 'reset_api_key' in request.POST:
-            # The rest of the form is irrelevant.
-            try:
-                request.user.api_key.delete()
-            except ApiKey.DoesNotExist:
-                pass
-            return redirect(urlparams(reverse('profile.edit'), 'services'))
-
-        if form.is_valid():
+        if (user_form.is_valid() and profile_form.is_valid()):
             old_username = request.user.username
-            form.save()
+            user_form.save()
+            profile_form.save()
 
             # Notify the user that their old profile URL won't work.
-            if (not profile.is_vouched and
-                request.user.username != old_username):
+            if user.username != old_username:
                 messages.info(request, _(u'You changed your username; please '
-                                          'note your profile URL has also '
-                                          'changed.'))
+                                         'note your profile URL has also '
+                                         'changed.'))
 
-            return redirect(reverse('profile', args=[request.user.username]))
-    else:
-        initial = dict(first_name=request.user.first_name,
-                       last_name=request.user.last_name,
-                       username=request.user.username,
-                       bio=profile.bio,
-                       website=profile.website,
-                       irc_nickname=profile.ircname,
-                       groups=user_groups,
-                       skills=user_skills,
-                       languages=user_languages)
+            return redirect(reverse('profile', args=[user.username]))
 
-        form = forms.ProfileForm(
-                instance=profile,
-                initial=initial,
-        )
-        form.fields['country'].choices = COUNTRIES
-
-        if not request.user.username.startswith('u/'):
-            initial.update(username=request.user.username)
-
-    # When changing this keep in mind that the same view is used for
-    # user.register.
-    d = dict(form=form,
+    d = dict(profile_form=profile_form,
+             user_form=user_form,
              mode='edit',
              user_groups=user_groups,
              my_vouches=UserProfile.objects.filter(vouched_by=profile),
-             profile=profile)
+             profile=profile,
+             apps=user.apiapp_set.filter(is_active=True))
+
     # If there are form errors, don't send a 200 OK.
-    status = 400 if form.errors else 200
+    status = 400 if (profile_form.errors or user_form.errors) else 200
     return render(request, 'phonebook/edit_profile.html', d, status=status)
 
 

@@ -11,10 +11,10 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 
-from groups.models import Group, Skill
-from phonebook import forms
-from phonebook.views import vouch_required
-from users.models import UserProfile
+from apps.groups.models import Group, Skill
+from apps.phonebook import forms
+from apps.phonebook.views import vouch_required
+from apps.users.models import UserProfile
 
 log = commonware.log.getLogger('m.groups')
 

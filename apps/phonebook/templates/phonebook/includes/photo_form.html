@@ -1,5 +1,5 @@
-<div class="control-group photo {% if form.photo.errors %}error{% endif %}">
-  <label class="control-label" for="id_photo">{{ form.photo.label }}</label>
+<div class="control-group photo {% if profile_form.photo.errors %}error{% endif %}">
+  <label class="control-label" for="id_photo">{{ profile_form.photo.label }}</label>
   <div class="controls">
     <div class="thumbnail">
       <img id="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile photo') }}">
@@ -8,7 +8,7 @@
       <li>
         <input class="input-file" id="id_photo" type="file" name="photo">
       </li>
-      {% for error in form.photo.errors %}
+      {% for error in profile_form.photo.errors %}
         <li>
           <span class="help-inline">{{ error }}</span>
         </li>
