@@ -7,9 +7,10 @@ from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 import common.tests
-from groups.cron import assign_autocomplete_to_groups
-from groups.helpers import stringify_groups
-from groups.models import AUTO_COMPLETE_COUNT, Group
+
+from ..cron import assign_autocomplete_to_groups
+from ..helpers import stringify_groups
+from ..models import AUTO_COMPLETE_COUNT, Group
 
 
 class GroupTest(common.tests.ESTestCase):

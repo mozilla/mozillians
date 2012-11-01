@@ -13,16 +13,14 @@ from django.dispatch import receiver
 from elasticutils.contrib.django import S
 from elasticutils.contrib.django.models import SearchMixin
 from elasticutils.contrib.django import tasks
-
 from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
 from sorl.thumbnail import ImageField
-from tastypie.models import ApiKey
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from groups.models import Group, Skill, Language
-from phonebook.helpers import gravatar
+from apps.groups.models import Group, Skill, Language
+from apps.phonebook.helpers import gravatar
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage
@@ -58,7 +56,6 @@ class UserProfile(models.Model, SearchMixin):
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
-    display_name = models.CharField(max_length=255, default='', blank=True)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
@@ -70,8 +67,19 @@ class UserProfile(models.Model, SearchMixin):
     city = models.CharField(max_length=255, default='', blank=True,
                             verbose_name=_lazy(u'City'))
 
+    # Privacy Settings
+    allows_community_sites = models.BooleanField(
+        default=True,
+        verbose_name=_lazy(u'Sites that can determine my vouched status'),
+        choices=((True, _lazy(u'All Community Sites')),
+                 (False, _lazy(u'Only Mozilla Properties'))))
+    allows_mozilla_sites = models.BooleanField(
+        default=True,
+        verbose_name=_lazy(u'Mozilla sites can access all my Phonebook data.'),
+        choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
+
     @property
-    def full_name(self):
+    def display_name(self):
         return '%s %s' % (self.user.first_name, self.user.last_name)
 
     class Meta:
@@ -83,12 +91,6 @@ class UserProfile(models.Model, SearchMixin):
 
     def get_absolute_url(self):
         return reverse('profile', args=[self.user.username])
-
-    def user_email(self):
-        return self.user.email
-
-    def user_username(self):
-        return self.user.username
 
     def anonymize(self):
         """Remove personal info from a user"""
@@ -165,10 +167,6 @@ class UserProfile(models.Model, SearchMixin):
 
         self._email_now_vouched()
 
-    def get_api_key(self):
-        api_key, created = ApiKey.objects.get_or_create(user=self.user)
-        return api_key.key
-
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
@@ -187,7 +185,8 @@ class UserProfile(models.Model, SearchMixin):
         d = {}
 
         attrs = ('id', 'is_vouched', 'website', 'ircname', 'country',
-                 'region', 'city')
+                 'region', 'city', 'allows_mozilla_sites',
+                 'allows_community_sites')
         for a in attrs:
             data = getattr(obj, a)
             if isinstance(data, basestring):
@@ -238,6 +237,8 @@ class UserProfile(models.Model, SearchMixin):
                 'bio': {'type': 'string', 'analyzer': 'snowball'},
 
                 'is_vouched': {'type': 'boolean'},
+                'allows_mozilla_sites': {'type': 'boolean'},
+                'allows_community_sites': {'type': 'boolean'},
                 'photo': {'type': 'boolean'},
 
                 # The website also shouldn't be analyzed.
@@ -271,11 +272,9 @@ class UserProfile(models.Model, SearchMixin):
 @receiver(models.signals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, **kwargs):
-    dn = '%s %s' % (instance.first_name, instance.last_name)
-
     up, created = UserProfile.objects.get_or_create(user=instance)
-    up.display_name = dn
-    up.save()
+    if created:
+        up.save()
 
 
 @receiver(models.signals.pre_save, sender=UserProfile,
@@ -293,7 +292,7 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
 def add_to_staff_group(sender, instance, created, **kwargs):
     """Keep users in the staff group if they're autovouchable."""
     email = instance.user.email
-    staff = Group.objects.get(name='staff', system=True)
+    staff, created = Group.objects.get_or_create(name='staff', system=True)
     if any(email.endswith('@' + x) for x in
            settings.AUTO_VOUCH_DOMAINS):
         instance.groups.add(staff)

@@ -1,16 +1,17 @@
 from django.contrib.auth.models import User
 from django.core import mail
 
+from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from common.browserid_mock import mock_browserid
-import common.tests
-from funfactory.urlresolvers import reverse
-from phonebook.models import Invite
+import apps.common.tests
+from apps.common.browserid_mock import mock_browserid
+
+from ..models import Invite
 
 
-class InviteFlowTest(common.tests.ESTestCase):
+class InviteFlowTest(apps.common.tests.ESTestCase):
     fake_email = 'mr.fusion@gmail.com'
     fake_email2 = 'mrs.fusion@gmail.com'
 
@@ -116,7 +117,7 @@ class InviteFlowTest(common.tests.ESTestCase):
             False)
 
 
-class InviteEdgeTest(common.tests.ESTestCase):
+class InviteEdgeTest(apps.common.tests.ESTestCase):
 
     def test_no_reinvite(self):
         """Don't reinvite a vouched user."""

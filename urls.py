@@ -5,18 +5,9 @@ from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.views.generic.base import TemplateView
 from django.views.i18n import javascript_catalog
-from tastypie import api
-from tastypie.api import Api
-import users.api
-import common.api
 
 admin.autodiscover()
 
-# Monkey patch the default serializer to also provide a to_html view.
-api.Serializer = common.api.HTMLSerializer
-
-v1_api = Api(api_name='v1')
-v1_api.register(users.api.VouchedResource())
 
 def error_page(request, template, status=None):
     """Render error templates, found in the root /templates directory.
@@ -34,14 +25,16 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 
 urlpatterns = patterns('',
-    url(r'^api/', include(v1_api.urls)),
-    (r'', include('users.urls')),
-    (r'', include('groups.urls')),
-    (r'', include('phonebook.urls')),
+    url(r'^api/', include('api.urls')),
+    url(r'', include('users.urls')),
+    url(r'', include('groups.urls')),
+    url(r'', include('phonebook.urls')),
 
-    (r'^csp', include('csp.urls')),
+    url(r'^csp', include('csp.urls')),
 
-    (r'^admin/', include(admin.site.urls)),
+    # Admin URLs.
+    url(r'^admin/', include(admin.site.urls)),
+
     url(r'^jsi18n/$', cache_page(60 * 60 * 24 * 365)(javascript_catalog),
         {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
 )

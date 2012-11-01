@@ -16,11 +16,14 @@
 
 {% block main_content %}
 
-  {% if form.errors %}
+  {% if (user_form.errors or profile_form.errors) %}
     <div class="alert alert-error">
       The following fields are required (optin is the checkbox in the last panel):
       <ol>
-      {% for error in form.errors %}
+      {% for error in user_form.errors %}
+        <li>{{ error|escape }}</li>
+      {% endfor %}
+      {% for error in profile_form.errors %}
         <li>{{ error|escape }}</li>
       {% endfor %}
       </ol>
@@ -40,25 +43,25 @@
       <div class="tab-content">
         <div class="tab-pane active" id="start">
           <h2>{{ _('Profile') }}</h2>
-          {{ bootstrap(form.username) }}
-          {{ bootstrap(form.first_name) }}
-          {{ bootstrap(form.last_name) }}
-          {{ bootstrap(form.ircname) }}
-          {{ bootstrap(form.website) }}
-          {{ bootstrap(form.bio) }}
+          {{ bootstrap(user_form.username) }}
+          {{ bootstrap(user_form.first_name) }}
+          {{ bootstrap(user_form.last_name) }}
+          {{ bootstrap(profile_form.ircname) }}
+          {{ bootstrap(profile_form.website) }}
+          {{ bootstrap(profile_form.bio) }}
           <button type="button" id="page2button" class="span2 btn btn-primary">{{ _('Next') }}</button>
         </div>
         <div class="tab-pane" id="skills">
           <h2>{{ _('Skills & Groups') }}</h2>
           <div class="register-groups">
-            {{ form.groups.label_tag() }}
-            {{ form.groups }}
+            {{ profile_form.groups.label_tag() }}
+            {{ profile_form.groups }}
           </div>
           <div class="register-skills">
-            {{ form.skills.label_tag() }}
-            {{ form.skills }}
-            {{ form.languages.label_tag() }}
-            {{ form.languages }}
+            {{ profile_form.skills.label_tag() }}
+            {{ profile_form.skills }}
+            {{ profile_form.languages.label_tag() }}
+            {{ profile_form.languages }}
           </div>
           <button type="button" id="page3button" class="span2 btn btn-primary">{{ _('Next') }}</button>
           <button type="button" id="page1button" class="span2 btn">{{ _('Previous') }}</button>
@@ -71,10 +74,10 @@
               will be able to contact you easier and vice-versa.
             {% endtrans %}
           </p>
-          {{ bootstrap(form.country) }}
-          {{ bootstrap(form.region) }}
-          {{ bootstrap(form.city) }}
-          {{ bootstrap(form.optin) }}
+          {{ bootstrap(profile_form.country) }}
+          {{ bootstrap(profile_form.region) }}
+          {{ bootstrap(profile_form.city) }}
+          {{ bootstrap(profile_form.optin) }}
           <div id="edit_controls">
             <button type="submit" class="span2 btn-large btn-primary">{{ _('Create Profile') }}</button>
           </div>

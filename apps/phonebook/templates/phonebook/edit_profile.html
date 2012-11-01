@@ -17,11 +17,14 @@
 {% block main_content %}
   <h1>{{ _('Edit Your Profile') }}</h1>
 
-  {% if form.errors %}
+  {% if profile_form.errors or user_form.errors  %}
     <div class="alert alert-error">
       Please correct the following errors:
       <ol>
-      {% for error in form.errors %}
+      {% for error in user_form.errors %}
+        <li>{{ error|escape }}</li>
+      {% endfor %}
+      {% for error in profile_form.errors %}
         <li>{{ error|escape }}</li>
       {% endfor %}
       </ol>
@@ -46,11 +49,11 @@
         <div class="tab-pane active" id="1">
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
-          {{ bootstrap(form.first_name) }}
-          {{ bootstrap(form.last_name) }}
-          {{ bootstrap(form.ircname) }}
-          {{ bootstrap(form.website) }}
-          {{ bootstrap(form.bio) }}
+          {{ bootstrap(user_form.first_name) }}
+          {{ bootstrap(user_form.last_name) }}
+          {{ bootstrap(profile_form.ircname) }}
+          {{ bootstrap(profile_form.website) }}
+          {{ bootstrap(profile_form.bio) }}
 
           <h2>{{ _('Location') }}</h2>
           <p>
@@ -59,9 +62,9 @@
               will be able to contact you easier and vice-versa.
             {% endtrans %}
           </p>
-          {{ bootstrap(form.country) }}
-          {{ bootstrap(form.region) }}
-          {{ bootstrap(form.city) }}
+          {{ bootstrap(profile_form.country) }}
+          {{ bootstrap(profile_form.region) }}
+          {{ bootstrap(profile_form.city) }}
         </div>
         <div class="tab-pane" id="skills">
           <h2>{{ _('Groups') }}</h2>
@@ -72,8 +75,8 @@
               sub-community.
             {% endtrans %}
           </p>
-          {{ form.groups.label_tag() }}
-          {{ form.groups }}
+          {{ profile_form.groups.label_tag() }}
+          {{ profile_form.groups }}
           <h2>{{ _('Skills') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -81,8 +84,8 @@
               results often with the minimum outlay of time, energy, or both.
             {% endtrans %}
           </p>
-          {{ form.skills.label_tag() }}
-          {{ form.skills }}
+          {{ profile_form.skills.label_tag() }}
+          {{ profile_form.skills }}
           <h2>{{ _('Languages') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -91,8 +94,8 @@
               Mozillians.
             {% endtrans %}
           </p>
-          {{ form.languages.label_tag() }}
-          {{ form.languages }}
+          {{ profile_form.languages.label_tag() }}
+          {{ profile_form.languages }}
         </div>
         <div class="tab-pane" id="vouches">
           <div class="control-group">
@@ -135,7 +138,7 @@
           {% endif %}
         </div>
         <div class="tab-pane" id="account">
-          {{ bootstrap(form.username) }}
+          {{ bootstrap(user_form.username) }}
           <div class="control-group">
             <label class="control-label">{{ _('BrowserID Email') }}</label>
             <div class="controls">
@@ -178,27 +181,30 @@
                   and the <a href="http://reps.mozilla.org">Mozilla Reps Portal</a>.
                 {% endtrans %}
               </p>
+              <h2>{{ _("Privacy Settings") }}</h2>
+              <p class="field_description">
+                {{ bootstrap(profile_form.allows_community_sites) }}
+                {{ bootstrap(profile_form.allows_mozilla_sites) }}
+              </p>
               <h2>{{ _("Developers") }}</h2>
               <p class="field_description">
                 {% trans %}
-                Take a look at the list of the <a href="/api/v1/">API methods we've made available</a>. To use this API,
+                Take a look at the list of the <a href="/api/v1/?format=json">API methods we've made available</a>. To use this API,
                 you'll need to get approval from the Privacy team. To get started,
                 <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Data%20Safety">file a bug</a>.
                 If you have any questions, talk to us in our <a href="http://groups.google.com/group/mozilla-dev-community-tools/">
                 development forum</a>.
                 {% endtrans %}
               </p>
-              <label class="control-label">{{ _("Api Key") }}</label>
-              <div class="controls">
-                <span class="label-text">
-                  <div class="input-append">
-                    <input id="api-key" type="text" class="span4" autocomplete="off" data-value="{{ profile.get_api_key() }}" value="{{ profile.get_api_key() }}">
-                    <button type="submit" name="reset_api_key" class="btn btn-mini btn-danger">
-                      {{ _("Generate new API Key") }}
-                    </button>
-                  </div>
-                </span>
-              </div>
+              <h4>Your approved apps:</h4>
+              <br/>
+              <ul>
+              {% for app in apps %}
+                <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
+                  <small>Key: {{ app.key }}</small>
+                </li>
+              {% endfor %}
+              </ul>
             </div>
           </div>
         {% endif %}

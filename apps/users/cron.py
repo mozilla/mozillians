@@ -7,7 +7,7 @@ from celeryutils import chunked
 from django.conf import settings
 
 from elasticutils.contrib.django import get_es, tasks
-from users.models import UserProfile
+from models import UserProfile
 
 log = commonware.log.getLogger('m.cron')
 

@@ -6,8 +6,9 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
 import common.tests
-from groups.cron import assign_autocomplete_to_groups
-from groups.models import AUTO_COMPLETE_COUNT, Skill
+
+from ..cron import assign_autocomplete_to_groups
+from ..models import AUTO_COMPLETE_COUNT, Skill
 
 
 class SkillsTest(common.tests.ESTestCase):

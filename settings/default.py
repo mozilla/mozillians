@@ -167,6 +167,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'phonebook',
     'groups',
     'common',
+    'api',
 
     'csp',
     'jingo_minify',
@@ -174,7 +175,6 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
-    'tastypie',
 
     'django.contrib.admin',
     'django.contrib.auth',

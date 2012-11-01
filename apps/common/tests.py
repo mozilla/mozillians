@@ -1,8 +1,6 @@
 import random
 from string import letters
 
-import pyes.exceptions
-
 from django import test
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -13,7 +11,7 @@ import elasticutils.contrib.django.estestcase as estestcase
 from elasticutils.contrib.django import get_es
 
 from apps.users.cron import index_all_profiles
-from apps.users.models import UserProfile
+
 
 class TestCase(test_utils.TestCase):
     """Tests for common package."""

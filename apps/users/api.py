@@ -1,86 +1,95 @@
+from urllib2 import unquote
+
+from elasticutils.contrib.django import F, S
 from tastypie import fields
-from tastypie.authentication import Authentication
-from tastypie.authorization import ReadOnlyAuthorization
+from tastypie import http
+from tastypie.bundle import Bundle
+from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.resources import ModelResource
+from tastypie.serializers import Serializer
 
-from common.api import HTMLSerializer
-from users.models import UserProfile
+from apps.api.authenticators import AppAuthentication
+from apps.api.authorisers import MozillaOfficialAuthorization
 
-
-class VouchedAuthentication(Authentication):
-    """Api Authentication that only lets in authenticated and vouched
-    users.
-
-    """
-
-    def is_authenticated(self, request, **kwargs):
-        user = request.user
-        if user.is_authenticated() and user.get_profile().is_vouched:
-            return True
-
-        return False
-
-    def get_identifier(self, request):
-        return request.user.username
+from models import UserProfile
 
 
-class PaidStaffAuthentication(Authentication):
-    """API Authentication that only lets in paid staff users.
-
-    """
-
-    def is_authenticated(self, request, **kwargs):
-        user = request.user
-        if (user.is_authenticated() and
-                user.get_profile().groups.filter(name='staff')):
-            return True
-
-        return False
-
-    def get_identifier(self, request):
-        return request.user.username
-
-
-# class UserProfileResource(ModelResource):
-#     email = fields.CharField(attribute='user__email', null=True,
-#                              readonly=True)
-
-#     class Meta:
-#         queryset = UserProfile.objects.select_related()
-#         authentication = PaidStaffAuthentication()
-#         authorization = ReadOnlyAuthorization()
-#         serializer = HTMLSerializer()
-#         list_allowed_methods = ['get']
-#         detail_allowed_methods = ['get']
-#         resource_name = 'users'
-#         filtering = {'email': ('exact'),
-#                      'display_name': ('exact', 'contains', 'startswith'),
-#                      'ircname': ('exact', 'contains', 'startswith')}
-
-#     def get_object_list(self, request):
-#         if 'updated' in request.GET:
-#             try:
-#                 updated = float(request.GET.get('updated'))
-#                 time = datetime.fromtimestamp(updated)
-#             except (ValueError, TypeError):
-#                 pass
-#             else:
-#                 return (super(UserProfileResource, self)
-#                         .get_object_list(request)
-#                         .filter(last_updated__gt=time))
-
-#         return super(UserProfileResource, self).get_object_list(request)
-
-class VouchedResource(ModelResource):
+class UserResource(ModelResource):
+    """User Resource."""
     email = fields.CharField(attribute='user__email', null=True, readonly=True)
+    groups = fields.CharField()
+    skills = fields.CharField()
+    languages = fields.CharField()
 
     class Meta:
         queryset = UserProfile.objects.all()
-        authentication = VouchedAuthentication()
-        authorization = ReadOnlyAuthorization()
-        serializer = HTMLSerializer()
+        authentication = AppAuthentication()
+        authorization = MozillaOfficialAuthorization()
+        serializer = Serializer(formats=['json', 'jsonp', 'xml'])
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
-        resource_name = 'vouched'
-        fields = ['is_vouched']
-        filtering = {'email': ['exact']}
+        resource_name = 'users'
+        restrict_fields = False
+        restricted_fields = ['email', 'is_vouched']
+        fields = []
+
+    def build_filters(self, filters=None):
+        es_filters = []
+
+        for item in ['email', 'country', 'region', 'city', 'ircname',
+                     'username', 'languages', 'skills', 'groups',
+                     'is_vouched', 'last_name', 'first_name']:
+            if item in filters:
+                es_filters.append(F(**{item: unquote(filters[item]).lower()}))
+
+        return es_filters
+
+    def dehydrate(self, bundle):
+        if (bundle.request.GET.get('restricted', False)
+            or not bundle.data['allows_mozilla_sites']):
+            data = {}
+            for key in self._meta.restricted_fields:
+                data[key] = bundle.data[key]
+            bundle = Bundle(obj=bundle.obj, data=data, request=bundle.request)
+
+        return bundle
+
+    def dehydrate_groups(self, bundle):
+        return [unicode(g) for g in bundle.obj.groups.all()]
+
+    def dehydrate_skills(self, bundle):
+        return [unicode(g) for g in bundle.obj.skills.all()]
+
+    def dehydrate_languages(self, bundle):
+        return [unicode(g) for g in bundle.obj.languages.all()]
+
+    def dehydrate_photo(self, bundle):
+        return bundle.obj.photo_url()
+
+    def get_detail(self, request, **kwargs):
+        if request.GET.get('restricted', False):
+            raise ImmediateHttpResponse(response=http.HttpForbidden())
+
+        return super(UserResource, self).get_detail(request, **kwargs)
+
+    def apply_filters(self, request, applicable_filters):
+        """Implement advanced filters.
+
+        - Implement 'groups' filter.
+        - Implement 'languages' filter.
+        - Implement 'skills' filter.
+
+        """
+        if (request.GET.get('restricted', False)
+            and 'email__text' not in applicable_filters
+            and len(applicable_filters) != 1):
+            raise ImmediateHttpResponse(response=http.HttpForbidden())
+
+        if request.GET.get('restricted', False):
+            applicable_filters.append(F(allows_community_sites=True))
+
+        mega_filter = F()
+        for filter in applicable_filters:
+            mega_filter &= filter
+
+        return S(UserProfile).filter(mega_filter)

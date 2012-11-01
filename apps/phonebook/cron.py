@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 import commonware.log
 import cronjobs
 
-from phonebook.models import Invite
+from models import Invite
 
 log = commonware.log.getLogger('m.cron')
 
