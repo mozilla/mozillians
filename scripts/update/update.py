@@ -43,9 +43,13 @@ def update_assets(ctx):
 @task
 def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        #ctx.local("python2.6 ./vendor/src/schematic/schematic migrations")  # schematic (old)
         ctx.local("python2.6 manage.py syncdb")                             # South (new)
         ctx.local("python2.6 manage.py migrate")                            # South (new)
+
+@task
+def update_es_indexes(ctx):
+    with ctx.lcd(settings.SRC_DIR):
+        ctx.local("python2.6 manage.py cron index_all_profiles")
 
 
 #@task
@@ -85,7 +89,6 @@ def update_info(ctx):
         ctx.local("git log -3")
         ctx.local("git status")
         ctx.local("git submodule status")
-        #ctx.local("python ./vendor/src/schematic/schematic -v migrations/")
         ctx.local("python ./manage.py migrate --list")
         with ctx.lcd("locale"):
             ctx.local("svn info")
@@ -105,6 +108,7 @@ def update(ctx):
     update_assets()
     update_locales()
     database()
+    update_es_indexes()
 
 
 @task
