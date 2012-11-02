@@ -58,8 +58,9 @@
           <h2>{{ _('Location') }}</h2>
           <p>
             {% trans %}
-              Let us know where in the world you are. Other vouched Mozillians
-              will be able to contact you easier and vice-versa.
+              Let us know where in the world you are. Other vouched
+              Mozillians will be able to contact you easier and
+              vice-versa.
             {% endtrans %}
           </p>
           {{ bootstrap(profile_form.country) }}
@@ -70,9 +71,9 @@
           <h2>{{ _('Groups') }}</h2>
           <p class="field_description">
             {% trans %}
-              Groups are a community of Mozillians with some relation to each
-              other. This can be an interest, team, project, product or
-              sub-community.
+              Groups are a community of Mozillians with some relation
+              to each other. This can be an interest, team, project,
+              product or sub-community.
             {% endtrans %}
           </p>
           {{ profile_form.groups.label_tag() }}
@@ -80,8 +81,9 @@
           <h2>{{ _('Skills') }}</h2>
           <p class="field_description">
             {% trans %}
-              A skill is the learned capacity to carry out pre-determined
-              results often with the minimum outlay of time, energy, or both.
+              A skill is the learned capacity to carry out
+              pre-determined results often with the minimum outlay of
+              time, energy, or both.
             {% endtrans %}
           </p>
           {{ profile_form.skills.label_tag() }}
@@ -89,9 +91,9 @@
           <h2>{{ _('Languages') }}</h2>
           <p class="field_description">
             {% trans %}
-              The Mozilla Project spans over many countries and languages.
-              Share the languages you speak to be found easily by other
-              Mozillians.
+              The Mozilla Project spans over many countries and
+              languages.  Share the languages you speak to be found
+              easily by other Mozillians.
             {% endtrans %}
           </p>
           {{ profile_form.languages.label_tag() }}
@@ -110,8 +112,8 @@
                   {{ _('You are automatically vouched!') }}
                 {% else %}
                   {% trans profile_url=absolutify(url('profile', user.username)) %}
-                    You aren't vouched! Send this link to a mozillian who can
-                    vouch for your contributions:
+                    You aren't vouched! Send this link to a mozillian
+                    who can vouch for your contributions:
                     <em class="underline" title="Your profile URL">
                       {{ profile_url }}
                     </em>
@@ -175,24 +177,35 @@
           <div class="tab-pane" id="services">
             <div class="control-group">
               <p class="field_description">
-                {% trans %}
-                  The Phonebook offers an API to help authorize contributors and share profile
-                  data to other tools and sites like <a href="http://bugzilla.mozilla.org">Bugzilla</a>
-                  and the <a href="http://reps.mozilla.org">Mozilla Reps Portal</a>.
+                {% trans bugzilla_url='http://bugzilla.mozilla.org',
+                         reps_url='http://reps.mozilla.org' %}
+                  The Phonebook offers an API to help authorize
+                  contributors and share profile data to other tools
+                  and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
+                  <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
                 {% endtrans %}
               </p>
               <h2>{{ _("Privacy Settings") }}</h2>
-              <p class="field_description">
-                {{ bootstrap(profile_form.allows_community_sites) }}
-                {{ bootstrap(profile_form.allows_mozilla_sites) }}
-              </p>
+              <div id="privacy-settings">
+                <p class="field_description">
+                  {{ bootstrap(profile_form.allows_community_sites) }}
+                  {{ bootstrap(profile_form.allows_mozilla_sites) }}
+                </p>
+              </div>
               <h2>{{ _("Developers") }}</h2>
               <p class="field_description">
-                {% trans %}
-                Take a look at the list of the <a href="/api/v1/?format=json">API methods we've made available</a>. To use this API,
-                you'll need to get approval from the Privacy team. To get started,
-                <a href="https://bugzilla.mozilla.org/enter_bug.cgi?product=Data%20Safety">file a bug</a>.
-                If you have any questions, talk to us in our <a href="http://groups.google.com/group/mozilla-dev-community-tools/">
+                {% trans api_schema_url='/api/v1/?format=json',
+                         bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                               'product=Data%20Safety&cc=mozaakash@gmail.com'
+                                               '&short_desc=Phonebook%20API%20Usage%20Request'),
+                         dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
+                Take a look at the list of
+                the <a href="{{ api_schema_url }}">API methods we've
+                made available</a>. To use this API, you'll need to
+                get approval from the Privacy team. To get started,
+                <a href="{{ bugzilla_request_url }}">file
+                a bug</a>.  If you have any questions, talk to us in
+                our <a href="{{ dev_form_url }}">
                 development forum</a>.
                 {% endtrans %}
               </p>
@@ -203,6 +216,8 @@
                 <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
                   <small>Key: {{ app.key }}</small>
                 </li>
+              {% else %}
+                {% trans %} You have no registered, active apps. {% endtrans %}
               {% endfor %}
               </ul>
             </div>
