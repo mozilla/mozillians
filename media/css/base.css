@@ -626,3 +626,8 @@ label, input, button, select, textarea {
 .popular-groups {
     padding: 10px 0;
 }
+
+#privacy-settings .control-group > label {
+    margin-right: 15px;
+    width: 300px;
+}

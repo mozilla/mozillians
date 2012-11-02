@@ -75,7 +75,7 @@ class UserProfile(models.Model, SearchMixin):
                  (False, _lazy(u'Only Mozilla Properties'))))
     allows_mozilla_sites = models.BooleanField(
         default=True,
-        verbose_name=_lazy(u'Mozilla sites can access all my Phonebook data.'),
+        verbose_name=_lazy(u'Allow Mozilla sites to access my profile data?'),
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
 
     @property
