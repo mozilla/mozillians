@@ -41,9 +41,9 @@
         </p>
       {% elif not user.get_profile().is_vouched %}
         <p>
-          {% trans %}
+          {% trans contribute_url='http://mozilla.org/contribute' %}
             You need to be vouched by a core or active contributor in the Mozilla community.
-            To do this, find ways to <a href="http://mozilla.org/contribute">get involved</a>.
+            To do this, find ways to <a href="{{ contribute_url }}">get involved</a>.
           {% endtrans %}
         </p>
       {% endif %}
