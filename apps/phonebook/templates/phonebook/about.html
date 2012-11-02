@@ -20,7 +20,8 @@
          alt="{{ _('Photo collage of Mozillians') }}">
     <div class="span4">
       <h1>{{ _('About Mozillians') }}</h1>
-      {% trans %}
+      {% trans wiki_roadmap_url='https://wiki.mozilla.org/Mozillians#Roadmap',
+               wiki_get_involved_url='https://wiki.mozilla.org/Mozillians#Get_Involved' %}
         <p>
           Mozillians are people who volunteer their time to advance the Mozilla
           mission. They're dedicated to promoting openness, innovation and
@@ -35,9 +36,10 @@
           hacker to review a patch? That's exactly what this site is for.
         </p>
         <p>
-          <a href="https://wiki.mozilla.org/Mozillians#Roadmap">These features</a>,
-          and others, are currently in development. If you'd like to help us out
-          with these, find out how you can <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">get involved</a>.
+          <a href="{{ wiki_roadmap_url }}">These features</a>, and
+          others, are currently in development. If you'd like to help
+          us out with these, find out how you can <a href="{{
+          wiki_get_involved_url }}"> get involved</a>.
         </p>
       {% endtrans %}
     </div>
@@ -45,13 +47,14 @@
       <h2>{{ _('Privacy First') }}</h2>
 
       <p>
-        {% trans locale=LANG %}
+        {% trans privacy_policy_url=('http://www.mozilla.org/'
+                                     + LANG +'/privacy-policy.html') %}
           Privacy has been an important part of this directory from the very
           beginning. We want to make sure we provide Mozillians with the best
           experience possible, from the way the site is built to the way we
           vouch for new users before they can access data that should only be
           available to other Mozillians. Read our
-          <a href="http://www.mozilla.org/{{ locale }}/privacy-policy.html">
+          <a href="{{ privacy_policy_url }}">
             Privacy Policy
           </a> for more information.
         {% endtrans %}
@@ -62,11 +65,11 @@
       <h2>{{ _('Get Involved') }}</h2>
 
       <p>
-        {% trans %}
+        {% trans google_groups_url='http://groups.google.com/group/mozilla.mozillians/topics' %}
           The community directory is also a community project and you are
           welcome to get involved to help us make it even better or to
           integrate it into other community tools. Get in touch with us on the
-          <a href="http://groups.google.com/group/mozilla.mozillians/topics">
+          <a href="{{ google_groups_url }}">
             Mozillians forums
           </a> to learn how.
         {% endtrans %}

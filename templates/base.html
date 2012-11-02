@@ -122,11 +122,12 @@
   <footer>
     <div class="container row">
       <p class="span4">
-        {% trans %}
+        {% trans legal_url='http://mozilla.com/about/legal.html#site',
+	         cc_url='http://creativecommons.org/licenses/by-sa/3.0/' %}
           Except where otherwise
-          <a href="http://mozilla.com/about/legal.html#site">noted</a>,
+          <a href="{{ legal_url }}">noted</a>,
           content on this site is licensed under the
-          <a href="http://creativecommons.org/licenses/by-sa/3.0/">
+          <a href="{{ cc_url }}">
             Creative Commons Attribution Share-Alike License v3.0
           </a> or any later version.
         {% endtrans %}
