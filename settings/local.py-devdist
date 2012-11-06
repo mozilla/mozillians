@@ -54,3 +54,5 @@ JAVA_BIN = '/usr/bin/java'
 SESSION_COOKIE_SECURE = False
 
 CACHES = {}
+
+STATSD_CLIENT = 'django_statsd.clients.log'

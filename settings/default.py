@@ -133,12 +133,13 @@ MINIFY_BUNDLES = {
 
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
-    'commonware.response.middleware.GraphiteMiddleware',
-    'commonware.response.middleware.GraphiteRequestTimingMiddleware',
     'csp.middleware.CSPMiddleware',
     'common.middleware.PermissionDeniedMiddleware',
     'common.middleware.RemoveSlashMiddleware',
-    'common.middleware.UsernameRedirectionMiddleware'
+    'common.middleware.UsernameRedirectionMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware',
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 ]
 
 # StrictTransport
@@ -255,3 +256,6 @@ THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
+
+# Statsd Graphite
+STATSD_CLIENT = 'django_statsd.clients.normal'
