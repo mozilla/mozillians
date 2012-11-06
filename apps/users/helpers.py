@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import re
 
@@ -41,6 +42,7 @@ def calculate_username(email):
         if username > USERNAME_MAX_LENGTH:
             # We failed to calculate a name for you, default to a
             # email digest.
-            username = hashlib.sha1(email).hexdigest()
+            username = base64.urlsafe_b64encode(
+                hashlib.sha1(email).digest()).rstrip('=')
 
     return username
