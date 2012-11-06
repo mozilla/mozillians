@@ -41,9 +41,7 @@
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
         <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
-        {% if user.get_profile().is_vouched %}
-          <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
-        {% endif %}
+        <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
@@ -173,25 +171,25 @@
             </div>
           </div>
         </div>
-        {% if user.get_profile().is_vouched %}
-          <div class="tab-pane" id="services">
-            <div class="control-group">
+        <div class="tab-pane" id="services">
+          <div class="control-group">
+            <p class="field_description">
+              {% trans bugzilla_url='http://bugzilla.mozilla.org',
+                       reps_url='http://reps.mozilla.org' %}
+                The Phonebook offers an API to help authorize
+                contributors and share profile data to other tools
+                and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
+                <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
+              {% endtrans %}
+            </p>
+            <h2>{{ _("Privacy Settings") }}</h2>
+            <div id="privacy-settings">
               <p class="field_description">
-                {% trans bugzilla_url='http://bugzilla.mozilla.org',
-                         reps_url='http://reps.mozilla.org' %}
-                  The Phonebook offers an API to help authorize
-                  contributors and share profile data to other tools
-                  and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
-                  <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
-                {% endtrans %}
+                {{ bootstrap(profile_form.allows_community_sites) }}
+                {{ bootstrap(profile_form.allows_mozilla_sites) }}
               </p>
-              <h2>{{ _("Privacy Settings") }}</h2>
-              <div id="privacy-settings">
-                <p class="field_description">
-                  {{ bootstrap(profile_form.allows_community_sites) }}
-                  {{ bootstrap(profile_form.allows_mozilla_sites) }}
-                </p>
-              </div>
+            </div>
+            {% if user.get_profile().is_vouched %}
               <h2>{{ _("Developers") }}</h2>
               <p class="field_description">
                 {% trans api_schema_url='/api/v1/?format=json',
@@ -199,30 +197,30 @@
                                                'product=Data%20Safety&cc=mozaakash@gmail.com'
                                                '&short_desc=Phonebook%20API%20Usage%20Request'),
                          dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
-                Take a look at the list of
-                the <a href="{{ api_schema_url }}">API methods we've
-                made available</a>. To use this API, you'll need to
-                get approval from the Privacy team. To get started,
-                <a href="{{ bugzilla_request_url }}">file
-                a bug</a>.  If you have any questions, talk to us in
-                our <a href="{{ dev_form_url }}">
-                development forum</a>.
+                  Take a look at the list of
+                  the <a href="{{ api_schema_url }}">API methods we've
+                  made available</a>. To use this API, you'll need to
+                  get approval from the Privacy team. To get started,
+                  <a href="{{ bugzilla_request_url }}">file
+                  a bug</a>.  If you have any questions, talk to us in
+                  our <a href="{{ dev_form_url }}">
+                  development forum</a>.
                 {% endtrans %}
               </p>
               <h4>Your approved apps:</h4>
               <br/>
               <ul>
-              {% for app in apps %}
-                <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
-                  <small>Key: {{ app.key }}</small>
-                </li>
-              {% else %}
-                {% trans %} You have no registered, active apps. {% endtrans %}
-              {% endfor %}
-              </ul>
+                {% for app in apps %}
+                  <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
+                    <small>Key: {{ app.key }}</small>
+                  </li>
+                {% else %}
+                  {% trans %} You have no registered, active apps. {% endtrans %}
+                {% endfor %}
+                </ul>
+              {% endif %}
             </div>
           </div>
-        {% endif %}
       </div>
     </div>
     <div id="edit_controls">
