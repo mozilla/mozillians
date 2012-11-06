@@ -202,6 +202,14 @@ class RegisterForm(BaseProfileForm):
                     'contributing to or would like to contribute to:'),
         queryset=Group.get_curated(), required=False)
 
+    class Meta:
+        # Model form stuff
+        model = UserProfile
+        fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
+                  'city')
+        exclude = ('display_name', )
+        widgets = {'bio': forms.Textarea()}
+
 
 class VouchForm(happyforms.Form):
     """Vouching is captured via a user's id."""
