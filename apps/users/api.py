@@ -10,6 +10,7 @@ from tastypie.serializers import Serializer
 
 from apps.api.authenticators import AppAuthentication
 from apps.api.authorisers import MozillaOfficialAuthorization
+from apps.api.paginator import Paginator
 
 from models import UserProfile
 
@@ -26,6 +27,7 @@ class UserResource(ModelResource):
         authentication = AppAuthentication()
         authorization = MozillaOfficialAuthorization()
         serializer = Serializer(formats=['json', 'jsonp', 'xml'])
+        paginator_class = Paginator
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
         resource_name = 'users'
