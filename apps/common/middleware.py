@@ -9,7 +9,6 @@ from django.utils.encoding import iri_to_uri
 
 import commonware.log
 from funfactory.manage import ROOT
-from funfactory.urlresolvers import reverse
 
 
 # TODO: this is hackish. Once we update mozillians to the newest playdoh layout

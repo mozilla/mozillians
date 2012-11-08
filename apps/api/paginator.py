@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from tastypie import paginator
+from tastypie.exceptions import BadRequest
 
 
 class Paginator(paginator.Paginator):
@@ -13,7 +14,6 @@ class Paginator(paginator.Paginator):
     This should be replaced with 'max_limit' tastypie.Resource
     attribute when we upgrade to tastypie >= 0.9.12.
     """
-
 
     def get_limit(self):
         """
@@ -47,7 +47,39 @@ class Paginator(paginator.Paginator):
             raise BadRequest("Invalid limit '%s' provided. Please provide "
                              "an integer >= 0.")
 
-        if limit > hard_limit:
-            limit = hard_limit
+        limit = min(limit, hard_limit)
 
         return limit
+
+    def get_offset(self):
+        """
+        Determines the proper starting offset of results to return.
+
+        It attempst to use the user-provided ``offset`` from the GET
+        parameters, if specified. If user provided ``offset`` is
+        larger than the total number of objects in the database, then
+        is total number is returned to avoid ES crashes (related bug
+        809669).
+
+        Otherwise, it falls back to the object-level ``offset``.
+
+        Default is 0.
+        """
+        offset = self.offset
+
+        if 'offset' in self.request_data:
+            offset = self.request_data['offset']
+
+        try:
+            offset = int(offset)
+        except ValueError:
+            raise BadRequest("Invalid offset '%s' provided. "
+                             "Please provide an integer.")
+
+        if offset < 0:
+            raise BadRequest("Invalid offset '%s' provided. "
+                             "Please provide an integer >= 0.")
+
+        offset = min(self.get_count(), offset)
+
+        return offset
