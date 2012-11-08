@@ -878,6 +878,39 @@ class APITests(ESTestCase):
         response = self.client.get(new_url, follow=True)
         self.assertEqual(response.status_code, 401)
 
+    def test_huge_offset(self):
+        """Test sending huge offset."""
+        url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
+                                                   'resource_name': 'users'})
+        self.app.is_mozilla_app = True
+        self.app.is_active = True
+        self.app.save()
+
+        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
+                            offset=2000000000000000000000000000)
+        response = self.client.get(new_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.content)
+        self.assertEqual(data['meta']['offset'], data['meta']['total_count'])
+
+    @override_settings(HARD_API_LIMIT_PER_PAGE=50)
+    def test_huge_limit(self):
+        """Test sending huge limit."""
+        url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
+                                                   'resource_name': 'users'})
+        self.app.is_mozilla_app = True
+        self.app.is_active = True
+        self.app.save()
+
+        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
+                            limit=20000)
+        response = self.client.get(new_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        data = json.loads(response.content)
+        self.assertEqual(data['meta']['limit'], 50)
+
     def test_inactive_app(self):
         """Test inactive app access."""
         url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
