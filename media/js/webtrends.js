@@ -9,7 +9,7 @@ function WebTrends(){
 	this.dcsid="dcsl7zs5tvz5bd3tvw0ch9hem_5z3z";
 	this.domain="statse.webtrendslive.com";
 	this.timezone=0;
-	this.fpcdom=".mozillians.org";
+	this.fpcdom="community.mozilla.org";
 	this.enabled=true;
 	this.i18n=true;
 	this.fpc="WT_FPC";

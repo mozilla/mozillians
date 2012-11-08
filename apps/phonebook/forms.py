@@ -42,7 +42,7 @@ class UsernameWidget(forms.widgets.TextInput):
 
     def render(self, *args, **kwargs):
         return mark_safe(u'<span class="label-text">'
-                          'http://mozillians.org/u/ </span>%s' %
+                          'http://community.mozilla.org/u/ </span>%s' %
                 super(UsernameWidget, self).render(*args, **kwargs))
 
 

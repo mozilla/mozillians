@@ -37,7 +37,7 @@ Vagrant::Config.run do |config|
     # um, doesn't work... in .8.10...
     # config.vm.customize ["modifyvm", :id, "--cpuexecutioncap", "90"]
 
-    # Add to /etc/hosts: 33.33.33.24 dev.mozillians.org
+    # Add to /etc/hosts: 33.33.33.24 dev.community.mozilla.org
     config.vm.network :hostonly, "33.33.33.24"
 
     config.vm.provision :puppet do |puppet|
