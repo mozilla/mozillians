@@ -27,9 +27,7 @@ from django.core.files.storage import FileSystemStorage
 fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
                        base_url='/media/uploads/')
 
-COUNTRIES = zip(product_details.get_regions('en-US').values(),
-                product_details.get_regions('en-US').values())
-COUNTRIES = sorted(COUNTRIES, key=lambda country: country[1])
+COUNTRIES = product_details.get_regions('en-US')
 
 USERNAME_MAX_LENGTH = 30
 
@@ -60,7 +58,7 @@ class UserProfile(models.Model, SearchMixin):
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
     country = models.CharField(max_length=50, default='', blank=True,
-                               choices=COUNTRIES,
+                               choices=COUNTRIES.items(),
                                verbose_name=_lazy(u'Country'))
     region = models.CharField(max_length=255, default='', blank=True,
                               verbose_name=_lazy(u'Province/State'))
@@ -184,7 +182,7 @@ class UserProfile(models.Model, SearchMixin):
 
         d = {}
 
-        attrs = ('id', 'is_vouched', 'website', 'ircname', 'country',
+        attrs = ('id', 'is_vouched', 'website', 'ircname',
                  'region', 'city', 'allows_mozilla_sites',
                  'allows_community_sites')
         for a in attrs:
@@ -192,6 +190,9 @@ class UserProfile(models.Model, SearchMixin):
             if isinstance(data, basestring):
                 data = data.lower()
             d.update({a: data})
+
+        if obj.country:
+            d.update({'country': COUNTRIES[obj.country].lower()})
 
         # user data
         attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
