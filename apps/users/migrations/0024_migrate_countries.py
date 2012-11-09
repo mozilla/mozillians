@@ -5,21 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    """Convert countries from two letter representation to full name."""
     no_dry_run = True
 
     def forwards(self, orm):
-        # Translate country code to full country names
-        from product_details import product_details
-        COUNTRIES = product_details.get_regions('en-US')
-
-        for up in orm.UserProfile.objects.all():
-            if up.country:
-                up.country = COUNTRIES.get(up.country, '')
-                up.save()
-
-
-    def backwards(self, orm):
         from product_details import product_details
         COUNTRIES = product_details.get_regions('en-US')
 
@@ -30,6 +18,17 @@ class Migration(SchemaMigration):
             if up.country:
                 up.country = COUNTRIES.get(up.country, '')
                 up.save()
+
+    def backwards(self, orm):
+        # Translate country code to full country names
+        from product_details import product_details
+        COUNTRIES = product_details.get_regions('en-US')
+
+        for up in orm.UserProfile.objects.all():
+            if up.country:
+                up.country = COUNTRIES.get(up.country, '')
+                up.save()
+
 
     models = {
         'auth.group': {
@@ -47,7 +46,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 11, 9, 3, 38, 21, 714650)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -55,7 +54,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 11, 9, 3, 38, 21, 714479)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -96,12 +95,19 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'})
         },
+        'users.usernameblacklist': {
+            'Meta': {'ordering': "['value']", 'object_name': 'UsernameBlacklist'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_regex': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'value': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
+        },
         'users.userprofile': {
             'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},
+            'allows_community_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'allows_mozilla_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'bio': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'city': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'country': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '50', 'blank': 'True'}),
-            'display_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['groups.Group']", 'symmetrical': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
