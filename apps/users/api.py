@@ -11,11 +11,12 @@ from tastypie.serializers import Serializer
 from apps.api.authenticators import AppAuthentication
 from apps.api.authorisers import MozillaOfficialAuthorization
 from apps.api.paginator import Paginator
+from apps.api.resources import ClientCachedResource
 
 from models import UserProfile
 
 
-class UserResource(ModelResource):
+class UserResource(ClientCachedResource, ModelResource):
     """User Resource."""
     email = fields.CharField(attribute='user__email', null=True, readonly=True)
     groups = fields.CharField()
@@ -28,6 +29,7 @@ class UserResource(ModelResource):
         authorization = MozillaOfficialAuthorization()
         serializer = Serializer(formats=['json', 'jsonp', 'xml'])
         paginator_class = Paginator
+        cache_control = {'max-age': 0}
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
         resource_name = 'users'
