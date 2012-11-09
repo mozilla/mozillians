@@ -115,8 +115,7 @@ class BaseProfileForm(forms.ModelForm):
         locale = kwargs.pop('locale', 'en-US')
 
         super(BaseProfileForm, self).__init__(*args, **kwargs)
-        country_list = product_details.get_regions(locale).values()
-        country_list = zip(country_list, country_list)
+        country_list = product_details.get_regions(locale).items()
         country_list = sorted(country_list, key=lambda country: country[1])
         country_list.insert(0, ('', '----'))
         self.fields['country'].choices = country_list

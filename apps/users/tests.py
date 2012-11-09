@@ -7,6 +7,7 @@ from elasticutils.contrib.django import get_es
 from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_, nottest
+from product_details import product_details
 from pyquery import PyQuery as pq
 
 from apps.api.models import APIApp
@@ -19,6 +20,7 @@ from .helpers import validate_username
 from .models import UserProfile, UsernameBlacklist
 
 Group.objects.get_or_create(name='staff', system=True)
+COUNTRIES = product_details.get_regions('en-US')
 
 
 class RegistrationTest(ESTestCase):
@@ -489,7 +491,7 @@ class UsernameRedirectionMiddlewareTests(ESTestCase):
 class SearchTests(ESTestCase):
 
     def setUp(self):
-        self.data = {'country': 'United States',
+        self.data = {'country': 'us',
                      'region': 'California',
                      'city': 'Mountain View',
                      'ircname': 'hax0r',
@@ -506,6 +508,8 @@ class SearchTests(ESTestCase):
 
     def test_search_generic(self):
         for key, value in self.data.iteritems():
+            if key == 'country':
+                value = COUNTRIES[value]
             results = UserProfile.search(value)
             self.assertEqual(len(results), 1)
 
@@ -541,7 +545,7 @@ class APITests(ESTestCase):
         up.set_membership(Skill, 'python')
         up.set_membership(Language, 'Greek')
         up.ircname = 'foobar'
-        up.country = 'Greece'
+        up.country = 'gr'
         up.region = 'Attika'
         up.city = 'Athens'
         up.save()
@@ -652,8 +656,9 @@ class APITests(ESTestCase):
         url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
                                                    'resource_name': 'users'})
 
+        country=COUNTRIES[self.auto_user.userprofile.country]
         new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
-                            country=self.auto_user.userprofile.country)
+                            country=country)
         response = self.client.get(new_url, follow=True)
         self.assertEqual(response.status_code, 200)
 

@@ -5,14 +5,7 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    """Convert countries from two letter representation to full name.
-
-    Do the update using SQL Queries and not through the ORM to
-    prevent issues with newer versions of the UserProfile model.
-    Create the query in a string first, as South freaks out when
-    you have %s in your query.
-
-    """
+    """Convert countries from two letter representation to full name."""
     no_dry_run = True
 
     def forwards(self, orm):
@@ -31,7 +24,7 @@ class Migration(SchemaMigration):
         COUNTRIES = product_details.get_regions('en-US')
 
         # Reverse dictionary mapping
-        COUNTRIES = dict((v,k) for k, v in COUNTRIES.iteritems())
+        COUNTRIES = dict((v,k) for k, v in COUNTRIES.items())
 
         for up in orm.UserProfile.objects.all():
             if up.country:
