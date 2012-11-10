@@ -83,7 +83,7 @@ class Language(GroupBase):
 @receiver(models.signals.pre_save, sender=Group)
 def _create_url_slug(sender, instance, raw, using, **kwargs):
     """Create a Group's URL slug when it's first saved."""
-    if not instance.pk:
+    if not instance.pk and not raw:
         instance.url = slugify(instance.name.lower())
 
 

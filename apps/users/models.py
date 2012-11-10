@@ -272,17 +272,16 @@ class UserProfile(models.Model, SearchMixin):
 
 @receiver(models.signals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
-def create_user_profile(sender, instance, created, **kwargs):
-    up, created = UserProfile.objects.get_or_create(user=instance)
-    if created:
-        up.save()
+def create_user_profile(sender, instance, created, raw, **kwargs):
+    if created and not raw:
+        up, created = UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(models.signals.pre_save, sender=UserProfile,
           dispatch_uid='auto_vouch_sig')
 def auto_vouch(sender, instance, raw, using, **kwargs):
     """Auto vouch mozilla.com users."""
-    if not instance.id:
+    if not instance.id and not raw:
         email = instance.user.email
         if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
             instance.vouch(None, commit=False)
@@ -290,8 +289,10 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
 
 @receiver(models.signals.post_save, sender=UserProfile,
           dispatch_uid='add_to_staff_group_sig')
-def add_to_staff_group(sender, instance, created, **kwargs):
+def add_to_staff_group(sender, instance, created, raw, **kwargs):
     """Keep users in the staff group if they're autovouchable."""
+    if raw:
+        return
     email = instance.user.email
     staff, created = Group.objects.get_or_create(name='staff', system=True)
     if any(email.endswith('@' + x) for x in
