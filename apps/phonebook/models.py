@@ -71,7 +71,7 @@ class Invite(models.Model):
 
 @receiver(models.signals.pre_save, sender=Invite)
 def generate_code(sender, instance, raw, using, **kwargs):
-    if instance.code:
+    if instance.code or raw:
         return
 
     # 10 tries for uniqueness
