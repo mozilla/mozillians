@@ -88,7 +88,7 @@ SETTINGS
 
 echo "Database name: ${JOB_NAME}"
 echo "Dropping Test database"
-echo "DROP DATABASE test_${JOB_NAME};"|mysql -u $DB_USER -h $DB_HOST
+echo "DROP DATABASE IF EXISTS test_${JOB_NAME};"|mysql -u $DB_USER -h $DB_HOST
 
 echo "Creating database if we need it..."
 echo "CREATE DATABASE IF NOT EXISTS ${JOB_NAME}"|mysql -u $DB_USER -h $DB_HOST
