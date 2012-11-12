@@ -84,6 +84,7 @@ DEBUG = TEMPLATE_DEBUG = True
 ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='test_${JOB_NAME}')
+ES_TIMEOUT=60
 SETTINGS
 
 echo "Database name: ${JOB_NAME}"
