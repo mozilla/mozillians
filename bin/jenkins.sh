@@ -14,6 +14,13 @@ echo "Starting build on executor $EXECUTOR_NUMBER..."
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;
 
+git submodule sync
+git submodule update --init --recursive
+
+if [ ! -d "$WORKSPACE/vendor" ]; then
+    echo "No /vendor... crap."
+    exit 1
+fi
 
 if [ ! -d "$VENV" ]; then
     echo "Making virtualenv..."
@@ -22,14 +29,6 @@ fi
 source $VENV/bin/activate
 pip install -r requirements/tests-compiled.txt
 pip install -r requirements/compiled.txt
-
-git submodule sync
-git submodule update --init --recursive
-
-if [ ! -d "$WORKSPACE/vendor" ]; then
-    echo "No /vendor... crap."
-    exit 1
-fi
 
 cat > settings/local.py <<SETTINGS
 import logging
@@ -87,10 +86,12 @@ ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='test_${JOB_NAME}')
 SETTINGS
 
+echo "Database name: ${JOB_NAME}"
+echo "Dropping Test database"
+echo "DROP DATABASE test_${JOB_NAME};"|mysql -u $DB_USER -h $DB_HOST
+
 echo "Creating database if we need it..."
 echo "CREATE DATABASE IF NOT EXISTS ${JOB_NAME}"|mysql -u $DB_USER -h $DB_HOST
-
-echo "Database name: ${JOB_NAME}"
 
 echo "Updating product details."
 
