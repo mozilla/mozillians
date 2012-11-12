@@ -140,7 +140,7 @@
         <div class="tab-pane" id="account">
           {{ bootstrap(user_form.username) }}
           <div class="control-group">
-            <label class="control-label">{{ _('BrowserID Email') }}</label>
+            <label class="control-label">{{ _('Persona Email') }}</label>
             <div class="controls">
               <span class="label-text">{{ user.email }}</span>
             </div>
@@ -149,8 +149,8 @@
             <label class="control-label">{{ _('Password') }}</label>
             <div class="controls">
               <span class="label-text">
-                {% trans browserid='https://browserid.org/' %}
-                  Change your password at <a href={{ browserid }}>BrowserID</a>
+                {% trans persona='https://persona.org/' %}
+                  Change your password at <a href="{{ persona }}">Persona</a>
                 {% endtrans %}
               </span>
             </div>
