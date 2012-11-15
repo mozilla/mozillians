@@ -1,7 +1,6 @@
 from django.conf import settings
 
 from tastypie import paginator
-from tastypie.exceptions import BadRequest
 
 
 class Paginator(paginator.Paginator):
@@ -21,7 +20,6 @@ class Paginator(paginator.Paginator):
         """
         hard_limit = getattr(settings, 'HARD_API_LIMIT_PER_PAGE', 500)
         return min(super(Paginator, self).get_limit(), hard_limit)
-
 
     def get_offset(self):
         """Determines the proper starting offset of results to return.

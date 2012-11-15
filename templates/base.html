@@ -172,6 +172,8 @@
     <form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
       {{ csrf() }}
       {{ browserid_form.as_p() }}
+      <input type="hidden" name="next"
+             value="{{ request.REQUEST.next|default(settings.LOGIN_REDIRECT_URL) }}" />
     </form>
   {% endif %}
 {% endblock %}
