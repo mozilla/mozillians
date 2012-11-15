@@ -37,3 +37,7 @@
     {% endblock %}
   -->
 {% endblock main_content %}
+
+{# Don't display browserid block or user may enter a infinite authentication loop. #}
+{% block browserid_form %}
+{% endblock %}
