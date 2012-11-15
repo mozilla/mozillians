@@ -62,6 +62,10 @@ def profile(request, username):
     vouch_form = None
     profile = user.get_profile()
 
+    if not request.user.userprofile.is_vouched and request.user != user:
+        log.warning('vouch_required forbidding access')
+        return HttpResponseForbidden(_('You must be vouched to do this.'))
+
     if not profile.is_vouched and request.user.get_profile().is_vouched:
         vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
 

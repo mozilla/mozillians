@@ -124,6 +124,24 @@ class TestViews(ESTestCase):
         eq_(r.status_code, 200)
         eq_(r.context['profile'].user, _user)
 
+    def test_pending_view_own_profile(self):
+        """Test view own profile by unvouched user."""
+        url = reverse('profile', args=[self.pending.username])
+        response = self.pending_client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_pending_view_other_profile(self):
+        """Test view other profile by unvouched user."""
+        url = reverse('profile', args=[self.mozillian.username])
+        response = self.pending_client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_mozillians_view_own_profile(self):
+        """Test view own profile by vouched user."""
+        url = reverse('profile', args=[self.mozillian.username])
+        response = self.mozillian_client.get(url)
+        self.assertEqual(response.status_code, 200)
+
     def test_pending_edit_profile(self):
         # do all then reset
         newbie_client = self.pending_client
