@@ -255,3 +255,7 @@ THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # This is for the commons/helper.py thumbnail.
 DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
+
+# TEMPORARY
+# TODO: Remove this
+KEYNOTE_FILE = None

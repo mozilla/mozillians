@@ -272,3 +272,7 @@ def vouch(request):
         return redirect(reverse('profile', args=[p.user.username]))
 
     return HttpResponseForbidden
+
+@vouch_required
+def keynote(request):
+    return render(request, 'phonebook/keynote.html')
