@@ -45,9 +45,7 @@ class Invite(models.Model):
 
         """
         if sender:
-            sender = '%s %s (%s)' % (sender.user.first_name,
-                                     sender.user.last_name,
-                                     sender.user.email)
+            sender = '%s (%s)' % (sender.full_name, sender.user.email)
 
         subject = _('Become a Mozillian')
 

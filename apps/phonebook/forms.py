@@ -53,17 +53,12 @@ class UserForm(forms.ModelForm):
     Profile.
 
     """
-
-    first_name = forms.CharField(label=_lazy(u'First Name'),
-                                 max_length=30, required=False)
-    last_name = forms.CharField(label=_lazy(u'Last Name'),
-                                max_length=30, required=True)
     username = forms.CharField(label=_lazy(u'Username'),
                                max_length=30, required=False)
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'username')
+        fields = ['username']
         widgets = {'username': UsernameWidget()}
 
     def clean_username(self):
@@ -106,8 +101,9 @@ class BaseProfileForm(forms.ModelForm):
     class Meta:
         # Model form stuff
         model = UserProfile
-        fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
-                  'city', 'allows_community_sites', 'allows_mozilla_sites')
+        fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
+                  'region', 'city', 'allows_community_sites',
+                  'allows_mozilla_sites')
         exclude = ('display_name', )
         widgets = {'bio': forms.Textarea()}
 
@@ -204,8 +200,8 @@ class RegisterForm(BaseProfileForm):
     class Meta:
         # Model form stuff
         model = UserProfile
-        fields = ('ircname', 'website', 'bio', 'photo', 'country', 'region',
-                  'city')
+        fields = ('full_name', 'ircname', 'website', 'bio', 'photo',
+                  'country', 'region', 'city')
         exclude = ('display_name', )
         widgets = {'bio': forms.Textarea()}
 
