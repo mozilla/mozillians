@@ -1,15 +1,17 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 
 from models import UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
+admin.site.unregister(Group)
 
 
 class UserProfileInline(admin.StackedInline):
     """UserProfile Inline model for UserAdmin."""
     model = UserProfile
+    raw_id_fields = ['vouched_by']
 
 
 class UserAdmin(UserAdmin):
