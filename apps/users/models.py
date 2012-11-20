@@ -30,6 +30,7 @@ fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
 COUNTRIES = product_details.get_regions('en-US')
 
 USERNAME_MAX_LENGTH = 30
+AVATAR_SIZE = (300, 300)
 
 
 class UserProfile(models.Model, SearchMixin):
@@ -308,8 +309,10 @@ def resize_photo(sender, instance, **kwargs):
     if instance.photo:
         path = str(instance.photo.path)
         img = Image.open(path)
-        img = ImageOps.fit(img, (300, 300), Image.ANTIALIAS, 0, (0.5, 0.5))
-        img.save(path)
+        if img.size != AVATAR_SIZE:
+            img = ImageOps.fit(img, AVATAR_SIZE,
+                               Image.ANTIALIAS, 0, (0.5, 0.5))
+            img.save(path)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
