@@ -56,40 +56,52 @@
             {% endblock %}
           {% endif %}
           <ul class="nav pull-right">
-            {% if user.is_authenticated() and user.userprofile.is_complete() %}
-              <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
-              <li class="dropdown" id="profile_menu">
-                <a class="dropdown-toggle" data-toggle="dropdown" href="#profile_menu">
-                  {{ user.username }}
-                  <b class="caret"></b>
-                </a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <a id="profile" href="{{ url('profile', user.username) }}">
-                      {{ _('View Profile') }}
-                    </a>
-                  </li>
-                  {% if user.get_profile().is_vouched %}
-                    <li class="{{nav_invite}}">
-                      <a id="invite" href="{{ url('invite') }}">
-                        {{ _('Invite') }}
+            {% if user.is_authenticated() %}
+              {% if user.userprofile.is_complete() %}
+                <li class="{{ nav_about}}"><a href="{{ url('about') }}">About</a></li>
+                <li class="dropdown" id="profile_menu">
+                  <a class="dropdown-toggle" data-toggle="dropdown" href="#profile_menu">
+                    {{ user.username }}
+                    <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a id="profile" href="{{ url('profile', user.username) }}">
+                        {{ _('View Profile') }}
                       </a>
                     </li>
-                  {% endif %}
-                  <li class="divider"></li>
-                  <li>
-                    <a id="edit_profile" href="{{ url('profile.edit') }}">
-                      {{ _('Settings') }}
-                    </a>
-                  </li>
-                  <li>
-                    <a id="logout" href="{{ url('logout') }}">{{ _('Log Out') }}</a>
-                  </li>
-                </ul>
-              </li>
+                    {% if user.get_profile().is_vouched %}
+                      <li class="{{nav_invite}}">
+                        <a id="invite" href="{{ url('invite') }}">
+                          {{ _('Invite') }}
+                        </a>
+                      </li>
+                    {% endif %}
+                    <li class="divider"></li>
+                    <li>
+                      <a id="edit_profile" href="{{ url('profile.edit') }}">
+                        {{ _('Settings') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a id="logout" href="{{ url('logout') }}"
+                         class="browserid-logout">
+                        {{ _('Log Out') }}
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              {% else %}
+                <li class="{{ nav_about}}">
+                  <a id="logout" href="{{ url('logout') }}"
+                     class="browserid-logout">
+                    {{ _('Log Out') }}
+                  </a>
+                </li>
+              {% endif %}
             {% else  %}
               <li class="pull-right">
-                <a class="browser_id_login" href="#join_us">
+                <a class="browserid-login" href="#join_us">
                   <img alt="{{ _('Sign in with Persona') }}"
                        src="{{ MEDIA_URL }}img/plain_sign_in_blue.png" />
                 </a>
@@ -110,7 +122,10 @@
         {% for message in messages %}
           {% with %}
             {% set label = message.tags in ['error', 'success', 'info'] %}
-            <div class="alert{% if label %} alert-{{ message.tags }}{% endif %} offset1 span8" id="pending-approval">{{ message }}</div>
+              <div class="alert{% if label %} alert-{{ message.tags }}{% endif %} offset1 span8"
+                   id="pending-approval">
+                {{ message }}
+              </div>
           {% endwith %}
         {% endfor %}
       {% endif %}
@@ -123,7 +138,7 @@
     <div class="container row">
       <p class="span4">
         {% trans legal_url='http://mozilla.com/about/legal.html#site',
-	         cc_url='http://creativecommons.org/licenses/by-sa/3.0/' %}
+                 cc_url='http://creativecommons.org/licenses/by-sa/3.0/' %}
           Except where otherwise
           <a href="{{ legal_url }}">noted</a>,
           content on this site is licensed under the
@@ -164,11 +179,16 @@
     </div>
   </footer>
 
-{# To add browserid Login to something add the class .browser_id_login to an element #}
-<form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
-  {{ csrf() }}
-  {{ browserid_form }}
-</form>
+{% block browserid_form %}
+  {% if not user.is_authenticated() %}
+    <form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
+      {{ csrf() }}
+      {{ browserid_form.as_p() }}
+      <input type="hidden" name="next"
+             value="{{ request.REQUEST.next|default(settings.LOGIN_REDIRECT_URL) }}" />
+    </form>
+  {% endif %}
+{% endblock %}
 
 {% block site_js %}
   <script src="{{ url('jsi18n') }}"></script>
@@ -176,6 +196,6 @@
   {% include "includes/webtrends_desktop.html" %}
 {% endblock %}
 {% block page_js %}{% endblock %}
-<script src="https://browserid.org/include.js" type="text/javascript"></script>
+<script src="https://login.persona.org/include.js" type="text/javascript"></script>
 </body>
 </html>

@@ -99,7 +99,7 @@ MINIFY_BUNDLES = {
             'js/libs/bootstrap/bootstrap-tab.js',
             'js/libs/validation/validation.js',
             'js/main.js',
-            'js/browserid.js',
+            'static/browserid/browserid.js',
             'js/groups.js',
         ),
         'api': (

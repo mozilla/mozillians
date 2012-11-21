@@ -9,11 +9,6 @@
   {{ super() }}
 {% endblock %}
 
-  {% if user.is_anonymous() %}
-    <a href="#sign_in" id="create-profile" class="button primary browser_id_login">
-      {{ _('Create Profile') }}
-    </a>
-  {% endif %}
 {% block main_content %}
   <div class="row">
     <img class="span4" id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
