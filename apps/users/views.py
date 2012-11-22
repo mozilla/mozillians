@@ -38,8 +38,7 @@ class BrowserID(Verify):
             log.warning('Created profile for user with email %s' % user.email)
 
         if profile.is_complete():
-            auth.login(self.request, self.user)
-            return redirect(reverse('home'))
+            return super(BrowserID, self).login_success()
 
         self.request.session['authenticated_email'] = user.email
         return redirect(reverse('register'))
