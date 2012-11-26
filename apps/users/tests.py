@@ -6,6 +6,7 @@ from django.test.utils import override_settings
 from elasticutils.contrib.django import get_es
 from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
+from mock import patch
 from nose.tools import eq_, nottest
 from product_details import product_details
 from pyquery import PyQuery as pq
@@ -306,6 +307,17 @@ class TestThingsForPeople(ESTestCase):
         errmsg = 'Self vouching... silliness.'
         assert not doc('#vouch-form button'), errmsg
         assert 'Vouch for me' not in r.content, errmsg
+
+    @patch('users.admin.index_all_profiles')
+    def test_es_index_admin_view(self, mock_obj):
+        """Test that admin:user_index_profiles work fires a re-index."""
+        self.mozillian.is_superuser = True
+        self.mozillian.is_staff = True
+        self.mozillian.save()
+        url = reverse('admin:users_index_profiles')
+        self.client.login(email=self.mozillian.email)
+        self.client.get(url)
+        mock_obj.assert_any_call()
 
 
 class VouchTest(ESTestCase):
