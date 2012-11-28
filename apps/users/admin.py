@@ -1,8 +1,14 @@
+from functools import update_wrapper
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.contrib import messages
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
-from models import UserProfile, UsernameBlacklist
+from .cron import index_all_profiles
+from .models import UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
@@ -33,6 +39,26 @@ class UserAdmin(UserAdmin):
 
     def vouched_by(self, obj):
         return obj.userprofile.vouched_by
+
+    def index_profiles(self, request):
+        """Fire an Elastic Search Index Profiles task."""
+        index_all_profiles()
+        messages.success(request, 'Profile indexing started.')
+        return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
+
+    def get_urls(self):
+        """Return custom and UserAdmin urls."""
+
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+
+        urls = super(UserAdmin, self).get_urls()
+        my_urls = patterns('',
+                           url(r'index_profiles', wrap(self.index_profiles),
+                               name='users_index_profiles'))
+        return my_urls + urls
 
 admin.site.register(User, UserAdmin)
 
