@@ -271,14 +271,17 @@ class UserProfile(models.Model, SearchMixin):
         return s
 
 
-@receiver(models.signals.post_save, sender=User,
+@receiver(dbsignals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, raw, **kwargs):
-    if created and not raw:
+    if not raw:
         up, created = UserProfile.objects.get_or_create(user=instance)
+        if not created:
+            dbsignals.post_save.send(sender=UserProfile, instance=up,
+                                     created=created, raw=raw)
 
 
-@receiver(models.signals.pre_save, sender=UserProfile,
+@receiver(dbsignals.pre_save, sender=UserProfile,
           dispatch_uid='auto_vouch_sig')
 def auto_vouch(sender, instance, raw, using, **kwargs):
     """Auto vouch mozilla.com users."""
@@ -288,7 +291,7 @@ def auto_vouch(sender, instance, raw, using, **kwargs):
             instance.vouch(None, commit=False)
 
 
-@receiver(models.signals.post_save, sender=UserProfile,
+@receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='add_to_staff_group_sig')
 def add_to_staff_group(sender, instance, created, raw, **kwargs):
     """Keep users in the staff group if they're autovouchable."""
