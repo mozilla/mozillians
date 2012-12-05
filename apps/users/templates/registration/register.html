@@ -44,8 +44,7 @@
         <div class="tab-pane active" id="start">
           <h2>{{ _('Profile') }}</h2>
           {{ bootstrap(user_form.username) }}
-          {{ bootstrap(user_form.first_name) }}
-          {{ bootstrap(user_form.last_name) }}
+          {{ bootstrap(profile_form.full_name) }}
           {{ bootstrap(profile_form.ircname) }}
           {{ bootstrap(profile_form.website) }}
           {{ bootstrap(profile_form.bio) }}

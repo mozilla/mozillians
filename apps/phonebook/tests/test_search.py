@@ -52,7 +52,8 @@ class TestSearch(ESTestCase):
         amanda = 'Amanda Younger'
         amandeep = 'Amandeep McIlrath'
 
-        user(first_name='Amanda', last_name='Unvouched')
+        user(full_name='Amanda Unvouched')
+
 
         url = reverse('search')
         r = self.mozillian_client.get(url, {'q': 'Am'})
@@ -83,9 +84,9 @@ class TestSearch(ESTestCase):
     def test_profilepic_search(self):
         """Make sure searching for only users with profile pics works."""
 
-        user(first_name='Aman', vouched=True, photo=True)
-        user(first_name='Amanda', vouched=True, photo=True)
-        u = user(first_name='Amihuman', vouched=True)
+        user(full_name='Aman', vouched=True, photo=True)
+        user(full_name='Amanda', vouched=True, photo=True)
+        u = user(full_name='Amihuman', vouched=True)
 
         self.client.login(email=u.email)
 
@@ -164,7 +165,7 @@ class TestSearch(ESTestCase):
         they are the only result returned by the query.
 
         """
-        u = user(first_name='Findme', last_name='Ifyoucan')
+        u = user(full_name='Findme Ifyoucan')
 
         r = create_client(vouched=True).get(reverse('search'),
                                             {'q': 'Fin', 'nonvouched_only': 1},

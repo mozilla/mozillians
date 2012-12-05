@@ -39,12 +39,14 @@ class UserResource(ClientCachedResource, ModelResource):
 
     def build_filters(self, filters=None):
         es_filters = []
+        for item in set(['email', 'country', 'region', 'city', 'ircname',
+                         'username', 'languages', 'skills', 'groups',
+                         'is_vouched']) & set(filters):
+            es_filters.append(F(**{item: unquote(filters[item]).lower()}))
 
-        for item in ['email', 'country', 'region', 'city', 'ircname',
-                     'username', 'languages', 'skills', 'groups',
-                     'is_vouched', 'last_name', 'first_name']:
-            if item in filters:
-                es_filters.append(F(**{item: unquote(filters[item]).lower()}))
+        if 'name' in filters:
+            query = unquote(filters['name']).lower()
+            es_filters.append(F(name=query)|F(fullname=query))
 
         return es_filters
 

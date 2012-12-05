@@ -24,16 +24,18 @@ class TestCase(test_utils.TestCase):
 
         # Create a Mozillian
         cls.mozillian = User.objects.create(
-                email='u000001@mozillians.org', username='7f3a67u000001',
-                first_name='Amandeep', last_name='McIlrath')
+                email='u000001@mozillians.org', username='7f3a67u000001')
         profile = cls.mozillian.get_profile()
         profile.is_vouched = True
+        profile.full_name='Amandeep McIlrath'
         profile.save()
 
         # Create a non-vouched account
         cls.pending = User.objects.create(
-                email='pending@mozillians.org', username='pending',
-                first_name='Amanda', last_name='Younger')
+                email='pending@mozillians.org', username='pending')
+        pending_profile = cls.pending.get_profile()
+        pending_profile.full_name='Amanda Younger'
+        pending_profile.save()
 
     def setUp(self):
         # TODO: can this be more elegant?

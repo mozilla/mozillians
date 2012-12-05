@@ -23,13 +23,13 @@ class UserProfileInline(admin.StackedInline):
 class UserAdmin(UserAdmin):
     """User Admin."""
     inlines = [UserProfileInline]
-    search_fields = ['first_name', 'last_name', 'email', 'username',
+    search_fields = ['userprofile__full_name', 'email', 'username',
                      'userprofile__ircname']
     list_filter = ['userprofile__is_vouched']
     save_on_top = True
-    list_display = ['first_name', 'last_name', 'email', 'username', 'country',
-                    'is_vouched', 'vouched_by']
-    list_display_links = ['first_name', 'last_name', 'email', 'username']
+    list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
+                    'vouched_by']
+    list_display_links = ['full_name', 'email', 'username']
 
     def country(self, obj):
         return obj.userprofile.country
@@ -50,6 +50,7 @@ class UserAdmin(UserAdmin):
         """Return custom and UserAdmin urls."""
 
         def wrap(view):
+
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
@@ -59,6 +60,9 @@ class UserAdmin(UserAdmin):
                            url(r'index_profiles', wrap(self.index_profiles),
                                name='users_index_profiles'))
         return my_urls + urls
+
+    def full_name(self, obj):
+        return obj.userprofile.full_name
 
 admin.site.register(User, UserAdmin)
 

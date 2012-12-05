@@ -63,8 +63,7 @@ class InviteFlowTest(apps.common.tests.ESTestCase):
             self.client.post(reverse('browserid_verify'), d, follow=True)
 
         # Now let's register
-        d = dict(first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
+        d = dict(full_name='Desaaaaaaai',
                  username='aakash',
                  optin=True)
         with mock_browserid(email):
@@ -143,9 +142,9 @@ class InviteEdgeTest(apps.common.tests.ESTestCase):
 
 
 def create_vouched_user(email):
-        user = User.objects.create(email=email, username=email,
-                                   first_name='Amandeep', last_name='McIlrath')
+        user = User.objects.create(email=email, username=email)
         profile = user.get_profile()
         profile.is_vouched = True
+        profile.full_name='Amandeep McIlrath'
         profile.save()
         return user

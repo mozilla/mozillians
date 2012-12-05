@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from tastypie import paginator
 
 
@@ -28,5 +27,4 @@ class Paginator(paginator.Paginator):
         tastypie.paginator.Paginator and total objects to prevent
         Elastic Search crashes and timeouts.
         """
-        return min(super(Paginator, self).get_offset(),
-                   self.get_count())
+        return min(super(Paginator, self).get_offset(), self.get_count())

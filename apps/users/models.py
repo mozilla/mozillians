@@ -37,21 +37,17 @@ class UserProfile(models.Model, SearchMixin):
     # This field is required.
     user = models.OneToOneField(User)
 
-    # Other fields here
+    full_name = models.CharField(max_length=255, default='', blank=True,
+                                verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
                               default='', blank=True, null=True)
-
-    # Foreign Keys and Relationships
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
                                    on_delete=models.SET_NULL, blank=True)
-
     groups = models.ManyToManyField(Group, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
     languages = models.ManyToManyField(Language, blank=True)
-
-    # Personal info
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
                        upload_to='userprofile')
@@ -65,8 +61,6 @@ class UserProfile(models.Model, SearchMixin):
                               verbose_name=_lazy(u'Province/State'))
     city = models.CharField(max_length=255, default='', blank=True,
                             verbose_name=_lazy(u'City'))
-
-    # Privacy Settings
     allows_community_sites = models.BooleanField(
         default=True,
         verbose_name=_lazy(u'Sites that can determine my vouched status'),
@@ -79,7 +73,7 @@ class UserProfile(models.Model, SearchMixin):
 
     @property
     def display_name(self):
-        return '%s %s' % (self.user.first_name, self.user.last_name)
+        return self.full_name
 
     class Meta:
         db_table = 'profile'
@@ -96,6 +90,7 @@ class UserProfile(models.Model, SearchMixin):
 
         for name in ['first_name', 'last_name', 'email']:
             setattr(self.user, name, '')
+        self.full_name = ''
 
         # Give a random username
         self.user.username = uuid.uuid4().hex[:30]
@@ -196,14 +191,15 @@ class UserProfile(models.Model, SearchMixin):
             d.update({'country': COUNTRIES[obj.country].lower()})
 
         # user data
-        attrs = ('username', 'first_name', 'last_name', 'email', 'last_login',
-                 'date_joined')
+        attrs = ('username', 'email', 'last_login', 'date_joined')
         for a in attrs:
             data = getattr(obj.user, a)
             if isinstance(data, basestring):
                 data = data.lower()
             d.update({a: data})
 
+        d.update(dict(name=obj.full_name.lower()))
+        d.update(dict(fullname=obj.full_name.lower()))
         d.update(dict(bio=obj.bio))
         d.update(dict(has_photo=bool(obj.photo)))
         # Index groups, skills, and languages ... for fun.
@@ -222,8 +218,8 @@ class UserProfile(models.Model, SearchMixin):
                 'id': {'type': 'integer'},
                 # The name is a name---so we shouldn't analyze it
                 # (de-stem, tokenize, parse, etc).
-                'first_name': {'type': 'string', 'index': 'not_analyzed'},
-                'last_name': {'type': 'string', 'index': 'not_analyzed'},
+                'name': {'type': 'string', 'analyzer': 'whitespace'},
+                'fullname': {'type': 'string', 'index': 'not_analyzed'},
                 'email': {'type': 'string', 'index': 'not_analyzed'},
                 'ircname': {'type': 'string', 'index': 'not_analyzed'},
                 'username': {'type': 'string', 'index': 'not_analyzed'},
@@ -255,8 +251,8 @@ class UserProfile(models.Model, SearchMixin):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('username', 'bio__text', 'website', 'email', 'groups',
-                  'skills', 'languages', 'first_name__prefix',
-                  'last_name__prefix', 'ircname', 'country', 'region', 'city')
+                  'skills', 'languages', 'name__prefix', 'ircname',
+                  'country', 'region', 'city', 'fullname__prefix')
 
         if query:
             q = dict((field, query) for field in fields)

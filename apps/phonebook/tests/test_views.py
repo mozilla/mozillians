@@ -71,6 +71,8 @@ class TestDeleteUser(ESTestCase):
 
         # Make sure the user data isn't there anymore
         assert not User.objects.get(id=user_id).first_name
+        assert not User.objects.get(id=user_id).last_name
+        assert not User.objects.get(id=user_id).userprofile.full_name
         assert not User.objects.get(id=user_id).email
         assert not User.objects.get(id=user_id).is_active
 
@@ -152,23 +154,17 @@ class TestViews(ESTestCase):
         # original
         r = newbie_client.get(profile_url)
         newbie = r.context['profile']
-        first = newbie.user.first_name
-        last = newbie.user.last_name
+        full = newbie.full_name
         bio = newbie.bio
 
         # update
-        data = dict(first_name='Hobo', last_name='LaRue',
-                    bio='Rides the rails')
+        data = dict(full_name='Hobo LaRue', bio='Rides the rails')
         edit = newbie_client.post(edit_profile_url, data, follow=True)
         eq_(200, edit.status_code, 'Edits okay')
         r = newbie_client.get(profile_url)
         newbie = r.context['profile']
-        self.assertNotEqual(first, newbie.user.first_name)
-        self.assertNotEqual(last, newbie.user.last_name)
+        self.assertNotEqual(full, newbie.full_name)
         self.assertNotEqual(bio, newbie.bio)
-
-        dn = "%s %s" % (newbie.user.first_name, newbie.user.last_name)
-        eq_(dn, newbie.display_name, 'Editing should update display name')
 
         # cleanup
         delete_url = reverse('profile.delete')
@@ -185,8 +181,8 @@ class TestViews(ESTestCase):
 
         .. note::
 
-           This does not test that the web server is serving the files
-           from the filesystem properly.
+            This does not test that the web server is serving the files
+            from the filesystem properly.
         """
         client = self.mozillian_client
 
@@ -197,7 +193,7 @@ class TestViews(ESTestCase):
 
         # Try to game the form -- it shouldn't do anything.
         r = client.post(reverse('profile.edit'),
-                {'last_name': 'foo', 'photo-clear': 1})
+                        {'full_name': 'foo', 'photo-clear': 1})
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
                                 "shouldn't result in an error.")
 
@@ -205,7 +201,7 @@ class TestViews(ESTestCase):
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo=f))
+                        dict(full_name='foo', photo=f))
         f.close()
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -219,7 +215,7 @@ class TestViews(ESTestCase):
 
         # Remove a profile photo
         r = client.post(reverse('profile.edit'),
-                {'last_name': 'foo', 'photo-clear': 1})
+                {'full_name': 'foo', 'photo-clear': 1})
 
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -266,7 +262,7 @@ class TestViews(ESTestCase):
 
         # Add a URL sans protocol.
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', website='tofumatt.com'))
+                        dict(full_name='foo', website='tofumatt.com'))
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
         r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
@@ -314,7 +310,7 @@ class TestViews(ESTestCase):
         f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
                  'rb')
         r = client.post(reverse('profile.edit'),
-                dict(last_name='foo', photo=f), follow=True)
+                        dict(full_name='foo', photo=f), follow=True)
 
         f.close()
 
@@ -323,7 +319,7 @@ class TestViews(ESTestCase):
         doc = pq(r.content)
         old_photo = doc('#profile-photo').attr('src')
         r = client.post(reverse('profile.edit'),
-                        dict(last_name='foo', photo=f), follow=True)
+                        dict(full_name='foo', photo=f), follow=True)
         f.close()
         doc = pq(r.content)
         new_photo = doc('#profile-photo').attr('src')
@@ -401,8 +397,7 @@ def _create_new_user():
                   email=newbie_email,
                   password='asdfasdf',
                   confirmp='asdfasdf',
-                  first_name='Newbie',
-                  last_name='McPal',
+                  full_name='Newbie McPal',
                   optin='True')
     r = newbie_client.post(reg_url, params, follow=True)
     eq_('registration/login.html', r.templates[0].name)
