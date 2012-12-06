@@ -109,7 +109,6 @@ def update(ctx):
     update_assets()
     update_locales()
     database()
-    update_es_indexes()
 
 
 @task
@@ -119,6 +118,7 @@ def deploy(ctx):
     deploy_app()
     prime_app()
     update_celery()
+    update_es_indexes()
 
 
 @task
