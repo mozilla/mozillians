@@ -54,8 +54,7 @@ class RegistrationTest(ESTestCase):
 
         d = dict(username='ad',
                  email='mrfusion@mozilla.com',
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
+                 full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             r = self.client.post(reverse('register'), d, follow=True)
@@ -79,10 +78,7 @@ class RegistrationTest(ESTestCase):
 
         d = dict(username='ad',
                  email=email,
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
+                 full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('register'), d, follow=True)
@@ -101,10 +97,7 @@ class RegistrationTest(ESTestCase):
             self.client.post(reverse('browserid_verify'), d, follow=True)
         d = dict(email=email,
                  username='mrfusion',
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
+                 full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
@@ -130,10 +123,7 @@ class RegistrationTest(ESTestCase):
 
         d = dict(email=email,
                  username=username,
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
+                 full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
@@ -156,10 +146,7 @@ class RegistrationTest(ESTestCase):
 
         d = dict(email=bad_user_email,
                  username=bad_username,
-                 first_name='Akaaaaaaash',
-                 last_name='Desaaaaaaai',
-                 password='tacoface',
-                 confirmp='tacoface',
+                 full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
@@ -186,8 +173,7 @@ class RegistrationTest(ESTestCase):
         for name in badnames:
             d = dict(email=email,
                      username=name,
-                     first_name='Akaaaaaaash',
-                     last_name='Desaaaaaaai',
+                     full_name='Akaaaaaaash Desaaaaaaai',
                      optin=True)
             with browserid_mock.mock_browserid(email):
                 r = self.client.post(reverse('register'), d)
@@ -211,8 +197,7 @@ class RegistrationTest(ESTestCase):
 
         # Note: No username supplied.
         d = dict(email=email,
-                 first_name='Tofu',
-                 last_name='Matt',
+                 full_name='Tofu Matt',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d, follow=True)
@@ -230,8 +215,7 @@ class RegistrationTest(ESTestCase):
     def test_repeat_username(self):
         """Verify one cannot repeat email adresses."""
         register = dict(username='repeatedun',
-                        first_name='Akaaaaaaash',
-                        last_name='Desaaaaaaai',
+                        full_name='Akaaaaaaash Desaaaaaaai',
                         optin=True)
 
         # Create first user
@@ -388,8 +372,7 @@ class TestUser(ESTestCase):
         username = 'thisisatest'
         email = 'test@example.com'
         register = dict(username=username,
-                        first_name='David',
-                        last_name='Teststhings',
+                        full_name='David Teststhings',
                         optin=True)
         d = {'assertion': 'rarrr'}
 
@@ -411,16 +394,12 @@ class TestMigrateRegistration(ESTestCase):
             """Given an invite_url go to it and redeem an invite."""
             # Lettuce make sure we have a clean slate
 
-            info = dict(first_name='Akaaaaaaash',
-                        last_name='Desaaaaaaai',
-                        optin=True)
-
+            info = dict(full_name='Akaaaaaaash Desaaaaaaai', optin=True)
             self.client.logout()
             u = User.objects.create(username='robot1337', email=self.email)
             p = u.get_profile()
 
-            u.first_name = info['first_name']
-            u.last_name = ''
+            p.full_name = info['full_name']
             u.save()
             p.save()
 
@@ -433,7 +412,6 @@ class TestMigrateRegistration(ESTestCase):
             eq_(r.status_code, 200)
 
             # Now let's register
-
             with browserid_mock.mock_browserid(self.email):
                 r = self.client.post(reverse('register'), info, follow=True)
 
@@ -508,15 +486,13 @@ class SearchTests(ESTestCase):
                      'city': 'Mountain View',
                      'ircname': 'hax0r',
                      'bio': 'I love ice cream. I code. I tweet.',
-                     'website': 'http://www.example.com'}
+                     'website': 'http://www.example.com',
+                     'full_name': 'Nikos Koukos'}
         self.auto_user = user()
-        self.auto_user.first_name = 'Nikos'
-        self.auto_user.last_name = 'Koukos'
-        self.auto_user.save()
-        up = self.auto_user.userprofile
+        self.up = self.auto_user.userprofile
         for key, value in self.data.iteritems():
-            setattr(up, key, value)
-        up.save()
+            setattr(self.up, key, value)
+        self.up.save()
 
     def test_search_generic(self):
         for key, value in self.data.iteritems():
@@ -525,23 +501,17 @@ class SearchTests(ESTestCase):
             results = UserProfile.search(value)
             self.assertEqual(len(results), 1)
 
-        results = UserProfile.search(self.auto_user.first_name)
-        self.assertEqual(len(results), 1)
-
-        results = UserProfile.search(self.auto_user.last_name)
+        results = UserProfile.search(self.up.full_name)
         self.assertEqual(len(results), 1)
 
         results = UserProfile.search('mountain')
         self.assertEqual(len(results), 0)
 
-        results = UserProfile.search(self.auto_user.first_name[:3])
-        self.assertEqual(len(results), 1)
-
-        results = UserProfile.search(self.auto_user.last_name[:2])
+        results = UserProfile.search(self.up.full_name[:2])
         self.assertEqual(len(results), 1)
 
         results = UserProfile.search(
-            self.auto_user.userprofile.bio.split(' ')[3])
+            self.up.bio.split(' ')[3])
         self.assertEqual(len(results), 1)
 
 
@@ -560,10 +530,8 @@ class APITests(ESTestCase):
         up.country = 'gr'
         up.region = 'Attika'
         up.city = 'Athens'
+        up.full_name = 'Foo Bar'
         up.save()
-        self.auto_user.first_name = 'Foo'
-        self.auto_user.last_name = 'Bar'
-        self.auto_user.save()
 
         self.app = APIApp.objects.create(name='test_app',
                                          description='Foo',
@@ -736,50 +704,28 @@ class APITests(ESTestCase):
         data = json.loads(response.content)
         self.assertEqual(data['meta']['total_count'], 0)
 
-    def test_api_search_first_name(self):
-        """Test API search first name."""
+    def test_api_search_name(self):
+        """Test API search name."""
         self.app.is_mozilla_app = True
         self.app.is_active = True
         self.app.save()
         url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
                                                    'resource_name': 'users'})
 
-        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
-                            first_name=self.auto_user.first_name)
-        response = self.client.get(new_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        data = json.loads(response.content)
-        self.assertEqual(data['meta']['total_count'], 1)
-
-        # Search nonexistent term
-        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
-                            first_name='random')
-        response = self.client.get(new_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        data = json.loads(response.content)
-        self.assertEqual(data['meta']['total_count'], 0)
-
-    def test_api_search_last_name(self):
-        """Test API search last name."""
-        self.app.is_mozilla_app = True
-        self.app.is_active = True
-        self.app.save()
-        url = reverse('api_dispatch_list', kwargs={'api_name': 'v1',
-                                                   'resource_name': 'users'})
-
-        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
-                            last_name=self.auto_user.last_name)
-        response = self.client.get(new_url, follow=True)
-        self.assertEqual(response.status_code, 200)
-
-        data = json.loads(response.content)
-        self.assertEqual(data['meta']['total_count'], 1)
+        # Search name using
+        for name in [self.auto_user.userprofile.full_name,
+                     self.auto_user.userprofile.full_name.split(' ')[0],
+                     self.auto_user.userprofile.full_name.split(' ')[1]]:
+            new_url = urlparams(url, app_name=self.app.name,
+                                app_key=self.app.key, name=name)
+            response = self.client.get(new_url, follow=True)
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.content)
+            self.assertEqual(data['meta']['total_count'], 1)
 
         # Search nonexistent term
         new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
-                            last_name='random')
+                            name='random')
         response = self.client.get(new_url, follow=True)
         self.assertEqual(response.status_code, 200)
 

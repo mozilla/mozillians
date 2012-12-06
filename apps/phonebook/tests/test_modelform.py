@@ -15,15 +15,15 @@ class ModelForms(ESTestCase):
 
         edit_profile_url = reverse('profile.edit')
 
-        bad_data = dict(first_name='BadHobo', last_name='BadLaRue',
-                        bio='Rides the rails', is_vouched=True)
+        bad_data = dict(full_name='BadLaRue', bio='Rides the rails',
+                        is_vouched=True)
 
         bad_edit = newbie_client.post(edit_profile_url, bad_data, follow=True)
         eq_(bad_edit.status_code, 200)
 
         newbie_profile = bad_edit.context['profile']
         assert not newbie_profile.is_vouched
-        eq_(newbie_profile.user.first_name, bad_data['first_name'])
+        eq_(newbie_profile.full_name, bad_data['full_name'])
 
     def test_username_filled_in(self):
         """The username field should have a type and value."""
