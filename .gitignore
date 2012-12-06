@@ -28,3 +28,4 @@ media/cache
 venv/
 mozillians.db
 media/static
+locale*
