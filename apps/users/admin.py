@@ -1,17 +1,63 @@
+from datetime import datetime, timedelta
+
 from functools import update_wrapper
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib import messages
+from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+
+from apps.common.admin import export_as_csv_action
 
 from .cron import index_all_profiles
 from .models import UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
+
+
+class DateJoinedFilter(SimpleListFilter):
+    """Admin filter for date joined."""
+    title = 'date joined'
+    parameter_name = 'date_joined'
+
+    def lookups(self, request, model_admin):
+        return map(lambda x: (str(x.year), x.year),
+                   User.objects.dates('date_joined', 'year'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        else:
+            return queryset.filter(date_joined__year=self.value())
+        return queryset
+
+
+class LastLoginFilter(SimpleListFilter):
+    """Admin filter for last login."""
+    title = 'last login'
+    parameter_name = 'last_login'
+
+    def lookups(self, request, model_admin):
+        return (('<6', 'Less than 6 months'),
+                ('>6', 'Between 6 and 12 months'),
+                ('>12', 'More than a year'))
+
+    def queryset(self, request, queryset):
+        half_year = datetime.today() - timedelta(days=180)
+        full_year = datetime.today() - timedelta(days=360)
+
+        if self.value() == '<6':
+            return queryset.filter(last_login__gte=half_year)
+        elif self.value() == '>6':
+            return queryset.filter(last_login__lt=half_year,
+                                   last_login__gt=full_year)
+        elif self.value() == '>12':
+            return queryset.filter(last_login__lt=full_year)
+        return queryset
 
 
 class UserProfileInline(admin.StackedInline):
@@ -25,11 +71,13 @@ class UserAdmin(UserAdmin):
     inlines = [UserProfileInline]
     search_fields = ['userprofile__full_name', 'email', 'username',
                      'userprofile__ircname']
-    list_filter = ['userprofile__is_vouched']
+    list_filter = ['userprofile__is_vouched', DateJoinedFilter,
+                   LastLoginFilter]
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
                     'vouched_by']
     list_display_links = ['full_name', 'email', 'username']
+    actions = [export_as_csv_action(fields=('username', 'email'), header=True)]
 
     def country(self, obj):
         return obj.userprofile.country
