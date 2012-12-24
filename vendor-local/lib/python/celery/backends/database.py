@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from datetime import datetime
-
 from .. import states
 from ..db.models import Task, TaskSet
 from ..db.session import ResultSession
@@ -127,11 +125,12 @@ class DatabaseBackend(BaseDictBackend):
         """Delete expired metadata."""
         session = self.ResultSession()
         expires = self.expires
+        now = self.app.now()
         try:
             session.query(Task).filter(
-                    Task.date_done < (datetime.now() - expires)).delete()
+                    Task.date_done < (now - expires)).delete()
             session.query(TaskSet).filter(
-                    TaskSet.date_done < (datetime.now() - expires)).delete()
+                    TaskSet.date_done < (now - expires)).delete()
             session.commit()
         finally:
             session.close()

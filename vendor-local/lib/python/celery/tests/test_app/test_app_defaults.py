@@ -5,10 +5,10 @@ import sys
 
 from importlib import import_module
 
-from celery.tests.utils import unittest, pypy_version, sys_platform
+from celery.tests.utils import Case, pypy_version, sys_platform
 
 
-class test_defaults(unittest.TestCase):
+class test_defaults(Case):
 
     def setUp(self):
         self._prev = sys.modules.pop("celery.app.defaults", None)
@@ -30,6 +30,13 @@ class test_defaults(unittest.TestCase):
     def test_default_pool_jython(self):
         with sys_platform("java 1.6.51"):
             self.assertEqual(self.defaults.DEFAULT_POOL, "threads")
+
+    def test_find(self):
+        find = self.defaults.find
+
+        self.assertEqual(find("server_email")[2].default, "celery@localhost")
+        self.assertEqual(find("default_queue")[2].default, "celery")
+        self.assertEqual(find("celery_default_exchange")[2], "celery")
 
     @property
     def defaults(self):

@@ -35,7 +35,7 @@ class DjangoLoader(BaseLoader):
         # any embedded celerybeat process forks.
         signals.beat_embedded_init.connect(self.close_database)
 
-    def now(self):
+    def now(self, **kwargs):
         return now()
 
     def read_configuration(self):
@@ -63,7 +63,7 @@ class DjangoLoader(BaseLoader):
                     raise
 
     def close_database(self, **kwargs):
-        db_reuse_max = getattr(self.conf, "CELERY_DB_REUSE_MAX", None)
+        db_reuse_max = self.conf.get("CELERY_DB_REUSE_MAX", None)
         if not db_reuse_max:
             return self._close_database()
         if self._db_reuse >= db_reuse_max * 2:
@@ -87,9 +87,14 @@ class DjangoLoader(BaseLoader):
         self.close_database()
         self.close_cache()
 
-    def on_task_init(self, *args, **kwargs):
+    def on_task_init(self, task_id, task):
         """Called before every task."""
-        self.close_database()
+        try:
+            is_eager = task.request.is_eager
+        except AttributeError:
+            is_eager = False
+        if not is_eager:
+            self.close_database()
 
     def on_worker_init(self):
         """Called when the worker starts.
@@ -102,10 +107,10 @@ class DjangoLoader(BaseLoader):
         if settings.DEBUG:
             warnings.warn("Using settings.DEBUG leads to a memory leak, never "
                           "use this setting in production environments!")
+        self.import_default_modules()
 
         self.close_database()
         self.close_cache()
-        self.import_default_modules()
 
     def import_default_modules(self):
         super(DjangoLoader, self).import_default_modules()

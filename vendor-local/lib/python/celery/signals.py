@@ -5,7 +5,7 @@
 
     See :ref:`signals`.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -23,6 +23,8 @@ task_postrun = Signal(providing_args=["task_id", "task",
 task_failure = Signal(providing_args=["task_id", "exception",
                                       "args", "kwargs", "traceback",
                                       "einfo"])
+
+celeryd_init = Signal(providing_args=["instance"])
 
 worker_init = Signal(providing_args=[])
 worker_process_init = Signal(providing_args=[])

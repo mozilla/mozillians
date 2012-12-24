@@ -2,13 +2,13 @@
 from __future__ import absolute_import
 
 import os
-import sys
-
-from time import time
-
 if not os.environ.get("GEVENT_NOPATCH"):
     from gevent import monkey
     monkey.patch_all()
+
+import sys
+
+from time import time
 
 from ..utils import timer2
 
@@ -109,3 +109,15 @@ class TaskPool(BasePool):
             accept_callback=None, **_):
         return self._pool.spawn(apply_target, target, args, kwargs,
                                 callback, accept_callback)
+
+    def grow(self, n=1):
+        self._pool._semaphore.counter += n
+        self._pool.size += n
+
+    def shrink(self, n=1):
+        self._pool._semaphore.counter -= n
+        self._pool.size -= n
+
+    @property
+    def num_processes(self):
+        return len(self._pool)

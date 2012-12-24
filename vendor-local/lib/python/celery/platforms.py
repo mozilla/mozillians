@@ -6,11 +6,12 @@
     Utilities dealing with platform specifics: signals, daemonization,
     users, groups, and so on.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+from __future__ import with_statement
 
 import errno
 import os
@@ -21,10 +22,22 @@ import sys
 
 from .local import try_import
 
+from kombu.utils.limits import TokenBucket
+
 _setproctitle = try_import("setproctitle")
 resource = try_import("resource")
 pwd = try_import("pwd")
 grp = try_import("grp")
+
+EX_OK = getattr(os, "EX_OK", 0)
+EX_FAILURE = 1
+EX_UNAVAILABLE = getattr(os, "EX_UNAVAILABLE", 69)
+EX_USAGE = getattr(os, "EX_USAGE", 64)
+
+try:
+    from multiprocessing.process import current_process
+except ImportError:
+    current_process = None  # noqa
 
 SYSTEM = _platform.system()
 IS_OSX = SYSTEM == "Darwin"
@@ -34,17 +47,19 @@ DAEMON_UMASK = 0
 DAEMON_WORKDIR = "/"
 DAEMON_REDIRECT_TO = getattr(os, "devnull", "/dev/null")
 
+_setps_bucket = TokenBucket(0.5)  # 30/m, every 2 seconds
+
 
 def pyimplementation():
     if hasattr(_platform, "python_implementation"):
         return _platform.python_implementation()
     elif sys.platform.startswith("java"):
-        return "Jython %s" % (sys.platform, )
+        return "Jython " + sys.platform
     elif hasattr(sys, "pypy_version_info"):
         v = ".".join(map(str, sys.pypy_version_info[:3]))
         if sys.pypy_version_info[3:]:
             v += "-" + "".join(map(str, sys.pypy_version_info[3:]))
-        return "PyPy %s" % (v, )
+        return "PyPy " + v
     else:
         return "CPython"
 
@@ -89,7 +104,7 @@ class PIDFile(object):
         try:
             self.write_pid()
         except OSError, exc:
-            raise LockFailed(str(exc))
+            raise LockFailed, LockFailed(str(exc)), sys.exc_info()[2]
         return self
     __enter__ = acquire
 
@@ -111,11 +126,16 @@ class PIDFile(object):
                 return
             raise
 
-        line = fh.readline().strip()
-        fh.close()
+        try:
+            line = fh.readline()
+            if line.strip() == line:  # must contain '\n'
+                raise ValueError(
+                    "Partially written or invalid pidfile %r" % (self.path))
+        finally:
+            fh.close()
 
         try:
-            return int(line)
+            return int(line.strip())
         except ValueError:
             raise ValueError("PID file %r contents invalid." % self.path)
 
@@ -151,6 +171,9 @@ class PIDFile(object):
         return False
 
     def write_pid(self):
+        pid = os.getpid()
+        content = "%d\n" % (pid, )
+
         open_flags = (os.O_CREAT | os.O_EXCL | os.O_WRONLY)
         open_mode = (((os.R_OK | os.W_OK) << 6) |
                         ((os.R_OK) << 3) |
@@ -158,10 +181,20 @@ class PIDFile(object):
         pidfile_fd = os.open(self.path, open_flags, open_mode)
         pidfile = os.fdopen(pidfile_fd, "w")
         try:
-            pid = os.getpid()
-            pidfile.write("%d\n" % (pid, ))
+            pidfile.write(content)
+            # flush and sync so that the re-read below works.
+            pidfile.flush()
+            try:
+                os.fsync(pidfile_fd)
+            except AttributeError:
+                pass
         finally:
             pidfile.close()
+
+        with open(self.path) as fh:
+            if fh.read() != content:
+                raise LockFailed(
+                    "Inconsistency: Pidfile content doesn't match at re-read")
 
 
 def create_pidlock(pidfile):
@@ -197,15 +230,19 @@ def create_pidlock(pidfile):
 
 class DaemonContext(object):
     _is_open = False
+    workdir = DAEMON_WORKDIR
+    umask = DAEMON_UMASK
 
-    def __init__(self, pidfile=None, workdir=DAEMON_WORKDIR,
-            umask=DAEMON_UMASK, **kwargs):
-        self.workdir = workdir
-        self.umask = umask
+    def __init__(self, pidfile=None, workdir=None, umask=None,
+            fake=False, **kwargs):
+        self.workdir = workdir or self.workdir
+        self.umask = self.umask if umask is None else umask
+        self.fake = fake
 
     def open(self):
         if not self._is_open:
-            self._detach()
+            if not self.fake:
+                self._detach()
 
             os.chdir(self.workdir)
             os.umask(self.umask)
@@ -240,7 +277,7 @@ class DaemonContext(object):
 
 
 def detached(logfile=None, pidfile=None, uid=None, gid=None, umask=0,
-             workdir=None, **opts):
+             workdir=None, fake=False, **opts):
     """Detach the current process in the background (daemonize).
 
     :keyword logfile: Optional log file.  The ability to write to this file
@@ -254,6 +291,7 @@ def detached(logfile=None, pidfile=None, uid=None, gid=None, umask=0,
       privileges to.
     :keyword umask: Optional umask that will be effective in the child process.
     :keyword workdir: Optional new working directory.
+    :keyword fake: Don't actually detach, intented for debugging purposes.
     :keyword \*\*opts: Ignored.
 
     **Example**:
@@ -281,7 +319,9 @@ def detached(logfile=None, pidfile=None, uid=None, gid=None, umask=0,
     workdir = os.getcwd() if workdir is None else workdir
 
     signals.reset("SIGCLD")  # Make sure SIGCLD is using the default handler.
-    set_effective_user(uid=uid, gid=gid)
+    if not os.geteuid():
+        # no point trying to setuid unless we're root.
+        maybe_drop_privileges(uid=uid, gid=gid)
 
     # Since without stderr any errors will be silently suppressed,
     # we need to know that we have access to the logfile.
@@ -289,7 +329,7 @@ def detached(logfile=None, pidfile=None, uid=None, gid=None, umask=0,
     # Doesn't actually create the pidfile, but makes sure it's not stale.
     pidfile and create_pidlock(pidfile)
 
-    return DaemonContext(umask=umask, workdir=workdir)
+    return DaemonContext(umask=umask, workdir=workdir, fake=fake)
 
 
 def parse_uid(uid):
@@ -328,29 +368,82 @@ def parse_gid(gid):
         raise
 
 
+def _setgroups_hack(groups):
+    """:fun:`setgroups` may have a platform-dependent limit,
+    and it is not always possible to know in advance what this limit
+    is, so we use this ugly hack stolen from glibc."""
+    groups = groups[:]
+
+    while 1:
+        try:
+            return os.setgroups(groups)
+        except ValueError:   # error from Python's check.
+            if len(groups) <= 1:
+                raise
+            groups[:] = groups[:-1]
+        except OSError, exc:  # error from the OS.
+            if exc.errno != errno.EINVAL or len(groups) <= 1:
+                raise
+            groups[:] = groups[:-1]
+
+
+def setgroups(groups):
+    max_groups = None
+    try:
+        max_groups = os.sysconf("SC_NGROUPS_MAX")
+    except:
+        pass
+    try:
+        return _setgroups_hack(groups[:max_groups])
+    except OSError, exc:
+        if exc.errno != errno.EPERM:
+            raise
+        if any(group not in groups for group in os.getgroups()):
+            # we shouldn't be allowed to change to this group.
+            raise
+
+
+def initgroups(uid, gid):
+    if grp and pwd:
+        username = pwd.getpwuid(uid)[0]
+        if hasattr(os, "initgroups"):  # Python 2.7+
+            return os.initgroups(username, gid)
+        groups = [gr.gr_gid for gr in grp.getgrall()
+                                if username in gr.gr_mem]
+        setgroups(groups)
+
+
 def setegid(gid):
     """Set effective group id."""
     gid = parse_gid(gid)
-    if gid != os.getgid():
+    if gid != os.getegid():
         os.setegid(gid)
 
 
 def seteuid(uid):
     """Set effective user id."""
     uid = parse_uid(uid)
-    if uid != os.getuid():
+    if uid != os.geteuid():
         os.seteuid(uid)
 
 
-def set_effective_user(uid=None, gid=None):
+def setgid(gid):
+    os.setgid(parse_gid(gid))
+
+
+def setuid(uid):
+    os.setuid(parse_uid(uid))
+
+
+def maybe_drop_privileges(uid=None, gid=None):
     """Change process privileges to new user/group.
 
-    If UID and GID is set the effective user/group is set.
+    If UID and GID is specified, the real user/group is changed.
 
-    If only UID is set, the effective user is set, and the group is
-    set to the users primary group.
+    If only UID is specified, the real user is changed, and the group is
+    changed to the users primary group.
 
-    If only GID is set, the effective group is set.
+    If only GID is specified, only the group is changed.
 
     """
     uid = uid and parse_uid(uid)
@@ -360,10 +453,15 @@ def set_effective_user(uid=None, gid=None):
         # If GID isn't defined, get the primary GID of the user.
         if not gid and pwd:
             gid = pwd.getpwuid(uid).pw_gid
-        setegid(gid)
-        seteuid(uid)
+        # Must set the GID before initgroups(), as setgid()
+        # is known to zap the group list on some platforms.
+        setgid(gid)
+        initgroups(uid, gid)
+
+        # at last:
+        setuid(uid)
     else:
-        gid and setegid(gid)
+        gid and setgid(gid)
 
 
 class Signals(object):
@@ -490,21 +588,27 @@ def set_process_title(progname, info=None):
     return proctitle
 
 
-def set_mp_process_title(progname, info=None, hostname=None):
-    """Set the ps name using the multiprocessing process name.
+if os.environ.get("NOSETPS"):
 
-    Only works if :mod:`setproctitle` is installed.
+    def set_mp_process_title(*a, **k):
+        pass
+else:
 
-    """
-    if hostname:
-        progname = "%s@%s" % (progname, hostname.split(".")[0])
-    try:
-        from multiprocessing.process import current_process
-    except ImportError:
-        return set_process_title(progname, info=info)
-    else:
-        return set_process_title("%s:%s" % (progname,
-                                            current_process().name), info=info)
+    def set_mp_process_title(progname, info=None, hostname=None,  # noqa
+            rate_limit=False):
+        """Set the ps name using the multiprocessing process name.
+
+        Only works if :mod:`setproctitle` is installed.
+
+        """
+        if not rate_limit or _setps_bucket.can_consume(1):
+            if hostname:
+                progname = "%s@%s" % (progname, hostname.split(".")[0])
+            if current_process is not None:
+                return set_process_title(
+                    "%s:%s" % (progname, current_process().name), info=info)
+            else:
+                return set_process_title(progname, info=info)
 
 
 def shellsplit(s, posix=True):

@@ -7,22 +7,28 @@ from celery.utils import uuid
 from celery.utils.serialization import pickle
 from celery.result import AsyncResult, EagerResult, TaskSetResult, ResultSet
 from celery.exceptions import TimeoutError
+from celery.task import task
 from celery.task.base import Task
 
 from celery.tests.utils import AppCase
 from celery.tests.utils import skip_if_quick
 
 
-def mock_task(name, status, result):
-    return dict(id=uuid(), name=name, status=status, result=result)
+@task
+def mytask():
+    pass
+
+
+def mock_task(name, state, result):
+    return dict(id=uuid(), name=name, state=state, result=result)
 
 
 def save_result(task):
     app = app_or_default()
     traceback = "Some traceback"
-    if task["status"] == states.SUCCESS:
+    if task["state"] == states.SUCCESS:
         app.backend.mark_as_done(task["id"], task["result"])
-    elif task["status"] == states.RETRY:
+    elif task["state"] == states.RETRY:
         app.backend.mark_as_retry(task["id"], task["result"],
                 traceback=traceback)
     else:
@@ -48,10 +54,10 @@ class TestAsyncResult(AppCase):
             save_result(task)
 
     def test_reduce(self):
-        a1 = AsyncResult("uuid", task_name="celery.ping")
+        a1 = AsyncResult("uuid", task_name=mytask.name)
         restored = pickle.loads(pickle.dumps(a1))
         self.assertEqual(restored.task_id, "uuid")
-        self.assertEqual(restored.task_name, "celery.ping")
+        self.assertEqual(restored.task_name, mytask.name)
 
         a2 = AsyncResult("uuid")
         self.assertEqual(pickle.loads(pickle.dumps(a2)).task_id, "uuid")
@@ -127,7 +133,7 @@ class TestAsyncResult(AppCase):
         self.assertEqual(ok_res.info, "the")
 
     def test_get_timeout(self):
-        res = AsyncResult(self.task4["id"])             # has RETRY status
+        res = AsyncResult(self.task4["id"])             # has RETRY state
         with self.assertRaises(TimeoutError):
             res.get(timeout=0.1)
 
@@ -137,7 +143,7 @@ class TestAsyncResult(AppCase):
 
     @skip_if_quick
     def test_get_timeout_longer(self):
-        res = AsyncResult(self.task4["id"])             # has RETRY status
+        res = AsyncResult(self.task4["id"])             # has RETRY state
         with self.assertRaises(TimeoutError):
             res.get(timeout=1)
 
@@ -178,7 +184,7 @@ class MockAsyncResultFailure(AsyncResult):
         return KeyError("baz")
 
     @property
-    def status(self):
+    def state(self):
         return states.FAILURE
 
     def get(self, propagate=True, **kwargs):
@@ -198,7 +204,7 @@ class MockAsyncResultSuccess(AsyncResult):
         return 42
 
     @property
-    def status(self):
+    def state(self):
         return states.SUCCESS
 
     def get(self, **kwargs):
@@ -222,6 +228,7 @@ class TestTaskSetResult(AppCase):
         self.ts = TaskSetResult(uuid(), make_mock_taskset(self.size))
 
     def test_total(self):
+        self.assertEqual(len(self.ts), self.size)
         self.assertEqual(self.ts.total, self.size)
 
     def test_iterate_raises(self):
@@ -331,7 +338,7 @@ class TestTaskSetResult(AppCase):
         self.assertTrue(self.ts.ready())
 
     def test_completed_count(self):
-        self.assertEqual(self.ts.completed_count(), self.ts.total)
+        self.assertEqual(self.ts.completed_count(), len(self.ts))
 
 
 class TestPendingAsyncResult(AppCase):
@@ -365,7 +372,7 @@ class TestFailedTaskSetResult(TestTaskSetResult):
             t.get()
 
     def test_completed_count(self):
-        self.assertEqual(self.ts.completed_count(), self.ts.total - 1)
+        self.assertEqual(self.ts.completed_count(), len(self.ts) - 1)
 
     def test___iter__(self):
         it = iter(self.ts)

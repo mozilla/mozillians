@@ -13,9 +13,9 @@ from time import time
 
 from celery.exceptions import TimeoutError
 from celery.task.control import ping, flatten_reply, inspect
-from celery.utils import get_full_cls_name
+from celery.utils import qualname
 
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 HOSTNAME = socket.gethostname()
 
@@ -52,8 +52,9 @@ class Worker(object):
         pid = os.fork()
         if pid == 0:
             from celery import current_app
-            current_app.worker_main(["celeryd", "--loglevel=DEBUG",
-                                                "-n", self.hostname])
+            current_app.worker_main(["celeryd", "--loglevel=INFO",
+                                                "-n", self.hostname,
+                                                "-P", "solo"])
             os._exit(0)
         self.pid = pid
 
@@ -84,7 +85,7 @@ class Worker(object):
     def managed(cls, hostname=None, caller=None):
         hostname = hostname or socket.gethostname()
         if caller:
-            hostname = ".".join([get_full_cls_name(caller), hostname])
+            hostname = ".".join([qualname(caller), hostname])
         else:
             hostname += str(cls.next_worker_id())
         worker = cls(hostname)
@@ -102,7 +103,7 @@ class Worker(object):
         return worker
 
 
-class WorkerCase(unittest.TestCase):
+class WorkerCase(Case):
     hostname = HOSTNAME
     worker = None
 

@@ -10,19 +10,20 @@ Beanstalk transport.
 """
 from __future__ import absolute_import
 
-import beanstalkc
 import socket
 
-from anyjson import loads, dumps
 from Queue import Empty
 
-from kombu.exceptions import StdConnectionError, StdChannelError
+from anyjson import loads, dumps
+from beanstalkc import Connection, BeanstalkcException, SocketError
+
+from kombu.exceptions import StdChannelError
 
 from . import virtual
 
 DEFAULT_PORT = 11300
 
-__author__ = 'David Ziegler <david.ziegler@gmail.com>'
+__author__ = "David Ziegler <david.ziegler@gmail.com>"
 
 
 class Channel(virtual.Channel):
@@ -33,7 +34,7 @@ class Channel(virtual.Channel):
         if job:
             try:
                 item = loads(job.body)
-                dest = job.stats()['tube']
+                dest = job.stats()["tube"]
             except Exception:
                 job.bury()
             else:
@@ -44,10 +45,10 @@ class Channel(virtual.Channel):
 
     def _put(self, queue, message, **kwargs):
         extra = {}
-        priority = message['properties']['delivery_info']['priority']
-        ttr = message['properties'].get('ttr')
+        priority = message["properties"]["delivery_info"]["priority"]
+        ttr = message["properties"].get("ttr")
         if ttr is not None:
-            extra['ttr'] = ttr
+            extra["ttr"] = ttr
 
         self.client.use(queue)
         self.client.put(dumps(message), priority=priority, **extra)
@@ -71,14 +72,9 @@ class Channel(virtual.Channel):
             timeout = 1
 
         watching = self.client.watching()
-
         [self.client.watch(active)
             for active in queues
                 if active not in watching]
-
-        [self.client.ignore(active)
-            for active in watching
-                if active not in queues]
 
         job = self.client.reserve(timeout=timeout)
         return self._parse_job(job)
@@ -105,9 +101,8 @@ class Channel(virtual.Channel):
 
     def _open(self):
         conninfo = self.connection.client
-        host = conninfo.hostname or 'localhost'
         port = conninfo.port or DEFAULT_PORT
-        conn = beanstalkc.Connection(host=host, port=port)
+        conn = Connection(host=conninfo.hostname, port=port)
         conn.connect()
         return conn
 
@@ -128,17 +123,11 @@ class Transport(virtual.Transport):
 
     polling_interval = 1
     default_port = DEFAULT_PORT
-    connection_errors = (StdConnectionError,
-                         socket.error,
-                         beanstalkc.SocketError,
+    connection_errors = (socket.error,
+                         SocketError,
                          IOError)
     channel_errors = (StdChannelError,
                       socket.error,
                       IOError,
-                      beanstalkc.SocketError,
-                      beanstalkc.BeanstalkcException)
-    driver_type = 'beanstalk'
-    driver_name = 'beanstalkc'
-
-    def driver_version(self):
-        return beanstalkc.__version__
+                      SocketError,
+                      BeanstalkcException)

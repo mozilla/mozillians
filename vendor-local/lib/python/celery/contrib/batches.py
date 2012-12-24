@@ -36,7 +36,7 @@ Registering the click is done as follows:
     In the future we hope to add the ability to direct batching tasks
     to a channel with different QoS requirements than the task channel.
 
-:copyright: (c) 2009 - 2011 by Ask Solem.
+:copyright: (c) 2009 - 2012 by Ask Solem.
 :license: BSD, see LICENSE for more details.
 
 """
@@ -166,7 +166,7 @@ class Batches(Task):
         if self._buffer.qsize():
             requests = list(consume_queue(self._buffer))
             if requests:
-                self.debug("Buffer complete: %s" % (len(requests), ))
+                self.debug("Buffer complete: %s", len(requests))
                 self.flush(requests)
         if not requests:
             self.debug("Cancelling timer: Nothing in buffer.")

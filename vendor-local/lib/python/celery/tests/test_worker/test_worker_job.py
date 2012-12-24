@@ -18,32 +18,31 @@ from celery import states
 from celery.app import app_or_default
 from celery.concurrency.base import BasePool
 from celery.datastructures import ExceptionInfo
-from celery.task import task as task_dec
-from celery.exceptions import RetryTaskError, NotRegistered, WorkerLostError
+from celery.exceptions import (RetryTaskError,
+                               WorkerLostError, InvalidTaskError)
+from celery.execute.trace import eager_trace_task, TraceInfo
 from celery.log import setup_logger
+from celery.registry import tasks
 from celery.result import AsyncResult
+from celery.task import task as task_dec
 from celery.task.base import Task
 from celery.utils import uuid
-from celery.utils.encoding import from_utf8
-from celery.worker.job import (WorkerTaskTrace, TaskRequest,
-                               InvalidTaskError, execute_and_trace,
-                               default_encode)
+from celery.utils.encoding import from_utf8, default_encode
+from celery.worker.job import Request, TaskRequest, execute_and_trace
 from celery.worker.state import revoked
 
-from celery.tests.compat import catch_warnings
-from celery.tests.utils import unittest
-from celery.tests.utils import WhateverIO, wrap_logger
+from celery.tests.utils import Case, WhateverIO, wrap_logger
 
 
 scratch = {"ACK": False}
 some_kwargs_scratchpad = {}
 
 
-def jail(task_id, task_name, args, kwargs):
-    return WorkerTaskTrace(task_name, task_id, args, kwargs)()
+def jail(task_id, name, args, kwargs):
+    return eager_trace_task(tasks[name], task_id, args, kwargs, eager=False)[0]
 
 
-def on_ack():
+def on_ack(*args, **kwargs):
     scratch["ACK"] = True
 
 
@@ -75,7 +74,7 @@ def mytask_raising(i, **kwargs):
     raise KeyError(i)
 
 
-class test_default_encode(unittest.TestCase):
+class test_default_encode(Case):
 
     def setUp(self):
         if sys.version_info >= (3, 0):
@@ -99,7 +98,7 @@ class test_default_encode(unittest.TestCase):
             sys.getfilesystemencoding = gfe
 
 
-class test_RetryTaskError(unittest.TestCase):
+class test_RetryTaskError(Case):
 
     def test_retry_task_error(self):
         try:
@@ -109,7 +108,7 @@ class test_RetryTaskError(unittest.TestCase):
             self.assertEqual(ret.exc, exc)
 
 
-class test_WorkerTaskTrace(unittest.TestCase):
+class test_trace_task(Case):
 
     def test_process_cleanup_fails(self):
         backend = mytask.backend
@@ -122,7 +121,8 @@ class test_WorkerTaskTrace(unittest.TestCase):
                 tid = uuid()
                 ret = jail(tid, mytask.name, [2], {})
                 self.assertEqual(ret, 4)
-                mytask.backend.mark_as_done.assert_called_with(tid, 4)
+                mytask.backend.store_result.assert_called_with(tid, 4,
+                                                               states.SUCCESS)
                 logs = sio.getvalue().strip()
                 self.assertIn("Process cleanup failed", logs)
         finally:
@@ -143,15 +143,16 @@ class test_WorkerTaskTrace(unittest.TestCase):
         self.assertEqual(ret, 4)
 
     def test_marked_as_started(self):
-        mytask.track_started = True
 
         class Backend(mytask.backend.__class__):
             _started = []
 
-            def mark_as_started(self, tid, *args, **kwargs):
-                self._started.append(tid)
+            def store_result(self, tid, meta, state):
+                if state == states.STARTED:
+                    self._started.append(tid)
 
         prev, mytask.backend = mytask.backend, Backend()
+        mytask.track_started = True
 
         try:
             tid = uuid()
@@ -168,29 +169,39 @@ class test_WorkerTaskTrace(unittest.TestCase):
             mytask.ignore_result = False
 
     def test_execute_jail_failure(self):
-        ret = jail(uuid(), mytask_raising.name,
-                   [4], {})
-        self.assertIsInstance(ret, ExceptionInfo)
-        self.assertTupleEqual(ret.exception.args, (4, ))
+        u = uuid()
+        mytask_raising.request.update({"id": u})
+        try:
+            ret = jail(u, mytask_raising.name,
+                    [4], {})
+            self.assertIsInstance(ret, ExceptionInfo)
+            self.assertTupleEqual(ret.exception.args, (4, ))
+        finally:
+            mytask_raising.request.clear()
 
     def test_execute_ignore_result(self):
         task_id = uuid()
-        ret = jail(id, MyTaskIgnoreResult.name,
-                   [4], {})
-        self.assertEqual(ret, 256)
-        self.assertFalse(AsyncResult(task_id).ready())
+        MyTaskIgnoreResult.request.update({"id": task_id})
+        try:
+            ret = jail(task_id, MyTaskIgnoreResult.name,
+                       [4], {})
+            self.assertEqual(ret, 256)
+            self.assertFalse(AsyncResult(task_id).ready())
+        finally:
+            MyTaskIgnoreResult.request.clear()
 
 
 class MockEventDispatcher(object):
 
     def __init__(self):
         self.sent = []
+        self.enabled = True
 
     def send(self, event, **fields):
         self.sent.append(event)
 
 
-class test_TaskRequest(unittest.TestCase):
+class test_TaskRequest(Case):
 
     def test_task_wrapper_repr(self):
         tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
@@ -200,10 +211,10 @@ class test_TaskRequest(unittest.TestCase):
         mytask.ignore_result = True
         try:
             tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-            self.assertFalse(tw._store_errors)
+            self.assertFalse(tw.store_errors)
             mytask.store_errors_even_if_ignored = True
             tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-            self.assertTrue(tw._store_errors)
+            self.assertTrue(tw.store_errors)
         finally:
             mytask.ignore_result = False
             mytask.store_errors_even_if_ignored = False
@@ -242,16 +253,16 @@ class test_TaskRequest(unittest.TestCase):
         tw.terminate(pool, signal="KILL")
 
     def test_revoked_expires_expired(self):
-        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-        tw.expires = datetime.now() - timedelta(days=1)
+        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"},
+                         expires=datetime.utcnow() - timedelta(days=1))
         tw.revoked()
         self.assertIn(tw.task_id, revoked)
         self.assertEqual(mytask.backend.get_status(tw.task_id),
                          states.REVOKED)
 
     def test_revoked_expires_not_expired(self):
-        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-        tw.expires = datetime.now() + timedelta(days=1)
+        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"},
+                         expires=datetime.utcnow() + timedelta(days=1))
         tw.revoked()
         self.assertNotIn(tw.task_id, revoked)
         self.assertNotEqual(mytask.backend.get_status(tw.task_id),
@@ -259,9 +270,9 @@ class test_TaskRequest(unittest.TestCase):
 
     def test_revoked_expires_ignore_result(self):
         mytask.ignore_result = True
-        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
+        tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"},
+                         expires=datetime.utcnow() - timedelta(days=1))
         try:
-            tw.expires = datetime.now() - timedelta(days=1)
             tw.revoked()
             self.assertIn(tw.task_id, revoked)
             self.assertNotEqual(mytask.backend.get_status(tw.task_id),
@@ -279,29 +290,35 @@ class test_TaskRequest(unittest.TestCase):
         def mock_mail_admins(*args, **kwargs):
             mail_sent[0] = True
 
+        def get_ei():
+            try:
+                raise KeyError("moofoobar")
+            except:
+                return ExceptionInfo(sys.exc_info())
+
         app.mail_admins = mock_mail_admins
         mytask.send_error_emails = True
         try:
             tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-            try:
-                raise KeyError("moofoobar")
-            except:
-                einfo = ExceptionInfo(sys.exc_info())
 
+            einfo = get_ei()
             tw.on_failure(einfo)
             self.assertTrue(mail_sent[0])
 
+            einfo = get_ei()
             mail_sent[0] = False
             mytask.send_error_emails = False
             tw.on_failure(einfo)
             self.assertFalse(mail_sent[0])
 
+            einfo = get_ei()
             mail_sent[0] = False
             mytask.send_error_emails = True
             mytask.error_whitelist = [KeyError]
             tw.on_failure(einfo)
             self.assertTrue(mail_sent[0])
 
+            einfo = get_ei()
             mail_sent[0] = False
             mytask.send_error_emails = True
             mytask.error_whitelist = [SyntaxError]
@@ -383,17 +400,22 @@ class test_TaskRequest(unittest.TestCase):
             mytask.acks_late = False
 
     def test_on_failure_WorkerLostError(self):
+
+        def get_ei():
+            try:
+                raise WorkerLostError("do re mi")
+            except WorkerLostError:
+                return ExceptionInfo(sys.exc_info())
+
         tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
-        try:
-            raise WorkerLostError("do re mi")
-        except WorkerLostError:
-            exc_info = ExceptionInfo(sys.exc_info())
-            tw.on_failure(exc_info)
-            self.assertEqual(mytask.backend.get_status(tw.task_id),
-                             states.FAILURE)
+        exc_info = get_ei()
+        tw.on_failure(exc_info)
+        self.assertEqual(mytask.backend.get_status(tw.task_id),
+                         states.FAILURE)
 
         mytask.ignore_result = True
         try:
+            exc_info = get_ei()
             tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
             tw.on_failure(exc_info)
             self.assertEqual(mytask.backend.get_status(tw.task_id),
@@ -416,7 +438,7 @@ class test_TaskRequest(unittest.TestCase):
             mytask.acks_late = False
 
     def test_from_message_invalid_kwargs(self):
-        body = dict(task="foo", id=1, args=(), kwargs="foo")
+        body = dict(task=mytask.name, id=1, args=(), kwargs="foo")
         with self.assertRaises(InvalidTaskError):
             TaskRequest.from_message(None, body)
 
@@ -449,32 +471,30 @@ class test_TaskRequest(unittest.TestCase):
             tw = TaskRequest(mytask.name, uuid(), [1], {"f": "x"})
             tw.logger = MockLogger()
         finally:
-            mytask.ignore_result = False
             tw.on_timeout(soft=True, timeout=1336)
             self.assertEqual(mytask.backend.get_status(tw.task_id),
                              states.PENDING)
+            mytask.ignore_result = False
 
     def test_execute_and_trace(self):
         res = execute_and_trace(mytask.name, uuid(), [4], {})
         self.assertEqual(res, 4 ** 4)
 
     def test_execute_safe_catches_exception(self):
-        old_exec = WorkerTaskTrace.execute
 
         def _error_exec(self, *args, **kwargs):
             raise KeyError("baz")
 
-        WorkerTaskTrace.execute = _error_exec
-        try:
-            with catch_warnings(record=True) as log:
-                res = execute_and_trace(mytask.name, uuid(),
-                                        [4], {})
-                self.assertIsInstance(res, ExceptionInfo)
-                self.assertTrue(log)
-                self.assertIn("Exception outside", log[0].message.args[0])
-                self.assertIn("KeyError", log[0].message.args[0])
-        finally:
-            WorkerTaskTrace.execute = old_exec
+        @task_dec
+        def raising():
+            raise KeyError("baz")
+        raising.request = None
+
+        with self.assertWarnsRegex(RuntimeWarning,
+                r'Exception raised outside'):
+            res = execute_and_trace(raising.name, uuid(),
+                                    [], {})
+            self.assertIsInstance(res, ExceptionInfo)
 
     def create_exception(self, exc):
         try:
@@ -485,27 +505,31 @@ class test_TaskRequest(unittest.TestCase):
     def test_worker_task_trace_handle_retry(self):
         from celery.exceptions import RetryTaskError
         tid = uuid()
-        w = WorkerTaskTrace(mytask.name, tid, [4], {})
-        type_, value_, tb_ = self.create_exception(ValueError("foo"))
-        type_, value_, tb_ = self.create_exception(RetryTaskError(str(value_),
-                                                                  exc=value_))
-        w._store_errors = False
-        w.handle_retry(value_, type_, tb_, "")
-        self.assertEqual(mytask.backend.get_status(tid), states.PENDING)
-        w._store_errors = True
-        w.handle_retry(value_, type_, tb_, "")
-        self.assertEqual(mytask.backend.get_status(tid), states.RETRY)
+        mytask.request.update({"id": tid})
+        try:
+            _, value_, _ = self.create_exception(ValueError("foo"))
+            einfo = self.create_exception(RetryTaskError(str(value_),
+                                          exc=value_))
+            w = TraceInfo(states.RETRY, einfo[1], einfo)
+            w.handle_retry(mytask, store_errors=False)
+            self.assertEqual(mytask.backend.get_status(tid), states.PENDING)
+            w.handle_retry(mytask, store_errors=True)
+            self.assertEqual(mytask.backend.get_status(tid), states.RETRY)
+        finally:
+            mytask.request.clear()
 
     def test_worker_task_trace_handle_failure(self):
         tid = uuid()
-        w = WorkerTaskTrace(mytask.name, tid, [4], {})
-        type_, value_, tb_ = self.create_exception(ValueError("foo"))
-        w._store_errors = False
-        w.handle_failure(value_, type_, tb_, "")
-        self.assertEqual(mytask.backend.get_status(tid), states.PENDING)
-        w._store_errors = True
-        w.handle_failure(value_, type_, tb_, "")
-        self.assertEqual(mytask.backend.get_status(tid), states.FAILURE)
+        mytask.request.update({"id": tid})
+        try:
+            einfo = self.create_exception(ValueError("foo"))
+            w = TraceInfo(states.FAILURE, einfo[1], einfo)
+            w.handle_failure(mytask, store_errors=False)
+            self.assertEqual(mytask.backend.get_status(tid), states.PENDING)
+            w.handle_failure(mytask, store_errors=True)
+            self.assertEqual(mytask.backend.get_status(tid), states.FAILURE)
+        finally:
+            mytask.request.clear()
 
     def test_task_wrapper_mail_attrs(self):
         tw = TaskRequest(mytask.name, uuid(), [], {})
@@ -528,13 +552,14 @@ class test_TaskRequest(unittest.TestCase):
                           content_type="application/json",
                           content_encoding="utf-8")
         tw = TaskRequest.from_message(m, m.decode())
-        self.assertIsInstance(tw, TaskRequest)
+        self.assertIsInstance(tw, Request)
         self.assertEqual(tw.task_name, body["task"])
         self.assertEqual(tw.task_id, body["id"])
         self.assertEqual(tw.args, body["args"])
         us = from_utf8(us)
-        self.assertEqual(tw.kwargs.keys()[0], us)
-        self.assertIsInstance(tw.kwargs.keys()[0], str)
+        if sys.version_info < (2, 6):
+            self.assertEqual(tw.kwargs.keys()[0], us)
+            self.assertIsInstance(tw.kwargs.keys()[0], str)
         self.assertTrue(tw.logger)
 
     def test_from_message_empty_args(self):
@@ -543,7 +568,7 @@ class test_TaskRequest(unittest.TestCase):
                           content_type="application/json",
                           content_encoding="utf-8")
         tw = TaskRequest.from_message(m, m.decode())
-        self.assertIsInstance(tw, TaskRequest)
+        self.assertIsInstance(tw, Request)
         self.assertEquals(tw.args, [])
         self.assertEquals(tw.kwargs, {})
 
@@ -552,7 +577,7 @@ class test_TaskRequest(unittest.TestCase):
         m = Message(None, body=anyjson.serialize(body), backend="foo",
                           content_type="application/json",
                           content_encoding="utf-8")
-        with self.assertRaises(InvalidTaskError):
+        with self.assertRaises(KeyError):
             TaskRequest.from_message(m, m.decode())
 
     def test_from_message_nonexistant_task(self):
@@ -561,7 +586,7 @@ class test_TaskRequest(unittest.TestCase):
         m = Message(None, body=anyjson.serialize(body), backend="foo",
                           content_type="application/json",
                           content_encoding="utf-8")
-        with self.assertRaises(NotRegistered):
+        with self.assertRaises(KeyError):
             TaskRequest.from_message(m, m.decode())
 
     def test_execute(self):
@@ -645,7 +670,7 @@ class test_TaskRequest(unittest.TestCase):
                     "task_id": tw.task_id,
                     "task_retries": 0,
                     "task_is_eager": False,
-                    "delivery_info": {},
+                    "delivery_info": {"exchange": None, "routing_key": None},
                     "task_name": tw.task_name})
 
     def _test_on_failure(self, exception):

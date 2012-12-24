@@ -5,7 +5,7 @@
 
     Scheduler for Python functions.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -112,6 +112,10 @@ class Schedule(object):
             if not self.handle_error(sys.exc_info()):
                 raise
 
+        if eta is None:
+            # schedule now.
+            eta = time()
+
         heapq.heappush(self._queue, (eta, priority, entry))
         return entry
 
@@ -185,10 +189,17 @@ class Timer(Thread):
         try:
             entry()
         except Exception, exc:
-            typ, val, tb = einfo = sys.exc_info()
-            if not self.schedule.handle_error(einfo):
-                warnings.warn(TimedFunctionFailed(repr(exc))),
-                traceback.print_exception(typ, val, tb)
+            exc_info = sys.exc_info()
+            try:
+                if not self.schedule.handle_error(exc_info):
+                    warnings.warn(TimedFunctionFailed(repr(exc))),
+                    sys.stderr.write("Error in timer: %r\n" % (exc, ))
+                    traceback.print_exception(exc_info[0],
+                                              exc_info[1],
+                                              exc_info[2],
+                                              None, sys.__stderr__)
+            finally:
+                del(exc_info)
 
     def _next_entry(self):
         with self.not_empty:
@@ -221,7 +232,7 @@ class Timer(Thread):
                 pass
         except Exception, exc:
             self.logger.error("Thread Timer crashed: %r", exc,
-                              exc_info=sys.exc_info())
+                              exc_info=True)
             os._exit(1)
 
     def stop(self):

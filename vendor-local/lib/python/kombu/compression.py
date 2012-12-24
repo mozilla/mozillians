@@ -4,6 +4,9 @@ kombu.compression
 
 Compression utilities.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
@@ -15,8 +18,8 @@ _aliases = {}
 _encoders = {}
 _decoders = {}
 
-__all__ = ['register', 'encoders', 'get_encoder',
-           'get_decoder', 'compress', 'decompress']
+__all__ = ["register", "encoders", "get_encoder",
+           "get_decoder", "compress", "decompress"]
 
 
 def register(encoder, decoder, content_type, aliases=[]):
@@ -35,7 +38,7 @@ def register(encoder, decoder, content_type, aliases=[]):
 
 def encoders():
     """Returns a list of available compression methods."""
-    return list(_encoders)
+    return _encoders.keys()
 
 
 def get_encoder(t):
@@ -72,7 +75,7 @@ def decompress(body, content_type):
 
 register(zlib.compress,
          zlib.decompress,
-         'application/x-gzip', aliases=['gzip', 'zlib'])
+         "application/x-gzip", aliases=["gzip", "zlib"])
 try:
     import bz2
 except ImportError:
@@ -80,4 +83,4 @@ except ImportError:
 else:
     register(bz2.compress,
              bz2.decompress,
-             'application/x-bz2', aliases=['bzip2', 'bzip'])
+             "application/x-bz2", aliases=["bzip2", "bzip"])

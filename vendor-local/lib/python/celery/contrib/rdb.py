@@ -11,7 +11,7 @@ Inspired by http://snippets.dzone.com/posts/show/7248
 .. code-block:: python
 
     from celery.contrib import rdb
-    from celery.decorators import task
+    from celery.task import task
 
     @task
     def add(x, y):
@@ -33,7 +33,7 @@ Inspired by http://snippets.dzone.com/posts/show/7248
     The debugger will try to find an available port starting from the
     base port.  The selected port will be logged by celeryd.
 
-:copyright: (c) 2009 - 2011 by Ask Solem.
+:copyright: (c) 2009 - 2012 by Ask Solem.
 :license: BSD, see LICENSE for more details.
 
 """

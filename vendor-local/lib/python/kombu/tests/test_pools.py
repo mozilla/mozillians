@@ -1,8 +1,9 @@
 from __future__ import with_statement
 
-from kombu import Connection, Producer
+from kombu import Connection
 from kombu import pools
 from kombu.connection import ConnectionPool
+from kombu.messaging import Producer
 from kombu.utils import eqhash
 
 from .utils import TestCase
@@ -24,34 +25,6 @@ class test_ProducerPool(TestCase):
     def setUp(self):
         self.connections = Mock()
         self.pool = self.Pool(self.connections, limit=10)
-
-    def test_releases_connection_when_Producer_raises(self):
-        self.pool.Producer = Mock()
-        self.pool.Producer.side_effect = IOError()
-        acq = self.pool._acquire_connection = Mock()
-        conn = acq.return_value = Mock()
-        with self.assertRaises(IOError):
-            self.pool.create_producer()
-        conn.release.assert_called_with()
-
-    def test_prepare_release_connection_on_error(self):
-        pp = Mock()
-        p = pp.return_value = Mock()
-        p.revive.side_effect = IOError()
-        acq = self.pool._acquire_connection = Mock()
-        conn = acq.return_value = Mock()
-        p._channel = None
-        with self.assertRaises(IOError):
-            self.pool.prepare(pp)
-        conn.release.assert_called_with()
-
-    def test_release_releases_connection(self):
-        p = Mock()
-        p.__connection__ = Mock()
-        self.pool.release(p)
-        p.__connection__.release.assert_called_with()
-        p.__connection__ = None
-        self.pool.release(p)
 
     def test_init(self):
         self.assertIs(self.pool.connections, self.connections)
@@ -84,16 +57,16 @@ class test_ProducerPool(TestCase):
     def test_prepare(self):
         connection = self.connections.acquire.return_value = Mock()
         pool = self.MyPool(self.connections, limit=10)
-        pool.instance._channel = None
+        pool.instance.channel = None
         first = pool._resource.get_nowait()
         producer = pool.prepare(first)
         self.assertTrue(self.connections.acquire.called)
-        producer.revive.assert_called_with(connection)
+        producer.revive.assert_called_with(connection.default_channel)
 
     def test_prepare_channel_already_created(self):
         self.connections.acquire.return_value = Mock()
         pool = self.MyPool(self.connections, limit=10)
-        pool.instance._channel = Mock()
+        pool.instance.channel = Mock()
         first = pool._resource.get_nowait()
         self.connections.acquire.reset()
         producer = pool.prepare(first)
@@ -106,9 +79,8 @@ class test_ProducerPool(TestCase):
     def test_release(self):
         p = Mock()
         p.channel = Mock()
-        p.__connection__ = Mock()
         self.pool.release(p)
-        p.__connection__.release.assert_called_with()
+        p.connection.release.assert_called_with()
         self.assertIsNone(p.channel)
 
 
@@ -128,24 +100,24 @@ class test_PoolGroup(TestCase):
     def test_getitem_using_global_limit(self):
         pools._used[0] = False
         g = self.MyGroup(limit=pools.use_global_limit)
-        res = g['foo']
-        self.assertTupleEqual(res, ('foo', pools.get_limit()))
+        res = g["foo"]
+        self.assertTupleEqual(res, ("foo", pools.get_limit()))
         self.assertTrue(pools._used[0])
 
     def test_getitem_using_custom_limit(self):
         pools._used[0] = True
         g = self.MyGroup(limit=102456)
-        res = g['foo']
-        self.assertTupleEqual(res, ('foo', 102456))
+        res = g["foo"]
+        self.assertTupleEqual(res, ("foo", 102456))
 
     def test_delitem(self):
         g = self.MyGroup()
-        g['foo']
-        del(g['foo'])
-        self.assertNotIn('foo', g)
+        g["foo"]
+        del(g["foo"])
+        self.assertNotIn("foo", g)
 
     def test_Connections(self):
-        conn = Connection('memory://')
+        conn = Connection("memory://")
         p = pools.connections[conn]
         self.assertTrue(p)
         self.assertIsInstance(p, ConnectionPool)
@@ -153,7 +125,7 @@ class test_PoolGroup(TestCase):
         self.assertEqual(p.limit, pools.get_limit())
 
     def test_Producers(self):
-        conn = Connection('memory://')
+        conn = Connection("memory://")
         p = pools.producers[conn]
         self.assertTrue(p)
         self.assertIsInstance(p, pools.ProducerPool)
@@ -162,7 +134,7 @@ class test_PoolGroup(TestCase):
         self.assertEqual(p.limit, pools.get_limit())
 
     def test_all_groups(self):
-        conn = Connection('memory://')
+        conn = Connection("memory://")
         pools.connections[conn]
 
         self.assertTrue(list(pools._all_pools()))
@@ -176,7 +148,7 @@ class test_PoolGroup(TestCase):
             def clear(self):
                 self.clear_called = True
 
-        p1 = pools.connections['foo'] = Mock()
+        p1 = pools.connections["foo"] = Mock()
         g1 = MyGroup()
         pools._groups.append(g1)
 
@@ -184,7 +156,7 @@ class test_PoolGroup(TestCase):
         p1.force_close_all.assert_called_with()
         self.assertTrue(g1.clear_called)
 
-        p1 = pools.connections['foo'] = Mock()
+        p1 = pools.connections["foo"] = Mock()
         p1.force_close_all.side_effect = KeyError()
         pools.reset()
 
@@ -194,7 +166,7 @@ class test_PoolGroup(TestCase):
         limit = pools.get_limit()
         self.assertEqual(limit, 34576)
 
-        pools.connections[Connection('memory://')]
+        pools.connections[Connection("memory://")]
         pools.set_limit(limit + 1)
         self.assertEqual(pools.get_limit(), limit + 1)
         limit = pools.get_limit()
@@ -209,8 +181,8 @@ class test_PoolGroup(TestCase):
 class test_fun_PoolGroup(TestCase):
 
     def test_connections_behavior(self):
-        c1u = 'memory://localhost:123'
-        c2u = 'memory://localhost:124'
+        c1u = "memory://localhost:123"
+        c2u = "memory://localhost:124"
         c1 = Connection(c1u)
         c2 = Connection(c2u)
         c3 = Connection(c1u)

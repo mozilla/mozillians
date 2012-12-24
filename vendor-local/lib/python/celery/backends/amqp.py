@@ -37,6 +37,8 @@ class AMQPBackend(BaseDictBackend):
 
     BacklogLimitExceeded = BacklogLimitExceeded
 
+    supports_native_join = True
+
     def __init__(self, connection=None, exchange=None, exchange_type=None,
             persistent=None, serializer=None, auto_delete=True,
             **kwargs):
@@ -53,7 +55,7 @@ class AMQPBackend(BaseDictBackend):
                                       type=exchange_type,
                                       delivery_mode=delivery_mode,
                                       durable=self.persistent,
-                                      auto_delete=auto_delete)
+                                      auto_delete=False)
         self.serializer = serializer or conf.CELERY_RESULT_SERIALIZER
         self.auto_delete = auto_delete
 
@@ -81,9 +83,9 @@ class AMQPBackend(BaseDictBackend):
                           auto_delete=self.auto_delete,
                           queue_arguments=self.queue_arguments)
 
-    def _create_producer(self, task_id, channel):
-        self._create_binding(task_id)(channel).declare()
-        return self.Producer(channel, exchange=self.exchange,
+    def _create_producer(self, task_id, connection):
+        self._create_binding(task_id)(connection.default_channel).declare()
+        return self.Producer(connection, exchange=self.exchange,
                              routing_key=task_id.replace("-", ""),
                              serializer=self.serializer)
 
@@ -92,12 +94,7 @@ class AMQPBackend(BaseDictBackend):
 
     def _publish_result(self, connection, task_id, meta):
         # cache single channel
-        if connection._default_channel is not None and \
-                connection._default_channel.connection is None:
-            connection.maybe_close_channel(connection._default_channel)
-        channel = connection.default_channel
-
-        self._create_producer(task_id, channel).publish(meta)
+        self._create_producer(task_id, connection).publish(meta)
 
     def revive(self, channel):
         pass
@@ -214,7 +211,7 @@ class AMQPBackend(BaseDictBackend):
             with self._create_consumer(bindings, channel) as consumer:
                 while ids:
                     r = self.drain_events(conn, consumer, timeout)
-                    ids ^= set(r.keys())
+                    ids ^= set(r)
                     for ready_id, ready_meta in r.iteritems():
                         yield ready_id, ready_meta
 

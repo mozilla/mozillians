@@ -1,14 +1,15 @@
 from __future__ import absolute_import
+from __future__ import with_statement
 
 import os
 
 from itertools import count
 
 from celery.concurrency.base import apply_target, BasePool
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
-class test_BasePool(unittest.TestCase):
+class test_BasePool(Case):
 
     def test_apply_target(self):
 
@@ -63,3 +64,8 @@ class test_BasePool(unittest.TestCase):
         self.assertFalse(p.active)
         p._state = p.RUN
         self.assertTrue(p.active)
+
+    def test_restart(self):
+        p = BasePool(10)
+        with self.assertRaises(NotImplementedError):
+            p.restart()

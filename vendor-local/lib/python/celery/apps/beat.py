@@ -4,12 +4,12 @@ from __future__ import absolute_import
 import atexit
 import socket
 import sys
-import traceback
 
 from .. import __version__, platforms
 from .. import beat
 from ..app import app_or_default
-from ..utils import get_full_cls_name, LOG_LEVELS
+from ..app.abstract import configurated, from_config
+from ..utils import LOG_LEVELS, qualname
 from ..utils.timeutils import humanize_seconds
 
 STARTUP_INFO_FMT = """
@@ -23,27 +23,25 @@ Configuration ->
 """.strip()
 
 
-class Beat(object):
+class Beat(configurated):
     Service = beat.Service
 
-    def __init__(self, loglevel=None, logfile=None, schedule=None,
-            max_interval=None, scheduler_cls=None, app=None,
-            socket_timeout=30, redirect_stdouts=None,
-            redirect_stdouts_level=None, pidfile=None, **kwargs):
+    loglevel = from_config("log_level")
+    logfile = from_config("log_file")
+    schedule = from_config("schedule_filename")
+    scheduler_cls = from_config("scheduler")
+    redirect_stdouts = from_config()
+    redirect_stdouts_level = from_config()
+
+    def __init__(self, max_interval=None, app=None,
+            socket_timeout=30, pidfile=None, **kwargs):
         """Starts the celerybeat task scheduler."""
         self.app = app = app_or_default(app)
+        self.setup_defaults(kwargs, namespace="celerybeat")
 
-        self.loglevel = loglevel or app.conf.CELERYBEAT_LOG_LEVEL
-        self.logfile = logfile or app.conf.CELERYBEAT_LOG_FILE
-        self.schedule = schedule or app.conf.CELERYBEAT_SCHEDULE_FILENAME
-        self.scheduler_cls = scheduler_cls or app.conf.CELERYBEAT_SCHEDULER
         self.max_interval = max_interval
         self.socket_timeout = socket_timeout
         self.colored = app.log.colored(self.logfile)
-        self.redirect_stdouts = (redirect_stdouts or
-                                 app.conf.CELERY_REDIRECT_STDOUTS)
-        self.redirect_stdouts_level = (redirect_stdouts_level or
-                                       app.conf.CELERY_REDIRECT_STDOUTS_LEVEL)
         self.pidfile = pidfile
 
         if not isinstance(self.loglevel, int):
@@ -89,9 +87,9 @@ class Beat(object):
             self.install_sync_handler(beat)
             beat.start()
         except Exception, exc:
-            logger.critical("celerybeat raised exception %s: %r\n%s",
-                            exc.__class__, exc, traceback.format_exc(),
-                            exc_info=sys.exc_info())
+            logger.critical("celerybeat raised exception %s: %r",
+                            exc.__class__, exc,
+                            exc_info=True)
 
     def init_loader(self):
         # Run the worker init handler.
@@ -104,8 +102,8 @@ class Beat(object):
             "conninfo": self.app.broker_connection().as_uri(),
             "logfile": self.logfile or "[stderr]",
             "loglevel": LOG_LEVELS[self.loglevel],
-            "loader": get_full_cls_name(self.app.loader.__class__),
-            "scheduler": get_full_cls_name(scheduler.__class__),
+            "loader": qualname(self.app.loader),
+            "scheduler": qualname(scheduler),
             "scheduler_info": scheduler.info,
             "hmax_interval": humanize_seconds(beat.max_interval),
             "max_interval": beat.max_interval,

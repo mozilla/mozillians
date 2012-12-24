@@ -7,14 +7,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
-from kombu.transport import virtual
-from kombu.exceptions import StdConnectionError, StdChannelError
+from kombu import virtual
+from kombu.exceptions import StdChannelError
 
 from .models import Queue, Message, metadata
 
 
 VERSION = (1, 1, 0)
-__version__ = '.'.join(map(str, VERSION))
+__version__ = ".".join(map(str, VERSION))
 
 
 class Channel(virtual.Channel):
@@ -108,11 +108,5 @@ class Transport(virtual.Transport):
     Channel = Channel
 
     default_port = 0
-    connection_errors = (StdConnectionError, )
+    connection_errors = ()
     channel_errors = (StdChannelError, )
-    driver_type = 'sql'
-    driver_name = 'sqlalchemy'
-
-    def driver_version(self):
-        import sqlalchemy
-        return sqlalchemy.__version__

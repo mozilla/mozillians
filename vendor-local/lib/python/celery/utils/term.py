@@ -5,7 +5,7 @@
 
     Terminals and colors.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -81,11 +81,14 @@ class colored(object):
             prefix = self.op
         return prefix + safe_str(reduce(self._add, self.s))
 
-    def __str__(self):
+    def __unicode__(self):
         suffix = ""
         if self.enabled:
             suffix = RESET_SEQ
-        return safe_str(self.embed()) + suffix
+        return self.embed() + suffix
+
+    def __str__(self):
+        return safe_str(self.__unicode__())
 
     def node(self, s, op):
         return self.__class__(enabled=self.enabled, op=op, *s)

@@ -5,7 +5,7 @@
 
     The Celery periodic task scheduler.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -23,12 +23,13 @@ try:
 except ImportError:
     multiprocessing = None  # noqa
 
-from datetime import datetime
+from kombu.utils import reprcall
 
 from . import __version__
 from . import platforms
 from . import registry
 from . import signals
+from . import current_app
 from .app import app_or_default
 from .log import SilenceRepeated
 from .schedules import maybe_schedule, crontab
@@ -88,14 +89,14 @@ class ScheduleEntry(object):
         self.total_run_count = total_run_count or 0
 
     def _default_now(self):
-        return datetime.now()
+        return current_app.now()
 
     def _next_instance(self, last_run_at=None):
         """Returns a new instance of the same class, but with
         its date and count fields updated."""
         return self.__class__(**dict(self,
-                                     last_run_at=last_run_at or datetime.now(),
-                                     total_run_count=self.total_run_count + 1))
+                                last_run_at=last_run_at or self._default_now(),
+                                total_run_count=self.total_run_count + 1))
     __next__ = next = _next_instance  # for 2to3
 
     def update(self, other):
@@ -117,8 +118,9 @@ class ScheduleEntry(object):
         return vars(self).iteritems()
 
     def __repr__(self):
-        return ("<Entry: %(name)s %(task)s(*%(args)s, **%(kwargs)s) "
-                "{%(schedule)s}>" % vars(self))
+        return ("<Entry: %s %s {%s}" % (self.name,
+                    reprcall(self.task, self.args or (), self.kwargs or {}),
+                    self.schedule))
 
 
 class Scheduler(object):
@@ -171,13 +173,13 @@ class Scheduler(object):
         is_due, next_time_to_run = entry.is_due()
 
         if is_due:
-            self.logger.debug("Scheduler: Sending due task %s", entry.task)
+            self.logger.info("Scheduler: Sending due task %s", entry.task)
             try:
                 result = self.apply_async(entry, publisher=publisher)
             except Exception, exc:
                 self.logger.error("Message Error: %s\n%s", exc,
                                   traceback.format_stack(),
-                                  exc_info=sys.exc_info())
+                                  exc_info=True)
             else:
                 self.logger.debug("%s sent. id->%s", entry.task,
                                                      result.task_id)
@@ -225,8 +227,9 @@ class Scheduler(object):
                                         publisher=publisher,
                                         **entry.options)
         except Exception, exc:
-            raise SchedulingError("Couldn't apply scheduled task %s: %s" % (
-                    entry.name, exc))
+            raise SchedulingError, SchedulingError(
+                "Couldn't apply scheduled task %s: %s" % (
+                    entry.name, exc)), sys.exc_info()[2]
 
         if self.should_sync():
             self._do_sync()
@@ -267,7 +270,7 @@ class Scheduler(object):
 
     def merge_inplace(self, b):
         schedule = self.schedule
-        A, B = set(schedule.keys()), set(b.keys())
+        A, B = set(schedule), set(b)
 
         # Remove items from disk not in the schedule anymore.
         for key in A ^ B:
@@ -401,8 +404,8 @@ class Service(object):
         try:
             while not self._is_shutdown.isSet():
                 interval = self.scheduler.tick()
-                self.debug("Celerybeat: Waking up %s." % (
-                        humanize_seconds(interval, prefix="in ")))
+                self.debug("Celerybeat: Waking up %s.",
+                           humanize_seconds(interval, prefix="in "))
                 time.sleep(interval)
         except (KeyboardInterrupt, SystemExit):
             self._is_shutdown.set()

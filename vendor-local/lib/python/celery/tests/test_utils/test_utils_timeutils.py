@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from datetime import datetime, timedelta
 
 from celery.utils import timeutils
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
-class test_timeutils(unittest.TestCase):
+class test_timeutils(Case):
 
     def test_delta_resolution(self):
         D = timeutils.delta_resolution
@@ -33,12 +33,12 @@ class test_timeutils(unittest.TestCase):
         self.assertEqual(timeutils.timedelta_seconds(delta), 0)
 
     def test_humanize_seconds(self):
-        t = ((4 * 60 * 60 * 24, "4 days"),
-             (1 * 60 * 60 * 24, "1 day"),
-             (4 * 60 * 60, "4 hours"),
-             (1 * 60 * 60, "1 hour"),
-             (4 * 60, "4 minutes"),
-             (1 * 60, "1 minute"),
+        t = ((4 * 60 * 60 * 24, "4.00 days"),
+             (1 * 60 * 60 * 24, "1.00 day"),
+             (4 * 60 * 60, "4.00 hours"),
+             (1 * 60 * 60, "1.00 hour"),
+             (4 * 60, "4.00 minutes"),
+             (1 * 60, "1.00 minute"),
              (4, "4.00 seconds"),
              (1, "1.00 second"),
              (4.3567631221, "4.36 seconds"),

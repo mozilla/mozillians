@@ -22,7 +22,7 @@ from . import loaders
 from .admin_utils import action, display_field, fixedwidth
 from .models import (TaskState, WorkerState,
                      PeriodicTask, IntervalSchedule, CrontabSchedule)
-from .utils import naturaldate
+from .humanize import naturaldate
 
 
 TASK_STATE_COLORS = {states.SUCCESS: "green",
@@ -260,6 +260,7 @@ def periodic_task_form():
 class PeriodicTaskAdmin(admin.ModelAdmin):
     model = PeriodicTask
     form = periodic_task_form()
+    list_display = ('__unicode__', 'enabled')
     fieldsets = (
             (None, {
                 "fields": ("name", "regtask", "task", "enabled"),

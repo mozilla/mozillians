@@ -6,12 +6,13 @@ from mock import Mock, patch
 
 from celery import current_app
 from celery import states
+from celery.result import AsyncResult
 from celery.registry import tasks
 from celery.task import subtask
 from celery.utils import cached_property, uuid
 from celery.utils.timeutils import timedelta_seconds
 
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
 class Redis(object):
@@ -34,6 +35,10 @@ class Redis(object):
     def get(self, key):
         return self.keyspace.get(key)
 
+    def setex(self, key, value, expires):
+        self.set(key, value)
+        self.expire(key, expires)
+
     def set(self, key, value):
         self.keyspace[key] = value
 
@@ -43,12 +48,20 @@ class Redis(object):
     def delete(self, key):
         self.keyspace.pop(key)
 
+    def publish(self, key, value):
+        pass
+
 
 class redis(object):
     Redis = Redis
 
+    class ConnectionPool(object):
 
-class test_RedisBackend(unittest.TestCase):
+        def __init__(self, **kwargs):
+            pass
+
+
+class test_RedisBackend(Case):
 
     def get_backend(self):
         from celery.backends import redis
@@ -93,7 +106,8 @@ class test_RedisBackend(unittest.TestCase):
         self.assertEqual(b.expires, 60)
 
     def test_on_chord_apply(self):
-        self.Backend().on_chord_apply("setid")
+        self.Backend().on_chord_apply("setid", {},
+                                      result=map(AsyncResult, [1, 2, 3]))
 
     def test_mget(self):
         b = self.MockBackend()

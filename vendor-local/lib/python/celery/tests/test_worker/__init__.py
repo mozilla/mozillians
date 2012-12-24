@@ -11,24 +11,25 @@ from Queue import Empty
 from kombu.transport.base import Message
 from kombu.connection import BrokerConnection
 from mock import Mock, patch
+from nose import SkipTest
 
 from celery import current_app
+from celery.app.defaults import DEFAULTS
 from celery.concurrency.base import BasePool
+from celery.datastructures import AttributeDict
 from celery.exceptions import SystemTerminate
 from celery.task import task as task_dec
 from celery.task import periodic_task as periodic_task_dec
 from celery.utils import uuid
 from celery.worker import WorkController
 from celery.worker.buckets import FastQueue
-from celery.worker.job import TaskRequest
+from celery.worker.job import Request
 from celery.worker.consumer import Consumer as MainConsumer
 from celery.worker.consumer import QoS, RUN, PREFETCH_COUNT_MAX, CLOSE
 from celery.utils.serialization import pickle
 from celery.utils.timer2 import Timer
 
-from celery.tests.compat import catch_warnings
-from celery.tests.utils import unittest
-from celery.tests.utils import AppCase
+from celery.tests.utils import AppCase, Case
 
 
 class PlaceHolder(object):
@@ -96,7 +97,7 @@ def create_message(channel, **data):
                    delivery_info={"consumer_tag": "mock"})
 
 
-class test_QoS(unittest.TestCase):
+class test_QoS(Case):
 
     class _QoS(QoS):
         def __init__(self, value):
@@ -202,7 +203,7 @@ class test_QoS(unittest.TestCase):
         qos.set(qos.prev)
 
 
-class test_Consumer(unittest.TestCase):
+class test_Consumer(Case):
 
     def setUp(self):
         self.ready_queue = FastQueue()
@@ -281,10 +282,8 @@ class test_Consumer(unittest.TestCase):
         l.event_dispatcher = Mock()
         l.pidbox_node = MockNode()
 
-        with catch_warnings(record=True) as log:
+        with self.assertWarnsRegex(RuntimeWarning, r'unknown message'):
             l.receive_message(m.decode(), m)
-            self.assertTrue(log)
-            self.assertIn("unknown message", log[0].message.args[0])
 
     @patch("celery.utils.timer2.to_timestamp")
     def test_receive_message_eta_OverflowError(self, to_timestamp):
@@ -297,6 +296,7 @@ class test_Consumer(unittest.TestCase):
                                    eta=datetime.now().isoformat())
         l.event_dispatcher = Mock()
         l.pidbox_node = MockNode()
+        l.update_strategies()
 
         l.receive_message(m.decode(), m)
         self.assertTrue(m.acknowledged)
@@ -308,6 +308,7 @@ class test_Consumer(unittest.TestCase):
                            send_events=False)
         m = create_message(Mock(), task=foo_task.name,
                            args=(1, 2), kwargs="foobarbaz", id=1)
+        l.update_strategies()
         l.event_dispatcher = Mock()
         l.pidbox_node = MockNode()
 
@@ -336,12 +337,13 @@ class test_Consumer(unittest.TestCase):
                            send_events=False)
         m = create_message(Mock(), task=foo_task.name,
                            args=[2, 4, 8], kwargs={})
+        l.update_strategies()
 
         l.event_dispatcher = Mock()
         l.receive_message(m.decode(), m)
 
         in_bucket = self.ready_queue.get_nowait()
-        self.assertIsInstance(in_bucket, TaskRequest)
+        self.assertIsInstance(in_bucket, Request)
         self.assertEqual(in_bucket.task_name, foo_task.name)
         self.assertEqual(in_bucket.execute(), 2 * 4 * 8)
         self.assertTrue(self.eta_schedule.empty())
@@ -362,6 +364,27 @@ class test_Consumer(unittest.TestCase):
         l.connection_errors = (KeyError, )
         with self.assertRaises(SyntaxError):
             l.start()
+        l.heart.stop()
+        l.priority_timer.stop()
+
+    def test_start_channel_error(self):
+        # Regression test for AMQPChannelExceptions that can occur within the
+        # consumer. (i.e. 404 errors)
+
+        class MockConsumer(MainConsumer):
+            iterations = 0
+
+            def consume_messages(self):
+                if not self.iterations:
+                    self.iterations = 1
+                    raise KeyError("foo")
+                raise SyntaxError("bar")
+
+        l = MockConsumer(self.ready_queue, self.eta_schedule, self.logger,
+                             send_events=False, pool=BasePool())
+
+        l.channel_errors = (KeyError, )
+        self.assertRaises(SyntaxError, l.start)
         l.heart.stop()
         l.priority_timer.stop()
 
@@ -463,13 +486,14 @@ class test_Consumer(unittest.TestCase):
         l.qos = QoS(l.task_consumer, l.initial_prefetch_count, l.logger)
         l.event_dispatcher = Mock()
         l.enabled = False
+        l.update_strategies()
         l.receive_message(m.decode(), m)
         l.eta_schedule.stop()
 
         items = [entry[2] for entry in self.eta_schedule.queue]
         found = 0
         for item in items:
-            if item.args[0].task_name == foo_task.name:
+            if item.args[0].name == foo_task.name:
                 found = True
         self.assertTrue(found)
         self.assertTrue(l.task_consumer.qos.call_count)
@@ -530,16 +554,14 @@ class test_Consumer(unittest.TestCase):
         l.event_dispatcher = Mock()
         l.connection_errors = (socket.error, )
         l.logger = Mock()
-        m.ack = Mock()
-        m.ack.side_effect = socket.error("foo")
-        with catch_warnings(record=True) as log:
+        m.reject = Mock()
+        m.reject.side_effect = socket.error("foo")
+        with self.assertWarnsRegex(RuntimeWarning, r'unknown message'):
             self.assertFalse(l.receive_message(m.decode(), m))
-            self.assertTrue(log)
-            self.assertIn("unknown message", log[0].message.args[0])
         with self.assertRaises(Empty):
             self.ready_queue.get_nowait()
         self.assertTrue(self.eta_schedule.empty())
-        m.ack.assert_called_with()
+        m.reject.assert_called_with()
         self.assertTrue(l.logger.critical.call_count)
 
     def test_receieve_message_eta(self):
@@ -568,7 +590,7 @@ class test_Consumer(unittest.TestCase):
         self.assertEqual(len(in_hold), 3)
         eta, priority, entry = in_hold
         task = entry.args[0]
-        self.assertIsInstance(task, TaskRequest)
+        self.assertIsInstance(task, Request)
         self.assertEqual(task.task_name, foo_task.name)
         self.assertEqual(task.execute(), 2 * 4 * 8)
         with self.assertRaises(Empty):
@@ -721,15 +743,18 @@ class test_WorkController(AppCase):
         from celery import Celery
         from celery import signals
         from celery.app import _tls
-        from celery.worker import process_initializer
-        from celery.worker import WORKER_SIGRESET, WORKER_SIGIGNORE
+        from celery.concurrency.processes import process_initializer
+        from celery.concurrency.processes import (WORKER_SIGRESET,
+                                                  WORKER_SIGIGNORE)
 
         def on_worker_process_init(**kwargs):
             on_worker_process_init.called = True
         on_worker_process_init.called = False
         signals.worker_process_init.connect(on_worker_process_init)
 
-        app = Celery(loader=Mock(), set_as_current=False)
+        loader = Mock()
+        app = Celery(loader=loader, set_as_current=False)
+        app.conf = AttributeDict(DEFAULTS)
         process_initializer(app, "awesome.worker.com")
         self.assertIn((tuple(WORKER_SIGIGNORE), {}),
                       _signals.ignore.call_args_list)
@@ -802,8 +827,10 @@ class test_WorkController(AppCase):
         worker.timer_debug = worker.logger.debug
 
         worker.on_timer_tick(30.0)
-        logged = worker.logger.debug.call_args[0][0]
-        self.assertIn("30.0", logged)
+        xargs = worker.logger.debug.call_args[0]
+        fmt, arg = xargs[0], xargs[1]
+        self.assertEqual(30.0, arg)
+        self.assertIn("Next eta %s secs", fmt)
 
     def test_process_task(self):
         worker = self.worker
@@ -811,7 +838,7 @@ class test_WorkController(AppCase):
         backend = Mock()
         m = create_message(backend, task=foo_task.name, args=[4, 8, 10],
                            kwargs={})
-        task = TaskRequest.from_message(m, m.decode())
+        task = Request.from_message(m, m.decode())
         worker.process_task(task)
         self.assertEqual(worker.pool.apply_async.call_count, 1)
         worker.pool.stop()
@@ -823,7 +850,7 @@ class test_WorkController(AppCase):
         backend = Mock()
         m = create_message(backend, task=foo_task.name, args=[4, 8, 10],
                            kwargs={})
-        task = TaskRequest.from_message(m, m.decode())
+        task = Request.from_message(m, m.decode())
         worker.components = []
         worker._state = worker.RUN
         with self.assertRaises(KeyboardInterrupt):
@@ -837,7 +864,7 @@ class test_WorkController(AppCase):
         backend = Mock()
         m = create_message(backend, task=foo_task.name, args=[4, 8, 10],
                            kwargs={})
-        task = TaskRequest.from_message(m, m.decode())
+        task = Request.from_message(m, m.decode())
         worker.components = []
         worker._state = worker.RUN
         with self.assertRaises(SystemExit):
@@ -851,7 +878,7 @@ class test_WorkController(AppCase):
         backend = Mock()
         m = create_message(backend, task=foo_task.name, args=[4, 8, 10],
                            kwargs={})
-        task = TaskRequest.from_message(m, m.decode())
+        task = Request.from_message(m, m.decode())
         worker.process_task(task)
         worker.pool.stop()
 
@@ -877,17 +904,27 @@ class test_WorkController(AppCase):
 
         state.Persistent = Mock()
         try:
-            worker = self.create_worker(db="statefilename")
+            worker = self.create_worker(state_db="statefilename")
             self.assertTrue(worker._persistence)
         finally:
             state.Persistent = Persistent
 
-    def test_disable_rate_limits(self):
-        from celery.worker.buckets import FastQueue
-        worker = self.create_worker(disable_rate_limits=True)
+    def test_disable_rate_limits_solo(self):
+        worker = self.create_worker(disable_rate_limits=True,
+                                    pool_cls="solo")
         self.assertIsInstance(worker.ready_queue, FastQueue)
         self.assertIsNone(worker.mediator)
         self.assertEqual(worker.ready_queue.put, worker.process_task)
+
+    def test_disable_rate_limits_processes(self):
+        try:
+            worker = self.create_worker(disable_rate_limits=True,
+                                        pool_cls="processes")
+        except ImportError:
+            raise SkipTest("multiprocessing not supported")
+        self.assertIsInstance(worker.ready_queue, FastQueue)
+        self.assertTrue(worker.mediator)
+        self.assertNotEqual(worker.ready_queue.put, worker.process_task)
 
     def test_start__stop(self):
         worker = self.worker

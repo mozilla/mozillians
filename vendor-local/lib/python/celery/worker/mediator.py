@@ -12,23 +12,39 @@
     rate limits will also disable this machinery,
     and can improve performance.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
 
-import os
-import sys
-import threading
-import traceback
+import logging
 
 from Queue import Empty
 
+from ..abstract import StartStopComponent
 from ..app import app_or_default
+from ..utils.threads import bgThread
 
 
-class Mediator(threading.Thread):
+class WorkerComponent(StartStopComponent):
+    name = "worker.mediator"
+    requires = ("pool", "queues", )
+
+    def __init__(self, w, **kwargs):
+        w.mediator = None
+
+    def include_if(self, w):
+        return not w.disable_rate_limits or w.pool_cls.requires_mediator
+
+    def create(self, w):
+        m = w.mediator = self.instantiate(w.mediator_cls, w.ready_queue,
+                                          app=w.app, callback=w.process_task,
+                                          logger=w.logger)
+        return m
+
+
+class Mediator(bgThread):
 
     #: The task queue, a :class:`~Queue.Queue` instance.
     ready_queue = None
@@ -37,17 +53,14 @@ class Mediator(threading.Thread):
     callback = None
 
     def __init__(self, ready_queue, callback, logger=None, app=None):
-        threading.Thread.__init__(self)
         self.app = app_or_default(app)
         self.logger = logger or self.app.log.get_default_logger()
         self.ready_queue = ready_queue
         self.callback = callback
-        self._is_shutdown = threading.Event()
-        self._is_stopped = threading.Event()
-        self.setDaemon(True)
-        self.setName(self.__class__.__name__)
+        self._does_debug = self.logger.isEnabledFor(logging.DEBUG)
+        super(Mediator, self).__init__()
 
-    def move(self):
+    def body(self):
         try:
             task = self.ready_queue.get(timeout=1.0)
         except Empty:
@@ -56,33 +69,17 @@ class Mediator(threading.Thread):
         if task.revoked():
             return
 
-        self.logger.debug(
-            "Mediator: Running callback for task: %s[%s]" % (
-                task.task_name, task.task_id))
+        if self._does_debug:
+            self.logger.debug(
+                "Mediator: Running callback for task: %s[%s]" % (
+                    task.task_name, task.task_id))
 
         try:
             self.callback(task)
         except Exception, exc:
-            self.logger.error("Mediator callback raised exception %r\n%s",
-                              exc, traceback.format_exc(),
-                              exc_info=sys.exc_info(),
+            self.logger.error("Mediator callback raised exception %r",
+                              exc, exc_info=True,
                               extra={"data": {"id": task.task_id,
                                               "name": task.task_name,
                                               "hostname": task.hostname}})
-
-    def run(self):
-        """Move tasks until :meth:`stop` is called."""
-        while not self._is_shutdown.isSet():
-            try:
-                self.move()
-            except Exception, exc:
-                self.logger.error("Mediator crash: %r", exc, exc_info=True)
-                # exiting by normal means does not work here, so force exit.
-                os._exit(1)
-        self._is_stopped.set()
-
-    def stop(self):
-        """Gracefully shutdown the thread."""
-        self._is_shutdown.set()
-        self._is_stopped.wait()
-        self.join(1e10)
+    move = body   # XXX compat

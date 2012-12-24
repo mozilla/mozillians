@@ -4,26 +4,22 @@ kombu.pidbox
 
 Generic process mailbox.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
-from __future__ import with_statement
 
 import socket
 
-from collections import defaultdict, deque
 from copy import copy
 from itertools import count
-from threading import local
-from time import time
 
-from . import Exchange, Queue, Consumer, Producer
-from .clocks import LamportClock
-from .common import maybe_declare, oid_from
-from .utils import cached_property, kwdict, uuid
+from .entity import Exchange, Queue
+from .messaging import Consumer, Producer
+from .utils import kwdict, uuid
 
-REPLY_QUEUE_EXPIRES = 10
-
-__all__ = ['Node', 'Mailbox']
+__all__ = ["Node", "Mailbox"]
 
 
 class Node(object):
@@ -49,13 +45,12 @@ class Node(object):
         self.mailbox = mailbox
         self.hostname = hostname
         self.state = state
-        self.adjust_clock = self.mailbox.clock.adjust
         if handlers is None:
             handlers = {}
         self.handlers = handlers
 
     def Consumer(self, channel=None, **options):
-        options.setdefault('no_ack', True)
+        options.setdefault("no_ack", True)
         return Consumer(channel or self.channel,
                         [self.mailbox.get_queue(self.hostname)],
                         **options)
@@ -71,8 +66,16 @@ class Node(object):
         consumer.consume()
         return consumer
 
-    def dispatch(self, method, arguments=None, reply_to=None, ticket=None,
-            **kwargs):
+    def dispatch_from_message(self, message):
+        message = dict(message)
+        method = message["method"]
+        destination = message.get("destination")
+        reply_to = message.get("reply_to")
+        arguments = message.get("arguments")
+        if not destination or self.hostname in destination:
+            return self.dispatch(method, arguments, reply_to)
+
+    def dispatch(self, method, arguments=None, reply_to=None):
         arguments = arguments or {}
         handle = reply_to and self.handle_call or self.handle_cast
         try:
@@ -80,13 +83,12 @@ class Node(object):
         except SystemExit:
             raise
         except Exception, exc:
-            reply = {'error': repr(exc)}
+            reply = {"error": repr(exc)}
 
         if reply_to:
             self.reply({self.hostname: reply},
-                       exchange=reply_to['exchange'],
-                       routing_key=reply_to['routing_key'],
-                       ticket=ticket)
+                       exchange=reply_to["exchange"],
+                       routing_key=reply_to["routing_key"])
         return reply
 
     def handle(self, method, arguments={}):
@@ -98,23 +100,18 @@ class Node(object):
     def handle_cast(self, method, arguments):
         return self.handle(method, arguments)
 
-    def handle_message(self, body, message=None):
-        destination = body.get('destination')
-        if message:
-            self.adjust_clock(message.headers.get('clock') or 0)
-        if not destination or self.hostname in destination:
-            return self.dispatch(**kwdict(body))
-    dispatch_from_message = handle_message
+    def handle_message(self, body, message):
+        return self.dispatch_from_message(body)
 
-    def reply(self, data, exchange, routing_key, ticket, **kwargs):
-        self.mailbox._publish_reply(data, exchange, routing_key, ticket,
+    def reply(self, data, exchange, routing_key, **kwargs):
+        self.mailbox._publish_reply(data, exchange, routing_key,
                                     channel=self.channel)
 
 
 class Mailbox(object):
     node_cls = Node
-    exchange_fmt = '%s.pidbox'
-    reply_exchange_fmt = 'reply.%s.pidbox'
+    exchange_fmt = "%s.pidbox"
+    reply_exchange_fmt = "reply.%s.pidbox"
 
     #: Name of application.
     namespace = None
@@ -123,7 +120,7 @@ class Mailbox(object):
     connection = None
 
     #: Exchange type (usually direct, or fanout for broadcast).
-    type = 'direct'
+    type = "direct"
 
     #: mailbox exchange (init by constructor).
     exchange = None
@@ -131,15 +128,12 @@ class Mailbox(object):
     #: exchange to send replies to.
     reply_exchange = None
 
-    def __init__(self, namespace, type='direct', connection=None, clock=None):
+    def __init__(self, namespace, type="direct", connection=None):
         self.namespace = namespace
         self.connection = connection
         self.type = type
-        self.clock = LamportClock() if clock is None else clock
         self.exchange = self._get_exchange(self.namespace, self.type)
         self.reply_exchange = self._get_reply_exchange(self.namespace)
-        self._tls = local()
-        self.unclaimed = defaultdict(deque)
 
     def __call__(self, connection):
         bound = copy(self)
@@ -170,138 +164,113 @@ class Mailbox(object):
                                callback=callback,
                                channel=channel)
 
-    def get_reply_queue(self):
-        oid = self.oid
-        return Queue('%s.%s' % (oid, self.reply_exchange.name),
+    def get_reply_queue(self, ticket):
+        return Queue("%s.%s" % (ticket, self.reply_exchange.name),
                      exchange=self.reply_exchange,
-                     routing_key=oid,
+                     routing_key=ticket,
                      durable=False,
-                     auto_delete=True,
-                     queue_arguments={
-                         'x-expires': int(REPLY_QUEUE_EXPIRES * 1000),
-                     })
-
-    @cached_property
-    def reply_queue(self):
-        return self.get_reply_queue()
+                     auto_delete=True)
 
     def get_queue(self, hostname):
-        return Queue('%s.%s.pidbox' % (hostname, self.namespace),
+        return Queue("%s.%s.pidbox" % (hostname, self.namespace),
                      exchange=self.exchange,
                      durable=False,
                      auto_delete=True)
 
-    def _publish_reply(self, reply, exchange, routing_key, ticket,
-            channel=None):
-        chan = channel or self.connection.default_channel
-        exchange = Exchange(exchange, exchange_type='direct',
-                                      delivery_mode='transient',
-                                      durable=False)
-        producer = Producer(chan, auto_declare=False)
-        producer.publish(reply, exchange=exchange, routing_key=routing_key,
-                         declare=[exchange], headers={
-                             'ticket': ticket, 'clock': self.clock.forward()})
+    def _publish_reply(self, reply, exchange, routing_key, channel=None):
+        chan = channel or self.connection.channel()
+        try:
+            exchange = Exchange(exchange, exchange_type="direct",
+                                          delivery_mode="transient",
+                                          durable=False,
+                                          auto_delete=True)
+            producer = Producer(chan, exchange=exchange,
+                                      auto_declare=True)
+            producer.publish(reply, routing_key=routing_key)
+        finally:
+            channel or chan.close()
 
     def _publish(self, type, arguments, destination=None, reply_ticket=None,
-            channel=None, timeout=None):
-        message = {'method': type,
-                   'arguments': arguments,
-                   'destination': destination}
-        chan = channel or self.connection.default_channel
-        exchange = self.exchange
+            channel=None):
+        message = {"method": type,
+                   "arguments": arguments,
+                   "destination": destination}
         if reply_ticket:
-            maybe_declare(self.reply_queue(channel))
-            message.update(ticket=reply_ticket,
-                           reply_to={'exchange': self.reply_exchange.name,
-                                     'routing_key': self.oid})
-        producer = Producer(chan, auto_declare=False)
-        producer.publish(message, exchange=exchange.name, declare=[exchange],
-                headers={'clock': self.clock.forward(),
-                         'expires': time() + timeout if timeout else None})
+            message["reply_to"] = {"exchange": self.reply_exchange.name,
+                                   "routing_key": reply_ticket}
+        chan = channel or self.connection.channel()
+        producer = Producer(chan, exchange=self.exchange)
+        try:
+            producer.publish(message)
+        finally:
+            channel or chan.close()
 
     def _broadcast(self, command, arguments=None, destination=None,
             reply=False, timeout=1, limit=None, callback=None, channel=None):
-        if destination is not None and \
-                not isinstance(destination, (list, tuple)):
-            raise ValueError('destination must be a list/tuple not %s' % (
-                    type(destination)))
-
         arguments = arguments or {}
         reply_ticket = reply and uuid() or None
-        chan = channel or self.connection.default_channel
+
+        if destination is not None and \
+                not isinstance(destination, (list, tuple)):
+            raise ValueError("destination must be a list/tuple not %s" % (
+                    type(destination)))
 
         # Set reply limit to number of destinations (if specified)
         if limit is None and destination:
             limit = destination and len(destination) or None
 
-        self._publish(command, arguments, destination=destination,
-                                          reply_ticket=reply_ticket,
-                                          channel=chan,
-                                          timeout=timeout)
+        chan = channel or self.connection.channel()
+        try:
+            if reply_ticket:
+                self.get_reply_queue(reply_ticket)(chan).declare()
 
-        if reply_ticket:
-            return self._collect(reply_ticket, limit=limit,
-                                               timeout=timeout,
-                                               callback=callback,
-                                               channel=chan)
+            self._publish(command, arguments, destination=destination,
+                                              reply_ticket=reply_ticket,
+                                              channel=chan)
+
+            if reply_ticket:
+                return self._collect(reply_ticket, limit=limit,
+                                                   timeout=timeout,
+                                                   callback=callback,
+                                                   channel=chan)
+        finally:
+            channel or chan.close()
 
     def _collect(self, ticket, limit=None, timeout=1,
             callback=None, channel=None):
-        chan = channel or self.connection.default_channel
-        queue = self.reply_queue
+        chan = channel or self.connection.channel()
+        queue = self.get_reply_queue(ticket)
         consumer = Consumer(channel, [queue], no_ack=True)
         responses = []
-        unclaimed = self.unclaimed
-        adjust_clock = self.clock.adjust
-
-        try:
-            return unclaimed.pop(ticket)
-        except KeyError:
-            pass
 
         def on_message(body, message):
-            # ticket header added in kombu 2.5
-            header = message.headers.get
-            adjust_clock(header('clock') or 0)
-            expires = header('expires')
-            if expires and time() > expires:
-                return
-            this_id = header('ticket', ticket)
-            if this_id == ticket:
-                if callback:
-                    callback(body)
-                responses.append(body)
-            else:
-                unclaimed[this_id].append(body)
+            if callback:
+                callback(body)
+            responses.append(body)
 
-        consumer.register_callback(on_message)
         try:
-            with consumer:
-                for i in limit and range(limit) or count():
-                    try:
-                        self.connection.drain_events(timeout=timeout)
-                    except socket.timeout:
-                        break
-                return responses
-        finally:
+            consumer.register_callback(on_message)
+            consumer.consume()
+            for i in limit and range(limit) or count():
+                try:
+                    self.connection.drain_events(timeout=timeout)
+                except socket.timeout:
+                    break
             chan.after_reply_message_received(queue.name)
+            return responses
+        finally:
+            channel or chan.close()
 
     def _get_exchange(self, namespace, type):
         return Exchange(self.exchange_fmt % namespace,
                         type=type,
                         durable=False,
-                        delivery_mode='transient')
+                        auto_delete=True,
+                        delivery_mode="transient")
 
     def _get_reply_exchange(self, namespace):
         return Exchange(self.reply_exchange_fmt % namespace,
-                        type='direct',
+                        type="direct",
                         durable=False,
-                        delivery_mode='transient')
-
-    @cached_property
-    def oid(self):
-        try:
-            return self._tls.OID
-        except AttributeError:
-            oid = self._tls.OID = oid_from(self)
-            return oid
+                        auto_delete=True,
+                        delivery_mode="transient")

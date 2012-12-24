@@ -5,22 +5,32 @@
 
     The default loader used when no custom app has been initialized.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
 
 import os
+import sys
 import warnings
 
 from ..datastructures import AttributeDict
 from ..exceptions import NotConfigured
-from ..utils import find_module
+from ..utils import find_module, NotAPackage
 
 from .base import BaseLoader
 
 DEFAULT_CONFIG_MODULE = "celeryconfig"
+
+CONFIG_INVALID_NAME = """
+Error: Module '%(module)s' doesn't exist, or it's not a valid \
+Python module name.
+"""
+
+CONFIG_WITH_SUFFIX = CONFIG_INVALID_NAME + """
+Did you mean '%(suggest)s'?
+"""
 
 
 class Loader(BaseLoader):
@@ -39,6 +49,15 @@ class Loader(BaseLoader):
                                      DEFAULT_CONFIG_MODULE)
         try:
             self.find_module(configname)
+        except NotAPackage:
+            if configname.endswith('.py'):
+                raise NotAPackage, NotAPackage(
+                        CONFIG_WITH_SUFFIX % {
+                            "module": configname,
+                            "suggest": configname[:-3]}), sys.exc_info()[2]
+            raise NotAPackage, NotAPackage(
+                    CONFIG_INVALID_NAME % {
+                        "module": configname}), sys.exc_info()[2]
         except ImportError:
             warnings.warn(NotConfigured(
                 "No %r module found! Please make sure it exists and "

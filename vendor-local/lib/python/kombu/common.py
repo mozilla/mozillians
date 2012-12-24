@@ -4,54 +4,31 @@ kombu.common
 
 Common Utilities.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 from __future__ import with_statement
 
-import os
 import socket
-import threading
-import uuid as _uuid
+import sys
 
 from collections import deque
-from contextlib import contextmanager
 from functools import partial
 from itertools import count
 
 from . import serialization
 from .entity import Exchange, Queue
-from .exceptions import StdChannelError
-from .log import get_logger
+from .log import Log
 from .messaging import Consumer as _Consumer
 from .utils import uuid
 
-try:
-    from thread import get_ident            # noqa
-except ImportError:                         # pragma: no cover
-    try:
-        from dummy_thread import get_ident  # noqa
-    except ImportError:                     # pragma: no cover
-        from _thread import get_ident       # noqa
+__all__ = ["Broadcast", "entry_to_queue", "maybe_declare", "uuid",
+           "itermessages", "send_reply", "isend_reply",
+           "collect_replies", "insured", "ipublish"]
 
-__all__ = ['Broadcast', 'maybe_declare', 'uuid',
-           'itermessages', 'send_reply', 'isend_reply',
-           'collect_replies', 'insured', 'ipublish', 'drain_consumer',
-           'eventloop']
-
-#: Prefetch count can't exceed short.
-PREFETCH_COUNT_MAX = 0xFFFF
-
-logger = get_logger(__name__)
-_nodeid = _uuid.getnode()
-
-
-def generate_oid(node_id, process_id, thread_id, instance):
-    ent = '%x-%x-%x-%x' % (node_id, process_id, thread_id, id(instance))
-    return str(_uuid.uuid3(_uuid.NAMESPACE_OID, ent))
-
-
-def oid_from(instance):
-    return generate_oid(_nodeid, os.getpid(), get_ident(), instance)
+insured_logger = Log("kombu.insurance")
 
 
 class Broadcast(Queue):
@@ -64,17 +41,17 @@ class Broadcast(Queue):
     :keyword queue: By default a unique id is used for the queue
        name for every consumer.  You can specify a custom queue
        name here.
-    :keyword \*\*kwargs: See :class:`~kombu.Queue` for a list
+    :keyword \*\*kwargs: See :class:`~kombu.entity.Queue` for a list
         of additional keyword arguments supported.
 
     """
 
     def __init__(self, name=None, queue=None, **kwargs):
         return super(Broadcast, self).__init__(
-                    name=queue or 'bcast.%s' % (uuid(), ),
-                    **dict({'alias': name,
-                            'auto_delete': True,
-                            'exchange': Exchange(name, type='fanout'),
+                    name=queue or "bcast.%s" % (uuid(), ),
+                    **dict({"alias": name,
+                            "auto_delete": True,
+                            "exchange": Exchange(name, type="fanout"),
                            }, **kwargs))
 
 
@@ -82,30 +59,27 @@ def declaration_cached(entity, channel):
     return entity in channel.connection.client.declared_entities
 
 
-def maybe_declare(entity, channel=None, retry=False, **retry_policy):
-    if not entity.is_bound:
-        assert channel
-        entity = entity.bind(channel)
+def maybe_declare(entity, channel, retry=False, **retry_policy):
     if retry:
-        return _imaybe_declare(entity, **retry_policy)
-    return _maybe_declare(entity)
+        return _imaybe_declare(entity, channel, **retry_policy)
+    return _maybe_declare(entity, channel)
 
 
-def _maybe_declare(entity):
-    channel = entity.channel
-    if not channel.connection:
-        raise StdChannelError("channel disconnected")
+def _maybe_declare(entity, channel):
     declared = channel.connection.client.declared_entities
-    if entity not in declared or getattr(entity, 'auto_delete', None):
+    if entity not in declared:
+        if not entity.is_bound:
+            entity = entity.bind(channel)
         entity.declare()
         declared.add(entity)
         return True
     return False
 
 
-def _imaybe_declare(entity, **retry_policy):
-    return entity.channel.connection.client.ensure(entity, _maybe_declare,
-                             **retry_policy)(entity)
+def _imaybe_declare(entity, channel, **retry_policy):
+    entity = entity(channel)
+    return channel.connection.client.ensure(entity, _maybe_declare,
+                             **retry_policy)(entity, channel)
 
 
 def drain_consumer(consumer, limit=1, timeout=None, callbacks=None):
@@ -129,7 +103,6 @@ def itermessages(conn, channel, queue, limit=1, timeout=None,
         Consumer=_Consumer, callbacks=None, **kwargs):
     return drain_consumer(Consumer(channel, queues=[queue], **kwargs),
                           limit=limit, timeout=timeout, callbacks=callbacks)
-
 
 def eventloop(conn, limit=None, timeout=None, ignore_timeouts=False):
     """Best practice generator wrapper around ``Connection.drain_events``.
@@ -166,9 +139,9 @@ def eventloop(conn, limit=None, timeout=None, ignore_timeouts=False):
         try:
             yield conn.drain_events(timeout=timeout)
         except socket.timeout:
-            if timeout and not ignore_timeouts:  # pragma: no cover
+            if timeout and not ignore_timeouts:
                 raise
-        except socket.error:  # pragma: no cover
+        except socket.error:
             pass
 
 
@@ -177,9 +150,9 @@ def send_reply(exchange, req, msg, producer=None, **props):
     serializer = serialization.registry.type_to_name[content_type]
     maybe_declare(exchange, producer.channel)
     producer.publish(msg, exchange=exchange,
-            **dict({'routing_key': req.properties['reply_to'],
-                    'correlation_id': req.properties.get('correlation_id'),
-                    'serializer': serializer},
+            **dict({"routing_key": req.properties["reply_to"],
+                    "correlation_id": req.properties.get("correlation_id"),
+                    "serializer": serializer},
                     **props))
 
 
@@ -189,61 +162,21 @@ def isend_reply(pool, exchange, req, msg, props, **retry_policy):
 
 
 def collect_replies(conn, channel, queue, *args, **kwargs):
-    no_ack = kwargs.setdefault('no_ack', True)
+    no_ack = kwargs.setdefault("no_ack", True)
     received = False
-    try:
-        for body, message in itermessages(conn, channel, queue,
-                                          *args, **kwargs):
-            if not no_ack:
-                message.ack()
-            received = True
-            yield body
-    finally:
-        if received:
-            channel.after_reply_message_received(queue.name)
+    for body, message in itermessages(conn, channel, queue, *args, **kwargs):
+        if not no_ack:
+            message.ack()
+        received = True
+        yield body
+    if received:
+        channel.after_reply_message_received(queue.name)
 
 
 def _ensure_errback(exc, interval):
-    logger.error(
-        'Connection error: %r. Retry in %ss\n', exc, interval,
-            exc_info=True)
-
-
-@contextmanager
-def _ignore_errors(conn):
-    try:
-        yield
-    except conn.connection_errors + conn.channel_errors:
-        pass
-
-
-def ignore_errors(conn, fun=None, *args, **kwargs):
-    """Ignore connection and channel errors.
-
-    The first argument must be a connection object, or any other object
-    with ``connection_error`` and ``channel_error`` attributes.
-
-    Can be used as a function::
-
-        >>> ignore_errors(conn, consumer.channel.close)
-
-    or as a context manager::
-
-        >>> with ignore_errors(conn):
-        ...     consumer.channel.close()
-
-
-    .. note::
-
-        Connection and channel errors should be properly handled,
-        and not ignored.  Using this function is only acceptible in a cleanup
-        phase, like when a connection is lost or at shutdown.
-
-    """
-    if fun:
-        with _ignore_errors(conn):
-            return fun(*args, **kwargs)
-    return _ignore_errors(conn)
+    insured_logger.error(
+        "Connection error: %r. Retry in %ss\n" % (exc, interval),
+            exc_info=sys.exc_info())
 
 
 def revive_connection(connection, channel, on_revive=None):
@@ -285,95 +218,42 @@ def ipublish(pool, fun, args=(), kwargs={}, errback=None, on_revive=None,
 
 
 def entry_to_queue(queue, **options):
-    return Queue.from_dict(queue, **options)
+    binding_key = options.get("binding_key") or options.get("routing_key")
 
+    e_durable = options.get("exchange_durable")
+    if e_durable is None:
+        e_durable = options.get("durable")
 
-class QoS(object):
-    """Thread safe increment/decrement of a channels prefetch_count.
+    e_auto_delete = options.get("exchange_auto_delete")
+    if e_auto_delete is None:
+        e_auto_delete = options.get("auto_delete")
 
-    :param callback: Function used to set new prefetch count,
-        e.g. ``consumer.qos`` or ``channel.basic_qos``.  Will be called
-        with a single ``prefetch_count`` keyword argument.
-    :param initial_value: Initial prefetch count value.
+    q_durable = options.get("queue_durable")
+    if q_durable is None:
+        q_durable = options.get("durable")
 
-    **Example usage**
+    q_auto_delete = options.get("queue_auto_delete")
+    if q_auto_delete is None:
+        q_auto_delete = options.get("auto_delete")
 
-    .. code-block:: python
+    e_arguments = options.get("exchange_arguments")
+    q_arguments = options.get("queue_arguments")
+    b_arguments = options.get("binding_arguments")
 
-        >>> consumer = Consumer(connection)
-        >>> qos = QoS(consumer.qos, initial_prefetch_count=2)
-        >>> qos.update()  # set initial
+    exchange = Exchange(options.get("exchange"),
+                        type=options.get("exchange_type"),
+                        delivery_mode=options.get("delivery_mode"),
+                        routing_key=options.get("routing_key"),
+                        durable=e_durable,
+                        auto_delete=e_auto_delete,
+                        arguments=e_arguments)
 
-        >>> qos.value
-        2
-
-        >>> def in_some_thread():
-        ...     qos.increment_eventually()
-
-        >>> def in_some_other_thread():
-        ...     qos.decrement_eventually()
-
-        >>> while some_loop:
-        ...    if qos.prev != qos.value:
-        ...        qos.update()  # prefetch changed so update.
-
-    It can be used with any function supporting a ``prefetch_count`` keyword
-    argument::
-
-        >>> channel = connection.channel()
-        >>> QoS(channel.basic_qos, 10)
-
-
-        >>> def set_qos(prefetch_count):
-        ...     some_object.change(prefetch=prefetch_count)
-        >>> QoS(set_qos, 10)
-
-    """
-    prev = None
-
-    def __init__(self, callback, initial_value):
-        self.callback = callback
-        self._mutex = threading.RLock()
-        self.value = initial_value or 0
-
-    def increment_eventually(self, n=1):
-        """Increment the value, but do not update the channels QoS.
-
-        The MainThread will be responsible for calling :meth:`update`
-        when necessary.
-
-        """
-        with self._mutex:
-            if self.value:
-                self.value = self.value + max(n, 0)
-        return self.value
-
-    def decrement_eventually(self, n=1):
-        """Decrement the value, but do not update the channels QoS.
-
-        The MainThread will be responsible for calling :meth:`update`
-        when necessary.
-
-        """
-        with self._mutex:
-            if self.value:
-                self.value -= n
-        return self.value
-
-    def set(self, pcount):
-        """Set channel prefetch_count setting."""
-        if pcount != self.prev:
-            new_value = pcount
-            if pcount > PREFETCH_COUNT_MAX:
-                logger.warn('QoS: Disabled: prefetch_count exceeds %r',
-                             PREFETCH_COUNT_MAX)
-                new_value = 0
-            logger.debug('basic.qos: prefetch_count->%s', new_value)
-            self.callback(prefetch_count=new_value)
-            self.prev = pcount
-        return pcount
-
-    def update(self):
-        """Update prefetch count with current value."""
-        with self._mutex:
-            return self.set(self.value)
+    return Queue(queue,
+                 exchange=exchange,
+                 routing_key=binding_key,
+                 durable=q_durable,
+                 exclusive=options.get("exclusive"),
+                 auto_delete=q_auto_delete,
+                 no_ack=options.get("no_ack"),
+                 queue_arguments=q_arguments,
+                 binding_arguments=b_arguments)

@@ -6,6 +6,9 @@
 """
 from __future__ import absolute_import
 
+if __name__ == "__main__" and globals.get("__package__") is None:
+    __package__ = "celery.bin.celeryctl"
+
 import cmd
 import sys
 import shlex
@@ -249,7 +252,7 @@ class AMQShell(cmd.Cmd):
         say("unknown syntax: '%s'. how about some 'help'?" % line)
 
     def get_names(self):
-        return set(self.builtins.keys() + self.amqp.keys())
+        return set(self.builtins) | set(self.amqp)
 
     def completenames(self, text, *ignored):
         """Return all commands starting with `text`, for tab-completion."""

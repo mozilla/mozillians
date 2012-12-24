@@ -5,10 +5,10 @@ import sys
 
 from nose import SkipTest
 
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
-class EventletCase(unittest.TestCase):
+class EventletCase(Case):
 
     def setUp(self):
         if getattr(sys, "pypy_version_info", None):
@@ -29,8 +29,7 @@ class test_eventlet_patch(EventletCase):
         prev_eventlet = sys.modules.pop("celery.concurrency.eventlet", None)
         os.environ.pop("EVENTLET_NOPATCH")
         try:
-            from celery.concurrency import eventlet
-            self.assertTrue(eventlet)
+            import celery.concurrency.eventlet  # noqa
             self.assertTrue(monkey_patched)
         finally:
             sys.modules["celery.concurrency.eventlet"] = prev_eventlet

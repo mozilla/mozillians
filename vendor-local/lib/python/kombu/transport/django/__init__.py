@@ -9,15 +9,15 @@ from django.conf import settings
 from django.core import exceptions as errors
 
 from kombu.transport import virtual
-from kombu.exceptions import StdConnectionError, StdChannelError
+from kombu.exceptions import StdChannelError
 
 from .models import Queue
 
 VERSION = (1, 0, 0)
-__version__ = '.'.join(map(str, VERSION))
+__version__ = ".".join(map(str, VERSION))
 
-POLLING_INTERVAL = getattr(settings, 'KOMBU_POLLING_INTERVAL',
-                       getattr(settings, 'DJKOMBU_POLLING_INTERVAL', 5.0))
+POLLING_INTERVAL = getattr(settings, "KOMBU_POLLING_INTERVAL",
+                       getattr(settings, "DJKOMBU_POLLING_INTERVAL", 5.0))
 
 
 class Channel(virtual.Channel):
@@ -31,7 +31,7 @@ class Channel(virtual.Channel):
     def basic_consume(self, queue, *args, **kwargs):
         qinfo = self.state.bindings[queue]
         exchange = qinfo[0]
-        if self.typeof(exchange).type == 'fanout':
+        if self.typeof(exchange).type == "fanout":
             return
         super(Channel, self).basic_consume(queue, *args, **kwargs)
 
@@ -58,13 +58,7 @@ class Transport(virtual.Transport):
 
     default_port = 0
     polling_interval = POLLING_INTERVAL
-    connection_errors = (StdConnectionError, )
+    connection_errors = ()
     channel_errors = (StdChannelError,
                       errors.ObjectDoesNotExist,
                       errors.MultipleObjectsReturned)
-    driver_type = 'sql'
-    driver_name = 'django'
-
-    def driver_version(self):
-        import django
-        return '.'.join(map(str, django.VERSION))

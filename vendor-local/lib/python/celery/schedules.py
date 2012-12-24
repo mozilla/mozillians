@@ -6,7 +6,7 @@
     Schedules define the intervals at which periodic tasks
     should run.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -14,11 +14,12 @@ from __future__ import absolute_import
 
 import re
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 
+from . import current_app
 from .utils import is_iterable
-from .utils.timeutils import (timedelta_seconds, weekday,
+from .utils.timeutils import (timedelta_seconds, weekday, maybe_timedelta,
                               remaining, humanize_seconds)
 
 
@@ -29,13 +30,18 @@ class ParseException(Exception):
 class schedule(object):
     relative = False
 
-    def __init__(self, run_every=None, relative=False):
-        self.run_every = run_every
+    def __init__(self, run_every=None, relative=False, nowfun=None):
+        self.run_every = maybe_timedelta(run_every)
         self.relative = relative
+        self.nowfun = nowfun
+
+    def now(self):
+        return (self.nowfun or current_app.now)()
 
     def remaining_estimate(self, last_run_at):
         """Returns when the periodic task should run next as a timedelta."""
-        return remaining(last_run_at, self.run_every, relative=self.relative)
+        return remaining(last_run_at, self.run_every, relative=self.relative,
+                         now=self.now())
 
     def is_due(self, last_run_at):
         """Returns tuple of two items `(is_due, next_time_to_run)`,
@@ -62,17 +68,24 @@ class schedule(object):
         rem_delta = self.remaining_estimate(last_run_at)
         rem = timedelta_seconds(rem_delta)
         if rem == 0:
-            return True, timedelta_seconds(self.run_every)
+            return True, self.seconds
         return False, rem
 
     def __repr__(self):
-        return "<freq: %s>" % (
-                    humanize_seconds(timedelta_seconds(self.run_every)), )
+        return "<freq: %s>" % self.human_seconds
 
     def __eq__(self, other):
         if isinstance(other, schedule):
             return self.run_every == other.run_every
         return self.run_every == other
+
+    @property
+    def seconds(self):
+        return timedelta_seconds(self.run_every)
+
+    @property
+    def human_seconds(self):
+        return humanize_seconds(self.seconds)
 
 
 class crontab_parser(object):
@@ -140,15 +153,12 @@ class crontab_parser(object):
     def _range_steps(self, toks):
         if len(toks) != 3 or not toks[2]:
             raise self.ParseException("empty filter")
-        return self._filter_steps(self._expand_range(toks[:2]), int(toks[2]))
+        return self._expand_range(toks[:2])[::int(toks[2])]
 
     def _star_steps(self, toks):
         if not toks or not toks[0]:
             raise self.ParseException("empty filter")
-        return self._filter_steps(self._expand_star(), int(toks[0]))
-
-    def _filter_steps(self, numbers, steps):
-        return [n for n in numbers if n % steps == 0]
+        return self._expand_star()[::int(toks[0])]
 
     def _expand_star(self, *args):
         return range(self.max_)
@@ -250,15 +260,14 @@ class crontab(schedule):
 
         return result
 
-    def __init__(self, minute='*', hour='*', day_of_week='*',
-            nowfun=datetime.now):
+    def __init__(self, minute='*', hour='*', day_of_week='*', nowfun=None):
         self._orig_minute = minute
         self._orig_hour = hour
         self._orig_day_of_week = day_of_week
         self.hour = self._expand_cronspec(hour, 24)
         self.minute = self._expand_cronspec(minute, 60)
         self.day_of_week = self._expand_cronspec(day_of_week, 7)
-        self.nowfun = nowfun
+        self.nowfun = nowfun or current_app.now
 
     def __repr__(self):
         return "<crontab: %s %s %s (m/h/d)>" % (self._orig_minute or "*",

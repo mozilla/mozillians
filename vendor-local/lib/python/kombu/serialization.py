@@ -1,15 +1,16 @@
 """
-ns
 kombu.serialization
 ===================
 
 Serialization utilities.
 
+:copyright: (c) 2009 - 2012 by Ask Solem
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
 import codecs
-import os
 import sys
 
 import pickle as pypickle
@@ -19,14 +20,13 @@ except ImportError:  # pragma: no cover
     cpickle = None  # noqa
 
 from .exceptions import SerializerNotInstalled
-from .utils import entrypoints
-from .utils.encoding import str_to_bytes, bytes_t
+from .utils.encoding import bytes_to_str, str_to_bytes, bytes_t
 
-__all__ = ['pickle', 'encode', 'decode',
-           'register', 'unregister']
-SKIP_DECODE = frozenset(['binary', 'ascii-8bit'])
+__all__ = ["pickle", "encode", "decode",
+           "register", "unregister"]
+SKIP_DECODE = frozenset(["binary", "ascii-8bit"])
 
-if sys.platform.startswith('java'):  # pragma: no cover
+if sys.platform.startswith("java"):  # pragma: no cover
 
     def _decode(t, coding):
         return codecs.getdecoder(coding)(t)[0]
@@ -46,35 +46,8 @@ if sys.version_info < (2, 6):  # pragma: no cover
     # as while the pure pickle version has worse performance,
     # it is the only safe option for older Python versions.
     pickle = pypickle
-    pickle_load = pypickle.load
-    pickle_loads = pypickle.loads
 else:
     pickle = cpickle or pypickle
-    pickle_load = pickle.load
-    pickle_loads = pickle.loads
-
-
-# cPickle.loads does not support buffer() objects,
-# but we can just create a StringIO and use load.
-if sys.version_info[0] == 3:
-    from io import BytesIO
-else:
-    try:
-        from cStringIO import StringIO as BytesIO # noqa
-    except ImportError:
-        from StringIO import StringIO  as BytesIO # noqa
-
-#: Kombu requires Python 2.5 or later so we use protocol 2 by default.
-#: There's a new protocol (3) but this is only supported by Python 3.
-pickle_protocol = int(os.environ.get('PICKLE_PROTOCOL', 2))
-
-#: Kombu requires Python 2.5 or later so we use protocol 2 by default.
-#: There's a new protocol (3) but this is only supported by Python 3.
-pickle_protocol = int(os.environ.get('PICKLE_PROTOCOL', 2))
-
-
-def pickle_loads(s, load=pickle_load):
-    return load(BytesIO(s))
 
 
 class SerializerRegistry(object):
@@ -110,7 +83,7 @@ class SerializerRegistry(object):
             self.type_to_name.pop(content_type, None)
         except KeyError:
             raise SerializerNotInstalled(
-                'No encoder/decoder installed for %s' % name)
+                "No encoder/decoder installed for %s" % name)
 
     def _set_default_serializer(self, name):
         """
@@ -128,14 +101,14 @@ class SerializerRegistry(object):
              self._default_encode) = self._encoders[name]
         except KeyError:
             raise SerializerNotInstalled(
-                'No encoder installed for %s' % name)
+                "No encoder installed for %s" % name)
 
     def encode(self, data, serializer=None):
-        if serializer == 'raw':
+        if serializer == "raw":
             return raw_encode(data)
         if serializer and not self._encoders.get(serializer):
             raise SerializerNotInstalled(
-                        'No encoder installed for %s' % serializer)
+                        "No encoder installed for %s" % serializer)
 
         # If a raw string was sent, assume binary encoding
         # (it's likely either ASCII or a raw binary file, and a character
@@ -143,12 +116,12 @@ class SerializerRegistry(object):
         if not serializer and isinstance(data, bytes_t):
             # In Python 3+, this would be "bytes"; allow binary data to be
             # sent as a message without getting encoder errors
-            return 'application/data', 'binary', data
+            return "application/data", "binary", data
 
         # For Unicode objects, force it into a string
         if not serializer and isinstance(data, unicode):
-            payload = data.encode('utf-8')
-            return 'text/plain', 'utf-8', payload
+            payload = data.encode("utf-8")
+            return "text/plain", "utf-8", payload
 
         if serializer:
             content_type, content_encoding, encoder = \
@@ -164,7 +137,7 @@ class SerializerRegistry(object):
     def decode(self, data, content_type, content_encoding, force=False):
         if content_type in self._disabled_content_types and not force:
             raise SerializerNotInstalled(
-                'Content-type %r has been disabled.' % (content_type, ))
+                "Content-type %r has been disabled." % (content_type, ))
         content_type = content_type or 'application/data'
         content_encoding = (content_encoding or 'utf-8').lower()
 
@@ -241,7 +214,7 @@ decode = registry.decode
 
 """
 .. function:: register(name, encoder, decoder, content_type,
-                       content_encoding='utf-8'):
+                       content_encoding="utf-8"):
     Register a new encoder/decoder.
 
     :param name: A convenience name for the serialization method.
@@ -263,7 +236,7 @@ decode = registry.decode
         the `decoder` method will be returning. Will usually be
         utf-8`, `us-ascii`, or `binary`.
 
-"""
+        """
 register = registry.register
 
 
@@ -273,7 +246,7 @@ register = registry.register
 
     :param name: Registered serialization method name.
 
-"""
+        """
 unregister = registry.unregister
 
 
@@ -294,9 +267,7 @@ def register_json():
     from anyjson import loads, dumps
 
     def _loads(obj):
-        if isinstance(obj, bytes_t):
-            obj = obj.decode()
-        return loads(obj)
+        return loads(bytes_to_str(obj))
 
     registry.register('json', dumps, _loads,
                       content_type='application/json',
@@ -319,27 +290,19 @@ def register_yaml():
             """In case a client receives a yaml message, but yaml
             isn't installed."""
             raise SerializerNotInstalled(
-                'No decoder installed for YAML. Install the PyYAML library')
+                "No decoder installed for YAML. Install the PyYAML library")
         registry.register('yaml', None, not_available, 'application/x-yaml')
-
-
-if sys.version_info[0] == 3:
-
-    def unpickle(s):
-        return pickle_loads(str_to_bytes(s))
-
-else:
-    unpickle = pickle_loads  # noqa
 
 
 def register_pickle():
     """The fastest serialization method, but restricts
     you to python clients."""
 
-    def dumps(obj, dumper=pickle.dumps):
-        return dumper(obj, protocol=pickle_protocol)
+    # pickle doesn't handle unicode.
+    def unpickle(s):
+        return pickle.loads(str_to_bytes(s))
 
-    registry.register('pickle', dumps, unpickle,
+    registry.register('pickle', pickle.dumps, unpickle,
                       content_type='application/x-python-serialize',
                       content_encoding='binary')
 
@@ -347,13 +310,8 @@ def register_pickle():
 def register_msgpack():
     """See http://msgpack.sourceforge.net/"""
     try:
-        try:
-            from msgpack import packb as dumps, unpackb
-            loads = lambda s: unpackb(s, encoding='utf-8')
-        except ImportError:
-            # msgpack < 0.2.0 and Python 2.5
-            from msgpack import packs as dumps, unpacks as loads  # noqa
-        registry.register('msgpack', dumps, loads,
+        import msgpack
+        registry.register('msgpack', msgpack.packs, msgpack.unpacks,
                 content_type='application/x-msgpack',
                 content_encoding='binary')
     except ImportError:
@@ -362,8 +320,8 @@ def register_msgpack():
             """In case a client receives a msgpack message, but yaml
             isn't installed."""
             raise SerializerNotInstalled(
-                    'No decoder installed for msgpack. '
-                    'Install the msgpack library')
+                    "No decoder installed for msgpack. "
+                    "Install the msgpack library")
         registry.register('msgpack', None, not_available,
                           'application/x-msgpack')
 
@@ -376,7 +334,3 @@ register_msgpack()
 # JSON is assumed to always be available, so is the default.
 # (this matches the historical use of kombu.)
 registry._set_default_serializer('json')
-
-# Load entrypoints from installed extensions
-for ep, args in entrypoints('kombu.serializers'):
-    register(ep.name, *args)

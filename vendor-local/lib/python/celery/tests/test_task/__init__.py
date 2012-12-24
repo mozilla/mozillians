@@ -4,8 +4,6 @@ from __future__ import with_statement
 from datetime import datetime, timedelta
 from functools import wraps
 
-from mock import Mock
-
 from celery import task
 from celery.app import app_or_default
 from celery.task import task as task_dec
@@ -16,7 +14,7 @@ from celery.schedules import crontab, crontab_parser, ParseException
 from celery.utils import uuid
 from celery.utils.timeutils import parse_iso8601
 
-from celery.tests.utils import with_eager_tasks, unittest, WhateverIO
+from celery.tests.utils import Case, with_eager_tasks, WhateverIO
 
 
 def return_True(*args, **kwargs):
@@ -130,7 +128,7 @@ class RetryTaskCustomExc(task.Task):
                                   countdown=0, exc=exc)
 
 
-class TestTaskRetries(unittest.TestCase):
+class TestTaskRetries(Case):
 
     def test_retry(self):
         RetryTask.max_retries = 3
@@ -206,7 +204,7 @@ class TestTaskRetries(unittest.TestCase):
         self.assertEqual(RetryTask.iterations, 2)
 
 
-class TestCeleryTasks(unittest.TestCase):
+class TestCeleryTasks(Case):
 
     def test_unpickle_task(self):
         import pickle
@@ -231,10 +229,6 @@ class TestCeleryTasks(unittest.TestCase):
         result = RetryTask.AsyncResult(task_id)
         self.assertEqual(result.backend, RetryTask.backend)
         self.assertEqual(result.task_id, task_id)
-
-    @with_eager_tasks
-    def test_ping(self):
-        self.assertEqual(task.ping(), 'pong')
 
     def assertNextTaskDataEqual(self, consumer, presult, task_name,
             test_eta=False, test_expires=False, **kwargs):
@@ -306,8 +300,8 @@ class TestCeleryTasks(unittest.TestCase):
 
         # With eta.
         presult2 = t1.apply_async(kwargs=dict(name="George Costanza"),
-                                  eta=datetime.now() + timedelta(days=1),
-                                  expires=datetime.now() + timedelta(days=2))
+                            eta=datetime.utcnow() + timedelta(days=1),
+                            expires=datetime.utcnow() + timedelta(days=2))
         self.assertNextTaskDataEqual(consumer, presult2, t1.name,
                 name="George Costanza", test_eta=True, test_expires=True)
 
@@ -343,10 +337,8 @@ class TestCeleryTasks(unittest.TestCase):
 
     def test_after_return(self):
         task = self.createTaskCls("T1", "c.unittest.t.after_return")()
-        task.backend = Mock()
         task.request.chord = return_True_task.subtask()
         task.after_return("SUCCESS", 1.0, "foobar", (), {}, None)
-        task.backend.on_chord_part_return.assert_called_with(task)
         task.request.clear()
 
     def test_send_task_sent_event(self):
@@ -424,7 +416,7 @@ class TestCeleryTasks(unittest.TestCase):
         self.assertTrue(logger)
 
 
-class TestTaskSet(unittest.TestCase):
+class TestTaskSet(Case):
 
     @with_eager_tasks
     def test_function_taskset(self):
@@ -471,7 +463,7 @@ class TestTaskSet(unittest.TestCase):
         self.assertTrue(res.taskset_id.startswith(prefix))
 
 
-class TestTaskApply(unittest.TestCase):
+class TestTaskApply(Case):
 
     def test_apply_throw(self):
         with self.assertRaises(KeyError):
@@ -514,7 +506,7 @@ class MyPeriodic(task.PeriodicTask):
     run_every = timedelta(hours=1)
 
 
-class TestPeriodicTask(unittest.TestCase):
+class TestPeriodicTask(Case):
 
     def test_must_have_run_every(self):
         with self.assertRaises(NotImplementedError):
@@ -522,11 +514,11 @@ class TestPeriodicTask(unittest.TestCase):
 
     def test_remaining_estimate(self):
         self.assertIsInstance(
-            MyPeriodic().remaining_estimate(datetime.now()),
+            MyPeriodic().remaining_estimate(datetime.utcnow()),
             timedelta)
 
     def test_is_due_not_due(self):
-        due, remaining = MyPeriodic().is_due(datetime.now())
+        due, remaining = MyPeriodic().is_due(datetime.utcnow())
         self.assertFalse(due)
         # This assertion may fail if executed in the
         # first minute of an hour, thus 59 instead of 60
@@ -534,7 +526,7 @@ class TestPeriodicTask(unittest.TestCase):
 
     def test_is_due(self):
         p = MyPeriodic()
-        due, remaining = p.is_due(datetime.now() - p.run_every.run_every)
+        due, remaining = p.is_due(datetime.utcnow() - p.run_every.run_every)
         self.assertTrue(due)
         self.assertEqual(remaining,
                          p.timedelta_seconds(p.run_every.run_every))
@@ -582,7 +574,7 @@ def patch_crontab_nowfun(cls, retval):
     return create_patcher
 
 
-class test_crontab_parser(unittest.TestCase):
+class test_crontab_parser(Case):
 
     def test_parse_star(self):
         self.assertEqual(crontab_parser(24).parse('*'), set(range(24)))
@@ -613,12 +605,14 @@ class test_crontab_parser(unittest.TestCase):
 
     def test_parse_composite(self):
         self.assertEqual(crontab_parser(8).parse('*/2'), set([0, 2, 4, 6]))
-        self.assertEqual(crontab_parser().parse('2-9/5'), set([5]))
-        self.assertEqual(crontab_parser().parse('2-10/5'), set([5, 10]))
-        self.assertEqual(crontab_parser().parse('2-11/5,3'), set([3, 5, 10]))
+        self.assertEqual(crontab_parser().parse('2-9/5'), set([2, 7]))
+        self.assertEqual(crontab_parser().parse('2-10/5'), set([2, 7]))
+        self.assertEqual(crontab_parser().parse('2-11/5,3'), set([2, 3, 7]))
         self.assertEqual(crontab_parser().parse('2-4/3,*/5,0-21/4'),
-                set([0, 3, 4, 5, 8, 10, 12, 15, 16,
-                    20, 25, 30, 35, 40, 45, 50, 55]))
+                set([0, 2, 4, 5, 8, 10, 12, 15, 16,
+                     20, 25, 30, 35, 40, 45, 50, 55]))
+        self.assertEqual(crontab_parser().parse('1-9/2'),
+                set([1, 3, 5, 7, 9]))
 
     def test_parse_errors_on_empty_string(self):
         with self.assertRaises(ParseException):
@@ -657,7 +651,7 @@ class test_crontab_parser(unittest.TestCase):
         self.assertFalse(crontab(minute="1") == object())
 
 
-class test_crontab_remaining_estimate(unittest.TestCase):
+class test_crontab_remaining_estimate(Case):
 
     def next_ocurrance(self, crontab, now):
         crontab.nowfun = lambda: now
@@ -707,10 +701,10 @@ class test_crontab_remaining_estimate(unittest.TestCase):
         self.assertEqual(next, datetime(2010, 9, 13, 0, 5))
 
 
-class test_crontab_is_due(unittest.TestCase):
+class test_crontab_is_due(Case):
 
     def setUp(self):
-        self.now = datetime.now()
+        self.now = datetime.utcnow()
         self.next_minute = 60 - self.now.second - 1e-6 * self.now.microsecond
 
     def test_default_crontab_spec(self):

@@ -2,6 +2,9 @@
 from __future__ import absolute_import
 from __future__ import with_statement
 
+if __name__ == "__main__" and globals().get("__package__") is None:
+    __package__ = "celery.bin.celeryd_detach"
+
 import os
 import sys
 
@@ -10,14 +13,17 @@ from optparse import OptionParser, BadOptionError
 from .. import __version__
 from ..platforms import detached
 
-from .base import daemon_options
+from .base import daemon_options, Option
 
-OPTION_LIST = daemon_options(default_pidfile="celeryd.pid")
+OPTION_LIST = daemon_options(default_pidfile="celeryd.pid") + (
+                Option("--fake",
+                       default=False, action="store_true", dest="fake",
+                       help="Don't fork (for debugging purposes)"), )
 
 
 def detach(path, argv, logfile=None, pidfile=None, uid=None,
-           gid=None, umask=0, working_directory=None):
-    with detached(logfile, pidfile, uid, gid, umask, working_directory):
+           gid=None, umask=0, working_directory=None, fake=False, ):
+    with detached(logfile, pidfile, uid, gid, umask, working_directory, fake):
         try:
             os.execv(path, [path] + argv)
         except Exception:
@@ -25,7 +31,7 @@ def detach(path, argv, logfile=None, pidfile=None, uid=None,
             from ..log import setup_logger
             logger = setup_logger(logfile=logfile, loglevel=logging.ERROR)
             logger.critical("Can't exec %r", " ".join([path] + argv),
-                            exc_info=sys.exc_info())
+                            exc_info=True)
 
 
 class PartialOptionParser(OptionParser):

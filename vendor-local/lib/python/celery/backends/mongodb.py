@@ -69,8 +69,20 @@ class MongoBackend(BaseDictBackend):
         """Connect to the MongoDB server."""
         if self._connection is None:
             from pymongo.connection import Connection
-            self._connection = Connection(self.mongodb_host,
-                                          self.mongodb_port)
+
+            # The first pymongo.Connection() argument (host) can be
+            # a list of ['host:port'] elements or a mongodb connection
+            # URI. If this is the case, don't use self.mongodb_port
+            # but let pymongo get the port(s) from the URI instead.
+            # This enables the use of replica sets and sharding.
+            # See pymongo.Connection() for more info.
+            args = [self.mongodb_host]
+            if isinstance(self.mongodb_host, basestring) \
+                    and not self.mongodb_host.startswith("mongodb://"):
+                args.append(self.mongodb_port)
+
+            self._connection = Connection(*args)
+
         return self._connection
 
     def _get_database(self):
@@ -102,7 +114,7 @@ class MongoBackend(BaseDictBackend):
         meta = {"_id": task_id,
                 "status": status,
                 "result": Binary(self.encode(result)),
-                "date_done": datetime.now(),
+                "date_done": datetime.utcnow(),
                 "traceback": Binary(self.encode(traceback))}
 
         db = self._get_database()
@@ -130,13 +142,65 @@ class MongoBackend(BaseDictBackend):
 
         return meta
 
+    def _save_taskset(self, taskset_id, result):
+        """Save the taskset result."""
+        from pymongo.binary import Binary
+
+        meta = {"_id": taskset_id,
+                "result": Binary(self.encode(result)),
+                "date_done": datetime.utcnow()}
+
+        db = self._get_database()
+        taskmeta_collection = db[self.mongodb_taskmeta_collection]
+        taskmeta_collection.save(meta, safe=True)
+
+        return result
+
+    def _restore_taskset(self, taskset_id):
+        """Get the result for a taskset by id."""
+        db = self._get_database()
+        taskmeta_collection = db[self.mongodb_taskmeta_collection]
+        obj = taskmeta_collection.find_one({"_id": taskset_id})
+        if not obj:
+            return
+
+        meta = {
+            "task_id": obj["_id"],
+            "result": self.decode(obj["result"]),
+            "date_done": obj["date_done"],
+        }
+
+        return meta
+
+    def _delete_taskset(self, taskset_id):
+        """Delete a taskset by id."""
+        db = self._get_database()
+        taskmeta_collection = db[self.mongodb_taskmeta_collection]
+        taskmeta_collection.remove({"_id": taskset_id})
+
+    def _forget(self, task_id):
+        """
+        Remove result from MongoDB.
+
+        :raises celery.exceptions.OperationsError: if the task_id could not be
+                                                   removed.
+        """
+
+        db = self._get_database()
+        taskmeta_collection = db[self.mongodb_taskmeta_collection]
+
+        # By using safe=True, this will wait until it receives a response from
+        # the server.  Likewise, it will raise an OperationsError if the
+        # response was unable to be completed.
+        taskmeta_collection.remove({"_id": task_id}, safe=True)
+
     def cleanup(self):
         """Delete expired metadata."""
         db = self._get_database()
         taskmeta_collection = db[self.mongodb_taskmeta_collection]
         taskmeta_collection.remove({
                 "date_done": {
-                    "$lt": datetime.now() - self.expires,
+                    "$lt": self.app.now() - self.expires,
                  }
         })
 

@@ -5,7 +5,7 @@
 
     Task webhooks implementation.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -70,7 +70,8 @@ def extract_response(raw_response):
     try:
         payload = deserialize(raw_response)
     except ValueError, exc:
-        raise InvalidResponseError(str(exc))
+        raise InvalidResponseError, InvalidResponseError(
+                str(exc)), sys.exc_info()[2]
 
     status = payload["status"]
     if status == "success":
@@ -108,12 +109,10 @@ class MutableURL(object):
     def __str__(self):
         scheme, netloc, path, params, query, fragment = self.parts
         query = urlencode(utf8dict(self.query.items()))
-        components = ["%s://" % scheme,
-                      "%s" % netloc,
-                      path and "%s" % path or "/",
-                      params and ";%s" % params or None,
-                      query and "?%s" % query or None,
-                      fragment and "#%s" % fragment or None]
+        components = [scheme + "://", netloc, path or "/",
+                      ";%s" % params   if params   else "",
+                      "?%s" % query    if query    else "",
+                      "#%s" % fragment if fragment else ""]
         return "".join(filter(None, components))
 
     def __repr__(self):
@@ -141,8 +140,9 @@ class HttpDispatch(object):
 
     def make_request(self, url, method, params):
         """Makes an HTTP request and returns the response."""
-        request = urllib2.Request(url, params, headers=self.http_headers)
-        request.headers.update(self.http_headers)
+        request = urllib2.Request(url, params)
+        for key, val in self.http_headers.items():
+            request.add_header(key, val)
         response = urllib2.urlopen(request)         # user catches errors.
         return response.read()
 
@@ -159,8 +159,7 @@ class HttpDispatch(object):
 
     @property
     def http_headers(self):
-        headers = {"Content-Type": "application/json",
-                   "User-Agent": self.user_agent}
+        headers = {"User-Agent": self.user_agent}
         return headers
 
 

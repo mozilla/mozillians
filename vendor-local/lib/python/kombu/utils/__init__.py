@@ -4,15 +4,15 @@ kombu.utils
 
 Internal utilities.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
-import importlib
-import random
 import sys
 
 from contextlib import contextmanager
-from itertools import count, repeat
 from time import sleep
 from uuid import UUID, uuid4 as _uuid4, _uuid_generate_random
 
@@ -23,69 +23,10 @@ try:
 except:
     ctypes = None  # noqa
 
-__all__ = ['EqualityDict', 'say', 'uuid', 'kwdict', 'maybe_list',
-           'fxrange', 'fxrangemax', 'retry_over_time',
-           'emergency_dump_state', 'cached_property',
-           'reprkwargs', 'reprcall', 'nested']
-
-
-def symbol_by_name(name, aliases={}, imp=None, package=None,
-        sep='.', default=None, **kwargs):
-    """Get symbol by qualified name.
-
-    The name should be the full dot-separated path to the class::
-
-        modulename.ClassName
-
-    Example::
-
-        celery.concurrency.processes.TaskPool
-                                    ^- class name
-
-    or using ':' to separate module and symbol::
-
-        celery.concurrency.processes:TaskPool
-
-    If `aliases` is provided, a dict containing short name/long name
-    mappings, the name is looked up in the aliases first.
-
-    Examples:
-
-        >>> symbol_by_name('celery.concurrency.processes.TaskPool')
-        <class 'celery.concurrency.processes.TaskPool'>
-
-        >>> symbol_by_name('default', {
-        ...     'default': 'celery.concurrency.processes.TaskPool'})
-        <class 'celery.concurrency.processes.TaskPool'>
-
-        # Does not try to look up non-string names.
-        >>> from celery.concurrency.processes import TaskPool
-        >>> symbol_by_name(TaskPool) is TaskPool
-        True
-
-    """
-    if imp is None:
-        imp = importlib.import_module
-
-    if not isinstance(name, basestring):
-        return name                                 # already a class
-
-    name = aliases.get(name) or name
-    sep = ':' if ':' in name else sep
-    module_name, _, cls_name = name.rpartition(sep)
-    if not module_name:
-        cls_name, module_name = None, package if package else cls_name
-    try:
-        try:
-            module = imp(module_name, package=package, **kwargs)
-        except ValueError, exc:
-            raise ValueError, ValueError(
-                    "Couldn't import %r: %s" % (name, exc)), sys.exc_info()[2]
-        return getattr(module, cls_name) if cls_name else module
-    except (ImportError, AttributeError):
-        if default is None:
-            raise
-    return default
+__all__ = ["EqualityDict", "say", "uuid", "kwdict", "maybe_list",
+           "fxrange", "fxrangemax", "retry_over_time",
+           "emergency_dump_state", "cached_property",
+           "reprkwargs", "reprcall", "nested"]
 
 
 def eqhash(o):
@@ -111,7 +52,7 @@ class EqualityDict(dict):
 
 
 def say(m, *s):
-    sys.stderr.write(str(m) % s + '\n')
+    sys.stderr.write(str(m) % s + "\n")
 
 
 def uuid4():
@@ -145,14 +86,14 @@ else:
         see: http://bugs.python.org/issue4978.
 
         """
-        return dict((key.encode('utf-8'), value)
+        return dict((key.encode("utf-8"), value)
                         for key, value in kwargs.items())
 
 
 def maybe_list(v):
     if v is None:
         return []
-    if hasattr(v, '__iter__'):
+    if hasattr(v, "__iter__"):
         return v
     return [v]
 
@@ -183,8 +124,7 @@ def fxrangemax(start=1.0, stop=None, step=1.0, max=100.0):
 
 
 def retry_over_time(fun, catch, args=[], kwargs={}, errback=None,
-        max_retries=None, interval_start=2, interval_step=2, interval_max=30,
-        callback=None):
+        max_retries=None, interval_start=2, interval_step=2, interval_max=30):
     """Retry the function over and over until max retries is exceeded.
 
     For each retry we sleep a for a while before we try again, this interval
@@ -212,20 +152,16 @@ def retry_over_time(fun, catch, args=[], kwargs={}, errback=None,
     interval_range = fxrange(interval_start,
                              interval_max + interval_start,
                              interval_step, repeatlast=True)
-    for retries in count():
+
+    for retries, interval in enumerate(interval_range):  # for infinity
         try:
             return fun(*args, **kwargs)
         except catch, exc:
             if max_retries is not None and retries > max_retries:
                 raise
-            if callback:
-                callback()
-            tts = errback(exc, interval_range, retries) if errback else None
-            if tts:
-                for i in range(int(tts / interval_step)):
-                    if callback:
-                        callback()
-                    sleep(interval_step)
+            if errback:
+                errback(exc, interval)
+            sleep(interval)
 
 
 def emergency_dump_state(state, open_file=open, dump=None):
@@ -236,13 +172,13 @@ def emergency_dump_state(state, open_file=open, dump=None):
         import pickle
         dump = pickle.dump
     persist = mktemp()
-    say('EMERGENCY DUMP STATE TO FILE -> %s <-' % persist)
-    fh = open_file(persist, 'w')
+    say("EMERGENCY DUMP STATE TO FILE -> %s <-" % persist)
+    fh = open_file(persist, "w")
     try:
         try:
             dump(state, fh, protocol=0)
         except Exception, exc:
-            say('Cannot pickle state: %r. Fallback to pformat.' % (exc, ))
+            say("Cannot pickle state: %r. Fallback to pformat." % (exc, ))
             fh.write(pformat(state))
     finally:
         fh.flush()
@@ -265,14 +201,14 @@ class cached_property(object):
         @connection.setter  # Prepares stored value
         def connection(self, value):
             if value is None:
-                raise TypeError('Connection must be a connection')
+                raise TypeError("Connection must be a connection")
             return value
 
         @connection.deleter
         def connection(self, value):
             # Additional action to do at del(self.attr)
             if value is not None:
-                print('Connection %r deleted' % (value, ))
+                print("Connection %r deleted" % (value, ))
 
     """
 
@@ -318,13 +254,13 @@ class cached_property(object):
         return self.__class__(self.__get, self.__set, fdel)
 
 
-def reprkwargs(kwargs, sep=', ', fmt='%s=%s'):
+def reprkwargs(kwargs, sep=', ', fmt="%s=%s"):
     return sep.join(fmt % (k, _safe_repr(v)) for k, v in kwargs.iteritems())
 
 
-def reprcall(name, args=(), kwargs={}, sep=', '):
-    return '%s(%s%s%s)' % (name, sep.join(map(_safe_repr, args or ())),
-                           (args and kwargs) and sep or '',
+def reprcall(name, args=(), kwargs=(), sep=', '):
+    return "%s(%s%s%s)" % (name, sep.join(map(_safe_repr, args or ())),
+                           (args and kwargs) and sep or "",
                            reprkwargs(kwargs, sep))
 
 
@@ -336,59 +272,24 @@ def nested(*managers):  # pragma: no cover
     vars = []
     exc = (None, None, None)
     try:
-        try:
-            for mgr in managers:
-                exit = mgr.__exit__
-                enter = mgr.__enter__
-                vars.append(enter())
-                exits.append(exit)
-            yield vars
-        except:
-            exc = sys.exc_info()
-        finally:
-            while exits:
-                exit = exits.pop()
-                try:
-                    if exit(*exc):
-                        exc = (None, None, None)
-                except:
-                    exc = sys.exc_info()
-            if exc != (None, None, None):
-                # Don't rely on sys.exc_info() still containing
-                # the right information. Another exception may
-                # have been raised and caught by an exit method
-                raise exc[0], exc[1], exc[2]
+        for mgr in managers:
+            exit = mgr.__exit__
+            enter = mgr.__enter__
+            vars.append(enter())
+            exits.append(exit)
+        yield vars
+    except:
+        exc = sys.exc_info()
     finally:
-        del(exc)
-
-
-def shufflecycle(it):
-    it = list(it)  # don't modify callers list
-    shuffle = random.shuffle
-    for _ in repeat(None):
-        shuffle(it)
-        yield it[0]
-
-
-def entrypoints(namespace):
-    try:
-        from pkg_resources import iter_entry_points
-    except ImportError:
-        return iter([])
-    return ((ep, ep.load()) for ep in iter_entry_points(namespace))
-
-
-class ChannelPromise(object):
-
-    def __init__(self, contract):
-        self.__contract__ = contract
-
-    def __call__(self):
-        try:
-            return self.__value__
-        except AttributeError:
-            value = self.__value__ = self.__contract__()
-            return value
-
-    def __repr__(self):
-        return '<promise: %r>' % (self(), )
+        while exits:
+            exit = exits.pop()
+            try:
+                if exit(*exc):
+                    exc = (None, None, None)
+            except:
+                exc = sys.exc_info()
+        if exc != (None, None, None):
+            # Don't rely on sys.exc_info() still containing
+            # the right information. Another exception may
+            # have been raised and caught by an exit method
+            raise exc[0], exc[1], exc[2]

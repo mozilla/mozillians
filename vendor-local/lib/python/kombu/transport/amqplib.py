@@ -4,10 +4,12 @@ kombu.transport.amqplib
 
 amqplib transport.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
-import errno
 import socket
 
 try:
@@ -15,7 +17,6 @@ try:
 except ImportError:
     class SSLError(Exception):  # noqa
         pass
-from struct import unpack
 
 from amqplib import client_0_8 as amqp
 from amqplib.client_0_8 import transport
@@ -23,63 +24,34 @@ from amqplib.client_0_8.channel import Channel as _Channel
 from amqplib.client_0_8.exceptions import AMQPConnectionException
 from amqplib.client_0_8.exceptions import AMQPChannelException
 
-from kombu.exceptions import StdConnectionError, StdChannelError
+from kombu.exceptions import StdChannelError
 from kombu.utils.encoding import str_to_bytes
-from kombu.utils.amq_manager import get_manager
 
 from . import base
 
 DEFAULT_PORT = 5672
-HAS_MSG_PEEK = hasattr(socket, 'MSG_PEEK')
+HAS_MSG_PEEK = hasattr(socket, "MSG_PEEK")
 
 # amqplib's handshake mistakenly identifies as protocol version 1191,
 # this breaks in RabbitMQ tip, which no longer falls back to
 # 0-8 for unknown ids.
-transport.AMQP_PROTOCOL_HEADER = str_to_bytes('AMQP\x01\x01\x08\x00')
+transport.AMQP_PROTOCOL_HEADER = str_to_bytes("AMQP\x01\x01\x08\x00")
 
 
 # - fixes warnings when socket is not connected.
-class TCPTransport(transport.TCPTransport):
-
-    def read_frame(self):
-        frame_type, channel, size = unpack('>BHI', self._read(7, True))
-        payload = self._read(size)
-        ch = ord(self._read(1))
-        if ch == 206:  # '\xce'
-            return frame_type, channel, payload
-        else:
-            raise Exception(
-                'Framing Error, received 0x%02x while expecting 0xce' % ch)
-
-    def _read(self, n, initial=False):
-        while len(self._read_buffer) < n:
-            try:
-                s = self.sock.recv(65536)
-            except socket.error, exc:
-                if not initial and exc.errno in (errno.EAGAIN, errno.EINTR):
-                    continue
-                raise
-            if not s:
-                raise IOError('Socket closed')
-            self._read_buffer += s
-
-        result = self._read_buffer[:n]
-        self._read_buffer = self._read_buffer[n:]
-
-        return result
+class _TCPTransport(transport.TCPTransport):
 
     def __del__(self):
         try:
-            self.close()
-        except Exception:
+            transport._AbstractTransport.__del__(self)
+        except socket.error:
             pass
         finally:
             self.sock = None
+transport.TCPTransport = _TCPTransport
 
-transport.TCPTransport = TCPTransport
 
-
-class SSLTransport(transport.SSLTransport):
+class _SSLTransport(transport.SSLTransport):
 
     def __init__(self, host, connect_timeout, ssl):
         if isinstance(ssl, dict):
@@ -87,41 +59,7 @@ class SSLTransport(transport.SSLTransport):
         self.sslobj = None
 
         transport._AbstractTransport.__init__(self, host, connect_timeout)
-
-    def read_frame(self):
-        frame_type, channel, size = unpack('>BHI', self._read(7, True))
-        payload = self._read(size)
-        ch = ord(self._read(1))
-        if ch == 206:  # '\xce'
-            return frame_type, channel, payload
-        else:
-            raise Exception(
-                'Framing Error, received 0x%02x while expecting 0xce' % ch)
-
-    def _read(self, n, initial=False):
-        result = ''
-
-        while len(result) < n:
-            try:
-                s = self.sslobj.read(n - len(result))
-            except socket.error, exc:
-                if not initial and exc.errno in (errno.EAGAIN, errno.EINTR):
-                    continue
-                raise
-            if not s:
-                raise IOError('Socket closed')
-            result += s
-
-        return result
-
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
-        finally:
-            self.sock = None
-transport.SSLTransport = SSLTransport
+transport.SSLTransport = _SSLTransport
 
 
 class Connection(amqp.Connection):  # pragma: no cover
@@ -141,8 +79,8 @@ class Connection(amqp.Connection):  # pragma: no cover
         routing_key = args.read_shortstr()
 
         exc = AMQPChannelException(reply_code, reply_text, (50, 60))
-        if channel.events['basic_return']:
-            for callback in channel.events['basic_return']:
+        if channel.events["basic_return"]:
+            for callback in channel.events["basic_return"]:
                 callback(exc, exchange, routing_key, msg)
         else:
             raise exc
@@ -151,11 +89,15 @@ class Connection(amqp.Connection):  # pragma: no cover
         super(Connection, self).__init__(*args, **kwargs)
         self._method_override = {(60, 50): self._dispatch_basic_return}
 
-    def drain_events(self, timeout=None):
+    def drain_events(self, allowed_methods=None, timeout=None):
+        """Wait for an event on any channel."""
+        return self.wait_multi(self.channels.values(), timeout=timeout)
+
+    def wait_multi(self, channels, allowed_methods=None, timeout=None):
         """Wait for an event on a channel."""
-        chanmap = self.channels
+        chanmap = dict((chan.channel_id, chan) for chan in channels)
         chanid, method_sig, args, content = self._wait_multiple(
-                chanmap, None, timeout=timeout)
+                chanmap.keys(), allowed_methods, timeout=timeout)
 
         channel = chanmap[chanid]
 
@@ -190,19 +132,16 @@ class Connection(amqp.Connection):  # pragma: no cover
                 return self.method_reader.read_method()
             except SSLError, exc:
                 # http://bugs.python.org/issue10272
-                if 'timed out' in str(exc):
-                    raise socket.timeout()
-                # Non-blocking SSL sockets can throw SSLError
-                if 'The operation did not complete' in str(exc):
+                if "timed out" in str(exc):
                     raise socket.timeout()
                 raise
         finally:
             if prev != timeout:
                 sock.settimeout(prev)
 
-    def _wait_multiple(self, channels, allowed_methods, timeout=None):
-        for channel_id, channel in channels.iteritems():
-            method_queue = channel.method_queue
+    def _wait_multiple(self, channel_ids, allowed_methods, timeout=None):
+        for channel_id in channel_ids:
+            method_queue = self.channels[channel_id].method_queue
             for queued_method in method_queue:
                 method_sig = queued_method[0]
                 if (allowed_methods is None) \
@@ -214,11 +153,12 @@ class Connection(amqp.Connection):  # pragma: no cover
 
         # Nothing queued, need to wait for a method from the peer
         read_timeout = self.read_timeout
+        channels = self.channels
         wait = self.wait
         while 1:
             channel, method_sig, args, content = read_timeout(timeout)
 
-            if (channel in channels) \
+            if (channel in channel_ids) \
             and ((allowed_methods is None) \
                 or (method_sig in allowed_methods) \
                 or (method_sig == (20, 40))):
@@ -250,27 +190,27 @@ class Message(base.Message):
         super(Message, self).__init__(channel,
                 body=msg.body,
                 delivery_tag=msg.delivery_tag,
-                content_type=props.get('content_type'),
-                content_encoding=props.get('content_encoding'),
+                content_type=props.get("content_type"),
+                content_encoding=props.get("content_encoding"),
                 delivery_info=msg.delivery_info,
                 properties=msg.properties,
-                headers=props.get('application_headers') or {},
+                headers=props.get("application_headers") or {},
                 **kwargs)
 
 
 class Channel(_Channel, base.StdChannel):
     Message = Message
-    events = {'basic_return': set()}
+    events = {"basic_return": []}
 
     def __init__(self, *args, **kwargs):
         self.no_ack_consumers = set()
         super(Channel, self).__init__(*args, **kwargs)
 
-    def prepare_message(self, body, priority=None,
+    def prepare_message(self, message_data, priority=None,
                 content_type=None, content_encoding=None, headers=None,
                 properties=None):
         """Encapsulate data into a AMQP message."""
-        return amqp.Message(body, priority=priority,
+        return amqp.Message(message_data, priority=priority,
                             content_type=content_type,
                             content_encoding=content_encoding,
                             application_headers=headers,
@@ -288,7 +228,7 @@ class Channel(_Channel, base.StdChannel):
 
     def basic_consume(self, *args, **kwargs):
         consumer_tag = super(Channel, self).basic_consume(*args, **kwargs)
-        if kwargs['no_ack']:
+        if kwargs["no_ack"]:
             self.no_ack_consumers.add(consumer_tag)
         return consumer_tag
 
@@ -304,18 +244,12 @@ class Transport(base.Transport):
 
     # it's very annoying that amqplib sometimes raises AttributeError
     # if the connection is lost, but nothing we can do about that here.
-    connection_errors = (StdConnectionError,
-                         AMQPConnectionException,
+    connection_errors = (AMQPConnectionException,
                          socket.error,
                          IOError,
                          OSError,
                          AttributeError)
     channel_errors = (StdChannelError, AMQPChannelException, )
-
-    nb_keep_draining = True
-    driver_name = "amqplib"
-    driver_type = "amqp"
-    supports_ev = True
 
     def __init__(self, client, **kwargs):
         self.client = client
@@ -333,8 +267,8 @@ class Transport(base.Transport):
         for name, default_value in self.default_connection_params.items():
             if not getattr(conninfo, name, None):
                 setattr(conninfo, name, default_value)
-        if conninfo.hostname == 'localhost':
-            conninfo.hostname = '127.0.0.1'
+        if conninfo.hostname == "localhost":
+            conninfo.hostname = "127.0.0.1"
         conn = self.Connection(host=conninfo.host,
                                userid=conninfo.userid,
                                password=conninfo.password,
@@ -369,20 +303,22 @@ class Transport(base.Transport):
     def verify_connection(self, connection):
         return connection.channels is not None and self.is_alive(connection)
 
-    def eventmap(self, connection):
-        return {connection.method_reader.source.sock: self.client.drain_nowait}
-
-    def on_poll_init(self, poller):
-        pass
-
-    def on_poll_start(self):
-        return {}
-
     @property
     def default_connection_params(self):
-        return {'userid': 'guest', 'password': 'guest',
-                'port': self.default_port,
-                'hostname': 'localhost', 'login_method': 'AMQPLAIN'}
+        return {"userid": "guest", "password": "guest",
+                "port": self.default_port,
+                "hostname": "localhost", "login_method": "AMQPLAIN"}
 
-    def get_manager(self, *args, **kwargs):
-        return get_manager(self.client, *args, **kwargs)
+    def get_manager(self, hostname=None, port=None, userid=None,
+            password=None):
+        import pyrabbit
+        c = self.client
+        opt = c.transport_options.get
+        host = (hostname if hostname is not None
+                         else opt("manager_hostname", c.hostname))
+        port = port if port is not None else opt("manager_port", 55672)
+        return pyrabbit.Client("%s:%s" % (host, port),
+            userid if userid is not None
+                   else opt("manager_userid", c.userid),
+            password if password is not None
+                   else opt("manager_password", c.password))

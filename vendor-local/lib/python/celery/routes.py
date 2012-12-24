@@ -6,7 +6,7 @@
     Contains utilities for working with task routes
     (:setting:`CELERY_ROUTES`).
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -67,7 +67,10 @@ class Router(object):
                 if not self.create_missing:
                     raise QueueNotFound(
                         "Queue %r is not defined in CELERY_QUEUES" % queue)
-                dest = dict(self.app.amqp.queues.add(queue, queue, queue))
+                for key in "exchange", "routing_key":
+                    if route.get(key) is None:
+                        route[key] = queue
+                dest = dict(self.app.amqp.queues.add(queue, **route))
             # needs to be declared by publisher
             dest["queue"] = queue
             # routing_key and binding_key are synonyms.

@@ -5,11 +5,12 @@
 
     Graphical monitor of Celery events using curses.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
+from __future__ import with_statement
 
 import curses
 import sys
@@ -311,11 +312,12 @@ class CursesMonitor(object):
         attr = curses.A_NORMAL
         if task.uuid == self.selected_task:
             attr = curses.A_STANDOUT
-        timestamp = datetime.fromtimestamp(
+        timestamp = datetime.utcfromtimestamp(
                         task.timestamp or time.time())
         timef = timestamp.strftime("%H:%M:%S")
+        hostname = task.worker.hostname if task.worker else '*NONE*'
         line = self.format_row(task.uuid, task.name,
-                               task.worker.hostname,
+                               hostname,
                                timef, task.state)
         self.win.addstr(lineno, LEFT_BORDER_OFFSET, line, attr)
 
@@ -470,27 +472,42 @@ class DisplayThread(threading.Thread):
             self.display.nap()
 
 
+def capture_events(app, state, display):
+
+    def on_connection_error(exc, interval):
+        sys.stderr.write("Connection Error: %r. Retry in %ss." % (
+            exc, interval))
+
+    while 1:
+        sys.stderr.write("-> evtop: starting capture...\n")
+        with app.broker_connection() as conn:
+            try:
+                conn.ensure_connection(on_connection_error,
+                                       app.conf.BROKER_CONNECTION_MAX_RETRIES)
+                recv = app.events.Receiver(conn, handlers={"*": state.event})
+                display.resetscreen()
+                display.init_screen()
+                with recv.consumer():
+                    recv.drain_events(timeout=1, ignore_timeouts=True)
+            except (conn.connection_errors, conn.channel_errors), exc:
+                sys.stderr.write("Connection lost: %r" % (exc, ))
+
+
 def evtop(app=None):
-    sys.stderr.write("-> evtop: starting capture...\n")
     app = app_or_default(app)
     state = app.events.State()
-    conn = app.broker_connection()
-    recv = app.events.Receiver(conn, handlers={"*": state.event})
-    capture = recv.itercapture()
-    capture.next()
     display = CursesMonitor(state, app=app)
     display.init_screen()
     refresher = DisplayThread(display)
     refresher.start()
     try:
-        capture.next()
+        capture_events(app, state, display)
     except Exception:
         refresher.shutdown = True
         refresher.join()
         display.resetscreen()
         raise
     except (KeyboardInterrupt, SystemExit):
-        conn and conn.close()
         refresher.shutdown = True
         refresher.join()
         display.resetscreen()

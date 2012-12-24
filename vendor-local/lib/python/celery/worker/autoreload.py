@@ -18,6 +18,7 @@ import time
 from collections import defaultdict
 
 from ..abstract import StartStopComponent
+from ..utils import module_file
 from ..utils.threads import bgThread, Event
 
 try:
@@ -148,23 +149,30 @@ class InotifyMonitor(_ProcessEvent):
         assert pyinotify
         self._modules = modules
         self._on_change = on_change
+        self._wm = None
+        self._notifier = None
 
     def start(self):
         try:
             self._wm = pyinotify.WatchManager()
-            self._notifier = pyinotify.Notifier(self._wm)
+            self._notifier = pyinotify.Notifier(self._wm, self)
             for m in self._modules:
-                self._wm.add_watch(m, pyinotify.IN_MODIFY)
+                self._wm.add_watch(m,
+                        pyinotify.IN_MODIFY | pyinotify.IN_ATTRIB)
             self._notifier.loop()
         finally:
-            self.close()
+            if self._wm:
+                self._wm.close()
+                # Notifier.close is called at the end of Notifier.loop
+                self._wm = self._notifier = None
 
-    def close(self):
-        self._notifier.stop()
-        self._wm.close()
+    def stop(self):
+        pass
 
-    def process_IN_MODIFY(self, event):
-        self.on_change(event.pathname)
+    def process_(self, event):
+        self.on_change([event.path])
+
+    process_IN_ATTRIB = process_IN_MODIFY = process_
 
     def on_change(self, modified):
         if self._on_change:
@@ -204,7 +212,7 @@ class Autoreloader(bgThread):
         self._hashes = None
 
     def body(self):
-        files = [sys.modules[m].__file__ for m in self.modules]
+        files = [module_file(sys.modules[m]) for m in self.modules]
         self._monitor = self.Monitor(files, self.on_change,
                 shutdown_event=self._is_shutdown, **self.options)
         self._hashes = dict([(f, file_hash(f)) for f in files])
@@ -224,9 +232,9 @@ class Autoreloader(bgThread):
     def on_change(self, files):
         modified = [f for f in files if self._maybe_modified(f)]
         if modified:
-            self.logger.info("Detected modified modules: %s" % (
-                    map(self._module_name, modified), ))
-            self._reload(map(self._module_name, modified))
+            names = [self._module_name(module) for module in modified]
+            self.logger.info("Detected modified modules: %r", names)
+            self._reload(names)
 
     def _reload(self, modules):
         self.controller.reload(modules, reload=True)

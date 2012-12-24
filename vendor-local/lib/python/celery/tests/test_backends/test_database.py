@@ -13,8 +13,7 @@ from celery.exceptions import ImproperlyConfigured
 from celery.result import AsyncResult
 from celery.utils import uuid
 
-from celery.tests.utils import mask_modules
-from celery.tests.utils import unittest
+from celery.tests.utils import Case, mask_modules
 
 try:
     import sqlalchemy  # noqa
@@ -31,7 +30,7 @@ class SomeClass(object):
         self.data = data
 
 
-class test_DatabaseBackend(unittest.TestCase):
+class test_DatabaseBackend(Case):
 
     def setUp(self):
         if sys.platform.startswith("java"):
@@ -129,7 +128,7 @@ class test_DatabaseBackend(unittest.TestCase):
         except KeyError, exception:
             import traceback
             trace = "\n".join(traceback.format_stack())
-        tb.mark_as_retry(tid, exception, traceback=trace)
+            tb.mark_as_retry(tid, exception, traceback=trace)
         self.assertEqual(tb.get_status(tid), states.RETRY)
         self.assertIsInstance(tb.get_result(tid), KeyError)
         self.assertEqual(tb.get_traceback(tid), trace)
@@ -143,7 +142,7 @@ class test_DatabaseBackend(unittest.TestCase):
         except KeyError, exception:
             import traceback
             trace = "\n".join(traceback.format_stack())
-        tb.mark_as_failure(tid3, exception, traceback=trace)
+            tb.mark_as_failure(tid3, exception, traceback=trace)
         self.assertEqual(tb.get_status(tid3), states.FAILURE)
         self.assertIsInstance(tb.get_result(tid3), KeyError)
         self.assertEqual(tb.get_traceback(tid3), trace)

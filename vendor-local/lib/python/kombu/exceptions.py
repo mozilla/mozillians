@@ -4,15 +4,18 @@ kombu.exceptions
 
 Exceptions.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
 import socket
 
-__all__ = ['NotBoundError', 'MessageStateError', 'TimeoutError',
-           'LimitExceeded', 'ConnectionLimitExceeded',
-           'ChannelLimitExceeded', 'StdConnectionError',
-           'StdChannelError', 'VersionMismatch', 'SerializerNotInstalled']
+__all__ = ["NotBoundError", "MessageStateError", "TimeoutError",
+           "LimitExceeded", "ConnectionLimitExceeded",
+           "ChannelLimitExceeded", "StdChannelError", "VersionMismatch",
+           "SerializerNotInstalled"]
 
 TimeoutError = socket.timeout
 
@@ -46,10 +49,6 @@ class ChannelLimitExceeded(LimitExceeded):
     pass
 
 
-class StdConnectionError(KombuError):
-    pass
-
-
 class StdChannelError(KombuError):
     pass
 
@@ -63,7 +62,7 @@ class SerializerNotInstalled(KombuError):
     pass
 
 
-class InconsistencyError(StdConnectionError):
+class InconsistencyError(StdChannelError):
     """Data or environment has been found to be inconsistent,
     depending on the cause it may be possible to retry the operation."""
     pass

@@ -4,7 +4,6 @@ from __future__ import with_statement
 import logging
 import os
 import sys
-import warnings
 
 from functools import wraps
 try:
@@ -14,18 +13,15 @@ except ImportError:
 
 from mock import patch
 from nose import SkipTest
-from kombu.tests.utils import redirect_stdouts
 
 from celery import Celery
 from celery import platforms
 from celery import signals
 from celery import current_app
 from celery.apps import worker as cd
-from celery.bin.celeryd import WorkerCommand, windows_main, \
-                               main as celeryd_main
-from celery.exceptions import ImproperlyConfigured
+from celery.bin.celeryd import WorkerCommand, main as celeryd_main
+from celery.exceptions import ImproperlyConfigured, SystemTerminate
 
-from celery.tests.compat import catch_warnings
 from celery.tests.utils import (AppCase, WhateverIO, mask_modules,
                                 reset_modules, skip_unless_module)
 
@@ -120,7 +116,7 @@ class test_Worker(AppCase):
         celery = Celery(set_as_current=False)
         celery.IS_WINDOWS = True
         with self.assertRaises(SystemExit):
-            celery.Worker(run_clockservice=True)
+            celery.Worker(embed_clockservice=True)
 
     def test_tasklist(self):
         celery = Celery(set_as_current=False)
@@ -251,21 +247,18 @@ class test_Worker(AppCase):
         app = current_app
         if app.IS_WINDOWS:
             raise SkipTest("Not applicable on Windows")
-        warnings.resetwarnings()
 
-        def geteuid():
+        def getuid():
             return 0
 
-        prev, os.geteuid = os.geteuid, geteuid
+        prev, os.getuid = os.getuid, getuid
         try:
-            with catch_warnings(record=True) as log:
+            with self.assertWarnsRegex(RuntimeWarning,
+                    r'superuser privileges is discouraged'):
                 worker = self.Worker()
                 worker.run()
-                self.assertTrue(log)
-                self.assertIn("superuser privileges is not encouraged",
-                              log[0].message.args[0])
         finally:
-            os.geteuid = prev
+            os.getuid = prev
 
     @disable_stdouts
     def test_use_pidfile(self):
@@ -384,12 +377,6 @@ class test_Worker(AppCase):
 
 
 class test_funs(AppCase):
-
-    @redirect_stdouts
-    def test_windows_main(self, stdout, stderr):
-        windows_main()
-        self.assertIn("celeryd command does not work on Windows",
-                      stderr.getvalue())
 
     @disable_stdouts
     def test_set_process_status(self):
@@ -580,3 +567,11 @@ class test_signal_handlers(AppCase):
             self.assertTrue(argv)
         finally:
             os.execv = execv
+
+    @disable_stdouts
+    def test_worker_term_hard_handler(self):
+        worker = self._Worker()
+        handlers = self.psig(cd.install_worker_term_hard_handler, worker)
+        with self.assertRaises(SystemTerminate):
+            handlers["SIGQUIT"]("SIGQUIT", object())
+        self.assertTrue(worker.terminated)

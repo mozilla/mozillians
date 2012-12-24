@@ -11,7 +11,7 @@
     The :mod:`celery.worker.mediator` is then responsible
     for moving tasks from the ``ready_queue`` to the worker pool.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -24,7 +24,8 @@ from collections import deque
 from time import time, sleep
 from Queue import Queue, Empty
 
-from ..datastructures import TokenBucket
+from kombu.utils.limits import TokenBucket
+
 from ..utils import timeutils
 from ..utils.compat import zip_longest, chain_from_iterable
 
@@ -43,11 +44,11 @@ class TaskBucket(object):
     while the :meth:`get` operation iterates over the buckets and retrieves
     the first available item.
 
-    Say we have three types of tasks in the registry: `celery.ping`,
+    Say we have three types of tasks in the registry: `twitter.update`,
     `feed.refresh` and `video.compress`, the TaskBucket will consist
     of the following items::
 
-        {"celery.ping": TokenBucketQueue(fill_rate=300),
+        {"twitter.update": TokenBucketQueue(fill_rate=300),
          "feed.refresh": Queue(),
          "video.compress": TokenBucketQueue(fill_rate=2)}
 
@@ -69,12 +70,12 @@ class TaskBucket(object):
         self.not_empty = threading.Condition(self.mutex)
 
     def put(self, request):
-        """Put a :class:`~celery.worker.job.TaskRequest` into
+        """Put a :class:`~celery.worker.job.Request` into
         the appropiate bucket."""
+        if request.task_name not in self.buckets:
+            self.add_bucket_for_type(request.task_name)
+        self.buckets[request.task_name].put_nowait(request)
         with self.mutex:
-            if request.task_name not in self.buckets:
-                self.add_bucket_for_type(request.task_name)
-            self.buckets[request.task_name].put_nowait(request)
             self.not_empty.notify()
     put_nowait = put
 
@@ -127,20 +128,21 @@ class TaskBucket(object):
         consume tokens from it.
 
         """
-        time_start = time()
-        did_timeout = lambda: timeout and time() - time_start > timeout
+        tstart = time()
+        get = self._get
+        not_empty = self.not_empty
 
-        with self.not_empty:
-            while True:
+        with not_empty:
+            while 1:
                 try:
-                    remaining_time, item = self._get()
+                    remaining_time, item = get()
                 except Empty:
-                    if not block or did_timeout():
+                    if not block or (timeout and time() - tstart > timeout):
                         raise
-                    self.not_empty.wait(timeout)
+                    not_empty.wait(timeout)
                     continue
                 if remaining_time:
-                    if not block or did_timeout():
+                    if not block or (timeout and time() - tstart > timeout):
                         raise Empty()
                     sleep(min(remaining_time, timeout or 1))
                 else:

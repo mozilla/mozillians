@@ -5,7 +5,7 @@
 
     Utility functions.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -28,13 +28,13 @@ from inspect import getargspec
 from itertools import islice
 from pprint import pprint
 
-from kombu.utils import cached_property, gen_unique_id  # noqa
+from kombu.utils import cached_property, gen_unique_id, kwdict  # noqa
+from kombu.utils import reprcall, reprkwargs                    # noqa
+from kombu.utils.functional import promise, maybe_promise       # noqa
 uuid = gen_unique_id
 
 from ..exceptions import CPendingDeprecationWarning, CDeprecationWarning
-
-from .compat import StringIO
-from .encoding import safe_repr as _safe_repr
+from .compat import StringIO, reload
 
 LOG_LEVELS = dict(logging._levelNames)
 LOG_LEVELS["FATAL"] = logging.FATAL
@@ -71,7 +71,7 @@ def deprecated(description=None, deprecation=None, removal=None,
 
         @wraps(fun)
         def __inner(*args, **kwargs):
-            warn_deprecated(description=description or get_full_cls_name(fun),
+            warn_deprecated(description=description or qualname(fun),
                             deprecation=deprecation,
                             removal=removal,
                             alternative=alternative)
@@ -84,52 +84,6 @@ def lpmerge(L, R):
     """Left precedent dictionary merge.  Keeps values from `l`, if the value
     in `r` is :const:`None`."""
     return dict(L, **dict((k, v) for k, v in R.iteritems() if v is not None))
-
-
-class promise(object):
-    """A promise.
-
-    Evaluated when called or if the :meth:`evaluate` method is called.
-    The function is evaluated on every access, so the value is not
-    memoized (see :class:`mpromise`).
-
-    Overloaded operations that will evaluate the promise:
-        :meth:`__str__`, :meth:`__repr__`, :meth:`__cmp__`.
-
-    """
-
-    def __init__(self, fun, *args, **kwargs):
-        self._fun = fun
-        self._args = args
-        self._kwargs = kwargs
-
-    def __call__(self):
-        return self.evaluate()
-
-    def evaluate(self):
-        return self._fun(*self._args, **self._kwargs)
-
-    def __str__(self):
-        return str(self())
-
-    def __repr__(self):
-        return repr(self())
-
-    def __cmp__(self, rhs):
-        if isinstance(rhs, self.__class__):
-            return -cmp(rhs, self())
-        return cmp(self(), rhs)
-
-    def __eq__(self, rhs):
-        return self() == rhs
-
-    def __deepcopy__(self, memo):
-        memo[id(self)] = self
-        return self
-
-    def __reduce__(self):
-        return (self.__class__, (self._fun, ), {"_args": self._args,
-                                                "_kwargs": self._kwargs})
 
 
 class mpromise(promise):
@@ -153,13 +107,6 @@ class mpromise(promise):
         return self._value
 
 
-def maybe_promise(value):
-    """Evaluates if the value is a promise."""
-    if isinstance(value, promise):
-        return value.evaluate()
-    return value
-
-
 def noop(*args, **kwargs):
     """No operation.
 
@@ -167,22 +114,6 @@ def noop(*args, **kwargs):
 
     """
     pass
-
-
-if sys.version_info >= (3, 0):
-
-    def kwdict(kwargs):
-        return kwargs
-else:
-    def kwdict(kwargs):  # noqa
-        """Make sure keyword arguments are not in unicode.
-
-        This should be fixed in newer Python versions,
-        see: http://bugs.python.org/issue4978.
-
-        """
-        return dict((key.encode("utf-8"), value)
-                        for key, value in kwargs.items())
 
 
 def first(predicate, iterable):
@@ -264,10 +195,19 @@ def mattrgetter(*attrs):
                                 for attr in attrs)
 
 
-def get_full_cls_name(cls):
-    """With a class, get its full module and class name."""
-    return ".".join([cls.__module__,
-                     cls.__name__])
+if sys.version_info >= (3, 3):
+
+    def qualname(obj):
+        return obj.__qualname__
+
+else:
+
+    def qualname(obj):  # noqa
+        if not hasattr(obj, "__name__") and hasattr(obj, "__class__"):
+            return qualname(obj.__class__)
+
+        return '.'.join([obj.__module__, obj.__name__])
+get_full_cls_name = qualname  # XXX Compat
 
 
 def fun_takes_kwargs(fun, kwlist=[]):
@@ -299,7 +239,8 @@ def fun_takes_kwargs(fun, kwlist=[]):
     return filter(partial(operator.contains, args), kwlist)
 
 
-def get_cls_by_name(name, aliases={}, imp=None, package=None, **kwargs):
+def get_cls_by_name(name, aliases={}, imp=None, package=None,
+        sep='.', **kwargs):
     """Get class by name.
 
     The name should be the full dot-separated path to the class::
@@ -310,6 +251,10 @@ def get_cls_by_name(name, aliases={}, imp=None, package=None, **kwargs):
 
         celery.concurrency.processes.TaskPool
                                     ^- class name
+
+    or using ':' to separate module and symbol::
+
+        celery.concurrency.processes:TaskPool
 
     If `aliases` is provided, a dict containing short name/long name
     mappings, the name is looked up in the aliases first.
@@ -336,13 +281,15 @@ def get_cls_by_name(name, aliases={}, imp=None, package=None, **kwargs):
         return name                                 # already a class
 
     name = aliases.get(name) or name
-    module_name, _, cls_name = name.rpartition(".")
+    sep = ':' if ':' in name else sep
+    module_name, _, cls_name = name.rpartition(sep)
     if not module_name and package:
         module_name = package
     try:
         module = imp(module_name, package=package, **kwargs)
     except ValueError, exc:
-        raise ValueError("Couldn't import %r: %s" % (name, exc))
+        raise ValueError, ValueError(
+                "Couldn't import %r: %s" % (name, exc)), sys.exc_info()[2]
     return getattr(module, cls_name)
 
 get_symbol_by_name = get_cls_by_name
@@ -361,6 +308,12 @@ def truncate_text(text, maxlen=128, suffix="..."):
     """Truncates text to a maximum number of characters."""
     if len(text) >= maxlen:
         return text[:maxlen].rsplit(" ", 1)[0] + suffix
+    return text
+
+
+def pluralize(n, text, suffix='s'):
+    if n > 1:
+        return text + suffix
     return text
 
 
@@ -409,6 +362,10 @@ def cwd_in_path():
                 pass
 
 
+class NotAPackage(Exception):
+    pass
+
+
 def find_module(module, path=None, imp=None):
     """Version of :func:`imp.find_module` supporting dots."""
     if imp is None:
@@ -418,7 +375,11 @@ def find_module(module, path=None, imp=None):
             last = None
             parts = module.split(".")
             for i, part in enumerate(parts[:-1]):
-                path = imp(".".join(parts[:i + 1])).__path__
+                mpart = imp(".".join(parts[:i + 1]))
+                try:
+                    path = mpart.__path__
+                except AttributeError:
+                    raise NotAPackage(module)
                 last = _imp.find_module(parts[i + 1], path)
             return last
         return _imp.find_module(module)
@@ -435,6 +396,13 @@ def import_from_cwd(module, imp=None, package=None):
         imp = importlib.import_module
     with cwd_in_path():
         return imp(module, package=package)
+
+
+def reload_from_cwd(module, reloader=None):
+    if reloader is None:
+        reloader = reload
+    with cwd_in_path():
+        return reloader(module)
 
 
 def cry():  # pragma: no cover
@@ -471,11 +439,26 @@ def cry():  # pragma: no cover
     return out.getvalue()
 
 
-def reprkwargs(kwargs, sep=', ', fmt="%s=%s"):
-    return sep.join(fmt % (k, _safe_repr(v)) for k, v in kwargs.iteritems())
+def uniq(it):
+    seen = set()
+    for obj in it:
+        if obj not in seen:
+            yield obj
+            seen.add(obj)
 
 
-def reprcall(name, args=(), kwargs=(), sep=', '):
-    return "%s(%s%s%s)" % (name, sep.join(map(_safe_repr, args)),
-                           (args and kwargs) and sep or "",
-                           reprkwargs(kwargs, sep))
+def maybe_reraise():
+    """Reraise if an exception is currently being handled, or return
+    otherwise."""
+    type_, exc, tb = sys.exc_info()
+    try:
+        if tb:
+            raise type_, exc, tb
+    finally:
+        # see http://docs.python.org/library/sys.html#sys.exc_info
+        del(tb)
+
+
+def module_file(module):
+    name = module.__file__
+    return name[:-1] if name.endswith(".pyc") else name

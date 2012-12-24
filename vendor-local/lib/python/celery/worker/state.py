@@ -8,7 +8,7 @@
     This includes the currently active and reserved tasks,
     statistics, and revoked tasks.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -36,10 +36,10 @@ REVOKES_MAX = 10000
 #: being expired when the max limit has been exceeded.
 REVOKE_EXPIRES = 3600
 
-#: set of all reserved :class:`~celery.worker.job.TaskRequest`'s.
+#: set of all reserved :class:`~celery.worker.job.Request`'s.
 reserved_requests = set()
 
-#: set of currently active :class:`~celery.worker.job.TaskRequest`'s.
+#: set of currently active :class:`~celery.worker.job.Request`'s.
 active_requests = set()
 
 #: count of tasks executed by the worker, sorted by type.
@@ -48,10 +48,8 @@ total_count = defaultdict(lambda: 0)
 #: the list of currently revoked tasks.  Persistent if statedb set.
 revoked = LimitedSet(maxlen=REVOKES_MAX, expires=REVOKE_EXPIRES)
 
-
-def task_reserved(request):
-    """Updates global state when a task has been reserved."""
-    reserved_requests.add(request)
+#: Updates global state when a task has been reserved.
+task_reserved = reserved_requests.add
 
 
 def task_accepted(request):

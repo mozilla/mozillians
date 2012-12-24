@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import logging
 import threading
+import os
 import sys
 import traceback
 
@@ -22,6 +23,12 @@ from .utils.patch import ensure_process_aware_logger
 from .utils.term import colored
 
 is_py3k = sys.version_info >= (3, 0)
+
+
+def mlevel(level):
+    if level and not isinstance(level, int):
+        return LOG_LEVELS[level.upper()]
+    return level
 
 
 class ColorFormatter(logging.Formatter):
@@ -46,7 +53,7 @@ class ColorFormatter(logging.Formatter):
 
         if self.use_color and color:
             try:
-                record.msg = str_t(color(safe_str(record.msg)))
+                record.msg = safe_str(str_t(color(record.msg)))
             except Exception, exc:
                 record.msg = "<Unrepresentable %r: %r>" % (
                         type(record.msg), exc)
@@ -71,7 +78,7 @@ class Logging(object):
 
     def __init__(self, app):
         self.app = app
-        self.loglevel = self.app.conf.CELERYD_LOG_LEVEL
+        self.loglevel = mlevel(self.app.conf.CELERYD_LOG_LEVEL)
         self.format = self.app.conf.CELERYD_LOG_FORMAT
         self.task_format = self.app.conf.CELERYD_TASK_LOG_FORMAT
         self.colorize = self.app.conf.CELERYD_LOG_COLOR
@@ -92,14 +99,14 @@ class Logging(object):
     def get_task_logger(self, loglevel=None, name=None):
         logger = logging.getLogger(name or "celery.task.default")
         if loglevel is not None:
-            logger.setLevel(loglevel)
+            logger.setLevel(mlevel(loglevel))
         return logger
 
     def setup_logging_subsystem(self, loglevel=None, logfile=None,
             format=None, colorize=None, **kwargs):
         if Logging._setup:
             return
-        loglevel = loglevel or self.loglevel
+        loglevel = mlevel(loglevel or self.loglevel)
         format = format or self.format
         if colorize is None:
             colorize = self.supports_color(logfile)
@@ -120,13 +127,34 @@ class Logging(object):
             mp = mputil.get_logger() if mputil else None
             for logger in filter(None, (root, mp)):
                 self._setup_logger(logger, logfile, format, colorize, **kwargs)
-                logger.setLevel(loglevel)
+                logger.setLevel(mlevel(loglevel))
                 signals.after_setup_logger.send(sender=None, logger=logger,
                                         loglevel=loglevel, logfile=logfile,
                                         format=format, colorize=colorize)
+
+        # This is a hack for multiprocessing's fork+exec, so that
+        # logging before Process.run works.
+        os.environ.update(_MP_FORK_LOGLEVEL_=str(loglevel),
+                          _MP_FORK_LOGFILE_=logfile or "",
+                          _MP_FORK_LOGFORMAT_=format)
         Logging._setup = True
 
         return receivers
+
+    def setup(self, loglevel=None, logfile=None, redirect_stdouts=False,
+            redirect_level="WARNING"):
+        handled = self.setup_logging_subsystem(loglevel=loglevel,
+                                               logfile=logfile)
+        if not handled:
+            logger = self.get_default_logger()
+            if redirect_stdouts:
+                self.redirect_stdouts_to_logger(logger,
+                                loglevel=redirect_level)
+        os.environ.update(
+            CELERY_LOG_LEVEL=str(loglevel) if loglevel else "",
+            CELERY_LOG_FILE=str(logfile) if logfile else "",
+            CELERY_LOG_REDIRECT="1" if redirect_stdouts else "",
+            CELERY_LOG_REDIRECT_LEVEL=str(redirect_level))
 
     def _detect_handler(self, logfile=None):
         """Create log handler with either a filename, an open stream
@@ -144,7 +172,7 @@ class Logging(object):
         """
         logger = logging.getLogger(name)
         if loglevel is not None:
-            logger.setLevel(loglevel)
+            logger.setLevel(mlevel(loglevel))
         return logger
 
     def setup_logger(self, loglevel=None, logfile=None,
@@ -157,7 +185,7 @@ class Logging(object):
         Returns logger object.
 
         """
-        loglevel = loglevel or self.loglevel
+        loglevel = mlevel(loglevel or self.loglevel)
         format = format or self.format
         if colorize is None:
             colorize = self.supports_color(logfile)
@@ -179,7 +207,7 @@ class Logging(object):
         Returns logger object.
 
         """
-        loglevel = loglevel or self.loglevel
+        loglevel = mlevel(loglevel or self.loglevel)
         format = format or self.task_format
         if colorize is None:
             colorize = self.supports_color(logfile)
@@ -205,15 +233,18 @@ class Logging(object):
         """
         proxy = LoggingProxy(logger, loglevel)
         if stdout:
-            sys.stdout = sys.__stdout__ = proxy
+            sys.stdout = proxy
         if stderr:
-            sys.stderr = sys.__stderr__ = proxy
+            sys.stderr = proxy
         return proxy
+
+    def _is_configured(self, logger):
+        return logger.handlers and not getattr(
+                logger, "_rudimentary_setup", False)
 
     def _setup_logger(self, logger, logfile, format, colorize,
             formatter=ColorFormatter, **kwargs):
-
-        if logger.handlers:  # Logger already configured
+        if self._is_configured(logger):
             return logger
 
         handler = self._detect_handler(logfile)
@@ -247,9 +278,7 @@ class LoggingProxy(object):
 
     def __init__(self, logger, loglevel=None):
         self.logger = logger
-        self.loglevel = loglevel or self.logger.level or self.loglevel
-        if not isinstance(self.loglevel, int):
-            self.loglevel = LOG_LEVELS[self.loglevel.upper()]
+        self.loglevel = mlevel(loglevel or self.logger.level or self.loglevel)
         self._safewrap_handlers()
 
     def _safewrap_handlers(self):
@@ -287,7 +316,7 @@ class LoggingProxy(object):
         if data and not self.closed:
             self._thread.recurse_protection = True
             try:
-                self.logger.log(self.loglevel, data)
+                self.logger.log(self.loglevel, safe_str(data))
             finally:
                 self._thread.recurse_protection = False
 
@@ -318,7 +347,7 @@ class LoggingProxy(object):
         return False
 
     def fileno(self):
-        return None
+        pass
 
 
 class SilenceRepeated(object):
@@ -329,10 +358,9 @@ class SilenceRepeated(object):
         self.max_iterations = max_iterations
         self._iterations = 0
 
-    def __call__(self, *msgs):
+    def __call__(self, *args, **kwargs):
         if not self._iterations or self._iterations >= self.max_iterations:
-            for msg in msgs:
-                self.action(msg)
+            self.action(*args, **kwargs)
             self._iterations = 0
         else:
             self._iterations += 1

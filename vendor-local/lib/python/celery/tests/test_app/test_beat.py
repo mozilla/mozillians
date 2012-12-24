@@ -11,7 +11,7 @@ from celery.result import AsyncResult
 from celery.schedules import schedule
 from celery.task.base import Task
 from celery.utils import uuid
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
 class Object(object):
@@ -43,7 +43,7 @@ class MockService(object):
         self.stopped = True
 
 
-class test_ScheduleEntry(unittest.TestCase):
+class test_ScheduleEntry(Case):
     Entry = beat.ScheduleEntry
 
     def create_entry(self, **kwargs):
@@ -150,7 +150,7 @@ always_due = mocked_schedule(True, 1)
 always_pending = mocked_schedule(False, 1)
 
 
-class test_Scheduler(unittest.TestCase):
+class test_Scheduler(Case):
 
     def test_custom_schedule_dict(self):
         custom = {"foo": "bar"}
@@ -192,7 +192,8 @@ class test_Scheduler(unittest.TestCase):
         self.assertTrue(scheduler.logger.logged[0])
         level, msg, args, kwargs = scheduler.logger.logged[0]
         self.assertEqual(level, logging.ERROR)
-        self.assertIn("Couldn't apply scheduled task", args[0].args[0])
+        self.assertIn("Couldn't apply scheduled task",
+                      repr(args[0].args[0]))
 
     def test_due_tick_RuntimeError(self):
         scheduler = mSchedulerRuntimeError()
@@ -248,7 +249,7 @@ class test_Scheduler(unittest.TestCase):
         self.assertEqual(a.schedule["bar"].schedule._next_run_at, 40)
 
 
-class test_Service(unittest.TestCase):
+class test_Service(Case):
 
     def get_service(self):
         sh = MockShelve()
@@ -317,7 +318,7 @@ class test_Service(unittest.TestCase):
         self.assertTrue(s._is_shutdown.isSet())
 
 
-class test_EmbeddedService(unittest.TestCase):
+class test_EmbeddedService(Case):
 
     def test_start_stop_process(self):
         try:

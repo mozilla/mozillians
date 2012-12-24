@@ -4,6 +4,9 @@ kombu.transport.memory
 
 In-memory transport.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
@@ -55,9 +58,3 @@ class Transport(virtual.Transport):
 
     #: memory backend state is global.
     state = virtual.BrokerState()
-
-    driver_type = 'memory'
-    driver_name = 'memory'
-
-    def driver_version(self):
-        return 'N/A'

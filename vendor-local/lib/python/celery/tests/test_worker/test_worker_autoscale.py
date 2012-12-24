@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import sys
 
 from time import time
 
@@ -9,7 +10,7 @@ from mock import Mock, patch
 from celery.concurrency.base import BasePool
 from celery.worker import state
 from celery.worker import autoscale
-from celery.tests.utils import unittest, sleepdeprived
+from celery.tests.utils import Case, sleepdeprived
 
 logger = logging.getLogger("celery.tests.autoscale")
 
@@ -42,7 +43,7 @@ class MockPool(BasePool):
         return self._pool._processes
 
 
-class test_Autoscaler(unittest.TestCase):
+class test_Autoscaler(Case):
 
     def setUp(self):
         self.pool = MockPool(3)
@@ -53,7 +54,7 @@ class test_Autoscaler(unittest.TestCase):
             alive = True
             joined = False
 
-            def isAlive(self):
+            def is_alive(self):
                 return self.alive
 
             def join(self, timeout=None):
@@ -90,7 +91,7 @@ class test_Autoscaler(unittest.TestCase):
         class Scaler(autoscale.Autoscaler):
             scale_called = False
 
-            def scale(self):
+            def body(self):
                 self.scale_called = True
                 self._is_shutdown.set()
 
@@ -140,12 +141,16 @@ class test_Autoscaler(unittest.TestCase):
 
         class _Autoscaler(autoscale.Autoscaler):
 
-            def scale(self):
+            def body(self):
                 self._is_shutdown.set()
                 raise OSError("foo")
-
         x = _Autoscaler(self.pool, 10, 3, logger=logger)
-        x.logger = Mock()
-        x.run()
+
+        stderr = Mock()
+        p, sys.stderr = sys.stderr, stderr
+        try:
+            x.run()
+        finally:
+            sys.stderr = p
         _exit.assert_called_with(1)
-        self.assertTrue(x.logger.error.call_count)
+        self.assertTrue(stderr.write.call_count)

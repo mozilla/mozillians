@@ -3,18 +3,17 @@ from __future__ import with_statement
 
 import sys
 
-from celery.datastructures import ExceptionInfo, LRUCache
-from celery.datastructures import LimitedSet
-from celery.datastructures import AttributeDict, DictAttribute
-from celery.datastructures import ConfigurationView
-from celery.tests.utils import unittest
+from celery.datastructures import (ExceptionInfo, LRUCache, LimitedSet,
+                                   AttributeDict, DictAttribute,
+                                   ConfigurationView, DependencyGraph)
+from celery.tests.utils import Case, WhateverIO
 
 
 class Object(object):
     pass
 
 
-class test_DictAttribute(unittest.TestCase):
+class test_DictAttribute(Case):
 
     def test_get_set(self):
         x = DictAttribute(Object())
@@ -37,16 +36,18 @@ class test_DictAttribute(unittest.TestCase):
         self.assertIn("foo", x)
         self.assertNotIn("bar", x)
 
-    def test_iteritems(self):
+    def test_items(self):
         obj = Object()
         obj.attr1 = 1
         x = DictAttribute(obj)
         x["attr2"] = 2
         self.assertDictEqual(dict(x.iteritems()),
                              dict(attr1=1, attr2=2))
+        self.assertDictEqual(dict(x.items()),
+                             dict(attr1=1, attr2=2))
 
 
-class test_ConfigurationView(unittest.TestCase):
+class test_ConfigurationView(Case):
 
     def setUp(self):
         self.view = ConfigurationView({"changed_key": 1,
@@ -57,6 +58,17 @@ class test_ConfigurationView(unittest.TestCase):
     def test_setdefault(self):
         self.assertEqual(self.view.setdefault("both", 36), 2)
         self.assertEqual(self.view.setdefault("new", 36), 36)
+
+    def test_get(self):
+        self.assertEqual(self.view.get("both"), 2)
+        sp = object()
+        self.assertIs(self.view.get("nonexisting", sp), sp)
+
+    def test_update(self):
+        changes = dict(self.view.changes)
+        self.view.update(a=1, b=2, c=3)
+        self.assertDictEqual(self.view.changes,
+                             dict(changes, a=1, b=2, c=3))
 
     def test_contains(self):
         self.assertIn("changed_key", self.view)
@@ -72,9 +84,13 @@ class test_ConfigurationView(unittest.TestCase):
                     "default_key": 1,
                     "both": 2}
         self.assertDictEqual(dict(self.view.items()), expected)
+        self.assertItemsEqual(list(iter(self.view)),
+                              expected.keys())
+        self.assertItemsEqual(self.view.keys(), expected.keys())
+        self.assertItemsEqual(self.view.values(), expected.values())
 
 
-class test_ExceptionInfo(unittest.TestCase):
+class test_ExceptionInfo(Case):
 
     def test_exception_info(self):
 
@@ -94,7 +110,7 @@ class test_ExceptionInfo(unittest.TestCase):
         self.assertTrue(r)
 
 
-class test_LimitedSet(unittest.TestCase):
+class test_LimitedSet(Case):
 
     def test_add(self):
         s = LimitedSet(maxlen=2)
@@ -123,8 +139,36 @@ class test_LimitedSet(unittest.TestCase):
             s.add(item)
         self.assertIn("LimitedSet(", repr(s))
 
+    def test_clear(self):
+        s = LimitedSet(maxlen=2)
+        s.add("foo")
+        s.add("bar")
+        self.assertEqual(len(s), 2)
+        s.clear()
+        self.assertFalse(s)
 
-class test_LRUCache(unittest.TestCase):
+    def test_update(self):
+        s1 = LimitedSet(maxlen=2)
+        s1.add("foo")
+        s1.add("bar")
+
+        s2 = LimitedSet(maxlen=2)
+        s2.update(s1)
+        self.assertItemsEqual(list(s2), ["foo", "bar"])
+
+        s2.update(["bla"])
+        self.assertItemsEqual(list(s2), ["bla", "bar"])
+
+        s2.update(["do", "re"])
+        self.assertItemsEqual(list(s2), ["do", "re"])
+
+    def test_as_dict(self):
+        s = LimitedSet(maxlen=2)
+        s.add("foo")
+        self.assertIsInstance(s.as_dict(), dict)
+
+
+class test_LRUCache(Case):
 
     def test_expires(self):
         limit = 100
@@ -195,8 +239,13 @@ class test_LRUCache(unittest.TestCase):
     def test_safe_to_remove_while_itervalues(self):
         self.assertSafeIter("itervalues")
 
+    def test_items(self):
+        c = LRUCache()
+        c.update(a=1, b=2, c=3)
+        self.assertTrue(c.items())
 
-class test_AttributeDict(unittest.TestCase):
+
+class test_AttributeDict(Case):
 
     def test_getattr__setattr(self):
         x = AttributeDict({"foo": "bar"})
@@ -205,3 +254,40 @@ class test_AttributeDict(unittest.TestCase):
             x.bar
         x.bar = "foo"
         self.assertEqual(x["bar"], "foo")
+
+
+class test_DependencyGraph(Case):
+
+    def graph1(self):
+        return DependencyGraph([
+            ("A", []),
+            ("B", []),
+            ("C", ["A"]),
+            ("D", ["C", "B"]),
+        ])
+
+    def test_repr(self):
+        self.assertTrue(repr(self.graph1()))
+
+    def test_topsort(self):
+        order = self.graph1().topsort()
+        # C must start before D
+        self.assertLess(order.index("C"), order.index("D"))
+        # and B must start before D
+        self.assertLess(order.index("B"), order.index("D"))
+        # and A must start before C
+        self.assertLess(order.index("A"), order.index("C"))
+
+    def test_edges(self):
+        self.assertListEqual(list(self.graph1().edges()),
+                             ["C", "D"])
+
+    def test_items(self):
+        self.assertDictEqual(dict(self.graph1().items()),
+                {"A": [], "B": [],
+                 "C": ["A"], "D": ["C", "B"]})
+
+    def test_to_dot(self):
+        s = WhateverIO()
+        self.graph1().to_dot(s)
+        self.assertTrue(s.getvalue())

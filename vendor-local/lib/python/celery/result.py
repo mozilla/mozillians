@@ -5,7 +5,7 @@
 
     Task results/state and groups of results.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
@@ -29,11 +29,11 @@ def _unpickle_result(task_id, task_name):
     return _unpickle_task(task_name).AsyncResult(task_id)
 
 
-class BaseAsyncResult(object):
-    """Base class for pending result, supports custom task result backend.
+class AsyncResult(object):
+    """Query task state.
 
     :param task_id: see :attr:`task_id`.
-    :param backend: see :attr:`backend`.
+    :keyword backend: see :attr:`backend`.
 
     """
 
@@ -46,10 +46,10 @@ class BaseAsyncResult(object):
     #: The task result backend to use.
     backend = None
 
-    def __init__(self, task_id, backend, task_name=None, app=None):
+    def __init__(self, task_id, backend=None, task_name=None, app=None):
         self.app = app_or_default(app)
         self.task_id = task_id
-        self.backend = backend
+        self.backend = backend or self.app.backend
         self.task_name = task_name
 
     def forget(self):
@@ -93,10 +93,7 @@ class BaseAsyncResult(object):
         return self.backend.wait_for(self.task_id, timeout=timeout,
                                                    propagate=propagate,
                                                    interval=interval)
-
-    def wait(self, *args, **kwargs):
-        """Deprecated alias to :meth:`get`."""
-        return self.get(*args, **kwargs)
+    wait = get  # deprecated alias to :meth:`get`.
 
     def ready(self):
         """Returns :const:`True` if the task has been executed.
@@ -105,15 +102,15 @@ class BaseAsyncResult(object):
         for retry then :const:`False` is returned.
 
         """
-        return self.status in self.backend.READY_STATES
+        return self.state in self.backend.READY_STATES
 
     def successful(self):
         """Returns :const:`True` if the task executed successfully."""
-        return self.status == states.SUCCESS
+        return self.state == states.SUCCESS
 
     def failed(self):
         """Returns :const:`True` if the task failed."""
-        return self.status == states.FAILURE
+        return self.state == states.FAILURE
 
     def __str__(self):
         """`str(self) -> self.task_id`"""
@@ -147,11 +144,7 @@ class BaseAsyncResult(object):
         If the task raised an exception, this will be the exception
         instance."""
         return self.backend.get_result(self.task_id)
-
-    @property
-    def info(self):
-        """Get state metadata.  Alias to :meth:`result`."""
-        return self.result
+    info = result
 
     @property
     def traceback(self):
@@ -189,28 +182,8 @@ class BaseAsyncResult(object):
 
         """
         return self.backend.get_status(self.task_id)
-
-    @property
-    def status(self):
-        """Deprecated alias of :attr:`state`."""
-        return self.state
-
-
-class AsyncResult(BaseAsyncResult):
-    """Pending task result using the default backend.
-
-    :param task_id: The task uuid.
-
-    """
-
-    #: Task result store backend to use.
-    backend = None
-
-    def __init__(self, task_id, backend=None, task_name=None, app=None):
-        app = app_or_default(app)
-        backend = backend or app.backend
-        super(AsyncResult, self).__init__(task_id, backend,
-                                          task_name=task_name, app=app)
+    status = state
+BaseAsyncResult = AsyncResult  # for backwards compatibility.
 
 
 class ResultSet(object):
@@ -435,21 +408,28 @@ class ResultSet(object):
 
         """
         results = self.results
-        acc = [None for _ in xrange(self.total)]
+        acc = [None for _ in xrange(len(self))]
         for task_id, meta in self.iter_native(timeout=timeout,
                                               interval=interval):
             acc[results.index(task_id)] = meta["result"]
         return acc
 
+    def __len__(self):
+        return len(self.results)
+
     @property
     def total(self):
-        """Total number of tasks in the set."""
-        return len(self.results)
+        """Deprecated: Use ``len(r)``."""
+        return len(self)
 
     @property
     def subtasks(self):
         """Deprecated alias to :attr:`results`."""
         return self.results
+
+    @property
+    def supports_native_join(self):
+        return self.results[0].backend.supports_native_join
 
 
 class TaskSetResult(ResultSet):
@@ -494,11 +474,6 @@ class TaskSetResult(ResultSet):
         """Remove this result if it was previously saved."""
         (backend or self.app.backend).delete_taskset(self.taskset_id)
 
-    @classmethod
-    def restore(self, taskset_id, backend=None):
-        """Restore previously saved taskset result."""
-        return (backend or current_app.backend).restore_taskset(taskset_id)
-
     def itersubtasks(self):
         """Depreacted.   Use ``iter(self.results)`` instead."""
         return iter(self.results)
@@ -506,10 +481,14 @@ class TaskSetResult(ResultSet):
     def __reduce__(self):
         return (self.__class__, (self.taskset_id, self.results))
 
+    @classmethod
+    def restore(self, taskset_id, backend=None):
+        """Restore previously saved taskset result."""
+        return (backend or current_app.backend).restore_taskset(taskset_id)
 
-class EagerResult(BaseAsyncResult):
+
+class EagerResult(AsyncResult):
     """Result that we know has already been executed."""
-    TimeoutError = TimeoutError
 
     def __init__(self, task_id, ret_value, state, traceback=None):
         self.task_id = task_id
@@ -525,22 +504,20 @@ class EagerResult(BaseAsyncResult):
         cls, args = self.__reduce__()
         return cls(*args)
 
-    def successful(self):
-        """Returns :const:`True` if the task executed without failure."""
-        return self.state == states.SUCCESS
-
     def ready(self):
-        """Returns :const:`True` if the task has been executed."""
         return True
 
     def get(self, timeout=None, propagate=True, **kwargs):
-        """Wait until the task has been executed and return its result."""
-        if self.state == states.SUCCESS:
+        if self.successful():
             return self.result
         elif self.state in states.PROPAGATE_STATES:
             if propagate:
                 raise self.result
             return self.result
+    wait = get
+
+    def forget(self):
+        pass
 
     def revoke(self):
         self._state = states.REVOKED
@@ -557,13 +534,9 @@ class EagerResult(BaseAsyncResult):
     def state(self):
         """The tasks state."""
         return self._state
+    status = state
 
     @property
     def traceback(self):
         """The traceback if the task failed."""
         return self._traceback
-
-    @property
-    def status(self):
-        """The tasks status (alias to :attr:`state`)."""
-        return self._state

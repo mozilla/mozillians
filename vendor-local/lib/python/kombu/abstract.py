@@ -4,16 +4,17 @@ kombu.compression
 
 Object utilities.
 
+:copyright: (c) 2009 - 2012 by Ask Solem.
+:license: BSD, see LICENSE for more details.
+
 """
 from __future__ import absolute_import
 
 from copy import copy
 
-from .connection import maybe_channel
 from .exceptions import NotBoundError
-from .utils import ChannelPromise
 
-__all__ = ['Object', 'MaybeChannelBound']
+__all__ = ["Object", "MaybeChannelBound"]
 
 
 def unpickle_dict(cls, kwargs):
@@ -37,13 +38,17 @@ class Object(object):
                 except AttributeError:
                     setattr(self, name, None)
 
+    def setdefault(self, **defaults):
+        for key, value in defaults.iteritems():
+            if getattr(self, key) is None:
+                setattr(self, key, value)
+
     def as_dict(self, recurse=False):
-        def f(obj, type):
+        def f(obj):
             if recurse and isinstance(obj, Object):
                 return obj.as_dict(recurse=True)
-            return type(obj) if type else obj
-        return dict((attr, f(getattr(self, attr), type))
-                        for attr, type in self.attrs)
+            return obj
+        return dict((attr, f(getattr(self, attr))) for attr, _ in self.attrs)
 
     def __reduce__(self):
         return unpickle_dict, (self.__class__, self.as_dict())
@@ -71,7 +76,7 @@ class MaybeChannelBound(Object):
     def maybe_bind(self, channel):
         """Bind instance to channel if not already bound."""
         if not self.is_bound and channel:
-            self._channel = maybe_channel(channel)
+            self._channel = channel
             self.when_bound()
             self._is_bound = True
         return self
@@ -79,7 +84,7 @@ class MaybeChannelBound(Object):
     def revive(self, channel):
         """Revive channel after the connection has been re-established.
 
-        Used by :meth:`~kombu.Connection.ensure`.
+        Used by :meth:`~kombu.connection.BrokerConnection.ensure`.
 
         """
         if self.is_bound:
@@ -90,11 +95,11 @@ class MaybeChannelBound(Object):
         """Callback called when the class is bound."""
         pass
 
-    def __repr__(self, item=''):
+    def __repr__(self, item=""):
         if self.is_bound:
-            return '<%s bound to chan:%s>' % (
-                item or type(self).__name__, self.channel.channel_id)
-        return '<unbound %s>' % (item, )
+            return "<bound %s of %s>" % (item or self.__class__.__name__,
+                                         self.channel)
+        return "<unbound %s>" % (item, )
 
     @property
     def is_bound(self):
@@ -104,11 +109,8 @@ class MaybeChannelBound(Object):
     @property
     def channel(self):
         """Current channel if the object is bound."""
-        channel = self._channel
-        if channel is None:
+        if self._channel is None:
             raise NotBoundError(
                 "Can't call method on %s not bound to a channel" % (
                     self.__class__.__name__))
-        if isinstance(channel, ChannelPromise):
-            channel = self._channel = channel()
-        return channel
+        return self._channel

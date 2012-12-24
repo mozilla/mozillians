@@ -5,13 +5,13 @@
 
     AMQ related functionality.
 
-    :copyright: (c) 2009 - 2011 by Ask Solem.
+    :copyright: (c) 2009 - 2012 by Ask Solem.
     :license: BSD, see LICENSE for more details.
 
 """
 from __future__ import absolute_import
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from kombu import BrokerConnection, Exchange
 from kombu import compat as messaging
@@ -24,7 +24,7 @@ from ..utils import cached_property, textindent, uuid
 #: List of known options to a Kombu producers send method.
 #: Used to extract the message related options out of any `dict`.
 MSG_OPTIONS = ("mandatory", "priority", "immediate", "routing_key",
-                "serializer", "delivery_mode", "compression")
+               "serializer", "delivery_mode", "compression")
 
 #: Human readable queue declaration.
 QUEUE_FORMAT = """
@@ -145,7 +145,7 @@ class Queues(dict):
 
 
 class TaskPublisher(messaging.Publisher):
-    auto_declare = True
+    auto_declare = False
     retry = False
     retry_policy = None
 
@@ -154,6 +154,7 @@ class TaskPublisher(messaging.Publisher):
         self.retry = kwargs.pop("retry", self.retry)
         self.retry_policy = kwargs.pop("retry_policy",
                                         self.retry_policy or {})
+        self.utc = kwargs.pop("enable_utc", False)
         super(TaskPublisher, self).__init__(*args, **kwargs)
 
     def declare(self):
@@ -163,7 +164,7 @@ class TaskPublisher(messaging.Publisher):
             _exchanges_declared.add(self.exchange.name)
 
     def _declare_queue(self, name, retry=False, retry_policy={}):
-        options = self.app.queues[name]
+        options = self.app.amqp.queues[name]
         queue = messaging.entry_to_queue(name, **options)(self.channel)
         if retry:
             self.connection.ensure(queue, queue.declare, **retry_policy)()
@@ -208,10 +209,10 @@ class TaskPublisher(messaging.Publisher):
         if not isinstance(task_kwargs, dict):
             raise ValueError("task kwargs must be a dictionary")
         if countdown:                           # Convert countdown to ETA.
-            now = now or datetime.now()
+            now = now or self.app.now()
             eta = now + timedelta(seconds=countdown)
-        if isinstance(expires, int):
-            now = now or datetime.now()
+        if isinstance(expires, (int, float)):
+            now = now or self.app.now()
             expires = now + timedelta(seconds=expires)
         eta = eta and eta.isoformat()
         expires = expires and expires.isoformat()
@@ -222,8 +223,8 @@ class TaskPublisher(messaging.Publisher):
                 "kwargs": task_kwargs or {},
                 "retries": retries or 0,
                 "eta": eta,
-                "expires": expires}
-
+                "expires": expires,
+                "utc": self.utc}
         if taskset_id:
             body["taskset"] = taskset_id
         if chord:
@@ -319,9 +320,11 @@ class AMQP(object):
                     "exchange_type": default_queue["exchange_type"],
                     "routing_key": conf.CELERY_DEFAULT_ROUTING_KEY,
                     "serializer": conf.CELERY_TASK_SERIALIZER,
+                    "compression": conf.CELERY_MESSAGE_COMPRESSION,
                     "retry": conf.CELERY_TASK_PUBLISH_RETRY,
                     "retry_policy": conf.CELERY_TASK_PUBLISH_RETRY_POLICY,
-                    "app": self}
+                    "enable_utc": conf.CELERY_ENABLE_UTC,
+                    "app": self.app}
         return TaskPublisher(*args, **self.app.merge(defaults, kwargs))
 
     def get_task_consumer(self, connection, queues=None, **kwargs):

@@ -14,8 +14,9 @@ import warnings
 
 from .. import __version__, platforms, signals
 from ..app import app_or_default
+from ..app.abstract import configurated, from_config
 from ..exceptions import ImproperlyConfigured, SystemTerminate
-from ..utils import get_full_cls_name, isatty, LOG_LEVELS, cry
+from ..utils import cry, isatty, LOG_LEVELS, pluralize, qualname
 from ..worker import WorkController
 
 try:
@@ -45,6 +46,14 @@ EXTRA_INFO_FMT = """
 %(tasks)s
 """
 
+UNKNOWN_QUEUE_ERROR = """\
+Trying to select queue subset of %r, but queue %s is not
+defined in the CELERY_QUEUES setting.
+
+If you want to automatically declare unknown queues you can
+enable the CELERY_CREATE_MISSING_QUEUES setting.
+"""
+
 
 def cpu_count():
     if multiprocessing is not None:
@@ -60,49 +69,39 @@ def get_process_name():
         return multiprocessing.current_process().name
 
 
-class Worker(object):
+class Worker(configurated):
     WorkController = WorkController
 
-    def __init__(self, concurrency=None, loglevel=None, logfile=None,
-            hostname=None, discard=False, run_clockservice=False,
-            schedule=None, task_time_limit=None, task_soft_time_limit=None,
-            max_tasks_per_child=None, queues=None, events=None, db=None,
-            include=None, app=None, pidfile=None,
-            redirect_stdouts=None, redirect_stdouts_level=None,
-            autoscale=None, scheduler_cls=None, pool=None, **kwargs):
-        self.app = app = app_or_default(app)
-        conf = app.conf
-        self.concurrency = (concurrency or
-                            conf.CELERYD_CONCURRENCY or cpu_count())
-        self.loglevel = loglevel or conf.CELERYD_LOG_LEVEL
-        self.logfile = logfile or conf.CELERYD_LOG_FILE
+    inherit_confopts = (WorkController, )
+    loglevel = from_config("log_level")
+    redirect_stdouts = from_config()
+    redirect_stdouts_level = from_config()
 
+    def __init__(self, hostname=None, discard=False, embed_clockservice=False,
+            queues=None, include=None, app=None, pidfile=None,
+            autoscale=None, autoreload=False, **kwargs):
+        self.app = app = app_or_default(app)
         self.hostname = hostname or socket.gethostname()
+
+        # this signal can be used to set up configuration for
+        # workers by name.
+        signals.celeryd_init.send(sender=self.hostname, instance=self,
+                                  conf=self.app.conf)
+
+        self.setup_defaults(kwargs, namespace="celeryd")
+        if not self.concurrency:
+            self.concurrency = cpu_count()
         self.discard = discard
-        self.run_clockservice = run_clockservice
-        if self.app.IS_WINDOWS and self.run_clockservice:
+        self.embed_clockservice = embed_clockservice
+        if self.app.IS_WINDOWS and self.embed_clockservice:
             self.die("-B option does not work on Windows.  "
                      "Please run celerybeat as a separate service.")
-        self.schedule = schedule or conf.CELERYBEAT_SCHEDULE_FILENAME
-        self.scheduler_cls = scheduler_cls or conf.CELERYBEAT_SCHEDULER
-        self.events = events if events is not None else conf.CELERY_SEND_EVENTS
-        self.task_time_limit = (task_time_limit or
-                                conf.CELERYD_TASK_TIME_LIMIT)
-        self.task_soft_time_limit = (task_soft_time_limit or
-                                     conf.CELERYD_TASK_SOFT_TIME_LIMIT)
-        self.max_tasks_per_child = (max_tasks_per_child or
-                                    conf.CELERYD_MAX_TASKS_PER_CHILD)
-        self.redirect_stdouts = (redirect_stdouts or
-                                 conf.CELERY_REDIRECT_STDOUTS)
-        self.redirect_stdouts_level = (redirect_stdouts_level or
-                                       conf.CELERY_REDIRECT_STDOUTS_LEVEL)
-        self.pool = pool or conf.CELERYD_POOL
-        self.db = db
         self.use_queues = [] if queues is None else queues
         self.queues = None
         self.include = [] if include is None else include
         self.pidfile = pidfile
         self.autoscale = None
+        self.autoreload = autoreload
         if autoscale:
             max_c, _, min_c = autoscale.partition(",")
             self.autoscale = [int(max_c), min_c and int(min_c) or 0]
@@ -130,9 +129,9 @@ class Worker(object):
         self.worker_init()
         self.redirect_stdouts_to_logger()
 
-        if getattr(os, "geteuid", None) and os.geteuid() == 0:
-            warnings.warn(
-                "Running celeryd with superuser privileges is not encouraged!")
+        if getattr(os, "getuid", None) and os.getuid() == 0:
+            warnings.warn(RuntimeWarning(
+                "Running celeryd with superuser privileges is discouraged!"))
 
         if self.discard:
             self.purge_messages()
@@ -153,38 +152,27 @@ class Worker(object):
         print("celery@%s has started." % self.hostname)
 
     def init_queues(self):
-        if self.use_queues:
-            create_missing = self.app.conf.CELERY_CREATE_MISSING_QUEUES
-            try:
-                self.app.amqp.queues.select_subset(self.use_queues,
-                                                   create_missing)
-            except KeyError, exc:
-                raise ImproperlyConfigured(
-                    "Trying to select queue subset of %r, but queue %s"
-                    "is not defined in CELERY_QUEUES. If you want to "
-                    "automatically declare unknown queues you have to "
-                    "enable CELERY_CREATE_MISSING_QUEUES" % (
-                        self.use_queues, exc))
+        try:
+            self.app.select_queues(self.use_queues)
+        except KeyError, exc:
+            raise ImproperlyConfigured(
+                        UNKNOWN_QUEUE_ERROR % (self.use_queues, exc))
 
     def init_loader(self):
         self.loader = self.app.loader
         self.settings = self.app.conf
         for module in self.include:
-            self.loader.import_from_cwd(module)
+            self.loader.import_task_module(module)
 
     def redirect_stdouts_to_logger(self):
-        handled = self.app.log.setup_logging_subsystem(loglevel=self.loglevel,
-                                                       logfile=self.logfile)
-        if not handled:
-            logger = self.app.log.get_default_logger()
-            if self.redirect_stdouts:
-                self.app.log.redirect_stdouts_to_logger(logger,
-                                loglevel=self.redirect_stdouts_level)
+        self.app.log.setup(self.loglevel, self.logfile,
+                           self.redirect_stdouts,
+                           self.redirect_stdouts_level)
 
     def purge_messages(self):
         count = self.app.control.discard_all()
-        what = (not count or count > 1) and "messages" or "message"
-        print("discard: Erased %d %s from the queue.\n" % (count, what))
+        print("discard: Erased %d %s from the queue.\n" % (
+                count, pluralize(count, "message")))
 
     def worker_init(self):
         # Run the worker init handler.
@@ -219,9 +207,9 @@ class Worker(object):
             "concurrency": concurrency,
             "loglevel": LOG_LEVELS[self.loglevel],
             "logfile": self.logfile or "[stderr]",
-            "celerybeat": "ON" if self.run_clockservice else "OFF",
-            "events": "ON" if self.events else "OFF",
-            "loader": get_full_cls_name(self.loader.__class__),
+            "celerybeat": "ON" if self.embed_clockservice else "OFF",
+            "events": "ON" if self.send_events else "OFF",
+            "loader": qualname(self.loader),
             "queues": app.amqp.queues.format(indent=18, indent_first=False),
         }
 
@@ -230,22 +218,14 @@ class Worker(object):
             pidlock = platforms.create_pidlock(self.pidfile).acquire()
             atexit.register(pidlock.release)
         worker = self.WorkController(app=self.app,
-                                concurrency=self.concurrency,
-                                loglevel=self.loglevel,
-                                logfile=self.logfile,
-                                hostname=self.hostname,
-                                ready_callback=self.on_consumer_ready,
-                                embed_clockservice=self.run_clockservice,
-                                schedule_filename=self.schedule,
-                                scheduler_cls=self.scheduler_cls,
-                                send_events=self.events,
-                                db=self.db,
-                                max_tasks_per_child=self.max_tasks_per_child,
-                                task_time_limit=self.task_time_limit,
-                                task_soft_time_limit=self.task_soft_time_limit,
-                                autoscale=self.autoscale,
-                                pool_cls=self.pool)
+                                    hostname=self.hostname,
+                                    ready_callback=self.on_consumer_ready,
+                                    embed_clockservice=self.embed_clockservice,
+                                    autoscale=self.autoscale,
+                                    autoreload=self.autoreload,
+                                    **self.confopts_as_dict())
         self.install_platform_tweaks(worker)
+        signals.worker_init.send(sender=worker)
         worker.start()
 
     def install_platform_tweaks(self, worker):
@@ -260,18 +240,18 @@ class Worker(object):
             # into the background.
             if self.app.IS_OSX:
                 # OS X can't exec from a process using threads.
-                # See http://github.com/ask/celery/issues#issue/152
+                # See http://github.com/celery/celery/issues#issue/152
                 install_HUP_not_supported_handler(worker)
             else:
                 install_worker_restart_handler(worker)
         install_worker_term_handler(worker)
+        install_worker_term_hard_handler(worker)
         install_worker_int_handler(worker)
         install_cry_handler(worker.logger)
         install_rdb_handler()
-        signals.worker_init.send(sender=worker)
 
     def osx_proxy_detection_workaround(self):
-        """See http://github.com/ask/celery/issues#issue/161"""
+        """See http://github.com/celery/celery/issues#issue/161"""
         os.environ.setdefault("celery_dummy_proxy", "set_by_celeryd")
 
     def set_process_status(self, info):
@@ -322,6 +302,18 @@ def install_worker_term_handler(worker):
         raise SystemExit()
 
     platforms.signals["SIGTERM"] = _stop
+
+
+def install_worker_term_hard_handler(worker):
+
+    def _stop(signum, frame):
+        process_name = get_process_name()
+        if not process_name or process_name == "MainProcess":
+            print("celeryd: Cold shutdown (%s)" % (process_name, ))
+            worker.terminate(in_sighandler=True)
+        raise SystemTerminate()
+
+    platforms.signals["SIGQUIT"] = _stop
 
 
 def install_worker_restart_handler(worker):

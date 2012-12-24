@@ -3,26 +3,41 @@ from __future__ import with_statement
 
 import signal
 import sys
+import time
 
 from itertools import cycle
 
-from mock import patch
+from mock import Mock, patch
 from nose import SkipTest
 
 try:
     from celery.concurrency import processes as mp
+    from celery.concurrency.processes.pool import safe_apply_callback
 except ImportError:
 
     class _mp(object):
         RUN = 0x1
 
         class TaskPool(object):
-            pass
+            _pool = Mock()
+
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def start(self):
+                pass
+
+            def stop(self):
+                pass
+
+            def apply_async(self, *args, **kwargs):
+                pass
     mp = _mp()  # noqa
+    safe_apply_callback = None  # noqa
 
 from celery.datastructures import ExceptionInfo
 from celery.utils import noop
-from celery.tests.utils import unittest
+from celery.tests.utils import Case
 
 
 class Object(object):   # for writeable attributes.
@@ -102,7 +117,7 @@ class ExeMockTaskPool(mp.TaskPool):
     Pool = ExeMockPool
 
 
-class test_TaskPool(unittest.TestCase):
+class test_TaskPool(Case):
 
     def setUp(self):
         try:
@@ -127,36 +142,9 @@ class test_TaskPool(unittest.TestCase):
         pool.terminate()
         self.assertTrue(_pool.terminated)
 
-    def test_on_worker_error(self):
-        scratch = [None]
-
-        def errback(einfo):
-            scratch[0] = einfo
-
-        pool = TaskPool(10)
-        exc_info = None
-        try:
-            raise KeyError("foo")
-        except KeyError:
-            exc_info = ExceptionInfo(sys.exc_info())
-        pool.on_worker_error(errback, exc_info)
-
-        self.assertTrue(scratch[0])
-        self.assertIs(scratch[0], exc_info)
-
-    def test_on_ready_exception(self):
-        scratch = [None]
-
-        def errback(retval):
-            scratch[0] = retval
-
-        pool = TaskPool(10)
-        exc = to_excinfo(KeyError("foo"))
-        pool.on_ready(None, errback, exc)
-        self.assertEqual(exc, scratch[0])
-
     def test_safe_apply_callback(self):
-
+        if safe_apply_callback is None:
+            raise SkipTest("multiprocessig not supported")
         _good_called = [0]
         _evil_called = [0]
 
@@ -168,28 +156,10 @@ class test_TaskPool(unittest.TestCase):
             _evil_called[0] = 1
             raise KeyError(x)
 
-        pool = TaskPool(10)
-        self.assertIsNone(pool.safe_apply_callback(good, 10))
-        self.assertIsNone(pool.safe_apply_callback(evil, 10))
+        self.assertIsNone(safe_apply_callback(good, 10))
+        self.assertIsNone(safe_apply_callback(evil, 10))
         self.assertTrue(_good_called[0])
         self.assertTrue(_evil_called[0])
-
-    def test_on_ready_value(self):
-        scratch = [None]
-
-        def callback(retval):
-            scratch[0] = retval
-
-        pool = TaskPool(10)
-        retval = "the quick brown fox"
-        pool.on_ready(callback, None, retval)
-        self.assertEqual(retval, scratch[0])
-
-    def test_on_ready_exit_exception(self):
-        pool = TaskPool(10)
-        exc = to_excinfo(SystemExit("foo"))
-        with self.assertRaises(SystemExit):
-            pool.on_ready([], [], exc)
 
     def test_apply_async(self):
         pool = TaskPool(10)
@@ -226,3 +196,17 @@ class test_TaskPool(unittest.TestCase):
         self.assertEqual(info["max-concurrency"], pool.limit)
         self.assertIsNone(info["max-tasks-per-child"])
         self.assertEqual(info["timeouts"], (5, 10))
+
+    def test_restart(self):
+        raise SkipTest("functional test")
+
+        def get_pids(pool):
+            return set([p.pid for p in pool._pool._pool])
+
+        tp = self.TaskPool(5)
+        time.sleep(0.5)
+        tp.start()
+        pids = get_pids(tp)
+        tp.restart()
+        time.sleep(0.5)
+        self.assertEqual(pids, get_pids(tp))
