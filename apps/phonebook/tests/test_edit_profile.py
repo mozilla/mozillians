@@ -15,8 +15,7 @@ class EditProfileTests(ESTestCase):
         """Geographic fields exist and require increasing specificity."""
         u = user()
         self.client.login(email=u.email, password='testpass')
-        # For some reason last_name is a required field.
-        data = {'city': 'New York', 'last_name': 'Foobar'}
+        data = {'city': 'New York', 'full_name': 'Foobar'}
         url = reverse('profile.edit')
         response = self.client.post(url, data)
         eq_(400, response.status_code)
@@ -33,6 +32,6 @@ class EditProfileTests(ESTestCase):
         """Not every country is a real country."""
         u = user()
         self.client.login(email=u.email, password='testpass')
-        data = {'country': 'xyz', 'last_name': 'Foobar'}
+        data = {'country': 'xyz', 'full_name': 'Foobar'}
         response = self.client.post(reverse('profile.edit'), data)
         eq_(400, response.status_code)

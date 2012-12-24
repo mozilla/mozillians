@@ -69,14 +69,22 @@
           <h2>{{ _('Location') }}</h2>
           <p>
             {% trans %}
-              Let us know where in the world you are. Other vouched Mozillians
-              will be able to contact you easier and vice-versa.
+              Let us know where in the world you are. Other vouched Mozillians will
+              be able to contact you and vice-versa. We may also send you emails
+              about important Mozilla news relevant to your location.
             {% endtrans %}
           </p>
           {{ bootstrap(profile_form.country) }}
           {{ bootstrap(profile_form.region) }}
           {{ bootstrap(profile_form.city) }}
           {{ bootstrap(profile_form.optin) }}
+          <p>
+            {% trans %}
+              You will begin to receive email communications from Mozilla once you
+              are a vouched Mozillian. You may unsubscribe at anytime by clicking
+              the link at the bottom of these emails.
+            {% endtrans %}
+          </p>
           <div id="edit_controls">
             <button type="submit" class="span2 btn-large btn-primary">{{ _('Create Profile') }}</button>
           </div>

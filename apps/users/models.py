@@ -12,7 +12,7 @@ from django.dispatch import receiver
 
 from elasticutils.contrib.django import S
 from elasticutils.contrib.django.models import SearchMixin
-from elasticutils.contrib.django import tasks
+from elasticutils.contrib.django import tasks as elasticutilstasks
 from funfactory.urlresolvers import reverse
 from PIL import Image, ImageOps
 from product_details import product_details
@@ -21,6 +21,8 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from apps.groups.models import Group, Skill, Language
 from apps.phonebook.helpers import gravatar
+
+from tasks import update_basket_task
 
 # This is because we are using MEDIA_ROOT wrong in 1.4
 from django.core.files.storage import FileSystemStorage
@@ -37,8 +39,8 @@ class UserProfile(models.Model, SearchMixin):
     # This field is required.
     user = models.OneToOneField(User)
 
-    full_name = models.CharField(max_length=255, default='', blank=True,
-                                verbose_name=_lazy(u'Full Name'))
+    full_name = models.CharField(max_length=255, default='', blank=False,
+                                 verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
@@ -70,6 +72,7 @@ class UserProfile(models.Model, SearchMixin):
         default=True,
         verbose_name=_lazy(u'Allow Mozilla sites to access my profile data?'),
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
+    basket_token = models.CharField(max_length=1024, default='', blank=True)
 
     @property
     def display_name(self):
@@ -161,6 +164,22 @@ class UserProfile(models.Model, SearchMixin):
 
         self._email_now_vouched()
 
+    def auto_vouch(self):
+        """Auto vouch mozilla.com users."""
+        email = self.user.email
+        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+            self.vouch(None, commit=False)
+
+    def add_to_staff_group(self):
+        """Keep users in the staff group if they're autovouchable."""
+        email = self.user.email
+        staff, created = Group.objects.get_or_create(name='staff', system=True)
+        if any(email.endswith('@' + x) for x in
+               settings.AUTO_VOUCH_DOMAINS):
+            self.groups.add(staff)
+        elif staff in self.groups.all():
+            self.groups.remove(staff)
+
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
@@ -207,7 +226,6 @@ class UserProfile(models.Model, SearchMixin):
         d.update(dict(skills=list(obj.skills.values_list('name', flat=True))))
         d.update(dict(languages=list(obj.languages.values_list('name',
                                                                flat=True))))
-
         return d
 
     @classmethod
@@ -266,6 +284,11 @@ class UserProfile(models.Model, SearchMixin):
             s = s.filter(has_photo=photo)
         return s
 
+    def save(self, *args, **kwargs):
+        self.auto_vouch()
+        super(UserProfile, self).save(*args, **kwargs)
+        self.add_to_staff_group()
+
 
 @receiver(dbsignals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
@@ -275,31 +298,6 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
         if not created:
             dbsignals.post_save.send(sender=UserProfile, instance=up,
                                      created=created, raw=raw)
-
-
-@receiver(dbsignals.pre_save, sender=UserProfile,
-          dispatch_uid='auto_vouch_sig')
-def auto_vouch(sender, instance, raw, using, **kwargs):
-    """Auto vouch mozilla.com users."""
-    if not instance.id and not raw:
-        email = instance.user.email
-        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            instance.vouch(None, commit=False)
-
-
-@receiver(dbsignals.post_save, sender=UserProfile,
-          dispatch_uid='add_to_staff_group_sig')
-def add_to_staff_group(sender, instance, created, raw, **kwargs):
-    """Keep users in the staff group if they're autovouchable."""
-    if raw:
-        return
-    email = instance.user.email
-    staff, created = Group.objects.get_or_create(name='staff', system=True)
-    if any(email.endswith('@' + x) for x in
-           settings.AUTO_VOUCH_DOMAINS):
-        instance.groups.add(staff)
-    elif staff in instance.groups.all():
-        instance.groups.remove(staff)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
@@ -315,16 +313,22 @@ def resize_photo(sender, instance, **kwargs):
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
+          dispatch_uid='update_basket_sig')
+def update_basket(sender, instance, **kwargs):
+    update_basket_task.delay(instance.id)
+
+
+@receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_search_index_sig')
-def update_search_index(sender, instance, **kw):
-    tasks.index_objects.delay(sender, [instance.id])
+def update_search_index(sender, instance, **kwargs):
+    elasticutilstasks.index_objects.delay(sender, [instance.id])
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile,
           dispatch_uid='remove_from_search_index_sig')
-def remove_from_search_index(sender, instance, **kw):
+def remove_from_search_index(sender, instance, **kwargs):
     try:
-        tasks.unindex_objects.delay(sender, [instance.id])
+        elasticutilstasks.unindex_objects.delay(sender, [instance.id])
     except pyes.exceptions.ElasticSearchException, e:
         # Patch pyes
         if (e.status == 404 and

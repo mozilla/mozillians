@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from celery.task.sets import TaskSet
 from functools import update_wrapper
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
@@ -17,6 +18,37 @@ from .models import UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
+
+import tasks
+
+
+def _update_basket(action, request, queryset):
+    """Generic basket (un)subscribe for queryset."""
+    userprofiles = UserProfile.objects.filter(user__in=queryset)
+    ts = [getattr(tasks, action).subtask(args=[profile])
+          for profile in userprofiles]
+    TaskSet(ts).apply_async()
+    messages.success(request, 'Basket update started.')
+
+
+def subscribe_to_basket_action():
+    """Subscribe to Basket action."""
+
+    def subscribe_to_basket(modeladmin, request, queryset):
+        """Subscribe to Basket or update details of already subscribed."""
+        _update_basket('update_basket_task', request, queryset)
+    subscribe_to_basket.short_description = 'Subscribe to or Update Basket'
+    return subscribe_to_basket
+
+
+def unsubscribe_from_basket_action():
+    """Unsubscribe from Basket action."""
+
+    def unsubscribe_from_basket(modeladmin, request, queryset):
+        """Unsubscribe from Basket."""
+        _update_basket('remove_from_basket_task', request, queryset)
+    unsubscribe_from_basket.short_description = 'Unsubscribe from Basket'
+    return unsubscribe_from_basket
 
 
 class DateJoinedFilter(SimpleListFilter):
@@ -77,7 +109,8 @@ class UserAdmin(UserAdmin):
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
                     'vouched_by']
     list_display_links = ['full_name', 'email', 'username']
-    actions = [export_as_csv_action(fields=('username', 'email'), header=True)]
+    actions = [export_as_csv_action(fields=('username', 'email'), header=True),
+               subscribe_to_basket_action(), unsubscribe_from_basket_action()]
 
     def country(self, obj):
         return obj.userprofile.country

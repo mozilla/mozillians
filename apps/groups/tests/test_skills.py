@@ -45,7 +45,7 @@ class SkillsTest(common.tests.ESTestCase):
 
         self.client.login(email=self.pending.email)
         self.client.post(reverse('profile.edit'),
-                         dict(last_name='McAwesomepants',
+                         dict(full_name='McAwesomepants',
                               skills='Awesome foo Bar'),
                          follow=True)
 
