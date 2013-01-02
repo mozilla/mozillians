@@ -17,6 +17,7 @@ from tower import ugettext as _
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
 from apps.users.models import UserProfile
+from apps.users.tasks import remove_from_basket_task
 
 import forms
 from models import Invite
@@ -102,7 +103,6 @@ def edit_profile(request):
                 messages.info(request, _(u'You changed your username; please '
                                          'note your profile URL has also '
                                          'changed.'))
-
             return redirect(reverse('profile', args=[user.username]))
 
     d = dict(profile_form=profile_form,
@@ -132,11 +132,11 @@ def confirm_delete(request):
 @login_required
 @require_POST
 def delete(request):
-    delete_me = request.user.pk
+    user_profile = request.user.get_profile()
+    remove_from_basket_task.delay(user_profile.id)
+    user_profile.anonymize()
+    log.info('Deleting %d' % user_profile.user.id)
     logout(request)
-    removed = User.objects.get(pk=delete_me)
-    removed.get_profile().anonymize()
-    log.info('Deleting %d' % removed.id)
     return redirect(reverse('home'))
 
 
@@ -225,7 +225,6 @@ def invite(request):
     else:
         f = forms.InviteForm()
     data = dict(form=f)
-
     return render(request, 'phonebook/invite.html', data)
 
 
@@ -243,7 +242,6 @@ def vouch(request):
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
                  'This user is now vouched!')
         messages.info(request, msg)
-
         return redirect(reverse('profile', args=[p.user.username]))
 
     return HttpResponseForbidden
