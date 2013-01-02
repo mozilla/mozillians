@@ -25,7 +25,7 @@ import tasks
 def _update_basket(action, request, queryset):
     """Generic basket (un)subscribe for queryset."""
     userprofiles = UserProfile.objects.filter(user__in=queryset)
-    ts = [getattr(tasks, action).subtask(args=[profile])
+    ts = [getattr(tasks, action).subtask(args=[profile.id])
           for profile in userprofiles]
     TaskSet(ts).apply_async()
     messages.success(request, 'Basket update started.')
