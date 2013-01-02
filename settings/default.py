@@ -260,3 +260,7 @@ DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
 
 # Statsd Graphite
 STATSD_CLIENT = 'django_statsd.clients.normal'
+
+# Basket
+BASKET_URL = 'http://basket.mozilla.com'
+BASKET_NEWSLETTER = 'mozilla-phone'

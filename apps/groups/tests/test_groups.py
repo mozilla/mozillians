@@ -75,7 +75,7 @@ class GroupTest(common.tests.ESTestCase):
         self.client.login(email=self.mozillian.email)
 
         self.client.post(reverse('profile.edit'),
-                         dict(last_name='tofumatt', groups='Awesome,foo,Bar'),
+                         dict(full_name='tofumatt', groups='Awesome,foo,Bar'),
                          follow=True)
 
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
@@ -102,7 +102,7 @@ class GroupTest(common.tests.ESTestCase):
 
         self.client.login(email=self.pending.email)
         self.client.post(reverse('profile.edit'),
-                         dict(last_name='McAwesomepants',
+                         dict(full_name='McAwesomepants',
                               groups='Awesome foo Bar'),
                          follow=True)
 
@@ -122,7 +122,7 @@ class GroupTest(common.tests.ESTestCase):
         self.client.login(email=self.pending.email)
         self.client.post(reverse('profile.edit'),
                          dict(
-                              last_name='McAwesomepants',
+                              full_name='McAwesomepants',
                               # This should result in four groups
                               groups='Awesome,,foo bar,  Bar,g '),
                          follow=True)
@@ -142,7 +142,7 @@ class GroupTest(common.tests.ESTestCase):
 
         self.client.login(email=self.mozillian.email)
         self.client.post(reverse('profile.edit'),
-                         dict(last_name='tofumatt',
+                         dict(full_name='tofumatt',
                               groups='%s %s' % (self.NORMAL_GROUP.name,
                                                 self.SYSTEM_GROUP.name)),
                          follow=True)
@@ -173,7 +173,7 @@ class GroupTest(common.tests.ESTestCase):
         self.client.login(email=self.mozillian.email)
         response = self.client.post(
             reverse('profile.edit'),
-            dict(last_name="McLovin'", username='fo', groups=''),
+            dict(full_name="McLovin'", username='fo', groups=''),
             follow=True)
 
         doc = pq(response.content)

@@ -71,7 +71,6 @@ class TestDeleteUser(ESTestCase):
 
         # Make sure the user data isn't there anymore
         assert not User.objects.get(id=user_id).first_name
-        assert not User.objects.get(id=user_id).last_name
         assert not User.objects.get(id=user_id).userprofile.full_name
         assert not User.objects.get(id=user_id).email
         assert not User.objects.get(id=user_id).is_active
