@@ -101,12 +101,8 @@ def remove_from_basket_task(instance_id):
     if not BASKET_ENABLED:
         return
 
-    token = instance.basket_token
-    instance.basket_token = ''
-    instance.save()
-
     try:
-        basket.unsubscribe(token, instance.user.email,
+        basket.unsubscribe(instance.basket_token, instance.user.email,
                            newsletters=settings.BASKET_NEWSLETTER)
     except (requests.exceptions.RequestException,
             basket.BasketException), exception:
