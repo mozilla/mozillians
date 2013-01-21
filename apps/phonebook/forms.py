@@ -46,7 +46,7 @@ class UsernameWidget(forms.widgets.TextInput):
                 super(UsernameWidget, self).render(*args, **kwargs))
 
 
-class UserForm(forms.ModelForm):
+class UserForm(happyforms.ModelForm):
     """Instead of just inhereting form a UserProfile model form, this
     base class allows us to also abstract over methods that have to do
     with the User object that need to exist in both Registration and
@@ -85,7 +85,7 @@ class UserForm(forms.ModelForm):
         return username
 
 
-class BaseProfileForm(forms.ModelForm):
+class BaseProfileForm(happyforms.ModelForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)

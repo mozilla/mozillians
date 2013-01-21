@@ -44,7 +44,7 @@ class UserProfile(models.Model, SearchMixin):
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
-                              default='', blank=True, null=True)
+                              default='', blank=True)
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
                                    on_delete=models.SET_NULL, blank=True)
     groups = models.ManyToManyField(Group, blank=True)
