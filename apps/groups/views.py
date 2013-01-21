@@ -5,7 +5,7 @@ from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
 import commonware.log
@@ -55,6 +55,7 @@ def search(request, searched_object=Group):
 
 
 @vouch_required
+@never_cache
 def show(request, id, url=None):
     """ List all users with this group."""
     group = get_object_or_404(Group, id=id)
