@@ -1,8 +1,8 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.template.defaultfilters import slugify
 
+from autoslug.fields import AutoSlugField
 from tower import ugettext_lazy as _lazy
 
 # If three or more users use a group, it will get auto-completed.
@@ -15,7 +15,8 @@ class GroupBase(models.Model):
     Think of tags on a user profile.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
-    url = models.SlugField(default='')
+    url = AutoSlugField(populate_from='name', unique=True,
+                        editable=False, blank=True)
 
     # If this is true, this Group/Skill/Language will appear in the
     # autocomplete list.
@@ -41,8 +42,6 @@ class GroupBase(models.Model):
 
     def save(self, *args, **kwargs):
         self.name = self.name.lower()
-        if not self.url:
-            self.url = slugify(self.name.lower())
         super(GroupBase, self).save(*args, **kwargs)
 
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 
 from django.contrib.auth.models import User
@@ -255,3 +257,12 @@ class GroupTest(common.tests.ESTestCase):
         eq_(GroupAlias.objects.count(), 3)
         map(lambda x: eq_(x, master_group.id),
             GroupAlias.objects.values_list('alias', flat=True))
+
+
+    def test_unique_url(self):
+        """Test unique group url.
+
+        Name 'cheesezilla' generates the same url as 'cheeseζιλλα'.
+        """
+        new_group = Group.objects.create(name=u'cheeseζiλλα')
+        self.assertNotEqual(new_group.url, self.NORMAL_GROUP.url)
