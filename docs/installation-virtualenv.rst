@@ -57,7 +57,7 @@ You 'll need python, virtualenv and pip.
 
 #. Download and run elastic search::
 
-     (venv)$ wget https://github.com/downloads/elasticsearch/elasticsearch/elasticsearch-0.19.4.tar.gz -O /tmp/es.tar.gz
+     (venv)$ wget http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.19.4.tar.gz -O /tmp/es.tar.gz
      (venv)$ tar xvf /tmp/es.tar.gz -C venv/
      (venv)$ ./venv/elasticsearch-0.19.4/bin/elasticsearch -p venv/es.pid >/dev/null 2>&1
 
