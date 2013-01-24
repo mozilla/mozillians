@@ -38,7 +38,7 @@ class InviteFlowTest(apps.common.tests.ESTestCase):
         i = Invite.objects.get()
         invite_url = i.get_url()
 
-        assert 'no-reply@mozillians.org' in mail.outbox[0].from_email
+        assert 'no-reply@mozilla.org' in mail.outbox[0].from_email
         assert invite_url in mail.outbox[0].body, "No link in email."
         return i
 

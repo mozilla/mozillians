@@ -183,10 +183,10 @@ class UserProfile(models.Model, SearchMixin):
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
-        message = _(u"You've now been vouched on Mozillians.org. "
+        message = _(u"You've now been vouched on community.mozilla.org. "
                      "You'll now be able to search, vouch "
                      "and invite other Mozillians onto the site.")
-        send_mail(subject, message, 'no-reply@mozillians.org',
+        send_mail(subject, message, 'no-reply@mozilla.org',
                   [self.user.email])
 
     @classmethod

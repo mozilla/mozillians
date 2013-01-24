@@ -20,7 +20,7 @@ UPLOAD_URL = '/media/uploads'
 UPLOAD_ROOT = path('media/uploads')
 
 #: This is the base URL for the current instance of the site.
-SITE_URL = 'http://mozillians.org'
+SITE_URL = 'http://community.mozilla.org'
 
 try:
     from settings.initial_local import *

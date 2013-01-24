@@ -60,7 +60,7 @@ class Invite(models.Model):
         # escaped by the template and this makes the message look bad.
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
-        send_mail(subject, filtered_message, 'no-reply@mozillians.org',
+        send_mail(subject, filtered_message, 'no-reply@mozilla.org',
                   [self.recipient])
 
     class Meta:
