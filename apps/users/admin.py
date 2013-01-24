@@ -127,6 +127,12 @@ class UserAdmin(UserAdmin):
         messages.success(request, 'Profile indexing started.')
         return HttpResponseRedirect(reverse('admin:auth_user_changelist'))
 
+    def get_actions(self, request):
+        """Return bulk actions for UserAdmin without bulk delete."""
+        actions = super(UserAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
     def get_urls(self):
         """Return custom and UserAdmin urls."""
 
