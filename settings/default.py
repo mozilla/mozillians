@@ -138,6 +138,7 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'common.middleware.PermissionDeniedMiddleware',
     'common.middleware.RemoveSlashMiddleware',
     'common.middleware.UsernameRedirectionMiddleware',
+    'common.middleware.GroupRedirectionMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',

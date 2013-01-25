@@ -4,7 +4,6 @@ from funfactory.urlresolvers import reverse
 from common.tests import ESTestCase
 
 from mock import patch
-from nose.tools import eq_
 
 
 class BasketTests(ESTestCase):
@@ -24,7 +23,7 @@ class BasketTests(ESTestCase):
 
     @patch('users.tasks.request')
     def test_basket_call_on_edit(self, mock_obj):
-        data = {'full_name': 'Foobar', 'country':'gr'}
+        data = {'full_name': 'Foobar', 'country': 'gr'}
         userprofile = self.mozillian.userprofile
         userprofile.basket_token = 'exampleid'
         userprofile.save()
@@ -32,7 +31,7 @@ class BasketTests(ESTestCase):
         self.mozillian_client.post(reverse('profile.edit'), data)
         mock_obj.assert_called_with('post', 'custom_update_phonebook',
                                     token=userprofile.basket_token,
-                                    data={'country':'gr'})
+                                    data={'country': 'gr'})
 
     @patch('users.tasks.basket.unsubscribe')
     def test_remove_from_basket_on_delete(self, mock_obj):

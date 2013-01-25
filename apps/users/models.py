@@ -38,7 +38,6 @@ AVATAR_SIZE = (300, 300)
 class UserProfile(models.Model, SearchMixin):
     # This field is required.
     user = models.OneToOneField(User)
-
     full_name = models.CharField(max_length=255, default='', blank=False,
                                  verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(default=False)
