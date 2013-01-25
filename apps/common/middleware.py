@@ -11,7 +11,7 @@ from django.utils.encoding import iri_to_uri
 import commonware.log
 from funfactory.manage import ROOT
 
-from apps.groups.models import Group
+from apps.groups.models import Group, GroupAlias
 
 # TODO: this is hackish. Once we update mozillians to the newest playdoh layout
 error_page = __import__('%s.urls' % os.path.basename(ROOT)).urls.error_page
@@ -89,7 +89,7 @@ class UsernameRedirectionMiddleware(object):
         return response
 
 
-class GroupRedirectionMiddleware(object):
+class OldGroupRedirectionMiddleware(object):
     """
     Redirect requests for groups from /group/<id>-<url> to
     /group/<url> to avoid breaking group urls with the new url
@@ -98,14 +98,32 @@ class GroupRedirectionMiddleware(object):
     """
 
     def process_response(self, request, response):
-        de_group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[^/]+)$',
-                                request.path_info)
+        group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[^/]+)$',
+                             request.path_info)
         if (response.status_code == 404
-            and de_group_url
-            and (Group.objects
-                 .filter(url=de_group_url.group('url')).exists())):
+            and group_url
+            and (Group.objects.filter(url=group_url.group('url')).exists())):
 
-            newurl = reverse('group', args=[de_group_url.group('url')])
+            newurl = reverse('group', args=[group_url.group('url')])
+            if request.GET:
+                with safe_query_string(request):
+                    newurl += '?' + request.META['QUERY_STRING']
+            return HttpResponseRedirect(newurl)
+        return response
+
+
+class GroupAliasRedirectionMiddleware(object):
+    """Redirect `group` requests to the alias `group` if it exists."""
+
+    def process_response(self, request, response):
+        group_url = re.match('^/group/(?P<url>[^/]+)$', request.path_info)
+        if (response.status_code == 404
+            and group_url
+            and (GroupAlias.objects.filter(url=group_url.group('url'))
+                 .exists())):
+
+            group_alias = GroupAlias.objects.get(url=group_url.group('url'))
+            newurl = reverse('group', args=[group_alias.alias.url])
             if request.GET:
                 with safe_query_string(request):
                     newurl += '?' + request.META['QUERY_STRING']

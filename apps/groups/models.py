@@ -80,6 +80,9 @@ class Group(GroupBase):
 class GroupAlias(GroupAliasBase):
     alias = models.ForeignKey(Group, related_name='aliases')
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         verbose_name_plural = 'group aliases'
 

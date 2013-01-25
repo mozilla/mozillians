@@ -8,7 +8,7 @@ from models import (Group, GroupAlias,
 
 
 def merge_groups_action():
-
+    """Merge groups admin action."""
     def merge_groups(modeladmin, request, queryset):
         master_group = queryset[0]
         groups = queryset[1:]
@@ -54,6 +54,7 @@ class GroupAdmin(GroupBaseAdmin):
 
 
 class GroupAliasBaseAdmin(admin.ModelAdmin):
+    """GroupAliasBase Admin."""
     list_display = ['name', 'url', 'alias']
     raw_id_fields = ['alias']
 

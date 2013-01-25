@@ -19,7 +19,9 @@ from product_details import product_details
 from sorl.thumbnail import ImageField
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from apps.groups.models import Group, Skill, Language
+from apps.groups.models import (Group, GroupAlias,
+                                Skill, SkillAlias,
+                                Language, LanguageAlias)
 from apps.phonebook.helpers import gravatar
 
 from tasks import update_basket_task
@@ -118,20 +120,26 @@ class UserProfile(models.Model, SearchMixin):
         """Alters membership to Groups, Skills and Languages."""
         if model is Group:
             m2mfield = self.groups
+            alias_model = GroupAlias
         elif model is Skill:
             m2mfield = self.skills
+            alias_model = SkillAlias
         elif model is Language:
             m2mfield = self.languages
+            alias_model = LanguageAlias
 
         # Remove any non-system groups that weren't supplied in this list.
         m2mfield.remove(*[g for g in m2mfield.all()
-                                if g.name not in membership_list
-                                and not getattr(g, 'system', False)])
+                          if g.name not in membership_list
+                          and not getattr(g, 'system', False)])
 
         # Add/create the rest of the groups
         groups_to_add = []
         for g in membership_list:
-            (group, created) = model.objects.get_or_create(name=g)
+            if alias_model.objects.filter(name=g).exists():
+                group = alias_model.objects.get(name=g).alias
+            else:
+                group = model.objects.create(name=g)
 
             if not getattr(g, 'system', False):
                 groups_to_add.append(group)
