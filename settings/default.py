@@ -264,3 +264,5 @@ STATSD_CLIENT = 'django_statsd.clients.normal'
 # Basket
 BASKET_URL = 'http://basket.mozilla.com'
 BASKET_NEWSLETTER = 'mozilla-phone'
+
+USER_AVATAR_DIR = 'userprofile'
