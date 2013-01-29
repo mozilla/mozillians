@@ -1,3 +1,4 @@
+import os
 import uuid
 from datetime import datetime
 
@@ -35,6 +36,12 @@ USERNAME_MAX_LENGTH = 30
 AVATAR_SIZE = (300, 300)
 
 
+def _calculate_photo_filename(instance, filename):
+    """Generate a unique filename for uploaded photo."""
+    filename = '%s.%s' % (uuid.uuid4(), filename.rsplit('.', 1)[1])
+    return os.path.join(settings.USER_AVATAR_DIR, filename)
+
+
 class UserProfile(models.Model, SearchMixin):
     # This field is required.
     user = models.OneToOneField(User)
@@ -52,7 +59,7 @@ class UserProfile(models.Model, SearchMixin):
     languages = models.ManyToManyField(Language, blank=True)
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True, storage=fs,
-                       upload_to='userprofile')
+                       upload_to=_calculate_photo_filename)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
