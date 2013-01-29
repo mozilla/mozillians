@@ -6,6 +6,8 @@ from django.conf import settings
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 
+from apps.groups.models import Group
+
 BASKET_TASK_RETRY_DELAY = 120 # 2 minutes
 BASKET_TASK_MAX_RETRIES = 2 # Total 1+2 = 3 tries
 BASKET_URL = getattr(settings, 'BASKET_URL', False)
@@ -56,9 +58,12 @@ def update_basket_task(instance_id):
         return
 
     data = {}
-    for group in instance.groups.exclude(steward=None):
+    for group in Group.objects.exclude(steward=None):
         name = group.name.upper().replace(' ', '_')
-        data[name] = 'Y'
+        data[name] = 'N'
+        if instance.groups.filter(pk=group.id).exists():
+            data[name] = 'Y'
+
     if instance.country:
         data['country'] = instance.country
     if instance.city:
@@ -72,9 +77,8 @@ def update_basket_task(instance_id):
             instance.basket_token = result['token']
             instance.save()
 
-        if data:
-            request('post', 'custom_update_phonebook',
-                    token=instance.basket_token, data=data)
+        request('post', 'custom_update_phonebook',
+                token=instance.basket_token, data=data)
     except (requests.exceptions.RequestException,
             basket.BasketException), exception:
         try:

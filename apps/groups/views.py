@@ -15,6 +15,7 @@ from apps.groups.models import Group, Skill
 from apps.phonebook import forms
 from apps.phonebook.views import vouch_required
 from apps.users.models import UserProfile
+from apps.users.tasks import update_basket_task
 
 log = commonware.log.getLogger('m.groups')
 
@@ -122,5 +123,6 @@ def toggle(request, id, url):
             profile.groups.remove(group)
         else:
             profile.groups.add(group)
+        update_basket_task.delay(profile.id)
 
     return redirect(reverse('group', args=[group.id, group.url]))
