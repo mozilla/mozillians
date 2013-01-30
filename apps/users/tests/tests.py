@@ -480,7 +480,6 @@ class SearchTests(ESTestCase):
                      'city': 'Mountain View',
                      'ircname': 'hax0r',
                      'bio': 'I love ice cream. I code. I tweet.',
-                     'website': 'http://www.example.com',
                      'full_name': 'Nikos Koukos'}
         self.auto_user = user()
         self.up = self.auto_user.userprofile
@@ -497,9 +496,6 @@ class SearchTests(ESTestCase):
 
         results = UserProfile.search(self.up.full_name)
         self.assertEqual(len(results), 1)
-
-        results = UserProfile.search('mountain')
-        self.assertEqual(len(results), 0)
 
         results = UserProfile.search(self.up.full_name[:2])
         self.assertEqual(len(results), 1)
