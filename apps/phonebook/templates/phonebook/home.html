@@ -62,7 +62,7 @@
         {% for group in curated_groups %}
           <li class="tagit-choice ui-widget-content ui-state-default
                      ui-corner-all p-category category">
-            <a href="{{ url('group', group.id, group.url) }}">
+            <a href="{{ url('group', group.url) }}">
               {{ group.name }}
             </a>
           </li>

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import json
 
 from django.contrib.auth.models import User
@@ -10,7 +12,8 @@ import common.tests
 
 from ..cron import assign_autocomplete_to_groups
 from ..helpers import stringify_groups
-from ..models import AUTO_COMPLETE_COUNT, Group
+from ..models import AUTO_COMPLETE_COUNT, Group, GroupAlias
+from ..utils import merge_groups
 
 
 class GroupTest(common.tests.ESTestCase):
@@ -196,8 +199,8 @@ class GroupTest(common.tests.ESTestCase):
         profile = self.mozillian.get_profile()
 
         self.client.login(email=self.mozillian.email)
-        response = self.client.get(reverse('group', args=[
-                self.NORMAL_GROUP.id, self.NORMAL_GROUP.url]))
+        response = self.client.get(reverse('group',
+                                           args=[self.NORMAL_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
@@ -225,8 +228,8 @@ class GroupTest(common.tests.ESTestCase):
 
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
-        response = self.client.get(reverse('group', args=[self.SYSTEM_GROUP.id,
-                                                     self.SYSTEM_GROUP.url]))
+        response = self.client.get(reverse('group',
+                                           args=[self.SYSTEM_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
@@ -236,8 +239,30 @@ class GroupTest(common.tests.ESTestCase):
                 '"Join Group" button should not be present in the response.')
 
         # Attempt to manually toggle the group membership
-        r = self.client.post(reverse('group_toggle', args=[
-                self.SYSTEM_GROUP.id, self.SYSTEM_GROUP.url]), follow=True)
+        r = self.client.post(reverse('group_toggle',
+                                     args=[self.SYSTEM_GROUP.url]),
+                            follow=True)
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
                 'User should not be in the "%s" group' %
                 self.SYSTEM_GROUP.name)
+
+    def test_group_merging(self):
+        """Test group merging."""
+        master_group = self.NORMAL_GROUP
+        groups = Group.objects.filter(system=True)
+
+        merge_groups(master_group, groups)
+        eq_(Group.objects.count(), 1)
+        eq_(Group.objects.all()[0], master_group)
+        eq_(GroupAlias.objects.count(), 3)
+        map(lambda x: eq_(x, master_group.id),
+            GroupAlias.objects.values_list('alias', flat=True))
+
+
+    def test_unique_url(self):
+        """Test unique group url.
+
+        Name 'cheesezilla' generates the same url as 'cheeseζιλλα'.
+        """
+        new_group = Group.objects.create(name=u'cheeseζiλλα')
+        self.assertNotEqual(new_group.url, self.NORMAL_GROUP.url)
