@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.template.defaultfilters import slugify
 
+from autoslug.fields import AutoSlugField
 from tower import ugettext_lazy as _lazy
 
 # If three or more users use a group, it will get auto-completed.
@@ -14,6 +15,8 @@ class GroupBase(models.Model):
     Think of tags on a user profile.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
+    url = AutoSlugField(populate_from='name', unique=True,
+                        editable=False, blank=True)
 
     # If this is true, this Group/Skill/Language will appear in the
     # autocomplete list.
@@ -35,11 +38,22 @@ class GroupBase(models.Model):
         yet.
 
         """
-        return getattr(self, 'name', u'Unnamed')
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(GroupBase, self).save(*args, **kwargs)
+
+
+class GroupAliasBase(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    url = models.SlugField()
+
+    class Meta:
+        abstract = True
 
 
 class Group(GroupBase):
-    url = models.SlugField()
     system = models.BooleanField(db_index=True, default=False)
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=255,
@@ -63,33 +77,58 @@ class Group(GroupBase):
         db_table = 'group'
 
 
+class GroupAlias(GroupAliasBase):
+    alias = models.ForeignKey(Group, related_name='aliases')
+
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'group aliases'
+
+
 class Skill(GroupBase):
     """Model to hold skill tags.
 
-    Like groups but without system prefs or pages/urls.
+    Like groups but with less attributes.
 
     """
     pass
+
+
+class SkillAlias(GroupAliasBase):
+    alias = models.ForeignKey(Skill, related_name='aliases')
+
+    class Meta:
+        verbose_name_plural = 'skill aliases'
 
 
 class Language(GroupBase):
     """Model to hold languages spoken tags.
 
-    Like groups but without system prefs or pages/urls.
+    Like groups but with less attributes.
     """
     pass
 
 
-@receiver(models.signals.pre_save, sender=Group)
-def _create_url_slug(sender, instance, raw, using, **kwargs):
-    """Create a Group's URL slug when it's first saved."""
-    if not instance.pk and not raw:
-        instance.url = slugify(instance.name.lower())
+class LanguageAlias(GroupAliasBase):
+    alias = models.ForeignKey(Language, related_name='aliases')
+
+    class Meta:
+        verbose_name_plural = 'language aliases'
 
 
-@receiver(models.signals.pre_save, sender=Language)
-@receiver(models.signals.pre_save, sender=Skill)
-@receiver(models.signals.pre_save, sender=Group)
-def _lowercase_name(sender, instance, raw, using, **kwargs):
-    """Convert any group's name to lowercase before it's saved."""
-    instance.name = instance.name.lower()
+@receiver(post_save, sender=Language, dispatch_uid='create_alias_lang_sig')
+@receiver(post_save, sender=Skill, dispatch_uid='create_alias_skill_sig')
+@receiver(post_save, sender=Group, dispatch_uid='create_alias_group_sig')
+def create_alias(sender, instance, created, **kwargs):
+    if isinstance(instance, Language):
+        model = LanguageAlias
+    elif isinstance(instance, Skill):
+        model = SkillAlias
+    elif isinstance(instance, Group):
+        model = GroupAlias
+
+    if created:
+        model.objects.get_or_create(name=instance.name, url=instance.url,
+                                    alias=instance)

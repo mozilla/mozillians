@@ -57,11 +57,11 @@ def search(request, searched_object=Group):
 
 @vouch_required
 @never_cache
-def show(request, id, url=None):
+def show(request, url):
     """ List all users with this group."""
-    group = get_object_or_404(Group, id=id)
+    group = get_object_or_404(Group, url=url)
     if not url:
-        redirect(reverse('group', args=[group.id, group.url]))
+        redirect(reverse('group', args=[group.url]))
     form = forms.SearchForm(request.GET)
     limit = forms.PAGINATION_LIMIT
     if form.is_valid():
@@ -112,7 +112,7 @@ def show(request, id, url=None):
 
 @require_POST
 @vouch_required
-def toggle(request, id, url):
+def toggle(request, url):
     """Toggle the current user's membership of a group."""
     group = get_object_or_404(Group, url=url)
     profile = request.user.get_profile()
@@ -125,4 +125,4 @@ def toggle(request, id, url):
             profile.groups.add(group)
         update_basket_task.delay(profile.id)
 
-    return redirect(reverse('group', args=[group.id, group.url]))
+    return redirect(reverse('group', args=[group.url]))
