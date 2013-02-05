@@ -40,8 +40,7 @@ AVATAR_SIZE = (300, 300)
 
 def _calculate_photo_filename(instance, filename):
     """Generate a unique filename for uploaded photo."""
-    filename = '%s.%s' % (uuid.uuid4(), filename.rsplit('.', 1)[1])
-    return os.path.join(settings.USER_AVATAR_DIR, filename)
+    return os.path.join(settings.USER_AVATAR_DIR, str(uuid.uuid4()) + '.jpg')
 
 
 class UserProfile(models.Model, SearchMixin):
