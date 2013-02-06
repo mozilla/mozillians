@@ -1,21 +1,22 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
-class Migration(SchemaMigration):
-    no_dry_run = True
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        model = 'groups.Group'
-        aliasmodel = 'groups.GroupAlias'
-        for group in orm[model].objects.all():
-            obj = orm[aliasmodel](name=group.name, url=group.url, alias=group)
-            obj.save()
+        """Loop through Languages and Skills, generating slugs and aliases."""
+        for model, aliasmodel in [('groups.Language', 'groups.LanguageAlias'),
+                                  ('groups.Skill', 'groups.SkillAlias')]:
+            for item in orm[model].objects.all():
+                item.save()
+                alias = orm[aliasmodel](name=item.name, url=item.url, alias=item)
+                alias.save()
 
     def backwards(self, orm):
-        pass
+        "Write your backwards methods here."
 
 
     models = {
@@ -34,7 +35,7 @@ class Migration(SchemaMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 22, 6, 8, 35, 809667)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 2, 6, 0, 23, 40, 439070)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -42,7 +43,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 22, 6, 8, 35, 809327)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 2, 6, 0, 23, 40, 438940)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -65,13 +66,13 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
             'steward': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']", 'null': 'True', 'blank': 'True'}),
             'system': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
-            'url': ('django.db.models.fields.SlugField', [], {'default': "''", 'max_length': '50', 'db_index': 'True'}),
+            'url': ('autoslug.fields.AutoSlugField', [], {'unique_with': '()', 'max_length': '50', 'blank': 'True', 'unique': 'True', 'populate_from': "'name'", 'db_index': 'True'}),
             'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'}),
             'wiki': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
         },
         'groups.groupalias': {
             'Meta': {'object_name': 'GroupAlias'},
-            'alias': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['groups.Group']"}),
+            'alias': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'aliases'", 'to': "orm['groups.Group']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
@@ -82,11 +83,11 @@ class Migration(SchemaMigration):
             'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'url': ('django.db.models.fields.SlugField', [], {'default': "''", 'max_length': '50', 'db_index': 'True'})
+            'url': ('autoslug.fields.AutoSlugField', [], {'unique_with': '()', 'max_length': '50', 'blank': 'True', 'unique': 'True', 'populate_from': "'name'", 'db_index': 'True'})
         },
         'groups.languagealias': {
             'Meta': {'object_name': 'LanguageAlias'},
-            'alias': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['groups.Language']"}),
+            'alias': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'aliases'", 'to': "orm['groups.Language']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
@@ -97,11 +98,11 @@ class Migration(SchemaMigration):
             'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'url': ('django.db.models.fields.SlugField', [], {'default': "''", 'max_length': '50', 'db_index': 'True'})
+            'url': ('autoslug.fields.AutoSlugField', [], {'unique_with': '()', 'max_length': '50', 'blank': 'True', 'unique': 'True', 'populate_from': "'name'", 'db_index': 'True'})
         },
         'groups.skillalias': {
             'Meta': {'object_name': 'SkillAlias'},
-            'alias': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['groups.Skill']"}),
+            'alias': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'aliases'", 'to': "orm['groups.Skill']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
