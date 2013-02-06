@@ -88,6 +88,7 @@ class UserProfile(models.Model, SearchMixin):
 
     class Meta:
         db_table = 'profile'
+        ordering = ['full_name']
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -292,6 +293,8 @@ class UserProfile(models.Model, SearchMixin):
                  .query(or_=q))
         else:
             s = S(cls)
+
+        s = s.order_by('_score', 'name')
 
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
