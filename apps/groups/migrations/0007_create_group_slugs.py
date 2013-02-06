@@ -8,13 +8,11 @@ class Migration(SchemaMigration):
     no_dry_run = True
 
     def forwards(self, orm):
-        for model, aliasmodel in [('groups.Group', 'groups.GroupAlias'),
-                                  ('groups.Skill', 'groups.SkillAlias'),
-                                  ('groups.Language', 'groups.LanguageAlias')]:
-            for group in orm[model].objects.all():
-                obj = orm[aliasmodel](name=group.name, url=group.url,
-                                      alias=group)
-                obj.save()
+        model = 'groups.Group'
+        aliasmodel = 'groups.GroupAlias'
+        for group in orm[model].objects.all():
+            obj = orm[aliasmodel](name=group.name, url=group.url, alias=group)
+            obj.save()
 
     def backwards(self, orm):
         pass

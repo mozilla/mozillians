@@ -12,22 +12,21 @@ _logger = logging.getLogger('south')
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        for model, ordering in [('groups.Group', ('steward', 'id')),
-                                ('groups.Skill', ('id',)),
-                                ('groups.Language', ('id',))]:
-            double_urls = (orm[model].objects.values_list('url', flat=True)
-                            .annotate(total=models.Count('url'))
-                            .filter(total__gt=1))
-            for url in double_urls:
-                groups = orm[model].objects.filter(url=url).order_by(*ordering)
-                master_group = groups[0]
-                similar_groups = groups[1:]
-                _logger.info('Merging [%d %s] with %s' %
-                             (master_group.id, master_group.name,
-                              ', '.join(map(lambda x: ('[%d %s]'
-                                                       % (x.id, x.name)),
-                                            similar_groups))))
-                merge_groups(master_group, similar_groups)
+        model = 'groups.Group'
+        ordering = ('steward', 'id')
+        double_urls = (orm[model].objects.values_list('url', flat=True)
+                        .annotate(total=models.Count('url'))
+                        .filter(total__gt=1))
+        for url in double_urls:
+            groups = orm[model].objects.filter(url=url).order_by(*ordering)
+            master_group = groups[0]
+            similar_groups = groups[1:]
+            _logger.info('Merging [%d %s] with %s' %
+                         (master_group.id, master_group.name,
+                          ', '.join(map(lambda x: ('[%d %s]'
+                                                   % (x.id, x.name)),
+                                        similar_groups))))
+            merge_groups(master_group, similar_groups)
 
     def backwards(self, orm):
         pass
