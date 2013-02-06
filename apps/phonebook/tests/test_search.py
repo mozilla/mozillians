@@ -138,7 +138,7 @@ class TestSearch(ESTestCase):
         self.assertEqual(len(peeps), 2)
 
         r = self.mozillian_client.get(url, {'q': 'Amand', 'page': 'test',
-                                                'limit': '-3'})
+                                            'limit': '-3'})
         peeps = r.context['people']
         self.assertEqual(len(peeps), 2)
 

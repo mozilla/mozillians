@@ -41,12 +41,8 @@ class UserResource(ClientCachedResource, ModelResource):
         es_filters = []
         for item in set(['email', 'country', 'region', 'city', 'ircname',
                          'username', 'languages', 'skills', 'groups',
-                         'is_vouched']) & set(filters):
+                         'is_vouched', 'name']) & set(filters):
             es_filters.append(F(**{item: unquote(filters[item]).lower()}))
-
-        if 'name' in filters:
-            query = unquote(filters['name']).lower()
-            es_filters.append(F(name=query)|F(fullname=query))
 
         return es_filters
 

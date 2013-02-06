@@ -214,15 +214,12 @@ class APITests(ESTestCase):
                                                    'resource_name': 'users'})
 
         # Search name using
-        for name in [self.auto_user.userprofile.full_name,
-                     self.auto_user.userprofile.full_name.split(' ')[0],
-                     self.auto_user.userprofile.full_name.split(' ')[1]]:
-            new_url = urlparams(url, app_name=self.app.name,
-                                app_key=self.app.key, name=name)
-            response = self.client.get(new_url, follow=True)
-            self.assertEqual(response.status_code, 200)
-            data = json.loads(response.content)
-            self.assertEqual(data['meta']['total_count'], 1)
+        new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,
+                            name=self.auto_user.userprofile.full_name)
+        response = self.client.get(new_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data['meta']['total_count'], 1)
 
         # Search nonexistent term
         new_url = urlparams(url, app_name=self.app.name, app_key=self.app.key,

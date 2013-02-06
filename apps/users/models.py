@@ -87,6 +87,7 @@ class UserProfile(models.Model, SearchMixin):
 
     class Meta:
         db_table = 'profile'
+        ordering = ['full_name']
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -220,7 +221,7 @@ class UserProfile(models.Model, SearchMixin):
             d.update({a: data})
 
         if obj.country:
-            d.update({'country': COUNTRIES[obj.country].lower()})
+            d.update({'country': [obj.country, COUNTRIES[obj.country].lower()]})
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')
@@ -230,15 +231,16 @@ class UserProfile(models.Model, SearchMixin):
                 data = data.lower()
             d.update({a: data})
 
-        d.update(dict(name=obj.full_name.lower()))
         d.update(dict(fullname=obj.full_name.lower()))
+        d.update(dict(name=obj.full_name.lower()))
         d.update(dict(bio=obj.bio))
         d.update(dict(has_photo=bool(obj.photo)))
-        # Index groups, skills, and languages ... for fun.
-        d.update(dict(groups=list(obj.groups.values_list('name', flat=True))))
-        d.update(dict(skills=list(obj.skills.values_list('name', flat=True))))
-        d.update(dict(languages=list(obj.languages.values_list('name',
-                                                               flat=True))))
+
+        for attribute in ['groups', 'skills', 'languages']:
+            groups = []
+            for g in getattr(obj, attribute).all():
+                groups.extend(g.aliases.values_list('name', flat=True))
+            d[attribute] = groups
         return d
 
     @classmethod
@@ -247,33 +249,23 @@ class UserProfile(models.Model, SearchMixin):
         return {
             'properties': {
                 'id': {'type': 'integer'},
-                # The name is a name---so we shouldn't analyze it
-                # (de-stem, tokenize, parse, etc).
-                'name': {'type': 'string', 'analyzer': 'whitespace'},
-                'fullname': {'type': 'string', 'index': 'not_analyzed'},
+                'name': {'type': 'string', 'index': 'not_analyzed'},
+                'fullname': {'type': 'string', 'analyzer': 'standard'},
                 'email': {'type': 'string', 'index': 'not_analyzed'},
                 'ircname': {'type': 'string', 'index': 'not_analyzed'},
                 'username': {'type': 'string', 'index': 'not_analyzed'},
-                'country': {'type': 'string', 'index': 'not_analyzed'},
-                'region': {'type': 'string', 'index': 'not_analyzed'},
-                'city': {'type': 'string', 'index': 'not_analyzed'},
-                'skills': {'type': 'string', 'index': 'not_analyzed'},
-                'groups': {'type': 'string', 'index': 'not_analyzed'},
+                'country': {'type': 'string', 'analyzer': 'whitespace'},
+                'region': {'type': 'string', 'analyzer': 'whitespace'},
+                'city': {'type': 'string', 'analyzer': 'whitespace'},
+                'skills': {'type': 'string', 'analyzer': 'whitespace'},
+                'groups': {'type': 'string', 'analyzer': 'whitespace'},
                 'languages': {'type': 'string', 'index': 'not_analyzed'},
-
-                # The bio has free-form text in it, so analyze it with
-                # snowball.
                 'bio': {'type': 'string', 'analyzer': 'snowball'},
-
                 'is_vouched': {'type': 'boolean'},
                 'allows_mozilla_sites': {'type': 'boolean'},
                 'allows_community_sites': {'type': 'boolean'},
                 'photo': {'type': 'boolean'},
-
-                # The website also shouldn't be analyzed.
                 'website': {'type': 'string', 'index': 'not_analyzed'},
-
-                # The last_updated field is a date.
                 'last_updated': {'type': 'date'},
                 'date_joined': {'type': 'date'}}}
 
@@ -281,15 +273,27 @@ class UserProfile(models.Model, SearchMixin):
     def search(cls, query, vouched=None, photo=None):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
-        fields = ('username', 'bio__text', 'website', 'email', 'groups',
-                  'skills', 'languages', 'name__prefix', 'ircname',
-                  'country', 'region', 'city', 'fullname__prefix')
+        fields = ('username', 'bio__text', 'email', 'ircname',
+                  'country__text', 'country__text_phrase',
+                  'region__text', 'region__text_phrase',
+                  'city__text', 'city__text_phrase',
+                  'fullname__text', 'fullname__text_phrase',
+                  'fullname__prefix', 'fullname__fuzzy'
+                  'groups__text')
 
         if query:
             q = dict((field, query) for field in fields)
-            s = S(cls).query(or_=q)
+            s = (S(cls)
+                 .boost(fullname__text_phrase=5, username=5, email=5, ircname=5,
+                        fullname__text=4, country__text_phrase=4,
+                        region__text_phrase=4, city__text_phrase=4,
+                        fullname__prefix=3, fullname__fuzzy=2,
+                        bio__text=2)
+                 .query(or_=q))
         else:
             s = S(cls)
+
+        s = s.order_by('_score', 'name')
 
         if vouched is not None:
             s = s.filter(is_vouched=vouched)
