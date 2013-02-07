@@ -22,7 +22,7 @@
                 return cease;
             },
             callback: function(i) {
-                cease = (pages < i);
+                cease = (pages <= i);
                 if (cease) {
                     // Show the user that we have stopped scrolling on purpose.
                     results.show()
