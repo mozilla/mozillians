@@ -65,6 +65,11 @@ body {
     text-shadow:0 1px 0 rgba(255,255,255,0.75);
 }
 
+#bio {
+    width:100%;
+    word-wrap:break-word;
+}
+
 .huge {
     font-size:108px;
     letter-spacing:-4px;
