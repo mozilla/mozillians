@@ -21,6 +21,7 @@ Contents:
    installation
    testing
    invites
+   contribute
 
 Indices and tables
 ------------------
