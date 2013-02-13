@@ -241,6 +241,7 @@ CSP_IMG_SRC = ("'self'", 'http://www.google-analytics.com',
                'https://secure.gravatar.com',)
 CSP_SCRIPT_SRC = ("'self'", 'http://www.google-analytics.com',
                   'https://ssl.google-analytics.com',
+                  'https://www.google-analytics.com',
                   'https://browserid.org',
                   'https://login.persona.org',)
 CSP_FRAME_SRC = ("'self'", 'https://browserid.org',
