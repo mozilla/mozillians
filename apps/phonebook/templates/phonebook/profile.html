@@ -109,12 +109,18 @@
           <dd>
             {% if profile.region %}
               {% if profile.city %}
-                {{ profile.city }},
+                <a href="{{ url('list_city', country=profile.country, city=profile.city )}}"}>
+                  {{ profile.city }}
+                </a>,
               {% endif %}
-              {{ profile.region }}
+              <a href="{{ url('list_region', country=profile.country, region=profile.region )}}"}>
+                {{ profile.region }}
+              </a>
               <br>
             {% endif %}
-            {{ profile.get_country_display() }}
+            <a href="{{ url('list_country', country=profile.country)}}"}>
+              {{ profile.get_country_display() }}
+            </a>
           </dd>
         {% endif %}
 

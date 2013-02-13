@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import patterns, url
 from django.contrib.auth import views as auth_views
-from django.views.generic.simple import redirect_to
 
 from jinjautils import jinja_for_django
 
@@ -14,6 +13,4 @@ urlpatterns = patterns('',
     url(r'^logout$', views.logout, name='logout'),
     url('^browserid/verify/', views.BrowserID.as_view(),
                               name='browserid_verify'),
-
-    url(r'^register$', views.register, name='register')
-)
+    url(r'^register$', views.register, name='register'))

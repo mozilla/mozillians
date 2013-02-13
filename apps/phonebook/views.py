@@ -16,7 +16,7 @@ from tower import ugettext as _
 
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
-from apps.users.models import UserProfile
+from apps.users.models import COUNTRIES, UserProfile
 from apps.users.tasks import remove_from_basket_task
 
 import forms
@@ -245,3 +245,20 @@ def vouch(request):
         return redirect(reverse('profile', args=[p.user.username]))
 
     return HttpResponseForbidden
+
+
+@vouch_required
+def list_country(request, country, region=None, city=None):
+    country = country.lower()
+    country_name = COUNTRIES.get(country, None)
+    queryset = UserProfile.objects.filter(country=country)
+    if city:
+        queryset = queryset.filter(city__iexact=city)
+    if region:
+        queryset = queryset.filter(region__iexact=region)
+
+    data = {'people': queryset,
+            'country_name': country_name,
+            'city_name': city,
+            'region_name': region}
+    return render(request, 'phonebook/countries.html', data)
