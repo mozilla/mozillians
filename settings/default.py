@@ -268,3 +268,6 @@ BASKET_URL = 'http://basket.mozilla.com'
 BASKET_NEWSLETTER = 'mozilla-phone'
 
 USER_AVATAR_DIR = 'userprofile'
+
+# Google Analytics
+GA_ACCOUNT_CODE = 'UA-35433268-19'
