@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Mozillians'
-copyright = u'2012, Matthew Riley MacPherson, Giorgos Logiotatidis'
+copyright = u'2013, Matthew Riley MacPherson, Giorgos Logiotatidis, Justin Crawford'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
