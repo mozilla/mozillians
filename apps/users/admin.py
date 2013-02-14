@@ -130,7 +130,7 @@ class UserAdmin(UserAdmin):
     def get_actions(self, request):
         """Return bulk actions for UserAdmin without bulk delete."""
         actions = super(UserAdmin, self).get_actions(request)
-        del actions['delete_selected']
+        actions.pop('delete_selected', None)
         return actions
 
     def get_urls(self):
