@@ -10,13 +10,16 @@ VirtualEnv Installation
    help.
 
 
-You 'll need python, virtualenv and pip.
+**Prerequisites:** You 'll need python, virtualenv and pip.
 
-#. Get a copy of mozillians::
+When you want to start contributing... 
 
-     $ git clone --recursive git://github.com/mozilla/mozillians.git mozillians
-     $ cd mozillians
+#.  `Fork the main Mozillians repository`_ (https://github.com/mozilla/mozillians) on GitHub. 
 
+#.  Clone your fork to your local machine::
+
+    $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
+    $ cd mozillians
 
 #. Create your python virtual environment::
 
@@ -73,20 +76,18 @@ You 'll need python, virtualenv and pip.
 
      #. Run server::
 
-	  ./manage.py runserver 127.0.0.1:8000
+        ./manage.py runserver 127.0.0.1:8000
 
      #. Load http://127.0.0.1:8000 and sign in with BrowserID, then create your profile.
-     #. Run::
+     #. Automatically vouch your account and convert it to superuser::
 
-	  ./scripts/su.sh
+        ./scripts/su.sh
 
-	to vouch your account and convert it to superuser.
 
 #. Develop!
 
-   Now you can start contributing to Mozillians. Check out the
-   `Mozillians Git-Fu <https://gist.github.com/2422571>`_. When you are
-   done this your coding session, do not forget to kill the `elastic
+   Now you can start :doc:`contributing to Mozillians </contribute>`. When you are
+   done with your coding session, do not forget to kill the `elastic
    search` process::
 
      (venv)$ kill `cat venv/es.pid`
@@ -105,3 +106,5 @@ You 'll need python, virtualenv and pip.
      $ source venv/bin/activate
 
    Have fun!
+
+.. _Fork the main Mozillians repository: https://github.com/mozilla/mozillians/fork_select
