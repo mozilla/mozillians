@@ -51,6 +51,22 @@ def unsubscribe_from_basket_action():
     return unsubscribe_from_basket
 
 
+class SuperUserFilter(SimpleListFilter):
+    """Admin filter for superusers."""
+    title = 'has access to admin interface'
+    parameter_name = 'superuser'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        value = self.value() == 'True'
+        return queryset.filter(is_staff=value)
+
+
 class DateJoinedFilter(SimpleListFilter):
     """Admin filter for date joined."""
     title = 'date joined'
@@ -104,7 +120,7 @@ class UserAdmin(UserAdmin):
     search_fields = ['userprofile__full_name', 'email', 'username',
                      'userprofile__ircname']
     list_filter = ['userprofile__is_vouched', DateJoinedFilter,
-                   LastLoginFilter]
+                   LastLoginFilter, SuperUserFilter]
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
                     'vouched_by']
