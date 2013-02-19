@@ -64,8 +64,27 @@ class SuperUserFilter(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() is None:
             return queryset
+
         value = self.value() == 'True'
         return queryset.filter(is_staff=value)
+
+
+class CompleteProfileFilter(SimpleListFilter):
+    """Admin filter for complete profiles."""
+    title = 'complete profile'
+    parameter_name = 'complete_profile'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'Incomplete'),
+                ('True', 'Complete'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        elif self.value() == 'True':
+            return queryset.exclude(userprofile__full_name='')
+        else:
+            return queryset.filter(userprofile__full_name='')
 
 
 class DateJoinedFilter(SimpleListFilter):
@@ -121,7 +140,7 @@ class UserAdmin(UserAdmin):
     search_fields = ['userprofile__full_name', 'email', 'username',
                      'userprofile__ircname']
     list_filter = ['userprofile__is_vouched', DateJoinedFilter,
-                   LastLoginFilter, SuperUserFilter]
+                   LastLoginFilter, SuperUserFilter, CompleteProfileFilter]
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
                     'vouched_by']
