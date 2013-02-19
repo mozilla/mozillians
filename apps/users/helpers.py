@@ -35,14 +35,17 @@ def calculate_username(email):
     email = email.split('@')[0]
     username = re.sub(r'[^\w.@+-]', '-', email)
     username = username[:USERNAME_MAX_LENGTH]
+    suggested_username = username
+    count = 0
 
-    while User.objects.filter(username=username).exists():
-        username += '_'
+    while User.objects.filter(username=suggested_username).exists():
+        count += 1
+        suggested_username = '%s%d' % (username, count)
 
-        if username > USERNAME_MAX_LENGTH:
+        if len(suggested_username) > USERNAME_MAX_LENGTH:
             # We failed to calculate a name for you, default to a
             # email digest.
             username = base64.urlsafe_b64encode(
                 hashlib.sha1(email).digest()).rstrip('=')
 
-    return username
+    return suggested_username
