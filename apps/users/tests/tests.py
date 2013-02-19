@@ -11,8 +11,9 @@ from common import browserid_mock
 from common.tests import ESTestCase, user
 from groups.models import Group
 
-from ..helpers import validate_username
+from ..helpers import calculate_username, validate_username
 from ..models import UserProfile, UsernameBlacklist
+
 
 Group.objects.get_or_create(name='staff', system=True)
 COUNTRIES = product_details.get_regions('en-US')
@@ -234,6 +235,11 @@ class RegistrationTest(ESTestCase):
 
         # Make sure we can't use the same username twice
         assert r.context['user_form'].errors, "Form should throw errors."
+
+    def test_calculate_username(self):
+        """Test calculated username."""
+        eq_(calculate_username('nikoskoukos@example.com'), 'nikoskoukos')
+        eq_(calculate_username('pending@example.com'), 'pending1')
 
 
 class TestThingsForPeople(ESTestCase):
