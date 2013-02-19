@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -62,6 +62,9 @@ def profile(request, username):
     user = get_object_or_404(User, username=username)
     vouch_form = None
     profile = user.get_profile()
+
+    if not profile.is_complete:
+        raise Http404()
 
     if not request.user.userprofile.is_vouched and request.user != user:
         log.warning('vouch_required forbidding access')

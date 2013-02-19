@@ -462,16 +462,12 @@ class AutoVouchTests(ESTestCase):
             'Profile should not be vouched.')
 
 
-@override_settings(
-    AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
 class UsernameRedirectionMiddlewareTests(ESTestCase):
     # Assertion doesn't matter since we monkey patched it for testing
     def test_username_redirection_middleware(self):
         """Test the username redirection middleware."""
-
-        auto_user = user(username='lalala')
-        self.client.login(username=auto_user.username, password='testpass')
-        response = self.client.get('/%s' % auto_user.username, follow=True)
+        response = self.mozillian_client.get('/%s' % self.mozillian.username,
+                                             follow=True)
         self.assertTemplateUsed(response, 'phonebook/profile.html')
 
         response = self.client.get('/%s' % 'invaliduser', follow=True)
