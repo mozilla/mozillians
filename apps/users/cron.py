@@ -28,7 +28,8 @@ def index_all_profiles():
 
     es.create_index(index, settings=mappings)
 
-    ids = (UserProfile.objects.values_list('id', flat=True))
+    ids = (UserProfile.objects.exclude(full_name='')
+           .values_list('id', flat=True))
     ts = [tasks.index_objects.subtask(args=[UserProfile, chunk])
           for chunk in chunked(sorted(list(ids)), 150)]
     TaskSet(ts).apply_async()
