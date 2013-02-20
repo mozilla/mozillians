@@ -5,6 +5,7 @@ from common.tests import ESTestCase
 
 from ..models import Group, GroupAlias
 
+
 class GroupRedirectionMiddlewareTests(ESTestCase):
 
     def test_oldgroup_redirection_middleware(self):

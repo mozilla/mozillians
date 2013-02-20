@@ -221,7 +221,8 @@ class UserProfile(models.Model, SearchMixin):
             d.update({a: data})
 
         if obj.country:
-            d.update({'country': [obj.country, COUNTRIES[obj.country].lower()]})
+            d.update({'country': [obj.country,
+                                  COUNTRIES[obj.country].lower()]})
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')
@@ -284,8 +285,8 @@ class UserProfile(models.Model, SearchMixin):
         if query:
             q = dict((field, query) for field in fields)
             s = (S(cls)
-                 .boost(fullname__text_phrase=5, username=5, email=5, ircname=5,
-                        fullname__text=4, country__text_phrase=4,
+                 .boost(fullname__text_phrase=5, username=5, email=5,
+                        ircname=5, fullname__text=4, country__text_phrase=4,
                         region__text_phrase=4, city__text_phrase=4,
                         fullname__prefix=3, fullname__fuzzy=2,
                         bio__text=2)

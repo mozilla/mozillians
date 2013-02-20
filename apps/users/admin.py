@@ -133,6 +133,7 @@ class UserAdmin(UserAdmin):
 
     def is_vouched(self, obj):
         return obj.userprofile.is_vouched
+    is_vouched.boolean = True
 
     def vouched_by(self, obj):
         return obj.userprofile.vouched_by
