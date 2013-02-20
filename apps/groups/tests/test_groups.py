@@ -258,7 +258,6 @@ class GroupTest(common.tests.ESTestCase):
         map(lambda x: eq_(x, master_group.id),
             GroupAlias.objects.values_list('alias', flat=True))
 
-
     def test_unique_url(self):
         """Test unique group url.
 
