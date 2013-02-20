@@ -19,11 +19,11 @@
   {% endtrans %}
 
   {% if user.is_anonymous() %}
-    {% trans log_in_url=url('login'), join_url=url('register') %}
+    {% trans join_url=url('register') %}
       <p>
-        Because you aren't authenticated, you may not have access to private
-        profiles in the phonebook. You should <a href="{{ log_in_url }}">log
-        in</a> in case you're trying to access a private profile. If you don't
+        Because you aren't authenticated, you may not have access to
+        private profiles in the phonebook. You should log in</a> in
+        case you're trying to access a private profile. If you don't
         have an account, <a href="{{ join_url }}">join us</a>.
       </p>
     {% endtrans %}

@@ -15,13 +15,20 @@ urlpatterns = patterns('',
     url('^vouch$', views.vouch, name='vouch'),
     url('^invite$', views.invite, name='invite'),
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
+    url('^country/(?P<country>[\w ]+)$', views.list_country,
+        name='list_country'),
+    url('^country/(?P<country>[A-Za-z]+)/city/(?P<city>[\w\' ]+)$',
+        views.list_country, name='list_city'),
+    url(('^country/(?P<country>[A-Za-z]+)/'
+         'region/(?P<region>[\w\' ]+)/city/(?P<city>[\w\' ]+)$'),
+        views.list_country, name='list_region_city'),
+    url('^country/(?P<country>[A-Za-z]+)/region/(?P<region>[\w\' ]+)$',
+        views.list_country, name='list_region'),
+
 
     # Static pages need csrf for browserID post to work
     url('^about$', direct_to_template, {'template': 'phonebook/about.html'},
         name='about'),
-    url('^confirm-register$', direct_to_template,
-        {'template': 'phonebook/confirm_register.html'},
-        name='confirm_register'),
     url(r'^u/(?P<username>[\w.@+-]{1,30})$',
         views.profile, name='profile'),
 )
