@@ -27,11 +27,6 @@ from apps.phonebook.helpers import gravatar
 
 from tasks import update_basket_task
 
-# This is because we are using MEDIA_ROOT wrong in 1.4
-from django.core.files.storage import FileSystemStorage
-fs = FileSystemStorage(location=settings.UPLOAD_ROOT,
-                       base_url='/media/uploads/')
-
 COUNTRIES = product_details.get_regions('en-US')
 
 USERNAME_MAX_LENGTH = 30
@@ -58,7 +53,7 @@ class UserProfile(models.Model, SearchMixin):
     skills = models.ManyToManyField(Skill, blank=True)
     languages = models.ManyToManyField(Language, blank=True)
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
-    photo = ImageField(default='', blank=True, storage=fs,
+    photo = ImageField(default='', blank=True,
                        upload_to=_calculate_photo_filename)
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
@@ -221,8 +216,8 @@ class UserProfile(models.Model, SearchMixin):
             d.update({a: data})
 
         if obj.country:
-            d.update({'country': [obj.country,
-                                  COUNTRIES[obj.country].lower()]})
+            d.update({'country':
+                      [obj.country, COUNTRIES[obj.country].lower()]})
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')

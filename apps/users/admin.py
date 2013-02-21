@@ -10,6 +10,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sorl.thumbnail.admin import AdminImageMixin
 
 from apps.common.admin import export_as_csv_action
 
@@ -108,7 +109,7 @@ class LastLoginFilter(SimpleListFilter):
         return queryset
 
 
-class UserProfileInline(admin.StackedInline):
+class UserProfileInline(AdminImageMixin, admin.StackedInline):
     """UserProfile Inline model for UserAdmin."""
     model = UserProfile
     raw_id_fields = ['vouched_by']
