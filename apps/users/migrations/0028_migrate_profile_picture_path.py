@@ -9,7 +9,7 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         """Prepend 'uploads' to profile photo path."""
-        queryset = orm['users.UserProfile'].objects.exclude(photo=None)
+        queryset = orm['users.UserProfile'].objects.exclude(photo='')
         for profile in queryset:
             profile.photo.name = os.path.join('uploads', profile.photo.name)
             profile.save()
@@ -17,7 +17,7 @@ class Migration(DataMigration):
 
     def backwards(self, orm):
         """Remove 'uploads' from profile photo path."""
-        queryset = orm['users.UserProfile'].objects.exclude(photo=None)
+        queryset = orm['users.UserProfile'].objects.exclude(photo='')
         for profile in queryset:
             profile.photo.name = profile.photo.name[8:]
             profile.save()
