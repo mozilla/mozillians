@@ -9,6 +9,7 @@ from settings import initial as pre
 from settings import MEDIA_URL
 
 from apps.users.helpers import calculate_username
+from django.utils.functional import lazy
 
 ## Log settings
 SYSLOG_TAG = "http_app_mozillians"
@@ -274,3 +275,13 @@ MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
 
 # Google Analytics
 GA_ACCOUNT_CODE = 'UA-35433268-19'
+
+# Set ALLOWED_HOSTS based on SITE_URL.
+def _allowed_hosts():
+    from django.conf import settings
+    from urlparse import urlparse
+
+    host = urlparse(settings.SITE_URL).netloc # Remove protocol and path
+    host = host.rsplit(':', 1)[0]  # Remove port
+    return [host]
+ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
