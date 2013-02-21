@@ -40,7 +40,8 @@ class EditProfileTests(ESTestCase):
         eq_(400, response.status_code)
 
     def test_unicode_avatar_filename(self):
-        filename = os.path.join(os.path.dirname(__file__), 'profile-φωτο.jpg')
+        filename = os.path.join(os.path.dirname(__file__),
+                                'profile-φωτο.jpg')
         with open(filename, 'rb') as f:
             data = {'full_name': 'Mozillian', 'photo': f}
             response = self.mozillian_client.post(reverse('profile.edit'),

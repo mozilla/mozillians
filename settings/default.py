@@ -172,6 +172,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'groups',
     'common',
     'api',
+    'mozspaces',
 
     'csp',
     'jingo_minify',
@@ -268,7 +269,8 @@ STATSD_CLIENT = 'django_statsd.clients.normal'
 BASKET_URL = 'http://basket.mozilla.com'
 BASKET_NEWSLETTER = 'mozilla-phone'
 
-USER_AVATAR_DIR = 'userprofile'
+USER_AVATAR_DIR = 'uploads/userprofile'
+MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
 
 # Google Analytics
 GA_ACCOUNT_CODE = 'UA-35433268-19'
