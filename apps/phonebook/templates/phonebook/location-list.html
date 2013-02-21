@@ -2,7 +2,12 @@
 
 {% block search %}{% endblock %}
 
-{% block page_title %}{{ _('Search Results') }}{% endblock %}
+{% block page_title %}
+  {% for name in [region_name, city_name] %}
+    {% if name %}{{ name }}, {% endif %}
+  {% endfor %}
+  {{ country_name }}
+{% endblock %}
 {% block body_id %}search{% endblock %}
 {% block body_classes %}box-content search-page{% endblock %}
 

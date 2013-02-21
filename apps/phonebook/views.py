@@ -261,4 +261,4 @@ def list_country(request, country, region=None, city=None):
             'country_name': country_name,
             'city_name': city,
             'region_name': region}
-    return render(request, 'phonebook/countries.html', data)
+    return render(request, 'phonebook/location-list.html', data)
