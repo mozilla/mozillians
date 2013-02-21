@@ -29,6 +29,6 @@ urlpatterns = patterns('',
     # Static pages need csrf for browserID post to work
     url('^about$', direct_to_template, {'template': 'phonebook/about.html'},
         name='about'),
-    url(r'^u/(?P<username>[\w.@+-]{1,30})$',
+    url(r'^u/(?P<username>[\w.@+-]+)$',
         views.profile, name='profile'),
 )
