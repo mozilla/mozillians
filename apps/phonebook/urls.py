@@ -17,12 +17,12 @@ urlpatterns = patterns('',
     url('^invited/(?P<id>\d+)$', views.invited, name='invited'),
     url('^country/(?P<country>[\w ]+)$', views.list_country,
         name='list_country'),
-    url('^country/(?P<country>[A-Za-z]+)/city/(?P<city>[\w\' ]+)$',
+    url('^country/(?P<country>[A-Za-z]+)/city/(?P<city>.+)$',
         views.list_country, name='list_city'),
     url(('^country/(?P<country>[A-Za-z]+)/'
          'region/(?P<region>[\w\' ]+)/city/(?P<city>[\w\' ]+)$'),
         views.list_country, name='list_region_city'),
-    url('^country/(?P<country>[A-Za-z]+)/region/(?P<region>[\w\' ]+)$',
+    url('^country/(?P<country>[A-Za-z]+)/region/(?P<region>.+)$',
         views.list_country, name='list_region'),
 
 
