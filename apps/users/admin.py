@@ -131,13 +131,20 @@ class UserAdmin(UserAdmin):
 
     def country(self, obj):
         return obj.userprofile.country
+    country.admin_order_field = 'userprofile__country'
 
     def is_vouched(self, obj):
         return obj.userprofile.is_vouched
     is_vouched.boolean = True
+    is_vouched.admin_order_field = 'userprofile__is_vouched'
 
     def vouched_by(self, obj):
-        return obj.userprofile.vouched_by
+        voucher = obj.userprofile.vouched_by
+        voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
+        return '<a href="%s">%s</a> (%d)' % (voucher_url, voucher,
+                                             voucher.vouchees.count())
+    vouched_by.admin_order_field = 'userprofile__vouched_by'
+    vouched_by.allow_tags = True
 
     def index_profiles(self, request):
         """Fire an Elastic Search Index Profiles task."""

@@ -48,7 +48,8 @@ class UserProfile(models.Model, SearchMixin):
     website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
                               default='', blank=True)
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
-                                   on_delete=models.SET_NULL, blank=True)
+                                   on_delete=models.SET_NULL, blank=True,
+                                   related_name='vouchees')
     groups = models.ManyToManyField(Group, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
     languages = models.ManyToManyField(Language, blank=True)
