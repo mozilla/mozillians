@@ -487,6 +487,7 @@ class SearchTests(ESTestCase):
         self.up = self.auto_user.userprofile
         for key, value in self.data.iteritems():
             setattr(self.up, key, value)
+        self.up.is_vouched = True
         self.up.save()
 
     def test_search_generic(self):
