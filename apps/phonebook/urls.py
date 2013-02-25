@@ -14,15 +14,15 @@ urlpatterns = patterns('',
     url('^search$', views.search, name='search'),
     url('^vouch$', views.vouch, name='vouch'),
     url('^invite$', views.invite, name='invite'),
-    url('^country/(?P<country>[\w ]+)$', views.list_country,
+    url('^country/(?P<country>[\w ]+)$', views.list_mozillians_in_location,
         name='list_country'),
     url('^country/(?P<country>[A-Za-z]+)/city/(?P<city>.+)$',
-        views.list_country, name='list_city'),
+        views.list_mozillians_in_location, name='list_city'),
     url(('^country/(?P<country>[A-Za-z]+)/'
          'region/(?P<region>[\w\' ]+)/city/(?P<city>[\w\' ]+)$'),
-        views.list_country, name='list_region_city'),
+        views.list_mozillians_in_location, name='list_region_city'),
     url('^country/(?P<country>[A-Za-z]+)/region/(?P<region>.+)$',
-        views.list_country, name='list_region'),
+        views.list_mozillians_in_location, name='list_region'),
 
 
     # Static pages need csrf for browserID post to work

@@ -243,9 +243,11 @@ def vouch(request):
 
 
 @vouch_required
-def list_country(request, country, region=None, city=None):
+def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, None)
+    if not country_name:
+        raise Http404
     queryset = UserProfile.objects.filter(country=country)
     if city:
         queryset = queryset.filter(city__iexact=city)
