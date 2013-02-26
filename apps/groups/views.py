@@ -60,16 +60,11 @@ def search(request, searched_object=Group):
 def show(request, url):
     """ List all users with this group."""
     group = get_object_or_404(Group, url=url)
-    if not url:
-        redirect(reverse('group', args=[group.url]))
-    form = forms.SearchForm(request.GET)
     limit = forms.PAGINATION_LIMIT
-    if form.is_valid():
-        limit = form.cleaned_data['limit']
 
-    in_group = (request.user.get_profile()
-                            .groups.filter(id=group.id).count())
-    profiles = group.userprofile_set.all()
+    in_group = (group.userprofile_set
+                .filter(id=request.user.userprofile.id).exists())
+    profiles = group.userprofile_set.exclude(full_name='')
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
     people = []
@@ -89,17 +84,16 @@ def show(request, url):
     d = dict(people=people,
              group=group,
              in_group=in_group,
-             form=form,
              limit=limit,
              show_pagination=show_pagination,
              num_pages=num_pages)
 
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
-        skills = [s.name for s in Skill.objects
-                                       .filter(userprofile__group__id=group.id)
-                                       .annotate(users=Count('userprofile'))
-                                       .order_by('users')][:15]
+        skills = [s.name for s in (Skill.objects
+                                   .filter(userprofile__group__id=group.id)
+                                   .annotate(users=Count('userprofile'))
+                                   .order_by('users'))][:15]
         d.update(skills=skills)
         d.update(irc_channels=group.irc_channel.split(' '))
         d.update(members=UserProfile.objects.filter(groups=group).count())
@@ -119,7 +113,7 @@ def toggle(request, url):
 
     # We don't operate on system groups using this view.
     if not group.system:
-        if profile.groups.filter(id=group.id).count():
+        if profile.groups.filter(id=group.id).exists():
             profile.groups.remove(group)
         else:
             profile.groups.add(group)

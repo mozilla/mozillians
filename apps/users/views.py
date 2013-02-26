@@ -37,7 +37,7 @@ class BrowserID(Verify):
         if created:
             log.warning('Created profile for user with email %s' % user.email)
 
-        if profile.is_complete():
+        if profile.is_complete:
             return super(BrowserID, self).login_success()
 
         self.request.session['authenticated_email'] = user.email
