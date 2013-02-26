@@ -215,17 +215,11 @@ class InviteForm(happyforms.ModelForm):
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
-
-        if User.objects.filter(email=recipient).count() > 0:
-            raise forms.ValidationError(_(u'You cannot invite someone who has '
-                                            'already been vouched.'))
+        if User.objects.filter(email=recipient,
+                               userprofile__is_vouched=True).exists():
+            raise forms.ValidationError(_(u'You cannot invite someone who '
+                                          'has already been vouched.'))
         return recipient
-
-    def save(self, inviter):
-        invite = super(InviteForm, self).save(commit=False)
-        invite.inviter = inviter
-        invite.save()
-        return invite
 
     class Meta:
         model = Invite
