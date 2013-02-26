@@ -14,7 +14,7 @@
     {% endtrans %}
   </p>
 
-  <form method="POST" action="{{ url('invite') }}">
+  <form method="POST" action="{{ url('invite') }}" autocomplete="off">
     {{ csrf() }}
     {{ bootstrap(form.recipient) }}
 
