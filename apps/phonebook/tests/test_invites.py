@@ -127,7 +127,7 @@ class InviteEdgeTest(apps.common.tests.ESTestCase):
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('You cannot invite someone who has already been vouched.' in
-                pq(r.content)('ul.errorlist li').text())
+                pq(r.content).text())
 
     def test_unvouched_cant_invite(self):
         """Let's make sure the unvouched don't let in their friends.
