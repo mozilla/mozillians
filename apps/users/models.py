@@ -148,6 +148,7 @@ class UserProfile(models.Model, SearchMixin):
 
         m2mfield.add(*groups_to_add)
 
+    @property
     def is_complete(self):
         """Tests if a user has all the information needed to move on
         past the original registration view.
@@ -334,7 +335,8 @@ def update_basket(sender, instance, **kwargs):
 @receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_search_index_sig')
 def update_search_index(sender, instance, **kwargs):
-    elasticutilstasks.index_objects.delay(sender, [instance.id])
+    if instance.is_complete:
+        elasticutilstasks.index_objects.delay(sender, [instance.id])
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile,

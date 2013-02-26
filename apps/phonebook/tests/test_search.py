@@ -149,7 +149,7 @@ class TestSearch(ESTestCase):
     def test_proper_url_arg_handling(self):
         """Make sure URL arguments are handled correctly."""
         # Create a new unvouched user to ensure results show up in search view
-        user()
+        user(full_name='sam')
 
         search_url = reverse('search')
         r = self.mozillian_client.get(search_url)

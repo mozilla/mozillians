@@ -117,9 +117,8 @@ class TestViews(ESTestCase):
         eq_(r.context.get('people', []), [])
 
     def test_mozillian_sees_mozillian_profile(self):
-        _user = User.objects.create(username='other',
-                                    email='whatever@whatver.man')
-
+        _user = user(username='other', email='whatever@whatver.man',
+                     full_name='other')
         url = reverse('profile', args=['other'])
         r = self.mozillian_client.get(url)
         eq_(r.status_code, 200)
@@ -271,7 +270,7 @@ class TestViews(ESTestCase):
             'User should have a URL with protocol added.')
 
     def test_has_country(self):
-        u = user(username='sam')
+        u = user(username='sam', full_name='sam')
         p = u.get_profile()
         p.country = 'us'
         p.save()
@@ -280,7 +279,7 @@ class TestViews(ESTestCase):
         self.assertContains(r, '<dt>Location</dt>')
 
     def test_has_region(self):
-        u = user(username='sam')
+        u = user(username='sam', full_name='sam')
         p = u.get_profile()
         p.country = 'us'
         p.region = 'New York'
@@ -291,7 +290,7 @@ class TestViews(ESTestCase):
         self.assertContains(r, p.region)
 
     def test_has_city(self):
-        u = user(username='sam')
+        u = user(username='sam', full_name='sam')
         p = u.get_profile()
         p.country = 'us'
         p.region = 'New York'

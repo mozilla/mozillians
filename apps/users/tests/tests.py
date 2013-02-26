@@ -11,8 +11,9 @@ from common import browserid_mock
 from common.tests import ESTestCase, user
 from groups.models import Group
 
-from ..helpers import validate_username
+from ..helpers import calculate_username, validate_username
 from ..models import UserProfile, UsernameBlacklist
+
 
 Group.objects.get_or_create(name='staff', system=True)
 COUNTRIES = product_details.get_regions('en-US')
@@ -235,6 +236,11 @@ class RegistrationTest(ESTestCase):
         # Make sure we can't use the same username twice
         assert r.context['user_form'].errors, "Form should throw errors."
 
+    def test_calculate_username(self):
+        """Test calculated username."""
+        eq_(calculate_username('nikoskoukos@example.com'), 'nikoskoukos')
+        eq_(calculate_username('pending@example.com'), 'pending1')
+
 
 class TestThingsForPeople(ESTestCase):
     """Verify that the wrong users don't see things."""
@@ -456,16 +462,12 @@ class AutoVouchTests(ESTestCase):
             'Profile should not be vouched.')
 
 
-@override_settings(
-    AUTHENTICATION_BACKENDS=['django.contrib.auth.backends.ModelBackend'])
 class UsernameRedirectionMiddlewareTests(ESTestCase):
     # Assertion doesn't matter since we monkey patched it for testing
     def test_username_redirection_middleware(self):
         """Test the username redirection middleware."""
-
-        auto_user = user(username='lalala')
-        self.client.login(username=auto_user.username, password='testpass')
-        response = self.client.get('/%s' % auto_user.username, follow=True)
+        response = self.mozillian_client.get('/%s' % self.mozillian.username,
+                                             follow=True)
         self.assertTemplateUsed(response, 'phonebook/profile.html')
 
         response = self.client.get('/%s' % 'invaliduser', follow=True)
