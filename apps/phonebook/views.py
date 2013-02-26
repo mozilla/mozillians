@@ -207,25 +207,17 @@ def search_plugin(request):
                   content_type='application/opensearchdescription+xml')
 
 
-@login_required
-def invited(request, id):
-    invite = Invite.objects.get(pk=id)
-    return render(request, 'phonebook/invited.html', dict(invite=invite))
-
-
 @vouch_required
 def invite(request):
-    if request.method == 'POST':
-        f = forms.InviteForm(request.POST)
-        if f.is_valid():
-            profile = request.user.get_profile()
-            invite = f.save(profile)
-            invite.send(sender=profile)
-            return HttpResponseRedirect(reverse(invited, args=[invite.id]))
-    else:
-        f = forms.InviteForm()
-    data = dict(form=f)
-    return render(request, 'phonebook/invite.html', data)
+    profile = request.user.userprofile
+    invite_form = forms.InviteForm(request.POST or None,
+                                   instance=Invite(inviter=profile))
+    if request.method == 'POST' and invite_form.is_valid():
+        invite = invite_form.save()
+        invite.send(sender=profile)
+        return render(request, 'phonebook/invited.html', {'recipient': invite.recipient })
+
+    return render(request, 'phonebook/invite.html', {'invite_form':invite_form})
 
 
 @vouch_required
