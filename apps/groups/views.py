@@ -90,13 +90,13 @@ def show(request, url):
 
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
-        skills = [s.name for s in
-                  (Skill.objects.filter(userprofile__group__id=group.id)
-                   .annotate(users=Count('userprofile'))
-                   .order_by('users'))][:15]
-        data.update(skills=skills)
-        data.update(irc_channels=group.irc_channel.split(' '))
-        data.update(members=profiles.count())
+        skills = (Skill.objects
+                  .filter(userprofile__in=profiles)
+                  .annotate(no_users=Count('userprofile'))
+                  .order_by('no_users'))
+        d.update(skills=skills)
+        d.update(irc_channels=group.irc_channel.split(' '))
+        d.update(members=UserProfile.objects.filter(groups=group).count())
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', data)
