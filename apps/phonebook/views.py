@@ -147,8 +147,6 @@ def delete(request):
 def search(request):
     num_pages = 0
     limit = None
-    nonvouched_only = False
-    picture_only = False
     people = []
     show_pagination = False
     form = forms.SearchForm(request.GET)
@@ -158,40 +156,34 @@ def search(request):
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
-        vouched = False if form.cleaned_data['nonvouched_only'] else None
-        profilepic = True if form.cleaned_data['picture_only'] else None
+        include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
         curated_groups = Group.get_curated()
 
-        # If nothing has been entered don't load any searches.
-        if not (not query and vouched is None and profilepic is None):
-            profiles = UserProfile.search(query,
-                                          vouched=vouched,
-                                          photo=profilepic)
-            groups = Group.search(query)
 
-            paginator = Paginator(profiles, limit)
+        profiles = UserProfile.search(
+            query, include_non_vouched=include_non_vouched)
+        groups = Group.search(query)
 
-            try:
-                people = paginator.page(page)
-            except PageNotAnInteger:
-                people = paginator.page(1)
-            except EmptyPage:
-                people = paginator.page(paginator.num_pages)
+        paginator = Paginator(profiles, limit)
 
-            if len(profiles) == 1 and not groups:
-                return redirect(reverse('profile',
-                                        args=[people[0].user.username]))
+        try:
+            people = paginator.page(page)
+        except PageNotAnInteger:
+            people = paginator.page(1)
+        except EmptyPage:
+            people = paginator.page(paginator.num_pages)
 
-            if paginator.count > forms.PAGINATION_LIMIT:
-                show_pagination = True
-                num_pages = len(people.paginator.page_range)
+        if profiles.count() == 1 and not groups:
+            return redirect(reverse('profile', args=[people[0].user.username]))
+
+        if paginator.count > forms.PAGINATION_LIMIT:
+            show_pagination = True
+            num_pages = len(people.paginator.page_range)
 
     d = dict(people=people,
              form=form,
              limit=limit,
-             nonvouched_only=nonvouched_only,
-             picture_only=picture_only,
              show_pagination=show_pagination,
              num_pages=num_pages,
              groups=groups,

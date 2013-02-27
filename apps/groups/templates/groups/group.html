@@ -107,28 +107,36 @@
     {% endif %}
   </div>
 
-  <h3>{{ _('Group Members') }}</h3>
-  <div class="row">
-    {% for person in people %}
-      {{ search_result(person) }}
-    {% endfor %}
-    {% if show_pagination %}
-      <div data-pages={{ num_pages }} class="pagination">
-        {% for page in people.paginator.page_range %}
-          {% if page == people.number %}
-            <span>{{ page }}</span>
-          {% else %}
-            <a href="#">{{ page }}</a>
-          {% endif %}
-        {% endfor %}
-      </div>
-      <div id="final-result">
-        <span>
-          {% trans count = people.paginator.count %}
-            Showing all {{ count }} results.
-          {% endtrans %}
-        </span>
-      </div>
-    {% endif %}
-  </div>
+  {% if not people.paginator.count %}
+    <div class="well">
+      <p id="not-found">
+        Sorry, we cannot find any mozillians in {{ group.name }}
+      </p>
+    </div>
+  {% else %}
+    <h3>{{ _('Group Members') }}</h3>
+    <div class="row">
+      {% for person in people %}
+        {{ search_result(person) }}
+      {% endfor %}
+      {% if show_pagination %}
+        <div data-pages={{ num_pages }} class="pagination">
+          {% for page in people.paginator.page_range %}
+            {% if page == people.number %}
+              <span>{{ page }}</span>
+            {% else %}
+              <a href="#">{{ page }}</a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div id="final-result">
+          <span>
+            {% trans count = people.paginator.count %}
+              Showing all {{ count }} results.
+            {% endtrans %}
+          </span>
+        </div>
+      {% endif %}
+   {% endif %}
+</div>
 {% endblock main_content %}

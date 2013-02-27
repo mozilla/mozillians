@@ -32,7 +32,7 @@
         {{ _('Advanced Options') }}
       </button>
       <div class="search-options">
-        {% for f in ['nonvouched_only', 'picture_only'] %}
+        {% for f in ['include_non_vouched'] %}
           <div id="{{ form[f].name }}-container"
                class="field {{ form[f].field.widget.attrs['class'] }}">
             {{ form[f] }}

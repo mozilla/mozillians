@@ -268,7 +268,7 @@ class UserProfile(models.Model, SearchMixin):
                 'date_joined': {'type': 'date'}}}
 
     @classmethod
-    def search(cls, query, vouched=None, photo=None):
+    def search(cls, query, include_non_vouched=False):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('username', 'bio__text', 'email', 'ircname',
@@ -293,10 +293,8 @@ class UserProfile(models.Model, SearchMixin):
 
         s = s.order_by('_score', 'name')
 
-        if vouched is not None:
-            s = s.filter(is_vouched=vouched)
-        if photo is not None:
-            s = s.filter(has_photo=photo)
+        if not include_non_vouched:
+            s = s.filter(is_vouched=True)
         return s
 
     def save(self, *args, **kwargs):
