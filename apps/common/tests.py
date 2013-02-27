@@ -30,6 +30,14 @@ class TestCase(test_utils.TestCase):
         profile.full_name='Amandeep McIlrath'
         profile.save()
 
+        # Create another Mozillian
+        cls.mozillian2 = User.objects.create(
+                email='u000002@mozillians.org', username='7f3a67u000002')
+        profile = cls.mozillian2.get_profile()
+        profile.is_vouched = True
+        profile.full_name='Amando Brown'
+        profile.save()
+
         # Create a non-vouched account
         cls.pending = User.objects.create(
                 email='pending@mozillians.org', username='pending')
@@ -42,6 +50,8 @@ class TestCase(test_utils.TestCase):
         self.client.get('/')
         self.mozillian_client = test.Client()
         self.mozillian_client.login(email=self.mozillian.email)
+        self.mozillian_client2 = test.Client()
+        self.mozillian_client2.login(email=self.mozillian2.email)
         self.pending_client = test.Client()
         self.pending_client.login(email=self.pending.email)
 

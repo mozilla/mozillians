@@ -58,13 +58,13 @@ def search(request, searched_object=Group):
 @vouch_required
 @never_cache
 def show(request, url):
-    """ List all users with this group."""
+    """List all vouched users with this group."""
     group = get_object_or_404(Group, url=url)
     limit = forms.PAGINATION_LIMIT
-
     in_group = (group.userprofile_set
-                .filter(id=request.user.userprofile.id).exists())
-    profiles = group.userprofile_set.exclude(full_name='')
+                .filter(user=request.user.userprofile).exists())
+    profiles = (group.userprofile_set
+                .exclude(full_name='').filter(is_vouched=True))
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
     people = []
@@ -81,7 +81,7 @@ def show(request, url):
         show_pagination = True
         num_pages = len(people.paginator.page_range)
 
-    d = dict(people=people,
+    data = dict(people=people,
              group=group,
              in_group=in_group,
              limit=limit,
@@ -90,18 +90,18 @@ def show(request, url):
 
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
-        skills = [s.name for s in (Skill.objects
-                                   .filter(userprofile__group__id=group.id)
-                                   .annotate(users=Count('userprofile'))
-                                   .order_by('users'))][:15]
-        d.update(skills=skills)
-        d.update(irc_channels=group.irc_channel.split(' '))
-        d.update(members=UserProfile.objects.filter(groups=group).count())
+        skills = [s.name for s in
+                  (Skill.objects.filter(userprofile__group__id=group.id)
+                   .annotate(users=Count('userprofile'))
+                   .order_by('users'))][:15]
+        data.update(skills=skills)
+        data.update(irc_channels=group.irc_channel.split(' '))
+        data.update(members=profiles.count())
 
     if request.is_ajax():
-        return render(request, 'search_ajax.html', d)
+        return render(request, 'search_ajax.html', data)
 
-    return render(request, 'groups/group.html', d)
+    return render(request, 'groups/group.html', data)
 
 
 @require_POST
