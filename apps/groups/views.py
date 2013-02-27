@@ -90,10 +90,10 @@ def show(request, url):
 
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
-        skills = [s.name for s in (Skill.objects
-                                   .filter(userprofile__group__id=group.id)
-                                   .annotate(users=Count('userprofile'))
-                                   .order_by('users'))][:15]
+        skills = (Skill.objects
+                  .filter(userprofile__in=profiles)
+                  .annotate(no_users=Count('userprofile'))
+                  .order_by('no_users'))
         d.update(skills=skills)
         d.update(irc_channels=group.irc_channel.split(' '))
         d.update(members=UserProfile.objects.filter(groups=group).count())

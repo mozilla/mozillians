@@ -86,8 +86,10 @@
       <div class="span6 group-skills">
         <h3>{{ _('Skills members have in common') }}</h3>
           <ul>
-            {% for skill in skills %}
-              <li><span class="underline">{{ skill }}</span></li>
+            {% for skill in skills[:15] %}
+              <li><span class="underline">{{ skill.name }}</span></li>
+            {% else %}
+              None
             {% endfor %}
           </ul>
       </div>
