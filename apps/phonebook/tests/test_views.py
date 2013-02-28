@@ -323,6 +323,39 @@ class TestViews(ESTestCase):
         new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
 
+    def test_location_listings(self):
+        """Test location listings."""
+        url = reverse('list_country', args=['us'])
+        response = self.mozillian_client.get(url)
+        eq_(response.status_code, 200)
+        response = self.pending_client.get(url)
+        eq_(response.status_code, 403)
+
+        url = reverse('list_country', args=['foobar'])
+        response = self.mozillian_client.get(url)
+        eq_(response.status_code, 404)
+        response = self.pending_client.get(url)
+        eq_(response.status_code, 403)
+
+        url = reverse('list_region', args=['us', 'california'])
+        response = self.mozillian_client.get(url)
+        eq_(response.status_code, 200)
+        response = self.pending_client.get(url)
+        eq_(response.status_code, 403)
+
+        url = reverse('list_city', args=['us', 'mountain view'])
+        response = self.mozillian_client.get(url)
+        eq_(response.status_code, 200)
+        response = self.pending_client.get(url)
+        eq_(response.status_code, 403)
+
+        url = reverse('list_region_city',
+                      args=['us', 'california', 'mountain view'])
+        response = self.mozillian_client.get(url)
+        eq_(response.status_code, 200)
+        response = self.pending_client.get(url)
+        eq_(response.status_code, 403)
+
 
 class TestVouch(ESTestCase):
     """This is implemented as its own class so that we can avoid
@@ -385,27 +418,3 @@ class TestOpensearchViews(ESTestCase):
 def _logged_in_html(response):
     doc = pq(response.content)
     return doc('a#logout')
-
-
-def _create_new_user():
-    newbie_client = test.Client()
-    newbie_email = '%s@test.net' % str(uuid4())[0:8]
-    reg_url = reverse('register')
-    params = dict(username=str(uuid4())[0:8],
-                  email=newbie_email,
-                  password='asdfasdf',
-                  confirmp='asdfasdf',
-                  full_name='Newbie McPal',
-                  optin='True')
-    r = newbie_client.post(reg_url, params, follow=True)
-    eq_('registration/login.html', r.templates[0].name)
-
-    u = User.objects.filter(email=params['email'])[0].get_profile()
-    u.save()
-
-    r = newbie_client.login(email=newbie_email)
-
-    r = newbie_client.get(reverse('profile', args=[u.user.username]))
-    eq_('phonebook/profile.html', r.templates[0].name)
-
-    return (u.user, newbie_client)
