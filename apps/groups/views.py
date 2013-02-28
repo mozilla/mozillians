@@ -82,11 +82,11 @@ def show(request, url):
         num_pages = len(people.paginator.page_range)
 
     data = dict(people=people,
-             group=group,
-             in_group=in_group,
-             limit=limit,
-             show_pagination=show_pagination,
-             num_pages=num_pages)
+                group=group,
+                in_group=in_group,
+                limit=limit,
+                show_pagination=show_pagination,
+                num_pages=num_pages)
 
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
@@ -94,9 +94,9 @@ def show(request, url):
                   .filter(userprofile__in=profiles)
                   .annotate(no_users=Count('userprofile'))
                   .order_by('no_users'))
-        d.update(skills=skills)
-        d.update(irc_channels=group.irc_channel.split(' '))
-        d.update(members=UserProfile.objects.filter(groups=group).count())
+        data.update(skills=skills)
+        data.update(irc_channels=group.irc_channel.split(' '))
+        data.update(members=profiles.count())
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', data)
