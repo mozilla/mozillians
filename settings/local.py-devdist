@@ -61,3 +61,5 @@ STATSD_CLIENT = 'django_statsd.clients.log'
 BASKET_URL = None
 BASKET_NEWSLETTER = 'mozilla-phone'
 BASKET_MANAGERS = None # or list of email addresses.
+
+GA_ACCOUNT_CODE = None
