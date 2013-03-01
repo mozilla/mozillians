@@ -70,9 +70,14 @@ class GroupBaseAdmin(admin.ModelAdmin):
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter]
 
+    def queryset(self, request):
+        return (super(GroupBaseAdmin, self)
+                .queryset(request).annotate(no_members=Count('userprofile')))
+
     def no_members(self, obj):
         """Return number of members in group."""
-        return obj.userprofile_set.count()
+        return obj.no_members
+    no_members.admin_order_field = 'no_members'
 
 
 class GroupAliasInline(admin.StackedInline):
