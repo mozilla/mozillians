@@ -62,7 +62,7 @@ def show(request, url):
     group = get_object_or_404(Group, url=url)
     limit = forms.PAGINATION_LIMIT
     in_group = (group.userprofile_set
-                .filter(user=request.user.userprofile).exists())
+                .filter(user=request.user).exists())
     profiles = (group.userprofile_set
                 .exclude(full_name='').filter(is_vouched=True))
     page = request.GET.get('page', 1)
