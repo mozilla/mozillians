@@ -45,11 +45,29 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
+          <h2>{{ _('Profile - Privacy Settings') }}</h2>
+          <p>
+            {% trans %}
+            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            {% endtrans %}
+          </p>
+          <div class="privacy-all">
+            {% trans %}Make all fields visible to:{% endtrans %}
+            <select name="{# Name content here #}" id="profile-privacy">
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.full_name) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.ircname) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.website) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.bio) }}
 
           <h2>{{ _('Location') }}</h2>
@@ -60,11 +78,28 @@
               vice-versa.
             {% endtrans %}
           </p>
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.country) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.region) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.city) }}
         </div>
         <div class="tab-pane" id="skills">
+          <h2>{{ _('Groups, Skills & Languages - Privacy Settings') }}</h2>
+          <p>
+            {% trans %}
+            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            {% endtrans %}
+          </p>
+          <div class="privacy-all">
+            {% trans %}Make all fields visible to:{% endtrans %}
+            <select name="{# Name content here #}" id="skills-privacy">
+              <option selected="selected">-- {{ _('Select One') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           <h2>{{ _('Groups') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -223,8 +258,8 @@
       </div>
     </div>
     <div id="edit_controls">
-      <button type="submit" class="span2 btn btn-primary">{{ _('Update') }}</button>
-      <a href="{{ url('profile', user.username) }}" class="span2 btn">
+      <button type="submit" class="btn btn-primary">{{ _('Update') }}</button>
+      <a href="{{ url('profile', user.username) }}" class="btn">
         {{ _('Cancel') }}{# L10n: Cancel editing #}
       </a>
     </div>

@@ -19,5 +19,10 @@ var app = {
         $('#language').change(function() {
             $('#language-switcher').submit();
         });
+
+        // Switching all options for profile privacy on select 
+        $('#profile-privacy').change(function(){
+            $('.privacy-choice').val($(this).val());
+        });
     });
 })(jQuery);
