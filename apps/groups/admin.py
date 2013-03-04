@@ -64,7 +64,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name']
-    list_display = ['name', 'no_members']
+    list_display = ['name', 'member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter]
 
@@ -77,12 +77,12 @@ class GroupBaseAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         return (super(GroupBaseAdmin, self)
-                .queryset(request).annotate(no_members=Count('userprofile')))
+                .queryset(request).annotate(member_count=Count('userprofile')))
 
-    def no_members(self, obj):
+    def member_count(self, obj):
         """Return number of members in group."""
-        return obj.no_members
-    no_members.admin_order_field = 'no_members'
+        return obj.member_count
+    member_count.admin_order_field = 'member_count'
 
 
 class GroupAliasInline(admin.StackedInline):
@@ -107,7 +107,7 @@ class GroupAdmin(GroupBaseAdmin):
     add_form = GroupAddAdminForm
     inlines = [GroupAliasInline]
     list_display = ['name', 'steward', 'wiki', 'website', 'irc_channel',
-                    'no_members']
+                    'member_count']
     raw_id_fields = ['steward']
     list_filter = [CurratedGroupFilter, EmptyGroupFilter]
 
