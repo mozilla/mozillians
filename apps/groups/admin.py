@@ -28,24 +28,6 @@ class EmptyGroupFilter(SimpleListFilter):
         return queryset.filter(no_profiles=0)
 
 
-class EmptyGroupFilter(SimpleListFilter):
-    title = 'empty_group'
-    parameter_name = 'empty_group'
-
-    def lookups(self, request, model_admin):
-        return (('False', 'Empty'),
-                ('True', 'Not empty'))
-
-    def queryset(self, request, queryset):
-        if self.value() is None:
-            return queryset
-        value = self.value() == 'True'
-        queryset = (queryset.annotate(no_profiles=Count('userprofile')))
-        if value:
-                 return queryset.filter(no_profiles__gt=0)
-        return queryset.filter(no_profiles=0)
-
-
 class CurratedGroupFilter(SimpleListFilter):
     """Admin filter for curated groups."""
     title = 'curated'
@@ -62,6 +44,22 @@ class CurratedGroupFilter(SimpleListFilter):
         return queryset.filter(steward__isnull=value)
 
 
+class GroupBaseEditAdminForm(forms.ModelForm):
+    merge_with_groups = forms.ModelMultipleChoiceField(
+        required=False, queryset = None,
+        widget=FilteredSelectMultiple('Merge', False))
+
+    def __init__(self, *args, **kwargs):
+        queryset = self._meta.model.objects.exclude(pk=kwargs['instance'].id)
+        self.base_fields['merge_with_groups'].queryset = queryset
+        super(GroupBaseEditAdminForm, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        utils.merge_groups(self.instance,
+                           self.cleaned_data.get('merge_with_groups', []))
+        return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
+
+
 class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
@@ -70,33 +68,34 @@ class GroupBaseAdmin(admin.ModelAdmin):
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter]
 
+    def get_form(self, request, obj=None, **kwargs):
+        defaults = {}
+        if obj is None:
+            defaults['form'] = self.add_form
+        defaults.update(kwargs)
+        return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
+
+    def queryset(self, request):
+        return (super(GroupBaseAdmin, self)
+                .queryset(request).annotate(no_members=Count('userprofile')))
+
     def no_members(self, obj):
         """Return number of members in group."""
-        return obj.userprofile_set.count()
+        return obj.no_members
+    no_members.admin_order_field = 'no_members'
 
 
 class GroupAliasInline(admin.StackedInline):
     model = GroupAlias
 
 
-class GroupAdminForm(forms.ModelForm):
-    merge_with_groups = forms.ModelMultipleChoiceField(
-        required=False, queryset = None,
-        widget=FilteredSelectMultiple('Merge', False))
+class GroupAddAdminForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
-        model= Group
-        if 'instance' in kwargs:
-            queryset = model.objects.exclude(pk=kwargs['instance'].id)
-            self.base_fields['merge_with_groups'].queryset = queryset
-        else:
-            self.declared_fields.pop('merge_with_groups')
-        super(GroupAdminForm, self).__init__(*args, **kwargs)
+    class Meta:
+        model = Group
 
-    def save(self, *args, **kwargs):
-        utils.merge_groups(self.instance,
-                           self.cleaned_data.get('merge_with_groups', []))
-        return super(GroupAdminForm, self).save(*args, **kwargs)
+
+class GroupEditAdminForm(GroupBaseEditAdminForm):
 
     class Meta:
         model = Group
@@ -104,7 +103,8 @@ class GroupAdminForm(forms.ModelForm):
 
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
-    form = GroupAdminForm
+    form = GroupEditAdminForm
+    add_form = GroupAddAdminForm
     inlines = [GroupAliasInline]
     list_display = ['name', 'steward', 'wiki', 'website', 'irc_channel',
                     'no_members']
@@ -115,28 +115,44 @@ class GroupAdmin(GroupBaseAdmin):
 class SkillAliasInline(admin.StackedInline):
     model = SkillAlias
 
+
+class SkillAddAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Skill
+
+
+class SkillEditAdminForm(GroupBaseEditAdminForm):
+
+    class Meta:
+        model = Skill
+
+
 class SkillAdmin(GroupBaseAdmin):
+    form = SkillEditAdminForm
+    add_form = SkillAddAdminForm
     inlines = [SkillAliasInline]
+
 
 class LanguageAliasInline(admin.StackedInline):
     model = LanguageAlias
 
-class LanguageAdmin(GroupBaseAdmin):
-    inlines = [LanguageAliasInline]
 
-class SkillAliasInline(admin.StackedInline):
-    model = SkillAlias
+class LanguageAddAdminForm(forms.ModelForm):
 
-
-class SkillAdmin(GroupBaseAdmin):
-    inlines = [SkillAliasInline]
+    class Meta:
+        model = Language
 
 
-class LanguageAliasInline(admin.StackedInline):
-    model = LanguageAlias
+class LanguageEditAdminForm(GroupBaseEditAdminForm):
+
+    class Meta:
+        model = Language
 
 
 class LanguageAdmin(GroupBaseAdmin):
+    form = LanguageEditAdminForm
+    add_form = LanguageAddAdminForm
     inlines = [LanguageAliasInline]
 
 
