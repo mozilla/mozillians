@@ -1,6 +1,7 @@
 <div class="control-group photo {% if profile_form.photo.errors %}error{% endif %}">
   <label class="control-label" for="id_photo">{{ profile_form.photo.label }}</label>
-  <div class="controls">
+  <div class="controls"> 
+    {% include 'phonebook/includes/privacy_controls.html' %}
     <div class="thumbnail">
       <img id="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile photo') }}">
     </div>
@@ -21,6 +22,7 @@
           </label>
         </li>
       {% endif %}
-    </ul>
+    </ul> 
+   
   </div>
 </div>
