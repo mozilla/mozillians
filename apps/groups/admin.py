@@ -5,6 +5,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db.models import Count
 
 import utils
+from users.models import UserProfile
 from models import (Group, GroupAlias,
                     Language, LanguageAlias,
                     Skill, SkillAlias)
@@ -156,6 +157,7 @@ class LanguageAdmin(GroupBaseAdmin):
     inlines = [LanguageAliasInline]
 
 
+admin.site.register(UserProfile)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(Skill, SkillAdmin)
