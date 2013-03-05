@@ -45,11 +45,29 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
+          <h2>{{ _('Profile - Privacy Settings') }}</h2>
+          <p>
+            {% trans %}
+            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            {% endtrans %}
+          </p>
+          <div class="privacy-all">
+            {{ _('Make all fields visible to:') }}
+            <select name="{# Name content here #}" id="profile-privacy">
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.full_name) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.ircname) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.website) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.bio) }}
 
           <h2>{{ _('Location') }}</h2>
@@ -60,11 +78,28 @@
               vice-versa.
             {% endtrans %}
           </p>
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.country) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.region) }}
+          {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.city) }}
         </div>
         <div class="tab-pane" id="skills">
+          <h2>{{ _('Groups, Skills & Languages - Privacy Settings') }}</h2>
+          <p>
+            {% trans %}
+            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            {% endtrans %}
+          </p>
+          <div class="privacy-all">
+            {{ _('Make all fields visible to:') }}
+            <select name="{# Name content here #}" id="skills-privacy">
+              <option selected="selected">-- {{ _('Select One') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           <h2>{{ _('Groups') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -181,7 +216,7 @@
                 <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
               {% endtrans %}
             </p>
-            <h2>{{ _("Privacy Settings") }}</h2>
+            <h2>{{ _('Privacy Settings') }}</h2>
             <div id="privacy-settings">
               <p class="field_description">
                 {{ bootstrap(profile_form.allows_community_sites) }}
@@ -189,7 +224,7 @@
               </p>
             </div>
             {% if user.get_profile().is_vouched %}
-              <h2>{{ _("Developers") }}</h2>
+              <h2>{{ _('Developers') }}</h2>
               <p class="field_description">
                 {% trans api_schema_url='https://wiki.mozilla.org/Mozillians/API-Specification',
                          bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
@@ -206,15 +241,15 @@
                   development forum</a>.
                 {% endtrans %}
               </p>
-              <h4>Your approved apps:</h4>
+              <h4>{{ _('Your approved apps:') }}</h4>
               <br/>
               <ul>
                 {% for app in apps %}
                   <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
-                    <small>Key: {{ app.key }}</small>
+                    <small>{{ _('Key') }}: {{ app.key }}</small>
                   </li>
                 {% else %}
-                  {% trans %} You have no registered, active apps. {% endtrans %}
+                  {{ _('You have no registered, active apps.') }}
                 {% endfor %}
                 </ul>
               {% endif %}
@@ -223,8 +258,8 @@
       </div>
     </div>
     <div id="edit_controls">
-      <button type="submit" class="span2 btn btn-primary">{{ _('Update') }}</button>
-      <a href="{{ url('profile', user.username) }}" class="span2 btn">
+      <button type="submit" class="btn btn-primary">{{ _('Update') }}</button>
+      <a href="{{ url('profile', user.username) }}" class="btn">
         {{ _('Cancel') }}{# L10n: Cancel editing #}
       </a>
     </div>
