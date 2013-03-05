@@ -52,7 +52,7 @@
             {% endtrans %}
           </p>
           <div class="privacy-all">
-            {% trans %}Make all fields visible to:{% endtrans %}
+            {{ _('Make all fields visible to:') }}
             <select name="{# Name content here #}" id="profile-privacy">
               <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
               <option value="public">{{ _('Public') }}</option>
@@ -93,7 +93,7 @@
             {% endtrans %}
           </p>
           <div class="privacy-all">
-            {% trans %}Make all fields visible to:{% endtrans %}
+            {{ _('Make all fields visible to:') }}
             <select name="{# Name content here #}" id="skills-privacy">
               <option selected="selected">-- {{ _('Select One') }} --</option>
               <option value="public">{{ _('Public') }}</option>
@@ -216,7 +216,7 @@
                 <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
               {% endtrans %}
             </p>
-            <h2>{{ _("Privacy Settings") }}</h2>
+            <h2>{{ _('Privacy Settings') }}</h2>
             <div id="privacy-settings">
               <p class="field_description">
                 {{ bootstrap(profile_form.allows_community_sites) }}
@@ -224,7 +224,7 @@
               </p>
             </div>
             {% if user.get_profile().is_vouched %}
-              <h2>{{ _("Developers") }}</h2>
+              <h2>{{ _('Developers') }}</h2>
               <p class="field_description">
                 {% trans api_schema_url='https://wiki.mozilla.org/Mozillians/API-Specification',
                          bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
@@ -241,15 +241,15 @@
                   development forum</a>.
                 {% endtrans %}
               </p>
-              <h4>Your approved apps:</h4>
+              <h4>{{ _('Your approved apps:') }}</h4>
               <br/>
               <ul>
                 {% for app in apps %}
                   <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
-                    <small>Key: {{ app.key }}</small>
+                    <small>{{ _('Key') }}: {{ app.key }}</small>
                   </li>
                 {% else %}
-                  {% trans %} You have no registered, active apps. {% endtrans %}
+                  {{ _('You have no registered, active apps.') }}
                 {% endfor %}
                 </ul>
               {% endif %}
