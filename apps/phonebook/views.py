@@ -238,7 +238,8 @@ def vouch(request):
 def list_country(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, None)
-    queryset = UserProfile.objects.filter(country=country)
+    queryset = (UserProfile.objects.exclude(full_name='')
+                .filter(is_vouched=True).filter(country=country))
     if city:
         queryset = queryset.filter(city__iexact=city)
     if region:
