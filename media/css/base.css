@@ -96,7 +96,7 @@ h2 {
     margin-bottom:5px;
 }
 
-h3, #profile-info dt {
+h3 {
     font-size:28px;
     letter-spacing:-.5px;
     line-height:100%;
@@ -609,6 +609,9 @@ legend {
 
 #profile-info h3, #profile-info dt {
     margin: 20px 0 10px 0;
+    font-size:22px;
+    letter-spacing:-.5px;
+    line-height:100%;
 }
 
 .search-options {
