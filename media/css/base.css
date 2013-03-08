@@ -472,10 +472,6 @@ a.btn {
     margin: 2px 5px 2px 0;
 }
 
-.photo #id_photo {
-
-}
-
 .photo .checkbox {
     margin: 0;
     padding: 0;
@@ -724,6 +720,10 @@ label, input, button, select, textarea {
 .popular-groups {
     padding: 10px 0;
 }
+.privacy-all {
+    margin-top: 20px;
+    float: right;
+}
 
 .privacy-all select {
     width: 180px;
@@ -739,17 +739,14 @@ label, input, button, select, textarea {
     float: right;
 }
 
-@media (max-width: 620px) {
-    .privacy-controls select {
-        margin-bottom: 10px;
-    }
-
+.edit-profile {
+    max-width: 700px;
 }
 
-@media (max-width: 480px) {
-    .privacy-controls select {
-        float: none;
-        margin-bottom: 10px;
-        
-    }
+.privacy-view {
+    width: 62%;
+}
+
+.privacy-view form {
+    float: right;
 }

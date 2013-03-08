@@ -22,7 +22,9 @@
     {% else %}
       {{ _('Pending Profile') }}
     {% endif %}
-  </h1>
+
+  </h1> 
+
 
   <div class="clear"></div>
 
@@ -77,6 +79,16 @@
         {% endwith %}
       {% endfor %}
     {% endif %}
+    <div class="privacy-view">
+      <form method="GET" action=".">
+        <select id="view-privacy-mode">
+            <option value="#">-- View as --</option>
+            <option value="public">Public</option>
+            <option value="mozillians">Mozillians</option>
+            <option value="all">All</option>
+        </select>
+      </form>
+    </div>
     <div class="span6 offset1 well" id="profile-info">
       <h2 class="fn p-name">
         {{ profile.display_name }}
