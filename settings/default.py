@@ -136,13 +136,15 @@ MINIFY_BUNDLES = {
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
-    'common.middleware.UsernameRedirectionMiddleware',
-    'common.middleware.OldGroupRedirectionMiddleware',
-    'common.middleware.GroupAliasRedirectionMiddleware',
+
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
-]
+
+    'common.middleware.StrongholdMiddleware',
+    'common.middleware.UsernameRedirectionMiddleware',
+    'common.middleware.OldGroupRedirectionMiddleware',
+    'common.middleware.GroupAliasRedirectionMiddleware']
 
 # StrictTransport
 STS_SUBDOMAINS = True
@@ -283,3 +285,8 @@ def _allowed_hosts():
     host = host.rsplit(':', 1)[0]  # Remove port
     return [host]
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
+
+STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
+                         '^/admin/',
+                         '^/browserid/verify/',
+                         '^/api']

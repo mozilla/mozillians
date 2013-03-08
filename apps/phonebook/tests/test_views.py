@@ -8,7 +8,7 @@ from funfactory.urlresolvers import set_url_prefix, reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from apps.common.tests import ESTestCase, user
+from apps.common.tests.init import ESTestCase, user
 
 
 class TestDeleteUser(ESTestCase):
@@ -133,8 +133,9 @@ class TestViews(ESTestCase):
     def test_pending_view_other_profile(self):
         """Test view other profile by unvouched user."""
         url = reverse('profile', args=[self.mozillian.username])
-        response = self.pending_client.get(url)
-        self.assertEqual(response.status_code, 403)
+        response = self.pending_client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        assert('You must be vouched to continue' in response.content)
 
     def test_mozillians_view_own_profile(self):
         """Test view own profile by vouched user."""
@@ -377,8 +378,7 @@ class TestOpensearchViews(ESTestCase):
 
         # Prefixer and its locale are sticky; clear it before the next request
         set_url_prefix(None)
-        response = self.client.get(reverse('search_plugin',
-                                   prefix='/fr/'))
+        response = self.client.get(reverse('search_plugin', prefix='/fr/'))
         assert '/fr/search' in response.content
 
 

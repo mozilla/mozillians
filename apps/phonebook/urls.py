@@ -1,6 +1,8 @@
 from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
+from apps.common.decorators import allow_public
+
 import views
 
 urlpatterns = patterns('',
@@ -26,8 +28,8 @@ urlpatterns = patterns('',
 
 
     # Static pages need csrf for browserID post to work
-    url('^about/$', direct_to_template, {'template': 'phonebook/about.html'},
-        name='about'),
+    url('^about/$', allow_public(direct_to_template),
+        {'template': 'phonebook/about.html'}, name='about'),
     url(r'^u/(?P<username>[\w.@+-]+)/$',
         views.profile, name='profile'),
 )

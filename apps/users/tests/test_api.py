@@ -8,8 +8,8 @@ from funfactory.urlresolvers import reverse
 from product_details import product_details
 
 from apps.api.models import APIApp
-from common.tests import ESTestCase, user
-from groups.models import Group, Language, Skill
+from apps.common.tests.init import ESTestCase, user
+from apps.groups.models import Group, Language, Skill
 
 from ..cron import index_all_profiles
 

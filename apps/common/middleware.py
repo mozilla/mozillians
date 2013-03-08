@@ -1,21 +1,52 @@
 import re
-import os
 from contextlib import contextmanager
-
-from django.contrib.auth.models import User
-from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
-                         HttpResponseRedirect, HttpResponsePermanentRedirect)
+from django.conf import settings
 from django.core.urlresolvers import is_valid_path, reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.utils.encoding import iri_to_uri
-
-import commonware.log
-from funfactory.manage import ROOT
+from django.shortcuts import redirect
+from tower import ugettext as _
 
 from apps.groups.models import Group, GroupAlias
 
-# TODO: this is hackish. Once we update mozillians to the newest playdoh layout
-error_page = __import__('%s.urls' % os.path.basename(ROOT)).urls.error_page
-log = commonware.log.getLogger('m.phonebook')
+
+class StrongholdMiddleware(object):
+    """Keep unvouched users out, unless explicitly allowed in.
+
+    Inspired by https://github.com/mgrouchy/django-stronghold/
+
+    """
+
+    def __init__(self):
+        self.exceptions = getattr(settings, 'STRONGHOLD_EXCEPTIONS', [])
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        for view_url in self.exceptions:
+            if re.match(view_url, request.path):
+                return None
+
+        allow_public = getattr(view_func, '_allow_public', None)
+        if allow_public:
+            return None
+
+        if not request.user.is_authenticated():
+            messages.warning(request, _('You must be logged in to continue.'))
+            return login_required(view_func)(request, *view_args,
+                                             **view_kwargs)
+
+        if request.user.userprofile.is_vouched:
+            return None
+
+        allow_unvouched = getattr(view_func, '_allow_unvouched', None)
+        if allow_unvouched:
+            return None
+
+        messages.error(request, _('You must be vouched to continue.'))
+        return redirect('home')
+
 
 class UsernameRedirectionMiddleware(object):
     """

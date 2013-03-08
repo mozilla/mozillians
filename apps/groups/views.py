@@ -1,6 +1,5 @@
 import json
 
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Count
 from django.http import HttpResponse
@@ -11,15 +10,14 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 
+from apps.common.decorators import allow_unvouched
 from apps.groups.models import Group, Skill
 from apps.phonebook import forms
-from apps.phonebook.views import vouch_required
 from apps.users.tasks import update_basket_task
 
 log = commonware.log.getLogger('m.groups')
 
 
-@login_required
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
     paginator = Paginator(Group.objects.all(), forms.PAGINATION_LIMIT)
@@ -36,7 +34,7 @@ def index(request):
     return render(request, 'groups/index.html', data)
 
 
-@login_required
+@allow_unvouched
 @cache_control(must_revalidate=True, max_age=3600)
 def search(request, searched_object=Group):
     """Simple wildcard search for a group using a GET parameter.
@@ -47,12 +45,12 @@ def search(request, searched_object=Group):
     term = request.GET.get('term', None)
     if request.is_ajax() and term:
         groups = searched_object.search(term).values_list('name', flat=True)
-        return HttpResponse(json.dumps(list(groups)), mimetype='application/json')
+        return HttpResponse(json.dumps(list(groups)),
+                            mimetype='application/json')
 
     return redirect('home')
 
 
-@vouch_required
 @never_cache
 def show(request, url):
     """List all vouched users with this group."""
@@ -102,7 +100,6 @@ def show(request, url):
 
 
 @require_POST
-@vouch_required
 def toggle(request, url):
     """Toggle the current user's membership of a group."""
     group = get_object_or_404(Group, url=url)

@@ -1,8 +1,5 @@
-from functools import wraps
-
 from django.contrib import messages
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponseForbidden
@@ -14,6 +11,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
+from apps.common.decorators import allow_public, allow_unvouched
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
 from apps.users.models import COUNTRIES, UserProfile
@@ -22,28 +20,12 @@ from apps.users.tasks import remove_from_basket_task
 import forms
 from models import Invite
 
-
 log = commonware.log.getLogger('m.phonebook')
-
 BAD_VOUCHER = 'Unknown Voucher'
 
 
-def vouch_required(f):
-    """If a user is not vouched they get a 403."""
-
-    @login_required
-    @wraps(f)
-    def wrapped(request, *args, **kwargs):
-        if request.user.get_profile().is_vouched:
-            return f(request, *args, **kwargs)
-        else:
-            log.warning('vouch_required forbidding access')
-            return HttpResponseForbidden(_('You must be vouched to do this.'))
-
-    return wrapped
-
-
 @never_cache
+@allow_public
 def home(request):
     if request.user.is_authenticated():
         profile = request.user.get_profile()
@@ -55,30 +37,38 @@ def home(request):
         return render(request, 'phonebook/home.html')
 
 
+@allow_unvouched
 @never_cache
-@login_required
 def profile(request, username):
     """View a profile by username."""
-    user = get_object_or_404(User, username=username)
-    vouch_form = None
-    profile = user.get_profile()
+    if username == request.user.username:
+        # wants to see own
+        data = {'shown_user': request.user,
+                'profile': request.user.userprofile,
+                'vouch_form': None}
+        return render(request, 'phonebook/profile.html', data)
 
-    if not profile.is_complete:
+    if not request.user.userprofile.is_vouched:
+        messages.error(request, _('You must be vouched to continue.'))
+        return redirect('home')
+
+    user = get_object_or_404(User, username=username)
+    if not user.userprofile.is_complete:
         raise Http404()
 
-    if not request.user.userprofile.is_vouched and request.user != user:
-        log.warning('vouch_required forbidding access')
-        return HttpResponseForbidden(_('You must be vouched to do this.'))
+    vouch_form = None
+    if (not user.userprofile.is_vouched
+        and request.user.userprofile.is_vouched):
+        vouch_form = forms.VouchForm(initial=dict(vouchee=user.userprofile.pk))
 
-    if not profile.is_vouched and request.user.get_profile().is_vouched:
-        vouch_form = forms.VouchForm(initial=dict(vouchee=profile.pk))
-
-    data = dict(shown_user=user, profile=profile, vouch_form=vouch_form)
+    data = {'shown_user': user,
+            'profile': user.userprofile,
+            'vouch_form': vouch_form}
     return render(request, 'phonebook/profile.html', data)
 
 
+@allow_unvouched
 @never_cache
-@login_required
 def edit_profile(request):
     """Edit user profile view."""
     # Don't user request.user
@@ -121,8 +111,8 @@ def edit_profile(request):
     return render(request, 'phonebook/edit_profile.html', d, status=status)
 
 
+@allow_unvouched
 @never_cache
-@login_required
 def confirm_delete(request):
     """Display a confirmation page asking the user if they want to
     leave.
@@ -131,8 +121,8 @@ def confirm_delete(request):
     return render(request, 'phonebook/confirm_delete.html')
 
 
+@allow_unvouched
 @never_cache
-@login_required
 @require_POST
 def delete(request):
     user_profile = request.user.get_profile()
@@ -143,7 +133,6 @@ def delete(request):
     return redirect(reverse('home'))
 
 
-@vouch_required
 def search(request):
     num_pages = 0
     limit = None
@@ -195,6 +184,7 @@ def search(request):
     return render(request, 'phonebook/search.html', d)
 
 
+@allow_public
 @cache_page(60 * 60 * 168)  # 1 week.
 def search_plugin(request):
     """Render an OpenSearch Plugin."""
@@ -202,7 +192,6 @@ def search_plugin(request):
                   content_type='application/opensearchdescription+xml')
 
 
-@vouch_required
 def invite(request):
     profile = request.user.userprofile
     invite_form = forms.InviteForm(request.POST or None,
@@ -217,7 +206,6 @@ def invite(request):
                   {'invite_form': invite_form})
 
 
-@vouch_required
 @require_POST
 def vouch(request):
     """Vouch a user."""
@@ -236,7 +224,6 @@ def vouch(request):
     return HttpResponseForbidden
 
 
-@vouch_required
 def list_country(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, None)

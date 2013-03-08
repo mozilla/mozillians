@@ -6,6 +6,8 @@ from django.views.decorators.cache import cache_page
 from django.views.generic.base import TemplateView
 from django.views.i18n import javascript_catalog
 
+from apps.common.decorators import allow_public
+
 admin.autodiscover()
 
 
@@ -35,7 +37,8 @@ urlpatterns = patterns('',
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^jsi18n/$', cache_page(60 * 60 * 24 * 365)(javascript_catalog),
+    url(r'^jsi18n/$',
+        allow_public(cache_page(60 * 60 * 24 * 365)(javascript_catalog)),
         {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
 )
 

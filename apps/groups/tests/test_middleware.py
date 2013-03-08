@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from nose.tools import eq_
 
-from common.tests import ESTestCase
+from apps.common.tests.init import ESTestCase
 
 from ..models import Group, GroupAlias
 
