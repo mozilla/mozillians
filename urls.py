@@ -45,12 +45,12 @@ if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
     media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
     urlpatterns += patterns('',
-        (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
+        (r'^%s/(?P<path>.*)' % media_url, 'django.views.static.serve',
          {'document_root': settings.MEDIA_ROOT}),
         # Add the 404, 500, and csrf pages for testing
-        (r'^404$', handler404),
-        (r'^500$', handler500),
-        (r'^csrf$', handler_csrf),
+        (r'^404/$', handler404),
+        (r'^500/$', handler500),
+        (r'^csrf/$', handler_csrf),
 
         url(r'^test/qunit/$', TemplateView.as_view(template_name='qunit.html'),
             name="qunit_test"),

@@ -136,8 +136,6 @@ MINIFY_BUNDLES = {
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
-    'common.middleware.PermissionDeniedMiddleware',
-    'common.middleware.RemoveSlashMiddleware',
     'common.middleware.UsernameRedirectionMiddleware',
     'common.middleware.OldGroupRedirectionMiddleware',
     'common.middleware.GroupAliasRedirectionMiddleware',
@@ -250,7 +248,7 @@ CSP_FRAME_SRC = ("'self'", 'https://browserid.org',
                  'https://login.persona.org',)
 CSP_FONT_SRC = ("'self'", 'https://www.mozilla.org')
 CSP_REPORT_ONLY = True
-CSP_REPORT_URI = '/csp/report'
+CSP_REPORT_URI = '/csp/report/'
 
 ES_DISABLED = True
 ES_HOSTS = ['127.0.0.1:9200']

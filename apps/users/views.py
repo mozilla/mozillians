@@ -115,11 +115,3 @@ def _update_invites(request):
     invite.redeemed = datetime.datetime.now()
     invite.redeemer = redeemer
     invite.save()
-
-
-def _set_already_exists_error(form):
-    msg = _('Someone has already registered an account with %(email)s.')
-    data = dict(email=form.cleaned_data['email'])
-    del form.cleaned_data['email']
-    error = _(msg % data)
-    form._errors['email'] = form.error_class([error])

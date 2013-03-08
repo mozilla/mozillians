@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -210,9 +210,11 @@ def invite(request):
     if request.method == 'POST' and invite_form.is_valid():
         invite = invite_form.save()
         invite.send(sender=profile)
-        return render(request, 'phonebook/invited.html', {'recipient': invite.recipient })
+        return render(request, 'phonebook/invited.html',
+                      {'recipient': invite.recipient})
 
-    return render(request, 'phonebook/invite.html', {'invite_form':invite_form})
+    return render(request, 'phonebook/invite.html',
+                  {'invite_form': invite_form})
 
 
 @vouch_required
