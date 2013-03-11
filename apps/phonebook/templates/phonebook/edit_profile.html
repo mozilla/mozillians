@@ -53,7 +53,7 @@
           </p>
           <div class="privacy-all">
             {{ _('Make all fields visible to:') }}
-            <select name="{# Name content here #}" id="profile-privacy">
+            <select id="privacy-profile-master" name="{# Name content here #}" id="profile-privacy">
               <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
               <option value="public">{{ _('Public') }}</option>
               <option value="mozillians">{{ _('Mozillians') }}</option>
@@ -62,16 +62,40 @@
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-fullname-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.full_name) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-ircname-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.ircname) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-website-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.website) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-bio-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.bio) }}
           <hr>
 
@@ -83,13 +107,31 @@
               vice-versa.
             {% endtrans %}
           </p>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-country-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.country) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-region-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.region) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          <div class="privacy-controls">
+            <select id="privacy-city-setting" class="privacy-choice" name="{# Name content here #}" >
+              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
+              <option value="public">{{ _('Public') }}</option>
+              <option value="mozillians">{{ _('Mozillians') }}</option>
+            </select>
+          </div>
           {{ bootstrap(profile_form.city) }}
           <hr>
         </div>
@@ -102,7 +144,7 @@
           </p>
           <div class="privacy-all">
             {{ _('Make all fields visible to:') }}
-            <select name="{# Name content here #}" id="skills-privacy">
+            <select id="privacy-skills-master" name="{# Name content here #}">
               <option selected="selected">-- {{ _('Select One') }} --</option>
               <option value="public">{{ _('Public') }}</option>
               <option value="mozillians">{{ _('Mozillians') }}</option>
