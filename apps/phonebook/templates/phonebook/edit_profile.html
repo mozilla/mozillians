@@ -45,7 +45,7 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
-          <h2>{{ _('Profile - Privacy Settings') }}</h2>
+          <h2>{{ _('Profile') }}</h2>
           <p>
             {% trans %}
             Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
@@ -61,14 +61,19 @@
           </div>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.full_name) }}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.ircname) }}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.website) }}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.bio) }}
+          <hr>
 
           <h2>{{ _('Location') }}</h2>
           <p>
@@ -80,13 +85,16 @@
           </p>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.country) }}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.region) }}
+          <hr>
           {% include 'phonebook/includes/privacy_controls.html' %}
           {{ bootstrap(profile_form.city) }}
+          <hr>
         </div>
         <div class="tab-pane" id="skills">
-          <h2>{{ _('Groups, Skills & Languages - Privacy Settings') }}</h2>
+          <h2>{{ _('Skills & Groups') }}</h2>
           <p>
             {% trans %}
             Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
@@ -132,6 +140,7 @@
           {{ profile_form.languages }}
         </div>
         <div class="tab-pane" id="vouches">
+          <h2>{{ _('Vouches & Invites') }}</h2>
           <div class="control-group">
             <label class="control-label">{{ _('Vouched By') }}</label>
             <div class="controls">
@@ -172,6 +181,7 @@
           {% endif %}
         </div>
         <div class="tab-pane" id="account">
+          <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
           <div class="control-group">
             <label class="control-label">{{ _('Persona Email') }}</label>
@@ -206,6 +216,7 @@
           </div>
         </div>
         <div class="tab-pane" id="services">
+          <h2>{{ _('Services') }}</h2>
           <div class="control-group">
             <p class="field_description">
               {% trans bugzilla_url='http://bugzilla.mozilla.org',

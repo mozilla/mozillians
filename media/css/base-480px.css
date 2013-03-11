@@ -23,4 +23,8 @@
     #home-group {
         height: 260px;
     }
+    .privacy-controls select {
+        float: none;
+        margin-bottom: 10px;
+    }
 }
