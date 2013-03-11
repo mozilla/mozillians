@@ -1,13 +1,9 @@
 <div class="control-group photo {% if profile_form.photo.errors %}error{% endif %}">
   <label class="control-label" for="id_photo">{{ profile_form.photo.label }}</label>
-  <div class="controls"> 
-    <div class="privacy-controls">
-      <select id="privacy-photo-setting" class="privacy-choice" name="{# Name content here #}" >
-        <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
-        <option value="public">{{ _('Public') }}</option>
-        <option value="mozillians">{{ _('Mozillians') }}</option>
-      </select>
-    </div>
+  <div class="controls">
+    {% with privacycontrolid = 'privacy-photo-setting' %}
+      {% include 'phonebook/includes/privacy_controls.html' %}
+    {% endwith %}
     <div class="thumbnail">
       <img id="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile photo') }}">
     </div>
