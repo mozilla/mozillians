@@ -53,7 +53,7 @@
           </p>
           <div class="privacy-all">
             {{ _('Make all fields visible to:') }}
-            <select name="{# Name content here #}" id="profile-privacy">
+            <select id="privacy-profile-master" name="{# Name content here #}"> 
               <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
               <option value="public">{{ _('Public') }}</option>
               <option value="mozillians">{{ _('Mozillians') }}</option>
@@ -62,16 +62,24 @@
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-fullname-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.full_name) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-ircname-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.ircname) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-website-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.website) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-bio-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.bio) }}
           <hr>
 
@@ -83,13 +91,19 @@
               vice-versa.
             {% endtrans %}
           </p>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-country-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.country) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-region-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.region) }}
           <hr>
-          {% include 'phonebook/includes/privacy_controls.html' %}
+          {% with privacycontrolid = 'privacy-city-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ bootstrap(profile_form.city) }}
           <hr>
         </div>
@@ -102,7 +116,7 @@
           </p>
           <div class="privacy-all">
             {{ _('Make all fields visible to:') }}
-            <select name="{# Name content here #}" id="skills-privacy">
+            <select id="privacy-skills-master" name="{# Name content here #}"> 
               <option selected="selected">-- {{ _('Select One') }} --</option>
               <option value="public">{{ _('Public') }}</option>
               <option value="mozillians">{{ _('Mozillians') }}</option>
