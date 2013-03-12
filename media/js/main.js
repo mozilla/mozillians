@@ -22,7 +22,9 @@ var app = {
 
         // Switching all options for profile privacy on select 
         $('.privacy-all select').change(function(){
-            $('.privacy-choice').val($(this).val());
+            if ($(this).val() != '') {
+              $('.privacy-choice').val($(this).val());
+            }
         });
 
         // Shows or hides all fields, based on their value in comparison to dropdown value
