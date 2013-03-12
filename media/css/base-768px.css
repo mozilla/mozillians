@@ -24,18 +24,21 @@
     #quick-search {
         display:none;
     }
-    .privacy-controls select {
+    .privacy-controls {
         float: none;
         margin: 0 0 25px 160px;
     }
 
-    .photo .privacy-controls select {
+    .photo .privacy-controls {
         margin: 0 0 15px 0;
     }
     .privacy-all { 
         float: none;
     }
     .privacy-view form {
+        float: none;
+    }
+    body#body-edit-profile .control-group {
         float: none;
     }
 }

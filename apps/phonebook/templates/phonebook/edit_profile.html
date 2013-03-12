@@ -45,42 +45,36 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
-          <h2>{{ _('Profile') }}</h2>
           <p>
             {% trans %}
-            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          <div class="privacy-all">
-            {{ _('Make all fields visible to:') }}
-            <select id="privacy-profile-master" name="{# Name content here #}"> 
-              <option selected="selected">-- {{ _('Select privacy mode') }} --</option>
-              <option value="public">{{ _('Public') }}</option>
-              <option value="mozillians">{{ _('Mozillians') }}</option>
-            </select>
-          </div>
+          {% with masterprivacycontrolid = 'privacy-profile-master' %}
+            {% include 'phonebook/includes/master_privacy_controls.html' %}
+          {% endwith %}
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
+          {{ bootstrap(profile_form.full_name) }}
           {% with privacycontrolid = 'privacy-fullname-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.full_name) }}
           <hr>
+          {{ bootstrap(profile_form.ircname) }}
           {% with privacycontrolid = 'privacy-ircname-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.ircname) }}
           <hr>
+          {{ bootstrap(profile_form.website) }}
           {% with privacycontrolid = 'privacy-website-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.website) }}
           <hr>
+          {{ bootstrap(profile_form.bio) }}
           {% with privacycontrolid = 'privacy-bio-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.bio) }}
           <hr>
 
           <h2>{{ _('Location') }}</h2>
@@ -91,37 +85,31 @@
               vice-versa.
             {% endtrans %}
           </p>
+          {{ bootstrap(profile_form.country) }}
           {% with privacycontrolid = 'privacy-country-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.country) }}
           <hr>
+          {{ bootstrap(profile_form.region) }}
           {% with privacycontrolid = 'privacy-region-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.region) }}
           <hr>
+          {{ bootstrap(profile_form.city) }}
           {% with privacycontrolid = 'privacy-city-setting' %}
             {% include 'phonebook/includes/privacy_controls.html' %}
           {% endwith %}
-          {{ bootstrap(profile_form.city) }}
           <hr>
         </div>
         <div class="tab-pane" id="skills">
-          <h2>{{ _('Skills & Groups') }}</h2>
           <p>
             {% trans %}
-            Select who can see your profile. Choose below which information you want to be public or visible to only Mozillians. You can also change the visibility of your entire profile at once.
+            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          <div class="privacy-all">
-            {{ _('Make all fields visible to:') }}
-            <select id="privacy-skills-master" name="{# Name content here #}"> 
-              <option selected="selected">-- {{ _('Select One') }} --</option>
-              <option value="public">{{ _('Public') }}</option>
-              <option value="mozillians">{{ _('Mozillians') }}</option>
-            </select>
-          </div>
+          {% with masterprivacycontrolid = 'privacy-skills-master' %}
+            {% include 'phonebook/includes/master_privacy_controls.html' %}
+          {% endwith %}
           <h2>{{ _('Groups') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -130,6 +118,9 @@
               product or sub-community.
             {% endtrans %}
           </p>
+          {% with privacycontrolid = 'privacy-groups-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ profile_form.groups.label_tag() }}
           {{ profile_form.groups }}
           <h2>{{ _('Skills') }}</h2>
@@ -140,6 +131,9 @@
               time, energy, or both.
             {% endtrans %}
           </p>
+          {% with privacycontrolid = 'privacy-skills-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ profile_form.skills.label_tag() }}
           {{ profile_form.skills }}
           <h2>{{ _('Languages') }}</h2>
@@ -150,6 +144,9 @@
               easily by other Mozillians.
             {% endtrans %}
           </p>
+          {% with privacycontrolid = 'privacy-groups-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
           {{ profile_form.languages.label_tag() }}
           {{ profile_form.languages }}
         </div>
@@ -195,14 +192,22 @@
           {% endif %}
         </div>
         <div class="tab-pane" id="account">
+          {% with masterprivacycontrolid = 'privacy-account-master' %}
+            {% include 'phonebook/includes/master_privacy_controls.html' %}
+          {% endwith %}
           <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Persona Email') }}</label>
             <div class="controls">
               <span class="label-text">{{ user.email }}</span>
             </div>
           </div>
+          {% with privacycontrolid = 'privacy-email-setting' %}
+            {% include 'phonebook/includes/privacy_controls.html' %}
+          {% endwith %}
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Password') }}</label>
             <div class="controls">
@@ -213,6 +218,7 @@
               </span>
             </div>
           </div>
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Delete Account') }}</label>
             <div class="controls">
@@ -241,7 +247,7 @@
                 <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
               {% endtrans %}
             </p>
-            <h2>{{ _('Privacy Settings') }}</h2>
+            <h2>{{ _('Other Sites') }}</h2>
             <div id="privacy-settings">
               <p class="field_description">
                 {{ bootstrap(profile_form.allows_community_sites) }}
