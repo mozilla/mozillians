@@ -22,9 +22,7 @@
     {% else %}
       {{ _('Pending Profile') }}
     {% endif %}
-
   </h1> 
-
 
   <div class="clear"></div>
 
@@ -83,9 +81,9 @@
       <form method="GET" action=".">
         <label>{{ _('View as:') }}</label>
         <select id="view-privacy-mode">
+            <option value="all" selected>Myself</option>
             <option value="mozillians">Mozillians</option>
             <option value="public">Public</option>
-            <option value="all">Myself</option>
         </select>
       </form>
     </div>

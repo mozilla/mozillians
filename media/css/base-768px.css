@@ -32,13 +32,15 @@
     .photo .privacy-controls {
         margin: 0 0 15px 0;
     }
-    .privacy-all { 
-        float: none;
-    }
+
     .privacy-view form {
         float: none;
     }
     body#body-edit-profile .control-group {
         float: none;
+    }
+
+    #skills .privacy-controls {
+        margin: 0 0 25px 0;
     }
 }

@@ -720,15 +720,18 @@ label, input, button, select, textarea {
 .popular-groups {
     padding: 10px 0;
 }
-.privacy-all {
-    margin-top: 20px;
-    float: right;
+
+.privacy-global-settings span.label-text, .privacy-global-settings .privacy-all {
+    float: left;
 }
 
-.privacy-all select {
+.privacy-global-settings .privacy-all select {
     width: 180px;
 }
 
+.privacy-global-settings span.label-text {
+    margin: 5px 10px 0 0;
+}
 
 #privacy-settings .control-group > label {
     margin-right: 15px;

@@ -50,9 +50,6 @@
             Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          {% with masterprivacycontrolid = 'privacy-profile-master' %}
-            {% include 'phonebook/includes/master_privacy_controls.html' %}
-          {% endwith %}
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
@@ -107,9 +104,6 @@
             Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          {% with masterprivacycontrolid = 'privacy-skills-master' %}
-            {% include 'phonebook/includes/master_privacy_controls.html' %}
-          {% endwith %}
           <h2>{{ _('Groups') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -192,9 +186,11 @@
           {% endif %}
         </div>
         <div class="tab-pane" id="account">
-          {% with masterprivacycontrolid = 'privacy-account-master' %}
-            {% include 'phonebook/includes/master_privacy_controls.html' %}
-          {% endwith %}
+          <p>
+            {% trans %}
+            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
+            {% endtrans %}
+          </p>
           <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
           <hr>
@@ -217,6 +213,21 @@
                 {% endtrans %}
               </span>
             </div>
+          </div>
+          <hr>
+          <div class="control-group privacy-global-settings">
+            <label class="control-label">{{ _('Privacy Settings') }}</label>
+              <div class="controls">
+                <span class="label-text">
+                  {{ _('Make all of my profile fields visible to:') }}
+                </span>
+                <div class="privacy-all">
+                  <select id="privacy-global-settings" name="{# Name content here #}"> 
+                      <option value="mozillians" selected>{{ _('Mozillians') }}</option>
+                        <option value="public">{{ _('Public') }}</option>
+                    </select>
+                </div>
+              </div>
           </div>
           <hr>
           <div class="control-group">
