@@ -81,11 +81,11 @@
     {% endif %}
     <div class="privacy-view">
       <form method="GET" action=".">
+        <label>{{ _('View as:') }}</label>
         <select id="view-privacy-mode">
-            <option value="#">-- View as --</option>
-            <option value="public">Public</option>
             <option value="mozillians">Mozillians</option>
-            <option value="all">All</option>
+            <option value="public">Public</option>
+            <option value="all">Myself</option>
         </select>
       </form>
     </div>

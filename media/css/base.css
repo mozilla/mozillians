@@ -729,14 +729,35 @@ label, input, button, select, textarea {
     width: 180px;
 }
 
+
 #privacy-settings .control-group > label {
     margin-right: 15px;
     width: 300px;
 }
 
-.privacy-controls select {
-    width: 180px;
+body#body-edit-profile .control-group {
+    float: left;
+}
+
+body#body-edit-profile #services .control-group {
+    float: none;
+}
+
+body#body-edit-profile .control-group.photo {
+    float: none;
+}
+
+.privacy-controls {
     float: right;
+}
+
+.privacy-controls select {
+    width: 100px;
+}
+
+.privacy-controls label {
+    margin: 3px 5px 0 0;
+    float: left;
 }
 
 .edit-profile {
@@ -749,4 +770,8 @@ label, input, button, select, textarea {
 
 .privacy-view form {
     float: right;
+}
+
+hr {
+   clear: both; 
 }
