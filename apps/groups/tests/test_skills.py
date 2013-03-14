@@ -14,10 +14,9 @@ from ..models import AUTO_COMPLETE_COUNT, Skill
 class SkillsTest(common.tests.ESTestCase):
 
     def test_autocomplete_api(self):
-        self.client.login(email=self.mozillian.email)
-
-        r = self.client.get(reverse('skill_search'), dict(term='daft'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('skill_search'),
+                                      dict(term='daft'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         eq_(r['Content-Type'], 'application/json', 'api uses json header')
         assert not 'daft_punk' in json.loads(r.content)
@@ -33,8 +32,9 @@ class SkillsTest(common.tests.ESTestCase):
             profile.skills.add(robots)
 
         assign_autocomplete_to_groups()
-        r = self.client.get(reverse('skill_search'), dict(term='true'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('skill_search'),
+                                      dict(term='true'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         assert 'true love' in json.loads(r.content)
 
@@ -43,11 +43,9 @@ class SkillsTest(common.tests.ESTestCase):
         profile = self.pending.get_profile()
         assert not profile.skills.all(), 'User should have no skills.'
 
-        self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(full_name='McAwesomepants',
-                              skills='Awesome foo Bar'),
-                         follow=True)
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='McAwesomepants', skills='Awesome foo Bar'))
+        self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.skills.all(), (
                 "Pending user should be able to edit skills.")

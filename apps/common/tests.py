@@ -11,6 +11,7 @@ import elasticutils.contrib.django.estestcase as estestcase
 from elasticutils.contrib.django import get_es
 
 from apps.users.cron import index_all_profiles
+from apps.users.models import MOZILLIANS, UserProfile
 
 
 class TestCase(test_utils.TestCase):
@@ -54,6 +55,9 @@ class TestCase(test_utils.TestCase):
         self.mozillian_client2.login(email=self.mozillian2.email)
         self.pending_client = test.Client()
         self.pending_client.login(email=self.pending.email)
+        self.data_privacy_fields = {}
+        for field in UserProfile._privacy_fields:
+            self.data_privacy_fields['privacy_%s' % field] = MOZILLIANS
 
     @classmethod
     def tearDownClass(cls):

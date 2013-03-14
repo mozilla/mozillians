@@ -15,7 +15,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 from apps.common.admin import export_as_csv_action
 
 from .cron import index_all_profiles
-from .models import UserProfile, UsernameBlacklist
+from .models import COUNTRIES, UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
@@ -149,7 +149,7 @@ class UserAdmin(UserAdmin):
                subscribe_to_basket_action(), unsubscribe_from_basket_action()]
 
     def country(self, obj):
-        return obj.userprofile.country
+        return COUNTRIES.get(obj.userprofile.country, '')
     country.admin_order_field = 'userprofile__country'
 
     def is_vouched(self, obj):

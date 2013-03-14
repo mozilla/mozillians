@@ -23,7 +23,8 @@ class BasketTests(ESTestCase):
 
     @patch('users.tasks.request')
     def test_basket_call_on_edit(self, mock_obj):
-        data = {'full_name': 'Foobar', 'country': 'gr'}
+        data = self.data_privacy_fields.copy()
+        data.update({'full_name': 'Foobar', 'country': 'gr'})
         userprofile = self.mozillian.userprofile
         userprofile.basket_token = 'exampleid'
         userprofile.save()
