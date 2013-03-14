@@ -1,7 +1,7 @@
 <div class="span6 result">
   <a class="btn js-btn" href="{{ url('profile', profile.user.username) }}">
     <div class="avatar">
-      <img class="profile-photo" src="{{ profile.photo_url() }}" alt="{{ _('Profile Photo') }}">
+      <img class="profile-photo" src="{{ profile.get_photo_url() }}" alt="{{ _('Profile Photo') }}">
     </div>
     <div class="details">
       <ul>
@@ -19,9 +19,9 @@
             {{ _('Non-Vouched') }}
           </li>
         {% endif %}
-        {% if profile.user.email %}
+        {% if profile.email %}
           <li>
-            {{ _('Email:') }} {{ profile.user.email }}
+            {{ _('Email:') }} {{ profile.email }}
           </li>
         {% endif %}
         {% if profile.user.username %}

@@ -34,10 +34,9 @@ class GroupTest(common.tests.ESTestCase):
                 'User should have no groups by default.')
 
     def test_autocomplete_api(self):
-        self.client.login(email=self.mozillian.email)
-
-        r = self.client.get(reverse('group_search'), dict(term='daft'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('group_search'),
+                                      dict(term='daft'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         eq_(r['Content-Type'], 'application/json', 'api uses json header')
         assert not 'daft_punk' in json.loads(r.content)
@@ -53,8 +52,9 @@ class GroupTest(common.tests.ESTestCase):
             profile.groups.add(robots)
 
         assign_autocomplete_to_groups()
-        r = self.client.get(reverse('group_search'), dict(term='daft'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('group_search'),
+                                      dict(term='daft'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         assert 'daft_punk' in json.loads(r.content)
 
@@ -75,12 +75,9 @@ class GroupTest(common.tests.ESTestCase):
         """Ensure groups are case insensitive."""
         profile = self.mozillian.get_profile()
 
-        self.client.login(email=self.mozillian.email)
-
-        self.client.post(reverse('profile.edit'),
-                         dict(full_name='tofumatt', groups='Awesome,foo,Bar'),
-                         follow=True)
-
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='tofumatt', groups='Awesome,foo,Bar'))
+        self.mozillian_client.post(reverse('profile.edit'), data, follow=True)
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
 
         group_string = stringify_groups(profile.groups.all())
@@ -92,8 +89,9 @@ class GroupTest(common.tests.ESTestCase):
                 'Uppercase group should be transformed to lowercase.')
 
         # Make an AJAX request for a group using a capital letter.
-        r = self.client.get(reverse('group_search'), dict(term='Awesome'),
-                            HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('group_search'),
+                                      dict(term='Awesome'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         for g in json.loads(r.content):
             assert g.name == g.name.lower(), (
                     'Group search is case-insensitive.')
@@ -103,11 +101,9 @@ class GroupTest(common.tests.ESTestCase):
         profile = self.pending.get_profile()
         assert not profile.groups.all(), 'User should have no groups.'
 
-        self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(full_name='McAwesomepants',
-                              groups='Awesome foo Bar'),
-                         follow=True)
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='McAwesomepants', groups='Awesome foo Bar'))
+        self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.groups.all(), (
                 "Pending user should be able to edit groups.")
@@ -122,13 +118,10 @@ class GroupTest(common.tests.ESTestCase):
         assert not profile.groups.all(), (
                 'User has no groups at beginning of test.')
 
-        self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(
-                              full_name='McAwesomepants',
-                              # This should result in four groups
-                              groups='Awesome,,foo bar,  Bar,g '),
-                         follow=True)
+        data = self.data_privacy_fields
+        data.update(dict(full_name='McAwesomepants',
+                         groups='Awesome,,foo bar,  Bar,g '))
+        self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         eq_(4, profile.groups.count(), 'User should have four groups.')
         assert profile.groups.get(name='foo bar'), (
@@ -142,13 +135,11 @@ class GroupTest(common.tests.ESTestCase):
     def test_users_cant_add_system_groups(self):
         """Make sure users can't add system groups to their profile."""
         profile = self.mozillian.get_profile()
-
-        self.client.login(email=self.mozillian.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(full_name='tofumatt',
-                              groups='%s %s' % (self.NORMAL_GROUP.name,
-                                                self.SYSTEM_GROUP.name)),
-                         follow=True)
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='tofumatt',
+                    groups='%s %s' % (self.NORMAL_GROUP.name,
+                                      self.SYSTEM_GROUP.name)))
+        self.mozillian_client.post(reverse('profile.edit'), data, follow=True)
 
         groups = profile.groups.all()
 
@@ -172,12 +163,11 @@ class GroupTest(common.tests.ESTestCase):
         eq_(2, profile.groups.count(), 'User should have both groups.')
 
         # Edit this user's profile and remove a group.
-        self.client.logout()
-        self.client.login(email=self.mozillian.email)
-        response = self.client.post(
-            reverse('profile.edit'),
-            dict(full_name="McLovin'", username='fo', groups=''),
-            follow=True)
+        self.mozillian_client.login(email=self.mozillian.email)
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name="McLovin'", username='fo', groups=''))
+        response = self.mozillian_client.post(
+            reverse('profile.edit'), data, follow=True)
 
         doc = pq(response.content)
         assert not doc('#id_groups').attr('value'), (
@@ -198,8 +188,7 @@ class GroupTest(common.tests.ESTestCase):
         """
         profile = self.mozillian.get_profile()
 
-        self.client.login(email=self.mozillian.email)
-        response = self.client.get(reverse('group',
+        response = self.mozillian_client.get(reverse('group',
                                            args=[self.NORMAL_GROUP.url]))
         doc = pq(response.content)
 
@@ -210,7 +199,8 @@ class GroupTest(common.tests.ESTestCase):
                 '"Join Group" button should be present in the response.')
 
         # Follow the toggle membership form action.
-        r = self.client.post(doc('#toggle-group').attr('action'), follow=True)
+        r = self.mozillian_client.post(doc('#toggle-group').attr('action'),
+                                       follow=True)
         doc = pq(r.content)
 
         assert "Leave Group" in r.content, (
@@ -220,7 +210,7 @@ class GroupTest(common.tests.ESTestCase):
                 self.NORMAL_GROUP.name)
 
         # Do it again and they should leave the group.
-        r = self.client.post(doc('#toggle-group').attr('action'), {},
+        r = self.mozillian_client.post(doc('#toggle-group').attr('action'), {},
                              xsfollow=True)
         assert not profile.groups.filter(id=self.NORMAL_GROUP.id), (
                 'User should not be in the "%s" group' %
@@ -228,8 +218,8 @@ class GroupTest(common.tests.ESTestCase):
 
         # Test against a system group, where we shouldn't be able to toggle
         # membership.
-        response = self.client.get(reverse('group',
-                                           args=[self.SYSTEM_GROUP.url]))
+        response = self.mozillian_client.get(
+            reverse('group', args=[self.SYSTEM_GROUP.url]))
         doc = pq(response.content)
 
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
@@ -239,9 +229,8 @@ class GroupTest(common.tests.ESTestCase):
                 '"Join Group" button should not be present in the response.')
 
         # Attempt to manually toggle the group membership
-        r = self.client.post(reverse('group_toggle',
-                                     args=[self.SYSTEM_GROUP.url]),
-                            follow=True)
+        r = self.mozillian_client.post(
+            reverse('group_toggle', args=[self.SYSTEM_GROUP.url]), follow=True)
         assert not profile.groups.filter(id=self.SYSTEM_GROUP.id), (
                 'User should not be in the "%s" group' %
                 self.SYSTEM_GROUP.name)

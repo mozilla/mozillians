@@ -54,24 +54,32 @@
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
           {{ bootstrap(profile_form.full_name) }}
-          {% with privacycontrolid = 'privacy-fullname-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_full_name,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_full_name})) }}
+          </div>
           <hr>
           {{ bootstrap(profile_form.ircname) }}
-          {% with privacycontrolid = 'privacy-ircname-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_ircname,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_ircname})) }}
+          </div>
           <hr>
           {{ bootstrap(profile_form.website) }}
-          {% with privacycontrolid = 'privacy-website-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_website,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_website})) }}
+          </div>
           <hr>
           {{ bootstrap(profile_form.bio) }}
-          {% with privacycontrolid = 'privacy-bio-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_bio,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_bio})) }}
+          </div>
           <hr>
 
           <h2>{{ _('Location') }}</h2>
@@ -83,19 +91,25 @@
             {% endtrans %}
           </p>
           {{ bootstrap(profile_form.country) }}
-          {% with privacycontrolid = 'privacy-country-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_country,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_country})) }}
+          </div>
           <hr>
           {{ bootstrap(profile_form.region) }}
-          {% with privacycontrolid = 'privacy-region-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_region,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_region})) }}
+          </div>
           <hr>
           {{ bootstrap(profile_form.city) }}
-          {% with privacycontrolid = 'privacy-city-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_city,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_city})) }}
+          </div>
           <hr>
         </div>
         <div class="tab-pane" id="skills">
@@ -112,11 +126,14 @@
               product or sub-community.
             {% endtrans %}
           </p>
-          {% with privacycontrolid = 'privacy-groups-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
           {{ profile_form.groups.label_tag() }}
           {{ profile_form.groups }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_groups,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_groups})) }}
+          </div>
+
           <h2>{{ _('Skills') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -125,11 +142,13 @@
               time, energy, or both.
             {% endtrans %}
           </p>
-          {% with privacycontrolid = 'privacy-skills-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
           {{ profile_form.skills.label_tag() }}
           {{ profile_form.skills }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_skills,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_skills})) }}
+          </div>
           <h2>{{ _('Languages') }}</h2>
           <p class="field_description">
             {% trans %}
@@ -138,11 +157,13 @@
               easily by other Mozillians.
             {% endtrans %}
           </p>
-          {% with privacycontrolid = 'privacy-groups-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
           {{ profile_form.languages.label_tag() }}
           {{ profile_form.languages }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_languages,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_languages})) }}
+          </div>
         </div>
         <div class="tab-pane" id="vouches">
           <h2>{{ _('Vouches & Invites') }}</h2>
@@ -168,6 +189,7 @@
               </span>
             </div>
           </div>
+          <hr>
           {% if my_vouches %}
             <div class="control-group">
               <label class="control-label">{{ _('Vouchees') }}</label>
@@ -197,12 +219,14 @@
           <div class="control-group">
             <label class="control-label">{{ _('Persona Email') }}</label>
             <div class="controls">
-              <span class="label-text">{{ user.email }}</span>
+              <span class="label-text">{{ user.userprofile.email }}</span>
             </div>
           </div>
-          {% with privacycontrolid = 'privacy-email-setting' %}
-            {% include 'phonebook/includes/privacy_controls.html' %}
-          {% endwith %}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_email,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_email})) }}
+          </div>
           <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Password') }}</label>
@@ -222,10 +246,10 @@
                   {{ _('Make all of my profile fields visible to:') }}
                 </span>
                 <div class="privacy-all">
-                  <select id="privacy-global-settings" name="{# Name content here #}"> 
-                      <option value="" selected>{{ _('-- No Change --') }}</option>
-                      <option value="mozillians">{{ _('Mozillians') }}</option>
-                        <option value="public">{{ _('Public') }}</option>
+                  <select id="privacy-global-settings">
+                      <option value="-1" selected>{{ _('-- No Change --') }}</option>
+                      <option value="3">{{ _('Mozillians') }}</option>
+                      <option value="4">{{ _('Public') }}</option>
                     </select>
                 </div>
               </div>

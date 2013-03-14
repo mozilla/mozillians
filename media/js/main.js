@@ -19,22 +19,5 @@ var app = {
         $('#language').change(function() {
             $('#language-switcher').submit();
         });
-
-        // Switching all options for profile privacy on select 
-        $('.privacy-all select').change(function(){
-            if ($(this).val() != '') {
-              $('.privacy-choice').val($(this).val());
-            }
-        });
-
-        // Shows or hides all fields, based on their value in comparison to dropdown value
-        $('#view-privacy-mode').on('change', function () {
-            if (($(this).val()) == 'all') {
-                $('.privacy-options').show();
-            } else {
-                $('.privacy-options').hide();
-                $('.privacy-options.p-' + $(this).val()).show();
-            }
-        });
     });
 })(jQuery);
