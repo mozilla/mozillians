@@ -61,7 +61,9 @@ class UsernameRedirectionMiddleware(object):
             and not request.path_info.startswith('/u/')
             and not is_valid_path(request.path_info)
             and User.objects.filter(
-                username__iexact=request.path_info[1:].strip('/')).exists()):
+                username__iexact=request.path_info[1:].strip('/')).exists()
+            and request.user.is_authenticated()
+            and request.user.userprofile.is_vouched):
 
             newurl = '/u' + request.path_info
             if request.GET:
