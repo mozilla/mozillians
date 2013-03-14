@@ -8,7 +8,7 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-import common.tests
+import apps.common.tests.init
 
 from ..cron import assign_autocomplete_to_groups
 from ..helpers import stringify_groups
@@ -16,7 +16,7 @@ from ..models import AUTO_COMPLETE_COUNT, Group, GroupAlias
 from ..utils import merge_groups
 
 
-class GroupTest(common.tests.ESTestCase):
+class GroupTest(apps.common.tests.init.ESTestCase):
     """Test the group/grouping system."""
 
     def setUp(self):

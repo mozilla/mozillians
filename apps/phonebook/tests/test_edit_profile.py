@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
-from apps.common.tests import ESTestCase, user
+from apps.common.tests.init import ESTestCase, user
 
 ASSERTION = 'asldkfjasldfka'
 

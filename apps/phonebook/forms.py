@@ -20,8 +20,8 @@ REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 class SearchForm(happyforms.Form):
     q = forms.CharField(widget=forms.HiddenInput, required=False)
     limit = forms.CharField(widget=forms.HiddenInput, required=False)
-    include_non_vouched = forms.BooleanField(label=_lazy(u'Include non-vouched'),
-                                             required=False)
+    include_non_vouched = forms.BooleanField(
+        label=_lazy(u'Include non-vouched'), required=False)
 
     def clean_limit(self):
         """Validate that this limit is numeric and greater than 1."""

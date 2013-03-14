@@ -5,13 +5,13 @@ from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-import apps.common.tests
+import apps.common.tests.init
 from apps.common.browserid_mock import mock_browserid
 
 from ..models import Invite
 
 
-class InviteFlowTest(apps.common.tests.ESTestCase):
+class InviteFlowTest(apps.common.tests.init.ESTestCase):
     fake_email = 'mr.fusion@gmail.com'
     fake_email2 = 'mrs.fusion@gmail.com'
 
@@ -116,7 +116,7 @@ class InviteFlowTest(apps.common.tests.ESTestCase):
             False)
 
 
-class InviteEdgeTest(apps.common.tests.ESTestCase):
+class InviteEdgeTest(apps.common.tests.init.ESTestCase):
 
     def test_no_reinvite(self):
         """Don't reinvite a vouched user."""
@@ -135,10 +135,10 @@ class InviteEdgeTest(apps.common.tests.ESTestCase):
         Their stupid friends...
         """
         url = reverse('invite')
-        d = dict(recipient='mr.fusion@gmail.com')
-        self.client.login(email=self.pending.email)
-        r = self.client.post(url, d, follow=True)
-        eq_(r.status_code, 403)
+        data = {'recipient': 'mr.fusion@gmail.com'}
+        response = self.pending_client.post(url, data, follow=True)
+        eq_(response.status_code, 200)
+        assert('You must be vouched to continue.' in response.content)
 
 
 def create_vouched_user(email):

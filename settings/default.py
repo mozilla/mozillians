@@ -136,15 +136,15 @@ MINIFY_BUNDLES = {
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
-    'common.middleware.PermissionDeniedMiddleware',
-    'common.middleware.RemoveSlashMiddleware',
-    'common.middleware.UsernameRedirectionMiddleware',
-    'common.middleware.OldGroupRedirectionMiddleware',
-    'common.middleware.GroupAliasRedirectionMiddleware',
+
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
-]
+
+    'common.middleware.StrongholdMiddleware',
+    'common.middleware.UsernameRedirectionMiddleware',
+    'common.middleware.OldGroupRedirectionMiddleware',
+    'common.middleware.GroupAliasRedirectionMiddleware']
 
 # StrictTransport
 STS_SUBDOMAINS = True
@@ -250,7 +250,7 @@ CSP_FRAME_SRC = ("'self'", 'https://browserid.org',
                  'https://login.persona.org',)
 CSP_FONT_SRC = ("'self'", 'https://www.mozilla.org')
 CSP_REPORT_ONLY = True
-CSP_REPORT_URI = '/csp/report'
+CSP_REPORT_URI = '/csp/report/'
 
 ES_DISABLED = True
 ES_HOSTS = ['127.0.0.1:9200']
@@ -285,3 +285,8 @@ def _allowed_hosts():
     host = host.rsplit(':', 1)[0]  # Remove port
     return [host]
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
+
+STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
+                         '^/admin/',
+                         '^/browserid/verify/',
+                         '^/api']

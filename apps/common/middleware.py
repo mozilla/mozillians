@@ -1,69 +1,51 @@
 import re
-import os
 from contextlib import contextmanager
-
-from django.contrib.auth.models import User
-from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
-                         HttpResponseRedirect, HttpResponsePermanentRedirect)
+from django.conf import settings
 from django.core.urlresolvers import is_valid_path, reverse
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.utils.encoding import iri_to_uri
-
-import commonware.log
-from funfactory.manage import ROOT
+from django.shortcuts import redirect
+from tower import ugettext as _
 
 from apps.groups.models import Group, GroupAlias
 
-# TODO: this is hackish. Once we update mozillians to the newest playdoh layout
-error_page = __import__('%s.urls' % os.path.basename(ROOT)).urls.error_page
-log = commonware.log.getLogger('m.phonebook')
 
+class StrongholdMiddleware(object):
+    """Keep unvouched users out, unless explicitly allowed in.
 
-class PermissionDeniedMiddleware(object):
-    """Add a generic 40x 'not allowed' handler.
-
-    TODO: Currently uses the 500.html error template, but in the
-    future should display a more tailored-to-the-actual-error 'not
-    allowed' page.
-    """
-
-    def process_response(self, request, response):
-        if isinstance(response, (HttpResponseForbidden,
-                                 HttpResponseNotAllowed)):
-            if request.user.is_authenticated():
-                log.debug('Permission denied middleware, user was '
-                          'authenticated, sending 500')
-            else:
-                if isinstance(response, (HttpResponseForbidden)):
-                    log.debug('Response was forbidden')
-                elif isinstance(response, (HttpResponseNotAllowed)):
-                    log.debug('Response was not allowed')
-            return error_page(request, 500, status=response.status_code)
-        return response
-
-
-class RemoveSlashMiddleware(object):
-    """Middleware that tries to remove a trailing slash if there was a 404.
-
-    If the response is a 404 because url resolution failed, we'll look
-    for a better url without a trailing slash.
-
-    Cribbed from kitsune:
-    https://github.com/mozilla/kitsune/blob/master/apps/sumo/middleware.py
+    Inspired by https://github.com/mgrouchy/django-stronghold/
 
     """
 
-    def process_response(self, request, response):
-        if (response.status_code == 404
-            and request.path_info.endswith('/')
-            and not is_valid_path(request.path_info)
-            and is_valid_path(request.path_info[:-1])):
-            # Use request.path because we munged app/locale in path_info.
-            newurl = request.path[:-1]
-            if request.GET:
-                with safe_query_string(request):
-                    newurl += '?' + request.META['QUERY_STRING']
-            return HttpResponsePermanentRedirect(newurl)
-        return response
+    def __init__(self):
+        self.exceptions = getattr(settings, 'STRONGHOLD_EXCEPTIONS', [])
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        for view_url in self.exceptions:
+            if re.match(view_url, request.path):
+                return None
+
+        allow_public = getattr(view_func, '_allow_public', None)
+        if allow_public:
+            return None
+
+        if not request.user.is_authenticated():
+            messages.warning(request, _('You must be logged in to continue.'))
+            return login_required(view_func)(request, *view_args,
+                                             **view_kwargs)
+
+        if request.user.userprofile.is_vouched:
+            return None
+
+        allow_unvouched = getattr(view_func, '_allow_unvouched', None)
+        if allow_unvouched:
+            return None
+
+        messages.error(request, _('You must be vouched to continue.'))
+        return redirect('home')
 
 
 class UsernameRedirectionMiddleware(object):
@@ -79,7 +61,9 @@ class UsernameRedirectionMiddleware(object):
             and not request.path_info.startswith('/u/')
             and not is_valid_path(request.path_info)
             and User.objects.filter(
-                username__iexact=request.path_info[1:].strip('/')).exists()):
+                username__iexact=request.path_info[1:].strip('/')).exists()
+            and request.user.is_authenticated()
+            and request.user.userprofile.is_vouched):
 
             newurl = '/u' + request.path_info
             if request.GET:

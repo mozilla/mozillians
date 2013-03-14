@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 
-import common.tests
+import apps.common.tests.init
 
 from ..cron import assign_autocomplete_to_groups
 from ..models import AUTO_COMPLETE_COUNT, Skill
 
 
-class SkillsTest(common.tests.ESTestCase):
+class SkillsTest(apps.common.tests.init.ESTestCase):
 
     def test_autocomplete_api(self):
         self.client.login(email=self.mozillian.email)

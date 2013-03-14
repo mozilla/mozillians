@@ -12,7 +12,7 @@
                 singleField: true,
                 singleFieldDelimiter: ',',
                 removeConfirmation: true,
-                tagSource: app.localeUrl('groups/search'),
+                tagSource: app.localeUrl('groups/search/'),
                 triggerKeys: ['enter', 'comma', 'tab']
             });
             $('#id_skills').tagit({
@@ -25,7 +25,7 @@
                 singleField: true,
                 singleFieldDelimiter: ',',
                 removeConfirmation: true,
-                tagSource: app.localeUrl('skills/search'),
+                tagSource: app.localeUrl('skills/search/'),
                 triggerKeys: ['enter', 'comma', 'tab']
             });
             $('#id_languages').tagit({
@@ -38,7 +38,7 @@
                 singleField: true,
                 singleFieldDelimiter: ',',
                 removeConfirmation: true,
-                tagSource: app.localeUrl('languages/search'),
+                tagSource: app.localeUrl('languages/search/'),
                 triggerKeys: ['enter', 'comma', 'tab']
             });
         }
