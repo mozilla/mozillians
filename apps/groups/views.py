@@ -14,7 +14,6 @@ from funfactory.urlresolvers import reverse
 from apps.groups.models import Group, Skill
 from apps.phonebook import forms
 from apps.phonebook.views import vouch_required
-from apps.users.models import UserProfile
 from apps.users.tasks import update_basket_task
 
 log = commonware.log.getLogger('m.groups')

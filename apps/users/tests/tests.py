@@ -185,27 +185,11 @@ class RegistrationTest(ESTestCase):
         See: https://bugzilla.mozilla.org/show_bug.cgi?id=736556
 
         """
-        d = dict(assertion=self.fake_assertion)
-        email = 'soy@latte.net'
-        with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
-
-        # Note: No username supplied.
-        d = dict(email=email,
-                 full_name='Tofu Matt',
-                 optin=True)
-        with browserid_mock.mock_browserid(email):
-            r = self.client.post(reverse('register'), d, follow=True)
-
-        assert r.context['user'].id, 'User should be created'
-        assert not r.context['user'].get_profile().is_vouched, (
-                'User should not be vouched')
-
-        d['username'] = 'foobar'
-        r = self.client.post(reverse('profile.edit'), d, follow=True)
-        assert 'You changed your username;' in r.content, (
-                'User should know that changing their username changes '
-                'their URL.')
+        data = self.data_privacy_fields.copy()
+        data.update({'username': 'foobar', 'full_name': 'Tofu Matt'})
+        response = self.pending_client.post(reverse('profile.edit'),
+                                            data, follow=True)
+        assert 'You changed your username;' in response.content
 
     def test_repeat_username(self):
         """Verify one cannot repeat email adresses."""

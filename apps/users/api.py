@@ -66,7 +66,7 @@ class UserResource(ClientCachedResource, ModelResource):
         return [unicode(g) for g in bundle.obj.languages.all()]
 
     def dehydrate_photo(self, bundle):
-        return bundle.obj.photo_url()
+        return bundle.obj.get_photo_url()
 
     def get_detail(self, request, **kwargs):
         if request.GET.get('restricted', False):
