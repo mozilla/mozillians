@@ -7,9 +7,9 @@ from nose.tools import eq_, nottest
 from product_details import product_details
 from pyquery import PyQuery as pq
 
-from common import browserid_mock
-from common.tests import ESTestCase, user
-from groups.models import Group
+from apps.common import browserid_mock
+from apps.common.tests.init import ESTestCase, user
+from apps.groups.models import Group
 
 from ..helpers import calculate_username, validate_username
 from ..models import UserProfile, UsernameBlacklist

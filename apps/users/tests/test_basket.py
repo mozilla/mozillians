@@ -1,7 +1,7 @@
 from django.conf import settings
 from funfactory.urlresolvers import reverse
 
-from common.tests import ESTestCase
+from apps.common.tests.init import ESTestCase
 
 from mock import patch
 

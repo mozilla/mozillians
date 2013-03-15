@@ -8,6 +8,7 @@ from django_browserid.views import Verify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
+from apps.common.decorators import allow_public, allow_unvouched
 from apps.phonebook.forms import RegisterForm, UserForm
 from apps.phonebook.models import Invite
 
@@ -17,6 +18,7 @@ log = commonware.log.getLogger('m.users')
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
 
 
+@allow_unvouched
 def logout(request, **kwargs):
     """Logout view that wraps Django's logout but always redirects.
 
@@ -49,6 +51,7 @@ class BrowserID(Verify):
         return self.failure_url
 
 
+@allow_public
 def register(request):
     """Registers Users.
 
@@ -115,11 +118,3 @@ def _update_invites(request):
     invite.redeemed = datetime.datetime.now()
     invite.redeemer = redeemer
     invite.save()
-
-
-def _set_already_exists_error(form):
-    msg = _('Someone has already registered an account with %(email)s.')
-    data = dict(email=form.cleaned_data['email'])
-    del form.cleaned_data['email']
-    error = _(msg % data)
-    form._errors['email'] = form.error_class([error])

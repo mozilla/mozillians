@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from mock import patch
 from nose.tools import eq_
 
-from apps.common.tests import ESTestCase, user
+from apps.common.tests.init import ESTestCase, user
 from apps.groups.models import Group
 
 
