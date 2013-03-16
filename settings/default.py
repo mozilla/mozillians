@@ -2,6 +2,7 @@
 
 # Django settings for the mozillians project.
 import logging
+import sys
 
 from funfactory.manage import path
 from funfactory import settings_base as base
@@ -267,7 +268,11 @@ DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
 STATSD_CLIENT = 'django_statsd.clients.normal'
 
 # Basket
-BASKET_URL = 'http://basket.mozilla.com'
+# If we're running tests, don't hit the real basket server.
+if 'test' in sys.argv:
+    BASKET_URL = 'http://127.0.0.1'
+else:
+    BASKET_URL = 'http://basket.mozilla.com'
 BASKET_NEWSLETTER = 'mozilla-phone'
 
 USER_AVATAR_DIR = 'uploads/userprofile'
