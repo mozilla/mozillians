@@ -58,7 +58,7 @@ CACHES = {}
 STATSD_CLIENT = 'django_statsd.clients.log'
 
 # Basket
-BASKET_URL = None
+BASKET_URL = 'http://127.0.0.1'
 BASKET_NEWSLETTER = 'mozilla-phone'
 BASKET_MANAGERS = None # or list of email addresses.
 
