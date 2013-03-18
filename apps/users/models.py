@@ -1,16 +1,21 @@
 import os
 import uuid
+import json
+import hashlib
 from datetime import datetime
+from urlparse import urljoin
 
 import pyes
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.core.cache import cache
 from django.db import models
 from django.db.models import signals as dbsignals
 from django.dispatch import receiver
 
+import requests
 from elasticutils.contrib.django import S
 from elasticutils.contrib.django.models import SearchMixin
 from elasticutils.contrib.django import tasks as elasticutilstasks
@@ -76,6 +81,9 @@ class UserProfile(models.Model, SearchMixin):
         verbose_name=_lazy(u'Allow Mozilla sites to access my profile data?'),
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
     basket_token = models.CharField(max_length=1024, default='', blank=True)
+
+    # Local in-memory cache of badges data
+    _badges = None
 
     @property
     def display_name(self):
@@ -297,10 +305,115 @@ class UserProfile(models.Model, SearchMixin):
             s = s.filter(is_vouched=True)
         return s
 
+    @property
+    def badges(self):
+        """Badges accessor as property that fetches badges for the profile,
+        swallows exceptions, and caches the results."""
+        try:
+            cache_key = ('OPENBADGES_PROFILE_BADGES_%s' %
+                         hashlib.md5(self.user.email).hexdigest())
+            if not self._badges:
+                badges = cache.get(cache_key)
+                if not badges:
+                    badges = self.fetch_raw_badges()
+                    tmout = getattr(settings, 'OPENBADGES_CACHE_TIMEOUT', 600)
+                    cache.set(cache_key, badges, tmout)
+                if badges:
+                    self._badges = [UserBadge(x) for x in badges]
+            return self._badges
+        except requests.exceptions.RequestException, e:
+            return None
+        except UserBadgesException, e:
+            return None
+        except ValueError, e:
+            return None
+
+    def fetch_raw_badges(self):
+        """Fetch open badges for the profile"""
+        badges_group = getattr(settings, 'OPENBADGES_SITE_GROUP',
+                               'mozillians.org')
+        base_url = getattr(settings, 'OPENBADGES_BASE_URL',
+                           'http://beta.openbadges.org')
+        timeout = getattr(settings, 'OPENBADGES_TIMEOUT',
+                          0.75)
+
+        # Convert the profile email address to OBI userid
+        convert_url = urljoin(base_url, 'displayer/convert/email')
+        r = requests.post(convert_url, timeout=timeout,
+                          data={'email': self.user.email})
+        if 200 != r.status_code:
+            raise UserBadgesException('User ID not found')
+        data = json.loads(r.content)
+        userid = data['userId']
+
+        # Fetch the public groups list for this user
+        group_list_url = urljoin(base_url, 'displayer/%(userid)s/groups.json')
+        r = requests.get(group_list_url % {'userid': userid}, timeout=timeout)
+        if 200 != r.status_code:
+            raise UserBadgesException('Badges groups could not be fetched')
+        data = json.loads(r.content)
+
+        # Search for the desired named group of badges
+        groupid = None
+        for group in data['groups']:
+            if group['name'].lower() == badges_group.lower():
+                groupid = group['groupId']
+        if groupid is None:
+            raise UserBadgesException('Badge group %s was not found' %
+                                      badges_group)
+
+        # Fetch the badges from the public group
+        group_url = urljoin(base_url,
+                            'displayer/%(userid)s/group/%(groupid)s.json')
+        r = requests.get(group_url % {'userid': userid,
+                                      'groupid': groupid}, timeout=timeout)
+        if 200 != r.status_code:
+            raise UserBadgesException('Badges could not be fetched')
+        data = json.loads(r.content)
+
+        return data['badges']
+
     def save(self, *args, **kwargs):
         self.auto_vouch()
         super(UserProfile, self).save(*args, **kwargs)
         self.add_to_staff_group()
+
+
+class UserBadgesException(Exception):
+    """Exception which may occur during the course of fetching badges from the
+    OpenBadges Displayer API"""
+    pass
+
+
+class UserBadge(object):
+    """Utility wrapper for badge assertion data"""
+
+    def __init__(self, raw):
+        self.raw = raw
+
+    @property
+    def link_url(self):
+        if self.evidence:
+            return self.evidence
+        if self.criteria:
+            return self.criteria
+        return None
+    
+    @property
+    def image_url(self):
+        if self.imageUrl:
+            return self.imageUrl
+        else:
+            return getattr(settings, 'OPENBADGES_DEFAULT_IMAGE',
+                           'https://openbadges.org/img/index/goldbadges.png')
+
+    def __getattr__(self, attr):
+        """Flatten the badge data into attributes"""
+        if attr in self.raw['assertion']['badge']:
+            return self.raw['assertion']['badge'][attr]
+        if attr in self.raw['assertion']:
+            return self.raw['assertion'][attr]
+        return self.raw.get(attr, None)
 
 
 @receiver(dbsignals.post_save, sender=User,

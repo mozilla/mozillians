@@ -184,6 +184,20 @@
         </ul>
       {% endif %}
 
+      {% if profile.badges %}
+        <h3>{{ _('Badges') }}</h3>
+        <ul id="badges">
+          {% for badge in profile.badges %}
+            <li class="badge">
+              {% set link_url = badge.link_url %}
+              {% if link_url %}<a target="_blank" href="{{ link_url }}" title="{{ badge.description }}">{% endif %}
+                <img src="{{ badge.image_url }}" alt="{{ badge.name }}">
+                <span class="name">{{ badge.name }}</span>
+              {% if link_url %}</a>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
       {% if shown_user.username == request.user.username %}
         <a href="{{ url('profile.edit') }}"

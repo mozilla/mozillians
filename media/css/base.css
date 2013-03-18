@@ -593,6 +593,53 @@ legend {
     width: 210px;
 }
 
+#profile-info ul#badges {
+    margin: 0; list-style-type: none;
+}
+
+#profile-info ul#badges:before,
+#profile-info ul#badges:after {
+    content: "";
+    display: table;
+}
+
+#profile-info ul#badges:after {
+    clear: both;
+}
+
+#profile-info ul#badges li.badge {
+    float: left;
+    position: relative;
+    width: 90px;
+    height: 130px;
+    height: calc(90px + 1.75em);
+    margin: 0.5em;
+    font-family: 'Open Sans Light','Lucida Sans','Lucida Grande','Lucida Sans Unicode',Verdana,sans-serif;
+    font-weight: normal;
+    text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.75);
+}
+
+#profile-info ul#badges li.badge a {
+    text-decoration: none;
+}
+
+#profile-info ul#badges li.badge img {
+    width: 90px;
+    height: 90px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#profile-info ul#badges li.badge span {
+    font-size: 0.8em;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 90px;
+    text-align: center;
+}
+
 .tab-content h2 {
     border-bottom: 1px solid #000;
     margin-bottom: 6px;
