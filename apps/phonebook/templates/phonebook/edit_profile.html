@@ -118,53 +118,62 @@
             Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          <h2>{{ _('Groups') }}</h2>
-          <p class="field_description">
-            {% trans %}
-              Groups are a community of Mozillians with some relation
-              to each other. This can be an interest, team, project,
-              product or sub-community.
-            {% endtrans %}
-          </p>
-          {{ profile_form.groups.label_tag() }}
-          {{ profile_form.groups }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_groups,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_groups})) }}
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Groups') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                Groups are a community of Mozillians with some relation
+                to each other. This can be an interest, team, project,
+                product or sub-community.
+              {% endtrans %}
+            </p>
+            {{ profile_form.groups.label_tag() }}
+            {{ profile_form.groups }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_groups,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_groups})) }}
+            </div>
           </div>
 
-          <h2>{{ _('Skills') }}</h2>
-          <p class="field_description">
-            {% trans %}
-              A skill is the learned capacity to carry out
-              pre-determined results often with the minimum outlay of
-              time, energy, or both.
-            {% endtrans %}
-          </p>
-          {{ profile_form.skills.label_tag() }}
-          {{ profile_form.skills }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_skills,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_skills})) }}
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Skills') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                A skill is the learned capacity to carry out
+                pre-determined results often with the minimum outlay of
+                time, energy, or both.
+              {% endtrans %}
+            </p>
+            {{ profile_form.skills.label_tag() }}
+            {{ profile_form.skills }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_skills,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_skills})) }}
+            </div>
           </div>
-          <h2>{{ _('Languages') }}</h2>
-          <p class="field_description">
-            {% trans %}
-              The Mozilla Project spans over many countries and
-              languages.  Share the languages you speak to be found
-              easily by other Mozillians.
-            {% endtrans %}
-          </p>
-          {{ profile_form.languages.label_tag() }}
-          {{ profile_form.languages }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_languages,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_languages})) }}
+
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Languages') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                The Mozilla Project spans over many countries and
+                languages.  Share the languages you speak to be found
+                easily by other Mozillians.
+              {% endtrans %}
+            </p>
+            {{ profile_form.languages.label_tag() }}
+            {{ profile_form.languages }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_languages,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_languages})) }}
+            </div>
           </div>
+
         </div>
+
         <div class="tab-pane" id="vouches">
           <h2>{{ _('Vouches & Invites') }}</h2>
           <div class="control-group">
