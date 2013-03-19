@@ -34,6 +34,11 @@
         class="form-horizontal well">
     {{ csrf() }}
     <h1>{{ _('Create Your Profile') }}</h1>
+    <div class="alert alert-info span10">
+      Our community directory is for Mozillians who are 13 and
+      older. We take safety issues very seriously, especially with
+      minors. If you are under 13, please don't create an account.
+    </div>
     <div class="tabbable">
       <ul class="nav nav-pills">
         <li class="active"><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
