@@ -10,7 +10,7 @@ build.py
 *-all.css
 *-min.js
 *-all.js
-vendor
+vendor/
 .noseids
 tmp/*
 *~
