@@ -16,7 +16,7 @@ tmp/*
 *~
 locale/*
 *.mo
-.vagrant
+.vagrant/
 puppet/cache/*
 puppet/manifests/build/
 vagrantconfig_local.yaml
