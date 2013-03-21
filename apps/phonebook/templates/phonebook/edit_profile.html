@@ -14,6 +14,11 @@
 {% block body_id %}edit-profile{% endblock %}
 {% block body_classes %}box-content{% endblock %}
 
+{% set top_blurb = 
+_('Modify your profile here and choose who can see your profile fields. You can 
+make parts of your profile publicly visible, but please be careful about 
+sharing your contact information.') %} 
+
 {% block main_content %}
   <h1>{{ _('Edit Your Profile') }}</h1>
 
@@ -45,13 +50,8 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
-          <p>
-            {% trans %}
-            Modify your profile here and choose who can see your
-            profile fields. Please be careful in deciding which
-            information to share publicly, especially your contact
-            information.
-            {% endtrans %}
+          <p> 
+            {{ top_blurb }} 
           </p>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
@@ -117,9 +117,7 @@
         </div>
         <div class="tab-pane" id="skills">
           <p>
-            {% trans %}
-            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
-            {% endtrans %}
+            {{ top_blurb }} 
           </p>
           <div class="ui-helper-clearfix">
             <h2>{{ _('Groups') }}</h2>
@@ -221,9 +219,7 @@
         </div>
         <div class="tab-pane" id="account">
           <p>
-            {% trans %}
-            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
-            {% endtrans %}
+            {{ top_blurb }} 
           </p>
           <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
