@@ -17,7 +17,7 @@ def index_all_profiles():
     # Get an es object, delete index and re-create it
 
     index = settings.ES_INDEXES['default']
-    es = get_es()
+    es = get_es(timeout=settings.ES_INDEXING_TIMEOUT)
     try:
         es.delete_index_if_exists(index)
     except pyes.exceptions.IndexMissingException:
