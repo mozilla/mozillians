@@ -111,6 +111,7 @@ MINIFY_BUNDLES = {
         ),
         'edit_profile': (
             'js/libs/tag-it/js/tag-it.js',
+            'js/profile_edit.js'
         ),
         'register': (
             'js/libs/tag-it/js/tag-it.js',
@@ -131,6 +132,9 @@ MINIFY_BUNDLES = {
             'js/libs/qunit.js',
             'js/tests/test.js',
         ),
+        'profile_view': (
+            'js/profile_view.js',
+            ),
     }
 }
 

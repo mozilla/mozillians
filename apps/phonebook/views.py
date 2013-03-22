@@ -3,7 +3,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponseForbidden
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -12,10 +12,13 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from apps.common.decorators import allow_public, allow_unvouched
+from apps.common.helpers import get_privacy_level
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
-from apps.users.models import COUNTRIES, UserProfile
+from apps.users.models import (COUNTRIES, EMPLOYEES, MOZILLIANS,
+                               PUBLIC, PRIVILEGED, UserProfile)
 from apps.users.tasks import remove_from_basket_task
+
 
 import forms
 from models import Invite
@@ -37,33 +40,55 @@ def home(request):
         return render(request, 'phonebook/home.html')
 
 
-@allow_unvouched
+@allow_public
 @never_cache
 def profile(request, username):
     """View a profile by username."""
-    if username == request.user.username:
-        # wants to see own
-        data = {'shown_user': request.user,
-                'profile': request.user.userprofile,
-                'vouch_form': None}
-        return render(request, 'phonebook/profile.html', data)
+    data = {}
+    if (request.user.is_authenticated() and request.user.username == username):
+        # own profile
+        view_as = request.GET.get('view_as', 'myself')
+        profile = request.user.userprofile
+        if view_as == 'anonymous':
+            profile = (UserProfile.objects
+                       .privacy_level(PUBLIC).get(user__username=username))
+        elif view_as == 'mozillian':
+            profile = (UserProfile.objects
+                       .privacy_level(MOZILLIANS).get(user__username=username))
+        elif view_as == 'employee':
+            profile = (UserProfile.objects
+                       .privacy_level(EMPLOYEES).get(user__username=username))
+        elif view_as == 'privileged':
+            profile = (UserProfile.objects
+                       .privacy_level(PRIVILEGED).get(user__username=username))
+        data['privacy_mode'] = view_as
 
-    if not request.user.userprofile.is_vouched:
-        messages.error(request, _('You must be vouched to continue.'))
-        return redirect('home')
+    else:
+        userprofile_query = UserProfile.objects.filter(user__username=username)
+        public_profile_exists = userprofile_query.public().exists()
+        profile_exists = userprofile_query.exists()
+        if (not profile_exists or ((not request.user.is_authenticated()
+                                    or not request.user.userprofile.is_vouched)
+                                   and not public_profile_exists)):
+            raise Http404
 
-    user = get_object_or_404(User, username=username)
-    if not user.userprofile.is_complete:
-        raise Http404()
+        # is vouched or public profile
+        profile = (UserProfile.objects
+                   .get(user__username=username))
+        if not profile.is_complete:
+            raise Http404
 
-    vouch_form = None
-    if (not user.userprofile.is_vouched
-        and request.user.userprofile.is_vouched):
-        vouch_form = forms.VouchForm(initial=dict(vouchee=user.userprofile.pk))
+        privacy_level = get_privacy_level(request.user)
+        profile.set_instance_privacy_level(privacy_level)
 
-    data = {'shown_user': user,
-            'profile': user.userprofile,
-            'vouch_form': vouch_form}
+        if (not profile.is_vouched
+            and request.user.is_authenticated()
+            and request.user.userprofile.is_vouched):
+            data['vouch_form'] = forms.VouchForm(
+                initial={'vouchee': profile.pk})
+
+    data['shown_user'] = profile.user
+    data['profile'] = profile
     return render(request, 'phonebook/profile.html', data)
 
 

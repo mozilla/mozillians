@@ -449,14 +449,19 @@ nav .nav a.browserid-login {
 a.btn {
     vertical-align:middle;
 }
+.photo .controls .thumbnail {
+    background-color: #FFFFFF;
+    margin-bottom: 15px;
+}
 
-.photo .controls img {
-    width:70px;
+.photo .controls .thumbnail img {
+    width: 70px;
 }
 
 .photo ul.photo_controls {
     list-style: none;
-    float: left;
+    width: 150px;
+    margin: 0;
 }
 
 .photo ul.photo_controls li {
@@ -467,21 +472,19 @@ a.btn {
     margin: 2px 5px 2px 0;
 }
 
-.photo #id_photo {
-
-}
-
 .photo .checkbox {
     margin: 0;
     padding: 0;
 }
 
 #edit_controls {
-    display:block;
-    overflow:auto;
-    margin:18px 20px;
+    margin: 20px 0;
 }
 
+#edit_controls button, #edit_controls a {
+    width: 175px; 
+    margin-right: 8px;   
+}
 .search-page .result {
     margin-top: 15px;
 }
@@ -593,10 +596,14 @@ legend {
     width: 210px;
 }
 
+.tab-content {
+    margin-bottom: 20px;
+}
+
 .tab-content h2 {
     border-bottom: 1px solid #000;
     margin-bottom: 6px;
-    padding-bottom: 3px;
+    padding: 15px 0 3px;
 }
 
 .tab-content .field_description {
@@ -626,10 +633,6 @@ legend {
 .search-options input {
     margin-left: 40px;
     margin-right: 10px;
-}
-
-.edit-profile {
-    max-width: 700px;
 }
 
 .well {
@@ -718,7 +721,60 @@ label, input, button, select, textarea {
     padding: 10px 0;
 }
 
+.privacy-global-settings span.label-text, .privacy-global-settings .privacy-all {
+    float: left;
+}
+
+.privacy-global-settings .privacy-all select {
+    width: 180px;
+}
+
+.privacy-global-settings span.label-text {
+    margin: 5px 10px 0 0;
+}
+
 #privacy-settings .control-group > label {
     margin-right: 15px;
     width: 300px;
+}
+
+body#body-edit-profile .control-group {
+    float: left;
+}
+
+body#body-edit-profile #services .control-group {
+    float: none;
+}
+
+body#body-edit-profile .control-group.photo {
+    float: none;
+}
+
+.privacy-controls {
+    float: right;
+}
+
+.privacy-controls select {
+    width: 100px;
+}
+
+.privacy-controls label {
+    margin: 3px 5px 0 0;
+    float: left;
+}
+
+.edit-profile {
+    max-width: 700px;
+}
+
+.privacy-view {
+    width: 62%;
+}
+
+.privacy-view form {
+    float: right;
+}
+
+hr {
+   clear: both; 
 }

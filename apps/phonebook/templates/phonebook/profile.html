@@ -46,13 +46,9 @@
             </em>
           {% endtrans %}
         {% else %}
-          {% trans %}
-            <p class="pull-left">This profile is waiting for approval.</p>
-          {% endtrans %}
-
           {% if vouch_form %}
             <form action="{{ url('vouch') }}" method="POST"
-                  id="vouch-form">
+                  id="vouch-form" class="pull-right">
               {{ csrf() }}
 
               {{ vouch_form }}
@@ -66,6 +62,12 @@
               {% endtrans %}
             </form>
           {% endif %}
+          {% trans %}
+            <p>This profile is waiting for approval.</p>
+            <p>Because our community directory is for Mozillians who
+              are 13 and older, please don't vouch for anyone under
+              13.</p>
+          {% endtrans %}
         {% endif %}
       </div>
     {% endif %}
@@ -77,16 +79,45 @@
         {% endwith %}
       {% endfor %}
     {% endif %}
+    {% if user == shown_user %}
+      <div class="privacy-view">
+        <form method="GET" action=".">
+          <label>{{ _('View as:') }}</label>
+          <select id="view-privacy-mode">
+              <option value="{{ url('profile', shown_user.username) }}"
+                      {% if privacy_mode == 'myself' %} selected {% endif %}>
+                Myself
+              </option>
+              <option value="{{ url('profile', shown_user.username)|urlparams(view_as='mozillian') }}"
+                      {% if privacy_mode == 'mozillian' %} selected {% endif %} >
+                Mozillian
+              </option>
+              <option value="{{ url('profile', shown_user.username)|urlparams(view_as='anonymous') }}"
+                      {% if privacy_mode == 'anonymous' %} selected {% endif %}>
+                Public
+              </option>
+          </select>
+        </form>
+      </div>
+    {% endif %}
     <div class="span6 offset1 well" id="profile-info">
+      {% if privacy_mode == 'anonymous' and not profile.is_public %}
+        {% trans edit_url=url('profile.edit') %}
+          Your profile is not public. If you <a href="{{ edit_url }}">edit
+          your profile</a> to have at least one public field,
+          your public profile will be viewable.
+        {% endtrans %}
+      {% endif %}
+
       <h2 class="fn p-name">
         {{ profile.display_name }}
       </h2>
 
       <dl>
-        {% if shown_user.email %}
+        {% if profile.email %}
           <dt>{{ _('Email') }}</dt>
-          <dd><a href="mailto:{{ shown_user.email }}">
-            {{ shown_user.email }}
+          <dd><a href="mailto:{{ profile.email }}">
+            {{ profile.email }}
           </a></dd>
         {% endif %}
 
@@ -104,20 +135,34 @@
           </dd>
         {% endif %}
 
-        {% if profile.country %}
+        {% if profile.country or profile.region or profile.city %}
           <dt>{{ _('Location') }}</dt>
           <dd>
-            {% if profile.region %}
-              {% if profile.city %}
+            {% if profile.city %}
+              {% if user.is_authenticated() %}
                 <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
                   {{ profile.city }}</a>,
+              {% else %}
+                {{ profile.city }}{% if profile.region %},{% elif profile.country %}<br>{% endif %}
               {% endif %}
-              <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
-                {{ profile.region }}</a>
-              <br>
             {% endif %}
-            <a href="{{ url('list_country', country=profile.country) }}">
-              {{ profile.get_country_display() }}</a>
+            {% if profile.region %}
+              {% if user.is_authenticated() %}
+                <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
+                  {{ profile.region }}</a>
+              {% else %}
+                {{ profile.region }}
+              {% endif %}
+                <br>
+            {% endif %}
+            {% if profile.country %}
+              {% if user.is_authenticated() %}
+              <a href="{{ url('list_country', country=profile.country) }}">
+                {{ profile.get_country_display() }}</a>
+              {% else %}
+                {{ profile.get_country_display() }}
+              {% endif %}
+            {% endif %}
           </dd>
         {% endif %}
 
@@ -146,7 +191,8 @@
           {% for group in profile.groups.all() %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
-              {% if request.user.get_profile().is_vouched %}
+              {% if (request.user.is_authenticated() and
+                     request.user.get_profile().is_vouched) %}
                 <a href="{{ url('group', group.url) }}">
                   {{ group.name }}
                 </a>
@@ -195,8 +241,13 @@
 
     <div class="span2">
       <div class="thumbnail">
-        <img id="profile-photo" src="{{ profile.photo_url() }}" width="600" alt="{{ _('Profile photo') }}">
+        <img id="profile-photo" src="{{ profile.get_photo_url() }}" width="600" alt="{{ _('Profile photo') }}">
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block site_js %}
+  {{ super() }}
+  {{ js('profile_view') }}
 {% endblock %}

@@ -8,7 +8,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import Q
 from django.db.models import signals as dbsignals
+from django.db.models.query import QuerySet, ValuesQuerySet
 from django.dispatch import receiver
 
 from elasticutils.contrib.django import S
@@ -23,7 +25,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from apps.groups.models import (Group, GroupAlias,
                                 Skill, SkillAlias,
                                 Language, LanguageAlias)
-from apps.phonebook.helpers import gravatar
+from apps.phonebook.helpers import DEFAULT_AVATAR, gravatar
 
 from tasks import update_basket_task
 
@@ -32,14 +34,158 @@ COUNTRIES = product_details.get_regions('en-US')
 USERNAME_MAX_LENGTH = 30
 AVATAR_SIZE = (300, 300)
 
+PRIVILEGED = 1
+EMPLOYEES = 2
+MOZILLIANS = 3
+PUBLIC = 4
+PRIVACY_CHOICES = (# (PRIVILEGED, 'Privileged'),
+                   # (EMPLOYEES, 'Employees'),
+                   (MOZILLIANS, 'Mozillians'),
+                   (PUBLIC, 'Public'))
+
 
 def _calculate_photo_filename(instance, filename):
     """Generate a unique filename for uploaded photo."""
     return os.path.join(settings.USER_AVATAR_DIR, str(uuid.uuid4()) + '.jpg')
 
 
-class UserProfile(models.Model, SearchMixin):
-    # This field is required.
+class UserProfileValuesQuerySet(ValuesQuerySet):
+    """Custom ValuesQuerySet to support privacy.
+
+    Note that when you specify fields in values() you need to include
+    the related privacy field in your query.
+
+    E.g. .values('first_name', 'privacy_first_name')
+
+    """
+
+    def _clone(self, *args, **kwargs):
+        c = super(UserProfileValuesQuerySet, self)._clone(*args, **kwargs)
+        c._privacy_level = getattr(self, '_privacy_level', None)
+        return c
+
+    def iterator(self):
+        # Purge any extra columns that haven't been explicitly asked for
+        extra_names = self.query.extra_select.keys()
+        field_names = self.field_names
+        aggregate_names = self.query.aggregate_select.keys()
+
+        names = extra_names + field_names + aggregate_names
+
+        privacy_fields = [
+            (names.index('privacy_%s' % field), names.index(field), field)
+            for field in set(UserProfile._privacy_fields) & set(names)]
+
+        for row in self.query.get_compiler(self.db).results_iter():
+            row = list(row)
+            for levelindex, fieldindex, field in privacy_fields:
+                if row[levelindex] < self._privacy_level:
+                    row[fieldindex] = UserProfile._privacy_fields[field]
+            yield dict(zip(names, row))
+
+
+class UserProfileQuerySet(QuerySet):
+    """Custom QuerySet to support privacy."""
+
+    def __init__(self, *args, **kwargs):
+        self.public_q = Q()
+        for field in UserProfile._privacy_fields:
+            key = 'privacy_%s' % field
+            self.public_q |= Q(**{key: PUBLIC})
+        return super(UserProfileQuerySet, self).__init__(*args, **kwargs)
+
+    def privacy_level(self, level=MOZILLIANS):
+        """Set privacy level for query set."""
+        self._privacy_level = level
+        return self.all()
+
+    def public(self):
+        """Return profiles with at least one PUBLIC field."""
+        return self.filter(self.public_q)
+
+    def _clone(self, *args, **kwargs):
+        """Custom _clone with privacy level propagation."""
+        if kwargs.get('klass', None) == ValuesQuerySet:
+            kwargs['klass'] = UserProfileValuesQuerySet
+        c = super(UserProfileQuerySet, self)._clone(*args, **kwargs)
+        c._privacy_level = getattr(self, '_privacy_level', None)
+        return c
+
+    def iterator(self):
+        """Custom QuerySet iterator which sets privacy level in every
+        object returned.
+
+        """
+
+        def _generator():
+            self._iterator = super(UserProfileQuerySet, self).iterator()
+            while True:
+                obj = self._iterator.next()
+                obj._privacy_level = getattr(self, '_privacy_level', None)
+                yield obj
+        return _generator()
+
+
+class UserProfileManager(models.Manager):
+    """Custom Manager for UserProfile."""
+
+    def get_query_set(self):
+        return UserProfileQuerySet(self.model)
+
+    def __getattr__(self, name):
+        return getattr(self.get_query_set(), name)
+
+
+class UserProfilePrivacyModel(models.Model):
+    _privacy_fields = {'photo': None,
+                       'full_name': '',
+                       'ircname': '',
+                       'email': '',
+                       'website': '',
+                       'bio': '',
+                       'city': '',
+                       'region': '',
+                       'country': '',
+                       'groups': Group.objects.none(),
+                       'skills': Skill.objects.none(),
+                       'languages': Language.objects.none(),
+                       'vouched_by': None}
+    _privacy_level = None
+
+    privacy_photo = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_full_name = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_ircname = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_email = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_website = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_bio = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_city = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_region = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_country = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_groups = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_skills = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_languages = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_vouched_by = models.PositiveIntegerField(
+        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+
+    class Meta:
+        abstract=True
+
+
+class UserProfile(UserProfilePrivacyModel, SearchMixin):
+    objects = UserProfileManager()
+
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
                                  verbose_name=_lazy(u'Full Name'))
@@ -77,135 +223,26 @@ class UserProfile(models.Model, SearchMixin):
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
     basket_token = models.CharField(max_length=1024, default='', blank=True)
 
-    @property
-    def display_name(self):
-        return self.full_name
-
     class Meta:
         db_table = 'profile'
         ordering = ['full_name']
 
-    def __unicode__(self):
-        """Return this user's name when their profile is called."""
-        return self.display_name
-
-    def get_absolute_url(self):
-        return reverse('profile', args=[self.user.username])
-
-    def anonymize(self):
-        """Remove personal info from a user"""
-
-        for name in ['first_name', 'last_name', 'email']:
-            setattr(self.user, name, '')
-        self.full_name = ''
-
-        # Give a random username
-        self.user.username = uuid.uuid4().hex[:30]
-        self.user.is_active = False
-
-        self.user.save()
-
-        for f in self._meta.fields:
-            if not f.editable or f.name in ['id', 'user']:
-                continue
-
-            if f.default == models.fields.NOT_PROVIDED:
-                raise Exception('No default value for %s' % f.name)
-
-            setattr(self, f.name, f.default)
-
-        for f in self._meta.many_to_many:
-            getattr(self, f.name).clear()
-
-        self.save()
-
-    def set_membership(self, model, membership_list):
-        """Alters membership to Groups, Skills and Languages."""
-        if model is Group:
-            m2mfield = self.groups
-            alias_model = GroupAlias
-        elif model is Skill:
-            m2mfield = self.skills
-            alias_model = SkillAlias
-        elif model is Language:
-            m2mfield = self.languages
-            alias_model = LanguageAlias
-
-        # Remove any non-system groups that weren't supplied in this list.
-        m2mfield.remove(*[g for g in m2mfield.all()
-                          if g.name not in membership_list
-                          and not getattr(g, 'system', False)])
-
-        # Add/create the rest of the groups
-        groups_to_add = []
-        for g in membership_list:
-            if alias_model.objects.filter(name=g).exists():
-                group = alias_model.objects.get(name=g).alias
-            else:
-                group = model.objects.create(name=g)
-
-            if not getattr(g, 'system', False):
-                groups_to_add.append(group)
-
-        m2mfield.add(*groups_to_add)
-
-    @property
-    def is_complete(self):
-        """Tests if a user has all the information needed to move on
-        past the original registration view.
-
-        """
-        return self.display_name.strip() != ''
-
-    def photo_url(self):
-        if self.photo:
-            return self.photo.url
-
-        return gravatar(self.user.email)
-
-    def vouch(self, vouched_by, commit=True):
-        if self.is_vouched:
-            return
-
-        self.is_vouched = True
-        self.vouched_by = vouched_by
-
-        if commit:
-            self.save()
-
-        self._email_now_vouched()
-
-    def auto_vouch(self):
-        """Auto vouch mozilla.com users."""
-        email = self.user.email
-        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            self.vouch(None, commit=False)
-
-    def add_to_staff_group(self):
-        """Keep users in the staff group if they're autovouchable."""
-        email = self.user.email
-        staff, created = Group.objects.get_or_create(name='staff', system=True)
-        if any(email.endswith('@' + x) for x in
-               settings.AUTO_VOUCH_DOMAINS):
-            self.groups.add(staff)
-        elif staff in self.groups.all():
-            self.groups.remove(staff)
-
-    def _email_now_vouched(self):
-        """Email this user, letting them know they are now vouched."""
-        subject = _(u'You are now vouched on Mozillians!')
-        message = _(u"You've now been vouched on Mozillians.org. "
-                     "You'll now be able to search, vouch "
-                     "and invite other Mozillians onto the site.")
-        send_mail(subject, message, 'no-reply@mozillians.org',
-                  [self.user.email])
+    def __getattribute__(self, attrname):
+        _getattr = (lambda x:
+                    super(UserProfile, self).__getattribute__(x))
+        privacy_fields = _getattr('_privacy_fields')
+        privacy_level = _getattr('_privacy_level')
+        if privacy_level is not None and attrname in privacy_fields:
+            field_privacy = _getattr('privacy_%s' % attrname)
+            if field_privacy < privacy_level:
+                return privacy_fields.get(attrname)
+        return super(UserProfile, self).__getattribute__(attrname)
 
     @classmethod
     def extract_document(cls, obj_id, obj=None):
         """Method used by elasticutils."""
         if obj is None:
             obj = cls.objects.get(pk=obj_id)
-
         d = {}
 
         attrs = ('id', 'is_vouched', 'website', 'ircname',
@@ -297,7 +334,165 @@ class UserProfile(models.Model, SearchMixin):
             s = s.filter(is_vouched=True)
         return s
 
+    @property
+    def email(self):
+        """Privacy aware email property."""
+        if self._privacy_level and self.privacy_email < self._privacy_level:
+            return self._privacy_fields['email']
+        return self.user.email
+
+    @property
+    def display_name(self):
+        return self.full_name
+
+    @property
+    def level(self):
+        """Return user privacy clearance."""
+        if self.groups.filter(name='staff').exists():
+            return EMPLOYEES
+        if self.is_vouched:
+            return MOZILLIANS
+        return PUBLIC
+
+    @property
+    def is_complete(self):
+        """Tests if a user has all the information needed to move on
+        past the original registration view.
+
+        """
+        return self.display_name.strip() != ''
+
+    @property
+    def is_public(self):
+        """Return True is any of the privacy protected fields is PUBLIC."""
+        for field in self._privacy_fields:
+            if getattr(self, 'privacy_%s' % field, None) == PUBLIC:
+                return True
+        return False
+
+    def __unicode__(self):
+        """Return this user's name when their profile is called."""
+        return self.display_name
+
+    def get_absolute_url(self):
+        return reverse('profile', args=[self.user.username])
+
+    def anonymize(self):
+        """Remove personal info from a user"""
+
+        for name in ['first_name', 'last_name', 'email']:
+            setattr(self.user, name, '')
+        self.full_name = ''
+
+        # Give a random username
+        self.user.username = uuid.uuid4().hex[:30]
+        self.user.is_active = False
+
+        self.user.save()
+
+        for f in self._meta.fields:
+            if not f.editable or f.name in ['id', 'user']:
+                continue
+
+            if f.default == models.fields.NOT_PROVIDED:
+                raise Exception('No default value for %s' % f.name)
+
+            setattr(self, f.name, f.default)
+
+        for f in self._meta.many_to_many:
+            getattr(self, f.name).clear()
+
+        self.save()
+
+    def set_instance_privacy_level(self, level):
+        """Sets privacy level of instance."""
+        self._privacy_level = level
+
+    def set_privacy_level(self, level, save=True):
+        """Sets all privacy enabled fields to 'level'."""
+        for field in self._privacy_fields:
+            setattr(self, 'privacy_%s' % field, level)
+        if save:
+            self.save()
+
+    def set_membership(self, model, membership_list):
+        """Alters membership to Groups, Skills and Languages."""
+        if model is Group:
+            m2mfield = self.groups
+            alias_model = GroupAlias
+        elif model is Skill:
+            m2mfield = self.skills
+            alias_model = SkillAlias
+        elif model is Language:
+            m2mfield = self.languages
+            alias_model = LanguageAlias
+
+        # Remove any non-system groups that weren't supplied in this list.
+        m2mfield.remove(*[g for g in m2mfield.all()
+                          if g.name not in membership_list
+                          and not getattr(g, 'system', False)])
+
+        # Add/create the rest of the groups
+        groups_to_add = []
+        for g in membership_list:
+            if alias_model.objects.filter(name=g).exists():
+                group = alias_model.objects.get(name=g).alias
+            else:
+                group = model.objects.create(name=g)
+
+            if not getattr(g, 'system', False):
+                groups_to_add.append(group)
+
+        m2mfield.add(*groups_to_add)
+
+    def get_photo_url(self):
+        if self._privacy_level and self.privacy_photo < self._privacy_level:
+            return DEFAULT_AVATAR
+
+        if self.photo:
+            return self.photo.url
+
+        return gravatar(self.user.email)
+
+    def vouch(self, vouched_by, commit=True):
+        if self.is_vouched:
+            return
+
+        self.is_vouched = True
+        self.vouched_by = vouched_by
+
+        if commit:
+            self.save()
+
+        self._email_now_vouched()
+
+    def auto_vouch(self):
+        """Auto vouch mozilla.com users."""
+        email = self.user.email
+        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+            self.vouch(None, commit=False)
+
+    def add_to_staff_group(self):
+        """Keep users in the staff group if they're autovouchable."""
+        email = self.user.email
+        staff, created = Group.objects.get_or_create(name='staff', system=True)
+        if any(email.endswith('@' + x) for x in
+               settings.AUTO_VOUCH_DOMAINS):
+            self.groups.add(staff)
+        elif staff in self.groups.all():
+            self.groups.remove(staff)
+
+    def _email_now_vouched(self):
+        """Email this user, letting them know they are now vouched."""
+        subject = _(u'You are now vouched on Mozillians!')
+        message = _(u"You've now been vouched on Mozillians.org. "
+                     "You'll now be able to search, vouch "
+                     "and invite other Mozillians onto the site.")
+        send_mail(subject, message, 'no-reply@mozillians.org',
+                  [self.user.email])
+
     def save(self, *args, **kwargs):
+        self._privacy_level = None
         self.auto_vouch()
         super(UserProfile, self).save(*args, **kwargs)
         self.add_to_staff_group()

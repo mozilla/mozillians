@@ -45,12 +45,45 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
+          <p>
+            {% trans %}
+            Modify your profile here and choose who can see your
+            profile fields. Please be careful in deciding which
+            information to share publicly, especially your contact
+            information.
+            {% endtrans %}
+          </p>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
+          <hr>
           {{ bootstrap(profile_form.full_name) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_full_name,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_full_name})) }}
+          </div>
+          <hr>
           {{ bootstrap(profile_form.ircname) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_ircname,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_ircname})) }}
+          </div>
+          <hr>
           {{ bootstrap(profile_form.website) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_website,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_website})) }}
+          </div>
+          <hr>
           {{ bootstrap(profile_form.bio) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_bio,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_bio})) }}
+          </div>
+          <hr>
 
           <h2>{{ _('Location') }}</h2>
           <p>
@@ -61,42 +94,91 @@
             {% endtrans %}
           </p>
           {{ bootstrap(profile_form.country) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_country,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_country})) }}
+          </div>
+          <hr>
           {{ bootstrap(profile_form.region) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_region,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_region})) }}
+          </div>
+          <hr>
           {{ bootstrap(profile_form.city) }}
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_city,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_city})) }}
+          </div>
+          <hr>
         </div>
         <div class="tab-pane" id="skills">
-          <h2>{{ _('Groups') }}</h2>
-          <p class="field_description">
+          <p>
             {% trans %}
-              Groups are a community of Mozillians with some relation
-              to each other. This can be an interest, team, project,
-              product or sub-community.
+            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
             {% endtrans %}
           </p>
-          {{ profile_form.groups.label_tag() }}
-          {{ profile_form.groups }}
-          <h2>{{ _('Skills') }}</h2>
-          <p class="field_description">
-            {% trans %}
-              A skill is the learned capacity to carry out
-              pre-determined results often with the minimum outlay of
-              time, energy, or both.
-            {% endtrans %}
-          </p>
-          {{ profile_form.skills.label_tag() }}
-          {{ profile_form.skills }}
-          <h2>{{ _('Languages') }}</h2>
-          <p class="field_description">
-            {% trans %}
-              The Mozilla Project spans over many countries and
-              languages.  Share the languages you speak to be found
-              easily by other Mozillians.
-            {% endtrans %}
-          </p>
-          {{ profile_form.languages.label_tag() }}
-          {{ profile_form.languages }}
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Groups') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                Groups are a community of Mozillians with some relation
+                to each other. This can be an interest, team, project,
+                product or sub-community.
+              {% endtrans %}
+            </p>
+            {{ profile_form.groups.label_tag() }}
+            {{ profile_form.groups }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_groups,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_groups})) }}
+            </div>
+          </div>
+
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Skills') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                A skill is the learned capacity to carry out
+                pre-determined results often with the minimum outlay of
+                time, energy, or both.
+              {% endtrans %}
+            </p>
+            {{ profile_form.skills.label_tag() }}
+            {{ profile_form.skills }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_skills,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_skills})) }}
+            </div>
+          </div>
+
+          <div class="ui-helper-clearfix">
+            <h2>{{ _('Languages') }}</h2>
+            <p class="field_description">
+              {% trans %}
+                The Mozilla Project spans over many countries and
+                languages.  Share the languages you speak to be found
+                easily by other Mozillians.
+              {% endtrans %}
+            </p>
+            {{ profile_form.languages.label_tag() }}
+            {{ profile_form.languages }}
+            <div class="privacy-controls">
+              {{ bootstrap(field_with_attrs(profile_form.privacy_languages,
+                                            **{'class':'privacy-choice',
+                                               'data-privacy-original':profile.privacy_languages})) }}
+            </div>
+          </div>
+
         </div>
+
         <div class="tab-pane" id="vouches">
+          <h2>{{ _('Vouches & Invites') }}</h2>
           <div class="control-group">
             <label class="control-label">{{ _('Vouched By') }}</label>
             <div class="controls">
@@ -119,6 +201,7 @@
               </span>
             </div>
           </div>
+          <hr>
           {% if my_vouches %}
             <div class="control-group">
               <label class="control-label">{{ _('Vouchees') }}</label>
@@ -137,13 +220,26 @@
           {% endif %}
         </div>
         <div class="tab-pane" id="account">
+          <p>
+            {% trans %}
+            Modify your profile here and choose who can see your profile fields. Please be careful in deciding which information to share publicly.
+            {% endtrans %}
+          </p>
+          <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Persona Email') }}</label>
             <div class="controls">
-              <span class="label-text">{{ user.email }}</span>
+              <span class="label-text">{{ user.userprofile.email }}</span>
             </div>
           </div>
+          <div class="privacy-controls">
+            {{ bootstrap(field_with_attrs(profile_form.privacy_email,
+                                          **{'class':'privacy-choice',
+                                             'data-privacy-original':profile.privacy_email})) }}
+          </div>
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Password') }}</label>
             <div class="controls">
@@ -154,6 +250,23 @@
               </span>
             </div>
           </div>
+          <hr>
+          <div class="control-group privacy-global-settings">
+            <label class="control-label">{{ _('Privacy Settings') }}</label>
+              <div class="controls">
+                <span class="label-text">
+                  {{ _('Make all of my profile fields visible to:') }}
+                </span>
+                <div class="privacy-all">
+                  <select id="privacy-global-settings">
+                      <option value="-1" selected>{{ _('-- No Change --') }}</option>
+                      <option value="3">{{ _('Mozillians') }}</option>
+                      <option value="4">{{ _('Public') }}</option>
+                    </select>
+                </div>
+              </div>
+          </div>
+          <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Delete Account') }}</label>
             <div class="controls">
@@ -171,6 +284,7 @@
           </div>
         </div>
         <div class="tab-pane" id="services">
+          <h2>{{ _('Services') }}</h2>
           <div class="control-group">
             <p class="field_description">
               {% trans bugzilla_url='http://bugzilla.mozilla.org',
@@ -181,7 +295,7 @@
                 <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
               {% endtrans %}
             </p>
-            <h2>{{ _("Privacy Settings") }}</h2>
+            <h2>{{ _('Other Sites') }}</h2>
             <div id="privacy-settings">
               <p class="field_description">
                 {{ bootstrap(profile_form.allows_community_sites) }}
@@ -189,7 +303,7 @@
               </p>
             </div>
             {% if user.get_profile().is_vouched %}
-              <h2>{{ _("Developers") }}</h2>
+              <h2>{{ _('Developers') }}</h2>
               <p class="field_description">
                 {% trans api_schema_url='https://wiki.mozilla.org/Mozillians/API-Specification',
                          bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
@@ -206,15 +320,15 @@
                   development forum</a>.
                 {% endtrans %}
               </p>
-              <h4>Your approved apps:</h4>
+              <h4>{{ _('Your approved apps:') }}</h4>
               <br/>
               <ul>
                 {% for app in apps %}
                   <li>{{ app.name }} {% if app.url %}<small>({{ app.url|urlize }})</small>{% endif %}<br/>
-                    <small>Key: {{ app.key }}</small>
+                    <small>{{ _('Key') }}: {{ app.key }}</small>
                   </li>
                 {% else %}
-                  {% trans %} You have no registered, active apps. {% endtrans %}
+                  {{ _('You have no registered, active apps.') }}
                 {% endfor %}
                 </ul>
               {% endif %}
@@ -223,8 +337,8 @@
       </div>
     </div>
     <div id="edit_controls">
-      <button type="submit" class="span2 btn btn-primary">{{ _('Update') }}</button>
-      <a href="{{ url('profile', user.username) }}" class="span2 btn">
+      <button type="submit" class="btn btn-primary">{{ _('Update') }}</button>
+      <a href="{{ url('profile', user.username) }}" class="btn">
         {{ _('Cancel') }}{# L10n: Cancel editing #}
       </a>
     </div>

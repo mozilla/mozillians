@@ -14,10 +14,9 @@ from ..models import AUTO_COMPLETE_COUNT, Language
 class LanguagesTest(apps.common.tests.init.ESTestCase):
 
     def test_autocomplete_api(self):
-        self.client.login(email=self.mozillian.email)
-
-        r = self.client.get(reverse('language_search'), dict(term='daft'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('language_search'),
+                                      dict(term='daft'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         eq_(r['Content-Type'], 'application/json', 'api uses json header')
         assert not 'daft_punk' in json.loads(r.content)
@@ -33,8 +32,9 @@ class LanguagesTest(apps.common.tests.init.ESTestCase):
             profile.languages.add(robots)
 
         assign_autocomplete_to_groups()
-        r = self.client.get(reverse('language_search'), dict(term='frenchie'),
-                HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        r = self.mozillian_client.get(reverse('language_search'),
+                                      dict(term='frenchie'),
+                                      HTTP_X_REQUESTED_WITH='XMLHttpRequest')
 
         assert 'frenchie' in json.loads(r.content)
 
@@ -42,12 +42,9 @@ class LanguagesTest(apps.common.tests.init.ESTestCase):
         """Ensure pending users can add/edit languages."""
         profile = self.pending.get_profile()
         assert not profile.languages.all(), 'User should have no languages.'
-
-        self.client.login(email=self.pending.email)
-        self.client.post(reverse('profile.edit'),
-                         dict(full_name='McAwesomepants',
-                              languages='frenchie'),
-                         follow=True)
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='McAwesomepants', languages='frenchie'))
+        self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.languages.all(), (
                 "Pending user should be able to edit languages.")

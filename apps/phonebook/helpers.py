@@ -3,16 +3,12 @@ import re
 import urllib
 
 from django.conf import settings
-from django.template import Context
-from django.template.loader import get_template
-from django.utils.safestring import mark_safe
-
 import jinja2
 from funfactory.utils import absolutify
 from jingo import register
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
-
+DEFAULT_AVATAR = '%simg/unknown.png' % (settings.MEDIA_URL)
 absolutify = register.function(absolutify)
 
 
@@ -31,8 +27,7 @@ def search_result(context, profile):
     return d
 
 
-def gravatar(email, default='%simg/unknown.png' % (settings.MEDIA_URL),
-             size=175, rating='pg'):
+def gravatar(email, default=DEFAULT_AVATAR, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
 
     return 'http://www.gravatar.com/avatar/%s?%s' % (
@@ -40,21 +35,3 @@ def gravatar(email, default='%simg/unknown.png' % (settings.MEDIA_URL),
             urllib.urlencode({'d': absolutify(default),
                               's': str(size),
                               'r': rating}))
-
-
-@register.function
-def bootstrap(element):
-    """Renders bootstrap forms in jinja2.
-
-    Takes an element that is either a field or an entire form and
-    renders the appropriate bootstrap elements.
-    """
-    element_type = element.__class__.__name__.lower()
-    if element_type == 'boundfield':
-        template = get_template("bootstrapform/field.html")
-        context = Context({'field': element})
-    else:
-        template = get_template("bootstrapform/form.html")
-        context = Context({'form': element})
-
-    return mark_safe(template.render(context))

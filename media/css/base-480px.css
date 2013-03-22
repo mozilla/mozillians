@@ -23,4 +23,11 @@
     #home-group {
         height: 260px;
     }
+    .privacy-controls {
+        float: none;
+        margin: 0 0 10px 0 !important;
+    }
+    body#body-edit-profile .control-group {
+        float: none;
+    }
 }

@@ -8,6 +8,7 @@ from funfactory.urlresolvers import set_url_prefix, reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
+from apps.users.models import PUBLIC
 from apps.common.tests.init import ESTestCase, user
 
 
@@ -105,16 +106,15 @@ class TestViews(ESTestCase):
         eq_(profile, doc('a#profile').attr('href'),
             'We see a link to our profile')
 
-    def test_anonymous_or_pending_search(self):
-        return
+    def test_anonymous_search(self):
         search = reverse('search')
+        response = self.client.get(search, follow=True)
+        assert('You must be logged in to continue' in response.content)
 
-        r = self.client.get(search, dict(q='Am'), follow=True)
-        self.assertFalse('people' in r.context)
-
-        self.client.login(email=self.pending.email)
-        r = self.client.get(search, dict(q='Am'), follow=True)
-        eq_(r.context.get('people', []), [])
+    def test_pending_search(self):
+        search = reverse('search')
+        response = self.pending_client.get(search, follow=True)
+        assert('You must be vouched to continue' in response.content)
 
     def test_mozillian_sees_mozillian_profile(self):
         _user = user(username='other', email='whatever@whatver.man',
@@ -134,8 +134,16 @@ class TestViews(ESTestCase):
         """Test view other profile by unvouched user."""
         url = reverse('profile', args=[self.mozillian.username])
         response = self.pending_client.get(url, follow=True)
-        self.assertEqual(response.status_code, 200)
-        assert('You must be vouched to continue' in response.content)
+        self.assertEqual(response.status_code, 404)
+
+    def test_pending_view_public_profile(self):
+        up = self.mozillian.userprofile
+        up.privacy_full_name = PUBLIC
+        up.save()
+        url = reverse('profile', args=[self.mozillian.username])
+        response = self.pending_client.get(url, follow=True)
+        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        eq_(response.context['profile'], up)
 
     def test_mozillians_view_own_profile(self):
         """Test view own profile by vouched user."""
@@ -157,7 +165,8 @@ class TestViews(ESTestCase):
         bio = newbie.bio
 
         # update
-        data = dict(full_name='Hobo LaRue', bio='Rides the rails')
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='Hobo LaRue', bio='Rides the rails'))
         edit = newbie_client.post(edit_profile_url, data, follow=True)
         eq_(200, edit.status_code, 'Edits okay')
         r = newbie_client.get(profile_url)
@@ -184,24 +193,25 @@ class TestViews(ESTestCase):
             from the filesystem properly.
         """
         client = self.mozillian_client
-
         # No photo exists by default, the delete photo form control shouldn't
         # be present, and trying to delete a non-existant photo shouldn't
         # do anything.
         self.assert_no_photo(client)
 
         # Try to game the form -- it shouldn't do anything.
-        r = client.post(reverse('profile.edit'),
-                        {'full_name': 'foo', 'photo-clear': 1})
-        eq_(r.status_code, 302, 'Trying to delete a non-existant photo'
+        data = self.data_privacy_fields.copy()
+        data.update({'full_name': 'foo', 'photo-clear': 1})
+        r = client.post(reverse('profile.edit'), data)
+        eq_(r.status_code, 302, 'Trying to delete a non-existant photo '
                                 "shouldn't result in an error.")
 
         # Add a profile photo
-        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
-                 'rb')
-        r = client.post(reverse('profile.edit'),
-                        dict(full_name='foo', photo=f))
-        f.close()
+        filename = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
+        with open(filename, 'rb') as f:
+            data = self.data_privacy_fields.copy()
+            data.update(dict(full_name='foo', photo=f))
+            r = client.post(reverse('profile.edit'), data)
+
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
         r = client.get(reverse('profile.edit'))
@@ -209,12 +219,11 @@ class TestViews(ESTestCase):
 
         assert doc('#id_photo_delete'), (
                 '"Remove Profile Photo" control should appear.')
-
-        assert self.mozillian.userprofile.photo
+        assert r.context['profile'].photo
 
         # Remove a profile photo
-        r = client.post(reverse('profile.edit'),
-                {'full_name': 'foo', 'photo-clear': 1})
+        data.update({'full_name': 'foo', 'photo-clear': 1, 'photo': None})
+        r = client.post(reverse('profile.edit'), data)
 
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
 
@@ -260,8 +269,9 @@ class TestViews(ESTestCase):
                 'No website info appears on the user\'s profile.')
 
         # Add a URL sans protocol.
-        r = client.post(reverse('profile.edit'),
-                        dict(full_name='foo', website='tofumatt.com'))
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='foo', website='tofumatt.com'))
+        r = client.post(reverse('profile.edit'), data)
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
         r = client.get(reverse('profile', args=[self.mozillian.username]))
         doc = pq(r.content)
@@ -306,22 +316,21 @@ class TestViews(ESTestCase):
     def test_replace_photo(self):
         """Ensure we can replace photos."""
         client = self.mozillian_client
-        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
-                 'rb')
-        r = client.post(reverse('profile.edit'),
-                        dict(full_name='foo', photo=f), follow=True)
 
-        f.close()
+        filename = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
+        with open(filename, 'rb') as f:
+            data = self.data_privacy_fields.copy()
+            data.update(dict(full_name='foo', photo=f), follow=True)
+            response = client.post(reverse('profile.edit'), data, follow=True)
+            doc = pq(response.content)
+            old_photo = doc('#profile-photo').attr('src')
 
-        f = open(os.path.join(os.path.dirname(__file__), 'profile-photo.jpg'),
-                 'rb')
-        doc = pq(r.content)
-        old_photo = doc('#profile-photo').attr('src')
-        r = client.post(reverse('profile.edit'),
-                        dict(full_name='foo', photo=f), follow=True)
-        f.close()
-        doc = pq(r.content)
-        new_photo = doc('#profile-photo').attr('src')
+        with open(filename, 'rb') as f:
+            data = self.data_privacy_fields.copy()
+            data.update(dict(full_name='foo', photo=f), follow=True)
+            response = client.post(reverse('profile.edit'), data, follow=True)
+            doc = pq(response.content)
+            new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
 
 

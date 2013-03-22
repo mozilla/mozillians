@@ -101,8 +101,11 @@ class BaseProfileForm(happyforms.ModelForm):
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites',
-                  'allows_mozilla_sites')
-        exclude = ('display_name', )
+                  'allows_mozilla_sites', 'privacy_photo', 'privacy_full_name',
+                  'privacy_ircname', 'privacy_email', 'privacy_website',
+                  'privacy_bio', 'privacy_city', 'privacy_region',
+                  'privacy_country', 'privacy_groups', 'privacy_skills',
+                  'privacy_languages')
         widgets = {'bio': forms.Textarea()}
 
     def __init__(self, *args, **kwargs):
