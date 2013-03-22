@@ -86,15 +86,15 @@
           <select id="view-privacy-mode">
               <option value="{{ url('profile', shown_user.username) }}"
                       {% if privacy_mode == 'myself' %} selected {% endif %}>
-                Myself
+                {{ _('Myself') }}
               </option>
               <option value="{{ url('profile', shown_user.username)|urlparams(view_as='mozillian') }}"
                       {% if privacy_mode == 'mozillian' %} selected {% endif %} >
-                Mozillian
+                {{ _('Mozillian') }}
               </option>
               <option value="{{ url('profile', shown_user.username)|urlparams(view_as='anonymous') }}"
                       {% if privacy_mode == 'anonymous' %} selected {% endif %}>
-                Public
+                {{ _('Public') }}
               </option>
           </select>
         </form>
