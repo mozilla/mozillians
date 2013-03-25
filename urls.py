@@ -6,8 +6,11 @@ from django.views.decorators.cache import cache_page
 from django.views.generic.base import TemplateView
 from django.views.i18n import javascript_catalog
 
+import autocomplete_light
+
 from apps.common.decorators import allow_public
 
+autocomplete_light.autodiscover()
 admin.autodiscover()
 
 
@@ -36,6 +39,7 @@ urlpatterns = patterns('',
 
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^_autocomplete/', include('autocomplete_light.urls')),
 
     url(r'^jsi18n/$',
         allow_public(cache_page(60 * 60 * 24 * 365)(javascript_catalog)),

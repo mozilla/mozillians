@@ -13,15 +13,16 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 from sorl.thumbnail.admin import AdminImageMixin
 
+import autocomplete_light
+
 from apps.common.admin import export_as_csv_action
 
-from .cron import index_all_profiles
-from .models import COUNTRIES, UserProfile, UsernameBlacklist
+import tasks
+from cron import index_all_profiles
+from models import COUNTRIES, UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
-
-import tasks
 
 
 def _update_basket(action, request, queryset):
@@ -94,6 +95,7 @@ class DateJoinedFilter(SimpleListFilter):
     parameter_name = 'date_joined'
 
     def lookups(self, request, model_admin):
+
         return map(lambda x: (str(x.year), x.year),
                    User.objects.dates('date_joined', 'year'))
 
@@ -133,6 +135,7 @@ class UserProfileInline(AdminImageMixin, admin.StackedInline):
     """UserProfile Inline model for UserAdmin."""
     model = UserProfile
     readonly_fields = ['date_vouched', 'vouched_by', 'basket_token']
+    form = autocomplete_light.modelform_factory(UserProfile)
 
 
 class UserAdmin(UserAdmin):
