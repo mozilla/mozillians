@@ -9,6 +9,7 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
+from django.db.models import Count
 from django.http import HttpResponseRedirect
 from sorl.thumbnail.admin import AdminImageMixin
 
@@ -143,10 +144,15 @@ class UserAdmin(UserAdmin):
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter]
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
-                    'vouched_by']
+                    'vouched_by', 'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
     actions = [export_as_csv_action(fields=('username', 'email'), header=True),
                subscribe_to_basket_action(), unsubscribe_from_basket_action()]
+
+    def queryset(self, request):
+        qs = super(UserAdmin, self).queryset(request)
+        qs = qs.annotate(Count('userprofile__vouchees'))
+        return qs
 
     def country(self, obj):
         return COUNTRIES.get(obj.userprofile.country, '')
@@ -160,10 +166,14 @@ class UserAdmin(UserAdmin):
     def vouched_by(self, obj):
         voucher = obj.userprofile.vouched_by
         voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
-        return '<a href="%s">%s</a> (%d)' % (voucher_url, voucher,
-                                             voucher.vouchees.count())
+        return '<a href="%s">%s</a>' % (voucher_url, voucher)
     vouched_by.admin_order_field = 'userprofile__vouched_by'
     vouched_by.allow_tags = True
+
+    def number_of_vouchees(self, obj):
+        """Return the number of vouchees for obj."""
+        return obj.userprofile.vouchees.count()
+    number_of_vouchees.admin_order_field = 'userprofile__vouchees__count'
 
     def index_profiles(self, request):
         """Fire an Elastic Search Index Profiles task."""
