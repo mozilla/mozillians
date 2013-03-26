@@ -196,6 +196,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
                                    on_delete=models.SET_NULL, blank=True,
                                    related_name='vouchees')
+    date_vouched = models.DateTimeField(null=True, blank=True, default=None)
     groups = models.ManyToManyField(Group, blank=True)
     skills = models.ManyToManyField(Skill, blank=True)
     languages = models.ManyToManyField(Language, blank=True)
@@ -460,6 +461,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         self.is_vouched = True
         self.vouched_by = vouched_by
+        self.date_vouched = datetime.now()
 
         if commit:
             self.save()

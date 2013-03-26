@@ -131,7 +131,7 @@ class LastLoginFilter(SimpleListFilter):
 class UserProfileInline(AdminImageMixin, admin.StackedInline):
     """UserProfile Inline model for UserAdmin."""
     model = UserProfile
-    raw_id_fields = ['vouched_by']
+    readonly_fields = ['date_vouched', 'vouched_by', 'basket_token']
 
 
 class UserAdmin(UserAdmin):
