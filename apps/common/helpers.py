@@ -35,6 +35,8 @@ def field_with_attrs(bfield, **kwargs):
 
     Copied from bedrock.
     """
+    if kwargs.get('label', None):
+        bfield.label = kwargs['label']
     bfield.field.widget.attrs.update(kwargs)
     return bfield
 

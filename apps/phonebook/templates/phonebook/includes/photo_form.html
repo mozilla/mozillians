@@ -1,12 +1,7 @@
 <div class="control-group photo {% if profile_form.photo.errors %}error{% endif %}">
   <label class="control-label" for="id_photo">{{ profile_form.photo.label }}</label>
   <div class="controls">
-    <div class="privacy-controls">
-      {{ bootstrap(field_with_attrs(profile_form.privacy_photo,
-                                    **{'class':'privacy-choice',
-                                       'data-privacy-original':profile.privacy_photo})) }}
-
-    </div>
+    {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
     <div class="thumbnail">
       <img id="profile-photo" src="{{ profile.get_photo_url() }}" alt="{{ _('Profile photo') }}">
     </div>

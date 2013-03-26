@@ -14,10 +14,20 @@
 {% block body_id %}edit-profile{% endblock %}
 {% block body_classes %}box-content{% endblock %}
 
-{% set top_blurb = 
-_('Modify your profile here and choose who can see your profile fields. You can 
-make parts of your profile publicly visible, but please be careful about 
-sharing your contact information.') %} 
+{% set top_blurb = _('Modify your profile here and choose who can see your
+                      profile fields. You can make parts of your profile
+                      publicly visible, but please be careful about sharing
+                      your contact information.') %}
+
+{% macro privacy_field(name, original_value) %}
+<div class="privacy-controls">
+  {{ bootstrap(field_with_attrs(name,
+                                **{'class':'privacy-choice',
+                                   'label': _('Visible to:'),
+                                   'data-privacy-original':original_value})) }}
+</div>
+{% endmacro %}
+
 
 {% block main_content %}
   <h1>{{ _('Edit Your Profile') }}</h1>
@@ -50,39 +60,23 @@ sharing your contact information.') %}
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="1">
-          <p> 
-            {{ top_blurb }} 
+          <p>
+            {{ top_blurb }}
           </p>
           <h2>{{ _('Personal') }}</h2>
           {% include 'phonebook/includes/photo_form.html' %}
           <hr>
           {{ bootstrap(profile_form.full_name) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_full_name,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_full_name})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
           <hr>
           {{ bootstrap(profile_form.ircname) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_ircname,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_ircname})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
           <hr>
           {{ bootstrap(profile_form.website) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_website,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_website})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_website, profile.privacy_website) }}
           <hr>
           {{ bootstrap(profile_form.bio) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_bio,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_bio})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_bio, profile.privacy_bio) }}
           <hr>
 
           <h2>{{ _('Location') }}</h2>
@@ -94,30 +88,18 @@ sharing your contact information.') %}
             {% endtrans %}
           </p>
           {{ bootstrap(profile_form.country) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_country,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_country})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_country, profile.privacy_country) }}
           <hr>
           {{ bootstrap(profile_form.region) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_region,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_region})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
           <hr>
           {{ bootstrap(profile_form.city) }}
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_city,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_city})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
           <hr>
         </div>
         <div class="tab-pane" id="skills">
           <p>
-            {{ top_blurb }} 
+            {{ top_blurb }}
           </p>
           <div class="ui-helper-clearfix">
             <h2>{{ _('Groups') }}</h2>
@@ -130,11 +112,7 @@ sharing your contact information.') %}
             </p>
             {{ profile_form.groups.label_tag() }}
             {{ profile_form.groups }}
-            <div class="privacy-controls">
-              {{ bootstrap(field_with_attrs(profile_form.privacy_groups,
-                                            **{'class':'privacy-choice',
-                                               'data-privacy-original':profile.privacy_groups})) }}
-            </div>
+            {{ privacy_field(profile_form.privacy_groups, profile.privacy_groups) }}
           </div>
 
           <div class="ui-helper-clearfix">
@@ -148,11 +126,7 @@ sharing your contact information.') %}
             </p>
             {{ profile_form.skills.label_tag() }}
             {{ profile_form.skills }}
-            <div class="privacy-controls">
-              {{ bootstrap(field_with_attrs(profile_form.privacy_skills,
-                                            **{'class':'privacy-choice',
-                                               'data-privacy-original':profile.privacy_skills})) }}
-            </div>
+            {{ privacy_field(profile_form.privacy_skills, profile.privacy_skills) }}
           </div>
 
           <div class="ui-helper-clearfix">
@@ -166,11 +140,7 @@ sharing your contact information.') %}
             </p>
             {{ profile_form.languages.label_tag() }}
             {{ profile_form.languages }}
-            <div class="privacy-controls">
-              {{ bootstrap(field_with_attrs(profile_form.privacy_languages,
-                                            **{'class':'privacy-choice',
-                                               'data-privacy-original':profile.privacy_languages})) }}
-            </div>
+            {{ privacy_field(profile_form.privacy_languages, profile.privacy_languages) }}
           </div>
 
         </div>
@@ -219,7 +189,7 @@ sharing your contact information.') %}
         </div>
         <div class="tab-pane" id="account">
           <p>
-            {{ top_blurb }} 
+            {{ top_blurb }}
           </p>
           <h2>{{ _('Account') }}</h2>
           {{ bootstrap(user_form.username) }}
@@ -230,11 +200,7 @@ sharing your contact information.') %}
               <span class="label-text">{{ user.userprofile.email }}</span>
             </div>
           </div>
-          <div class="privacy-controls">
-            {{ bootstrap(field_with_attrs(profile_form.privacy_email,
-                                          **{'class':'privacy-choice',
-                                             'data-privacy-original':profile.privacy_email})) }}
-          </div>
+          {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
           <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Password') }}</label>
