@@ -152,32 +152,32 @@ class UserProfilePrivacyModel(models.Model):
                        'vouched_by': None}
     _privacy_level = None
 
-    privacy_photo = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_full_name = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_ircname = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_email = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_website = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_bio = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_city = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_region = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_country = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_groups = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_skills = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_languages = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
-    privacy_vouched_by = models.PositiveIntegerField(
-        _('Visible to:'), default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_photo = models.PositiveIntegerField(default=MOZILLIANS,
+                                                choices=PRIVACY_CHOICES)
+    privacy_full_name = models.PositiveIntegerField(default=MOZILLIANS,
+                                                    choices=PRIVACY_CHOICES)
+    privacy_ircname = models.PositiveIntegerField(default=MOZILLIANS,
+                                                  choices=PRIVACY_CHOICES)
+    privacy_email = models.PositiveIntegerField(default=MOZILLIANS,
+                                                choices=PRIVACY_CHOICES)
+    privacy_website = models.PositiveIntegerField(default=MOZILLIANS,
+                                                  choices=PRIVACY_CHOICES)
+    privacy_bio = models.PositiveIntegerField(default=MOZILLIANS,
+                                              choices=PRIVACY_CHOICES)
+    privacy_city = models.PositiveIntegerField(default=MOZILLIANS,
+                                               choices=PRIVACY_CHOICES)
+    privacy_region = models.PositiveIntegerField(default=MOZILLIANS,
+                                                 choices=PRIVACY_CHOICES)
+    privacy_country = models.PositiveIntegerField(default=MOZILLIANS,
+                                                  choices=PRIVACY_CHOICES)
+    privacy_groups = models.PositiveIntegerField(default=MOZILLIANS,
+                                                 choices=PRIVACY_CHOICES)
+    privacy_skills = models.PositiveIntegerField(default=MOZILLIANS,
+                                                 choices=PRIVACY_CHOICES)
+    privacy_languages = models.PositiveIntegerField(default=MOZILLIANS,
+                                                    choices=PRIVACY_CHOICES)
+    privacy_vouched_by = models.PositiveIntegerField(default=MOZILLIANS,
+                                                     choices=PRIVACY_CHOICES)
 
     class Meta:
         abstract=True
