@@ -5,36 +5,10 @@ from south.v2 import DataMigration
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        """Copy userpics to the UPLOAD_ROOT and update the photo field."""
-        if not db.dry_run:
-            from django.core import management
-            import shutil, os
-            from django.core.files import File
-            from django.conf import settings
-            management.call_command('thumbnail', 'clear', verbosity=0)
-            management.call_command('thumbnail', 'cleanup', verbosity=0)
+        """Copy userpics to the UPLOAD_ROOT and update the photo field.
 
-            def ensure_dir(f):
-                d = os.path.dirname(f)
-                if not os.path.exists(d):
-                    os.makedirs(d)
-            new_path = os.path.join(settings.UPLOAD_ROOT, 'userprofile/')
-            ensure_dir(new_path)
-            for p in orm.UserProfile.objects.all():
-                try:
-                    old_pic = '%s/%d.jpg' % (settings.USERPICS_PATH, p.id)
-                    new_pic = '%s/profile-%d.jpg' % (new_path, p.id)
-                    shutil.copy(old_pic, new_pic)
-                    p.photo.file = file(new_pic)
-                    p.photo.name = './userprofile/profile-%d.jpg' % p.id
-                    p.save()
-                    print new_pic
-                    print p.photo.url
-                except Exception as e:
-                    # Something happened, assume no pic and log it.
-                    print e
-                    p.photo = ''
-                    p.save()
+        This was a one time migration. Removing legacy code."""
+        pass
 
     def backwards(self, orm):
         """Not needed since old pics are not deleted"""

@@ -17,15 +17,15 @@ from elasticutils.contrib.django import S
 from elasticutils.contrib.django.models import SearchMixin
 from elasticutils.contrib.django import tasks as elasticutilstasks
 from funfactory.urlresolvers import reverse
-from PIL import Image, ImageOps
 from product_details import product_details
-from sorl.thumbnail import ImageField
+from sorl.thumbnail import ImageField, get_thumbnail
 from tower import ugettext as _, ugettext_lazy as _lazy
 
+from apps.common.helpers import gravatar
 from apps.groups.models import (Group, GroupAlias,
                                 Skill, SkillAlias,
                                 Language, LanguageAlias)
-from apps.phonebook.helpers import DEFAULT_AVATAR, gravatar
+
 
 from tasks import update_basket_task
 
@@ -452,14 +452,23 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         m2mfield.add(*groups_to_add)
 
-    def get_photo_url(self):
-        if self._privacy_level and self.privacy_photo < self._privacy_level:
-            return DEFAULT_AVATAR
-
+    def get_photo_thumbnail(self, geometry='160x160', **kwargs):
+        if 'crop' not in kwargs:
+            kwargs['crop'] = 'center'
         if self.photo:
-            return self.photo.url
+            return get_thumbnail(self.photo, geometry, **kwargs)
+        return get_thumbnail(settings.DEFAULT_AVATAR, geometry, **kwargs)
 
-        return gravatar(self.user.email)
+    def get_photo_url(self, geometry='160x160', **kwargs):
+        """Return photo url.
+
+        If privacy allows and no photo set, return gravatar link.
+        If privacy allows and photo set return local photo link.
+        If privacy doesn't allow return default local link.
+        """
+        if not self.photo and self.privacy_photo >= self._privacy_level:
+            return gravatar(self.user.email, size=geometry)
+        return self.get_photo_thumbnail(geometry, **kwargs).url
 
     def vouch(self, vouched_by, commit=True):
         if self.is_vouched:
@@ -514,18 +523,6 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
         if not created:
             dbsignals.post_save.send(sender=UserProfile, instance=up,
                                      created=created, raw=raw)
-
-
-@receiver(dbsignals.post_save, sender=UserProfile,
-          dispatch_uid='resize_photo_sig')
-def resize_photo(sender, instance, **kwargs):
-    if instance.photo:
-        path = str(instance.photo.path)
-        img = Image.open(path)
-        if img.size != AVATAR_SIZE:
-            img = ImageOps.fit(img, AVATAR_SIZE,
-                               Image.ANTIALIAS, 0, (0.5, 0.5))
-            img.save(path)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
