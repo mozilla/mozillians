@@ -290,10 +290,6 @@ class TestThingsForPeople(ESTestCase):
 
 class VouchTest(ESTestCase):
 
-    # TODO
-    # Mark this as nottest until we decide the policy in search
-    # page. Then fix accordingly.
-    @nottest
     def test_vouch_method(self):
         """Test UserProfile.vouch()
 
@@ -307,12 +303,13 @@ class VouchTest(ESTestCase):
         assert not profile.is_vouched, 'User should not yet be vouched.'
         r = self.mozillian_client.get(reverse('search'),
                                       {'q': self.pending.email})
-        assert 'Non-Vouched' in r.content, (
+        assert profile.full_name not in r.content, (
                 'User should not appear as a Mozillian in search.')
 
         profile.vouch(vouchee)
         profile = UserProfile.objects.get(pk=profile.pk)
         assert profile.is_vouched, 'User should be marked as vouched.'
+        assert profile.date_vouched
 
         r = self.mozillian_client.get(reverse('profile', args=['pending']))
         eq_(r.status_code, 200)
@@ -326,8 +323,8 @@ class VouchTest(ESTestCase):
 
         # Make sure the user appears vouched in search results
         r = self.mozillian_client.get(reverse('search'),
-                                      {'q': self.pending.email})
-        assert 'Mozillian' in r.content, (
+                                      {'q': self.pending.email}, follow=True)
+        assert str(profile.full_name) in r.content, (
                 'User should appear as a Mozillian in search.')
 
 
