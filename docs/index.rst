@@ -6,7 +6,7 @@
 Mozillians
 ==========
 
-Mozillians.org_ is the community phonebook for Mozilla.
+Mozillians.org_ is the community phonebook for Mozilla. The instructions here are written for developers. If you're a user, visit the site for more information.
 
 This application is built on top of Playdoh_.
 
