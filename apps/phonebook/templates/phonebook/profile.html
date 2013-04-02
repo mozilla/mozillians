@@ -139,7 +139,7 @@
           <dt>{{ _('Location') }}</dt>
           <dd>
             {% if profile.city %}
-              {% if user.is_authenticated() %}
+              {% if profile.country and user.is_authenticated() %}
                 <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
                   {{ profile.city }}</a>,
               {% else %}
@@ -147,7 +147,7 @@
               {% endif %}
             {% endif %}
             {% if profile.region %}
-              {% if user.is_authenticated() %}
+              {% if profile.country and user.is_authenticated() %}
                 <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
                   {{ profile.region }}</a>
               {% else %}
