@@ -58,8 +58,7 @@ def show(request, url):
     limit = forms.PAGINATION_LIMIT
     in_group = (group.userprofile_set
                 .filter(user=request.user).exists())
-    profiles = (group.userprofile_set
-                .exclude(full_name='').filter(is_vouched=True))
+    profiles = group.userprofile_set.vouched()
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
     people = []
