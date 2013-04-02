@@ -1,5 +1,4 @@
 from django.core.urlresolvers import reverse
-from django.test.utils import override_settings
 from nose.tools import eq_
 
 from apps.common.tests.init import ESTestCase

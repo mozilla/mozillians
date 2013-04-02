@@ -37,7 +37,6 @@ PROTOCOL = "https://"
 PORT = 443
 
 ## Media and templates.
-TEMPLATE_DIRS = (path('apps/users/templates'), )
 
 STATIC_ROOT = path('media/static')
 STATIC_URL = MEDIA_URL + 'static/'
@@ -56,6 +55,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS +
 JINGO_EXCLUDE_APPS = [
     'bootstrapform',
     'admin',
+    'autocomplete_light'
 ]
 
 DEFAULT_IMAGE_SRC = 'img/unknown.png'
@@ -159,7 +159,8 @@ SUPPORTED_NONLOCALES = list(base.SUPPORTED_NONLOCALES) + [
     'csp',
     'api',
     'browserid',
-    'admin'
+    'admin',
+    'autocomplete'
 ]
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
@@ -186,6 +187,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'cronjobs',
     'elasticutils',
     'sorl.thumbnail',
+    'autocomplete_light',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -225,10 +227,6 @@ CACHES = {
 
 #: Userpics will be uploaded here.
 USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
-
-# Django 1.4
-# TODO fix all templates so this works.
-# MEDIA_ROOT = pre.NETAPP_STORAGE
 
 # Userpics will accessed here.
 USERPICS_URL = pre.UPLOAD_URL + '/userpics'

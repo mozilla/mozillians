@@ -252,7 +252,7 @@ def vouch(request):
 def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, country)
-    queryset = UserProfile.objects.filter(country=country)
+    queryset = UserProfile.objects.vouched().filter(country=country)
     if city:
         queryset = queryset.filter(city__iexact=city)
     if region:

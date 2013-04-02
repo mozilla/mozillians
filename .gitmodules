@@ -12,3 +12,6 @@
 [submodule "vendor-local/src/basket-client"]
 	path = vendor-local/src/basket-client
 	url = git://github.com/mozilla/basket-client.git
+[submodule "vendor-local/src/django-autocomplete-light"]
+	path = vendor-local/src/django-autocomplete-light
+	url = git://github.com/yourlabs/django-autocomplete-light

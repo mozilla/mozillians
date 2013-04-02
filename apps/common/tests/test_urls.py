@@ -5,6 +5,7 @@ from apps.common.decorators import allow_public, allow_unvouched
 
 from urls import urlpatterns
 
+
 def vouched(request):
     return HttpResponse('Hi!')
 
@@ -12,6 +13,7 @@ def vouched(request):
 @allow_unvouched
 def unvouched(request):
     return HttpResponse('Hi!')
+
 
 @allow_public
 def public(request):

@@ -1,3 +1,4 @@
 src/django-statsd
 src/mimeparse
 src/basket-client
+src/django-autocomplete-light

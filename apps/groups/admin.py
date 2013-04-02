@@ -4,8 +4,9 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db.models import Count
 
+import autocomplete_light
+
 import utils
-from users.models import UserProfile
 from models import (Group, GroupAlias,
                     Language, LanguageAlias,
                     Skill, SkillAlias)
@@ -46,18 +47,18 @@ class CurratedGroupFilter(SimpleListFilter):
 
 
 class GroupBaseEditAdminForm(forms.ModelForm):
-    merge_with_groups = forms.ModelMultipleChoiceField(
+    merge_with = forms.ModelMultipleChoiceField(
         required=False, queryset = None,
         widget=FilteredSelectMultiple('Merge', False))
 
     def __init__(self, *args, **kwargs):
         queryset = self._meta.model.objects.exclude(pk=kwargs['instance'].id)
-        self.base_fields['merge_with_groups'].queryset = queryset
+        self.base_fields['merge_with'].queryset = queryset
         super(GroupBaseEditAdminForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
         utils.merge_groups(self.instance,
-                           self.cleaned_data.get('merge_with_groups', []))
+                           self.cleaned_data.get('merge_with', []))
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
@@ -88,6 +89,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
 
 class GroupAliasInline(admin.StackedInline):
     model = GroupAlias
+    readonly_fields = ['name', 'url']
 
 
 class GroupAddAdminForm(forms.ModelForm):
@@ -104,12 +106,12 @@ class GroupEditAdminForm(GroupBaseEditAdminForm):
 
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
-    form = GroupEditAdminForm
-    add_form = GroupAddAdminForm
+    form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
+    add_form = autocomplete_light.modelform_factory(Group,
+                                                    form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'steward', 'wiki', 'website', 'irc_channel',
                     'member_count']
-    raw_id_fields = ['steward']
     list_filter = [CurratedGroupFilter, EmptyGroupFilter]
 
 
@@ -156,8 +158,6 @@ class LanguageAdmin(GroupBaseAdmin):
     add_form = LanguageAddAdminForm
     inlines = [LanguageAliasInline]
 
-
-admin.site.register(UserProfile)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(Skill, SkillAdmin)

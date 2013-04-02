@@ -103,6 +103,10 @@ class UserProfileQuerySet(QuerySet):
         """Return profiles with at least one PUBLIC field."""
         return self.filter(self.public_q)
 
+    def vouched(self):
+        """Return complete and vouched profiles."""
+        return self.exclude(full_name='').filter(is_vouched=True)
+
     def _clone(self, *args, **kwargs):
         """Custom _clone with privacy level propagation."""
         if kwargs.get('klass', None) == ValuesQuerySet:
@@ -128,6 +132,8 @@ class UserProfileQuerySet(QuerySet):
 
 class UserProfileManager(models.Manager):
     """Custom Manager for UserProfile."""
+
+    use_for_related_fields = True
 
     def get_query_set(self):
         return UserProfileQuerySet(self.model)

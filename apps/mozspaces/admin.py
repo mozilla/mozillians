@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from product_details import product_details
 from sorl.thumbnail.admin import AdminImageMixin
 
+import autocomplete_light
+
 from models import Keyword, MozSpace, Photo
 
 
@@ -36,7 +38,7 @@ class MozSpaceAdmin(admin.ModelAdmin):
     inlines = [PhotoAdmin, KeywordAdmin]
     search_fields = ['name']
     list_display = ['name', 'city', 'country', 'coordinator_link']
-    raw_id_fields = ['coordinator']
+    form = autocomplete_light.modelform_factory(MozSpace)
 
     def coordinator_link(self, obj):
         url = reverse('admin:auth_user_change', args=[obj.id])
