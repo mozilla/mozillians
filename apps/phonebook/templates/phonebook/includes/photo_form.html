@@ -3,7 +3,9 @@
   <div class="controls">
     {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
     <div class="thumbnail">
-      <img id="profile-photo" src="{{ profile.get_photo_url() }}" alt="{{ _('Profile photo') }}">
+      <img id="profile-photo"
+           src="{{ profile.get_photo_url('70x70') }}"
+           alt="{{ _('Profile photo') }}">
     </div>
     <ul class="photo_controls">
       <li>
