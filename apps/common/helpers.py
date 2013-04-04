@@ -1,31 +1,27 @@
+import hashlib
 import logging
+import urllib
 
 from django.conf import settings
 from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
+from funfactory.utils import absolutify
 from jingo import register
-from sorl.thumbnail import get_thumbnail
-
-from apps.users.models import PUBLIC
 
 logger = logging.getLogger('common.helpers')
+absolutify = register.function(absolutify)
 
 
-@register.function
-def thumbnail(source, *args, **kwargs):
-    """Wraps sorl thumbnail with an additional 'default' keyword."""
+def gravatar(email, default=settings.DEFAULT_AVATAR, size=175, rating='pg'):
+    """Return the Gravatar URL for an email address."""
 
-    # Templates should never return an exception
-    try:
-        if not source.path:
-            source = kwargs.get('default')
-        return get_thumbnail(source, *args, **kwargs)
-    except Exception as e:
-        logger.error('Thumbnail had Exception: %s' % e)
-        source = getattr(settings, 'DEFAULT_IMAGE_SRC')
-        return get_thumbnail(source, *args, **kwargs)
+    return 'http://www.gravatar.com/avatar/%s?%s' % (
+            hashlib.md5(email.lower()).hexdigest(),
+            urllib.urlencode({'d': absolutify(default),
+                              's': str(size),
+                              'r': rating}))
 
 
 @register.function
@@ -62,6 +58,7 @@ def bootstrap(element):
 @register.function
 def get_privacy_level(user):
     """Return privacy level user."""
+    from apps.users.models import PUBLIC
     if not user.is_authenticated():
         return PUBLIC
     return user.userprofile.level

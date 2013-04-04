@@ -1,4 +1,7 @@
 from urllib2 import unquote
+from urlparse import urljoin
+
+from django.conf import settings
 
 from elasticutils.contrib.django import F, S
 from tastypie import fields
@@ -66,7 +69,9 @@ class UserResource(ClientCachedResource, ModelResource):
         return [unicode(g) for g in bundle.obj.languages.all()]
 
     def dehydrate_photo(self, bundle):
-        return bundle.obj.get_photo_url()
+        if bundle.obj.photo:
+            return urljoin(settings.SITE_URL, bundle.obj.photo.url)
+        return ''
 
     def get_detail(self, request, **kwargs):
         if request.GET.get('restricted', False):

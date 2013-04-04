@@ -2,12 +2,12 @@
 
 # Django settings for the mozillians project.
 import logging
+import os.path
 import sys
 
 from funfactory.manage import path
 from funfactory import settings_base as base
-from settings import initial as pre
-from settings import MEDIA_URL
+from settings import MEDIA_URL, MEDIA_ROOT
 
 from apps.users.helpers import calculate_username
 from django.utils.functional import lazy
@@ -57,8 +57,6 @@ JINGO_EXCLUDE_APPS = [
     'admin',
     'autocomplete_light'
 ]
-
-DEFAULT_IMAGE_SRC = 'img/unknown.png'
 
 MINIFY_BUNDLES = {
     'css': {
@@ -225,12 +223,6 @@ CACHES = {
     }
 }
 
-#: Userpics will be uploaded here.
-USERPICS_PATH = pre.NETAPP_STORAGE + '/userpics'
-
-# Userpics will accessed here.
-USERPICS_URL = pre.UPLOAD_URL + '/userpics'
-
 AUTH_PROFILE_MODULE = 'users.UserProfile'
 
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
@@ -264,9 +256,6 @@ ES_INDEXING_TIMEOUT = 10
 THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
-# This is for the commons/helper.py thumbnail.
-DEFAULT_IMAGE_SRC = path('./media/uploads/unknown.png')
-
 # Statsd Graphite
 STATSD_CLIENT = 'django_statsd.clients.normal'
 
@@ -298,3 +287,5 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/admin/',
                          '^/browserid/verify/',
                          '^/api']
+
+DEFAULT_AVATAR = os.path.join(MEDIA_ROOT, 'img/unknown.png')
