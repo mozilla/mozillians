@@ -457,7 +457,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             kwargs['crop'] = 'center'
         if self.photo:
             return get_thumbnail(self.photo, geometry, **kwargs)
-        return get_thumbnail(settings.DEFAULT_AVATAR, geometry, **kwargs)
+        return get_thumbnail(settings.DEFAULT_AVATAR_PATH, geometry, **kwargs)
 
     def get_photo_url(self, geometry='160x160', **kwargs):
         """Return photo url.
