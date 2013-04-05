@@ -14,7 +14,7 @@ logger = logging.getLogger('common.helpers')
 absolutify = register.function(absolutify)
 
 
-def gravatar(email, default=settings.DEFAULT_AVATAR, size=175, rating='pg'):
+def gravatar(email, default=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
 
     return 'http://www.gravatar.com/avatar/%s?%s' % (

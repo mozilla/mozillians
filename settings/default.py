@@ -8,6 +8,7 @@ import sys
 from funfactory.manage import path
 from funfactory import settings_base as base
 from settings import MEDIA_URL, MEDIA_ROOT
+from urlparse import urljoin
 
 from apps.users.helpers import calculate_username
 from django.utils.functional import lazy
@@ -288,4 +289,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/browserid/verify/',
                          '^/api']
 
-DEFAULT_AVATAR = os.path.join(MEDIA_ROOT, 'img/unknown.png')
+# Set default avatar for user profiles
+DEFAULT_AVATAR= 'img/unknown.png'
+DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
+DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
