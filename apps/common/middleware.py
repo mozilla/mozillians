@@ -12,6 +12,9 @@ from tower import ugettext as _
 
 from apps.groups.models import Group, GroupAlias
 
+LOGIN_MESSAGE = _('You must be logged in to continue.')
+GET_VOUCHED_MESSAGE = _('You must be vouched to continue.')
+
 
 class StrongholdMiddleware(object):
     """Keep unvouched users out, unless explicitly allowed in.
@@ -33,7 +36,7 @@ class StrongholdMiddleware(object):
             return None
 
         if not request.user.is_authenticated():
-            messages.warning(request, _('You must be logged in to continue.'))
+            messages.warning(request, LOGIN_MESSAGE)
             return login_required(view_func)(request, *view_args,
                                              **view_kwargs)
 
@@ -44,7 +47,7 @@ class StrongholdMiddleware(object):
         if allow_unvouched:
             return None
 
-        messages.error(request, _('You must be vouched to continue.'))
+        messages.error(request, GET_VOUCHED_MESSAGE)
         return redirect('home')
 
 

@@ -31,5 +31,5 @@ urlpatterns = patterns('',
     url('^about/$', allow_public(direct_to_template),
         {'template': 'phonebook/about.html'}, name='about'),
     url(r'^u/(?P<username>[\w.@+-]+)/$',
-        views.profile, name='profile'),
+        views.view_profile, name='profile'),
 )

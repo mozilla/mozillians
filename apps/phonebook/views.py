@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponseForbidden
@@ -12,6 +13,7 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from apps.common.decorators import allow_public, allow_unvouched
+from apps.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from apps.common.helpers import get_privacy_level
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
@@ -42,7 +44,7 @@ def home(request):
 
 @allow_public
 @never_cache
-def profile(request, username):
+def view_profile(request, username):
     """View a profile by username."""
     data = {}
     if (request.user.is_authenticated() and request.user.username == username):
@@ -62,30 +64,34 @@ def profile(request, username):
             profile = (UserProfile.objects
                        .privacy_level(PRIVILEGED).get(user__username=username))
         data['privacy_mode'] = view_as
-
     else:
         userprofile_query = UserProfile.objects.filter(user__username=username)
         public_profile_exists = userprofile_query.public().exists()
         profile_exists = userprofile_query.exists()
-        if (not profile_exists or ((not request.user.is_authenticated()
-                                    or not request.user.userprofile.is_vouched)
-                                   and not public_profile_exists)):
+        profile_complete = userprofile_query.exclude(full_name='').exists()
+
+        if not public_profile_exists:
+            if not request.user.is_authenticated():
+                # you have to be authenticated to continue
+                messages.warning(request, LOGIN_MESSAGE)
+                return login_required(view_profile)(request, username)
+            if not request.user.userprofile.is_vouched:
+                # you have to be vouched to continue
+                messages.error(request, GET_VOUCHED_MESSAGE)
+                return redirect('home')
+
+        if not profile_exists or not profile_complete:
             raise Http404
 
-        # is vouched or public profile
-        profile = (UserProfile.objects
-                   .get(user__username=username))
-        if not profile.is_complete:
-            raise Http404
-
+        profile = UserProfile.objects.get(user__username=username)
         privacy_level = get_privacy_level(request.user)
         profile.set_instance_privacy_level(privacy_level)
 
         if (not profile.is_vouched
             and request.user.is_authenticated()
             and request.user.userprofile.is_vouched):
-            data['vouch_form'] = forms.VouchForm(
-                initial={'vouchee': profile.pk})
+            data['vouch_form'] = (
+                forms.VouchForm(initial={'vouchee': profile.pk}))
 
     data['shown_user'] = profile.user
     data['profile'] = profile
