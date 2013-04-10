@@ -100,7 +100,7 @@
         </form>
       </div>
     {% endif %}
-    <div class="span6 offset1 well" id="profile-info">
+    <div class="span6 offset1 well h-card vcard" id="profile-info">
       {% if privacy_mode == 'anonymous' and not profile.is_public %}
         {% trans edit_url=url('profile.edit') %}
           Your profile is not public. If you <a href="{{ edit_url }}">edit
@@ -109,35 +109,35 @@
         {% endtrans %}
       {% endif %}
 
-      <h2 class="fn p-name">
+      <h2 class="p-name fn">
         {{ profile.display_name }}
       </h2>
 
       <dl>
         {% if profile.email %}
           <dt>{{ _('Email') }}</dt>
-          <dd><a href="mailto:{{ profile.email }}">
+          <dd><a class="u-email email" href="mailto:{{ profile.email }}">
             {{ profile.email }}
           </a></dd>
         {% endif %}
 
         {% if profile.ircname %}
           <dt>{{ _('IRC Nickname') }}</dt>
-          <dd><a href="irc://irc.mozilla.org/">
+          <dd><a class="p-nickname nickname" href="irc://irc.mozilla.org/">
             {{ profile.ircname }}
           </a></dd>
         {% endif %}
 
         {% if profile.website %}
           <dt>{{ _('Website') }}</dt>
-          <dd><a rel="me" href="{{ profile.website }}">
+          <dd><a rel="me" class="u-url url" href="{{ profile.website }}">
             {{ profile.website }}</a>
           </dd>
         {% endif %}
 
         {% if profile.country or profile.region or profile.city %}
           <dt>{{ _('Location') }}</dt>
-          <dd>
+          <dd class="p-adr">
             {% if profile.city %}
               {% if profile.country and user.is_authenticated() %}
                 <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
@@ -179,7 +179,7 @@
 
       {% if profile.bio %}
         <h3>{{ _('Bio') }}{# L10n: Biography #}</h3>
-        <div id="bio" class="note p-note">
+        <div id="bio" class="p-note note">
           {{ profile.bio|paragraphize }}
         </div>
       {% endif %}
@@ -241,7 +241,8 @@
 
     <div class="span2">
       <div class="thumbnail">
-        <img id="profile-photo"
+        <img class="u-photo photo" 
+             id="profile-photo"
              src="{{ profile.get_photo_url() }}"
              alt="{{ _('Profile photo') }}">
       </div>
