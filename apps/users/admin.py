@@ -9,7 +9,7 @@ from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from sorl.thumbnail.admin import AdminImageMixin
 
@@ -19,10 +19,15 @@ from apps.common.admin import export_as_csv_action
 
 import tasks
 from cron import index_all_profiles
-from models import COUNTRIES, UserProfile, UsernameBlacklist
+from models import COUNTRIES, PUBLIC, UserProfile, UsernameBlacklist
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
+
+Q_PUBLIC_PROFILES = Q()
+for field in UserProfile._privacy_fields:
+    key = 'userprofile__privacy_%s' % field
+    Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
 
 
 def _update_basket(action, request, queryset):
@@ -84,14 +89,10 @@ class PublicProfileFilter(SimpleListFilter):
         if self.value() is None:
             return queryset
 
-        profiles = (UserProfile.objects
-                    .filter(user__id__in=queryset)
-                    .public().values_list('user__id', flat=True))
-
         if self.value() == 'True':
-            return queryset.filter(pk__in=profiles)
+            return queryset.filter(Q_PUBLIC_PROFILES)
 
-        return queryset.exclude(pk__in=profiles)
+        return queryset.exclude(Q_PUBLIC_PROFILES)
 
 class CompleteProfileFilter(SimpleListFilter):
     """Admin filter for complete profiles."""
