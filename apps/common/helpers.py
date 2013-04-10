@@ -2,13 +2,16 @@ import hashlib
 import logging
 import urllib
 
+from os import path
+
+from jingo import register
+
 from django.conf import settings
 from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
 from funfactory.utils import absolutify
-from jingo import register
 
 logger = logging.getLogger('common.helpers')
 absolutify = register.function(absolutify)
@@ -62,3 +65,8 @@ def get_privacy_level(user):
     if not user.is_authenticated():
         return PUBLIC
     return user.userprofile.level
+
+
+@register.function
+def media(url):
+    return path.join(settings.MEDIA_URL, url.lstrip('/'))

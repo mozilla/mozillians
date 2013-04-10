@@ -19,5 +19,10 @@ var app = {
         $('#language').change(function() {
             $('#language-switcher').submit();
         });
+
+        //Main nav dropdown
+        $('a.dropdown-toggle').click(function() {
+            $('.dropdown-menu').toggle();
+        });
     });
 })(jQuery);
