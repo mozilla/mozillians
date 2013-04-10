@@ -16,7 +16,7 @@
   {{ js('search') }}
 {% endblock %}
 
-{% block main_content %}
+{% block content %}
   <h1>{{ _('Search') }}</h1>
     <form method="GET" id="search-form" action="{{ url('search') }}">
       <input type="text" name="q" id="q"

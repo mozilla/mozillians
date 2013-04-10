@@ -4,7 +4,7 @@
 {% block body_id %}confirm-delete{% endblock %}
 {% block body_classes %}box-content{% endblock %}
 
-{% block main_content %}
+{% block content %}
   <h1>{{ _('Confirm Profile Deletion') }}</h1>
 
   <form action="{{ url('profile.delete') }}" method="POST"

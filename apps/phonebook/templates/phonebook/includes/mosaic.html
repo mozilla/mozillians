@@ -1,0 +1,7 @@
+<div id="{{ mosaicid }}" class="ri-grid">
+  <ul>
+  {% for i in range(1, 67) %}
+    <li><a><img src="{{ media('img/mosaic/' ~ '%03d'|format(i) ~ '.jpg') }}" alt="{{ i.slug }}"></a></li>
+  {% endfor %}
+  </ul>
+</div>

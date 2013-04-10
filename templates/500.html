@@ -3,7 +3,7 @@
 {% block page_title %}{{ _('Application Error') }}{% endblock %}
 {% block body_classes %}box-content error-page{% endblock %}
 
-{% block main_content %}
+{% block content %}
   <h1>{{ _("We're Sorry, but Something Went Wrong!") }}</h1>
 
   <a href="http://theoatmeal.com/comics/state_web_summer#tumblr">
@@ -39,7 +39,7 @@
       500 Server Error
     {% endblock %}
   -->
-{% endblock main_content %}
+{% endblock content %}
 
 {# Don't display browserid block or user may enter a infinite authentication loop. #}
 {% block browserid_form %}
