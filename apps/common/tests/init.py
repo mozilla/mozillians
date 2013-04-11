@@ -11,7 +11,7 @@ import elasticutils.contrib.django.estestcase as estestcase
 from elasticutils.contrib.django import get_es
 
 from apps.users.cron import index_all_profiles
-from apps.users.models import MOZILLIANS, UserProfile
+from apps.users.models import MOZILLIANS, PUBLIC, UserProfile
 
 
 class TestCase(test_utils.TestCase):
@@ -37,6 +37,7 @@ class TestCase(test_utils.TestCase):
         profile = cls.mozillian2.get_profile()
         profile.is_vouched = True
         profile.full_name='Amando Brown'
+        profile.privacy_full_name = PUBLIC
         profile.save()
 
         # Create a non-vouched account
@@ -44,17 +45,26 @@ class TestCase(test_utils.TestCase):
                 email='pending@mozillians.org', username='pending')
         pending_profile = cls.pending.get_profile()
         pending_profile.full_name='Amanda Younger'
+        pending_profile.privacy_full_name = PUBLIC
         pending_profile.save()
+
+        # Create an incomplete account
+        cls.incomplete = (
+            User.objects.create(email='incomplete@mozillians.org',
+                                username='incomplete'))
 
     def setUp(self):
         # TODO: can this be more elegant?
         self.client.get('/')
         self.mozillian_client = test.Client()
         self.mozillian_client.login(email=self.mozillian.email)
-        self.mozillian_client2 = test.Client()
-        self.mozillian_client2.login(email=self.mozillian2.email)
+        self.mozillian2_client = test.Client()
+        self.mozillian2_client.login(email=self.mozillian2.email)
         self.pending_client = test.Client()
         self.pending_client.login(email=self.pending.email)
+        self.incomplete_client = test.Client()
+        self.incomplete_client.login(email=self.incomplete.email)
+        self.anonymous_client = test.Client()
         self.data_privacy_fields = {}
         for field in UserProfile._privacy_fields:
             self.data_privacy_fields['privacy_%s' % field] = MOZILLIANS

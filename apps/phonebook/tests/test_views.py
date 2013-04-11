@@ -8,7 +8,7 @@ from funfactory.urlresolvers import set_url_prefix, reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
-from apps.users.models import PUBLIC
+from apps.users.models import MOZILLIANS
 from apps.common.tests.init import ESTestCase, user
 
 
@@ -116,40 +116,86 @@ class TestViews(ESTestCase):
         response = self.pending_client.get(search, follow=True)
         assert('You must be vouched to continue' in response.content)
 
-    def test_mozillian_sees_mozillian_profile(self):
-        _user = user(username='other', email='whatever@whatver.man',
-                     full_name='other')
-        url = reverse('profile', args=['other'])
-        r = self.mozillian_client.get(url)
-        eq_(r.status_code, 200)
-        eq_(r.context['profile'].user, _user)
+    def test_user_view_own_profile(self):
+        """Test user requests own profile."""
+        def _get_page(client, user):
+            url = reverse('profile', args=[user.username])
+            response = client.get(url)
+            self.assertEqual(response.status_code, 200)
+            eq_(response.context['profile'].user, user)
+        _get_page(self.mozillian_client, self.mozillian)
+        _get_page(self.mozillian2_client, self.mozillian2)
+        _get_page(self.pending_client, self.pending)
+        _get_page(self.incomplete_client, self.incomplete)
 
-    def test_pending_view_own_profile(self):
-        """Test view own profile by unvouched user."""
-        url = reverse('profile', args=[self.pending.username])
-        response = self.pending_client.get(url)
-        self.assertEqual(response.status_code, 200)
+    def test_user_view_nonpublic_mozillian_profile(self):
+        """Test user requests non public mozillian profile."""
+        def _get_page(client, status_code):
+            url = reverse('profile', args=[self.mozillian.username])
+            response = client.get(url)
+            eq_(response.status_code, status_code)
+        _get_page(self.mozillian_client, 200)
+        _get_page(self.mozillian2_client, 200)
+        _get_page(self.pending_client, 302)
+        _get_page(self.incomplete_client, 302)
+        _get_page(self.anonymous_client, 302)
 
-    def test_pending_view_other_profile(self):
-        """Test view other profile by unvouched user."""
-        url = reverse('profile', args=[self.mozillian.username])
-        response = self.pending_client.get(url, follow=True)
-        self.assertEqual(response.status_code, 404)
+    def test_user_view_public_mozillian_profile(self):
+        """Test user requests public mozillian profile."""
+        def _get_page(client, status_code):
+            url = reverse('profile', args=[self.mozillian2.username])
+            response = client.get(url)
+            eq_(response.status_code, status_code)
+        _get_page(self.mozillian_client, 200)
+        _get_page(self.mozillian2_client, 200)
+        _get_page(self.pending_client, 200)
+        _get_page(self.incomplete_client, 200)
+        _get_page(self.anonymous_client, 200)
 
-    def test_pending_view_public_profile(self):
-        up = self.mozillian.userprofile
-        up.privacy_full_name = PUBLIC
-        up.save()
-        url = reverse('profile', args=[self.mozillian.username])
-        response = self.pending_client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
-        eq_(response.context['profile'], up)
+    def test_user_view_pending_profile(self):
+        """Test user requests pending profile."""
+        def _get_page(client, status_code):
+            url = reverse('profile', args=[self.pending.username])
+            response = client.get(url)
+            eq_(response.status_code, status_code)
+        _get_page(self.mozillian_client, 200)
+        _get_page(self.mozillian2_client, 200)
+        _get_page(self.pending_client, 200)
+        _get_page(self.incomplete_client, 200)
+        _get_page(self.anonymous_client, 200)
 
-    def test_mozillians_view_own_profile(self):
-        """Test view own profile by vouched user."""
-        url = reverse('profile', args=[self.mozillian.username])
-        response = self.mozillian_client.get(url)
-        self.assertEqual(response.status_code, 200)
+        # Set pending profile to non public
+        self.pending.userprofile.privacy_full_name = MOZILLIANS
+        self.pending.userprofile.save()
+        _get_page(self.mozillian_client, 200)
+        _get_page(self.mozillian2_client, 200)
+        _get_page(self.pending_client, 200)
+        _get_page(self.incomplete_client, 302)
+        _get_page(self.anonymous_client, 302)
+
+    def test_user_view_non_existand_profile(self):
+        """Test user requests non existand profile."""
+        def _get_page(client, status_code):
+            url = reverse('profile', args=['foo-bar'])
+            response = client.get(url)
+            eq_(response.status_code, status_code)
+        _get_page(self.mozillian_client, 404)
+        _get_page(self.mozillian2_client, 404)
+        _get_page(self.pending_client, 302)
+        _get_page(self.incomplete_client, 302)
+        _get_page(self.anonymous_client, 302)
+
+    def test_user_view_incomplete_profile(self):
+        """Test user requests incomplete profile."""
+        def _get_page(client, status_code):
+            url = reverse('profile', args=[self.incomplete.username])
+            response = client.get(url)
+            eq_(response.status_code, status_code)
+        _get_page(self.mozillian_client, 404)
+        _get_page(self.mozillian2_client, 404)
+        _get_page(self.pending_client, 302)
+        _get_page(self.incomplete_client, 200)
+        _get_page(self.anonymous_client, 302)
 
     def test_pending_edit_profile(self):
         # do all then reset
