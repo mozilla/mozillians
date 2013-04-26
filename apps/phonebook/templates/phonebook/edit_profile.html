@@ -201,6 +201,33 @@
             </div>
           </div>
           {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
+          <div class="control-group">
+            <div class="controls">
+              <span class="label-text">
+                {% trans bug_url = 'https://bugzilla.mozilla.org/'
+                                   'enter_bug.cgi?alias=&assigned_to=nobody%40mozilla.org'
+                                   '&attach_text=&blocked=&bug_file_loc=http%3A%2F%2F&bug'
+                                   '_severity=normal&bug_status=NEW&comment=My%20mozillia'
+                                   'ns.org%20username%20is%3A%0D%0AMy%20old%20email%20is%'
+                                   '3A%0D%0AMy%20new%20email%20is%3A&component=Phonebook&'
+                                   'contenttypeentry=&contenttypemethod=autodetect&conten'
+                                   'ttypeselection=text%2Fplain&data=&defined_groups=1&de'
+                                   'pendson=&description=&flag_type-37=X&flag_type-4=X&fl'
+                                   'ag_type-607=X&flag_type-781=X&flag_type-787=X&flag_ty'
+                                   'pe-791=X&flag_type-800=X&form_name=enter_bug&keywords'
+                                   '=&maketemplate=Remember%20values%20as%20bookmarkable%'
+                                   '20template&op_sys=All&priority=--&product=Community%2'
+                                   '0Tools&qa_contact=&rep_platform=All&requestee_type-4='
+                                   '&requestee_type-607=&requestee_type-781=&requestee_ty'
+                                   'pe-787=&requestee_type-791=&requestee_type-800=&short'
+                                   '_desc=Please%20change%20my%20email%20address%20in%20M'
+                                   'ozillians.org&status_whiteboard=&target_milestone=---'
+                                   '&version=other' %}
+                  To change your Personal Email, please <a href="{{ bug_url }}">file a bug</a>.
+                {% endtrans %}
+              </span>
+            </div>
+          </div>
           <hr>
           <div class="control-group">
             <label class="control-label">{{ _('Password') }}</label>
