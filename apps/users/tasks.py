@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
+
 import basket
 import requests
 import pyes
 from basket.base import request
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.models import User
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
@@ -16,6 +19,7 @@ BASKET_TASK_MAX_RETRIES = 2 # Total 1+2 = 3 tries
 BASKET_URL = getattr(settings, 'BASKET_URL', False)
 BASKET_NEWSLETTER = getattr(settings, 'BASKET_NEWSLETTER', False)
 BASKET_ENABLED = all([BASKET_URL, BASKET_NEWSLETTER])
+INCOMPLETE_ACC_MAX_DAYS = 7
 
 def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
@@ -154,3 +158,11 @@ def unindex_objects(model, ids, public_index, **kwargs):
                 return
             else:
                 raise e
+
+@task
+def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
+    """Remove incomplete accounts older than INCOMPLETE_ACC_MAX_DAYS old."""
+
+    now = datetime.now() - timedelta(days=days)
+    (User.objects.filter(date_joined__lt=now)
+     .filter(userprofile__full_name='').delete())
