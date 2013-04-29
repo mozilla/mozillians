@@ -203,9 +203,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                    on_delete=models.SET_NULL, blank=True,
                                    related_name='vouchees')
     date_vouched = models.DateTimeField(null=True, blank=True, default=None)
-    groups = models.ManyToManyField(Group, blank=True)
-    skills = models.ManyToManyField(Skill, blank=True)
-    languages = models.ManyToManyField(Language, blank=True)
+    groups = models.ManyToManyField(Group, blank=True, related_name='members')
+    skills = models.ManyToManyField(Skill, blank=True, related_name='members')
+    languages = models.ManyToManyField(Language, blank=True,
+                                       related_name='members')
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True,
                        upload_to=_calculate_photo_filename)

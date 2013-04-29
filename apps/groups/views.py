@@ -56,9 +56,8 @@ def show(request, url):
     """List all vouched users with this group."""
     group = get_object_or_404(Group, url=url)
     limit = forms.PAGINATION_LIMIT
-    in_group = (group.userprofile_set
-                .filter(user=request.user).exists())
-    profiles = group.userprofile_set.vouched()
+    in_group = (group.members.filter(user=request.user).exists())
+    profiles = group.members.vouched()
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
     people = []
@@ -85,7 +84,7 @@ def show(request, url):
     if group.steward:
         # Get the 15 most globally popular skills that appear in the group
         skills = (Skill.objects
-                  .filter(userprofile__in=profiles)
+                  .filter(members__in=profiles)
                   .annotate(no_users=Count('userprofile'))
                   .order_by('no_users'))
         data.update(skills=skills)
