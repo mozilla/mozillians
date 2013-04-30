@@ -285,6 +285,7 @@ def _allowed_hosts():
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
+                         '^/csp/',
                          '^/admin/',
                          '^/browserid/verify/',
                          '^/api']
