@@ -6,8 +6,11 @@
 {% block main_content %}
   <h1>{{ _("Oh No! That Page Doesn't Exist!") }}</h1>
 
-  <img src="{{ MEDIA_URL }}img/tumblebeast-404.png" id="tumblebeast"
-       alt="{{ _('Tumblebeast from The Oatmeal (http://theoatmeal.com)') }}">
+  <a href="http://theoatmeal.com/comics/state_web_summer#tumblr">
+    <img src="{{ MEDIA_URL }}img/tumbeast-404.png" id="tumbeast"
+         alt="{{ _('Tumbeasts by Matthew Inman of The Oatmeal') }}"
+         title="{{ _('Tumbeasts by Matthew Inman of The Oatmeal') }}">
+  </a>
 
   {% trans home_url=url('home') %}
     <p>
