@@ -195,6 +195,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'common',
     'api',
     'mozspaces',
+    'funfacts',
 
     'csp',
     'jingo_minify',

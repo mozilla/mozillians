@@ -1,0 +1,119 @@
+[
+    {
+        "pk": 1,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:45:56.350",
+            "name": "Number of vouched mozillians",
+            "created": "2013-04-30T07:13:16.659",
+            "number": "UserProfile.objects.vouched().aggregate(number=Count('id'))",
+            "public_text": "vouched Mozillians.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 2,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:11.727",
+            "name": "Number of languages spoken",
+            "created": "2013-05-09T04:32:42.441",
+            "number": "Language.objects.annotate(members_count=Count('members')).filter(members_count__gt=0).aggregate(number=Count('id'))",
+            "public_text": "spoken languages.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 3,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:22.035",
+            "name": "Number of mozillians coding python",
+            "created": "2013-05-09T04:35:35.954",
+            "number": "UserProfile.objects.vouched().filter(skills__name='python').aggregate(number=Count('id'))",
+            "public_text": "python coders.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 4,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:34.841",
+            "name": "Number of mozillians in webdev",
+            "created": "2013-05-09T04:37:01.551",
+            "number": "UserProfile.objects.vouched().filter(groups__name='webdev').aggregate(number=Count('id'))",
+            "public_text": "webdev members.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 5,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:39.348",
+            "name": "Number of mozillians in Mountain View",
+            "created": "2013-05-09T04:40:51.890",
+            "number": "UserProfile.objects.vouched().filter(city__iexact='mountain view').aggregate(number=Count('id'))",
+            "public_text": "mozillians in Mountain View.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 6,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:44.314",
+            "name": "Number of mozillians in California",
+            "created": "2013-05-09T04:41:59.066",
+            "number": "UserProfile.objects.vouched().filter(region__iexact='california').aggregate(number=Count('id'))",
+            "public_text": "mozillians in California.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 7,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:48.717",
+            "name": "Number of mozillians in United States",
+            "created": "2013-05-09T04:42:57.259",
+            "number": "UserProfile.objects.vouched().filter(country='us').aggregate(number=Count('id'))",
+            "public_text": "mozillians in United States.",
+            "published": false,
+            "divisor": ""
+        }
+    },
+    {
+        "pk": 8,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:46:54.414",
+            "name": "Percentage of mozillians coding python",
+            "created": "2013-05-09T04:44:06.487",
+            "number": "UserProfile.objects.vouched().filter(skills__name='python').aggregate(number=Count('id'))",
+            "public_text": "of mozillians code python.",
+            "published": false,
+            "divisor": "UserProfile.objects.vouched().aggregate(number=Count('id'))"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "funfacts.funfact",
+        "fields": {
+            "updated": "2013-05-09T04:44:55.412",
+            "name": "Percentage of mozillians living in US",
+            "created": "2013-05-09T04:44:55.412",
+            "number": "UserProfile.objects.vouched().filter(country='us').aggregate(number=Count('id'))",
+            "public_text": "mozillians are in US.",
+            "published": false,
+            "divisor": "UserProfile.objects.vouched().aggregate(number=Count('id'))"
+        }
+    }
+]
