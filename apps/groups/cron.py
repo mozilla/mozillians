@@ -20,19 +20,19 @@ def assign_autocomplete_to_groups():
     # Only assign status to non-system groups.
     # TODO: add stats.d timer here
     for g in (Group.objects.filter(always_auto_complete=False, system=False)
-                           .annotate(count=Count('userprofile'))):
+                           .annotate(count=Count('members'))):
         g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
 
     # Assign appropriate status to skills
     for g in (Skill.objects.filter(always_auto_complete=False)
-                           .annotate(count=Count('userprofile'))):
+                           .annotate(count=Count('members'))):
         g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
 
     # Assign appropriate status to languages spoken
     for g in (Language.objects.filter(always_auto_complete=False)
-                              .annotate(count=Count('userprofile'))):
+                              .annotate(count=Count('members'))):
         g.auto_complete = g.count > AUTO_COMPLETE_COUNT
         g.save()
 
