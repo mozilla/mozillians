@@ -85,7 +85,7 @@ class OldGroupRedirectionMiddleware(object):
     """
 
     def process_response(self, request, response):
-        group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[^/]+)$',
+        group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[-\w]+)/$',
                              request.path_info)
         if (response.status_code == 404
             and group_url
@@ -103,7 +103,7 @@ class GroupAliasRedirectionMiddleware(object):
     """Redirect `group` requests to the alias `group` if it exists."""
 
     def process_response(self, request, response):
-        group_url = re.match('^/group/(?P<url>[^/]+)$', request.path_info)
+        group_url = re.match('^/group/(?P<url>[-\w]+)/$', request.path_info)
         if (response.status_code == 404
             and group_url
             and (GroupAlias.objects.filter(url=group_url.group('url'))

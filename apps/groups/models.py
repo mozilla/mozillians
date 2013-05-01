@@ -15,8 +15,7 @@ class GroupBase(models.Model):
     Think of tags on a user profile.
     """
     name = models.CharField(db_index=True, max_length=50, unique=True)
-    url = AutoSlugField(populate_from='name', unique=True,
-                        editable=False, blank=True)
+    url = models.SlugField(blank=True)
 
     # If this is true, this Group/Skill/Language will appear in the
     # autocomplete list.
@@ -40,14 +39,11 @@ class GroupBase(models.Model):
         """
         return self.name
 
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super(GroupBase, self).save(*args, **kwargs)
-
 
 class GroupAliasBase(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    url = models.SlugField()
+    url = AutoSlugField(populate_from='name', unique=True,
+                        editable=False, blank=True)
 
     class Meta:
         abstract = True
@@ -76,6 +72,14 @@ class Group(GroupBase):
     class Meta:
         db_table = 'group'
 
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(Group, self).save()
+        if not self.url:
+            alias = GroupAlias.objects.create(name=self.name, alias=self)
+            self.url = alias.url
+            super(Group, self).save()
+
 
 class GroupAlias(GroupAliasBase):
     alias = models.ForeignKey(Group, related_name='aliases')
@@ -93,7 +97,13 @@ class Skill(GroupBase):
     Like groups but with less attributes.
 
     """
-    pass
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(Skill, self).save()
+        if not self.url:
+            alias = SkillAlias.objects.create(name=self.name, alias=self)
+            self.url = alias.url
+            super(Skill, self).save()
 
 
 class SkillAlias(GroupAliasBase):
@@ -108,7 +118,13 @@ class Language(GroupBase):
 
     Like groups but with less attributes.
     """
-    pass
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(Language, self).save()
+        if not self.url:
+            alias = LanguageAlias.objects.create(name=self.name, alias=self)
+            self.url = alias.url
+            super(Language, self).save()
 
 
 class LanguageAlias(GroupAliasBase):
@@ -116,19 +132,3 @@ class LanguageAlias(GroupAliasBase):
 
     class Meta:
         verbose_name_plural = 'language aliases'
-
-
-@receiver(post_save, sender=Language, dispatch_uid='create_alias_lang_sig')
-@receiver(post_save, sender=Skill, dispatch_uid='create_alias_skill_sig')
-@receiver(post_save, sender=Group, dispatch_uid='create_alias_group_sig')
-def create_alias(sender, instance, created, **kwargs):
-    if isinstance(instance, Language):
-        model = LanguageAlias
-    elif isinstance(instance, Skill):
-        model = SkillAlias
-    elif isinstance(instance, Group):
-        model = GroupAlias
-
-    if created:
-        model.objects.get_or_create(name=instance.name, url=instance.url,
-                                    alias=instance)
