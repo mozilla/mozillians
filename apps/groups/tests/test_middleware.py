@@ -11,8 +11,7 @@ class GroupRedirectionMiddlewareTests(ESTestCase):
     def test_oldgroup_redirection_middleware(self):
         """Test the group old url schema redirection middleware."""
         self.mozillian_client.get('/')
-        response = self.mozillian_client.get(reverse('group', args=['staff']),
-                                             follow=True)
+        response = self.mozillian_client.get('/group/1-staff', follow=True)
         eq_(200, response.status_code)
 
         response = self.mozillian_client.get('/group/44-invalid-group',
@@ -23,5 +22,7 @@ class GroupRedirectionMiddlewareTests(ESTestCase):
         """Test GroupAlias redirection middleware."""
         staff_group = Group.objects.get(name='staff')
         GroupAlias.objects.create(name='ffats', url='ffats', alias=staff_group)
-        response = self.mozillian_client.get(reverse('group', args=['ffats']))
-        eq_(301, response.status_code)
+        response = self.mozillian_client.get(reverse('group', args=['ffats']),
+                                             follow=True)
+        eq_(200, response.status_code)
+        eq_('staff', response.context['group'].name)

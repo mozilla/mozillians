@@ -65,10 +65,11 @@ class GroupBaseEditAdminForm(forms.ModelForm):
 class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
-    search_fields = ['name']
+    search_fields = ['name', 'aliases__name']
     list_display = ['name', 'member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter]
+    readonly_fields = ['url']
 
     def get_form(self, request, obj=None, **kwargs):
         defaults = {}
