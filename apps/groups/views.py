@@ -85,7 +85,7 @@ def show(request, url):
         # Get the 15 most globally popular skills that appear in the group
         skills = (Skill.objects
                   .filter(members__in=profiles)
-                  .annotate(no_users=Count('userprofile'))
+                  .annotate(no_users=Count('members'))
                   .order_by('no_users'))
         data.update(skills=skills)
         data.update(irc_channels=group.irc_channel.split(' '))
