@@ -24,7 +24,7 @@ class EmptyGroupFilter(SimpleListFilter):
         if self.value() is None:
             return queryset
         value = self.value() == 'True'
-        queryset = (queryset.annotate(no_profiles=Count('userprofile')))
+        queryset = (queryset.annotate(no_profiles=Count('members')))
         if value:
             return queryset.filter(no_profiles__gt=0)
         return queryset.filter(no_profiles=0)
@@ -80,7 +80,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         return (super(GroupBaseAdmin, self)
-                .queryset(request).annotate(member_count=Count('userprofile')))
+                .queryset(request).annotate(member_count=Count('members')))
 
     def member_count(self, obj):
         """Return number of members in group."""
