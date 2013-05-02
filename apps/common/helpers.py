@@ -17,7 +17,7 @@ absolutify = register.function(absolutify)
 def gravatar(email, default=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
 
-    return 'http://www.gravatar.com/avatar/%s?%s' % (
+    return 'https://secure.gravatar.com/avatar/%s?%s' % (
             hashlib.md5(email.lower()).hexdigest(),
             urllib.urlencode({'d': absolutify(default),
                               's': str(size),
