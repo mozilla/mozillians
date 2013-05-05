@@ -33,12 +33,11 @@
 
 
 html {
-    background:#333;
 }
 
 body {
     background:#f5f1e8 url(../img/mozorg-gradient.png) repeat-x top center;
-    padding-top:60px;
+    padding-top:80px;
     font:16px/24px 'Open Sans', 'Lucida Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
 }
 
@@ -242,11 +241,14 @@ h4 {
 }
 
 footer {
+    border-top:6px solid #B91E27;
+    padding-top:6px;
+    left:0;
+    right:0;
+    bottom:0;
     background:#333;
     color:#999;
-    border-top:6px solid #B91E27;
-    padding:18px 0;
-    bottom:0;
+    overflow:hidden;
 }
 
 nav .nav a.browserid-login {
@@ -652,6 +654,10 @@ legend {
 footer div.container {
     margin-left: auto;
     margin-right: auto;
+}
+footer div.rollover {
+    margin:-25px auto 0px;
+    padding-top:3px;
 }
 
 .vouchees {
