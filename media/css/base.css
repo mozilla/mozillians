@@ -33,12 +33,12 @@
 
 
 html {
-    background:#333;
 }
 
 body {
     background:#f5f1e8 url(../img/mozorg-gradient.png) repeat-x top center;
-    padding-top:60px;
+    padding-top:80px;
+    padding-bottom:100px;
     font:16px/24px 'Open Sans', 'Lucida Sans', 'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
 }
 
@@ -242,10 +242,18 @@ h4 {
 }
 
 footer {
-    background:#333;
-    color:#999;
-    border-top:6px solid #B91E27;
-    padding:18px 0;
+      position:fixed;
+      left:0;
+      right:0;
+      background:#333;
+      color:#999;
+      border-top:10px solid #B91E27;
+      padding-top:10px;
+      bottom:-6em;
+      display:block;
+    }
+
+footer:hover {
     bottom:0;
 }
 
