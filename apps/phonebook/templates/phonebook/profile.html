@@ -130,9 +130,11 @@
 
         {% if profile.website %}
           <dt>{{ _('Website') }}</dt>
-          <dd><a rel="me" class="u-url url" href="{{ profile.website }}">
-            {{ profile.website }}</a>
-          </dd>
+          {% for website in profile.get_websites() %}
+            <dd><a rel="me" class="u-url url" href="{{ website }}">
+              {{ website }}</a>
+            </dd>
+          {% endfor %}
         {% endif %}
 
         {% if profile.country or profile.region or profile.city %}
@@ -241,7 +243,7 @@
 
     <div class="span2">
       <div class="thumbnail">
-        <img class="u-photo photo" 
+        <img class="u-photo photo"
              id="profile-photo"
              src="{{ profile.get_photo_url() }}"
              alt="{{ _('Profile photo') }}">

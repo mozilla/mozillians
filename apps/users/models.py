@@ -197,8 +197,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                  verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
-    website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
-                              default='', blank=True)
+    website = models.TextField(verbose_name=_lazy(u'Website'),
+                               default='', blank=True)
     vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
                                    on_delete=models.SET_NULL, blank=True,
                                    related_name='vouchees')
@@ -508,6 +508,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                      "and invite other Mozillians onto the site.")
         send_mail(subject, message, 'no-reply@mozillians.org',
                   [self.user.email])
+
+    def get_websites(self):
+        return[website if website else None for website in self.website.split('\r\n')]
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
