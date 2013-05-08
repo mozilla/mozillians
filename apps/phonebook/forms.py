@@ -1,6 +1,7 @@
 import re
 
 from django import forms
+from django.core.validators import URLValidator
 from django.utils.safestring import mark_safe
 
 import happyforms
@@ -138,6 +139,14 @@ class BaseProfileForm(happyforms.ModelForm):
         return filter(lambda x: x,
                       map(lambda x: x.strip() or False,
                           languages.lower().split(',')))
+
+    def clean_website(self):
+        value = self.cleaned_data['website']
+        validator = URLValidator(verify_exists=False)
+        urls = value.split('\r\n')
+        if value:
+            [validator(url) for url in urls]
+        return u'\r\n'.join([url for url in urls])
 
     def clean(self):
         """Make sure geographic fields aren't underspecified."""
