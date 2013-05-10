@@ -50,8 +50,10 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS +
-    ('django_browserid.context_processors.browserid_form',))
+TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS + (
+    'django_browserid.context_processors.browserid_form',
+    'apps.common.context_processors.current_year'
+))
 
 JINGO_EXCLUDE_APPS = [
     'bootstrapform',
@@ -62,14 +64,7 @@ JINGO_EXCLUDE_APPS = [
 MINIFY_BUNDLES = {
     'css': {
         'common': (
-            'css/bootstrap.css',
-            'css/jquery-ui-1.8.16.custom.css',
-            'js/libs/tag-it/css/jquery.tagit.css',
-            'css/base.css',
-            'css/bootstrap-responsive.css',
-            'css/base-480px.css',
-            'css/base-768px.css',
-            'css/base-980px.css',
+            'css/main.less',
         ),
         'api': (
             'css/prettify.css',
@@ -86,23 +81,18 @@ MINIFY_BUNDLES = {
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.7.2.js',
+            'js/libs/jquery-1.8.3.min.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
-            'js/libs/bootstrap/bootstrap-transition.js',
-            'js/libs/bootstrap/bootstrap-alert.js',
-            'js/libs/bootstrap/bootstrap-modal.js',
-            'js/libs/bootstrap/bootstrap-dropdown.js',
-            'js/libs/bootstrap/bootstrap-tooltip.js',
-            'js/libs/bootstrap/bootstrap-popover.js',
-            'js/libs/bootstrap/bootstrap-button.js',
-            'js/libs/bootstrap/bootstrap-collapse.js',
-            'js/libs/bootstrap/bootstrap-carousel.js',
-            'js/libs/bootstrap/bootstrap-typeahead.js',
-            'js/libs/bootstrap/bootstrap-tab.js',
-            'js/libs/validation/validation.js',
             'js/main.js',
+            'js/libs/validation/validation.js',
             'static/browserid/browserid.js',
-            'js/groups.js',
+        ),
+        'homepage': (
+            'js/libs/modernizr.custom.26887.js',
+            'js/libs/jquery.transit.min.js',
+            'js/libs/jquery.gridrotator.js',
+            'js/libs/jquery.smooth-scroll.min.js',
+            'js/homepage.js'
         ),
         'api': (
             'js/libs/prettify.js',
@@ -133,9 +123,12 @@ MINIFY_BUNDLES = {
         ),
         'profile_view': (
             'js/profile_view.js',
-            ),
+        ),
     }
 }
+
+LESS_PREPROCESS = False
+LESS_BIN = 'lessc'
 
 MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'commonware.response.middleware.StrictTransportMiddleware',
@@ -159,7 +152,7 @@ SUPPORTED_NONLOCALES = list(base.SUPPORTED_NONLOCALES) + [
     'api',
     'browserid',
     'admin',
-    'autocomplete'
+    'autocomplete',
 ]
 
 AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)

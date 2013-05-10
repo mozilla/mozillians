@@ -2,93 +2,144 @@
 
 {% block page_title %}{{ _('Mozilla Community Directory') }}{% endblock %}
 {% block body_id %}home{% endblock %}
-{% block body_classes %}box-content search-page{% endblock %}
 
-{% set nav_home = 'active' %}
-{% block nav %}
-  {{ super() }}
-{% endblock %}
+{% block mosaic %}
+{% if not user.is_authenticated() %}
+  {% with mosaicid = 'mosaic-top' %}
+    {% include 'phonebook/includes/mosaic.html' %}
+  {% endwith %}
+{% endif %}
+{% endblock mosaic %}
 
-
-{% block main_content %}
+{% block content %}
   {% if user.is_anonymous() or not user.get_profile().is_vouched %}
-    <div class="welcome">
-      <noscript>{{ _('This website requires JavaScript to be turned on.') }}</noscript>
-      {% trans %}
-        <h1>Welcome<br> <small>to the Mozilla community directory.</small></h1>
-      {% endtrans %}
+    <hgroup id="main-feature">
+      <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
+      <hr>
+      <form id="homepage-search" action="{{ url('search') }}" method="GET">
+          {{ csrf() }}
+          <input type="text" name="q" class="search-query" 
+          placeholder="{{ _('Search by name or group') }}">
+       </form>
+    </hgroup>
 
-      <p>
-        {% trans about=url('about') %}
-          Here you'll find information on your fellow contributors,
-          what they do and how to connect with them.
-          <a href="{{ about }}">Learn more</a>
-        {% endtrans %}
-      </p>
+    <article id="information">
+      <section id="quote">
+          <img alt="<username goes here>" src="{{ MEDIA_URL }}img/sean-placeholder.png">
+          <blockquote>
+            {% trans %}
+            <p>Salvia pop-up quinoa portland, cray blog pug next level godard pinterest banh mi freegan stumptown. Jean shorts YOLO street art bespoke wolf.</p>
+            <small>Sean Martell</small>
+            {% endtrans %}
+          </blockquote>
+      </section>
 
-      {% if not user.is_authenticated() %}
+      <section id="about">
+          <h2>{{ _('What is mozillians?') }}</h2>
+          <p>
+            {% trans %}
+            Tousled direct trade kale chips, ugh artisan try-hard church-key synth thundercats pop-up american apparel biodiesel portland trust fund pour-over. Banh mi wolf lo-fi bespoke swag. 3 wolf moon pitchfork messenger bag post-ironic, semiotics literally artisan fashion axe vinyl single-origin coffee banjo.
+            {% endtrans %}
+          </p>
+          <a href="#">{{ _('sign up now') }}</a>
+      </section>
+      
+      <section id="mozfacts">
+          <h2>23%</h2>
+          <p>
+            {% trans %}
+            Salvia pop-up quinoa portland, cray blog pug next level godard pinterest banh mi freegan stumptown. Jean shorts YOLO street art bespoke wolf.
+            {% endtrans %}
+          </p>
+      </section>
+    </article>
+
+    <article id="get-involved">
+      {% with mosaicid = 'mosaic-bottom' %}
+      {% include 'phonebook/includes/mosaic.html' %}
+      {% endwith %}
+      <div class="content">
+        <h2>{{ _('How do I get involved?') }}</h2>
         <p>
-          <a href="#" id="create_profile" class="persona-button browserid-login">
-            <span>{{ _('Sign In with Persona') }}</span>
-          </a>
-          <br/>
-          <a href="https://login.persona.org/about">
-            {{ _('What is Persona? Why are we using it?') }}
-          </a>
-        </p>
-      {% elif not user.get_profile().is_vouched %}
-        <p>
-          {% trans contribute_url='http://mozilla.org/contribute' %}
-            You need to be vouched by a core or active contributor in
-            the Mozilla community.  To do this, find ways
-            to <a href="{{ contribute_url }}">get involved</a>.
+          {% trans %}
+          Farm-to-table semiotics portland, freegan mcsweeney's typewriter photo booth wayfarers banksy 3 wolf moon DIY pour-over readymade scenester whatever. YOLO blue bottle marfa, kogi vice seitan brunch.
           {% endtrans %}
         </p>
-      {% endif %}
-    </div>
-  {% elif user.get_profile().is_vouched %}
-    <h1>Welcome to Mozillians!</h1>
-    {% if groups %}
-      <h3>Stewards in your Functional Area</h3>
-      <div class="row">
-        {% for my_group in groups %}
-          {{ search_result(my_group.steward) }}
-        {% endfor %}
+        {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook' %}
+          <a href="{{ bug_url }}">find a bug</a>
+        {% endtrans %}
       </div>
-    {% endif %}
-    <div class="popular-groups">
-      <h3>Browse Functional Areas</h3>
-      <ul id="groups" class="tagit ui-widget ui-corner-all">
-        {% for group in curated_groups %}
-          <li class="tagit-choice ui-widget-content ui-state-default
-                     ui-corner-all p-category category">
-            <a href="{{ url('group', group.url) }}">
-              {{ group.name }}
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
+    </article>
+
+  {% elif user.get_profile().is_vouched %}
+    <div class="white-bkg">
+      <div id="main-content" class="row">
+        <section class="greeting">
+          <img id="profile-photo" src="{{ user.userprofile.get_photo_url('130x130') }}" alt="{{ user.username }}">
+          <h2>{{ _('Hello') }}{% if user.userprofile.first_name %}, {{ user.userprofile.first_name }}{% endif %}!
+          </h2>
+        </section>
+        <section class="badges">
+          <h4>{{ _('My badges') }}</h4>
+          <a href="#">{{ _('See all') }}</a>
+        </section>
+        <section class="new-mozillians">
+          <h4>{{ _('New Mozillians') }}</h4>
+        </section>
+      </div>
     </div>
-    <div id="home-options">
-      <ul class="well">
-        <h3>Options</h3>
-        <li>
-          <a href="{{ url('invite') }}" class="btn">Invite a Mozillian</a>
-          {{ _('Invite other contributors to create a profile') }}
-        </li>
-        <li>
-          <a href="{{ url('profile.edit') }}" class="btn btn-primary">Edit your Profile</a>
-          {{ _('Edit your profile, privacy settings and account settings') }}
-        </li>
-        <li>
-          <a href="{{ url('group_index') }}" class="btn btn-info">View Groups</a>
-          {{ _('View all groups in the Phonebook') }}
-        </li>
-        <li>
-          <a href="{{ url('about') }}" class="btn btn-info">Read the About Page</a>
-          {{ _('Learn more about the Phonebook and why it was built') }}
-        </li>
-      </ul>
+    
+    <div id="content" class="row">
+      <section class="groups">
+            <h3>{{ _('Functional Areas') }}</h3>
+            <p>
+              {% trans %}
+              Tousled direct trade kale chips, ugh artisan try-hard church-key synth thundercats.
+              {% endtrans %}
+            </p>
+            <ul> 
+              {% for group in curated_groups %}
+                <li>
+                  <a href="{{ url('group', group.url) }}">
+                    <i class="icon-tag"></i>
+                    {{ group.name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+      </section>
+      <div class="border"></div>
+      <section class="badges">
+            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
+            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
+            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
+            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
+            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
+      </section>
+      <div class="border"></div>
+      <section class="new-mozillians">
+            <ul>
+              <li>
+                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
+                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
+              </li>
+              <li>
+                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
+                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
+              </li>
+              <li>
+                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
+                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
+              </li>
+            </ul>
+      </section>
     </div>
+
   {% endif %}
-{% endblock main_content %}
+
+  <a href="#" id="back-to-top"><img src="{{ MEDIA_URL }}img/back-to-top-arrow.png" alt="Back to top"></a>
+{% endblock content %}
+
+{% block page_js %}
+  {{ js('homepage') }}
+{% endblock %}

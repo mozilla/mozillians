@@ -11,7 +11,7 @@
   {{ js('search') }}
 {% endblock %}
 
-{% block main_content %}
+{% block content %}
   <div class="row group-options">
     <h1 class="span12">{{ _('Group: {name}')|f(name=group.name) }}</h1>
 
@@ -143,4 +143,4 @@
       {% endif %}
    {% endif %}
 </div>
-{% endblock main_content %}
+{% endblock content %}
