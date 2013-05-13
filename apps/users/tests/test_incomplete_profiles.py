@@ -10,7 +10,7 @@ from apps.groups.models import Group
 class IncompleteProfiles(ESTestCase):
     """Test incomplete profiles."""
 
-    @patch('apps.users.models.elasticutilstasks.index_objects.delay')
+    @patch('apps.users.models.index_objects.delay')
     def test_not_index(self, mock_obj):
         """Test incomplete profiles indexing."""
         user()

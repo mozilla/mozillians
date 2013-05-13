@@ -191,14 +191,9 @@
           {% for group in profile.groups.all() %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all p-category category">
-              {% if (request.user.is_authenticated() and
-                     request.user.get_profile().is_vouched) %}
                 <a href="{{ url('group', group.url) }}">
                   {{ group.name }}
                 </a>
-              {% else %}
-                {{ group.name }}
-              {% endif %}
             </li>
           {% endfor %}
         </ul>
@@ -241,7 +236,7 @@
 
     <div class="span2">
       <div class="thumbnail">
-        <img class="u-photo photo" 
+        <img class="u-photo photo"
              id="profile-photo"
              src="{{ profile.get_photo_url() }}"
              alt="{{ _('Profile photo') }}">

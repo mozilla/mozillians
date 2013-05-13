@@ -99,9 +99,10 @@
           </ul>
       </div>
     {% elif not group.system %}
-      <form action="{{ url('group_toggle', group.url) }}"
-            class="span2" id="toggle-group" method="post">
-        {{ csrf() }}
+      {% if user.is_authenticated() %}
+        <form action="{{ url('group_toggle', group.url) }}"
+              class="span2" id="toggle-group" method="post">
+          {{ csrf() }}
 
         <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
           {% if not in_group %}

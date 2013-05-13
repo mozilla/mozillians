@@ -1,5 +1,6 @@
 import random
 from string import letters
+from time import sleep
 
 from django import test
 from django.conf import settings
@@ -7,8 +8,6 @@ from django.contrib.auth.models import User
 
 import test_utils
 import elasticutils.contrib.django.estestcase as estestcase
-
-from elasticutils.contrib.django import get_es
 
 from apps.users.cron import index_all_profiles
 from apps.users.models import MOZILLIANS, PUBLIC, UserProfile
@@ -88,12 +87,12 @@ class ESTestCase(TestCase, estestcase.ESTestCase):
         """
         estestcase.ESTestCase.setUpClass()
         TestCase.setUpClass()
-        es = get_es()
 
         # Add on demand more models here.
         index_all_profiles()
 
-        es.flush(refresh=True)
+        # Allow time for ES to index stuff
+        sleep(1)
 
     @classmethod
     def tearDownClass(cls):
