@@ -6,3 +6,7 @@ try:
     from settings.local import *
 except ImportError:
     pass
+
+if DATABASES['default']['NAME'] and DATABASES['default']['USER'] and DATABASES['default']['PASSWORD'] is None:
+  raise NotConfigured
+  
