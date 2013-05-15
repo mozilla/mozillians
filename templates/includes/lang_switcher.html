@@ -1,5 +1,4 @@
 <form id="language-switcher" class="languages go span4" method="GET">
-  <label for="language">{{ _('Other languages:') }}</label>
   <select id="language" name="lang" dir="ltr" class="span3">
     {% for code, name in LANGUAGES|dictsort -%}
       <option value="{{ code }}" {{ code|ifeq(LANG|lower, "selected") }}>

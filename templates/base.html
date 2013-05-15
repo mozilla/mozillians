@@ -141,6 +141,44 @@
 
   <footer>
     <div class="container row">
+    <p class="span1.1">
+      {{ _('Other languages:') }}
+    </p>
+    <div class="span5">
+      {% block lang_switcher %}
+        {% include 'includes/lang_switcher.html' %}
+      {% endblock %}
+    </div>
+    <p class="span4">
+      <a href="{{ url('about') }}">
+        {{ _('About Mozillians') }}
+      </a>
+      &nbsp;|&nbsp;
+      <a href="http://www.mozilla.org/{{ LANG }}/privacy-policy.html">
+        {{ _('Privacy Policy') }}
+      </a>
+      &nbsp;
+    </p>
+    </div>
+    <div class="rollover">
+    <div class="container row">
+    <p>&nbsp;</p>
+    <p id="footer-links" class="span4">
+        {% block footer_links %}
+          <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">
+            {{ _('Get Involved') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/about/legal.html">
+            {{ _('Legal Notices') }}
+          </a>
+          &nbsp;|&nbsp;
+          <a href="http://mozilla.com/legal/fraud-report/index.html">
+            {{ _('Report Trademark Abuse') }}
+          </a>
+          {% block extra_footer_links %}{% endblock %}
+        {% endblock %}
+      </p>
       <p class="span4">
         {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook',
                  git_url='https://github.com/mozilla/mozillians' %}
@@ -158,35 +196,7 @@
           </a> or any later version.
         {% endtrans %}
       </p>
-      <p id="footer-links" class="span4">
-        {% block footer_links %}
-          <a href="{{ url('about') }}">
-            {{ _('About Mozillians') }}
-          </a>
-          &nbsp;|&nbsp;
-          <a href="https://wiki.mozilla.org/Mozillians#Get_Involved">
-            {{ _('Get Involved') }}
-          </a>
-          &nbsp;|&nbsp;
-          <a href="http://www.mozilla.org/{{ LANG }}/privacy-policy.html">
-            {{ _('Privacy Policy') }}
-          </a>
-          &nbsp;|&nbsp;
-          <a href="http://mozilla.com/about/legal.html">
-            {{ _('Legal Notices') }}
-          </a>
-          &nbsp;|&nbsp;
-          <a href="http://mozilla.com/legal/fraud-report/index.html">
-            {{ _('Report Trademark Abuse') }}
-          </a>
-          {% block extra_footer_links %}{% endblock %}
-        {% endblock %}
-      </p>
-      <div class="span2">
-        {% block lang_switcher %}
-          {% include 'includes/lang_switcher.html' %}
-        {% endblock %}
-      </div>
+    </div>
     </div>
   </footer>
 
