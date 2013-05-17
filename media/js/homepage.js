@@ -5,12 +5,12 @@
 $(function() {
   /* Mosaic image rotations
   ================================================== */
-  $('#mosaic-top, #mosaic-bottom' ).gridrotator( {
+  $('#mosaic').gridrotator( {
       rows    : 3,
       columns   : 15,
       animType  : 'fadeInOut',
-      animSpeed : 1000,
-      interval  : 2000,
+      animSpeed : 700,
+      interval  : 800,
       step    : 1,
       w480    : {
         rows  : 2,

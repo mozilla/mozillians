@@ -132,8 +132,21 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
 
     {% block mosaic %}{% endblock %}
 
+    {% block messages %}
+      {% if messages %}
+        {% for message in messages %}
+          {% with %}
+            {% set label = message.tags in ['error', 'success', 'info'] %}
+              <div class="alert{% if label %} alert-{{ message.tags }}{% endif %}"
+                   id="pending-approval">
+                {{ message }}
+              </div>
+          {% endwith %}
+        {% endfor %}
+      {% endif %}
+    {% endblock messages %}
+
     {% block content %}{% endblock %}
-    <div class="push"></div>
     </div><!-- close #wrapper -->
 
     {% block site_footer %}

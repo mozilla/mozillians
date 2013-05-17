@@ -5,14 +5,12 @@
 
 {% block mosaic %}
 {% if not user.is_authenticated() %}
-  {% with mosaicid = 'mosaic-top' %}
-    {% include 'phonebook/includes/mosaic.html' %}
-  {% endwith %}
+  {% include 'phonebook/includes/mosaic.html' %}
 {% endif %}
 {% endblock mosaic %}
 
 {% block content %}
-  {% if user.is_anonymous() or not user.get_profile().is_vouched %}
+  {% if not user.is_authenticated() %}
     <hgroup id="main-feature">
       <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
       <hr>
@@ -23,7 +21,7 @@
        </form>
     </hgroup>
 
-    <article id="information">
+    <article id="information" class="container">
       <section id="quote">
           <img alt="<username goes here>" src="{{ MEDIA_URL }}img/sean-placeholder.png">
           <blockquote>
@@ -41,7 +39,6 @@
             Tousled direct trade kale chips, ugh artisan try-hard church-key synth thundercats pop-up american apparel biodiesel portland trust fund pour-over. Banh mi wolf lo-fi bespoke swag. 3 wolf moon pitchfork messenger bag post-ironic, semiotics literally artisan fashion axe vinyl single-origin coffee banjo.
             {% endtrans %}
           </p>
-          <a href="#">{{ _('sign up now') }}</a>
       </section>
       
       <section id="mozfacts">
@@ -55,41 +52,40 @@
     </article>
 
     <article id="get-involved">
-      {% with mosaicid = 'mosaic-bottom' %}
-      {% include 'phonebook/includes/mosaic.html' %}
-      {% endwith %}
-      <div class="content">
-        <h2>{{ _('How do I get involved?') }}</h2>
-        <p>
-          {% trans %}
-          Farm-to-table semiotics portland, freegan mcsweeney's typewriter photo booth wayfarers banksy 3 wolf moon DIY pour-over readymade scenester whatever. YOLO blue bottle marfa, kogi vice seitan brunch.
+      <div class="container">
+        <div class="content">
+          <h2>{{ _('How do I get involved?') }}</h2>
+          <p>
+            {% trans %}
+            Farm-to-table semiotics portland, freegan mcsweeney's typewriter photo booth wayfarers banksy 3 wolf moon DIY pour-over readymade scenester whatever. YOLO blue bottle marfa, kogi vice seitan brunch.
+            {% endtrans %}
+          </p>
+          {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook' %}
+            <a href="{{ bug_url }}">find a bug</a>
           {% endtrans %}
-        </p>
-        {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook' %}
-          <a href="{{ bug_url }}">find a bug</a>
-        {% endtrans %}
+        </div>
       </div>
     </article>
 
-  {% elif user.get_profile().is_vouched %}
-    <div class="white-bkg">
-      <div id="main-content" class="row">
-        <section class="greeting">
-          <img id="profile-photo" src="{{ user.userprofile.get_photo_url('130x130') }}" alt="{{ user.username }}">
-          <h2>{{ _('Hello') }}{% if user.userprofile.first_name %}, {{ user.userprofile.first_name }}{% endif %}!
-          </h2>
-        </section>
-        <section class="badges">
-          <h4>{{ _('My badges') }}</h4>
-          <a href="#">{{ _('See all') }}</a>
-        </section>
-        <section class="new-mozillians">
-          <h4>{{ _('New Mozillians') }}</h4>
-        </section>
-      </div>
+  {% else %}
+    <div id="main-content" class="row">
+      <section class="greeting">
+        <img id="profile-photo" src="{{ user.userprofile.get_photo_url('130x130') }}" alt="{{ user.username }}">
+        <h2>{{ _('Hello') }}{% if user.userprofile.first_name %}, {{ user.userprofile.first_name }}{% endif %}!
+        </h2>
+      </section>
+      <section class="badges">
+        <h4>{{ _('My badges') }}</h4>
+        <a href="#">{{ _('See all') }}</a>
+      </section>
+      <section class="new-mozillians">
+        <h4>{{ _('New Mozillians') }}</h4>
+      </section>
     </div>
     
+    
     <div id="content" class="row">
+      {% if curated_groups %}
       <section class="groups">
             <h3>{{ _('Functional Areas') }}</h3>
             <p>
@@ -108,30 +104,14 @@
               {% endfor %}
             </ul>
       </section>
-      <div class="border"></div>
+      {% endif %}
+      {# TODO: Need to wrap this in an if statement to not display if there are no badges. #}
       <section class="badges">
             <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
             <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
             <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
             <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
             <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-      </section>
-      <div class="border"></div>
-      <section class="new-mozillians">
-            <ul>
-              <li>
-                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
-                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
-              </li>
-              <li>
-                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
-                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
-              </li>
-              <li>
-                <img src="{{ user.userprofile.get_photo_url('40x40') }}" alt="{{ user.username }}">
-                {% if user.userprofile.first_name %}{{ user.userprofile.first_name }}{% endif %}
-              </li>
-            </ul>
       </section>
     </div>
 
