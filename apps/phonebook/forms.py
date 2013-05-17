@@ -4,12 +4,13 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 import happyforms
+from django.utils import simplejson
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from apps.groups.models import Group, Skill, Language
 from apps.users.helpers import validate_username
-from apps.users.models import User, UserProfile
+from apps.users.models import User, UserProfile, MessengerName
 
 from models import Invite
 
@@ -102,7 +103,7 @@ class BaseProfileForm(happyforms.ModelForm):
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites',
                   'allows_mozilla_sites', 'privacy_photo', 'privacy_full_name',
-                  'privacy_ircname', 'privacy_email', 'privacy_website',
+                  'privacy_ircname', 'privacy_messenger_names', 'privacy_email', 'privacy_website',
                   'privacy_bio', 'privacy_city', 'privacy_region',
                   'privacy_country', 'privacy_groups', 'privacy_skills',
                   'privacy_languages')
@@ -166,6 +167,7 @@ class ProfileForm(BaseProfileForm):
         label=_lazy(u'Start typing to add a group (example: Marketing, '
                     'Support, WebDev, Thunderbird)'), required=False)
 
+
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and
         consistent.
@@ -225,3 +227,27 @@ class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite
         exclude = ('redeemer', 'inviter')
+
+class MessengerForm(happyforms.ModelForm):
+    name = forms.CharField(
+        required=False,
+        label=_lazy(u'IM Name'))
+    service = forms.ChoiceField(
+        choices = MessengerName.choices(),
+        required=False,
+        label=_lazy(u'IM Service'))
+    names = forms.CharField(widget=forms.HiddenInput, required=False)
+    def clean_names(self):
+        try:
+            names = simplejson.loads(self.cleaned_data['names'])
+            return names
+        except:
+            return ''
+
+    class Meta:
+        model = MessengerName
+        fields = ('name', 'service')
+
+    def save(self):
+        self.instance.set_messengers(self.cleaned_data['names'])
+        super(MessengerForm, self).save()

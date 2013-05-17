@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
+from django.utils import simplejson
 
 from funfactory.urlresolvers import reverse
 from mock import patch
@@ -79,6 +80,29 @@ class RegistrationTest(ESTestCase):
             self.client.post(reverse('register'), d, follow=True)
 
         assert User.objects.filter(email=d['email'])
+
+    def test_messenger(self):
+        """Test that we can add messengers during registration"""
+        email = 'thewiz@aol.com'
+        d = dict(assertion=self.fake_assertion)
+        with browserid_mock.mock_browserid(email):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+        n = [{'username':'thewiz', 'service':'AIM'},
+             {'username':'wizzer', 'service':'Fakeblock'}]
+        d = dict(username='wiz1',
+                 email=email,
+                 full_name='Max Power',
+                 names=simplejson.dumps(n),
+                 optin=True)
+        with browserid_mock.mock_browserid(email):
+           r = self.client.post(reverse('register'), d, follow=True)
+
+        u = User.objects.filter(email=email)[0]
+        p = u.get_profile()
+
+        assert p.messenger_names.filter(name='thewiz')
+
+        assert p.messenger_names.filter(name='wizzer')
 
     def test_username(self):
         """Test that we can submit a perfectly cromulent username.

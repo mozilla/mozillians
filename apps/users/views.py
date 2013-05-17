@@ -9,7 +9,7 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 from apps.common.decorators import allow_public, allow_unvouched
-from apps.phonebook.forms import RegisterForm, UserForm
+from apps.phonebook.forms import RegisterForm, UserForm, MessengerForm
 from apps.phonebook.models import Invite
 
 from models import UserProfile
@@ -77,13 +77,15 @@ def register(request):
     user_form = UserForm(request.POST or None, instance=user)
     profile_form = RegisterForm(request.POST or None,
                                 instance=user.get_profile())
-
+    messenger_form = MessengerForm(request.POST or None,
+                                instance=user.get_profile())
     if request.method == 'POST':
-        if (user_form.is_valid() and profile_form.is_valid()):
+        if (user_form.is_valid() and profile_form.is_valid() and messenger_form.is_valid()):
             user_form.save()
             profile_form.save()
             auth.login(request, user)
             _update_invites(request)
+            messenger_form.save()
             messages.info(request, _(u'Your account has been created.'))
             return redirect(reverse('profile', args=[request.user.username]))
 
@@ -91,6 +93,7 @@ def register(request):
     return render(request, 'registration/register.html',
                   dict(profile_form=profile_form,
                        user_form=user_form,
+                       messenger_form=messenger_form,
                        edit_form_action=reverse('register'),
                        mode='new',
                        profile=user.get_profile(),
