@@ -26,6 +26,7 @@ class LanguagesTest(apps.common.tests.init.ESTestCase):
         for i in range(0, AUTO_COMPLETE_COUNT + 1):
             email = 'always_angry%s@example.com' % (str(i))
             user = User.objects.create_user(email.split('@')[0], email)
+            user.country = 'pl'
             user.is_active = True
             user.save()
             profile = user.get_profile()
@@ -43,7 +44,8 @@ class LanguagesTest(apps.common.tests.init.ESTestCase):
         profile = self.pending.get_profile()
         assert not profile.languages.all(), 'User should have no languages.'
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='McAwesomepants', languages='frenchie'))
+        data.update(dict(full_name='McAwesomepants', country='pl',
+                          languages='frenchie'))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.languages.all(), (

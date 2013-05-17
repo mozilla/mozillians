@@ -93,6 +93,7 @@ class RegistrationTest(ESTestCase):
         d = dict(email=email,
                  username='mrfusion',
                  full_name='Akaaaaaaash Desaaaaaaai',
+                 country='pl',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
@@ -119,6 +120,7 @@ class RegistrationTest(ESTestCase):
         d = dict(email=email,
                  username=username,
                  full_name='Akaaaaaaash Desaaaaaaai',
+                 country='pl',
                  optin=True)
         with browserid_mock.mock_browserid(email):
             r = self.client.post(reverse('register'), d)
@@ -186,7 +188,8 @@ class RegistrationTest(ESTestCase):
 
         """
         data = self.data_privacy_fields.copy()
-        data.update({'username': 'foobar', 'full_name': 'Tofu Matt'})
+        data.update({'username': 'foobar', 'full_name': 'Tofu Matt',
+                      'country': 'pl'})
         response = self.pending_client.post(reverse('profile.edit'),
                                             data, follow=True)
         assert 'You changed your username;' in response.content
@@ -195,6 +198,7 @@ class RegistrationTest(ESTestCase):
         """Verify one cannot repeat email adresses."""
         register = dict(username='repeatedun',
                         full_name='Akaaaaaaash Desaaaaaaai',
+                        country='pl',
                         optin=True)
 
         # Create first user
