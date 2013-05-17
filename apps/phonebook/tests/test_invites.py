@@ -65,6 +65,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         # Now let's register
         d = dict(full_name='Desaaaaaaai',
                  username='aakash',
+                 country='pl',
                  optin=True)
         with mock_browserid(email):
             self.client.post(reverse('register'), d, follow=True)

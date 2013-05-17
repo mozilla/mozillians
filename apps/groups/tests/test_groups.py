@@ -76,7 +76,8 @@ class GroupTest(apps.common.tests.init.ESTestCase):
         profile = self.mozillian.get_profile()
 
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='tofumatt', groups='Awesome,foo,Bar'))
+        data.update(dict(full_name='tofumatt', country='pl',
+                          groups='Awesome,foo,Bar'))
         self.mozillian_client.post(reverse('profile.edit'), data, follow=True)
         eq_(3, profile.groups.count(), 'Three groups should be saved.')
 
@@ -102,7 +103,8 @@ class GroupTest(apps.common.tests.init.ESTestCase):
         assert not profile.groups.all(), 'User should have no groups.'
 
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='McAwesomepants', groups='Awesome foo Bar'))
+        data.update(dict(full_name='McAwesomepants', country='pl',
+                          groups='Awesome foo Bar'))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.groups.all(), (
@@ -119,8 +121,8 @@ class GroupTest(apps.common.tests.init.ESTestCase):
                 'User has no groups at beginning of test.')
 
         data = self.data_privacy_fields
-        data.update(dict(full_name='McAwesomepants',
-                         groups='Awesome,,foo bar,  Bar,g '))
+        data.update(dict(full_name='McAwesomepants', country='pl',
+                          groups='Awesome,,foo bar,  Bar,g '))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         eq_(4, profile.groups.count(), 'User should have four groups.')
@@ -136,9 +138,9 @@ class GroupTest(apps.common.tests.init.ESTestCase):
         """Make sure users can't add system groups to their profile."""
         profile = self.mozillian.get_profile()
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='tofumatt',
-                    groups='%s %s' % (self.NORMAL_GROUP.name,
-                                      self.SYSTEM_GROUP.name)))
+        data.update(dict(full_name='tofumatt', country='pl',
+                          groups='%s %s' % (self.NORMAL_GROUP.name,
+                                            self.SYSTEM_GROUP.name)))
         self.mozillian_client.post(reverse('profile.edit'), data, follow=True)
 
         groups = profile.groups.all()
@@ -165,7 +167,8 @@ class GroupTest(apps.common.tests.init.ESTestCase):
         # Edit this user's profile and remove a group.
         self.mozillian_client.login(email=self.mozillian.email)
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name="McLovin'", username='fo', groups=''))
+        data.update(dict(full_name="McLovin'", country='pl',
+                          username='fo', groups=''))
         response = self.mozillian_client.post(
             reverse('profile.edit'), data, follow=True)
 

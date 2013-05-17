@@ -16,8 +16,8 @@ class ModelForms(ESTestCase):
         edit_profile_url = reverse('profile.edit')
 
         bad_data = self.data_privacy_fields.copy()
-        bad_data.update(dict(full_name='BadLaRue', bio='Rides the rails',
-                             is_vouched=True))
+        bad_data.update(dict(full_name='BadLaRue', country='pl',
+                              bio='Rides the rails', is_vouched=True))
 
         bad_edit = newbie_client.post(edit_profile_url, bad_data, follow=True)
         eq_(bad_edit.status_code, 200)
