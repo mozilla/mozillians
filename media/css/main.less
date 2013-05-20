@@ -20,6 +20,7 @@
 @import "sandstone/sandstone.less";
 @import "sandstone/sandstone-resp.less";
 @import "mosaic.less";
+
 @import "font-awesome.less";
 
 /* Fonts
@@ -75,15 +76,6 @@
 
 /* Generic
 ==================== */
-
-#masthead, #main-content, #content {
-	@media (min-width: 1024px) {
-		margin-left: auto;
-	    margin-right: auto;
-	    width: 960px;
-	}
-}
-
 #wrapper {
     width: 100%;
     padding-bottom: 0;
@@ -185,7 +177,7 @@ nav {
     padding: 10px 5px;
     text-transform: none !important;
     float: none !important;
-    height: 30px;
+    height: 35px;
     #create_profile {
         float: right;
         padding-right: 5px;
@@ -193,7 +185,7 @@ nav {
     .brand {
         float: left;
         img {
-            width: 140px;
+            width: 130px;
             padding-right: 15px;
         }
     }
@@ -221,8 +213,8 @@ nav {
             font-weight: bold;
             padding: 0 10px 0 3px;
             .border-radius(3px 0 0 3px);
-            background-color: @white;
             margin-right: 20px;
+            #gradient .vertical(#43a6e2, #287cc2);
             &:after {
                 content: '';
                 position: absolute;
@@ -232,7 +224,12 @@ nav {
                 height: 24px;
                 .transform(scale(0.707) rotate(45deg));
                 .border-radius(0 3px 0 50px);  
-                background-color: @white;
+                background-color: #43a6e2;
+                background-image: -moz-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
+                background-image: -ms-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
+                background-image: -webkit-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
+                background-image: -o-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
+                background-image: linear-gradient(left top, #43a6e2, #287cc2);
             }
             img {
                 position: relative;
@@ -241,9 +238,14 @@ nav {
             }
         }
         a {
-            color: @white;
+            color: @textColorPrimary;
             &:hover {
                 text-decoration: none;
+            }
+            .icon-reorder {
+                &.open {
+                    color: @linkBlue;
+                }
             }
         }
         ul.dropdown-menu {
@@ -350,6 +352,7 @@ footer#colophon {
     .box-shadow(inset -10px 25px 10px -10px rgba(0, 0, 0, 0.09));
     background-color: #57585c;
     color: @white;
+    margin: 0;
     hr {
         border: 0;
         height: 5px;
@@ -383,7 +386,7 @@ footer#colophon {
             background: transparent;
             width: 350px;
             height: 30px;
-            padding: 5px;
+            padding: 0 5px;
             font-size: 18px;
             font-family: "Open Sans Light", sans-serif;
             font-style: italic;
@@ -441,7 +444,6 @@ body#home {
         .transition(background-color 0.3s linear 0s);
     }
     &.loggedout {
-        #colophon { margin: 0; }
         #masthead { z-index: 1000; }
 
         #mosaic {
@@ -603,80 +605,41 @@ body#home {
         }
     }
     &.loggedin {
-        h2 {
-            font-size: 36px;
-        }
+        .white-background { background-color: @white; }  
         #main-content {
-            padding: 40px 0 0;
-        }
-        #content {
-            background: url("/media/img/sandstone/bg-sky.png") #eaeff2;
-            section {
-                padding-top: 20px;
-                &.groups {
-                    padding-top: 80px;
-                    ul {
-                        list-style: none;
-                        li {
-                            margin: 0;
-                        }
-                    }
-                }
-                &.badges {
-                    img {
-                        width: 90px;
-                        height: 95px;
-                        margin-right: 5px;
-                    }
-                }
-            }
-        }
-        .white-bkg {
-            background: @white;
-        }
-        section {
-            &.greeting, &.groups {
-                .span(5);
+            padding-top: 25px;
+            #profile-info {
+                .span(3);
                 margin: 0;
-                img {
+                img#profile-photo {
                     .border-radius(100%);
                     border: 5px solid @white;
-                    float: left;
-                    position: absolute;
                     .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-                    top: 10px;
                 }
-                h2 {
-                    line-height: 24px;
-                    padding: 0 0 0 150px;
-                    margin: 0;
-                }
+                h2 { margin: 0; }
+                h4 { margin: 20px 0 0; }
             }
-            &.badges {
-                .span(3);
-                h4 {
-                    display: inline;
-                    padding-right: 15px;
+            #content-info {
+                .span(7);
+                padding: 0 10px 0 25px;
+                margin: 0;
+                border-left: 1px solid lighten(@black,90%);
+                h2 { margin: 30px 0; }
+                h3 { font-size: 24px; }
+                section, form {
+                    margin-bottom: 20px;
                 }
-            }
-            &.new-mozillians {
-                .span(3);
-                ul {
-                    list-style: none;
-                    li {
-                        margin: 0;
-                        line-height: 36px;
-                        padding-bottom: 15px;
-                        .clearfix;
+                #homepage-search {
+                    input {
+                        width: 100%;
+                        height: 40px;
+                        border: 1px solid lighten(@black,90%);
+                        font-size: 20px;
+                    }
+                    small {
+                        font-size: 12px;
                         font-style: italic;
-                        font-family: "Opens Sans Light", sans-serif;
-                        img {
-                            .border-radius(100%);
-                            border: 2px solid @white;
-                            .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-                            float: left;
-                            margin-right: 10px;
-                        }
+                        color: lighten(@black,70%);
                     }
                 }
             }
