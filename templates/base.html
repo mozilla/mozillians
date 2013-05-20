@@ -44,7 +44,6 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
   <div id="outer-wrapper">
     <div id="wrapper">
     {% block site_header %}
-    {% if user.is_authenticated() %}<div id="nav-background">{% endif %}
       <header id="masthead">
         <a href="http://www.mozilla.org/" id="tabzilla">{{ _('Mozilla') }}</a>
 
@@ -59,17 +58,8 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
                   <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
               </a>
               {% if user.userprofile.is_complete %}
-                {% if user.get_profile().is_vouched %}
-                  {% block search %}
-                    <form class="navbar-search pull-left"
-                          action="{{ url('search') }}" method="GET">
-                      <input type="text" name="q" class="search-query"
-                            placeholder="{{ _('Search for people, groups, etc.') }}">
-                    </form>
-                  {% endblock %}
-                {% endif %}
                 <div id="nav-main">
-                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-blue.png" alt="persona icon"></span>
+                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
                   <a href="#" class="dropdown-toggle">
                     {% if user.userprofile.full_name %}
                       {{ user.userprofile.full_name }}
@@ -126,8 +116,6 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
         {% block breadcrumbs %}{% endblock %}
 
       </header>
-    {# Closing div for top menu blue background. #}
-    {% if user.is_authenticated() %}</div>{% endif %}
     {% endblock %}  
 
     {% block mosaic %}{% endblock %}

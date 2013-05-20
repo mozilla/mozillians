@@ -23,6 +23,7 @@ var app = {
         //Main nav dropdown
         $('a.dropdown-toggle').click(function() {
             $('.dropdown-menu').toggle();
+            $('i.icon-reorder').toggleClass('open');
         });
     });
 })(jQuery);

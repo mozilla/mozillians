@@ -68,53 +68,100 @@
     </article>
 
   {% else %}
-    <div id="main-content" class="row">
-      <section class="greeting">
-        <img id="profile-photo" src="{{ user.userprofile.get_photo_url('130x130') }}" alt="{{ user.username }}">
-        <h2>{{ _('Hello') }}{% if user.userprofile.first_name %}, {{ user.userprofile.first_name }}{% endif %}!
-        </h2>
-      </section>
-      <section class="badges">
-        <h4>{{ _('My badges') }}</h4>
-        <a href="#">{{ _('See all') }}</a>
-      </section>
-      <section class="new-mozillians">
-        <h4>{{ _('New Mozillians') }}</h4>
-      </section>
-    </div>
-    
-    
-    <div id="content" class="row">
-      {% if curated_groups %}
-      <section class="groups">
-            <h3>{{ _('Functional Areas') }}</h3>
-            <p>
-              {% trans %}
-              Tousled direct trade kale chips, ugh artisan try-hard church-key synth thundercats.
-              {% endtrans %}
-            </p>
-            <ul> 
-              {% for group in curated_groups %}
-                <li>
-                  <a href="{{ url('group', group.url) }}">
-                    <i class="icon-tag"></i>
-                    {{ group.name }}
+    <div class="white-background">
+      <div id="main-content">
+        <article id="profile-info">
+          <a href="{{ url('profile', user.username) }}">
+            <img id="profile-photo" src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
+          </a>
+          <h2>{{ user.username }}</h2>
+          <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+          {% if user.userprofile.country or user.userprofile.region or user.userprofile.city %}
+            <section class="location">
+              {% if user.userprofile.city %}
+                {% if user.userprofile.country and user.is_authenticated() %}
+                  <a href="{{ url('list_city', country=user.userprofile.country, city=user.userprofile.city) }}">
+                    {{ user.userprofile.city }}</a>,
+                {% else %}
+                  {{ user.userprofile.city }}{% if user.userprofile.region %},{% endif %}
+                {% endif %}
+              {% endif %}
+              {% if user.userprofile.region %}
+                {% if user.userprofile.country and user.is_authenticated() %}
+                  <a href="{{ url('list_region', country=user.userprofile.country, region=user.userprofile.region) }}">
+                    {{ user.userprofile.region }}</a>
+                {% else %}
+                   {{ user.userprofile.region }}
+                {% endif %}
+              {% endif %}
+              {% if user.userprofile.country %}
+                {% if user.is_authenticated() %}
+                  <a href="{{ url('list_country', country=user.userprofile.country) }}">
+                    {{ user.userprofile.get_country_display() }}
                   </a>
-                </li>
+                {% else %}
+                    {{ user.userprofile.get_country_display() }}
+                {% endif %}
+              {% endif %}
+            </section>
+          {% endif %}
+          {% if curated_groups %}
+            <section class="groups">
+              <h4>{{ _('Groups') }}</h4>
+              {% for group in curated_groups %}
+                <a href="{{ url('group', group.url) }}">{{ group }}</a>
+                {% if not loop.last %},{% endif %}
               {% endfor %}
-            </ul>
-      </section>
-      {% endif %}
-      {# TODO: Need to wrap this in an if statement to not display if there are no badges. #}
-      <section class="badges">
-            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-            <img src="{{ MEDIA_URL }}img/badge-placeholder.png" alt="badge">
-      </section>
-    </div>
+            </section>
+          {% endif %}
+          {% if user.userprofile.languages.count() %}
+            <section class="languages">
+              <h4>{{ _('Languages') }}</h4>
+              {% for language in user.userprofile.languages.all() %}
+                {{ language|capitalize }}
+                {% if not loop.last %},{% endif %}
+              {% endfor %}
+            </section> 
+          {% endif %}
 
+          {% if user.userprofile.skills.count() %}
+            {% trans skill_count=user.userprofile.skills.count() %}
+              <h4>Has {{ skill_count }} skill</h4>
+              {% pluralize %}
+              <h4>Has {{ skill_count }} skills</h4>
+            {% endtrans %}
+          {% endif %}
+
+          {# Using this placeholder code for now.
+
+          {% if user.userprofile.badges.count() %}
+            {% trans badges_count=user.userprofile.badges.count() %}
+              Has {{ badges_count }} skills.
+            {% endtrans %}
+          {% endif %}
+
+          #}
+        </article>
+        <article id="content-info">
+          <h1>{{ _('Welcome!') }}</h1>
+          <form id="homepage-search" action="{{ url('search') }}" method="GET">
+            {{ csrf() }}
+            <input type="text" name="q" class="search-query" 
+            placeholder="{{ _('Search by name or group') }}">
+            <small>Help text goes here</small>
+          </form>
+          <section class="announcements">
+            <h2>Announcements</h2>
+            <h3>First announcement</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
+            <h3>Second announcement</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
+            <h3>Third announcement</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
+          </section>
+        </article>
+      </div>
+    </div>
   {% endif %}
 
   <a href="#" id="back-to-top"><img src="{{ MEDIA_URL }}img/back-to-top-arrow.png" alt="Back to top"></a>
