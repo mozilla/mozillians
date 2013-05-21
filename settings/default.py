@@ -173,6 +173,7 @@ INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     'api',
     'mozspaces',
     'funfacts',
+    'announcements',
 
     'csp',
     'jingo_minify',
@@ -270,6 +271,7 @@ BASKET_NEWSLETTER = 'mozilla-phone'
 
 USER_AVATAR_DIR = 'uploads/userprofile'
 MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
+ANNOUNCEMENTS_PHOTO_DIR = 'uploads/announcements'
 
 # Google Analytics
 GA_ACCOUNT_CODE = 'UA-35433268-19'
