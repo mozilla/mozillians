@@ -226,19 +226,25 @@ AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 SOUTH_TESTS_MIGRATE = False
 
 # Django-CSP
-CSP_IMG_SRC = ("'self'", 'http://www.google-analytics.com',
+CSP_IMG_SRC = ("'self'",
+               'https://mozorg.cdn.mozilla.net',
+               'http://www.google-analytics.com',
                'https://ssl.google-analytics.com',
                'http://www.gravatar.com',
                'https://i1.wp.com',
                'https://secure.gravatar.com',)
-CSP_SCRIPT_SRC = ("'self'", 'http://www.google-analytics.com',
+CSP_SCRIPT_SRC = ("'self'",
+                  'https://mozorg.cdn.mozilla.net',
+                  'http://www.google-analytics.com',
                   'https://ssl.google-analytics.com',
                   'https://www.google-analytics.com',
                   'https://browserid.org',
                   'https://login.persona.org',)
 CSP_FRAME_SRC = ("'self'", 'https://browserid.org',
                  'https://login.persona.org',)
-CSP_FONT_SRC = ("'self'", 'https://www.mozilla.org')
+CSP_FONT_SRC = ("'self'",
+                'https://www.mozilla.org',
+                'https://mozorg.cdn.mozilla.net')
 CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report/'
 
