@@ -52,14 +52,26 @@
     {{ csrf() }}
     <div class="tabbable">
       <ul class="nav nav-pills">
-        <li class="active"><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% if user_form.errors %}
+          <li><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% else %}
+          <li class="active"><a href="#1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% endif %}
         <li><a href="#skills" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
         <li><a href="#vouches" data-toggle="tab">{{ _('Vouches & Invites') }}</a></li>
-        <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
+        {% if user_form.errors %}
+        <li class="active"><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
+        {% else %}
+          <li><a href="#account" data-toggle="tab">{{ _('Account') }}</a></li>
+        {% endif %}
         <li><a href="#services" data-toggle="tab">{{ _('Services') }}</a></li>
       </ul>
       <div class="tab-content">
-        <div class="tab-pane active" id="1">
+        {% if user_form.errors %}
+          <div class="tab-pane" id="1">
+        {% else %}
+          <div class="tab-pane active" id="1">
+        {% endif %}
           <p>
             {{ top_blurb }}
           </p>
@@ -187,7 +199,11 @@
             </div>
           {% endif %}
         </div>
-        <div class="tab-pane" id="account">
+        {% if user_form.errors %}
+          <div class="tab-pane active" id="account">
+        {% else %}
+          <div class="tab-pane" id="account">
+        {% endif %}
           <p>
             {{ top_blurb }}
           </p>

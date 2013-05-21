@@ -41,12 +41,24 @@
     </div>
     <div class="tabbable">
       <ul class="nav nav-pills">
-        <li class="active"><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% if 'optin' in profile_form.errors %}
+          <li><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% else %}
+          <li class="active"><a href="#start" id="1" data-toggle="tab">{{ _('Profile') }}</a></li>
+        {% endif %}
         <li><a href="#skills" id="2" data-toggle="tab">{{ _('Skills & Groups') }}</a></li>
-        <li><a href="#location" id="3" data-toggle="tab">{{ _('Location') }}</a></li>
+        {% if 'optin' in profile_form.errors %}
+          <li class="active"><a href="#location" id="3" data-toggle="tab">{{ _('Location') }}</a></li>
+        {% else %}
+          <li><a href="#location" id="3" data-toggle="tab">{{ _('Location') }}</a></li>
+        {% endif %}
       </ul>
       <div class="tab-content">
-        <div class="tab-pane active" id="start">
+        {% if 'optin' in profile_form.errors %}
+          <div class="tab-pane" id="start">
+        {% else %}
+          <div class="tab-pane active" id="start">
+        {% endif %}
           <h2>{{ _('Profile') }}</h2>
           {{ bootstrap(user_form.username) }}
           {{ bootstrap(profile_form.full_name) }}
@@ -70,7 +82,11 @@
           <button type="button" id="page3button" class="span2 btn btn-primary">{{ _('Next') }}</button>
           <button type="button" id="page1button" class="span2 btn">{{ _('Previous') }}</button>
         </div>
-        <div class="tab-pane" id="location">
+        {% if 'optin' in profile_form.errors %}
+          <div class="tab-pane active" id="location">
+        {% else %}
+          <div class="tab-pane" id="location">
+        {% endif %}
           <h2>{{ _('Location') }}</h2>
           <p>
             {% trans %}
