@@ -14,6 +14,7 @@ from apps.users.models import User, UserProfile
 from models import Invite
 
 PAGINATION_LIMIT = 20
+PAGINATION_LIMIT_LARGE = 50
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 
 
