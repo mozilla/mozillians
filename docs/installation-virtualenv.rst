@@ -12,14 +12,20 @@ VirtualEnv Installation
 
 **Prerequisites:** You 'll need python, virtualenv and pip.
 
-When you want to start contributing... 
+When you want to start contributing...
 
-#.  `Fork the main Mozillians repository`_ (https://github.com/mozilla/mozillians) on GitHub. 
+#.  `Fork the main Mozillians repository`_ (https://github.com/mozilla/mozillians) on GitHub.
 
 #.  Clone your fork to your local machine::
 
     $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
     $ cd mozillians
+
+    .. note::
+
+       Make sure you use ``--recursive`` when checking the repo out! If you
+       didn't, you can load all the submodules with ``git submodule update --init
+       --recursive``.
 
 #. Create your python virtual environment::
 
