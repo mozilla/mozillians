@@ -6,8 +6,8 @@
 // =====================
 // Imports
 // Fonts
-// Mixins
 // Variables
+// Mixins
 // Generic
 // Navigation
 // Footer
@@ -46,6 +46,13 @@
     font-style: italic;
 }
 
+/* Variables
+==================== */
+@white:       #FFFFFF;
+@black:       #000000;
+@grayDark:    #333333;
+@gray:        #666666;
+@grayLighter: #CCCCCC;
 
 /* Mixins
 ==================== */
@@ -69,10 +76,10 @@
     }
 }
 
-/* Variables
-==================== */
-@white:     #FFFFFF;
-@black:     #000000;
+.icon-white {
+    color: @white;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
 
 /* Generic
 ==================== */
@@ -399,14 +406,15 @@ footer#colophon {
     .footer-license {
         a { color: @white; }
     }
+    .footer-nav {
+        .span(3);
+    }
     @media (min-width: @breakDesktop) {
         .footer-logo {
             width: auto;
         }
         .footer-license {
-            .span(5);
-        }
-        .footer-nav.details {
+            .span(6);
             .offset(1);
         }
     }
@@ -416,6 +424,7 @@ footer#colophon {
         }
         .footer-license {
             .span(3);
+            .offset(1);
         }
     }
     @media (max-width: @breakTablet) {
@@ -429,6 +438,15 @@ footer#colophon {
         }
         padding-left: 0;
         padding-right: 0;    
+    }
+    h4 {
+        text-align: center;
+        color: @white;
+        text-shadow: none;
+        padding-bottom: 20px;
+        a {
+            color: @linkSkyBlue;
+        }
     }
 }
 
@@ -465,6 +483,9 @@ body#home {
         #main-feature {
             text-align: center;
             padding: 60px 0;
+            @media (max-width: @breakMobileLandscape) { 
+                padding: 40px 0;
+            }
             hr {
                 border: 0;
                 height: 5px;
@@ -490,13 +511,15 @@ body#home {
                 input {
                     background: @white url("/media/img/spyglass.png") no-repeat 8px 50%;
                     background-color: @white;
-                    height: 40px;
-                    width: 400px;
-                    padding: 6px 0 0 35px;
+                    height: 50px;
+                    width: 600px;
+                    padding: 0  0 0 35px;
                     font-size: 24px;
+                    @media (max-width: @breakTablet) {
+                        width: 400px;
+                    }
                     @media (max-width: @breakMobileLandscape) {
                         width: 250px;
-                        padding: 5px 0 0 35px;
                         font-size: 18px;
                     }
                 } 
@@ -508,6 +531,10 @@ body#home {
             #quote, #about, #mozfacts {
                 color: #4d4e53;
             }
+            h2 {
+                height: 72px;
+                margin: 0;
+            }
             #quote, #mozfacts {
                 .span(2);
                 p {
@@ -516,7 +543,9 @@ body#home {
                 }
             }
             #about {
-                .span(6);
+                width: 500px;
+                float: left;
+                margin: 0 10px 0 20px;
                 p {
                     font-size: 16px;
                     line-height: 24px;
@@ -529,6 +558,12 @@ body#home {
                 @media (max-width: @breakDesktop) {
                     width: auto;
                 }
+                @media (max-width: @breakMobileLandscape) {
+                    h2 {
+                        margin-bottom: 20px;
+                    }
+                }
+
             }
             #quote {
                 font-style: italic;
@@ -563,6 +598,7 @@ body#home {
                 h2 {
                     text-align: center;
                     font-family: "Open Sans Extrabold", sans-serif;
+                    line-height: 72px;
                 }
                 @media (max-width: @breakDesktop) {
                     .hidden;
@@ -611,20 +647,30 @@ body#home {
             #profile-info {
                 .span(3);
                 margin: 0;
-                img#profile-photo {
+                posistion: relative;
+                a.profile-photo {
                     .border-radius(100%);
+                    position: absolute;
                     border: 5px solid @white;
                     .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
+                    width: 150px;
+                    height: 150px;
+                    img {
+                        .border-radius(100%);
+                    }
                 }
-                h2 { margin: 0; }
-                h4 { margin: 20px 0 0; }
+                .profile-details {
+                    margin-top: 170px;
+                    h2 { margin: 0; }
+                    h4 { margin: 20px 0 0; }
+                }
             }
             #content-info {
-                .span(7);
+                .span(8);
                 padding: 0 10px 0 25px;
                 margin: 0;
                 border-left: 1px solid lighten(@black,90%);
-                h2 { margin: 30px 0; }
+                h2 { margin: 30px 0 10px; }
                 h3 { font-size: 24px; }
                 section, form {
                     margin-bottom: 20px;
@@ -635,12 +681,48 @@ body#home {
                         height: 40px;
                         border: 1px solid lighten(@black,90%);
                         font-size: 20px;
+                        background: @white url("/media/img/spyglass.png") no-repeat 5px 50% !important;
+                        padding: 0 0 0 30px !important;
                     }
                     small {
                         font-size: 12px;
                         font-style: italic;
                         color: lighten(@black,70%);
                     }
+                }
+                .announcements-mozfacts {
+                    .clearfix;
+                    margin: 50px 0;
+                }
+                .functional-areas, .groups {
+                    .span(4);
+                    position: relative;
+                    margin-bottom: 20px;
+                    h2 {
+                        line-height: 0.2;
+                        height: 30px;
+                        margin: 0;
+                        padding: 0 0 0 50px;
+                    }
+                    span.icon {
+                        top: -20px;
+                        position: absolute;
+                        .border-radius(100%);
+                        width: 40px;
+                        height: 40px;
+                        border: 3px solid @white;
+                        .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
+                        img {
+                            .border-radius(100%);
+                        }
+                    }
+                }
+                .groups {
+                    margin: 0;
+                }
+                .functional-areas {
+                    margin-left: 0 !important;
+                    margin-right: 20px;
                 }
             }
         }

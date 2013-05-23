@@ -85,7 +85,7 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
                       <li>
                         <a id="invite" href="{{ url('invite') }}">
                           <i class="icon-group"></i> 
-                          {{ _('Invite groups') }}
+                          {{ _('Invite') }}
                         </a>
                       </li>
                     {% endif %}
@@ -140,6 +140,16 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
     {% block site_footer %}
       <footer id="colophon">
           <div class="container">
+
+            <h4>
+              {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook',
+                   git_url='https://github.com/mozilla/mozillians' %}
+                Help make Mozillians better. 
+                <a href="{{ bug_url }}">File a bug</a> or 
+                <a href="{{ git_url }}">make some changes</a>.
+              {% endtrans %}
+            </h4>
+
             <div class="footer-language row">
             {% include 'includes/lang_switcher.html' %}
             </div>
@@ -159,19 +169,12 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
             </div>
 
             <ul class="footer-nav details">
-              <li><a href="http://mozilla.org/about/contact.html#map-mountain_view">{{_('Contact Us')}}</a></li>
+              <li><a href="{{ url('about') }}">{{_('About Mozillians')}}</a></li>
               <li><a href="http://mozilla.org/privacy-policy.html">{{_('Privacy Policy')}}</a></li>
               <li><a href="http://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
               <li><a href="http://mozilla.org/legal/fraud-report/index.html">{{_('Report Trademark Abuse')}}</a></li>
             </ul>
 
-            {% block social %}
-            <ul class="footer-nav">
-              <li><a href="http://twitter.com/firefox">{{_('Twitter')}}</a></li>
-              <li><a href="http://facebook.com/Firefox">{{_('Facebook')}}</a></li>
-              <li><a href="https://affiliates.mozilla.org/">{{_('Firefox Affiliates')}}</a></li>
-            </ul>
-            {% endblock %}
           </div>
         </div>
       </footer>

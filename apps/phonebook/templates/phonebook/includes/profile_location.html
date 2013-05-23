@@ -1,0 +1,25 @@
+{% if profile.city %}
+  {% if profile.country and user.is_authenticated() %}
+    <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
+      {{ profile.city }}</a>,
+  {% else %}
+    {{ profile.city }}{% if profile.region %},{% endif %}
+  {% endif %}
+{% endif %}
+{% if profile.region %}
+  {% if profile.country and user.is_authenticated() %}
+    <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
+      {{ profile.region }}</a>
+  {% else %}
+     {{ profile.region }}
+  {% endif %}
+{% endif %}
+{% if profile.country %}
+  {% if user.is_authenticated() %}
+    <a href="{{ url('list_country', country=profile.country) }}">
+      {{ profile.get_country_display() }}
+    </a>
+  {% else %}
+      {{ profile.get_country_display() }}
+  {% endif %}
+{% endif %}
