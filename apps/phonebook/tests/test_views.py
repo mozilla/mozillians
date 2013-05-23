@@ -212,7 +212,7 @@ class TestViews(ESTestCase):
 
         # update
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='Hobo LaRue', bio='Rides the rails'))
+        data.update(dict(full_name='Hobo LaRue', country='pl', bio='Rides the rails'))
         edit = newbie_client.post(edit_profile_url, data, follow=True)
         eq_(200, edit.status_code, 'Edits okay')
         r = newbie_client.get(profile_url)
@@ -246,7 +246,7 @@ class TestViews(ESTestCase):
 
         # Try to game the form -- it shouldn't do anything.
         data = self.data_privacy_fields.copy()
-        data.update({'full_name': 'foo', 'photo-clear': 1})
+        data.update({'full_name': 'foo', 'country': 'pl', 'photo-clear': 1})
         r = client.post(reverse('profile.edit'), data)
         eq_(r.status_code, 302, 'Trying to delete a non-existant photo '
                                 "shouldn't result in an error.")
@@ -255,7 +255,7 @@ class TestViews(ESTestCase):
         filename = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
-            data.update(dict(full_name='foo', photo=f))
+            data.update(dict(full_name='foo', country='pl', photo=f))
             r = client.post(reverse('profile.edit'), data)
 
         eq_(r.status_code, 302, 'Form should validate and redirect the user.')
@@ -316,7 +316,7 @@ class TestViews(ESTestCase):
 
         # Add a URL sans protocol.
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='foo', website='tofumatt.com'))
+        data.update(dict(full_name='foo', country='pl', website='tofumatt.com'))
         r = client.post(reverse('profile.edit'), data)
         eq_(r.status_code, 302, 'Submission works and user is redirected.')
         r = client.get(reverse('profile', args=[self.mozillian.username]))
@@ -366,14 +366,14 @@ class TestViews(ESTestCase):
         filename = os.path.join(os.path.dirname(__file__), 'profile-photo.jpg')
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
-            data.update(dict(full_name='foo', photo=f), follow=True)
+            data.update(dict(full_name='foo', country='pl', photo=f), follow=True)
             response = client.post(reverse('profile.edit'), data, follow=True)
             doc = pq(response.content)
             old_photo = doc('#profile-photo').attr('src')
 
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
-            data.update(dict(full_name='foo', photo=f), follow=True)
+            data.update(dict(full_name='foo', country='pl', photo=f), follow=True)
             response = client.post(reverse('profile.edit'), data, follow=True)
             doc = pq(response.content)
             new_photo = doc('#profile-photo').attr('src')

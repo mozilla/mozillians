@@ -213,7 +213,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
-    country = models.CharField(max_length=50, default='', blank=True,
+    country = models.CharField(max_length=50, default='',
                                choices=COUNTRIES.items(),
                                verbose_name=_lazy(u'Country'))
     region = models.CharField(max_length=255, default='', blank=True,
