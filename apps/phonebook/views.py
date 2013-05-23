@@ -230,8 +230,11 @@ def invite(request):
     if request.method == 'POST' and invite_form.is_valid():
         invite = invite_form.save()
         invite.send(sender=profile)
-        return render(request, 'phonebook/invited.html',
-                      {'recipient': invite.recipient})
+        msg = _(u"%s has been invited to Mozillians. They'll receive an email "
+                 "with instructions on how to join. You can "
+                 "invite another Mozillian if you like." % invite.recipient)
+        messages.success(request, msg)
+        return redirect(reverse('profile', args=[request.user.username]))
 
     return render(request, 'phonebook/invite.html',
                   {'invite_form': invite_form})
