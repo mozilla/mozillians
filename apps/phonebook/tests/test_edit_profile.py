@@ -41,7 +41,7 @@ class EditProfileTests(ESTestCase):
                                 'profile-φωτο.jpg')
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
-            data.update({'full_name': 'Mozillian', 'photo': f})
+            data.update({'full_name': 'Mozillian', 'country': 'pl', 'photo': f})
             response = self.mozillian_client.post(reverse('profile.edit'),
                                                   data, follow=True)
 

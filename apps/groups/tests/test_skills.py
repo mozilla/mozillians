@@ -44,7 +44,8 @@ class SkillsTest(apps.common.tests.init.ESTestCase):
         assert not profile.skills.all(), 'User should have no skills.'
 
         data = self.data_privacy_fields.copy()
-        data.update(dict(full_name='McAwesomepants', skills='Awesome foo Bar'))
+        data.update(dict(full_name='McAwesomepants', country='pl',
+                          skills='Awesome foo Bar'))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.skills.all(), (
