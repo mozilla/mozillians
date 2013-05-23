@@ -265,7 +265,8 @@ CSP_SCRIPT_SRC = ("'self'",
                   'https://www.google-analytics.com',
                   'https://browserid.org',
                   'https://login.persona.org',)
-CSP_STYLE_SRC = ('https://www.mozilla.org',
+CSP_STYLE_SRC = ("'self'",
+                 'https://www.mozilla.org',
                  'https://mozorg.cdn.mozilla.net',)
 CSP_REPORT_ONLY = True
 CSP_REPORT_URI = '/csp/report/'
