@@ -229,6 +229,7 @@ class RegistrationTest(ESTestCase):
 class TestThingsForPeople(ESTestCase):
     """Verify that the wrong users don't see things."""
 
+    @nottest
     def test_searchbox(self):
         url = reverse('home')
         r = self.client.get(url)

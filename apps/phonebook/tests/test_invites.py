@@ -29,8 +29,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         d = dict(recipient=email, message=invite_message)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
-        assert ('%s has been invited to Mozillians.' % email in
-                pq(r.content)('div#main p').text())
+        assert ('%s has been invited to Mozillians.' % email in r.content)
 
         # See that the email was sent.
         eq_(len(mail.outbox), 1)
@@ -84,8 +83,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         d = dict(recipient=email)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
-        assert ('%s has been invited to Mozillians.' % email in
-                pq(r.content)('div#main p').text())
+        assert ('%s has been invited to Mozillians.' % email in r.content)
 
         # See that the email was sent.
         eq_(len(mail.outbox), 2)
