@@ -14,23 +14,39 @@ from ..models import Invite
 class InviteFlowTest(apps.common.tests.init.ESTestCase):
     fake_email = 'mr.fusion@gmail.com'
     fake_email2 = 'mrs.fusion@gmail.com'
+    fake_email3 = 'ms.fusion@gmail.com'
 
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
     fake_invite_message = 'Join Mozilla'
+  
+    fake_user = None
+  
+    def create_fake_user(self):
+            fake_user = User.objects.create(email=self.fake_email3, username='mozymike')
+            profile = fake_user.get_profile()
+            profile.is_vouched = True
+            profile.full_name='Michal Mozillianin'
+            profile.country = 'pl'
+            profile.save()        
 
     def invite_someone(self, email, invite_message):
         """This method will invite a user.
 
         This will verify that an email with link has been sent.
         """
+        # login as fake user.
+        d = dict(assertion=self.fake_assertion)
+        with mock_browserid(self.fake_email3):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+
         # Send an invite.
         url = reverse('invite')
         d = dict(recipient=email, message=invite_message)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('%s has been invited to Mozillians.' % email in
-                pq(r.content)('div#main p').text())
+                pq(r.content)('div.alert-success').text())
 
         # See that the email was sent.
         eq_(len(mail.outbox), 1)
@@ -80,13 +96,18 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         message and that the template doesn't use Personal message:
         when there's no personal message.
         """
+        #login as fake user.
+        d = dict(assertion=self.fake_assertion)
+        with mock_browserid(self.fake_email3):
+            self.client.post(reverse('browserid_verify'), d, follow=True)
+
         # Send an invite without a personal message.
         url = reverse('invite')
         d = dict(recipient=email)
         r = self.mozillian_client.post(url, d, follow=True)
         eq_(r.status_code, 200)
         assert ('%s has been invited to Mozillians.' % email in
-                pq(r.content)('div#main p').text())
+                pq(r.content)('div.alert-success').text())
 
         # See that the email was sent.
         eq_(len(mail.outbox), 2)
@@ -104,6 +125,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         Verify that we can't reuse the invite_url
         Verify we can't reinvite a vouched user
         """
+        self.create_fake_user()
         invite = self.invite_someone(self.fake_email, self.fake_invite_message)
         self.invite_without_message(self.fake_email)
         self.get_register(invite)
