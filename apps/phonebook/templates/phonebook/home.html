@@ -17,7 +17,7 @@
       <form id="homepage-search" action="{{ url('search') }}" method="GET">
           {{ csrf() }}
           <input type="text" name="q" class="search-query" 
-          placeholder="{{ _('Search by name or group') }}">
+          placeholder="{{ _('Search for people, groups and more') }}">
        </form>
     </hgroup>
 
@@ -26,26 +26,28 @@
           <img alt="<username goes here>" src="{{ MEDIA_URL }}img/sean-placeholder.png">
           <blockquote>
             {% trans %}
-            <p>Salvia pop-up quinoa portland, cray blog pug next level godard pinterest banh mi freegan stumptown. Jean shorts YOLO street art bespoke wolf.</p>
-            <small>Sean Martell</small>
+            <p>It’s an exciting time for Mozilla and the Web. Another two billion people will join the Internet community in the coming years.</p>
+            <small>Mitchell Baker</small>
             {% endtrans %}
           </blockquote>
       </section>
 
       <section id="about">
-          <h2>{{ _('What is mozillians?') }}</h2>
+          <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
           <p>
             {% trans %}
-            Tousled direct trade kale chips, ugh artisan try-hard church-key synth thundercats pop-up american apparel biodiesel portland trust fund pour-over. Banh mi wolf lo-fi bespoke swag. 3 wolf moon pitchfork messenger bag post-ironic, semiotics literally artisan fashion axe vinyl single-origin coffee banjo.
+            This site lists all core individuals and groups that participate in the Mozilla Project. We call ourselves Mozillians and this is where we connect and share with one another.
             {% endtrans %}
           </p>
+          <h3>{{ _('Are you a Mozillian?') }}</h3>
+          <a id="homepage-signup" class="persona-button browserid-login" href="#">{{ _('Sign up now') }}</a>
       </section>
       
       <section id="mozfacts">
-          <h2>23%</h2>
+          <h2>93</h2>
           <p>
             {% trans %}
-            Salvia pop-up quinoa portland, cray blog pug next level godard pinterest banh mi freegan stumptown. Jean shorts YOLO street art bespoke wolf.
+            Number of countries where you can meet passionate Mozillians — for work, play or a cup of coffee.
             {% endtrans %}
           </p>
       </section>
@@ -57,107 +59,108 @@
           <h2>{{ _('How do I get involved?') }}</h2>
           <p>
             {% trans %}
-            Farm-to-table semiotics portland, freegan mcsweeney's typewriter photo booth wayfarers banksy 3 wolf moon DIY pour-over readymade scenester whatever. YOLO blue bottle marfa, kogi vice seitan brunch.
+            Mozilla exists to promote openness, innovation and opportunity on the Internet. The success of our mission depends on participation from people like you. Find out how you can get involved to help make a difference in the lives of people everywhere.
             {% endtrans %}
           </p>
-          {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook' %}
-            <a href="{{ bug_url }}">find a bug</a>
+          {% trans contribute_url='http://mozilla.org/contribute' %}
+            <a href="{{ contribute_url }}">Get involved</a>
           {% endtrans %}
         </div>
       </div>
     </article>
 
   {% else %}
+
+  {# This is where the logged in homepage view starts. #}
     <div class="white-background">
       <div id="main-content">
         <article id="profile-info">
-          <a href="{{ url('profile', user.username) }}">
-            <img id="profile-photo" src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
+          <a class="profile-photo" href="{{ url('profile', user.username) }}">
+            <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
           </a>
-          <h2>{{ user.username }}</h2>
-          <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-          {% if user.userprofile.country or user.userprofile.region or user.userprofile.city %}
-            <section class="location">
-              {% if user.userprofile.city %}
-                {% if user.userprofile.country and user.is_authenticated() %}
-                  <a href="{{ url('list_city', country=user.userprofile.country, city=user.userprofile.city) }}">
-                    {{ user.userprofile.city }}</a>,
-                {% else %}
-                  {{ user.userprofile.city }}{% if user.userprofile.region %},{% endif %}
-                {% endif %}
-              {% endif %}
-              {% if user.userprofile.region %}
-                {% if user.userprofile.country and user.is_authenticated() %}
-                  <a href="{{ url('list_region', country=user.userprofile.country, region=user.userprofile.region) }}">
-                    {{ user.userprofile.region }}</a>
-                {% else %}
-                   {{ user.userprofile.region }}
-                {% endif %}
-              {% endif %}
-              {% if user.userprofile.country %}
-                {% if user.is_authenticated() %}
-                  <a href="{{ url('list_country', country=user.userprofile.country) }}">
-                    {{ user.userprofile.get_country_display() }}
-                  </a>
-                {% else %}
-                    {{ user.userprofile.get_country_display() }}
-                {% endif %}
-              {% endif %}
-            </section>
-          {% endif %}
-          {% if curated_groups %}
-            <section class="groups">
-              <h4>{{ _('Groups') }}</h4>
-              {% for group in curated_groups %}
-                <a href="{{ url('group', group.url) }}">{{ group }}</a>
-                {% if not loop.last %},{% endif %}
-              {% endfor %}
-            </section>
-          {% endif %}
-          {% if user.userprofile.languages.count() %}
-            <section class="languages">
-              <h4>{{ _('Languages') }}</h4>
-              {% for language in user.userprofile.languages.all() %}
-                {{ language|capitalize }}
-                {% if not loop.last %},{% endif %}
-              {% endfor %}
-            </section> 
-          {% endif %}
+          <div class="profile-details">
+            <h2>{{ user.username }}</h2>
+            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+            {% with profile = user.userprofile %}
+            {% if profile.country or profile.region or profile.city %}
+              <section class="location">
+                {% include 'phonebook/includes/profile_location.html' %}
+              </section>
+            {% endif %}
+            {% endwith %}
+            {% if curated_groups %}
+              <section class="groups">
+                <h4>{{ _('Member of:') }}</h4>
+                {% for group in curated_groups %}
+                  <a href="{{ url('group', group.url) }}">{{ group }}</a>
+                  {% if not loop.last %},{% endif %}
+                {% endfor %}
+              </section>
+            {% endif %}
+            {% if user.userprofile.languages.count() %}
+              <section class="languages">
+                <h4>{{ _('Languages') }}</h4>
+                {% for language in user.userprofile.languages.all() %}
+                  {{ language|capitalize }}
+                  {% if not loop.last %},{% endif %}
+                {% endfor %}
+              </section> 
+            {% endif %}
 
-          {% if user.userprofile.skills.count() %}
-            {% trans skill_count=user.userprofile.skills.count() %}
-              <h4>Has {{ skill_count }} skill</h4>
-              {% pluralize %}
-              <h4>Has {{ skill_count }} skills</h4>
-            {% endtrans %}
-          {% endif %}
+            {% if user.userprofile.skills.count() %}
+              {% trans skill_count=user.userprofile.skills.count() %}
+                <h4>Has {{ skill_count }} skill</h4>
+                {% pluralize %}
+                <h4>Has {{ skill_count }} skills</h4>
+              {% endtrans %}
+            {% endif %}
 
-          {# Using this placeholder code for now.
+            {# Using this placeholder code for now.
 
-          {% if user.userprofile.badges.count() %}
-            {% trans badges_count=user.userprofile.badges.count() %}
-              Has {{ badges_count }} skills.
-            {% endtrans %}
-          {% endif %}
+            {% if user.userprofile.badges.count() %}
+              {% trans badges_count=user.userprofile.badges.count() %}
+                Has {{ badges_count }} skills.
+              {% endtrans %}
+            {% endif %}
 
-          #}
+            #}
+          </div>
         </article>
         <article id="content-info">
-          <h1>{{ _('Welcome!') }}</h1>
+          <h1>{{ _('Hello!') }}</h1>
           <form id="homepage-search" action="{{ url('search') }}" method="GET">
             {{ csrf() }}
             <input type="text" name="q" class="search-query" 
-            placeholder="{{ _('Search by name or group') }}">
-            <small>Help text goes here</small>
+            placeholder="{{ _('Search for people, groups and more') }}">
+            <small>{{ _('Examples:') }}
+              {% trans search_url=url('search') %}
+              <a href="{{ search_url }}?q=python">python</a>, <a href="{{ search_url }}?q=berlin">Berlin</a>, <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
+              {% endtrans %}
+            </small>
           </form>
-          <section class="announcements">
-            <h2>Announcements</h2>
-            <h3>First announcement</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
-            <h3>Second announcement</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
-            <h3>Third announcement</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Labore, beatae, voluptates amet atque ratione sit.</p>
+          <section class="announcements-mozfacts">
+            <h2>Title placeholder</h2>
+            <p>This where about:home snippets and/or mozfacts will go.</p>
+          </section>
+          <section class="functional-areas">
+            <span class="icon">
+              <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
+            </span>
+            <h2>{{ _('Functional areas') }}</h2>
+            {% trans %}
+              <p>View Mozillians, Stewards and information for any functional area. Find out who works on what and how you can help out.</p>
+              <a href="#">Browse functional areas <i class="icon-arrow-right"></i></a>
+            {% endtrans %}
+          </section>
+          <section class="groups">
+            <span class="icon">
+              <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
+            </span>
+            <h2>{{ _('Groups') }}</h2>
+            {% trans group_url=url('group_index') %}
+              <p>Find and join groups centered around interests, technologies, geographies and more.</p>
+              <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
+            {% endtrans %}
           </section>
         </article>
       </div>
