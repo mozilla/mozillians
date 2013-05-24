@@ -506,7 +506,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         message = _(u"You've now been vouched on Mozillians.org. "
                      "You'll now be able to search, vouch "
                      "and invite other Mozillians onto the site.")
-        send_mail(subject, message, 'no-reply@mozillians.org',
+        send_mail(subject, message, settings.FROM_NOREPLY,
                   [self.user.email])
 
     def save(self, *args, **kwargs):

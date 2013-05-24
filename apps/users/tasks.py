@@ -14,7 +14,6 @@ BASKET_URL = getattr(settings, 'BASKET_URL', False)
 BASKET_NEWSLETTER = getattr(settings, 'BASKET_NEWSLETTER', False)
 BASKET_ENABLED = all([BASKET_URL, BASKET_NEWSLETTER])
 
-
 def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
     if not getattr(settings, 'BASKET_MANAGERS', False):
@@ -35,7 +34,7 @@ def _email_basket_managers(action, email, error_message):
     %s
     """ % (action, email, error_message)
 
-    send_mail(subject, body, 'no-reply@mozillians.org',
+    send_mail(subject, body, settings.FROM_NOREPLY,
               settings.BASKET_MANAGERS, fail_silently=False)
 
 

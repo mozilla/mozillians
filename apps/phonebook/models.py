@@ -1,5 +1,6 @@
 from django.utils.crypto import get_random_string
 from django.core.mail import send_mail
+from django.conf import settings
 from django.db import models
 from django.dispatch import receiver
 from django.template.loader import get_template
@@ -60,7 +61,7 @@ class Invite(models.Model):
         # escaped by the template and this makes the message look bad.
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
-        send_mail(subject, filtered_message, 'no-reply@mozillians.org',
+        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.recipient])
 
     class Meta:

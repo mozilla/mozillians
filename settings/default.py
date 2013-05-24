@@ -212,6 +212,7 @@ ANON_ALWAYS = True
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+FROM_NOREPLY = u'Mozillians <no-reply@mozillians.org>'
 
 # Auth
 LOGIN_URL = '/'
