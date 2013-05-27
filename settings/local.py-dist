@@ -10,23 +10,9 @@ PORT = 8000
 
 SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mozillians',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {
-            'init_command': 'SET storage_engine=InnoDB',
-            'charset': 'utf8',
-            'use_unicode': True,
-        },
-        'TEST_CHARSET': 'utf8',
-        'TEST_COLLATION': 'utf8_general_ci',
-    },
-}
+DATABASES['default']['NAME'] = 'mozillians_dev'
+DATABASES['default']['USER'] = 'root'
+DATABASES['default']['PASSWORD'] = ''
 
 #Serve Profile Photos from django
 UPLOAD_URL = '/media/uploads'
