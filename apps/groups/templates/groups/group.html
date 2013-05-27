@@ -18,7 +18,7 @@
     {% if group.steward %}
       <div class="span12">
         <p class="span6">{{ group.description }}</p>
-        <form class="curated-toggle span2 offset3"
+        <form class="curated-toggle span2 offset2"
               action="{{ url('group_toggle', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
@@ -31,6 +31,9 @@
             {% endif %}
           </button>
         </form>
+        <a class="btn btn-small pull-right" href="{{ url('group_index') }}">
+          <i class="icon-chevron-left"></i> Back to Group List
+        </a>
       </div>
       <div class="span12">
         <dl class="span12">
@@ -108,6 +111,13 @@
           {% endif %}
         </button>
       </form>
+      <a class="btn btn-small pull-right" href="{{ url('group_index') }}">
+        <i class="icon-chevron-left"></i> Back to Group List
+      </a>
+    {% else %}
+      <a class="btn btn-small pull-right" href="{{ url('group_index') }}">
+        <i class="icon-chevron-left"></i> Back to Group List
+      </a>
     {% endif %}
   </div>
 
