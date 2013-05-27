@@ -567,9 +567,21 @@ body#home {
             }
             #quote {
                 font-style: italic;
-                text-align: center;
+                position: relative;
+                span {
+                    position: absolute;
+                    .border-radius(100%);
+                    width: 60px;
+                    height: 60px;
+                    left: 18px;
+                    border: 6px solid @white;
+                    .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.1));
+                    img {
+                        .border-radius(100%);
+                    }
+                }
                 blockquote {
-                    position: relative;
+                    margin-top: 75px;
                     p {
                         &:after, &:before {
                             content: '"';
@@ -582,7 +594,7 @@ body#home {
                         }
                         &:before {
                             left: -20px;
-                            top: -10px;
+                            top: 67px;
                         }
                     }
                     small {
@@ -658,11 +670,23 @@ body#home {
                     img {
                         .border-radius(100%);
                     }
+                    @media (max-width: @breakDesktop) {
+                        margin-left: -80px;
+                    }
                 }
                 .profile-details {
                     margin-top: 170px;
                     h2 { margin: 0; }
                     h4 { margin: 20px 0 0; }
+                    @media (max-width: @breakDesktop) {
+                        .languages, h4 {
+                            .hidden;
+                        }
+                    }
+                }
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
                 }
             }
             #content-info {
@@ -683,16 +707,33 @@ body#home {
                         font-size: 20px;
                         background: @white url("/media/img/spyglass.png") no-repeat 5px 50% !important;
                         padding: 0 0 0 30px !important;
+                        display: block;
+                        @media (max-width: @breakDesktop) { 
+                            width: 95%;
+                        }
+                        @media (max-width: @breakTablet) { 
+                            width: 400px;
+                        }
+                        @media (max-width: @breakMobileLandscape) { 
+                            width: 75%;
+                            font-size: 16px;
+                        }
                     }
                     small {
                         font-size: 12px;
                         font-style: italic;
                         color: lighten(@black,70%);
                     }
+                    @media (max-width: @breakDesktop) {
+                            margin: 25px 0 0 0;
+                    }
                 }
                 .announcements-mozfacts {
                     .clearfix;
                     margin: 50px 0;
+                    @media (max-width: @breakDesktop) {
+                        margin: 25px 0;
+                    }
                 }
                 .functional-areas, .groups {
                     .span(4);
@@ -716,6 +757,10 @@ body#home {
                             .border-radius(100%);
                         }
                     }
+                    @media (max-width: @breakTablet) {
+                        width: 100%;
+                        margin-bottom: 50px;
+                    }
                 }
                 .groups {
                     margin: 0;
@@ -723,6 +768,13 @@ body#home {
                 .functional-areas {
                     margin-left: 0 !important;
                     margin-right: 20px;
+                }
+                @media (max-width: @breakDesktop) {
+                    border: none;
+                    h1 {
+                        .hidden;
+                    }
+                    width: auto;
                 }
             }
         }
