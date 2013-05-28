@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core import mail
+from django.conf import settings
 
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
@@ -54,7 +55,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         i = Invite.objects.get()
         invite_url = i.get_url()
 
-        assert 'no-reply@mozillians.org' in mail.outbox[0].from_email
+        assert settings.FROM_NOREPLY in mail.outbox[0].from_email
         assert invite_url in mail.outbox[0].body, "No link in email."
         return i
 
@@ -143,8 +144,8 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         eq_(len(mail.outbox), 4, "email wasn't sent to inviter")
 
         # Verify is email was sent to correct person.        
-        assert ('Amandeep McIlrath' in mail.outbox[3].body, 
-                'email was sent to wrong person.')
+        assert 'Amandeep McIlrath' in mail.outbox[3].body, \
+                'email was sent to wrong person.'
 
 
 class InviteEdgeTest(apps.common.tests.init.ESTestCase):
