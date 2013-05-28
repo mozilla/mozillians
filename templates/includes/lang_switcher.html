@@ -3,7 +3,7 @@
   	<option>{{ _('Select language') }}</option>
     {% for code, name in LANGUAGES|dictsort -%}
       <option value="{{ code }}" {{ code|ifeq(LANG|lower, "selected") }}>
-        {{ name }}
+        {{ name|safe }}
       </option>
     {%- endfor %}
   </select>

@@ -141,14 +141,14 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
       <footer id="colophon">
           <div class="container">
 
-            <h4>
+            <h5>
               {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook',
                    git_url='https://github.com/mozilla/mozillians' %}
                 Help make Mozillians better. 
                 <a href="{{ bug_url }}">File a bug</a> or 
                 <a href="{{ git_url }}">make some changes</a>.
               {% endtrans %}
-            </h4>
+            </h5>
 
             <div class="footer-language row">
             {% include 'includes/lang_switcher.html' %}
