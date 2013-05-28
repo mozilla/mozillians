@@ -74,7 +74,7 @@ class Invite(models.Model):
             'profile' : absolutify(reverse('profile', args=(self.redeemer.user,)))})        
         filtered_message = message.replace('&#34;', '"').replace('&#39;',"'")
 
-        send_mail(subject, filtered_message, 'no-reply@mozillians.org',
+        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
             [self.inviter.email])
 
     class Meta:
