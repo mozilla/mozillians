@@ -64,6 +64,19 @@ class Invite(models.Model):
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.recipient])
 
+    def send_thanks(self):
+        """Sends email to person who friend accepted invitation."""
+        template = get_template('phonebook/invite_accepted.txt')
+        subject = _('%s created a Mozillians profile' % self.redeemer.full_name)
+        message = template.render({
+            'inviter' : self.inviter.full_name,
+            'friend' : self.redeemer.full_name,
+            'profile' : absolutify(reverse('profile', args=(self.redeemer.user,)))})        
+        filtered_message = message.replace('&#34;', '"').replace('&#39;',"'")
+
+        send_mail(subject, filtered_message, 'no-reply@mozillians.org',
+            [self.inviter.email])
+
     class Meta:
         db_table = 'invite'
 
