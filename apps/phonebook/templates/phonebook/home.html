@@ -41,8 +41,6 @@
             This site lists all core individuals and groups that participate in the Mozilla Project. We call ourselves Mozillians and this is where we connect and share with one another.
             {% endtrans %}
           </p>
-          <h3>{{ _('Are you a Mozillian?') }}</h3>
-          <a id="homepage-signup" class="persona-button browserid-login" href="#">{{ _('Sign up now') }}</a>
       </section>
       
       <section id="mozfacts">
@@ -94,8 +92,7 @@
               <section class="groups">
                 <h4>{{ _('Member of:') }}</h4>
                 {% for group in curated_groups %}
-                  <a href="{{ url('group', group.url) }}">{{ group }}</a>
-                  {% if not loop.last %},{% endif %}
+                  <a href="{{ url('group', group.url) }}">{{ group }}</a>{% if not loop.last %},{% endif %}
                 {% endfor %}
               </section>
             {% endif %}
