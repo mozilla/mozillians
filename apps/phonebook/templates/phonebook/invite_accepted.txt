@@ -1,0 +1,7 @@
+{% trans %}
+Hi {{ inviter }},
+
+Thanks to you, your friend {{ friend }} created a profile on mozillians.org.
+
+Take a look at their profile: {{ profile }}
+{% endtrans %}

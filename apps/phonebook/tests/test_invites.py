@@ -122,8 +122,9 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
 
         Send an invite.  See that email is sent.
         See that link allows us to sign in and be auto-vouched.
-        Verify that we can't reuse the invite_url
-        Verify we can't reinvite a vouched user
+        Verify that we can't reuse the invite_url.
+        Verify we can't reinvite a vouched user.
+        Verify is email was sent to inviter.
         """
         self.create_fake_user()
         invite = self.invite_someone(self.fake_email, self.fake_invite_message)
@@ -137,6 +138,13 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         self.redeem_invite(invite, email='mr2@gmail.com')
         eq_(User.objects.get(email='mr2@gmail.com').get_profile().is_vouched,
             False)
+
+        # Verify is email was sent to inviter.
+        eq_(len(mail.outbox), 4, "email wasn't sent to inviter")
+
+        # Verify is email was sent to correct person.        
+        assert ('Amandeep McIlrath' in mail.outbox[3].body, 
+                'email was sent to wrong person.')
 
 
 class InviteEdgeTest(apps.common.tests.init.ESTestCase):

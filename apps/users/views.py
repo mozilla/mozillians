@@ -117,4 +117,5 @@ def _update_invites(request):
     redeemer.vouch(voucher)
     invite.redeemed = datetime.datetime.now()
     invite.redeemer = redeemer
+    invite.send_thanks()
     invite.save()
