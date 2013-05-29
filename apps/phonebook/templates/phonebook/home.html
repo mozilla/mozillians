@@ -44,12 +44,19 @@
       </section>
       
       <section id="mozfacts">
-          <h2>93</h2>
+        {% set fact=random_funfact() %}
+        {% if fact %}
+          <h2>{{ fact.execute() }}</h2>
           <p>
-            {% trans %}
-            Number of countries where you can meet passionate Mozillians — for work, play or a cup of coffee.
-            {% endtrans %}
+            {{ fact.public_text }}
           </p>
+        {% else %}
+          <h2>3000+</h2>
+          <p>
+            Passionate Mozillians you can meet for work, play or a
+            cup of coffee.
+          </p>
+        {% endif %}
       </section>
     </article>
 
