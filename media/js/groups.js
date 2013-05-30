@@ -1,7 +1,7 @@
 (function($) {
     $().ready(function() {
         $('a[href=' + location.hash + ']').tab('show');
-        if ($('#body-edit-profile').length || $('#body-register').length) {
+        if ($('#edit-profile').length || $('#register').length) {
             $('#id_groups').tagit({
                 allowSpaces: true,
                 caseSensitive: false,

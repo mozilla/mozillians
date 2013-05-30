@@ -1,239 +1,230 @@
-{% extends "base.html" %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ profile.display_name }}{% endblock %}
 {% block body_id %}profile{% endblock %}
-{% block body_classes %}
-    box-content {% if not profile.is_vouched %}pending{% endif %}
+{% block body_class %}
+  {% if not profile.is_vouched %}pending{% endif %}
 {% endblock %}
 
-{% set nav_profile = 'active' %}
-{% block nav %}
-  {{ super() }}
-{% endblock %}
 {% block messages %}{% endblock %}
 
-
 {% block content %}
-  <h1>
-    {% if request.user.username == shown_user.username %}
-      {{ _('Your Profile') }}
-    {% elif profile.is_vouched %}
-      {{ _('Mozillian Profile') }}
-    {% else %}
-      {{ _('Pending Profile') }}
-    {% endif %}
-  </h1>
-
-  <div class="ui-helper-clearfix"></div>
-
   <div class="row">
-    {% if not profile.is_vouched %}
-      <div class="alert alert alert-info offset1 span8" id="pending-approval">
-        {% if request.user == shown_user %}
-          {% trans profile_url=absolutify(url('profile', user.username)),
-                   contribute_url='http://www.mozilla.org/contribute' %}
-            <p>
-              Your profile is waiting to be vouched. Send the link below to someone who
-              is familiar with your contributions and ask them to vouch for you.
-            </p>
-            <p>
-              If you are new to the Mozilla community,
-              <a href="{{ contribute_url }}">get involved</a>.
-              The chances of being vouched increase as you finish tasks in our community.
-            </p>
-            <em class="underline" title="Your profile URL">
-              {{ profile_url }}
-            </em>
-          {% endtrans %}
+    <div class="span12">
+      <h1>
+        {% if request.user.username == shown_user.username %}
+          {{ _('Your Profile') }}
+        {% elif profile.is_vouched %}
+          {{ _('Mozillian Profile') }}
         {% else %}
-          {% if vouch_form %}
-            <form action="{{ url('vouch') }}" method="POST"
-                  id="vouch-form" class="pull-right">
-              {{ csrf() }}
-
-              {{ vouch_form }}
-
-              {% trans name=profile.display_name %}
-                <div>
-                  <button type="submit" class="btn btn-info pull-right">
-                    Vouch for {{ name }}
-                  </button>
-                </div>
-              {% endtrans %}
-            </form>
+          {{ _('Pending Profile') }}
+        {% endif %}
+      </h1>
+      {% if not profile.is_vouched %}
+        <div class="alert alert alert-info" id="pending-approval">
+          {% if request.user == shown_user %}
+            {% trans profile_url=absolutify(url('profile', user.username)),
+                     contribute_url='http://www.mozilla.org/contribute' %}
+              <p>
+                Your profile is waiting to be vouched. Send the link below to someone who
+                is familiar with your contributions and ask them to vouch for you.
+              </p>
+              <p>
+                If you are new to the Mozilla community,
+                <a href="{{ contribute_url }}">get involved</a>.
+                The chances of being vouched increase as you finish tasks in our community.
+              </p>
+              <em class="underline" title="Your profile URL">
+                {{ profile_url }}
+              </em>
+            {% endtrans %}
+          {% else %}
+            {% if vouch_form %}
+              <form action="{{ url('vouch') }}" method="POST"
+                    id="vouch-form" class="pull-right">
+                {{ csrf() }}
+                {{ vouch_form }}
+                {% trans name=profile.display_name %}
+                  <div>
+                    <button type="submit" class="btn btn-info pull-right">
+                      Vouch for {{ name }}
+                    </button>
+                  </div>
+                {% endtrans %}
+              </form>
+            {% endif %}
+            {% trans %}
+              <p>This profile is waiting for approval.</p>
+              <p>Because our community directory is for Mozillians who
+                are 13 and older, please don't vouch for anyone under
+                13.</p>
+            {% endtrans %}
           {% endif %}
-          {% trans %}
-            <p>This profile is waiting for approval.</p>
-            <p>Because our community directory is for Mozillians who
-              are 13 and older, please don't vouch for anyone under
-              13.</p>
-          {% endtrans %}
-        {% endif %}
-      </div>
-    {% endif %}
-    {% if messages %}
-      {% for message in messages %}
-        {% with %}
-          {% set label = message.tags in ['error', 'success', 'info'] %}
-          <div class="alert{% if label %} alert-{{ message.tags }}{% endif %} offset1 span8">{{ message }}</div>
-        {% endwith %}
-      {% endfor %}
-    {% endif %}
-    {% if user == shown_user %}
-      <div class="privacy-view">
-        <form method="GET" action=".">
-          <label>{{ _('View as:') }}</label>
-          <select id="view-privacy-mode">
-              <option value="{{ url('profile', shown_user.username) }}"
-                      {% if privacy_mode == 'myself' %} selected {% endif %}>
-                {{ _('Myself') }}
-              </option>
-              <option value="{{ url('profile', shown_user.username)|urlparams(view_as='mozillian') }}"
-                      {% if privacy_mode == 'mozillian' %} selected {% endif %} >
-                {{ _('Mozillian') }}
-              </option>
-              <option value="{{ url('profile', shown_user.username)|urlparams(view_as='anonymous') }}"
-                      {% if privacy_mode == 'anonymous' %} selected {% endif %}>
-                {{ _('Public') }}
-              </option>
-          </select>
-        </form>
-      </div>
-    {% endif %}
-    <div class="span6 offset1 well h-card vcard" id="profile-info">
-      {% if privacy_mode == 'anonymous' and not profile.is_public %}
-        {% trans edit_url=url('profile.edit') %}
-          Your profile is not public. If you <a href="{{ edit_url }}">edit
-          your profile</a> to have at least one public field,
-          your public profile will be viewable.
-        {% endtrans %}
-      {% endif %}
-
-      <h2 class="p-name fn">
-        {{ profile.display_name }}
-      </h2>
-
-      <dl>
-        {% if profile.email %}
-          <dt>{{ _('Email') }}</dt>
-          <dd><a class="u-email email" href="mailto:{{ profile.email }}">
-            {{ profile.email }}
-          </a></dd>
-        {% endif %}
-
-        {% if profile.ircname %}
-          <dt>{{ _('IRC Nickname') }}</dt>
-          <dd><a class="p-nickname nickname" href="irc://irc.mozilla.org/">
-            {{ profile.ircname }}
-          </a></dd>
-        {% endif %}
-
-        {% if profile.website %}
-          <dt>{{ _('Website') }}</dt>
-          <dd><a rel="me" class="u-url url" href="{{ profile.website }}">
-            {{ profile.website }}</a>
-          </dd>
-        {% endif %}
-
-        {% if profile.country or profile.region or profile.city %}
-          <dt>{{ _('Location') }}</dt>
-          <dd class="p-adr">
-            {% if profile.city %}
-              {% if profile.country and user.is_authenticated() %}
-                <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
-                  {{ profile.city }}</a>,
-              {% else %}
-                {{ profile.city }}{% if profile.region %},{% elif profile.country %}<br>{% endif %}
-              {% endif %}
-            {% endif %}
-            {% if profile.region %}
-              {% if profile.country and user.is_authenticated() %}
-                <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
-                  {{ profile.region }}</a>
-              {% else %}
-                {{ profile.region }}
-              {% endif %}
-                <br>
-            {% endif %}
-            {% if profile.country %}
-              {% if user.is_authenticated() %}
-              <a href="{{ url('list_country', country=profile.country) }}">
-                {{ profile.get_country_display() }}</a>
-              {% else %}
-                {{ profile.get_country_display() }}
-              {% endif %}
-            {% endif %}
-          </dd>
-        {% endif %}
-
-        {% if profile.vouched_by %}
-          <dt>{{ _('Vouched by') }}</dt>
-          <dd>
-            <a href="{{ url('profile', profile.vouched_by.user.username) }}"
-               class="vouched">
-              {{ profile.vouched_by.display_name }}
-            </a>
-          </dd>
-        {% endif %}
-      </dl>
-
-      {% if profile.bio %}
-        <h3>{{ _('Bio') }}{# L10n: Biography #}</h3>
-        <div id="bio" class="p-note note">
-          {{ profile.bio|paragraphize }}
         </div>
       {% endif %}
-
-      {% if profile.groups.count() %}
-        <h3>{{ _('Groups') }}</h3>
-
-        <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in profile.groups.all() %}
-            <li class="tagit-choice ui-widget-content ui-state-default
-                       ui-corner-all p-category category">
-                <a href="{{ url('group', group.url) }}">
-                  {{ group.name }}
-                </a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      {% if profile.skills.count() %}
-        <h3>{{ _('Skills') }}</h3>
-
-        <ul id="skills" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in profile.skills.all() %}
-            <li class="tagit-choice ui-widget-content ui-state-default
-                       ui-corner-all p-category category">
-              {{ group.name }}
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-      {% if profile.languages.count() %}
-        <h3>{{ _('Languages') }}</h3>
-
-        <ul id="languages" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in profile.languages.all() %}
-            <li class="tagit-choice ui-widget-content ui-state-default
-                       ui-corner-all p-category category">
-              {{ group.name }}
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-
-
-      {% if shown_user.username == request.user.username %}
-        <a href="{{ url('profile.edit') }}"
-           class="btn btn-primary pull-right" id="edit-profile">
-          {{ _('Edit My Profile') }}
-        </a>
+      {% if messages %}
+        {% for message in messages %}
+          {% with %}
+            {% set label = message.tags in ['error', 'success', 'info'] %}
+            <div class="alert{% if label %} alert-{{ message.tags }}{% endif %} offset1 span8">{{ message }}</div>
+          {% endwith %}
+        {% endfor %}
       {% endif %}
     </div>
+  </div>
 
+  {% if user == shown_user %}
+    <div class="row">
+      <div class="span8">
+        <div class="privacy-view">
+          <form method="GET" action=".">
+            <label>{{ _('View as:') }}</label>
+            <select id="view-privacy-mode">
+                <option value="{{ url('profile', shown_user.username) }}"
+                        {% if privacy_mode == 'myself' %} selected {% endif %}>
+                  {{ _('Myself') }}
+                </option>
+                <option value="{{ url('profile', shown_user.username)|urlparams(view_as='mozillian') }}"
+                        {% if privacy_mode == 'mozillian' %} selected {% endif %} >
+                  {{ _('Mozillian') }}
+                </option>
+                <option value="{{ url('profile', shown_user.username)|urlparams(view_as='anonymous') }}"
+                        {% if privacy_mode == 'anonymous' %} selected {% endif %}>
+                  {{ _('Public') }}
+                </option>
+            </select>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="span8 well">
+      <div class="h-card vcard clearfix" id="profile-info">
+        {% if privacy_mode == 'anonymous' and not profile.is_public %}
+          {% trans edit_url=url('profile.edit') %}
+            Your profile is not public. If you <a href="{{ edit_url }}">edit
+            your profile</a> to have at least one public field,
+            your public profile will be viewable.
+          {% endtrans %}
+        {% endif %}
+        <h2 class="p-name fn">
+          {{ profile.display_name }}
+        </h2>
+        <dl>
+          {% if profile.email %}
+            <dt>{{ _('Email') }}</dt>
+            <dd><a class="u-email email" href="mailto:{{ profile.email }}">
+              {{ profile.email }}
+            </a></dd>
+          {% endif %}
+          {% if profile.ircname %}
+            <dt>{{ _('IRC Nickname') }}</dt>
+            <dd><a class="p-nickname nickname" href="irc://irc.mozilla.org/">
+              {{ profile.ircname }}
+            </a></dd>
+          {% endif %}
+          {% if profile.website %}
+            <dt>{{ _('Website') }}</dt>
+            <dd><a rel="me" class="u-url url" href="{{ profile.website }}">
+              {{ profile.website }}</a>
+            </dd>
+          {% endif %}
+          {% if profile.country or profile.region or profile.city %}
+            <dt>{{ _('Location') }}</dt>
+            <dd class="p-adr">
+              {% if profile.city %}
+                {% if profile.country and user.is_authenticated() %}
+                  <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
+                    {{ profile.city }}</a>,
+                {% else %}
+                  {{ profile.city }}{% if profile.region %},{% elif profile.country %}<br>{% endif %}
+                {% endif %}
+              {% endif %}
+              {% if profile.region %}
+                {% if profile.country and user.is_authenticated() %}
+                  <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
+                    {{ profile.region }}</a>
+                {% else %}
+                  {{ profile.region }}
+                {% endif %}
+                  <br>
+              {% endif %}
+              {% if profile.country %}
+                {% if user.is_authenticated() %}
+                <a href="{{ url('list_country', country=profile.country) }}">
+                  {{ profile.get_country_display() }}</a>
+                {% else %}
+                  {{ profile.get_country_display() }}
+                {% endif %}
+              {% endif %}
+            </dd>
+          {% endif %}
+          {% if profile.vouched_by %}
+            <dt>{{ _('Vouched by') }}</dt>
+            <dd>
+              <a href="{{ url('profile', profile.vouched_by.user.username) }}"
+                 class="vouched">
+                {{ profile.vouched_by.display_name }}
+              </a>
+            </dd>
+          {% endif %}
+        </dl>
+        {% if profile.bio %}
+          <h3>{{ _('Bio') }}{# L10n: Biography #}</h3>
+          <div id="bio" class="p-note note">
+            {{ profile.bio|paragraphize }}
+          </div>
+        {% endif %}
+        {% if profile.groups.count() %}
+          <h3>{{ _('Groups') }}</h3>
+          <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+            {% for group in profile.groups.all() %}
+              <li class="tagit-choice ui-widget-content ui-state-default
+                         ui-corner-all p-category category">
+                {% if (request.user.is_authenticated() and
+                       request.user.get_profile().is_vouched) %}
+                  <a href="{{ url('group', group.url) }}">
+                    {{ group.name }}
+                  </a>
+                {% else %}
+                  {{ group.name }}
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if profile.skills.count() %}
+          <h3>{{ _('Skills') }}</h3>
+          <ul id="skills" class="tagit ui-widget ui-widget-content ui-corner-all">
+            {% for group in profile.skills.all() %}
+              <li class="tagit-choice ui-widget-content ui-state-default
+                         ui-corner-all p-category category">
+                {{ group.name }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if profile.languages.count() %}
+          <h3>{{ _('Languages') }}</h3>
+          <ul id="languages" class="tagit ui-widget ui-widget-content ui-corner-all">
+            {% for group in profile.languages.all() %}
+              <li class="tagit-choice ui-widget-content ui-state-default
+                         ui-corner-all p-category category">
+                {{ group.name }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if shown_user.username == request.user.username %}
+          <a href="{{ url('profile.edit') }}"
+             class="btn btn-primary pull-right" id="edit-profile">
+            {{ _('Edit My Profile') }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
     <div class="span2">
       <div class="thumbnail">
         <img class="u-photo photo"
@@ -245,7 +236,6 @@
   </div>
 {% endblock %}
 
-{% block site_js %}
-  {{ super() }}
+{% block page_js %}
   {{ js('profile_view') }}
 {% endblock %}
