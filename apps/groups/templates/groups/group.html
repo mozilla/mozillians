@@ -1,29 +1,27 @@
-{% extends "base.html" %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ _('Group: {name}')|f(name=group.name) }}{% endblock %}
 
 {% block body_id %}group-show{% endblock %}
-{% block body_classes %}
-  box-content search-page
-{% endblock %}
-
-{% block page_js %}
-  {{ js('search') }}
+{% block body_class %}
+  {{ super() }}
+  search-page
 {% endblock %}
 
 {% block content %}
-  <div class="row group-options">
-    <h1 class="span12">{{ _('Group: {name}')|f(name=group.name) }}</h1>
-
-    {% if group.steward %}
-      <div class="span12">
-        <p class="span6">{{ group.description }}</p>
-        <form class="curated-toggle span2 offset2"
+  <div class="group-options">
+    <h1>{{ _('Group: {name}')|f(name=group.name) }}</h1>
+    <div class="row">
+     {% if group.steward %}
+      <div class="span5">
+        {% if group.description %}
+          <p>{{ group.description }}</p>
+        {% endif %}
+        <form class="curated-toggle"
               action="{{ url('group_toggle', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
-
-          <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
+          <button class="btn btn{{ ('-danger' if in_group else '-primary') }}">
             {% if not in_group %}
               {{ _('Join Group') }}
             {% else %}
@@ -66,42 +64,46 @@
           <dd>{{ members }}</dd>
         </dl>
       </div>
-      <div class="span6 steward">
-        <h3>{{ _('Community Steward') }}</h3>
-        <div class="avatar">
-          <img class="profile-photo"
-               src="{{ group.steward.get_photo_url('70x70') }}"
-               alt="{{ _('Profile Photo') }}">
-        </div>
-        <ul>
-          <li>
-            <span>
-              <a href="{{ url('profile', group.steward.user.username) }}">
-                {{ group.steward.display_name }}
-              </a>
-            </span>
-          </li>
-          <li>
-            <a href="mailto:{{ group.steward.user.email }}">
-              {{ group.steward.user.email }}
-            </a>
-          </li>
-        </ul>
-      </div>
-      <div class="span6 group-skills">
-        <h3>{{ _('Skills members have in common') }}</h3>
+      <div class="span5 offset1">
+        <div class="steward">
+          <h3>{{ _('Community Steward') }}</h3>
+          <div class="avatar">
+            <img class="profile-photo"
+                 src="{{ group.steward.get_photo_url('70x70') }}"
+                 alt="{{ _('Profile Photo') }}">
+          </div>
           <ul>
-            {% for skill in skills[:15] %}
-              <li><span class="underline">{{ skill.name }}</span></li>
-            {% else %}
-              None
-            {% endfor %}
+            <li>
+              <span>
+                <a href="{{ url('profile', group.steward.user.username) }}">
+                  {{ group.steward.display_name }}
+                </a>
+              </span>
+            </li>
+            <li>
+              <a href="mailto:{{ group.steward.user.email }}">
+                {{ group.steward.user.email }}
+              </a>
+            </li>
           </ul>
+        </div>
+        {% if skills %}
+        <div class="group-skills">
+          <h3>{{ _('Skills members have in common') }}</h3>
+            <ul>
+              {% for skill in skills[:15] %}
+                <li><span class="underline">{{ skill.name }}</span></li>
+              {% else %}
+                None
+              {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
       </div>
-    {% elif not group.system %}
-      {% if user.is_authenticated() %}
+    {% elif not group.system %} 
+      <div class="span5">
         <form action="{{ url('group_toggle', group.url) }}"
-              class="span2" id="toggle-group" method="post">
+              id="toggle-group" method="post">
           {{ csrf() }}
 
         <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
@@ -120,6 +122,7 @@
         <i class="icon-chevron-left"></i> Back to Group List
       </a>
     {% endif %}
+    </div>
   </div>
 
   {% if not people.paginator.count %}
@@ -155,3 +158,7 @@
    {% endif %}
 </div>
 {% endblock content %}
+
+{% block page_js %}
+  {{ js('search') }}
+{% endblock %}

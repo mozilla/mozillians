@@ -9,6 +9,8 @@
 {% endif %}
 {% endblock mosaic %}
 
+{% block search %}{% endblock %}
+
 {% block content %}
   {% if not user.is_authenticated() %}
     <hgroup id="main-feature">
@@ -21,43 +23,45 @@
        </form>
     </hgroup>
 
-    <article id="information" class="container">
-      <section id="quote">
-          <span>
-            <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ MEDIA_URL }}img/homequote-mitchell-baker.png">
-          </span>
-          <blockquote>
-            {% trans %}
-            <p>It’s an exciting time for Mozilla and the Web. Another two billion people will join the Internet community in the coming years.</p>
-            <small>Mitchell Baker</small>
-            {% endtrans %}
-          </blockquote>
-      </section>
+    <article id="information">
+      <div class="container">
+        <section id="quote">
+            <span>
+              <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ MEDIA_URL }}img/homequote-mitchell-baker.png">
+            </span>
+            <blockquote>
+              {% trans %}
+              <p>It’s an exciting time for Mozilla and the Web. Another two billion people will join the Internet community in the coming years.</p>
+              <small>Mitchell Baker</small>
+              {% endtrans %}
+            </blockquote>
+        </section>
 
-      <section id="about">
-          <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
-          <p>
-            {% trans %}
-            This site lists all core individuals and groups that participate in the Mozilla Project. We call ourselves Mozillians and this is where we connect and share with one another.
-            {% endtrans %}
-          </p>
-      </section>
-      
-      <section id="mozfacts">
-        {% set fact=random_funfact() %}
-        {% if fact %}
-          <h2>{{ fact.execute() }}</h2>
-          <p>
-            {{ fact.public_text }}
-          </p>
-        {% else %}
-          <h2>3000+</h2>
-          <p>
-            Passionate Mozillians you can meet for work, play or a
-            cup of coffee.
-          </p>
-        {% endif %}
-      </section>
+        <section id="about">
+            <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
+            <p>
+              {% trans %}
+              This site lists all core individuals and groups that participate in the Mozilla Project. We call ourselves Mozillians and this is where we connect and share with one another.
+              {% endtrans %}
+            </p>
+        </section>
+        
+        <section id="mozfacts">
+          {% set fact=random_funfact() %}
+          {% if fact %}
+            <h2>{{ fact.execute() }}</h2>
+            <p>
+              {{ fact.public_text }}
+            </p>
+          {% else %}
+            <h2>3000+</h2>
+            <p>
+              Passionate Mozillians you can meet for work, play or a
+              cup of coffee.
+            </p>
+          {% endif %}
+        </section>
+      </div>
     </article>
 
     <article id="get-involved">
@@ -78,99 +82,97 @@
 
   {% else %}
 
-  {# This is where the logged in homepage view starts. #}
-    <div class="white-background">
-      <div id="main-content">
-        <article id="profile-info">
-          <a class="profile-photo" href="{{ url('profile', user.username) }}">
-            <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
-          </a>
-          <div class="profile-details">
-            <h2>{{ user.username }}</h2>
-            <a href="mailto:{{ user.email }}">{{ user.email }}</a>
-            {% with profile = user.userprofile %}
-            {% if profile.country or profile.region or profile.city %}
-              <section class="location">
-                {% include 'phonebook/includes/profile_location.html' %}
-              </section>
-            {% endif %}
-            {% endwith %}
-            {% if curated_groups %}
-              <section class="groups">
-                <h4>{{ _('Member of:') }}</h4>
-                {% for group in curated_groups %}
-                  <a href="{{ url('group', group.url) }}">{{ group }}</a>{% if not loop.last %},{% endif %}
-                {% endfor %}
-              </section>
-            {% endif %}
-            {% if user.userprofile.languages.count() %}
-              <section class="languages">
-                <h4>{{ _('Languages') }}</h4>
-                {% for language in user.userprofile.languages.all() %}
-                  {{ language|capitalize }}
-                  {% if not loop.last %},{% endif %}
-                {% endfor %}
-              </section> 
-            {% endif %}
-
-            {% if user.userprofile.skills.count() %}
-              {% trans skill_count=user.userprofile.skills.count() %}
-                <h4>Has {{ skill_count }} skill</h4>
-                {% pluralize %}
-                <h4>Has {{ skill_count }} skills</h4>
-              {% endtrans %}
-            {% endif %}
-
-            {# Using this placeholder code for now.
-
-            {% if user.userprofile.badges.count() %}
-              {% trans badges_count=user.userprofile.badges.count() %}
-                Has {{ badges_count }} skills.
-              {% endtrans %}
-            {% endif %}
-
-            #}
-          </div>
-        </article>
-        <article id="content-info">
-          <h1>{{ _('Hello!') }}</h1>
-          <form id="homepage-search" action="{{ url('search') }}" method="GET">
-            {{ csrf() }}
-            <input type="text" name="q" class="search-query" 
-            placeholder="{{ _('Search for people, groups and more') }}">
-            <small>{{ _('Examples:') }}
-              {% trans search_url=url('search') %}
-              <a href="{{ search_url }}?q=python">python</a>, <a href="{{ search_url }}?q=berlin">Berlin</a>, <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
-              {% endtrans %}
-            </small>
-          </form>
-          <section class="announcements-mozfacts">
-            <h2>Title placeholder</h2>
-            <p>This where about:home snippets and/or mozfacts will go.</p>
+    {# This is where the logged in homepage view starts. #}
+    <article id="profile-info">
+      <a class="profile-photo" href="{{ url('profile', user.username) }}">
+        <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
+      </a>
+      <div class="profile-details">
+        <h2>{{ user.username }}</h2>
+        <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+        {% with profile = user.userprofile %}
+        {% if profile.country or profile.region or profile.city %}
+          <section class="location">
+            {% include 'phonebook/includes/profile_location.html' %}
           </section>
-          <section class="functional-areas">
-            <span class="icon">
-              <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
-            </span>
-            <h2>{{ _('Functional areas') }}</h2>
-            {% trans %}
-              <p>View Mozillians, Stewards and information for any functional area. Find out who works on what and how you can help out.</p>
-              <a href="#">Browse functional areas <i class="icon-arrow-right"></i></a>
-            {% endtrans %}
-          </section>
+        {% endif %}
+        {% endwith %}
+        {% if curated_groups %}
           <section class="groups">
-            <span class="icon">
-              <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
-            </span>
-            <h2>{{ _('Groups') }}</h2>
-            {% trans group_url=url('group_index') %}
-              <p>Find and join groups centered around interests, technologies, geographies and more.</p>
-              <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
-            {% endtrans %}
+            <h4>{{ _('Member of:') }}</h4>
+            {% for group in curated_groups %}
+              <a href="{{ url('group', group.url) }}">{{ group }}</a>{% if not loop.last %},{% endif %}
+            {% endfor %}
           </section>
-        </article>
-      </div>
-    </div>
+        {% endif %}
+        {% if user.userprofile.languages.count() %}
+          <section class="languages">
+            <h4>{{ _('Languages') }}</h4>
+            {% for language in user.userprofile.languages.all() %}
+              {{ language|capitalize }}
+              {% if not loop.last %},{% endif %}
+            {% endfor %}
+          </section> 
+        {% endif %}
+
+        {% if user.userprofile.skills.count() %}
+          {% trans skill_count=user.userprofile.skills.count() %}
+            <h4>Has {{ skill_count }} skill</h4>
+            {% pluralize %}
+            <h4>Has {{ skill_count }} skills</h4>
+          {% endtrans %}
+        {% endif %}
+
+        {# Using this placeholder code for now.
+
+        {% if user.userprofile.badges.count() %}
+          {% trans badges_count=user.userprofile.badges.count() %}
+            Has {{ badges_count }} skills.
+          {% endtrans %}
+        {% endif %}
+
+        #}
+       </div>
+    </article>
+    <article id="content-info">
+      <h1>{{ _('Hello!') }}</h1>
+      <form id="homepage-search" action="{{ url('search') }}" method="GET">
+        {{ csrf() }}
+        <input type="text" name="q" class="search-query" 
+        placeholder="{{ _('Search for people, groups and more') }}">
+        <small>{{ _('Examples:') }}
+          {% trans search_url=url('search') %}
+          <a href="{{ search_url }}?q=python">python</a>, <a href="{{ search_url }}?q=berlin">Berlin</a>, <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
+          {% endtrans %}
+        </small>
+      </form>
+      <section class="announcements-mozfacts">
+        <img src="{{ MEDIA_URL }}img/placeholder.gif">
+        <h2>Title placeholder</h2>
+        <p>This where about:home snippets and/or mozfacts will go.</p>
+      </section>
+      <section class="functional-areas">
+        <span class="icon">
+          <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
+        </span>
+        <h2>{{ _('Functional areas') }}</h2>
+        {% trans %}
+          <p>View Mozillians, Stewards and information for any functional area. Find out who works on what and how you can help out.</p>
+          <a href="#">Browse functional areas <i class="icon-arrow-right"></i></a>
+        {% endtrans %}
+      </section>
+      <section class="groups">
+        <span class="icon">
+          <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
+        </span>
+        <h2>{{ _('Groups') }}</h2>
+        {% trans group_url=url('group_index') %}
+          <p>Find and join groups centered around interests, technologies, geographies and more.</p>
+          <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
+        {% endtrans %}
+      </section>
+    </article> 
+
   {% endif %}
 
   <a href="#" id="back-to-top"><img src="{{ MEDIA_URL }}img/back-to-top-arrow.png" alt="Back to top"></a>

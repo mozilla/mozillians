@@ -81,6 +81,11 @@ MINIFY_BUNDLES = {
     'css': {
         'common': (
             'css/main.less',
+            'css/jquery-ui-1.8.16.custom.css',
+            'js/libs/tag-it/css/jquery.tagit.css',
+        ),
+        'common-old': (
+            'css/bootstrap.min.css',
         ),
         'api': (
             'css/prettify.css',
@@ -102,6 +107,20 @@ MINIFY_BUNDLES = {
             'js/main.js',
             'js/libs/validation/validation.js',
             'static/browserid/browserid.js',
+        ),
+        'common-old': (
+            'js/libs/bootstrap/bootstrap-transition.js',
+            'js/libs/bootstrap/bootstrap-alert.js',
+            'js/libs/bootstrap/bootstrap-modal.js',
+            'js/libs/bootstrap/bootstrap-dropdown.js',
+            'js/libs/bootstrap/bootstrap-tooltip.js',
+            'js/libs/bootstrap/bootstrap-popover.js',
+            'js/libs/bootstrap/bootstrap-button.js',
+            'js/libs/bootstrap/bootstrap-collapse.js',
+            'js/libs/bootstrap/bootstrap-carousel.js',
+            'js/libs/bootstrap/bootstrap-typeahead.js',
+            'js/libs/bootstrap/bootstrap-tab.js',
+            'js/groups.js',
         ),
         'homepage': (
             'js/libs/modernizr.custom.26887.js',
@@ -138,6 +157,7 @@ MINIFY_BUNDLES = {
             'js/tests/test.js',
         ),
         'profile_view': (
+            'js/libs/tag-it/js/tag-it.js',
             'js/profile_view.js',
         ),
     }

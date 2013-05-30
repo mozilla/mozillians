@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(function() {
     // Switching all options for profile privacy on select
     $('.privacy-all select').change(function(){
         value = $(this).val();

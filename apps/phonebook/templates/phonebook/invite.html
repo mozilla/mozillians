@@ -1,8 +1,7 @@
-{% extends "base.html" %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ _('Invite a Mozillian') }}{% endblock %}
 {% block body_id %}invite{% endblock %}
-{% block body_classes %}box-content{% endblock %}
 
 {% block content %}
   <h1>{{ _('Invite a Mozillian') }}</h1>
@@ -17,18 +16,16 @@
   <form method="POST" action="{{ url('invite') }}" autocomplete="off">
     {{ csrf() }}
     {{ bootstrap(invite_form.recipient) }}
-
     {{ bootstrap(invite_form.message) }}
-
     <button type="submit" class="btn bump-button">
       {{ _('Send invite') }}
     </button>
-
     <p>
       {% trans %}
         <strong>Note:</strong>
         Your name and email will be sent to whomever you invite.
       {% endtrans %}
-    </p>
+      </p>
   </form>
+
 {% endblock %}

@@ -57,6 +57,15 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
               <a class="brand" href="{{ url('home') }}">
                   <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
               </a>
+              {% if user.get_profile().is_vouched %}
+                {% block search %}
+                  <form class="navbar-search"
+                      action="{{ url('search') }}" method="GET">
+                    <input type="text" name="q" class="search-query"
+                        placeholder="{{ _('Search for people, groups and more') }}">
+                  </form>
+                {% endblock %}
+              {% endif %}
               {% if user.userprofile.is_complete %}
                 <div id="nav-main">
                   <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
@@ -97,18 +106,25 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
                     </li>
                   </ul>
                 </div>
+              {% else %}
+                <a id="logout" class="btn pull-right" href="{{ url('logout') }}">
+                  <i class="icon-reply"></i>
+                  {{ _('Log Out') }}
+                </a>
               {% endif %}
             {% else %}
-              <form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
-                {{ csrf() }}
-                {{ browserid_form }}
-                <input type="hidden" name="next"
-                       value="{{ request.REQUEST.next|default(settings.LOGIN_REDIRECT_URL) }}" />
-                <a href="#" id="create_profile" class="persona-button browserid-login" title="{{_('Sign in with Persona')}}">
-                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                  <span class="signin">{{ _('Sign in with Persona') }}</span>
-                </a>
-              </form>
+              {% block browserid_form %}
+                <form method="POST" class="browserid_action_form" action="{{ url('browserid_verify') }}">
+                  {{ csrf() }}
+                  {{ browserid_form }}
+                  <input type="hidden" name="next"
+                         value="{{ request.REQUEST.next|default(settings.LOGIN_REDIRECT_URL) }}" />
+                  <a href="#" id="create_profile" class="persona-button browserid-login" title="{{_('Sign in with Persona')}}">
+                    <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
+                    <span class="signin">{{ _('Sign in with Persona') }}</span>
+                  </a>
+                </form>
+              {% endblock %}
             {% endif %}
           </nav>
         {% endblock %}
@@ -133,9 +149,15 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
         {% endfor %}
       {% endif %}
     {% endblock messages %}
-
-    {% block content %}{% endblock %}
-    </div><!-- close #wrapper -->
+    
+    {% block content_wrapper %}
+      <div id="content-wrapper">
+        <div id="main" class="container">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    {% endblock %}
+  </div><!-- close #wrapper -->
 
     {% block site_footer %}
       <footer id="colophon">
@@ -154,7 +176,6 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
             {% include 'includes/lang_switcher.html' %}
             </div>
             <hr>
-          </div>
           <div class="row">
             <div class="footer-logo">
               <a href="http://mozilla.org"><img src="{{ MEDIA_URL }}img/footer-mozilla.png" alt="mozilla"></a>

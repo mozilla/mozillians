@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-
-{% block search %}{% endblock %}
+{% extends "base-old.html" %}
 
 {% block page_title %}
   {% for name in [region_name, city_name] %}
@@ -9,11 +7,9 @@
   {{ country_name }}
 {% endblock %}
 {% block body_id %}search{% endblock %}
-{% block body_classes %}box-content search-page{% endblock %}
-
-{% block site_js %}
-  <script src="{{ url('jsi18n') }}"></script>
-  {{ js('common') }}
+{% block body_class %}
+  {{ super() }}
+  search-page
 {% endblock %}
 
 {% block content %}
@@ -23,21 +19,21 @@
     {% endfor %}
     {{ country_name }}
   </h2>
-      {% if people %}
-        <div class="row">
-          {% for person in people %}
-            {{ search_result(person) }}
+  {% if people %}
+    <div class="row">
+      {% for person in people %}
+        {{ search_result(person) }}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="well">
+        <p id="not-found">
+          {{ _("Sorry we cannot find any mozillians in") }}
+          {% for name in [region_name, city_name] %}
+            {% if name %}{{ name }}, {% endif %}
           {% endfor %}
-        </div>
-      {% else %}
-        <div class="well">
-            <p id="not-found">
-              {{ _("Sorry we cannot find any mozillians in") }}
-              {% for name in [region_name, city_name] %}
-                {% if name %}{{ name }}, {% endif %}
-              {% endfor %}
-              {{ country_name }}
-            </p>
-        </div>
-      {% endif %}
+          {{ country_name }}
+        </p>
+    </div>
+  {% endif %}
 {% endblock %}

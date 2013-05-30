@@ -1,6 +1,6 @@
 (function($){
     $().ready(function() {
-        if ($('#body-register').length) {
+        if ($('body#register').length) {
             $('#page1button').bind('click', function() {
                 document.getElementById('1').click();
             });
