@@ -18,19 +18,21 @@
     {% if group.steward %}
       <div class="span12">
         <p class="span6">{{ group.description }}</p>
-        <form class="curated-toggle span2 offset3"
-              action="{{ url('group_toggle', group.url) }}"
-              id="toggle-group" method="post">
-          {{ csrf() }}
+        {% if user.is_authenticated() %}
+          <form class="curated-toggle span2 offset3"
+                action="{{ url('group_toggle', group.url) }}"
+                id="toggle-group" method="post">
+            {{ csrf() }}
 
-          <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
-            {% if not in_group %}
-              {{ _('Join Group') }}
-            {% else %}
-              {{ _('Leave Group') }}
-            {% endif %}
-          </button>
-        </form>
+            <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
+              {% if not in_group  %}
+                {{ _('Join Group') }}
+              {% else %}
+                {{ _('Leave Group') }}
+              {% endif %}
+            </button>
+          </form>
+         {% endif %}
       </div>
       <div class="span12">
         <dl class="span12">
@@ -96,18 +98,20 @@
           </ul>
       </div>
     {% elif not group.system %}
-      <form action="{{ url('group_toggle', group.url) }}"
-            class="span2" id="toggle-group" method="post">
-        {{ csrf() }}
+      {% if user.is_authenticated() %}
+        <form action="{{ url('group_toggle', group.url) }}"
+              class="span2" id="toggle-group" method="post">
+          {{ csrf() }}
 
-        <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
-          {% if not in_group %}
-            {{ _('Join Group') }}
-          {% else %}
-            {{ _('Leave Group') }}
-          {% endif %}
-        </button>
-      </form>
+          <button class="btn btn{{ ('-danger' if in_group else '-primary') }} bump-button">
+            {% if not in_group %}
+              {{ _('Join Group') }}
+            {% else %}
+              {{ _('Leave Group') }}
+            {% endif %}
+          </button>
+        </form>
+      {% endif %}
     {% endif %}
   </div>
 

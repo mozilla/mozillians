@@ -1,9 +1,12 @@
+from time import sleep
+
+from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
 
 from apps.common.tests.init import ESTestCase
-from apps.users.models import UserProfile
+from apps.users.models import MOZILLIANS, PUBLIC, S, UserProfile
 from apps.groups.models import Group
 
 from ..tests import user, create_client
@@ -103,3 +106,34 @@ class TestSearch(ESTestCase):
         eq_(u.get_profile().display_name,
             pq(r.content)('#profile-info h2').text(),
             'Should be redirected to a user with the right name')
+
+    def test_public_search_vouched(self):
+        response = self.anonymous_client.get(reverse('search'), follow=True)
+        profile = response.context['profile']
+        eq_(profile, self.mozillian2.userprofile)
+        eq_(profile._privacy_level, PUBLIC)
+
+    def test_public_search_with_unvouched(self):
+        url = urlparams(reverse('search'), include_non_vouched='on')
+        response = self.anonymous_client.get(url, follow=True)
+        paginator = response.context['people'].paginator
+        eq_(paginator.count, 2)
+        self.assertIn(self.mozillian2.userprofile, paginator.object_list)
+        self.assertIn(self.pending.userprofile, paginator.object_list)
+
+    def test_removal_from_public_index(self):
+        """Test that a user gets removed from public index if makes
+        profile mozillians only again.
+
+        """
+        before = (S(UserProfile)
+                  .indexes(UserProfile.get_index(public_index=True))
+                  .count())
+        profile = self.mozillian2.userprofile
+        profile.privacy_full_name = MOZILLIANS
+        profile.save()
+        sleep(1)
+        after = (S(UserProfile)
+                 .indexes(UserProfile.get_index(public_index=True))
+                 .count())
+        eq_(after+1, before)

@@ -1,12 +1,15 @@
 import basket
 import requests
+import pyes
 from basket.base import request
 from django.core.mail import send_mail
 from django.conf import settings
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
+from elasticutils.contrib.django import get_es
 
 from apps.groups.models import Group
+
 
 BASKET_TASK_RETRY_DELAY = 120 # 2 minutes
 BASKET_TASK_MAX_RETRIES = 2 # Total 1+2 = 3 tries
@@ -115,3 +118,40 @@ def remove_from_basket_task(instance_id):
         except (MaxRetriesExceededError, basket.BasketException):
             _email_basket_managers('subscribe', instance.user.email,
                                    exception.message)
+
+@task
+def index_objects(model, ids, public_index=False, **kwargs):
+    if getattr(settings, 'ES_DISABLED', False):
+        return
+
+    es = get_es()
+    qs = model.objects.filter(id__in=ids)
+    if public_index:
+        from models import PUBLIC
+        qs = model.objects.privacy_level(PUBLIC).filter(id__in=ids)
+
+    for item in qs:
+        model.index(model.extract_document(item.id, item),
+                    bulk=True, id_=item.id, es=es, public_index=public_index)
+
+        es.flush_bulk(forced=True)
+        model.refresh_index(es=es)
+
+@task
+def unindex_objects(model, ids, public_index, **kwargs):
+    if getattr(settings, 'ES_DISABLED', False):
+        return
+
+    es = get_es()
+    for id_ in ids:
+        try:
+            model.unindex(id=id_, es=es, public_index=public_index)
+        except pyes.exceptions.ElasticSearchException, e:
+            # Patch pyes
+            if (e.status == 404 and
+                isinstance(e.result, dict) and 'error' not in e.result):
+                # Item was not found, but command did not return an error.
+                # Do not worry.
+                return
+            else:
+                raise e

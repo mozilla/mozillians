@@ -488,3 +488,17 @@ class SearchTests(ESTestCase):
         results = UserProfile.search(
             self.up.bio.split(' ')[3])
         self.assertEqual(len(results), 1)
+
+class UserProfileManagerTests(ESTestCase):
+
+    def test_complete_query(self):
+        """Test complete() of UserProfileManager."""
+        eq_(UserProfile.objects.complete().count(), 3)
+
+    def test_public_indexable_query(self):
+        """Test public_indexable() of UserProfileManager."""
+        eq_(UserProfile.objects.public_indexable().count(), 2)
+
+    def test_not_public_indexable_query(self):
+        """Test not_public_indexable() of UserProfileManager."""
+        eq_(UserProfile.objects.not_public_indexable().count(), 1)

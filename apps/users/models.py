@@ -2,8 +2,6 @@ import os
 import uuid
 from datetime import datetime
 
-import pyes
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -13,9 +11,8 @@ from django.db.models import signals as dbsignals
 from django.db.models.query import QuerySet, ValuesQuerySet
 from django.dispatch import receiver
 
-from elasticutils.contrib.django import S
+from elasticutils.contrib.django import S, get_es
 from elasticutils.contrib.django.models import SearchMixin
-from elasticutils.contrib.django import tasks as elasticutilstasks
 from funfactory.urlresolvers import reverse
 from product_details import product_details
 from sorl.thumbnail import ImageField, get_thumbnail
@@ -27,7 +24,7 @@ from apps.groups.models import (Group, GroupAlias,
                                 Language, LanguageAlias)
 
 
-from tasks import update_basket_task
+from tasks import update_basket_task, index_objects, unindex_objects
 
 COUNTRIES = product_details.get_regions('en-US')
 
@@ -42,6 +39,7 @@ PRIVACY_CHOICES = (# (PRIVILEGED, 'Privileged'),
                    # (EMPLOYEES, 'Employees'),
                    (MOZILLIANS, 'Mozillians'),
                    (PUBLIC, 'Public'))
+PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 
 
 def _calculate_photo_filename(instance, filename):
@@ -92,6 +90,14 @@ class UserProfileQuerySet(QuerySet):
         for field in UserProfile._privacy_fields:
             key = 'privacy_%s' % field
             self.public_q |= Q(**{key: PUBLIC})
+
+        self.public_index_q = Q()
+        for field in PUBLIC_INDEXABLE_FIELDS:
+            key = 'privacy_%s' % field
+            if field == 'email':
+                field = 'user__email'
+            self.public_index_q |= (Q(**{key: PUBLIC}) & ~Q(**{field: ''}))
+
         return super(UserProfileQuerySet, self).__init__(*args, **kwargs)
 
     def privacy_level(self, level=MOZILLIANS):
@@ -105,7 +111,18 @@ class UserProfileQuerySet(QuerySet):
 
     def vouched(self):
         """Return complete and vouched profiles."""
-        return self.exclude(full_name='').filter(is_vouched=True)
+        return self.complete().filter(is_vouched=True)
+
+    def complete(self):
+        """Return complete profiles."""
+        return self.exclude(full_name='')
+
+    def public_indexable(self):
+        """Return public indexable profiles."""
+        return self.complete().filter(self.public_index_q)
+
+    def not_public_indexable(self):
+        return self.complete().exclude(self.public_index_q)
 
     def _clone(self, *args, **kwargs):
         """Custom _clone with privacy level propagation."""
@@ -140,6 +157,28 @@ class UserProfileManager(models.Manager):
 
     def __getattr__(self, name):
         return getattr(self.get_query_set(), name)
+
+
+class PrivacyAwareS(S):
+
+    def privacy_level(self, level=MOZILLIANS):
+        """Set privacy level for query set."""
+        self._privacy_level = level
+        return self
+
+    def _clone(self, *args, **kwargs):
+        new = super(PrivacyAwareS, self)._clone(*args, **kwargs)
+        new._privacy_level = getattr(self, '_privacy_level', None)
+        return new
+
+    def __iter__(self):
+        self._iterator = super(PrivacyAwareS, self).__iter__()
+        def _generator():
+            while True:
+                obj = self._iterator.next()
+                obj._privacy_level = getattr(self, '_privacy_level', None)
+                yield obj
+        return _generator()
 
 
 class UserProfilePrivacyModel(models.Model):
@@ -313,7 +352,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 'date_joined': {'type': 'date'}}}
 
     @classmethod
-    def search(cls, query, include_non_vouched=False):
+    def search(cls, query, include_non_vouched=False, public=False):
         """Sensible default search for UserProfiles."""
         query = query.lower().strip()
         fields = ('username', 'bio__text', 'email', 'ircname',
@@ -323,23 +362,24 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                   'fullname__text', 'fullname__text_phrase',
                   'fullname__prefix', 'fullname__fuzzy'
                   'groups__text')
+        s = PrivacyAwareS(cls)
+        if public:
+            s = s.privacy_level(PUBLIC)
+        s = s.indexes(cls.get_index(public))
 
         if query:
             q = dict((field, query) for field in fields)
-            s = (S(cls)
-                 .boost(fullname__text_phrase=5, username=5, email=5,
-                        ircname=5, fullname__text=4, country__text_phrase=4,
-                        region__text_phrase=4, city__text_phrase=4,
-                        fullname__prefix=3, fullname__fuzzy=2,
-                        bio__text=2)
-                 .query(or_=q))
-        else:
-            s = S(cls)
+            s = (s.boost(fullname__text_phrase=5, username=5, email=5,
+                         ircname=5, fullname__text=4, country__text_phrase=4,
+                         region__text_phrase=4, city__text_phrase=4,
+                         fullname__prefix=3, fullname__fuzzy=2,
+                         bio__text=2).query(or_=q))
 
         s = s.order_by('_score', 'name')
 
         if not include_non_vouched:
             s = s.filter(is_vouched=True)
+
         return s
 
     @property
@@ -375,6 +415,18 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """Return True is any of the privacy protected fields is PUBLIC."""
         for field in self._privacy_fields:
             if getattr(self, 'privacy_%s' % field, None) == PUBLIC:
+                return True
+        return False
+
+    @property
+    def is_public_indexable(self):
+        """For profile to be public indexable should have at least
+        full_name OR ircname OR email set to PUBLIC.
+
+        """
+        for field in PUBLIC_INDEXABLE_FIELDS:
+            if (getattr(self, 'privacy_%s' % field, None) == PUBLIC and
+                getattr(self, field, None)):
                 return True
         return False
 
@@ -515,6 +567,36 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         super(UserProfile, self).save(*args, **kwargs)
         self.add_to_staff_group()
 
+    @classmethod
+    def get_index(cls, public_index=False):
+        if public_index:
+            return settings.ES_INDEXES['public']
+        return settings.ES_INDEXES['default']
+
+    @classmethod
+    def index(cls, document, id_=None, bulk=False, force_insert=False,
+              es=None, public_index=False):
+        """ Overide elasticutils.index() to support more than one index
+        for UserProfile model.
+
+        """
+        if bulk and es is None:
+            raise ValueError('bulk is True, but es is None')
+
+        if es is None:
+            es = get_es()
+
+        es.index(document, index=cls.get_index(public_index),
+                 doc_type=cls.get_mapping_type(),
+                 id=id_, bulk=bulk, force_insert=force_insert)
+
+    @classmethod
+    def unindex(cls, id, es=None, public_index=False):
+        if es is None:
+            es = get_es()
+
+        es.delete(cls.get_index(public_index), cls.get_mapping_type(), id)
+
 
 @receiver(dbsignals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
@@ -536,23 +618,18 @@ def update_basket(sender, instance, **kwargs):
           dispatch_uid='update_search_index_sig')
 def update_search_index(sender, instance, **kwargs):
     if instance.is_complete:
-        elasticutilstasks.index_objects.delay(sender, [instance.id])
+        index_objects.delay(sender, [instance.id], public=False)
+        if instance.is_public_indexable:
+            index_objects.delay(sender, [instance.id], public_index=True)
+        else:
+            unindex_objects(UserProfile, [instance.id], public_index=True)
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile,
           dispatch_uid='remove_from_search_index_sig')
 def remove_from_search_index(sender, instance, **kwargs):
-    try:
-        elasticutilstasks.unindex_objects.delay(sender, [instance.id])
-    except pyes.exceptions.ElasticSearchException, e:
-        # Patch pyes
-        if (e.status == 404 and
-            isinstance(e.result, dict) and 'error' not in e.result):
-            # Item was not found, but command did not return an error.
-            # Do not worry.
-            return
-        else:
-            raise e
+    unindex_objects(UserProfile, [instance.id], public_index=False)
+    unindex_objects(UserProfile, [instance.id], public_index=True)
 
 
 class UsernameBlacklist(models.Model):

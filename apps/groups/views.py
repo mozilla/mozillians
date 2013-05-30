@@ -10,9 +10,10 @@ from django.views.decorators.http import require_POST
 import commonware.log
 from funfactory.urlresolvers import reverse
 
-from apps.common.decorators import allow_unvouched
+from apps.common.decorators import allow_public, allow_unvouched
 from apps.groups.models import Group, Skill
 from apps.phonebook import forms
+from apps.users.models import PUBLIC
 from apps.users.tasks import update_basket_task
 
 log = commonware.log.getLogger('m.groups')
@@ -60,13 +61,21 @@ def search(request, searched_object=Group):
     return redirect('home')
 
 
+@allow_public
 @never_cache
 def show(request, url):
     """List all vouched users with this group."""
     group = get_object_or_404(Group, url=url)
     limit = forms.PAGINATION_LIMIT
-    in_group = (group.members.filter(user=request.user).exists())
     profiles = group.members.vouched()
+    in_group = False
+    if request.user.is_authenticated():
+        in_group = group.members.filter(user=request.user).exists()
+    if not (request.user.is_authenticated()
+            and request.user.userprofile.is_vouched):
+        profiles = (profiles.public_indexable()
+                    .exclude(privacy_groups__lt=PUBLIC).privacy_level(PUBLIC))
+
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, limit)
     people = []

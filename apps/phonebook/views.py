@@ -164,6 +164,7 @@ def delete(request):
     return redirect(reverse('home'))
 
 
+@allow_public
 def search(request):
     num_pages = 0
     limit = None
@@ -179,10 +180,11 @@ def search(request):
         include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
         curated_groups = Group.get_curated()
+        public = not (request.user.is_authenticated()
+                      and request.user.userprofile.is_vouched)
 
-
-        profiles = UserProfile.search(
-            query, include_non_vouched=include_non_vouched)
+        profiles = UserProfile.search(query, public=public,
+                                      include_non_vouched=include_non_vouched)
         groups = Group.search(query)
 
         paginator = Paginator(profiles, limit)

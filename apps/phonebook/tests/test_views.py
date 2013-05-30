@@ -106,16 +106,6 @@ class TestViews(ESTestCase):
         eq_(profile, doc('a#profile').attr('href'),
             'We see a link to our profile')
 
-    def test_anonymous_search(self):
-        search = reverse('search')
-        response = self.client.get(search, follow=True)
-        assert('You must be logged in to continue' in response.content)
-
-    def test_pending_search(self):
-        search = reverse('search')
-        response = self.pending_client.get(search, follow=True)
-        assert('You must be vouched to continue' in response.content)
-
     def test_user_view_own_profile(self):
         """Test user requests own profile."""
         def _get_page(client, user):

@@ -256,7 +256,8 @@ CSP_REPORT_URI = '/csp/report/'
 
 ES_DISABLED = True
 ES_HOSTS = ['127.0.0.1:9200']
-ES_INDEXES = dict(default='mozillians')
+ES_INDEXES = {'default': 'mozillians',
+              'public': 'mozillians-public'}
 ES_INDEXING_TIMEOUT = 10
 
 # Sorl settings
