@@ -30,6 +30,7 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 
 urlpatterns = patterns('',
+    url(r'^browserid/', include('django_browserid.urls')),
     url(r'^api/', include('api.urls')),
     url(r'', include('users.urls')),
     url(r'', include('groups.urls')),

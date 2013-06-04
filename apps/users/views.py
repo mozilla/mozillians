@@ -30,27 +30,6 @@ def logout(request, **kwargs):
     return auth.views.logout(request, next_page=reverse('home'), **kwargs)
 
 
-class BrowserID(Verify):
-    """View for dealing with Browserid callback."""
-
-    def login_success(self):
-        user = self.user
-        profile, created = UserProfile.objects.get_or_create(user=user)
-        if created:
-            log.warning('Created profile for user with email %s' % user.email)
-
-        if profile.is_complete:
-            return super(BrowserID, self).login_success()
-
-        self.request.session['authenticated_email'] = user.email
-        return redirect(reverse('register'))
-
-    def get_failure_url(self):
-        messages.error(self.request,
-                       _('Ooops, something went wrong. Please try again.'))
-        return self.failure_url
-
-
 @allow_public
 def register(request):
     """Registers Users.
@@ -62,30 +41,21 @@ def register(request):
         request.session['invite-code'] = request.GET['code']
         return redirect('home')
 
-    if request.user.is_authenticated():
-        return redirect(reverse('profile', args=[request.user.username]))
-
-    authenticated_email = request.session.get('authenticated_email')
-    if not authenticated_email:
-        log.error('Browserid registration, but no verified email in session')
-        return redirect('home')
-
-    user = auth.authenticate(authenticated_email=authenticated_email)
-    if not user:
+    user = request.user
+    if user.is_authenticated() and user.userprofile.is_complete:
         return redirect('home')
 
     user_form = UserForm(request.POST or None, instance=user)
     profile_form = RegisterForm(request.POST or None,
                                 instance=user.get_profile())
 
-    if request.method == 'POST':
-        if (user_form.is_valid() and profile_form.is_valid()):
-            user_form.save()
-            profile_form.save()
-            auth.login(request, user)
-            _update_invites(request)
-            messages.info(request, _(u'Your account has been created.'))
-            return redirect(reverse('profile', args=[request.user.username]))
+    if (user_form.is_valid() and profile_form.is_valid()):
+        user_form.save()
+        profile_form.save()
+        auth.login(request, user)
+        _update_invites(request)
+        messages.info(request, _(u'Your account has been created.'))
+        return redirect(reverse('profile', args=[request.user.username]))
 
     # 'user' object must be passed in because we are not logged in
     return render(request, 'registration/register.html',

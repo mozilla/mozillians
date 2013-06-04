@@ -45,7 +45,7 @@ class RegistrationTest(ESTestCase):
 
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         d = dict(username='ad',
                  email='mrfusion@mozilla.com',
@@ -69,7 +69,7 @@ class RegistrationTest(ESTestCase):
         email = 'mrfusion+dotcom@mozilla.com'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         d = dict(username='ad',
                  email=email,
@@ -89,7 +89,7 @@ class RegistrationTest(ESTestCase):
         email = 'mrfusion+dotcom@mozilla.com'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
         d = dict(email=email,
                  username='mrfusion',
                  full_name='Akaaaaaaash Desaaaaaaai',
@@ -115,7 +115,7 @@ class RegistrationTest(ESTestCase):
         username = 'mr.fu+s_i-on@246'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         d = dict(email=email,
                  username=username,
@@ -139,7 +139,7 @@ class RegistrationTest(ESTestCase):
         bad_username = 'mr.we*rd'
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         d = dict(email=bad_user_email,
                  username=bad_username,
@@ -165,7 +165,7 @@ class RegistrationTest(ESTestCase):
         # BrowserID needs an assertion not to be whiney
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         for name in badnames:
             d = dict(email=email,
@@ -206,7 +206,7 @@ class RegistrationTest(ESTestCase):
         register.update(email=email1)
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email1):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         with browserid_mock.mock_browserid(email1):
             self.client.post(reverse('register'), register, follow=True)
@@ -216,7 +216,7 @@ class RegistrationTest(ESTestCase):
         email2 = 'coldfusion@gmail.com'
         register.update(email=email2)
         with browserid_mock.mock_browserid(email2):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         with browserid_mock.mock_browserid(email2):
             r = self.client.post(reverse('register'), register, follow=True)
@@ -349,7 +349,7 @@ class TestUser(ESTestCase):
         # Sign in
         with browserid_mock.mock_browserid(u.email):
             d = dict(assertion='qwer')
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         # Good to go
         assert u.get_profile()
@@ -363,7 +363,7 @@ class TestUser(ESTestCase):
         d = {'assertion': 'rarrr'}
 
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
             self.client.post(reverse('register'), register, follow=True)
 
         u = User.objects.filter(email=email)[0]
@@ -392,7 +392,7 @@ class TestMigrateRegistration(ESTestCase):
             # BrowserID needs an assertion not to be whiney
             d = dict(assertion='tofu')
             with browserid_mock.mock_browserid(self.email):
-                r = self.client.post(reverse('browserid_verify'),
+                r = self.client.post(reverse('browserid_login'),
                                      d, follow=True)
 
             eq_(r.status_code, 200)

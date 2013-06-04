@@ -16,6 +16,24 @@ LOGIN_MESSAGE = _('You must be logged in to continue.')
 GET_VOUCHED_MESSAGE = _('You must be vouched to continue.')
 
 
+class RegisterMiddleware(object):
+    """Redirect authenticated users with incomplete profile to register view."""
+    def process_request(self, request):
+        user = request.user
+        path = request.path
+        allow_urls = (r'^/[\w-]+{0}'.format(reverse('logout')),
+                      r'^/[\w-]+{0}'.format(reverse('browserid_logout')),
+                      r'^/[\w-]+{0}'.format(reverse('register')),
+                      r'^/csp/',
+                      settings.MEDIA_URL if settings.DEBUG else '')
+
+        if (user.is_authenticated() and not user.userprofile.is_complete
+            and not filter(lambda url: re.match(url, path), allow_urls)):
+            messages.warning(request, _('Please complete registration '
+                                        'before proceeding.'))
+            return redirect('register')
+
+
 class StrongholdMiddleware(object):
     """Keep unvouched users out, unless explicitly allowed in.
 
