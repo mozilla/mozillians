@@ -1,123 +1,120 @@
-{% extends "base.html" %}
-
-{#
-  This removes the search box from the header, as we put it inside the
-  body of the page instead.
-#}
-{% block search %}{% endblock %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ _('Search Results') }}{% endblock %}
 {% block body_id %}search{% endblock %}
-{% block body_classes %}box-content search-page{% endblock %}
-
-{% block site_js %}
-  <script src="{{ url('jsi18n') }}"></script>
-  {{ js('common') }}
-  {{ js('search') }}
+{% block body_class %}
+  {{ super() }}
+  search-page
 {% endblock %}
+
+{% block search %}{% endblock %}
 
 {% block content %}
   <h1>{{ _('Search') }}</h1>
-    <form method="GET" id="search-form" action="{{ url('search') }}">
-      <input type="text" name="q" id="q"
-        placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
-        value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
-      <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-      <button type="submit" class="btn primary">
-        <span class="icon-search"></span>
-        {{ _('Search') }}
-      </button>
-      <button type="button" id="advanced" class="btn primary">
-        <span class="icon-chevron-down"></span>
-        {{ _('Advanced Options') }}
-      </button>
-      <div class="search-options">
-        {% for f in ['include_non_vouched'] %}
-          <div id="{{ form[f].name }}-container"
-               class="field {{ form[f].field.widget.attrs['class'] }}">
-            {{ form[f] }}
-            {{ form[f].label_tag() }}
-          </div>
-        {% endfor %}
-      </div>
-    </form>
-    {% if not form.cleaned_data %}
-      <div class="well">
-        {% trans %}
-          <h2>Search For a Mozillian</h2>
+  <form method="GET" id="search-form" action="{{ url('search') }}">
+    <input type="text" name="q" id="q"
+      placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
+      value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
+    <input type="hidden" name="limit" id="limit" value="{{ limit }}">
+    <button type="submit" class="btn primary">
+      <span class="icon-search"></span>
+      {{ _('Search') }}
+    </button>
+    <button type="button" id="advanced" class="btn primary">
+      <span class="icon-chevron-down"></span>
+      {{ _('Advanced Options') }}
+    </button>
+    <div class="search-options">
+      {% for f in ['include_non_vouched'] %}
+        <div id="{{ form[f].name }}-container"
+             class="field {{ form[f].field.widget.attrs['class'] }}">
+          {{ form[f] }}
+          {{ form[f].label_tag() }}
+        </div>
+      {% endfor %}
+    </div>
+  </form>
+  {% if not form.cleaned_data %}
+    <div class="well">
+      {% trans %}
+        <h2>Search For a Mozillian</h2>
 
+        <p>
+          You can search for another Mozillian using their name, email, or
+          nickname.
+        </p>
+      {% endtrans %}
+    </div>
+  {% else %}
+    {% if groups %}
+      <div id="search_group">
+        <h2>{{ _('Groups') }}</h2>
+        <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+          {% for group in groups %}
+            <li class="tagit-choice ui-widget-content ui-state-default
+                 ui-corner-all">
+              <a href="{{ url('group', group.url) }}">
+                {{ group.name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% if people %}
+      <h2>{{ _('Mozillians') }}</h2>
+      <div class="row">
+        {% for person in people %}
+          {{ search_result(person) }}
+        {% endfor %}
+        {% if show_pagination %}
+          <div data-pages={{ num_pages }} class="pagination">
+            {% for page in people.paginator.page_range %}
+              {% if page == people.number %}
+                <span>{{ page }}</span>
+              {% else %}
+                <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div id="final-result">
+            <span>Showing all {{ people.paginator.count }} results.</span>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+    {% if not people and not groups %}
+      <div class="well">
+        {% trans invite=url('invite'), query=form.cleaned_data.q %}
+          <p id="not-found">
+            Sorry, we cannot find a group or person related to "{{ query }}".
+          </p>
           <p>
-            You can search for another Mozillian using their name, email, or
-            nickname.
+            Maybe they're not a Mozillian yet?
+            <a href="{{ invite }}">Invite this person</a> to create a profile.
           </p>
         {% endtrans %}
-      </div>
-    {% else %}
-      {% if groups %}
-        <div id="search_group">
-          <h2>{{ _('Groups') }}</h2>
-          <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
-            {% for group in groups %}
-              <li class="tagit-choice ui-widget-content ui-state-default
-                   ui-corner-all">
-                <a href="{{ url('group', group.url) }}">
-                  {{ group.name }}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-      {% if people %}
-        <h2>{{ _('Mozillians') }}</h2>
-        <div class="row">
-          {% for person in people %}
-            {{ search_result(person) }}
-          {% endfor %}
-          {% if show_pagination %}
-            <div data-pages={{ num_pages }} class="pagination">
-              {% for page in people.paginator.page_range %}
-                {% if page == people.number %}
-                  <span>{{ page }}</span>
-                {% else %}
-                  <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
-                {% endif %}
+        {% if curated_groups %}
+          <hr>
+          <h3>{{ _('Need help? Contact a steward in a functional area!') }}</h3>
+          <div class="popular-groups">
+            <ul id="groups" class="tagit ui-widget ui-corner-all">
+              {% for group in curated_groups %}
+                <li class="tagit-choice ui-widget-content ui-state-default
+                           ui-corner-all p-category category">
+                  <a href="{{ url('group', group.url) }}">
+                    {{ group.name }}
+                  </a>
+                </li>
               {% endfor %}
-            </div>
-            <div id="final-result">
-              <span>Showing all {{ people.paginator.count }} results.</span>
-            </div>
-          {% endif %}
-        </div>
-      {% endif %}
-      {% if not people and not groups %}
-        <div class="well">
-          {% trans invite=url('invite'), query=form.cleaned_data.q %}
-            <p id="not-found">
-              Sorry, we cannot find a group or person related to "{{ query }}".
-            </p>
-            <p>
-              Maybe they're not a Mozillian yet?
-              <a href="{{ invite }}">Invite this person</a> to create a profile.
-            </p>
-          {% endtrans %}
-          {% if curated_groups %}
-            <hr>
-            <h3>{{ _('Need help? Contact a steward in a functional area!') }}</h3>
-            <div class="popular-groups">
-              <ul id="groups" class="tagit ui-widget ui-corner-all">
-                {% for group in curated_groups %}
-                  <li class="tagit-choice ui-widget-content ui-state-default
-                             ui-corner-all p-category category">
-                    <a href="{{ url('group', group.url) }}">
-                      {{ group.name }}
-                    </a>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
-        </div>
-      {% endif %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
     {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block page_js %}
+  {{ js('search') }}
 {% endblock %}

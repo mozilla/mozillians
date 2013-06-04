@@ -12,15 +12,20 @@
 // Navigation
 // Footer
 // Homepage
+// Generic bootstrap fixes
+// Profile
+// About
+// Generic Groups, Functional Areas and Search Results
+// Search Results
+// Invite/Invited
+// Groups
+
 
 /* Imports
 ==================== */
-@import "jquery-ui-1.8.16.custom.css";
-@import "../js/libs/tag-it/css/jquery.tagit.css";
 @import "sandstone/sandstone.less";
 @import "sandstone/sandstone-resp.less";
 @import "mosaic.less";
-
 @import "font-awesome.less";
 
 /* Fonts
@@ -83,6 +88,46 @@
 
 /* Generic
 ==================== */
+body {
+    &.loggedin {
+        #content-wrapper {
+            background: @white;
+        }
+        #main { 
+            padding: 25px 0 50px;
+            @media (max-width: @breakTablet) {
+                padding: 25px 20px 50px 20px;
+            } 
+        }
+        &.old {
+            #main {
+                min-height: 500px;
+                .avatar img, .avatar .profile-photo {
+                    float: left;
+                    height:70px;
+                    width:70px;
+                    margin: 0 10px 0 0;
+                    border: 1px solid #52ADCC;
+                    max-height: 70px;
+                    max-width: 70px;
+                    .border-radius(4px);
+                }
+                input[type=text], input[type=password],
+                input[type=email], input[type=search],
+                textarea {
+                    border: 1px solid @grayLighter !important;
+                    padding: 0 5px !important;
+                    background: @white !important;
+                    margin-right: 8px;
+                    line-height: 18px;
+                }
+                input[type=text], input#q {
+                    height: 30px !important
+                }
+            }
+        }
+    }
+}
 #wrapper {
     width: 100%;
     padding-bottom: 0;
@@ -117,7 +162,7 @@ form {
     .border-radius(4px);
     position: relative;
     text-align: center;
-    margin: 0 30px;
+    margin: 0 0 30px 0;
     .close {
         position: relative;
         top: -2px;
@@ -163,6 +208,10 @@ form {
 }
 .alert-block p + p {
     margin-top: 5px;
+} 
+
+dl, dd {
+    margin-bottom: 15px !important;
 }
 
 /* Navigation
@@ -196,13 +245,19 @@ nav {
             padding-right: 15px;
         }
     }
-    form {
+    // Note: These !important tags in here are to override Bootstrap 
+    // styles imported from older templates w/out new stylings.
+    form.navbar-search {
+        margin-top: 0 !important;
         input {
-            background: @white url("/media/img/spyglass.png") no-repeat 5px 50% !important;
-            height: 26px !important;
-            line-height: 1.2;
-            width: 300px;
-            padding: 3px 0 0 30px !important;
+            float: left;
+            background: @white url("/media/img/spyglass.png") no-repeat 5px 50%;
+            .border-radius(8px) !important;
+            height: 30px;
+            font-size: 16px !important;
+            padding: 0 0 0 30px !important;
+            .open-sans-light !important;
+            width: 275px;
         } 
     }
     #nav-main {
@@ -433,9 +488,6 @@ footer#colophon {
         }
     }
     @media (max-width: @breakMobileLandscape) {
-        .footer-language {
-            width: 250px;
-        }
         padding-left: 0;
         padding-right: 0;    
     }
@@ -443,7 +495,7 @@ footer#colophon {
         text-align: center;
         color: @white;
         text-shadow: none;
-        padding-bottom: 10px;
+        padding-bottom: 20px;
         a {
             color: @linkSkyBlue;
         }
@@ -462,6 +514,14 @@ body#home {
         .transition(background-color 0.3s linear 0s);
     }
     &.loggedout {
+        #main {  
+        padding: 0; 
+            &.container {
+                width: auto;
+                padding-right: 0;
+                padding-left: 0;
+            }
+        }
         #masthead { z-index: 1000; }
 
         #mosaic {
@@ -528,6 +588,10 @@ body#home {
 
         #information {
             padding-bottom: 50px;
+            .clearfix;
+            @media (max-width: @breakMobileLandscape) {
+                 padding-bottom: 25px;
+            }
             #quote, #about, #mozfacts {
                 color: #4d4e53;
             }
@@ -612,14 +676,16 @@ body#home {
                 }
             }
         }
-
+        
         #get-involved {
             color: @white;
             background: url("/media/img/homepage-getinvolved-bkg.png") repeat-x;
             background-color: #2c80c5;
+            float: none;
             .content {
                 .span(6);
                 .offset(2);
+                padding: 40px 0;
                 h2 {
                     color: @white;
                     text-shadow: none;
@@ -638,9 +704,6 @@ body#home {
                     width: auto;
                     .offset(0);
                 }
-                @media (min-width: @breakTablet) {
-                    padding: 40px 0;
-                }
                 @media (max-width: @breakTablet) {
                     padding: 40px 0 20px;
                 }
@@ -648,9 +711,7 @@ body#home {
         }
     }
     &.loggedin {
-        .white-background { background-color: @white; }  
-        #main-content {
-            padding-top: 25px;
+        #main {
             #profile-info {
                 .span(3);
                 margin: 0;
@@ -726,9 +787,16 @@ body#home {
                 .announcements-mozfacts {
                     .clearfix;
                     margin: 50px 0;
+                    img { 
+                        min-width: 60px;
+                        min-height: 60px;
+                        margin-right: 15px;
+                        float: left;
+                    }
                     @media (max-width: @breakDesktop) {
                         margin: 25px 0;
                     }
+
                 }
                 .functional-areas, .groups {
                     .span(4);
@@ -776,3 +844,300 @@ body#home {
     }
 }
 
+// Styles below this line are still using Bootstrap (media/css/bootstrap.min.css)
+
+/* Generic bootstrap fixes
+=========================== */
+.tabbable {
+    h2 {
+        border-bottom: 1px solid @grayDark;
+        margin-bottom: 20px;
+        padding: 15px 0 3px;
+    }
+    li { 
+        margin-left: 0;
+    }
+    button {
+        margin: 20px 10px 0 0;
+    }
+    .checkbox {
+        min-height: auto;
+    }
+    input { line-height: 24px; }
+    .ui-widget-content {
+        background: transparent;
+        border: none;
+        input {
+            border: 1px solid @grayLighter !important;
+            height: 30px !important;
+            padding: 0 3px !important;
+            background: @white !important;
+        }
+        li.tagit-new {
+            padding: 0 !important;
+        }
+    }
+    .tab-content {
+        overflow: hidden;
+        min-height: 400px;
+    }
+}
+
+/* Profile (View/Edit)
+==================== */
+body#profile {
+    .privacy-view {
+        form {
+            float: right;
+            margin-right: -30px;
+            @media (max-width: 767px) {
+                margin-right: 0;
+            }
+        }
+    }
+    #profile-info {
+        margin-bottom:15px;
+        h2 {
+            font-size: 36px;
+            letter-spacing: -1px;
+            margin: 10px 0 20px;
+        }
+        dt {
+            margin: 10px 0;
+            font-size:22px;
+            letter-spacing:-.5px;
+            line-height:100%;
+            
+        }
+        dl {
+            overflow: hidden;
+            padding-bottom: 0.2em;
+        }
+        #skills, #languages {
+            margin-left:0;
+            background: none;
+            border: 0;
+        }
+    }
+}
+
+body#edit-profile {
+    .edit-profile {
+        max-width: 700px;
+        input, textarea {
+            border: 1px solid @grayLighter;
+        }
+        hr {
+            .clearfix;
+            margin: 18px 0;
+            border: 0;
+            border-top: 1px solid #e5e5e5;
+            border-bottom: 1px solid #ffffff;
+        }
+        .photo .thumbnail {
+            background-color: @white;
+            margin-bottom: 15px;
+            width: 70px;
+        }
+        
+        #edit_controls {
+            margin: 20px 0;
+            button, a {
+                width: 175px; 
+                margin-right: 8px; 
+            }
+        }
+        .privacy-global-settings {   
+            span.label-text, .privacy-all {
+                float: left;
+            }
+            .privacy-all select {
+                width: 180px;
+            }
+            span.label-text {
+                margin: 5px 10px 0 0;
+            }
+            .control-group > label {
+                margin-right: 15px;
+                width: 300px;
+            }
+        }
+        .privacy-controls {
+            float: right;
+            select {
+                width: 100px;
+            }
+            label {
+                margin: 3px 5px 0 0;
+                float: left;
+            }
+        }
+        #privacy-settings .control-group > label {
+            margin-right: 15px;
+            width: 300px;
+        }
+        .delete {
+            display: block;
+            margin-top: 15px;
+            width: 100px;
+        }
+        @media (max-width: 768px) {
+            .privacy-controls {
+                float: none;
+            }
+
+            .photo .privacy-controls {
+                margin: 0 0 15px 0;
+            }
+
+            .privacy-view form {
+                float: none;
+            }
+            .control-group {
+                float: none;
+            }
+
+            #skills .privacy-controls {
+                margin: 0 0 25px 0;
+            }
+        }
+    }
+}
+
+/* About
+==================== */
+body#about {
+    #photo-collage {
+        float: right;
+        padding: 10px 0 10px 15px;
+        @media (max-width:  @breakTablet) {
+            float: none;
+            padding: 10px 0;
+        }
+    }
+}
+
+/* Generic Groups, Functional Areas and Search Results
+====================================================== */
+body.search-page {
+    .result {
+        margin-top: 15px;
+        a {
+            min-width: 340px;
+            height: 75px;
+            margin-bottom: 25px;
+        }
+        h2 {
+            font-size: 20px;
+            margin: 0;
+            width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-bottom: 3px;
+        }
+        img {
+            float: left;
+            height: 70px;
+            width: 70px;
+            margin: 0 10px 0 0;
+            border: 1px solid #52ADCC;
+            .border-radius(4px);
+        }
+        .details {
+            ul {
+                font-size: 12px;
+                list-style: none;
+                text-align: left;
+                width: 220px;
+                white-space: nowrap;
+                text-overflow: ellipsis; 
+                margin: 0 0 9px 25px;
+                li {
+                    line-height: 18px;
+                }
+            }
+        }
+    }
+}
+
+/* Search Results
+================== */
+body#search {
+    .search-options {
+        display: none;
+        input, span {
+            display: block;
+            float: left;
+        }
+        input {
+            margin-right: 10px;
+        }
+    }
+    #search-form {
+        button {
+            margin: -10px 8px 0 0;
+        }
+    }
+}
+
+/* Invite/Invited
+================== */
+body#invite {
+    .bump-button {
+        margin-bottom: 9px;
+    }
+}
+body#invited, body#invite {
+    .old {
+        min-height: 500px;
+    }
+}
+
+/* Groups
+================== */
+body#group-show {
+    .steward ul {
+        .clearfix;
+        list-style: none;
+        margin: 10px 0 10px 5px;
+        float: left;
+    }
+    .group-skills {
+        float: left;
+        margin-top: 25px;
+    }
+}
+
+body#group-index {
+    .sort {
+        form {
+            input {
+                .button !important;
+                margin-left: 10px;
+            }
+            select {
+                margin-bottom: 0;
+            }
+        }
+    }
+    #groups {
+        .clearfix;
+        ul.group-list {
+            list-style: none;
+            .clearfix;
+            margin: 0 15px 15px 0;
+            float: left;
+            width: 30%;
+            @media (max-width: @breakMobileLandscape) { 
+                width: 100%;
+            }
+            li {
+                margin: 0 0 15px 0;
+                &:last-child {
+                    margin: 0;
+                }
+            }
+        }
+    }
+}

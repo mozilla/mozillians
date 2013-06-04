@@ -1,35 +1,30 @@
-{% extends "base.html" %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ _('Confirm Profile Deletion') }}{% endblock %}
 {% block body_id %}confirm-delete{% endblock %}
-{% block body_classes %}box-content{% endblock %}
 
 {% block content %}
-  <h1>{{ _('Confirm Profile Deletion') }}</h1>
+<h1>{{ _('Confirm Profile Deletion') }}</h1>
 
-  <form action="{{ url('profile.delete') }}" method="POST"
-        class="blue-pastels">
-    {{ csrf() }}
-
-    <h2>{{ _('Are You Sure You Want to Leave Mozillians?') }}</h2>
-
-    <p>
-      {% trans %}
-        Deleting your profile is immediate and irreversible. Any
-        information in your profile will be permanently lost. If you want
-        to join Mozillians again, you will need to get vouched again.
-      {% endtrans %}
-    </p>
-
-    <div id="actions">
-      <a href="{{ url('profile.edit') }}"
-         class="btn" id="cancel-action">
-        {{ _("No: don't delete my profile") }}
-      </a>
-
-      <button class="btn btn-danger" id="delete-action">
-        {{ _("I'm sure: delete my profile") }}
-      </button>
-    </div>
-  </form>
+<form action="{{ url('profile.delete') }}" method="POST"
+      class="blue-pastels">
+  {{ csrf() }}
+  <h2>{{ _('Are You Sure You Want to Leave Mozillians?') }}</h2>
+  <p>
+    {% trans %}
+      Deleting your profile is immediate and irreversible. Any
+      information in your profile will be permanently lost. If you want
+      to join Mozillians again, you will need to get vouched again.
+    {% endtrans %}
+  </p>
+  <div id="actions">
+    <a href="{{ url('profile.edit') }}"
+       class="btn" id="cancel-action">
+      {{ _("No: don't delete my profile") }}
+    </a>
+    <button class="btn btn-danger" id="delete-action">
+      {{ _("I'm sure: delete my profile") }}
+    </button>
+  </div>
+</form>
 {% endblock %}
