@@ -1,5 +1,6 @@
 <!doctype html>
-<html class="windows no-js" lang="{{ LANG }}" dir="{{ DIR }}">
+<html class="windows no-js" lang="{{ LANG }}" dir="{{ DIR }}"
+      data-ga-code="{{ settings.GA_ACCOUNT_CODE }}">
 <head>
   <meta charset="utf-8">
 
@@ -35,10 +36,13 @@
 
   {% block feeds %}{% endblock %}
   {% block extrahead %}{% endblock %}
-  {% include "includes/google_analytics.html" %}
+
+  {% block google_analytics %}
+    {{ js('google_analytics') }}
+  {% endblock %}
 </head>
 
-<body id="{% block body_id %}{% endblock %}" 
+<body id="{% block body_id %}{% endblock %}"
 class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedout{% endif %} {% block body_class %}{% endblock %}" data-locale="{{ LANG }}" {% block body_attrs %}{% endblock %}>
 
   <div id="outer-wrapper">
@@ -75,7 +79,7 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
                     {% else %}
                       {{ user.username }}
                     {% endif %}
-                    <i class="icon-reorder"></i> 
+                    <i class="icon-reorder"></i>
                   </a>
                   <ul class="dropdown-menu">
                     <li>
@@ -93,7 +97,7 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
                     {% if user.get_profile().is_vouched %}
                       <li>
                         <a id="invite" href="{{ url('invite') }}">
-                          <i class="icon-group"></i> 
+                          <i class="icon-group"></i>
                           {{ _('Invite') }}
                         </a>
                       </li>
@@ -132,7 +136,7 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
         {% block breadcrumbs %}{% endblock %}
 
       </header>
-    {% endblock %}  
+    {% endblock %}
 
     {% block mosaic %}{% endblock %}
 
@@ -166,8 +170,8 @@ class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedou
             <h5>
               {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook',
                    git_url='https://github.com/mozilla/mozillians' %}
-                Help make Mozillians better. 
-                <a href="{{ bug_url }}">File a bug</a> or 
+                Help make Mozillians better.
+                <a href="{{ bug_url }}">File a bug</a> or
                 <a href="{{ git_url }}">make some changes</a>.
               {% endtrans %}
             </h5>
