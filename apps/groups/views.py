@@ -25,7 +25,7 @@ def index(request):
     sort_form = SortForm(request.GET or None)
     query = (Group.objects.filter(members__is_vouched=True)
              .annotate(num_members=Count('members')))
-    if sort_form.is_valid():
+    if sort_form.is_valid() and sort_form.cleaned_data['sort']:
         query = query.order_by(sort_form.cleaned_data['sort'], 'name')
     else:
         query = query.order_by('name')
