@@ -146,6 +146,7 @@ class UserProfilePrivacyModel(models.Model):
     _privacy_fields = {'photo': None,
                        'full_name': '',
                        'ircname': '',
+                       'messenger_names': '',
                        'email': '',
                        'website': '',
                        'bio': '',
@@ -163,6 +164,8 @@ class UserProfilePrivacyModel(models.Model):
     privacy_full_name = models.PositiveIntegerField(default=MOZILLIANS,
                                                     choices=PRIVACY_CHOICES)
     privacy_ircname = models.PositiveIntegerField(default=MOZILLIANS,
+                                                  choices=PRIVACY_CHOICES)
+    privacy_messenger_names = models.PositiveIntegerField(default=MOZILLIANS,
                                                   choices=PRIVACY_CHOICES)
     privacy_email = models.PositiveIntegerField(default=MOZILLIANS,
                                                 choices=PRIVACY_CHOICES)
@@ -188,6 +191,28 @@ class UserProfilePrivacyModel(models.Model):
     class Meta:
         abstract=True
 
+class MessengerName(models.Model):
+    SERVICE_CHOICES = (
+        ('AIM', 'AIM'),
+        ('Google Talk', 'Google Talk'),
+        ('ICQ', 'ICQ'),
+        ('Jabber', 'Jabber'),
+        ('MSN', 'MSN'),
+        ('Skype', 'Skype'),
+        ('Yahoo Messenger', 'Yahoo Messenger'),
+        ('Gadu-Gadu', 'Gadu-Gadu'),
+        ('QQ', 'QQ'),
+
+    )
+    name = models.CharField(max_length=30)
+    service = models.CharField(max_length=30, 
+                               choices=SERVICE_CHOICES,
+                               default='AIM')
+    @classmethod
+    def choices(self):
+        return self.SERVICE_CHOICES
+    def __unicode__(self):
+        return self.service + ' ' + self.name
 
 class UserProfile(UserProfilePrivacyModel, SearchMixin):
     objects = UserProfileManager()
@@ -213,6 +238,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
+    messenger_names = models.ManyToManyField(MessengerName, blank=True)
     country = models.CharField(max_length=50, default='',
                                choices=COUNTRIES.items(),
                                verbose_name=_lazy(u'Country'))
@@ -453,6 +479,14 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         m2mfield.add(*groups_to_add)
 
+    def set_messengers(self, messengers):
+        "Saves new messengers from registration"
+        if 0 < len(messengers) < 10:
+            for m in messengers:
+                mess = MessengerName(name=m['username'], service=m['service'])
+                mess.save()
+                self.messenger_names.add(mess)
+
     def get_photo_thumbnail(self, geometry='160x160', **kwargs):
         if 'crop' not in kwargs:
             kwargs['crop'] = 'center'
@@ -564,3 +598,4 @@ class UsernameBlacklist(models.Model):
 
     class Meta:
         ordering = ['value']
+
