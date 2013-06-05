@@ -8,6 +8,15 @@ from helpers import stringify_groups
 from models import Group
 
 
+class SortForm(forms.Form):
+    """Group Index Sort Form."""
+    sort = forms.ChoiceField(required=False,
+                             choices=(('name', 'Group Name A-Z'),
+                                      ('-num_members', 'Most Members'),
+                                      ('num_members', 'Fewest Members')),
+                             initial='name')
+
+
 class GroupWidget(forms.TextInput):
 
     def render(self, name, value, attrs=None):

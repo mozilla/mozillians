@@ -10,20 +10,11 @@
     <div class="sort">
       <form method="get" action="{{ request.path }}">
           <input type="hidden" name="page" value="{{ page }}" />
-          <label for="sort">Sort by:</label>
-          <select name="sort">
-              {% for key, value in sort_choices.items() %}
-              <option value="{{ key }}"
-                      {% if sort_by == key %}
-                      selected="selected"
-                      {% endif %}
-                      >{{ value }}</option>
-              {% endfor %}
-          </select>
+          {{ sort_form }}
           <input type="submit" value="Sort" />
       </form>
     </div>
-  
+
     <p>
       {% trans %}
         Mozillians work on all sorts of different things! From Add-on
@@ -33,17 +24,17 @@
     </p>
 
     <div id="groups">
-      {% for group_item in groups|sort|slice(3) -%}
+      {% for group_slice in groups|slice(3) -%}
         <ul class="group-list">
-          {% for group in group_item %}
+          {% for group in group_slice %}
             <li class="group-item">
               <a href="{{ url('group', group.url) }}" class="group-name btn">
                 {{ group.name|truncate(20, True) }} &mdash;
                 <i class="icon-user-md"></i>
-                {{ group.members.vouched().count() }}
+                {{ group.num_members }}
               </a>
             </li>
-          {% endfor %} 
+          {% endfor %}
         </ul>
       {% endfor %}
     </div>
