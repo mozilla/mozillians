@@ -12,6 +12,7 @@ from funfactory.urlresolvers import reverse
 
 from apps.common.decorators import allow_public, allow_unvouched
 from apps.groups.models import Group, Skill
+from apps.groups.forms import SortForm
 from apps.phonebook import forms
 from apps.users.models import PUBLIC
 from apps.users.tasks import update_basket_task
@@ -21,15 +22,15 @@ log = commonware.log.getLogger('m.groups')
 
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
+    sort_form = SortForm(request.GET or None)
+    query = (Group.objects.filter(members__is_vouched=True)
+             .annotate(num_members=Count('members')))
+    if sort_form.is_valid():
+        query = query.order_by(sort_form.cleaned_data['sort'], 'name')
+    else:
+        query = query.order_by('name')
 
-    sort_by = request.GET.get('sort', 'name')
-    sort_choices = {"name": "Group Name A-Z",
-                    "-num_members": "Most Members",
-                    "num_members": "Fewest Members"}
-
-    paginator = Paginator(Group.objects.annotate(num_members=Count('members'))
-                          .order_by(sort_by, 'name'),
-                          forms.PAGINATION_LIMIT_LARGE)
+    paginator = Paginator(query, forms.PAGINATION_LIMIT_LARGE)
 
     page = request.GET.get('page')
     try:
@@ -39,8 +40,7 @@ def index(request):
     except EmptyPage:
         groups = paginator.page(paginator.num_pages)
 
-    data = dict(groups=groups, sort_by=sort_by, page=page,
-                sort_choices=sort_choices)
+    data = dict(groups=groups, page=page, sort_form=sort_form)
     return render(request, 'groups/index.html', data)
 
 
