@@ -4,12 +4,12 @@ import urllib
 
 from os import path
 
-from jingo import register
-
 from django.conf import settings
 from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
+from jingo import register
+from sorl.thumbnail import get_thumbnail
 
 from funfactory.utils import absolutify
 
@@ -70,3 +70,9 @@ def get_privacy_level(user):
 @register.function
 def media(url):
     return path.join(settings.MEDIA_URL, url.lstrip('/'))
+
+
+@register.function
+def thumbnail(img, geometry, **kwargs):
+    """Proxy to solr's get_thumbnail."""
+    return get_thumbnail(img, geometry, **kwargs)

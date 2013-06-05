@@ -18,7 +18,7 @@
       <hr>
       <form id="homepage-search" action="{{ url('search') }}" method="GET">
           {{ csrf() }}
-          <input type="text" name="q" class="search-query" 
+          <input type="text" name="q" class="search-query"
           placeholder="{{ _('Search for people, groups and more') }}">
        </form>
     </hgroup>
@@ -45,7 +45,7 @@
               {% endtrans %}
             </p>
         </section>
-        
+
         <section id="mozfacts">
           {% set fact=random_funfact() %}
           {% if fact %}
@@ -112,7 +112,7 @@
               {{ language|capitalize }}
               {% if not loop.last %},{% endif %}
             {% endfor %}
-          </section> 
+          </section>
         {% endif %}
 
         {% if user.userprofile.skills.count() %}
@@ -138,7 +138,7 @@
       <h1>{{ _('Hello!') }}</h1>
       <form id="homepage-search" action="{{ url('search') }}" method="GET">
         {{ csrf() }}
-        <input type="text" name="q" class="search-query" 
+        <input type="text" name="q" class="search-query"
         placeholder="{{ _('Search for people, groups and more') }}">
         <small>{{ _('Examples:') }}
           {% trans search_url=url('search') %}
@@ -147,9 +147,20 @@
         </small>
       </form>
       <section class="announcements-mozfacts">
-        <img src="{{ MEDIA_URL }}img/placeholder.gif">
-        <h2>Title placeholder</h2>
-        <p>This where about:home snippets and/or mozfacts will go.</p>
+        {% set announcement=latest_announcement() %}
+        {% if announcement %}
+          {% if announcement.image %}
+            <img src="{{ thumbnail(announcement.image, '60x60').url }}">
+          {% endif %}
+          <h2>{{ announcement.title }}</h2>
+          <p> {{ announcement.text }} </p>
+        {% else %}
+          {% set fact=random_funfact() %}
+          {% if fact %}
+            <h2>{{ fact.execute() }}</h2>
+            <p>{{ fact.public_text }}</p>
+          {% endif %}
+        {% endif %}
       </section>
       <section class="functional-areas">
         <span class="icon">
@@ -171,7 +182,7 @@
           <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
         {% endtrans %}
       </section>
-    </article> 
+    </article>
 
   {% endif %}
 
