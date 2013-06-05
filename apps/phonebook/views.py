@@ -3,10 +3,12 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseForbidden
+from django.core import serializers
+from django.http import Http404, HttpResponseForbidden, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
+from django.utils import simplejson
 
 import commonware.log
 from funfactory.urlresolvers import reverse
@@ -18,9 +20,9 @@ from apps.common.helpers import get_privacy_level
 from apps.groups.helpers import stringify_groups
 from apps.groups.models import Group
 from apps.users.models import (COUNTRIES, EMPLOYEES, MOZILLIANS,
-                               PUBLIC, PRIVILEGED, UserProfile)
+                               PUBLIC, PRIVILEGED, UserProfile,
+                               MessengerName)
 from apps.users.tasks import remove_from_basket_task
-
 
 import forms
 from models import Invite
@@ -108,28 +110,28 @@ def edit_profile(request):
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
-
     user_form = forms.UserForm(request.POST or None, instance=user)
+    messenger_form = forms.MessengerForm()
     profile_form = forms.ProfileForm(
         request.POST or None, request.FILES or None, instance=profile,
         initial=dict(groups=user_groups, skills=user_skills,
                      languages=user_languages),
         locale=request.locale)
-
     if request.method == 'POST':
         if (user_form.is_valid() and profile_form.is_valid()):
             old_username = request.user.username
             user_form.save()
             profile_form.save()
-
             # Notify the user that their old profile URL won't work.
             if user.username != old_username:
                 messages.info(request, _(u'You changed your username; please '
                                          'note your profile URL has also '
                                          'changed.'))
             return redirect(reverse('profile', args=[user.username]))
-
+    elif request.is_ajax():
+        print request.POST
     d = dict(profile_form=profile_form,
+             messenger_form=messenger_form,
              user_form=user_form,
              mode='edit',
              user_groups=user_groups,
@@ -151,6 +153,46 @@ def confirm_delete(request):
     """
     return render(request, 'phonebook/confirm_delete.html')
 
+@allow_unvouched
+def messenger_add(request):
+    user = User.objects.get(pk=request.user.id)
+    profile = user.get_profile()
+    if request.method == "POST":
+        if profile.messenger_names.count() >= 10:
+            names = serializers.serialize("json", profile.messenger_names.all())
+            jnames = simplejson.dumps(names)
+            return HttpResponse(jnames, mimetype='application/json')
+        jbody = simplejson.loads(request.body)
+        uname = jbody['username']
+        uservice = jbody['service']
+        messenger = MessengerName(name=uname, service=uservice)
+        messenger.save()
+        profile.messenger_names.add(messenger)
+        names = serializers.serialize("json", profile.messenger_names.all())
+        jnames = simplejson.dumps(names)
+        return HttpResponse(jnames, mimetype='application/json')
+    elif request.method == 'GET':
+        names = serializers.serialize("json", profile.messenger_names.all())
+        jnames = simplejson.dumps(names)
+        return HttpResponse(jnames, mimetype='application/json')
+    
+@allow_unvouched
+def messenger_remove(request):
+    user = User.objects.get(pk=request.user.id)
+    profile = user.get_profile()
+    if request.method == "POST":
+        jbody = simplejson.loads(request.body)
+        mess_pk = jbody['messenger_pk']
+        messenger = MessengerName.objects.get(id=mess_pk)
+        messenger.delete()
+        names = serializers.serialize("json", profile.messenger_names.all())
+        jnames = simplejson.dumps(names)
+        return HttpResponse(jnames, mimetype='application/json')
+    elif request.method == 'GET':
+        names = serializers.serialize("json", profile.messenger_names.all())
+        jnames = simplejson.dumps(names)
+        return HttpResponse(jnames, mimetype='application/json')
+    
 
 @allow_unvouched
 @never_cache
