@@ -154,6 +154,9 @@ MINIFY_BUNDLES = {
             'js/libs/tag-it/js/tag-it.js',
             'js/profile_view.js',
         ),
+        'google_analytics': (
+            'js/google-analytics.js',
+        ),
     }
 }
 
