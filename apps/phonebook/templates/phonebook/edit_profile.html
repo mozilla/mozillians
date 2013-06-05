@@ -2,7 +2,6 @@
 
 {% block site_css %}
   {{ super() }}
-  {{ css('edit_profile') }}
 {% endblock %}
 
 {% block page_title %}{{ _('Edit Your Profile') }}{% endblock %}
@@ -100,7 +99,7 @@
                   product or sub-community.
                 {% endtrans %}
               </p>
-              
+
               {{ profile_form.groups.label_tag() }}
               {{ privacy_field(profile_form.privacy_groups, profile.privacy_groups) }}
               {{ profile_form.groups }}
@@ -115,10 +114,10 @@
                   time, energy, or both.
                 {% endtrans %}
               </p>
-              {{ profile_form.skills.label_tag() }} 
+              {{ profile_form.skills.label_tag() }}
               {{ privacy_field(profile_form.privacy_skills, profile.privacy_skills) }}
               {{ profile_form.skills }}
-             
+
             </div>
 
             <div class="ui-helper-clearfix">
