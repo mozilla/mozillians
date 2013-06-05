@@ -67,14 +67,15 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (base.TEMPLATE_CONTEXT_PROCESSORS + (
-    'django_browserid.context_processors.browserid_form',
+    'django_browserid.context_processors.browserid',
     'apps.common.context_processors.current_year'
 ))
 
 JINGO_EXCLUDE_APPS = [
     'bootstrapform',
     'admin',
-    'autocomplete_light'
+    'autocomplete_light',
+    'browserid'
 ]
 
 MINIFY_BUNDLES = {
@@ -100,7 +101,6 @@ MINIFY_BUNDLES = {
             'js/libs/jquery-ui-1.8.7.custom.min.js',
             'js/main.js',
             'js/libs/validation/validation.js',
-            'static/browserid/browserid.js',
         ),
         'common-old': (
             'js/libs/bootstrap/bootstrap-transition.js',
@@ -172,6 +172,7 @@ MIDDLEWARE_CLASSES = list(base.MIDDLEWARE_CLASSES) + [
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 
     'common.middleware.StrongholdMiddleware',
+    'common.middleware.RegisterMiddleware',
     'common.middleware.UsernameRedirectionMiddleware',
     'common.middleware.OldGroupRedirectionMiddleware',
     'common.middleware.GroupAliasRedirectionMiddleware']
@@ -188,7 +189,7 @@ SUPPORTED_NONLOCALES = list(base.SUPPORTED_NONLOCALES) + [
     'autocomplete',
 ]
 
-AUTHENTICATION_BACKENDS = ('common.backends.MozilliansBrowserID',)
+AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
 
 # BrowserID creates a user if one doesn't exist.
 BROWSERID_CREATE_USER = True
@@ -235,7 +236,8 @@ HMAC_KEYS = {
 }
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_COOKIE_NAME='mozillians_sessionid'
 ANON_ALWAYS = True
 
 # Email
@@ -264,8 +266,7 @@ SOUTH_TESTS_MIGRATE = False
 CSP_FONT_SRC = ("'self'",
                 'https://www.mozilla.org',
                 'https://mozorg.cdn.mozilla.net')
-CSP_FRAME_SRC = ("'self'", 'https://browserid.org',
-                 'https://login.persona.org',)
+CSP_FRAME_SRC = ("'self'", 'https://login.persona.org',)
 CSP_IMG_SRC = ("'self'",
                "'self' data:",
                'https://mozorg.cdn.mozilla.net',
@@ -280,7 +281,6 @@ CSP_SCRIPT_SRC = ("'self'",
                   'http://www.google-analytics.com',
                   'https://ssl.google-analytics.com',
                   'https://www.google-analytics.com',
-                  'https://browserid.org',
                   'https://login.persona.org',)
 CSP_STYLE_SRC = ("'self'",
                  'https://www.mozilla.org',
@@ -329,8 +329,8 @@ ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
-                         '^/browserid/verify/',
-                         '^/api']
+                         '^/browserid/',
+                         '^/api/']
 
 # Set default avatar for user profiles
 DEFAULT_AVATAR= 'img/unknown.png'
