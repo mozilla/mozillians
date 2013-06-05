@@ -11,7 +11,7 @@ class mock_browserid(object):
         self.settings_patches = (
             patch.object(
                 settings, 'AUTHENTICATION_BACKENDS',
-                ['common.backends.MozilliansBrowserID'],
+                ['django_browserid.auth.BrowserIDBackend'],
             ),
             patch.object(
                 settings, 'SITE_URL',

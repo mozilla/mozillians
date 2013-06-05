@@ -76,7 +76,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         # BrowserID needs an assertion not to be whiney
         d = dict(assertion=self.fake_assertion)
         with mock_browserid(email):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         # Now let's register
         d = dict(full_name='Desaaaaaaai',
