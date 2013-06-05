@@ -72,6 +72,15 @@
           {{ bootstrap(profile_form.ircname) }}
           {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
           <hr>
+          <div id="messenger_delete" style="display:none;">{{ url('messenger_remove') }}</div>
+          {{ bootstrap(messenger_form.name) }}
+          {{ bootstrap(messenger_form.service) }}
+          <button type="button" id="IM_add" value="{{ url('messenger_add') }}" class="btn btn-primary">
+            {{ _('Add') }}</button>
+          <div id="messenger-names" class="control-group"></div>
+          {{ privacy_field(profile_form.privacy_messenger_names, profile.privacy_messenger_names) }}
+          
+          <hr>
           {{ bootstrap(profile_form.website) }}
           {{ privacy_field(profile_form.privacy_website, profile.privacy_website) }}
           <hr>

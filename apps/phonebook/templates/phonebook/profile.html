@@ -127,7 +127,12 @@
             {{ profile.ircname }}
           </a></dd>
         {% endif %}
-
+        {% if profile.messenger_names %}
+          <dt>{{ _('IM Accounts') }}</dt>
+          {% for name in profile.messenger_names.all() %}
+            <dd>{{ name }}</dd>
+          {% endfor %}
+        {% endif %}
         {% if profile.website %}
           <dt>{{ _('Website') }}</dt>
           <dd><a rel="me" class="u-url url" href="{{ profile.website }}">
