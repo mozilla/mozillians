@@ -22,10 +22,10 @@ log = commonware.log.getLogger('m.groups')
 
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
-    sort_form = SortForm(request.GET or None)
+    sort_form = SortForm(request.GET)
     query = (Group.objects.filter(members__is_vouched=True)
              .annotate(num_members=Count('members')))
-    if sort_form.is_valid() and sort_form.cleaned_data['sort']:
+    if sort_form.is_valid():
         query = query.order_by(sort_form.cleaned_data['sort'], 'name')
     else:
         query = query.order_by('name')
