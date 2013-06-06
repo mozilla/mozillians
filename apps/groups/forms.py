@@ -13,9 +13,13 @@ class SortForm(forms.Form):
     sort = forms.ChoiceField(required=False,
                              choices=(('name', 'Group Name A-Z'),
                                       ('-num_members', 'Most Members'),
-                                      ('num_members', 'Fewest Members')),
-                             initial='name')
+                                      ('num_members', 'Fewest Members')))
 
+
+    def clean_sort(self):
+        if self.cleaned_data['sort'] == '':
+            return 'name'
+        return self.cleaned_data['sort']
 
 class GroupWidget(forms.TextInput):
 
