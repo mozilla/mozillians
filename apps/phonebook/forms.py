@@ -139,20 +139,6 @@ class BaseProfileForm(happyforms.ModelForm):
                       map(lambda x: x.strip() or False,
                           languages.lower().split(',')))
 
-    def clean(self):
-        """Make sure geographic fields aren't underspecified."""
-        cleaned_data = super(BaseProfileForm, self).clean()
-        # Rather than raising ValidationErrors for the whole form, we can
-        # add errors to specific fields.
-        if cleaned_data.get('city', None) and not cleaned_data.get('region', None):
-            self._errors['region'] = [_(u'You must specify a region to '
-                                         'specify a city.')]
-        if cleaned_data.get('region', None) and not cleaned_data.get('country', None):
-            self._errors['country'] = [_(u'You must specify a country to '
-                                         'specify a district.')]
-
-        return cleaned_data
-
     def save(self):
         """Save the data to profile."""
         self.instance.set_membership(Group, self.cleaned_data['groups'])
