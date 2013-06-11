@@ -20,11 +20,9 @@ from apps.users.tasks import update_basket_task
 log = commonware.log.getLogger('m.groups')
 
 
-def index(request):
-    """Lists all public groups (in use) on Mozillians."""
+def list_groups(request, template, query):
+    """Lists groups from given query."""
     sort_form = SortForm(request.GET)
-    query = (Group.objects.filter(members__is_vouched=True)
-             .annotate(num_members=Count('members')))
     if sort_form.is_valid():
         query = query.order_by(sort_form.cleaned_data['sort'], 'name')
     else:
@@ -41,7 +39,22 @@ def index(request):
         groups = paginator.page(paginator.num_pages)
 
     data = dict(groups=groups, page=page, sort_form=sort_form)
-    return render(request, 'groups/index.html', data)
+    return render(request, template, data)
+
+
+def index(request):
+    """Lists all public groups (in use) on Mozillians."""
+    query = (Group.objects.filter(members__is_vouched=True)
+              .annotate(num_members=Count('members')))
+    template = 'groups/index.html'
+    return list_groups(request, template, query)
+
+
+def index_functional_areas(request):
+    """Lists all curated groups."""
+    query = Group.get_curated()
+    template = 'groups/areas.html'
+    return list_groups(request, template, query)
 
 
 @allow_unvouched

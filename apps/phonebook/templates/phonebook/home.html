@@ -167,9 +167,9 @@
           <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
         </span>
         <h2>{{ _('Functional areas') }}</h2>
-        {% trans %}
+        {% trans areas_url=url('functional_areas_index') %}
           <p>View Mozillians, Stewards and information for any functional area. Find out who works on what and how you can help out.</p>
-          <a href="#">Browse functional areas <i class="icon-arrow-right"></i></a>
+          <a href="{{ areas_url }}">Browse functional areas <i class="icon-arrow-right"></i></a>
         {% endtrans %}
       </section>
       <section class="groups">
