@@ -2,3 +2,12 @@
   border-bottom: 1px solid black;
   margin-bottom: 10px;
 }
+
+#messenger-names {
+	margin: 0 80px;
+	clear: left;
+}
+
+#IM_add {
+	float: left;
+}

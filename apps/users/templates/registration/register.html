@@ -51,6 +51,11 @@
           {{ bootstrap(user_form.username) }}
           {{ bootstrap(profile_form.full_name) }}
           {{ bootstrap(profile_form.ircname) }}
+          {{ bootstrap(messenger_form.name) }}
+          {{ bootstrap(messenger_form.service) }}
+          <button type="button" id="IM_add" class="btn btn-primary">{{ _('Add') }}</button>
+          <div id="messenger-names" class="control-group"></div>
+          {{ messenger_form.names }}
           {{ bootstrap(profile_form.website) }}
           {{ bootstrap(profile_form.bio) }}
           <button type="button" id="page2button" class="span2 btn btn-primary">{{ _('Next') }}</button>
