@@ -39,7 +39,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         # login as fake user.
         d = dict(assertion=self.fake_assertion)
         with mock_browserid(self.fake_email3):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         # Send an invite.
         url = reverse('invite')
@@ -99,7 +99,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         #login as fake user.
         d = dict(assertion=self.fake_assertion)
         with mock_browserid(self.fake_email3):
-            self.client.post(reverse('browserid_verify'), d, follow=True)
+            self.client.post(reverse('browserid_login'), d, follow=True)
 
         # Send an invite without a personal message.
         url = reverse('invite')
