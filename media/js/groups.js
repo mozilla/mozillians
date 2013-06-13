@@ -1,6 +1,5 @@
 (function($) {
     $().ready(function() {
-        $('a[href=' + location.hash + ']').tab('show');
         if ($('#edit-profile').length || $('#register').length) {
             $('#id_groups').tagit({
                 allowSpaces: true,

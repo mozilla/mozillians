@@ -12,8 +12,9 @@
 // Navigation
 // Footer
 // Homepage
+// Profile detail
+// Profile create/edit
 // Generic bootstrap fixes
-// Profile
 // About
 // Generic Groups, Functional Areas and Search Results
 // Search Results
@@ -86,6 +87,19 @@
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
+.rounded-image {
+    .border-radius(100%);
+    position: absolute;
+    border: 5px solid @white;
+    .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
+    width: 150px;
+    height: 150px;
+    display: inline;
+    img {
+        .border-radius(100%);
+    }
+}
+
 /* Generic
 ==================== */
 body {
@@ -147,7 +161,8 @@ form {
     input[type=text] {
         .open-sans-light;
         font-style: italic;
-        font-size: 18px;
+        font-size: 16px;
+        height: 22px;
         border: none;
         .border-radius(8px);
     }
@@ -212,6 +227,24 @@ form {
 
 dl, dd {
     margin-bottom: 15px !important;
+}
+
+.ui-widget-content {
+    background: transparent;
+    border: none;
+    padding: 0;
+    &.ui-corner-all {
+        border: none;
+    }
+    input {
+        border: 1px solid @grayLighter !important;
+        height: 30px !important;
+        padding: 0 3px !important;
+        background: @white !important;
+    }
+    li.tagit-new {
+        padding: 0 !important;
+    }
 }
 
 /* Navigation
@@ -350,6 +383,10 @@ nav {
                 z-index: -100;
             }
         }
+    }
+    a#logout.no-profile {
+        .button;
+        float: right;
     }
 }
 
@@ -628,16 +665,11 @@ body#home {
                 font-style: italic;
                 position: relative;
                 span {
-                    position: absolute;
-                    .border-radius(100%);
+                    .rounded-image;
                     width: 60px;
                     height: 60px;
                     left: 18px;
                     border: 6px solid @white;
-                    .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.1));
-                    img {
-                        .border-radius(100%);
-                    }
                 }
                 blockquote {
                     margin-top: 75px;
@@ -715,23 +747,16 @@ body#home {
             #profile-info {
                 .span(3);
                 margin: 0;
-                posistion: relative;
+                position: relative;
                 a.profile-photo {
-                    .border-radius(100%);
-                    position: absolute;
-                    border: 5px solid @white;
-                    .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-                    width: 150px;
-                    height: 150px;
-                    img {
-                        .border-radius(100%);
-                    }
+                    .rounded-image;
                     @media (max-width: @breakDesktop) {
-                        margin-left: -80px;
+                        margin-left: -85px;
                     }
                 }
                 .profile-details {
                     margin-top: 170px;
+                    word-wrap: break-word;
                     h2 { margin: 0; }
                     h4 { margin: 20px 0 0; }
                     @media (max-width: @breakDesktop) {
@@ -809,16 +834,11 @@ body#home {
                         padding: 0 0 0 50px;
                     }
                     span.icon {
+                        .rounded-image;
                         top: -20px;
-                        position: absolute;
-                        .border-radius(100%);
                         width: 40px;
                         height: 40px;
                         border: 3px solid @white;
-                        .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-                        img {
-                            .border-radius(100%);
-                        }
                     }
                     @media (max-width: @breakTablet) {
                         width: 100%;
@@ -838,6 +858,287 @@ body#home {
                         .hidden;
                     }
                     width: auto;
+                }
+            }
+        }
+    }
+}
+
+/* Profile detail
+=========================== */
+body#profile {
+    #main {
+        #pending-approval {
+            .alert;
+            .alert-info;
+            padding: 25px 35px 8px 14px;
+            button {
+                .button;
+                margin: 15px 0;
+            }
+        }
+        #anonymous {
+            .alert;
+        }
+        #profile-stats {
+            .span(3);
+            margin: 0;
+            position: relative;
+            .profile-photo {
+                .rounded-image;
+                @media (max-width: @breakDesktop) {
+                    margin-left: -85px;
+                }
+            }
+            .stats {
+                margin-top: 170px;
+                h2 { margin: 0; }
+                h4 { margin: 20px 0 0; }
+                @media (max-width: @breakDesktop) {
+                    .languages, h4 {
+                        .hidden;
+                    }
+                }
+                #membership {
+                    position: relative;
+                    width: auto;
+                    .status {
+                        cursor: pointer;
+                        @media (max-width: @breakDesktop) {
+                            max-width: 200px;
+                            margin: 0 auto;
+                        }
+                        span {
+                            padding: 5px 15px;
+                            opacity: 0;
+                            visibility: hidden;
+                            width: 90px;
+                            z-index: 10;
+                            position: absolute;
+                            top: 0;
+                            left: 20px;
+                            background: @white;
+                            .border-radius(3px);
+                            .box-shadow(2px 2px 2px @gray);
+                            border: 1px solid lighten(@black,90%);
+                            text-align: center;
+                            -webkit-transition-property:opacity, margin-top, visibility, margin-left;
+                            -webkit-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                            -webkit-transition-timing-function: ease-in-out;
+                            -moz-transition-property:opacity, margin-top, visibility, margin-left;
+                            -moz-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                            -moz-transition-timing-function: ease-in-out;
+                            -o-transition-property:opacity, margin-top, visibility, margin-left;
+                            -o-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                            -o-transition-timing-function: ease-in-out;
+                            transition-property:opacity, margin-top, visibility, margin-left;
+                            transition-duration:0.4s 0.3s;
+                            transition-timing-function: ease-in-out;
+                            @media (max-width: @breakDesktop) {
+                                left: 42%;
+                            }
+                            b {
+                                width: 15px;
+                                height: 15px;
+                                position: absolute;
+                                top: 23px;
+                                left: 40%;
+                                margin: 0;
+                                background: @white;
+                                border-top: 1px solid lighten(@black,90%);
+                                border-right: 1px solid lighten(@black,90%);
+                                .box-shadow(inset -1px 1px 0 @white);
+                                .transform(rotate(135deg));
+                            }
+                        } 
+                        &:hover span {
+                            opacity: 1;
+                            visibility: visible;
+                            overflow: visible;
+                            margin-top: -40px;
+                        } 
+                    }
+                }
+            }
+            @media (max-width: @breakDesktop) {
+                text-align: center;
+                width: 100%;
+            }
+        }
+        #profile-info {
+            .span(8);
+            margin: 0;
+            border-left: 1px solid lighten(@black,90%);
+            padding: 0 10px 0 25px;
+            @media (max-width: @breakDesktop) {
+                text-align: center;
+                width: 100%;
+                border: none;
+                padding: 20px 0 0 0;
+            }
+            header {
+                margin-bottom: 20px;
+                .privacy-view {
+                    float: right;
+                    @media (max-width: @breakDesktop) {
+                        float: none;
+                        padding: 15px 0;
+                    }
+                }
+            }
+            #profile-details, #profile-contact {
+                h2 { margin: 30px 0 10px; }
+                h3 { font-size: 24px; }
+            }
+            #profile-details { 
+                width: 370px;
+                padding-right: 30px;
+                margin: 0;
+                float: left;
+                #groups, #skills, #languages {
+                    margin-bottom: 25px;
+                }
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
+                    float: none;
+                    padding: 0;
+                }
+            }
+            #profile-contact { 
+                width: 220px;
+                float: left;
+                ul {
+                    list-style: none;
+                    float: left;
+                    li {
+                        margin: 0 15px 0 0;
+                    }
+                }
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
+                    float: none;
+                    ul {
+                        float: none;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Profile create/edit
+========================= */
+body#edit-profile {
+    section {
+        margin-bottom: 25px;
+    }
+    form {
+        fieldset {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid lighten(@black,90%);
+            input, textarea {
+                border: 1px solid lighten(@black,90%);
+            }
+            
+            label {
+                margin-right: 8px;
+                float: left;
+                font-weight: bold;
+                span {
+                    color: @linkRed;
+                }
+            }
+            > label {
+                min-width: 120px;
+                @media (max-width: @breakMobileLandscape) {
+                    max-width: 100%;
+                    float: none;
+                }
+            }
+            textarea {
+                @media (max-width: @breakMobileLandscape) {
+                    width: 200px;
+                }
+            }
+            legend {
+                font-size: 24px;
+                font-weight: bold;
+                line-height: 36px;
+            }
+            .add { 
+                display: block; 
+                margin: 10px 0 0 130px;
+                cursor: pointer;
+                width: 100px;
+                @media (max-width: @breakTablet) {
+                margin: 10px 0 0 0;
+                }
+            }
+            .delete {
+                .button;
+                .button-negative;
+            }
+            &#photo {
+                position: relative;
+                .profile-photo {
+                    .rounded-image;
+                    width: 70px;
+                    height: 70px;
+                    top: -10px;
+                    @media (max-width: @breakMobileLandscape) {
+                        top: 40px;
+                    }
+                }
+                input {
+                    margin-top: 90px;
+                }
+            }
+            .privacy-controls {
+                float: right;
+                width: 165px;
+                .clearfix;
+                @media (max-width: @breakMobileLandscape) {
+                    float: none;
+                    width: auto;
+                    margin-bottom: 20px;
+                }
+            }
+            &#edit_controls {
+                border: none;
+                button, .cancel {
+                    .button;
+                    margin-right: 15px;
+                }
+                .cancel {
+                    .button-sand;
+                }
+            }
+            &#groups, &#skills {
+                label {
+                    font-style: italic;
+                    font-weight: normal;
+                }
+            }
+            #id_photo_delete {
+                margin: 10px 0 0 130px;
+                @media (max-width: @breakMobileLandscape) {
+                    margin: 10px 0 0 0;
+                }
+                input { margin: 0; }
+                label {
+                    float: none;
+                }
+            }
+            &#privacy-verify {
+                label { float: none; }
+            }
+            .newField {
+                margin: 10px 0 10px 130px;
+                @media (max-width: 700px) {
+                    margin: 10px 0;
                 }
             }
         }
@@ -864,143 +1165,9 @@ body#home {
         min-height: auto;
     }
     input { line-height: 24px; }
-    .ui-widget-content {
-        background: transparent;
-        border: none;
-        input {
-            border: 1px solid @grayLighter !important;
-            height: 30px !important;
-            padding: 0 3px !important;
-            background: @white !important;
-        }
-        li.tagit-new {
-            padding: 0 !important;
-        }
-    }
     .tab-content {
         overflow: hidden;
         min-height: 400px;
-    }
-}
-
-/* Profile (View/Edit)
-==================== */
-body#profile {
-    .privacy-view {
-        form {
-            float: right;
-            margin-right: -30px;
-            @media (max-width: 767px) {
-                margin-right: 0;
-            }
-        }
-    }
-    #profile-info {
-        margin-bottom:15px;
-        h2 {
-            font-size: 36px;
-            letter-spacing: -1px;
-            margin: 10px 0 20px;
-        }
-        dt {
-            margin: 10px 0;
-            font-size:22px;
-            letter-spacing:-.5px;
-            line-height:100%;
-            
-        }
-        dl {
-            overflow: hidden;
-            padding-bottom: 0.2em;
-        }
-        #skills, #languages {
-            margin-left:0;
-            background: none;
-            border: 0;
-        }
-    }
-}
-
-body#edit-profile {
-    .edit-profile {
-        max-width: 700px;
-        input, textarea {
-            border: 1px solid @grayLighter;
-        }
-        hr {
-            .clearfix;
-            margin: 18px 0;
-            border: 0;
-            border-top: 1px solid #e5e5e5;
-            border-bottom: 1px solid #ffffff;
-        }
-        .photo .thumbnail {
-            background-color: @white;
-            margin-bottom: 15px;
-            width: 70px;
-        }
-        
-        #edit_controls {
-            margin: 20px 0;
-            button, a {
-                width: 175px; 
-                margin-right: 8px; 
-            }
-        }
-        .privacy-global-settings {   
-            span.label-text, .privacy-all {
-                float: left;
-            }
-            .privacy-all select {
-                width: 180px;
-            }
-            span.label-text {
-                margin: 5px 10px 0 0;
-            }
-            .control-group > label {
-                margin-right: 15px;
-                width: 300px;
-            }
-        }
-        .privacy-controls {
-            float: right;
-            select {
-                width: 100px;
-            }
-            label {
-                margin: 3px 5px 0 0;
-                float: left;
-            }
-        }
-        #privacy-settings .control-group > label {
-            margin-right: 15px;
-            width: 300px;
-        }
-        .delete {
-            display: block;
-            margin-top: 15px;
-            width: 100px;
-        }
-        @media (max-width: 768px) {
-            .privacy-controls {
-                float: none;
-            }
-
-            .photo .privacy-controls {
-                margin: 0 0 15px 0;
-            }
-
-            .privacy-view form {
-                float: none;
-            }
-            .control-group {
-                float: none;
-            }
-
-            #skills .privacy-controls {
-                margin: 0 0 25px 0;
-            }
-        }
     }
 }
 

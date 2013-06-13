@@ -125,11 +125,12 @@ MINIFY_BUNDLES = {
         ),
         'api': (
             'js/libs/prettify.js',
-            'js/api.js',
+            'js/api.js'
         ),
         'edit_profile': (
             'js/libs/tag-it/js/tag-it.js',
-            'js/profile_edit.js'
+            'js/profile_edit.js',
+            'js/groups.js'
         ),
         'register': (
             'js/libs/tag-it/js/tag-it.js',
