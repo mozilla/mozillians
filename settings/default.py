@@ -263,31 +263,30 @@ AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 SOUTH_TESTS_MIGRATE = False
 
 # Django-CSP
+CSP_DEFAULT_SRC = ("'self'",)
 CSP_FONT_SRC = ("'self'",
-                'https://www.mozilla.org',
-                'https://mozorg.cdn.mozilla.net')
-CSP_FRAME_SRC = ("'self'", 'https://login.persona.org',)
+                'https://*.mozilla.org',
+                'https://*.mozilla.net')
+CSP_FRAME_SRC = ("'self'",
+                 'https://login.persona.org',)
 CSP_IMG_SRC = ("'self'",
-               "'self' data:",
-               'https://mozorg.cdn.mozilla.net',
-               'http://www.google-analytics.com',
-               'https://ssl.google-analytics.com',
-               'http://www.gravatar.com',
-               'https://i1.wp.com',
-               'https://secure.gravatar.com',)
+               'data:',
+               'https://*.mozilla.net',
+               'https://*.google-analytics.com',
+               'https://*.gravatar.com',
+               'https://i1.wp.com')
 CSP_SCRIPT_SRC = ("'self'",
-                  'https://www.mozilla.org',
-                  'https://mozorg.cdn.mozilla.net',
-                  'http://www.google-analytics.com',
-                  'https://ssl.google-analytics.com',
-                  'https://www.google-analytics.com',
+                  'https://*.mozilla.org',
+                  'https://*.mozilla.net',
+                  'https://*.google-analytics.com',
                   'https://login.persona.org',)
 CSP_STYLE_SRC = ("'self'",
-                 'https://www.mozilla.org',
-                 'https://mozorg.cdn.mozilla.net',)
-CSP_REPORT_ONLY = True
-CSP_REPORT_URI = '/csp/report/'
+                 "'unsafe-inline'",
+                 'https://*.mozilla.org',
+                 'https://*.mozilla.net',)
 
+
+# Elasticutils settings
 ES_DISABLED = True
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = {'default': 'mozillians',
