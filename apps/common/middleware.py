@@ -26,8 +26,7 @@ class RegisterMiddleware(object):
                       r'^/[\w-]+{0}'.format(reverse('login')),
                       r'^/[\w-]+{0}'.format(reverse('profile.edit')),
                       r'^/browserid/',
-                      r'^/[\w-]+/jsi18n/',
-                      r'^/csp/',]
+                      r'^/[\w-]+/jsi18n/']
 
         if settings.DEBUG:
             allow_urls.append(settings.MEDIA_URL)
