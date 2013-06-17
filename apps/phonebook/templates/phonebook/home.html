@@ -30,10 +30,14 @@
               <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ MEDIA_URL }}img/homequote-mitchell-baker.png">
             </span>
             <blockquote>
+              <p>
               {% trans %}
-              <p>It’s an exciting time for Mozilla and the Web. Another two billion people will join the Internet community in the coming years.</p>
-              <small>Mitchell Baker</small>
+              It’s an exciting time for Mozilla and the Web. Another
+              two billion people will join the Internet community in
+              the coming years.
               {% endtrans %}
+              </p>
+              <small>Mitchell Baker</small>
             </blockquote>
         </section>
 
@@ -41,7 +45,10 @@
             <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
             <p>
               {% trans %}
-              This site lists all core individuals and groups that participate in the Mozilla Project. We call ourselves Mozillians and this is where we connect and share with one another.
+              This site lists all core individuals and groups that
+              participate in the Mozilla Project. We call ourselves
+              Mozillians and this is where we connect and share with
+              one another.
               {% endtrans %}
             </p>
         </section>
@@ -70,7 +77,11 @@
           <h2>{{ _('How do I get involved?') }}</h2>
           <p>
             {% trans %}
-            Mozilla exists to promote openness, innovation and opportunity on the Internet. The success of our mission depends on participation from people like you. Find out how you can get involved to help make a difference in the lives of people everywhere.
+            Mozilla exists to promote openness, innovation and
+            opportunity on the Internet. The success of our mission
+            depends on participation from people like you. Find out
+            how you can get involved to help make a difference in the
+            lives of people everywhere.
             {% endtrans %}
           </p>
           {% trans contribute_url='http://mozilla.org/contribute' %}
@@ -142,7 +153,9 @@
         placeholder="{{ _('Search for people, groups and more') }}">
         <small>{{ _('Examples:') }}
           {% trans search_url=url('search') %}
-          <a href="{{ search_url }}?q=python">python</a>, <a href="{{ search_url }}?q=berlin">Berlin</a>, <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
+          <a href="{{ search_url }}?q=python">python</a>,
+          <a href="{{ search_url }}?q=berlin">Berlin</a>,
+          <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
           {% endtrans %}
         </small>
       </form>
@@ -168,7 +181,11 @@
         </span>
         <h2>{{ _('Functional areas') }}</h2>
         {% trans areas_url=url('functional_areas_index') %}
-          <p>View Mozillians, Stewards and information for any functional area. Find out who works on what and how you can help out.</p>
+          <p>
+            View Mozillians, Stewards and information for any
+            functional area. Find out who works on what and how you
+            can help out.
+          </p>
           <a href="{{ areas_url }}">Browse functional areas <i class="icon-arrow-right"></i></a>
         {% endtrans %}
       </section>
@@ -178,7 +195,10 @@
         </span>
         <h2>{{ _('Groups') }}</h2>
         {% trans group_url=url('group_index') %}
-          <p>Find and join groups centered around interests, technologies, geographies and more.</p>
+          <p>
+            Find and join groups centered around interests,
+            technologies, geographies and more.
+          </p>
           <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
         {% endtrans %}
       </section>
