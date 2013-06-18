@@ -50,14 +50,14 @@ class TestDeleteUser(ESTestCase):
         # Make sure there's a link to a confirm deletion page, and nothing
         # pointing directly to the delete URL.
         eq_(reverse('profile.delete_confirm'),
-            doc('a.btn-danger').attr('href'),
+            doc('a.delete').attr('href'),
             'We see a link to a confirmation page.')
         self.assertFalse(any((reverse('profile.delete') in el.action)
                               for el in doc('#main form')),
             "We don't see a form posting to the account delete URL.")
 
         # Follow the link to the deletion confirmation page.
-        r = self.client.get(doc('a.btn-danger').attr('href'))
+        r = self.client.get(doc('a.delete').attr('href'))
 
         # Test that we can go back (i.e. cancel account deletion).
         doc = pq(r.content)
@@ -288,7 +288,7 @@ class TestViews(ESTestCase):
         doc = pq(self.client.get(
                  reverse('profile', args=[self.pending.username])).content)
 
-        img = doc('.profile-photo')[0]
+        img = doc('.profile-photo')[0].getchildren()[0]
         assert 'gravatar' in img.attrib['src']
 
     def test_has_website(self):
@@ -357,14 +357,14 @@ class TestViews(ESTestCase):
             data.update(dict(full_name='foo', country='pl', photo=f), follow=True)
             response = client.post(reverse('profile.edit'), data, follow=True)
             doc = pq(response.content)
-            old_photo = doc('.profile-photo').attr('src')
+            old_photo = doc('.profile-photo')[0].getchildren()[0].attrib['src']
 
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
             data.update(dict(full_name='foo', country='pl', photo=f), follow=True)
             response = client.post(reverse('profile.edit'), data, follow=True)
             doc = pq(response.content)
-            new_photo = doc('.profile-photo').attr('src')
+            new_photo = doc('.profile-photo')[0].getchildren()[0].attrib['src']
         assert new_photo != old_photo
 
 

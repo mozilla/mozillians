@@ -19,7 +19,7 @@
       {% endfor %}
   {% endif %}
   <div class="alert">
-    {% if request.user.username == shown_user.username %}
+    {% if user.username == shown_user.username %}
       {{ _('Your Profile') }}
     {% elif profile.is_vouched %}
       {{ _('Mozillian Profile') }}
@@ -29,7 +29,7 @@
   </div>
   {% if not profile.is_vouched %}
     <div id="pending-approval">
-      {% if request.user == shown_user %}
+      {% if user == shown_user %}
         {% trans profile_url=absolutify(url('profile', user.username)),
                  contribute_url='http://www.mozilla.org/contribute' %}
           <p>
@@ -80,7 +80,7 @@
 
   <article id="profile-stats">
     <div class="profile-photo">
-      <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
+      <img src="{{ shown_user.userprofile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
     </div>
     <div class="stats">
       <section id="membership">
@@ -140,8 +140,8 @@
         <div id="groups" class="p-category category">
           <h3>{{ _('Groups') }}</h3>
             {% for group in profile.groups.all() %}
-              {% if (request.user.is_authenticated() and
-                     request.user.get_profile().is_vouched) %}
+              {% if (user.is_authenticated() and
+                     user.get_profile().is_vouched) %}
                 <a href="{{ url('group', group.url) }}">
                   {{ group.name }}
                 </a>
@@ -180,9 +180,7 @@
           {% if profile.email %}
             <li class="u-email email">
               <i class="icon-envelope"></i> 
-              <a href="mailto:{{ profile.email }}">
-                {{ profile.email }}
-              </a>
+              {{ profile.email }}
             </li>
           {% endif %}
           {% if profile.ircname %}

@@ -89,7 +89,7 @@
       </a>
       <div class="profile-details">
         <h2>{{ user.username }}</h2>
-        <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+        {{ user.email }}
         {% with profile = user.userprofile %}
         {% if profile.country or profile.region or profile.city %}
           <section class="location">

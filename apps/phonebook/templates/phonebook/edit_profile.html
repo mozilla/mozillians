@@ -36,13 +36,21 @@
       {% endif %}
     </h1>
     {% if profile.is_complete %}
-      {% trans %}
-      <p>Modify your profile here and choose who can see your profile fields. You can make parts of your profile publicly visible, but please be careful about sharing your contact information.</p>
+      <p>
+        {% trans %}
+          Modify your profile here and choose who can see your profile
+          fields. You can make parts of your profile publicly visible,
+          but please be careful about sharing your contact
+          information.
       {% endtrans %}
     {% else %}
-      {% trans %}
-      <p class="alert alert-info">Our community directory is for Mozillians who are 13 and older. We take safety issues very seriously, especially with minors. If you are under 13, please don't create an account.</p>
+      <p class="alert alert-info">
+        {% trans %}
+          Our community directory is for Mozillians who are 13 and
+          older. We take safety issues very seriously, especially with
+          minors. If you are under 13, please don't create an account.
       {% endtrans %}
+      </p>
     {% endif %}
   </header>
 
@@ -68,10 +76,12 @@
         <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
       </div>
       <input class="input-file" id="id_photo" type="file" name="photo">
-      <div id="id_photo_delete">
-        <input type="checkbox" name="photo-clear">
-        <label>{{ _('Remove Profile Photo') }}</label>
-      </div>
+      {% if profile.photo %}
+        <div id="id_photo_delete">
+          <input type="checkbox" name="photo-clear">
+          <label>{{ _('Remove Profile Photo') }}</label>
+        </div>
+      {% endif %}
     </fieldset>
     
     <fieldset>
@@ -86,15 +96,10 @@
     </fieldset>
 
     <fieldset>
-      <div class="privacy-controls">
-        <label>Visible to:</label>
-        <select class="privacy-choice" name="privacy_email" id="id_privacy_email">
-          <option value="mozillians">{{ _('Mozillians') }}</option>
-          <option value="public">{{ _('Public') }}</option>
-        </select>
-      </div>
+      {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
       <label>{{ _('Email') }}</label>
-      <input type="text" disabled="disabled" maxlength="30" value="{{ profile.user.email }}" name="email" id="id_email">
+      <input type="text" disabled="disabled" maxlength="30" 
+             value="{{ profile.user.email }}" name="email" id="id_email">
     </fieldset>
 
     <fieldset>
@@ -327,7 +332,9 @@
       <legend>{{ _('Groups') }}</legend>
       <p class="field_description">
         {% trans %}
-          Groups are a community of Mozillians with some relation to each other. This can be an interest, team, project, product or sub-community.
+          Groups are a community of Mozillians with some relation to
+          each other. This can be an interest, team, project, product
+          or sub-community.
         {% endtrans %}
       </p>
       {{ privacy_field(profile_form.privacy_groups, profile.privacy_groups) }}
@@ -339,7 +346,9 @@
       <legend>{{ _('Skills') }}</legend>
       <p class="field_description">
         {% trans %}
-        A skill is the learned capacity to carry out pre-determined results often with the minimum outlay of time, energy, or both.
+          A skill is the learned capacity to carry out pre-determined
+          results often with the minimum outlay of time, energy, or
+          both.
         {% endtrans %}
       </p>
     
@@ -457,14 +466,20 @@
         <input type="checkbox">
         <label>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
-            I'm okay with you handling this info as you explain in <a href="{{ privacy_url }}">Mozilla's privacy policy</a>.
+            I'm okay with you handling this info as you explain
+            in <a href="{{ privacy_url }}">Mozilla's privacy
+            policy</a>.
           {% endtrans %}
         </label>
       </fieldset>
     
-      {% trans %}
-        <p class="alert-info">You will begin to receive email communications from Mozilla once you are a vouched Mozillian. You may unsubscribe at anytime by clicking the link at the bottom of these emails.</p>
-      {% endtrans %}
+      <p class="alert-info">
+        {% trans %}
+          You will begin to receive email communications from Mozilla
+          once you are a vouched Mozillian. You may unsubscribe at
+          anytime by clicking the link at the bottom of these emails.
+        {% endtrans %}
+      </p>
     {% endif %}
 
     <fieldset id="edit_controls">
