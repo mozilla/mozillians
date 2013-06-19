@@ -4,7 +4,6 @@ from django.contrib import auth, messages
 from django.shortcuts import redirect, render
 
 import commonware.log
-from django_browserid.views import Verify
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
@@ -12,7 +11,6 @@ from apps.common.decorators import allow_public, allow_unvouched
 from apps.phonebook.forms import RegisterForm, UserForm
 from apps.phonebook.models import Invite
 
-from models import UserProfile
 
 log = commonware.log.getLogger('m.users')
 get_invite = lambda c: Invite.objects.get(code=c, redeemed=None)
@@ -42,7 +40,7 @@ def register(request):
         return redirect('home')
 
     user = request.user
-    if user.is_authenticated() and user.userprofile.is_complete:
+    if not user.is_authenticated() or user.userprofile.is_complete:
         return redirect('home')
 
     user_form = UserForm(request.POST or None, instance=user)
@@ -64,8 +62,7 @@ def register(request):
                        edit_form_action=reverse('register'),
                        mode='new',
                        profile=user.get_profile(),
-                       user=user,
-                       ))
+                       user=user))
 
 
 def _update_invites(request):
