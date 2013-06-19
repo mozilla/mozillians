@@ -25,7 +25,7 @@ class RegisterMiddleware(object):
                       r'^/[\w-]+{0}'.format(reverse('browserid_logout')),
                       r'^/[\w-]+{0}'.format(reverse('register')),
                       r'^/csp/',
-                      settings.MEDIA_URL if settings.DEBUG else '')
+                      settings.MEDIA_URL if settings.DEBUG else '$')
 
         if (user.is_authenticated() and not user.userprofile.is_complete
             and not filter(lambda url: re.match(url, path), allow_urls)):
