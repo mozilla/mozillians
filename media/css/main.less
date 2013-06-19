@@ -12,11 +12,11 @@
 // Navigation
 // Footer
 // Homepage
+// Generic Groups, Functional Areas and Search Results
+// Search Results
 // Generic bootstrap fixes
 // Profile
 // About
-// Generic Groups, Functional Areas and Search Results
-// Search Results
 // Invite/Invited
 // Groups
 
@@ -840,6 +840,126 @@ body#home {
         }
     }
 }
+/* Generic Groups, Functional Areas and Search Results
+====================================================== */
+body.search-page {
+    .results-list {
+        margin-top: 25px;
+        .pagination {
+            width: 100%;
+            float: left;
+            .clearfix;
+            span, a {
+                .button;
+                min-width: 30px !important;
+            }
+            span {
+                .button-white.selected
+            }
+            margin-bottom: 20px;
+        }
+        .people-list {
+            ul {
+                li {
+                    list-style: none;
+                    .clearfix;
+                    margin: 0 15px 15px 0;
+                    float: left;
+                    word-wrap: break-word; 
+                    @media (max-width: @breakMobileLandscape) { 
+                        width: 100%;
+                    }
+                    .avatar {
+                        position: relative;
+                        .profile-photo {
+                            .border-radius(100%);
+                            position: absolute;
+                            border: 5px solid @white;
+                            .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
+                            width: 70px;
+                            height: 70px;
+                            left: 0;
+                            img {
+                                .border-radius(100%);
+                            }
+                        }
+                    }
+                    .profile-info {
+                        text-align: left;
+                        margin: 3px 0 0 90px;
+                        ul {
+                            li {
+                                float: none;
+                                font-size: 12px;
+                                margin-bottom: 3px;
+                            }
+                        }
+                        p {
+                            margin-bottom: 8px;
+                            font-size: 20px;
+                        }
+                    }
+                    a {
+                        .button;
+                        .button-sand;
+                        .clearfix;
+                        width: 400px;
+                        min-height: 105px;
+                        padding: 13px 15px 0;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        @media (max-width: @breakMobileLandscape) {
+                            width: 300px; 
+                        }
+                        @media (max-width: @breakMobile) {
+                            width: 250px !important; 
+                        }
+                    }
+                }
+            } 
+        }
+    }
+}
+
+/* Search Results
+================= */
+body#search {
+    form#search-form {
+        .clearfix;
+        input[type=text] {
+            width: 80%;
+            height: 40px;
+            border: 1px solid lighten(@black,90%);
+            font-size: 20px;
+            background: @white url("/media/img/spyglass.png") no-repeat 5px 50% !important;
+            padding: 0 0 0 30px !important;
+            float: left;
+        }
+        button {
+            .button;
+            &[type=button] {
+                .button-sand;
+                margin-top: 15px;
+            }
+            &[type=submit] {
+                margin: 3px 0 0 10px;
+                font-size: 22px;
+                @media (max-width: @breakTablet) {
+                    margin: 0;
+                    font-size: 14px;
+                }
+            }
+        }
+        .search-options {
+            display: none;
+            margin-top: 10px;
+        }
+    }
+    .help_text {
+        margin-top: 25px;
+    }
+}
+
 
 // Styles below this line are still using Bootstrap (media/css/bootstrap.min.css)
 
@@ -1014,70 +1134,6 @@ body#about {
     }
 }
 
-/* Generic Groups, Functional Areas and Search Results
-====================================================== */
-body.search-page {
-    .result {
-        margin-top: 15px;
-        a {
-            min-width: 340px;
-            height: 75px;
-            margin-bottom: 25px;
-        }
-        h2 {
-            font-size: 20px;
-            margin: 0;
-            width: 220px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-bottom: 3px;
-        }
-        img {
-            float: left;
-            height: 70px;
-            width: 70px;
-            margin: 0 10px 0 0;
-            border: 1px solid #52ADCC;
-            .border-radius(4px);
-        }
-        .details {
-            ul {
-                font-size: 12px;
-                list-style: none;
-                text-align: left;
-                width: 220px;
-                white-space: nowrap;
-                text-overflow: ellipsis; 
-                margin: 0 0 9px 25px;
-                li {
-                    line-height: 18px;
-                }
-            }
-        }
-    }
-}
-
-/* Search Results
-================== */
-body#search {
-    .search-options {
-        display: none;
-        input, span {
-            display: block;
-            float: left;
-        }
-        input {
-            margin-right: 10px;
-        }
-    }
-    #search-form {
-        button {
-            margin: -10px 8px 0 0;
-        }
-    }
-}
-
 /* Invite/Invited
 ================== */
 body#invite {
@@ -1098,7 +1154,6 @@ body#group-show {
         margin: 0px; 
         padding: 0px;
         li {
-            margin: 0px; 
             padding: 0px;
             list-style-type: none;
         }

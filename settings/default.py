@@ -136,8 +136,6 @@ MINIFY_BUNDLES = {
             'js/register.js',
         ),
         'search': (
-            'js/libs/jquery.endless-scroll.js',
-            'js/infinite.js',
             'js/expand.js',
         ),
         'backbone': (
