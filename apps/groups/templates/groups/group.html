@@ -110,36 +110,48 @@
     {% endif %}
 
     {% if not people.paginator.count %}
-      <div class="well">
-        <p id="not-found">
-          Sorry, we cannot find any mozillians in {{ group.name }}
-        </p>
-      </div>
+      <h3 id="not-found">
+        Sorry, we cannot find any mozillians in <em>"{{ group.name }}"</em>.
+      </h3>
     {% else %}
-      <h3>{{ _('Group Members') }}</h3>
-      <div class="row">
-        {% for person in people %}
-          {{ search_result(person) }}
-        {% endfor %}
-        {% if show_pagination %}
-          <div data-pages={{ num_pages }} class="pagination">
-            {% for page in people.paginator.page_range %}
-              {% if page == people.number %}
-                <span>{{ page }}</span>
-              {% else %}
-                <a href="#">{{ page }}</a>
-              {% endif %}
-            {% endfor %}
-          </div>
-          <div id="final-result">
-            <span>
-              {% trans count = people.paginator.count %}
-                Showing all {{ count }} results.
+      <div class="results-list">
+        <div class="people-list">
+          <h3>{{ _('Group Members') }}</h3>
+          {% if show_pagination %}
+            <p>
+              {% trans paginator_count=people.paginator.count %}
+              Showing all <strong>{{ paginator_count }}</strong> results.
               {% endtrans %}
-            </span>
-          </div>
-        {% endif %}
-     {% endif %}
+            </p>
+            <div data-pages={{ num_pages }} class="pagination">
+              {% for page in people.paginator.page_range %}
+                {% if page == people.number %}
+                  <span>{{ page }}</span>
+                {% else %}
+                  <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+          <ul>
+            {% for person in people %}
+              {{ search_result(person) }}
+            {% endfor %}
+          </ul>
+          {% if show_pagination %}
+            <div data-pages={{ num_pages }} class="pagination">
+              {% for page in people.paginator.page_range %}
+                {% if page == people.number %}
+                  <span>{{ page }}</span>
+                {% else %}
+                  <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
 </div>
 {% endblock content %}
 
