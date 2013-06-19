@@ -3,15 +3,15 @@
     <a href="{{ url('list_city', country=profile.country, city=profile.city) }}">
       {{ profile.city }}</a>,
   {% else %}
-    {{ profile.city }}{% if profile.region %},{% endif %}
+    {{ profile.city }},
   {% endif %}
 {% endif %}
 {% if profile.region %}
   {% if profile.country and user.is_authenticated() %}
     <a href="{{ url('list_region', country=profile.country, region=profile.region) }}">
-      {{ profile.region }}</a>
+      {{ profile.region }}</a>,
   {% else %}
-     {{ profile.region }}
+     {{ profile.region }},
   {% endif %}
 {% endif %}
 {% if profile.country %}
