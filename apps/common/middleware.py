@@ -21,11 +21,12 @@ class RegisterMiddleware(object):
     def process_request(self, request):
         user = request.user
         path = request.path
-        allow_urls = (r'^/[\w-]+{0}'.format(reverse('logout')),
+        allow_urls = [r'^/[\w-]+{0}'.format(reverse('logout')),
                       r'^/[\w-]+{0}'.format(reverse('browserid_logout')),
                       r'^/[\w-]+{0}'.format(reverse('register')),
-                      r'^/csp/',
-                      settings.MEDIA_URL if settings.DEBUG else '')
+                      r'^/csp/',]
+        if settings.DEBUG:
+            allow_urls.append(settings.MEDIA_URL)
 
         if (user.is_authenticated() and not user.userprofile.is_complete
             and not filter(lambda url: re.match(url, path), allow_urls)):
