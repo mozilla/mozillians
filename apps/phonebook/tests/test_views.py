@@ -108,15 +108,16 @@ class TestViews(ESTestCase):
 
     def test_user_view_own_profile(self):
         """Test user requests own profile."""
-        def _get_page(client, user):
+        def _get_page(client, user, status=200):
             url = reverse('profile', args=[user.username])
             response = client.get(url)
-            self.assertEqual(response.status_code, 200)
-            eq_(response.context['profile'].user, user)
+            self.assertEqual(response.status_code, status)
+            if status == 200:
+                eq_(response.context['profile'].user, user)
         _get_page(self.mozillian_client, self.mozillian)
         _get_page(self.mozillian2_client, self.mozillian2)
         _get_page(self.pending_client, self.pending)
-        _get_page(self.incomplete_client, self.incomplete)
+        _get_page(self.incomplete_client, self.incomplete, 302)
 
     def test_user_view_nonpublic_mozillian_profile(self):
         """Test user requests non public mozillian profile."""
@@ -139,7 +140,7 @@ class TestViews(ESTestCase):
         _get_page(self.mozillian_client, 200)
         _get_page(self.mozillian2_client, 200)
         _get_page(self.pending_client, 200)
-        _get_page(self.incomplete_client, 200)
+        _get_page(self.incomplete_client, 302)
         _get_page(self.anonymous_client, 200)
 
     def test_user_view_pending_profile(self):
@@ -151,7 +152,7 @@ class TestViews(ESTestCase):
         _get_page(self.mozillian_client, 200)
         _get_page(self.mozillian2_client, 200)
         _get_page(self.pending_client, 200)
-        _get_page(self.incomplete_client, 200)
+        _get_page(self.incomplete_client, 302)
         _get_page(self.anonymous_client, 200)
 
         # Set pending profile to non public
@@ -184,7 +185,7 @@ class TestViews(ESTestCase):
         _get_page(self.mozillian_client, 404)
         _get_page(self.mozillian2_client, 404)
         _get_page(self.pending_client, 302)
-        _get_page(self.incomplete_client, 200)
+        _get_page(self.incomplete_client, 302)
         _get_page(self.anonymous_client, 302)
 
     def test_pending_edit_profile(self):
