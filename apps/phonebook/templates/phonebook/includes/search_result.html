@@ -1,38 +1,37 @@
-<div class="span5 result">
-  <a class="btn js-btn" href="{{ url('profile', profile.user.username) }}">
+<li>
+  <a href="{{ url('profile', profile.user.username) }}">
     <div class="avatar">
       <img class="profile-photo"
            src="{{ profile.get_photo_url('70x70') }}"
            alt="{{ _('Profile Photo') }}">
     </div>
-    <div class="details">
+    <div class="profile-info">
+      <h4>
+        {{ profile.display_name|truncate(20, True) }}
+      </h4>
+      {% if profile.is_vouched %}
+        <p title="{{ _('This user is a vouched Mozillian.') }}">
+          {{ _('Mozillian') }}
+        </p>
+      {% else %}
+        <p title="{{ _('This user has not yet been vouched.') }}">
+          {{ _('Non-Vouched') }}
+        </p>
+      {% endif %}
       <ul>
-        <li>
-          <h2>
-            {{ profile.display_name }}
-          </h2>
-        </li>
-        {% if profile.is_vouched %}
-          <li title="{{ _('This user is a vouched Mozillian.') }}">
-            {{ _('Mozillian') }}
-          </li>
-        {% else %}
-          <li title="{{ _('This user has not yet been vouched.') }}">
-            {{ _('Non-Vouched') }}
-          </li>
-        {% endif %}
         {% if profile.email %}
           <li>
-            {{ _('Email:') }} {{ profile.email }}
+            <i class="icon-envelope"></i>
+            {{ profile.email }}
           </li>
         {% endif %}
         {% if profile.user.username %}
           <li>
-            {{ _('Username:') }} {{ profile.user.username }}
+            <i class="icon-user"></i>
+            {{ profile.user.username }}
           </li>
         {% endif %}
       </ul>
     </div>
-    <div class="ui-helper-clearfix"></div>
   </a>
-</div>
+</li>
