@@ -525,21 +525,23 @@ body#home {
             width: 100%;
             position: absolute;
             top: 0;
-            &:after {
-                content: ' ';
-                position: absolute;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                right: 0;
-                #gradient .vertical-transparent-fade(bottom, rgba(234, 239, 242, 0.99) 20%, 
-                    rgba(234, 239, 242, 0.7) 95%);
-            }
+        }
+
+        #mosaic span {
+            background: transparent url('/media/img/mosaic_overlay.png') 0 0 repeat-x;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: block;
         }
 
         #main-feature {
             text-align: center;
             padding: 60px 0;
+            z-index: 11;
             @media (max-width: @breakMobileLandscape) { 
                 padding: 40px 0;
             }
