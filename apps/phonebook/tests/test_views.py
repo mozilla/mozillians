@@ -4,6 +4,7 @@ from uuid import uuid4
 from django import test
 from django.contrib.auth.models import User
 
+from funfactory.helpers import urlparams
 from funfactory.urlresolvers import set_url_prefix, reverse
 from nose.tools import eq_
 from pyquery import PyQuery as pq
@@ -369,6 +370,14 @@ class TestViews(ESTestCase):
             doc = pq(response.content)
             new_photo = doc('#profile-photo').attr('src')
         assert new_photo != old_photo
+
+
+    def test_redirect_after_login(self):
+        next_url = 'testurl'
+        url = urlparams(reverse('home'), next=next_url)
+        response = self.client.get(url)
+        doc = pq(response.content)
+        eq_(doc('.browserid-login').attr('data-next'), next_url)
 
 
 class TestVouch(ESTestCase):
