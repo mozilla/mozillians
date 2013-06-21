@@ -102,16 +102,6 @@ body {
         &.old {
             #main {
                 min-height: 500px;
-                .avatar img, .avatar .profile-photo {
-                    float: left;
-                    height:70px;
-                    width:70px;
-                    margin: 0 10px 0 0;
-                    border: 1px solid #52ADCC;
-                    max-height: 70px;
-                    max-width: 70px;
-                    .border-radius(4px);
-                }
                 input[type=text], input[type=password],
                 input[type=email], input[type=search],
                 textarea {
@@ -151,6 +141,7 @@ form {
 }
 
 .alert {
+    z-index: 11;
     padding: 8px 35px 8px 14px;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
     background-color: #fcf8e3;
@@ -1018,8 +1009,38 @@ body#about {
 
 /* Generic Groups, Functional Areas and Search Results
 ====================================================== */
-body.search-page {
+body.search-page, body#group-show {
+    .avatar {
+        img {
+            float: left;
+            height: 70px;
+            width: 70px;
+            margin: 0 10px 0 0;
+            .border-radius(100%);
+            border: 3px solid @white;
+            .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
+            img {
+                .border-radius(100%);
+            }
+        }
+    }
+    .details {
+        float: left;
+        ul {
+            font-size: 12px;
+            list-style: none;
+            text-align: left;
+            white-space: nowrap;
+            text-overflow: ellipsis; 
+            margin: 0 0 9px 0;
+            padding: 0;
+            li {
+                line-height: 18px;
+            }
+        }
+    }
     .result {
+        .span(5);
         margin-top: 15px;
         a {
             min-width: 340px;
@@ -1034,28 +1055,6 @@ body.search-page {
             overflow: hidden;
             text-overflow: ellipsis;
             padding-bottom: 3px;
-        }
-        img {
-            float: left;
-            height: 70px;
-            width: 70px;
-            margin: 0 10px 0 0;
-            border: 1px solid #52ADCC;
-            .border-radius(4px);
-        }
-        .details {
-            ul {
-                font-size: 12px;
-                list-style: none;
-                text-align: left;
-                width: 220px;
-                white-space: nowrap;
-                text-overflow: ellipsis; 
-                margin: 0 0 9px 25px;
-                li {
-                    line-height: 18px;
-                }
-            }
         }
     }
 }
@@ -1096,25 +1095,6 @@ body#invited, body#invite {
 /* Groups
 ================== */
 body#group-show {
-    ul {
-        margin: 0px; 
-        padding: 0px;
-        li {
-            margin: 0px; 
-            padding: 0px;
-            list-style-type: none;
-        }
-    }
-    img.profile-photo {
-        .border-radius(100%);
-        border: 3px solid @white;
-        .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-        width: 72px;
-        height: 72px;
-        img {
-            .border-radius(100%);
-        }
-    }
     button {
         .button;
     }
@@ -1138,9 +1118,15 @@ body#group-show {
         }
         .curated-group-details {
             .span(6);
+            @media (max-width: @breakMobileLandscape) { 
+                width: 100%;
+            }
         }
         .steward {
             .span(4);
+            @media (max-width: @breakMobileLandscape) { 
+                width: 100%;
+            }
             .avatar {
                 float: left;
                 margin-right: 10px;
@@ -1148,16 +1134,6 @@ body#group-show {
             ul {
                 float: left;
             }
-        }
-    }
-    .result {
-        .span(5);
-        margin-bottom: 20px;
-        .avatar {
-            float: left;
-        }
-        .details {
-            float: left;
         }
     }
     #toggle-group {
