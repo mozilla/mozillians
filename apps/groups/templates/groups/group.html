@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base-old.html" %}
 
 {% block page_title %}{{ _('Group: {name}')|f(name=group.name) }}{% endblock %}
 
@@ -74,20 +74,22 @@
                      src="{{ group.steward.get_photo_url('70x70') }}"
                      alt="{{ _('Profile Photo') }}">
               </div>
-              <ul>
-                <li>
-                  <span>
-                    <a href="{{ url('profile', group.steward.user.username) }}">
-                      {{ group.steward.display_name }}
-                    </a>
-                  </span>
-                </li>
-                <li>
-                  <a href="mailto:{{ group.steward.user.email }}">
-                    {{ group.steward.user.email }}
-                  </a>
-                </li>
-              </ul>
+              <div class="details">
+                  <ul>
+                    <li>
+                      <span>
+                        <a href="{{ url('profile', group.steward.user.username) }}">
+                          {{ group.steward.display_name }}
+                        </a>
+                      </span>
+                    </li>
+                    <li>
+                      <a href="mailto:{{ group.steward.user.email }}">
+                        {{ group.steward.user.email }}
+                      </a>
+                    </li>
+                  </ul>
+                </div><!-- details -->
             </div><!-- .steward -->
 
         </div><!-- .row -->

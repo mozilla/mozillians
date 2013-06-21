@@ -12,15 +12,6 @@
             {{ profile.display_name }}
           </h2>
         </li>
-        {% if profile.is_vouched %}
-          <li title="{{ _('This user is a vouched Mozillian.') }}">
-            {{ _('Mozillian') }}
-          </li>
-        {% else %}
-          <li title="{{ _('This user has not yet been vouched.') }}">
-            {{ _('Non-Vouched') }}
-          </li>
-        {% endif %}
         {% if profile.email %}
           <li>
             {{ _('Email:') }} {{ profile.email }}
@@ -33,6 +24,5 @@
         {% endif %}
       </ul>
     </div>
-    <div class="ui-helper-clearfix"></div>
   </a>
 </div>
