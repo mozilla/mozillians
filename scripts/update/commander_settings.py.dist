@@ -15,3 +15,6 @@ SSH_KEY = None
 
 REMOTE_WSGI = '/data/www/mozillians.allizom.org/mozillians/wsgi/playdoh.wsgi'
 REMOTE_HOSTNAME = 'mozillians.allizom.org'
+
+NEW_RELIC_API_KEY = None
+NEW_RELIC_APP_ID = None
