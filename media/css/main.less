@@ -1011,31 +1011,40 @@ body#about {
 ====================================================== */
 body.search-page, body#group-show {
     .avatar {
+        width: 70px;
+        height: 70px;
+        margin: 0 15px 0 0;
+        padding: 0;
+        float: left;
+        .border-radius(100%);
+        border: 5px solid @white;
+        .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
         img {
-            float: left;
+            display: block;
             height: 70px;
             width: 70px;
-            margin: 0 10px 0 0;
+            margin: 0;
             .border-radius(100%);
-            border: 3px solid @white;
-            .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-            img {
-                .border-radius(100%);
-            }
         }
     }
     .details {
         float: left;
+        margin: 0;
+        padding: 0;
         ul {
+            width: 240px;
+            margin: 0;
+            padding: 10px 0;
             font-size: 12px;
             list-style: none;
             text-align: left;
             white-space: nowrap;
-            text-overflow: ellipsis; 
-            margin: 0 0 9px 0;
-            padding: 0;
             li {
+                margin: 0;
+                padding: 0;
                 line-height: 18px;
+                overflow: hidden;
+                text-overflow: ellipsis; 
             }
         }
     }
@@ -1044,7 +1053,7 @@ body.search-page, body#group-show {
         margin-top: 15px;
         a {
             min-width: 340px;
-            height: 75px;
+            height: 80px;
             margin-bottom: 25px;
         }
         h2 {
@@ -1106,7 +1115,7 @@ body#group-show {
         box-sizing: border-box;
         border-radius: 4px 4px 4px 4px;
         padding: 20px;
-        margin: 0 0 20px 0;
+        margin: 0 0 10px 0;
         span {
             font-weight: 800;
             text-decoration: none;
@@ -1117,13 +1126,22 @@ body#group-show {
             .clearfix;
         }
         .curated-group-details {
-            .span(6);
+            .span(5);
+            list-style: none;
+            text-align: left;
+            margin-bottom: 10px;
+            li {
+                margin: 0;
+                padding: 0;
+                line-height: 18px;
+                overflow: hidden;
+            }
             @media (max-width: @breakMobileLandscape) { 
                 width: 100%;
             }
         }
         .steward {
-            .span(4);
+            .span(5);
             @media (max-width: @breakMobileLandscape) { 
                 width: 100%;
             }
@@ -1133,6 +1151,9 @@ body#group-show {
             }
             ul {
                 float: left;
+            }
+            h3 {
+                font-size: 1.3em;
             }
         }
     }
