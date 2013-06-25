@@ -9,11 +9,12 @@ from django.http import HttpResponseRedirect
 from django.utils.encoding import iri_to_uri
 from django.shortcuts import redirect
 from tower import ugettext as _
+from tower import ugettext_lazy as _lazy
 
 from apps.groups.models import Group, GroupAlias
 
-LOGIN_MESSAGE = _('You must be logged in to continue.')
-GET_VOUCHED_MESSAGE = _('You must be vouched to continue.')
+LOGIN_MESSAGE = _lazy(u'You must be logged in to continue.')
+GET_VOUCHED_MESSAGE = _lazy(u'You must be vouched to continue.')
 
 
 class RegisterMiddleware(object):

@@ -2,7 +2,7 @@ import re
 
 from django import forms
 
-from tower import ugettext_lazy as _
+from tower import ugettext_lazy as _lazy
 
 from helpers import stringify_groups
 from models import Group
@@ -11,15 +11,15 @@ from models import Group
 class SortForm(forms.Form):
     """Group Index Sort Form."""
     sort = forms.ChoiceField(required=False,
-                             choices=(('name', 'Group Name A-Z'),
-                                      ('-num_members', 'Most Members'),
-                                      ('num_members', 'Fewest Members')))
-
+                             choices=(('name', _lazy(u'Group Name A-Z')),
+                                      ('-num_members', _lazy(u'Most Members')),
+                                      ('num_members', _lazy(u'Fewest Members'))))
 
     def clean_sort(self):
         if self.cleaned_data['sort'] == '':
             return 'name'
         return self.cleaned_data['sort']
+
 
 class GroupWidget(forms.TextInput):
 
