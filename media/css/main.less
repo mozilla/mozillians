@@ -750,6 +750,10 @@ body#home {
                 section, form {
                     margin-bottom: 20px;
                 }
+                @media (max-width: @breakMobileLandscape) {
+                    padding: 0;
+                    text-align: center;
+                }
                 #homepage-search {
                     input {
                         width: 100%;
@@ -766,7 +770,7 @@ body#home {
                             width: 400px;
                         }
                         @media (max-width: @breakMobileLandscape) { 
-                            width: 75%;
+                            width: 91%;
                             font-size: 16px;
                         }
                     }
@@ -802,6 +806,10 @@ body#home {
                         height: 30px;
                         margin: 0;
                         padding: 0 0 0 50px;
+                        @media (max-width: @breakMobileLandscape) {
+                            padding: 0;
+                            margin-top: 60px;
+                        }
                     }
                     span.icon {
                         top: -20px;
@@ -813,6 +821,11 @@ body#home {
                         .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
                         img {
                             .border-radius(100%);
+                        }
+                        @media (max-width: @breakMobileLandscape) {
+                            left: 40%;
+                            width: 60px;
+                            height: 60px;
                         }
                     }
                     @media (max-width: @breakTablet) {
