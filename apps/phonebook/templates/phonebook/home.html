@@ -17,7 +17,6 @@
       <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
       <hr>
       <form id="homepage-search" action="{{ url('search') }}" method="GET">
-          {{ csrf() }}
           <input type="text" name="q" class="search-query"
           placeholder="{{ _('Search for people, groups and more') }}">
        </form>
@@ -148,9 +147,8 @@
     <article id="content-info">
       <h1>{{ _('Hello!') }}</h1>
       <form id="homepage-search" action="{{ url('search') }}" method="GET">
-        {{ csrf() }}
         <input type="text" name="q" class="search-query"
-        placeholder="{{ _('Search for people, groups and more') }}">
+               placeholder="{{ _('Search for people, groups and more') }}">
         <small>{{ _('Examples:') }}
           {% trans search_url=url('search') %}
           <a href="{{ search_url }}?q=python">python</a>,
