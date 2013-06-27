@@ -114,7 +114,9 @@
     {% if not people.paginator.count %}
       <div class="well">
         <p id="not-found">
-          Sorry, we cannot find any mozillians in {{ group.name }}
+          {% trans group_name=group.name %}
+            Sorry, we cannot find any mozillians in {{ group_name }}
+          {% endtrans %}
         </p>
       </div>
     {% else %}
