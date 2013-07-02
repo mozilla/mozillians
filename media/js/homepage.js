@@ -8,9 +8,9 @@ $(function() {
   $('#mosaic').gridrotator( {
       rows    : 3,
       columns   : 15,
-      animType  : 'fadeInOut',
-      animSpeed : 700,
-      interval  : 800,
+      animType  : 'rotateLeft',
+      animSpeed : 1000,
+      interval  : 2000,
       step    : 1,
       w480    : {
         rows  : 2,

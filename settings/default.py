@@ -118,7 +118,7 @@ MINIFY_BUNDLES = {
         ),
         'homepage': (
             'js/libs/modernizr.custom.26887.js',
-            'js/libs/jquery.transit.min.js',
+            'js/libs/jquery.transit.js',
             'js/libs/jquery.gridrotator.js',
             'js/libs/jquery.smooth-scroll.min.js',
             'js/homepage.js'
