@@ -1,7 +1,3 @@
-[submodule "vendor"]
-        ignore = dirty
-	path = vendor
-	url = git://github.com/mozilla/mozillians-lib.git
 [submodule "media/js/libs/tag-it"]
         ignore = dirty
 	path = media/js/libs/tag-it
@@ -15,3 +11,28 @@
 [submodule "vendor-local/src/django-autocomplete-light"]
 	path = vendor-local/src/django-autocomplete-light
 	url = git://github.com/yourlabs/django-autocomplete-light
+[submodule "vendor-local/src/django-bootstrap-form"]
+	path = vendor-local/src/django-bootstrap-form
+	url = https://github.com/tallowen/django-bootstrap-form
+[submodule "vendor"]
+        ignore = dirty
+	path = vendor
+	url = git://github.com/mozilla/playdoh-lib
+[submodule "vendor-local/src/elasticutils"]
+	path = vendor-local/src/elasticutils
+	url = git://github.com/mozilla/elasticutils
+[submodule "vendor-local/src/pyes"]
+	path = vendor-local/src/pyes
+	url = git://github.com/aparo/pyes
+[submodule "vendor-local/src/django-tastypie"]
+	path = vendor-local/src/django-tastypie
+	url = git://github.com/toastdriven/django-tastypie
+[submodule "vendor-local/src/pystatsd"]
+	path = vendor-local/src/pystatsd
+	url = git://github.com/jsocol/pystatsd
+[submodule "vendor-local/src/django-csp"]
+	path = vendor-local/src/django-csp
+	url = git://github.com/mozilla/django-csp
+[submodule "vendor-local/src/django-browserid"]
+	path = vendor-local/src/django-browserid
+	url = git://github.com/mozilla/django-browserid
