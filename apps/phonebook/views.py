@@ -185,7 +185,8 @@ def search(request):
 
         profiles = UserProfile.search(query, public=public,
                                       include_non_vouched=include_non_vouched)
-        groups = Group.search(query)
+        if not public:
+            groups = Group.search(query)
 
         paginator = Paginator(profiles, limit)
 

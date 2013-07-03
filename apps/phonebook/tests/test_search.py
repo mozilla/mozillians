@@ -113,6 +113,12 @@ class TestSearch(ESTestCase):
         eq_(profile, self.mozillian2.userprofile)
         eq_(profile._privacy_level, PUBLIC)
 
+    def test_public_search_no_groups(self):
+        url = urlparams(reverse('search'), include_non_vouched='on')
+        response = self.anonymous_client.get(url, follow=True)
+        groups = response.context['groups']
+        eq_(groups, None)
+
     def test_public_search_with_unvouched(self):
         url = urlparams(reverse('search'), include_non_vouched='on')
         response = self.anonymous_client.get(url, follow=True)
