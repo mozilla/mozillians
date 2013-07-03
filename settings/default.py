@@ -37,7 +37,7 @@ DATABASES = {
         'TEST_COLLATION': 'utf8_general_ci',
     },
 }
-						
+
 ## L10n
 LOCALE_PATHS = [path('locale')]
 
@@ -196,7 +196,7 @@ BROWSERID_CREATE_USER = True
 BROWSERID_USERNAME_ALGO = calculate_username
 
 # On Login, we redirect through register.
-LOGIN_REDIRECT_URL = '/register'
+LOGIN_REDIRECT_URL = '/register/'
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     # These need to go in order of migration.
@@ -245,9 +245,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 FROM_NOREPLY = u'Mozillians <no-reply@mozillians.org>'
 
 # Auth
-LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/'
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -330,6 +327,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
                          '^/browserid/',
+                         '^/jsi18n',
                          '^/api/']
 
 # Set default avatar for user profiles
