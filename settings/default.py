@@ -196,6 +196,7 @@ BROWSERID_CREATE_USER = True
 BROWSERID_USERNAME_ALGO = calculate_username
 
 # On Login, we redirect through register.
+LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/register/'
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
