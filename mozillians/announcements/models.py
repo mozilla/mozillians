@@ -1,15 +1,15 @@
 import os
 import uuid
-
 from datetime import datetime
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 import bleach
 from sorl.thumbnail import ImageField
+
+from mozillians.announcements.managers import AnnouncementManager
 
 
 ALLOWED_TAGS = ['em', 'strong', 'a']
@@ -19,27 +19,6 @@ def _calculate_image_filename(instance, filename):
     """Generate a unique filename for uploaded image."""
     return os.path.join(settings.ANNOUNCEMENTS_PHOTO_DIR,
                         str(uuid.uuid4()) + '.jpg')
-
-
-class AnnouncementManager(models.Manager):
-    """Announcements Manager."""
-    use_for_related_fields = True
-
-    def published(self):
-        """Return published announcements."""
-        now = datetime.now()
-        return (Announcement.objects
-                .filter(publish_from__lte=now)
-                .filter(Q(publish_until__isnull=True)|
-                        (Q(publish_until__isnull=False)
-                         &Q(publish_until__gt=now))))
-
-    def unpublished(self):
-        """Return unpublished announcements."""
-        now = datetime.now()
-        return Announcement.objects.filter(Q(publish_from__gt=now)|
-                                           (Q(publish_until__isnull=False) &
-                                            Q(publish_until__lte=now)))
 
 
 class Announcement(models.Model):
