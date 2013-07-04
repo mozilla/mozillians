@@ -59,73 +59,71 @@
         </ul>
         {% block site_header_nav %}
           <nav role="navigation">
-            {% if user.is_authenticated() %}
               <a class="brand" href="{{ url('home') }}">
                   <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
               </a>
-              {% if user.get_profile().is_vouched %}
-                {% block search %}
-                  <form class="navbar-search"
-                      action="{{ url('search') }}" method="GET">
-                    <input type="text" name="q" class="search-query"
-                        placeholder="{{ _('Search for people, groups and more') }}">
-                  </form>
-                {% endblock %}
-              {% endif %}
-              {% if user.userprofile.is_complete %}
-                <div id="nav-main">
-                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                  <a href="#" class="dropdown-toggle">
-                    {% if user.userprofile.full_name %}
-                      {{ user.userprofile.full_name }}
-                    {% else %}
-                      {{ user.username }}
-                    {% endif %}
-                    <i class="icon-reorder"></i>
-                  </a>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a id="profile" href="{{ url('profile', user.username) }}">
-                        <i class="icon-eye-open"></i>
-                        {{ _('View Profile') }}
-                      </a>
-                    </li>
-                    <li class="edit_profile">
-                      <a href="{{ url('profile.edit') }}">
-                        <i class="icon-pencil"></i>
-                        {{ _('Edit Your Profile') }}
-                      </a>
-                    </li>
-                    {% if user.get_profile().is_vouched %}
+              {% block search %}
+                <form class="navbar-search"
+                    action="{{ url('search') }}" method="GET">
+                  <input type="text" name="q" class="search-query"
+                      placeholder="{{ _('Search for people, groups and more') }}">
+                </form>
+              {% endblock %}
+              {% if user.is_authenticated() %}
+                {% if user.userprofile.is_complete %}
+                  <div id="nav-main">
+                    <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
+                    <a href="#" class="dropdown-toggle">
+                      {% if user.userprofile.full_name %}
+                        {{ user.userprofile.full_name }}
+                      {% else %}
+                        {{ user.username }}
+                      {% endif %}
+                      <i class="icon-reorder"></i>
+                    </a>
+                    <ul class="dropdown-menu">
                       <li>
-                        <a id="invite" href="{{ url('invite') }}">
-                          <i class="icon-group"></i>
-                          {{ _('Invite') }}
+                        <a id="profile" href="{{ url('profile', user.username) }}">
+                          <i class="icon-eye-open"></i>
+                          {{ _('View Profile') }}
                         </a>
                       </li>
-                    {% endif %}
-                    <li>
-                      <a id="logout" class="browserid-logout" href="{{ url('logout') }}">
-                        <i class="icon-reply"></i>
-                        {{ _('Log Out') }}
-                      </a>
-                    </li>
-                  </ul>
-                </div>
+                      <li class="edit_profile">
+                        <a href="{{ url('profile.edit') }}">
+                          <i class="icon-pencil"></i>
+                          {{ _('Edit Your Profile') }}
+                        </a>
+                      </li>
+                      {% if user.get_profile().is_vouched %}
+                        <li>
+                          <a id="invite" href="{{ url('invite') }}">
+                            <i class="icon-group"></i>
+                            {{ _('Invite') }}
+                          </a>
+                        </li>
+                      {% endif %}
+                      <li>
+                        <a id="logout" class="browserid-logout" href="{{ url('logout') }}">
+                          <i class="icon-reply"></i>
+                          {{ _('Log Out') }}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                {% else %}
+                  <a id="logout" class="browserid-logout btn pull-right" href="{{ url('logout') }}">
+                    <i class="icon-reply"></i>
+                    {{ _('Log Out') }}
+                  </a>
+                {% endif %}
               {% else %}
-                <a id="logout" class="browserid-logout btn pull-right" href="{{ url('logout') }}">
-                  <i class="icon-reply"></i>
-                  {{ _('Log Out') }}
+                <a href="#" id="create_profile" class="persona-button browserid-login" 
+                   title="{{_('Sign in with Persona')}}"
+                   data-next="{{ request.REQUEST.next }}">
+                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
+                  <span class="signin">{{ _('Sign in with Persona') }}</span>
                 </a>
               {% endif %}
-            {% else %}
-              <a href="#" id="create_profile" class="persona-button browserid-login" 
-                 title="{{_('Sign in with Persona')}}"
-                 data-next="{{ request.REQUEST.next }}">
-                <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                <span class="signin">{{ _('Sign in with Persona') }}</span>
-              </a>
-            {% endif %}
           </nav>
         {% endblock %}
 
