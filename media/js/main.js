@@ -25,5 +25,9 @@ var app = {
             $('.dropdown-menu').toggle();
             $('i.icon-reorder').toggleClass('open');
         });
+
+        if ($.browser.msie) {
+            $('input, textarea').placeholder();
+        }
     });
 })(jQuery);
