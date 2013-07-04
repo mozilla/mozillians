@@ -48,88 +48,91 @@
   {{ browserid_info() }}
 
   <div id="outer-wrapper">
-    <div id="wrapper">
+    <div id="page">
     {% block site_header %}
-      <header id="masthead">
-        <a href="http://www.mozilla.org/" id="tabzilla">{{ _('Mozilla') }}</a>
+      <div class="wrapper">
+        <header id="masthead">
+        
+          <a href="http://www.mozilla.org/" id="tabzilla">{{ _('Mozilla') }}</a>
 
-        <ul id="nav-access">
-          <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
-          <li><a href="#content">{{ _('Skip to main content') }}</a></li>
-        </ul>
-        {% block site_header_nav %}
-          <nav role="navigation">
-              <a class="brand" href="{{ url('home') }}">
-                  <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
-              </a>
-              {% block search %}
-                <form class="navbar-search"
-                    action="{{ url('search') }}" method="GET">
-                  <input type="text" name="q" class="search-query"
-                      placeholder="{{ _('Search for people, groups and more') }}">
-                </form>
-              {% endblock %}
-              {% if user.is_authenticated() %}
-                {% if user.userprofile.is_complete %}
-                  <div id="nav-main">
-                    <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                    <a href="#" class="dropdown-toggle">
-                      {% if user.userprofile.full_name %}
-                        {{ user.userprofile.full_name }}
-                      {% else %}
-                        {{ user.username }}
-                      {% endif %}
-                      <i class="icon-reorder"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                      <li>
-                        <a id="profile" href="{{ url('profile', user.username) }}">
-                          <i class="icon-eye-open"></i>
-                          {{ _('View Profile') }}
-                        </a>
-                      </li>
-                      <li class="edit_profile">
-                        <a href="{{ url('profile.edit') }}">
-                          <i class="icon-pencil"></i>
-                          {{ _('Edit Your Profile') }}
-                        </a>
-                      </li>
-                      {% if user.get_profile().is_vouched %}
+          <ul id="nav-access">
+            <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
+            <li><a href="#content">{{ _('Skip to main content') }}</a></li>
+          </ul>
+          {% block site_header_nav %}
+            <nav role="navigation">
+                <a class="brand" href="{{ url('home') }}">
+                    <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
+                </a>
+                {% block search %}
+                  <form class="navbar-search"
+                      action="{{ url('search') }}" method="GET">
+                    <input type="text" name="q" class="search-query"
+                        placeholder="{{ _('Search for people, groups and more') }}">
+                  </form>
+                {% endblock %}
+                {% if user.is_authenticated() %}
+                  {% if user.userprofile.is_complete %}
+                    <div id="nav-main">
+                      <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
+                      <a href="#" class="dropdown-toggle">
+                        {% if user.userprofile.full_name %}
+                          {{ user.userprofile.full_name }}
+                        {% else %}
+                          {{ user.username }}
+                        {% endif %}
+                        <i class="icon-reorder"></i>
+                      </a>
+                      <ul class="dropdown-menu">
                         <li>
-                          <a id="invite" href="{{ url('invite') }}">
-                            <i class="icon-group"></i>
-                            {{ _('Invite') }}
+                          <a id="profile" href="{{ url('profile', user.username) }}">
+                            <i class="icon-eye-open"></i>
+                            {{ _('View Profile') }}
                           </a>
                         </li>
-                      {% endif %}
-                      <li>
-                        <a id="logout" class="browserid-logout" href="{{ url('logout') }}">
-                          <i class="icon-reply"></i>
-                          {{ _('Log Out') }}
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
+                        <li class="edit_profile">
+                          <a href="{{ url('profile.edit') }}">
+                            <i class="icon-pencil"></i>
+                            {{ _('Edit Your Profile') }}
+                          </a>
+                        </li>
+                        {% if user.get_profile().is_vouched %}
+                          <li>
+                            <a id="invite" href="{{ url('invite') }}">
+                              <i class="icon-group"></i>
+                              {{ _('Invite') }}
+                            </a>
+                          </li>
+                        {% endif %}
+                        <li>
+                          <a id="logout" class="browserid-logout" href="{{ url('logout') }}">
+                            <i class="icon-reply"></i>
+                            {{ _('Log Out') }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  {% else %}
+                    <a id="logout" class="browserid-logout btn pull-right" href="{{ url('logout') }}">
+                      <i class="icon-reply"></i>
+                      {{ _('Log Out') }}
+                    </a>
+                  {% endif %}
                 {% else %}
-                  <a id="logout" class="browserid-logout btn pull-right" href="{{ url('logout') }}">
-                    <i class="icon-reply"></i>
-                    {{ _('Log Out') }}
+                  <a href="#" id="create_profile" class="persona-button browserid-login" 
+                     title="{{_('Sign in with Persona')}}"
+                     data-next="{{ request.REQUEST.next }}">
+                    <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
+                    <span class="signin">{{ _('Sign in with Persona') }}</span>
                   </a>
                 {% endif %}
-              {% else %}
-                <a href="#" id="create_profile" class="persona-button browserid-login" 
-                   title="{{_('Sign in with Persona')}}"
-                   data-next="{{ request.REQUEST.next }}">
-                  <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                  <span class="signin">{{ _('Sign in with Persona') }}</span>
-                </a>
-              {% endif %}
-          </nav>
-        {% endblock %}
+            </nav>
+          {% endblock %}
 
-        {% block breadcrumbs %}{% endblock %}
-
-      </header>
+          {% block breadcrumbs %}{% endblock %}
+        
+        </header>
+      </div>
     {% endblock %}
 
     {% block mosaic %}{% endblock %}
@@ -159,7 +162,7 @@
 
     {% block site_footer %}
       <footer id="colophon">
-          <div class="container">
+          <div class="row">
 
             <h5>
               {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook',
