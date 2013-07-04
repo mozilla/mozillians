@@ -26,8 +26,6 @@ var app = {
             $('i.icon-reorder').toggleClass('open');
         });
 
-        if ($.browser.msie) {
-            $('input, textarea').placeholder();
-        }
+        $('input, textarea').placeholder();
     });
 })(jQuery);
