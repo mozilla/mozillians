@@ -46,9 +46,12 @@ class Announcement(models.Model):
     objects = AnnouncementManager()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    title = models.CharField(max_length=255, help_text='For admin use only.')
+    title = models.CharField(max_length=255)
     text = models.TextField(max_length=750)
     image = ImageField(default='', blank=True,
+                       help_text = ('60x60 pixel image recommended. Image '
+                                    'will be rescaled automatically to '
+                                    'a square.'),
                        upload_to=_calculate_image_filename)
     publish_from = models.DateTimeField(
         help_text='Timezone is %s' % settings.TIME_ZONE)
