@@ -36,8 +36,6 @@ urlpatterns = patterns('',
     url(r'', include('groups.urls')),
     url(r'', include('phonebook.urls')),
 
-    url(r'^csp', include('csp.urls')),
-
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
     url(r'^_autocomplete/', include('autocomplete_light.urls')),

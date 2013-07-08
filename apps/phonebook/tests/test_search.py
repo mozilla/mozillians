@@ -104,7 +104,7 @@ class TestSearch(ESTestCase):
         eq_(r.status_code, 200, 'Search view query should return 200')
 
         eq_(u.get_profile().display_name,
-            pq(r.content)('#profile-info h2').text(),
+            pq(r.content)('h1.fn').text(),
             'Should be redirected to a user with the right name')
 
     def test_public_search_vouched(self):
