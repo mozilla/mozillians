@@ -22,19 +22,4 @@ $(function() {
       }
   });
 
-  /* Back to top button
-  ================================================== */
-  var a = $('#back-to-top');
-
-  $(a).hide().removeAttr("href");
-
-  $(window).scroll(function() {
-    $(this).scrollTop() >= 200 ? $(a).fadeIn("slow") : $(a).fadeOut("slow");
-  });
-
-  $(a).click(function(){
-    $('html, body').animate({ scrollTop: "0px"}, 1200);
-  });
-
-
 });
