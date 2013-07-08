@@ -34,9 +34,8 @@ BAD_VOUCHER = 'Unknown Voucher'
 def home(request):
     if request.user.is_authenticated():
         profile = request.user.get_profile()
-        my_groups = profile.groups.exclude(steward=None).order_by('name')
-        curated_groups = Group.get_curated()
-        data = dict(groups=my_groups, curated_groups=curated_groups)
+        user_groups = profile.groups.all().order_by('name')
+        data = dict(user_groups = user_groups)
         return render(request, 'phonebook/home.html', data)
     else:
         return render(request, 'phonebook/home.html')

@@ -109,10 +109,10 @@
           </section>
         {% endif %}
         {% endwith %}
-        {% if curated_groups %}
+        {% if user_groups %}
           <section class="groups">
             <h4>{{ _('Member of:') }}</h4>
-            {% for group in curated_groups %}
+            {% for group in user_groups %}
               <a href="{{ url('group', group.url) }}">{{ group }}</a>{% if not loop.last %},{% endif %}
             {% endfor %}
           </section>
