@@ -8,6 +8,7 @@ from mozillians.groups.models import Group, Language, Skill
 from mozillians.mozspaces.models import MozSpace
 from mozillians.users.models import UserProfile
 
+
 ALLOWED_TAGS = ['em', 'strong']
 
 
@@ -25,7 +26,7 @@ def _validate_query(query):
 
 
 class FunFactManager(models.Manager):
-    """ Fun Facts Manager."""
+    """Fun Facts Manager."""
 
     def published(self):
         """Return published funfacts."""
@@ -33,7 +34,7 @@ class FunFactManager(models.Manager):
 
     def unpublished(self):
         """Return unpublished funfacts."""
-        return FunFact.objects.filter(unpublished=True)
+        return FunFact.objects.filter(published=False)
 
     def random(self):
         """Return random picked fact or None."""
@@ -41,6 +42,7 @@ class FunFactManager(models.Manager):
         if query.count():
             return query[0]
         return None
+
 
 class FunFact(models.Model):
     objects = FunFactManager()
