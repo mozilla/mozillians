@@ -123,16 +123,9 @@ body {
         }
     }
 }
-#wrapper {
-    width: 100%;
-    padding-bottom: 0;
-}
 
 #outer-wrapper {
-    position: relative;
-    height: 100%;
     background: url("/media/img/sandstone/bg-sky.png") #eaeff2;
-
     form {
         textarea, 
         input[type=email], 
@@ -471,39 +464,6 @@ footer#colophon {
             cursor: pointer;
         }
     }
-    .footer-license {
-        a { color: @white; }
-    }
-    .footer-nav {
-        .span(3);
-    }
-    @media (min-width: @breakDesktop) {
-        .footer-logo {
-            width: auto;
-        }
-        .footer-license {
-            .span(6);
-            .offset(1);
-        }
-    }
-    @media (max-width: @breakDesktop) {
-        .footer-logo {
-            width: auto;
-        }
-        .footer-license {
-            .span(3);
-            .offset(1);
-        }
-    }
-    @media (max-width: @breakTablet) {
-        .footer-license {
-            .span(3);
-        }
-    }
-    @media (max-width: @breakMobileLandscape) {
-        padding-left: 0;
-        padding-right: 0;    
-    }
     h5 {
         text-align: center;
         color: @white;
@@ -588,7 +548,7 @@ body#home {
                     background: @white url("/media/img/spyglass.png") no-repeat 8px 50%;
                     background-color: @white;
                     height: 50px;
-                    width: 600px;
+                    width: 525px;
                     padding: 0  0 0 35px;
                     font-size: 24px;
                     @media (max-width: @breakTablet) {
@@ -617,15 +577,16 @@ body#home {
             }
             #quote, #mozfacts {
                 .span(2);
+                margin: 0;
                 p {
                     font-size: 13px;
                     text-align: left;
                 }
             }
             #about {
-                width: 500px;
+                width: 550px;
                 float: left;
-                margin: 0 10px 0 20px;
+                margin: 0 50px;
                 p {
                     font-size: 16px;
                     line-height: 24px;

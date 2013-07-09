@@ -22,8 +22,7 @@ body {
     background: #f9f9f9 url(/media/img/sandstone/bg-stone.png) 0 0 repeat-x;
 }
 
-#wrapper {
-    padding-bottom: @baseLine * 2;
+.wrapper {
     width: @widthDesktop;
     margin: 0 auto;
     position: relative;
@@ -736,7 +735,7 @@ nav.menu-bar {
 /* Tablet Layout: 760px */
 @media only screen and (min-width: @breakTablet) and (max-width: @breakDesktop) {
 
-    #wrapper {
+    .wrapper {
       width: @widthTablet;
     }
 
@@ -798,7 +797,7 @@ nav.menu-bar {
 /* Mobile Layout: 320px */
 @media only screen and (max-width: @breakTablet) {
 
-    #wrapper {
+    .wrapper {
       width: @widthMobile;
     }
 
@@ -1071,7 +1070,7 @@ nav.menu-bar {
 /* Wide Mobile Layout: 480px */
 @media only screen and (min-width: @breakMobileLandscape) and (max-width: @breakTablet) {
 
-    #wrapper {
+    .wrapper {
         width: @widthMobileLandscape;
     }
 
