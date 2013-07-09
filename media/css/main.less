@@ -403,6 +403,15 @@ nav {
     }
 }
 
+a#back-to-top {
+    z-index: 1000;
+    bottom: 20px;
+    cursor: pointer;
+    position: fixed;
+    right: 20px;
+    .transition(background-color 0.3s linear 0s);
+}
+
 /* Tabzilla
 ==================== */
 #tabzilla-nav {
@@ -509,14 +518,6 @@ footer#colophon {
 /* Homepage
 ==================== */
 body#home {
-    a#back-to-top {
-        z-index: 1000;
-        bottom: 20px;
-        cursor: pointer;
-        position: fixed;
-        right: 20px;
-        .transition(background-color 0.3s linear 0s);
-    }
     &.loggedout {
         #main {  
         padding: 0; 
@@ -526,7 +527,6 @@ body#home {
                 padding-left: 0;
             }
         }
-
         #mosaic {
             width: 100%;
             position: absolute;
