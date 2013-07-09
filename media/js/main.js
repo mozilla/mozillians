@@ -20,11 +20,28 @@ var app = {
             $('#language-switcher').submit();
         });
 
-        //Main nav dropdown
-        $('a.dropdown-toggle').click(function() {
+        // Collapses nav menu when user has clicked outside the dropdown
+        function collapseNavMenu () {
+            $('.dropdown-menu').hide();
+            $('i.icon-reorder').removeClass('open');
+            $('#outer-wrapper').off('click', collapseNavMenu);
+        }
+
+        // Main nav dropdown
+        $('a.dropdown-toggle').on('click', function(e) {
+            var $icon = $('i.icon-reorder');
+            e.stopPropagation();
+
             $('.dropdown-menu').toggle();
-            $('i.icon-reorder').toggleClass('open');
-        });
+            $icon.toggleClass('open');
+
+            // If the nav is open listen for clicks outside the dropdown
+            if ($icon.hasClass('open')) {
+                $('#outer-wrapper').on('click', collapseNavMenu);
+            } else {
+                $('#outer-wrapper').off('click', collapseNavMenu);
+            }
+        });     
 
         $('input, textarea').placeholder();
     });
