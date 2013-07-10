@@ -1,7 +1,8 @@
-from celery.task import task
 from django.db.models import Count
 
-from models import Group, Skill
+from celery.task import task
+
+from mozillians.groups.models import Group, Skill
 
 
 @task

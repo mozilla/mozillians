@@ -6,10 +6,10 @@ from django.db.models import Count
 
 import autocomplete_light
 
-import utils
-from models import (Group, GroupAlias,
-                    Language, LanguageAlias,
-                    Skill, SkillAlias)
+import mozillians.groups.utils as utils
+from mozillians.groups.models import (Group, GroupAlias,
+                                      Language, LanguageAlias,
+                                      Skill, SkillAlias)
 
 
 class EmptyGroupFilter(SimpleListFilter):

@@ -1,9 +1,8 @@
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from autoslug.fields import AutoSlugField
 from tower import ugettext_lazy as _lazy
+
 
 # If three or more users use a group, it will get auto-completed.
 AUTO_COMPLETE_COUNT = 3

@@ -5,7 +5,7 @@ from django.db.models import Count
 import commonware.log
 import cronjobs
 
-from models import AUTO_COMPLETE_COUNT, Group, Skill, Language
+from mozillians.groups.models import AUTO_COMPLETE_COUNT, Group, Skill, Language
 
 
 log = commonware.log.getLogger('m.cron')

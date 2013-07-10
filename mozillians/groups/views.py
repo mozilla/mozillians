@@ -16,6 +16,7 @@ from mozillians.groups.forms import SortForm
 from mozillians.phonebook import forms
 from mozillians.users.tasks import update_basket_task
 
+
 log = commonware.log.getLogger('m.groups')
 
 
@@ -44,7 +45,7 @@ def list_groups(request, template, query):
 def index(request):
     """Lists all public groups (in use) on Mozillians."""
     query = (Group.objects.filter(members__is_vouched=True)
-              .annotate(num_members=Count('members')))
+             .annotate(num_members=Count('members')))
     template = 'groups/index.html'
     return list_groups(request, template, query)
 

@@ -4,8 +4,8 @@ from django import forms
 
 from tower import ugettext_lazy as _lazy
 
-from helpers import stringify_groups
-from models import Group
+from mozillians.groups.helpers import stringify_groups
+from mozillians.groups.models import Group
 
 
 class SortForm(forms.Form):
