@@ -154,7 +154,7 @@
             {% for group in profile.groups.all() %}
               {% if (user.is_authenticated() and
                      user.get_profile().is_vouched) %}
-                <a href="{{ url('group', group.url) }}">{{ group.name }}</a>
+                <a href="{{ url('groups:show', group.url) }}">{{ group.name }}</a>
               {%- else -%}
                 {{ group.name }}
               {%- endif -%}

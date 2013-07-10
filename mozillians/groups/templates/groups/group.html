@@ -55,7 +55,7 @@
                 {% endif %}
 
                 <li><span>{{ _('Members') }}:</span> {{ members }}</li>
-                
+
                 {% if skills %}
                   <li>
                       <span>{{ _('Skills members have in common') }}:</span>
@@ -98,8 +98,8 @@
     </article><!-- .group-meta -->
     {% endif %}
 
-    {% if not group.system %} 
-        <form action="{{ url('group_toggle', group.url) }}"
+    {% if not group.system %}
+        <form action="{{ url('groups:toggle_subscription', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
         <button class="button button{{ ('-negative' if in_group) }}">

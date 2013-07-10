@@ -1,18 +1,20 @@
 from django.conf.urls.defaults import patterns, url
 
-import views
-from models import Group, Skill, Language
+from mozillians.groups.models import Group, Skill, Language
 
-urlpatterns = patterns('',
-    url('^groups/$', views.index, name='group_index'),
-    url('^group/(?P<url>[-\w]+)/$', views.show, name='group'),
-    url('^functional-areas/$', views.index_functional_areas,
-        name='functional_areas_index'), 
-    url('^group/(?P<url>[-\w]+)/toggle/$', views.toggle, name='group_toggle'),
-    url('^groups/search/$', views.search,
-        dict(searched_object=Group), name='group_search'),
-    url('^skills/search/$', views.search,
-        dict(searched_object=Skill), name='skill_search'),
-    url('^languages/search/$', views.search,
-        dict(searched_object=Language), name='language_search'),
+
+urlpatterns = patterns('mozillians.groups',
+    url('^groups/$', 'views.index', name='index'),
+    url('^group/(?P<url>[-\w]+)/$', 'views.show', name='show'),
+
+    url('^functional-areas/$', 'views.index_functional_areas',
+        name='index_functional_areas'),
+    url('^group/(?P<url>[-\w]+)/toggle/$', 'views.toggle',
+        name='toggle_subscription'),
+    url('^groups/search/$', 'views.search',
+        dict(searched_object=Group), name='search_groups'),
+    url('^skills/search/$', 'views.search',
+        dict(searched_object=Skill), name='search_skills'),
+    url('^languages/search/$', 'views.search',
+        dict(searched_object=Language), name='search_languages'),
 )

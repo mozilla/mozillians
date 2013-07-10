@@ -113,7 +113,7 @@
           <section class="groups">
             <h4>{{ _('Member of:') }}</h4>
             {% for group in user_groups %}
-              <a href="{{ url('group', group.url) }}">{{ group }}</a>
+              <a href="{{ url('groups:show', group.url) }}">{{ group }}</a>
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
@@ -181,7 +181,7 @@
           <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
         </span>
         <h2>{{ _('Functional areas') }}</h2>
-        {% trans areas_url=url('functional_areas_index') %}
+        {% trans areas_url=url('groups:index_functional_areas') %}
           <p>
             View Mozillians, Stewards and information for any
             functional area. Find out who works on what and how you
@@ -195,7 +195,7 @@
           <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
         </span>
         <h2>{{ _('Groups') }}</h2>
-        {% trans group_url=url('group_index') %}
+        {% trans group_url=url('groups:index') %}
           <p>
             Find and join groups centered around interests,
             technologies, geographies and more.
