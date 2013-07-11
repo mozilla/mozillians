@@ -11,7 +11,6 @@ from django.shortcuts import redirect
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group, GroupAlias
 
 LOGIN_MESSAGE = _lazy(u'You must be logged in to continue.')
 GET_VOUCHED_MESSAGE = _lazy(u'You must be vouched to continue.')
@@ -91,48 +90,6 @@ class UsernameRedirectionMiddleware(object):
             and request.user.userprofile.is_vouched):
 
             newurl = '/u' + request.path_info
-            if request.GET:
-                with safe_query_string(request):
-                    newurl += '?' + request.META['QUERY_STRING']
-            return HttpResponseRedirect(newurl)
-        return response
-
-
-class OldGroupRedirectionMiddleware(object):
-    """
-    Redirect requests for groups from /group/<id>-<url> to
-    /group/<url> to avoid breaking group urls with the new url
-    schema.
-
-    """
-
-    def process_response(self, request, response):
-        group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[-\w]+)/$',
-                             request.path_info)
-        if (response.status_code == 404
-            and group_url
-            and (Group.objects.filter(url=group_url.group('url')).exists())):
-
-            newurl = reverse('group', args=[group_url.group('url')])
-            if request.GET:
-                with safe_query_string(request):
-                    newurl += '?' + request.META['QUERY_STRING']
-            return HttpResponseRedirect(newurl)
-        return response
-
-
-class GroupAliasRedirectionMiddleware(object):
-    """Redirect `group` requests to the alias `group` if it exists."""
-
-    def process_response(self, request, response):
-        group_url = re.match('^/group/(?P<url>[-\w]+)/$', request.path_info)
-        if (response.status_code == 404
-            and group_url
-            and (GroupAlias.objects.filter(url=group_url.group('url'))
-                 .exists())):
-
-            group_alias = GroupAlias.objects.get(url=group_url.group('url'))
-            newurl = reverse('group', args=[group_alias.alias.url])
             if request.GET:
                 with safe_query_string(request):
                     newurl += '?' + request.META['QUERY_STRING']

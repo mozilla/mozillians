@@ -174,8 +174,7 @@ MIDDLEWARE_CLASSES = get_middleware(append=[
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.common.middleware.RegisterMiddleware',
     'mozillians.common.middleware.UsernameRedirectionMiddleware',
-    'mozillians.common.middleware.OldGroupRedirectionMiddleware',
-    'mozillians.common.middleware.GroupAliasRedirectionMiddleware'])
+    'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
 
 # StrictTransport
 STS_SUBDOMAINS = True

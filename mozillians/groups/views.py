@@ -77,7 +77,11 @@ def search(request, searched_object=Group):
 @never_cache
 def show(request, url):
     """List all vouched users with this group."""
-    group = get_object_or_404(Group, url=url)
+    group_alias = get_object_or_404(GroupAlias, url=url)
+    if group_alias.alias.url != url:
+        return redirect('groups:show', url=group_alias.alias.url)
+
+    group = group_alias.alias
     limit = forms.PAGINATION_LIMIT
     in_group = (group.members.filter(user=request.user).exists())
     profiles = group.members.vouched()
