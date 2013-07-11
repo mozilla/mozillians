@@ -2,7 +2,7 @@ import json
 
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Count
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
@@ -11,7 +11,7 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.groups.models import Group, Skill
+from mozillians.groups.models import Group, GroupAlias, Skill
 from mozillians.groups.forms import SortForm
 from mozillians.phonebook import forms
 from mozillians.users.tasks import update_basket_task
@@ -71,7 +71,7 @@ def search(request, searched_object=Group):
         return HttpResponse(json.dumps(list(groups)),
                             mimetype='application/json')
 
-    return redirect('home')
+    return HttpResponseBadRequest()
 
 
 @never_cache
