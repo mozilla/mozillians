@@ -9,10 +9,6 @@ AUTO_COMPLETE_COUNT = 3
 
 
 class GroupBase(models.Model):
-    """Base model for Languages, Skills and Groups.
-
-    Think of tags on a user profile.
-    """
     name = models.CharField(db_index=True, max_length=50, unique=True)
     url = models.SlugField(blank=True)
 
@@ -31,11 +27,15 @@ class GroupBase(models.Model):
                                       auto_complete=auto_complete_only)
         return []
 
-    def __unicode__(self):
-        """Return the name of this group, unless it doesn't have one
-        yet.
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower()
+        super(GroupBase, self).save()
+        if not self.url:
+            alias = self.ALIAS_MODEL.objects.create(name=self.name, alias=self)
+            self.url = alias.url
+            super(GroupBase, self).save()
 
-        """
+    def __unicode__(self):
         return self.name
 
 
@@ -48,7 +48,13 @@ class GroupAliasBase(models.Model):
         abstract = True
 
 
+class GroupAlias(GroupAliasBase):
+    alias = models.ForeignKey('Group', related_name='aliases')
+
+
 class Group(GroupBase):
+    ALIAS_MODEL = GroupAlias
+
     system = models.BooleanField(db_index=True, default=False)
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=255,
@@ -71,63 +77,24 @@ class Group(GroupBase):
     class Meta:
         db_table = 'group'
 
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super(Group, self).save()
-        if not self.url:
-            alias = GroupAlias.objects.create(name=self.name, alias=self)
-            self.url = alias.url
-            super(Group, self).save()
-
-
-class GroupAlias(GroupAliasBase):
-    alias = models.ForeignKey(Group, related_name='aliases')
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        verbose_name_plural = 'group aliases'
-
-
-class Skill(GroupBase):
-    """Model to hold skill tags.
-
-    Like groups but with less attributes.
-
-    """
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super(Skill, self).save()
-        if not self.url:
-            alias = SkillAlias.objects.create(name=self.name, alias=self)
-            self.url = alias.url
-            super(Skill, self).save()
 
 
 class SkillAlias(GroupAliasBase):
-    alias = models.ForeignKey(Skill, related_name='aliases')
+    alias = models.ForeignKey('Skill', related_name='aliases')
 
     class Meta:
         verbose_name_plural = 'skill aliases'
 
 
-class Language(GroupBase):
-    """Model to hold languages spoken tags.
-
-    Like groups but with less attributes.
-    """
-    def save(self, *args, **kwargs):
-        self.name = self.name.lower()
-        super(Language, self).save()
-        if not self.url:
-            alias = LanguageAlias.objects.create(name=self.name, alias=self)
-            self.url = alias.url
-            super(Language, self).save()
+class Skill(GroupBase):
+    ALIAS_MODEL = SkillAlias
 
 
 class LanguageAlias(GroupAliasBase):
-    alias = models.ForeignKey(Language, related_name='aliases')
+    alias = models.ForeignKey('Language', related_name='aliases')
 
     class Meta:
         verbose_name_plural = 'language aliases'
+
+class Language(GroupBase):
+    ALIAS_MODEL = LanguageAlias
