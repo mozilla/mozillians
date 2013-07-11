@@ -5,9 +5,9 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from ..utils import merge_groups
 
 _logger = logging.getLogger('south')
+
 
 class Migration(DataMigration):
 
@@ -26,7 +26,7 @@ class Migration(DataMigration):
                           ', '.join(map(lambda x: ('[%d %s]'
                                                    % (x.id, x.name)),
                                         similar_groups))))
-            merge_groups(master_group, similar_groups)
+            master_group.merge_groups(similar_groups)
 
     def backwards(self, orm):
         pass

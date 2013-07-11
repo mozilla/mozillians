@@ -38,6 +38,13 @@ class GroupBase(models.Model):
     def __unicode__(self):
         return self.name
 
+    def merge_groups(self, group_list):
+        for group in group_list:
+            map(lambda x: self.members.add(x),
+                group.members.values_list('id', flat=True))
+            group.aliases.update(alias=self)
+            group.delete()
+
 
 class GroupAliasBase(models.Model):
     name = models.CharField(max_length=50, unique=True)

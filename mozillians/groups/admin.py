@@ -6,7 +6,6 @@ from django.db.models import Count
 
 import autocomplete_light
 
-import mozillians.groups.utils as utils
 from mozillians.groups.models import (Group, GroupAlias,
                                       Language, LanguageAlias,
                                       Skill, SkillAlias)
@@ -57,8 +56,7 @@ class GroupBaseEditAdminForm(forms.ModelForm):
         super(GroupBaseEditAdminForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        utils.merge_groups(self.instance,
-                           self.cleaned_data.get('merge_with', []))
+        self.instance.merge_groups(self.cleaned_data.get('merge_with', []))
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
