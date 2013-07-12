@@ -9,7 +9,7 @@ urlpatterns = patterns('mozillians.groups',
 
     url('^functional-areas/$', 'views.index_functional_areas',
         name='index_functional_areas'),
-    url('^group/(?P<url>[-\w]+)/toggle/$', 'views.toggle',
+    url('^group/(?P<url>[-\w]+)/toggle/$', 'views.toggle_subscription',
         name='toggle_subscription'),
     url('^groups/search/$', 'views.search',
         dict(searched_object=Group), name='search_groups'),

@@ -1,7 +1,9 @@
 import re
 
 from django import forms
+from django.core.exceptions import ValidationError
 
+from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.helpers import stringify_groups
@@ -41,9 +43,8 @@ class GroupField(forms.CharField):
         value = super(GroupField, self).clean(value)
 
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', value):
-            raise forms.ValidationError(_(u'Groups can only contain '
-                                          'alphanumeric characters, dashes, '
-                                          'spaces.'))
+            raise ValidationError(_(u'Groups can only contain alphanumeric '
+                                    'characters, dashes, spaces.'))
 
         values = [g.strip() for g in value.lower().split(',')
                   if g and ',' not in g]

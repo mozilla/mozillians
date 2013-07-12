@@ -17,10 +17,11 @@ from mozillians.phonebook import forms
 from mozillians.users.tasks import update_basket_task
 
 
+GROUPS_PER_PAGE = 1
 log = commonware.log.getLogger('m.groups')
 
 
-def list_groups(request, template, query):
+def _list_groups(request, template, query):
     """Lists groups from given query."""
     sort_form = SortForm(request.GET)
     if sort_form.is_valid():
@@ -28,9 +29,9 @@ def list_groups(request, template, query):
     else:
         query = query.order_by('name')
 
-    paginator = Paginator(query, forms.PAGINATION_LIMIT_LARGE)
+    paginator = Paginator(query, GROUPS_PER_PAGE)
 
-    page = request.GET.get('page')
+    page = request.GET.get('page', 1)
     try:
         groups = paginator.page(page)
     except PageNotAnInteger:
@@ -38,7 +39,7 @@ def list_groups(request, template, query):
     except EmptyPage:
         groups = paginator.page(paginator.num_pages)
 
-    data = dict(groups=groups, page=page, sort_form=sort_form)
+    data = dict(groups=groups, sort_form=sort_form)
     return render(request, template, data)
 
 
@@ -47,14 +48,14 @@ def index(request):
     query = (Group.objects.filter(members__is_vouched=True)
              .annotate(num_members=Count('members')))
     template = 'groups/index.html'
-    return list_groups(request, template, query)
+    return _list_groups(request, template, query)
 
 
 def index_functional_areas(request):
     """Lists all curated groups."""
     query = Group.get_curated()
     template = 'groups/areas.html'
-    return list_groups(request, template, query)
+    return _list_groups(request, template, query)
 
 
 @allow_unvouched
@@ -125,10 +126,10 @@ def show(request, url):
 
 
 @require_POST
-def toggle(request, url):
+def toggle_subscription(request, url):
     """Toggle the current user's membership of a group."""
     group = get_object_or_404(Group, url=url)
-    profile = request.user.get_profile()
+    profile = request.user.userprofile
 
     # We don't operate on system groups using this view.
     if not group.system:
@@ -139,4 +140,4 @@ def toggle(request, url):
 
         update_basket_task.delay(profile.id)
 
-    return redirect(reverse('group', args=[group.url]))
+    return redirect(reverse('groups:show', args=[group.url]))

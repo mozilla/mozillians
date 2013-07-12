@@ -1,28 +1,35 @@
 from django.core.urlresolvers import reverse
+
 from nose.tools import eq_
 
-from mozillians.common.tests.init import ESTestCase
+from mozillians.common.tests import TestCase, UserFactory
+from mozillians.groups.tests import GroupFactory
 
-from ..models import Group, GroupAlias
 
+class OldGroupRedirectionMiddlewareTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory.create(userprofile={'is_vouched': True})
 
-class GroupRedirectionMiddlewareTests(ESTestCase):
+    def test_valid_name(self):
+        """Valid group with name that matches the old group regex doens't redirect."""
+        group = GroupFactory.create(name='111-foo')
+        GroupFactory.create(name='foo')
+        url = reverse('groups:show', kwargs={'url': group.url})
+        with self.login(self.user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['group'], group)
 
-    def test_oldgroup_redirection_middleware(self):
-        """Test the group old url schema redirection middleware."""
-        self.mozillian_client.get('/')
-        response = self.mozillian_client.get('/group/1-staff', follow=True)
-        eq_(200, response.status_code)
+    def test_old_group_url_redirects(self):
+        group = GroupFactory.create()
+        url = '/group/111-{0}/'.format(group.url)
+        with self.login(self.user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['group'], group)
 
-        response = self.mozillian_client.get('/group/44-invalid-group',
-                                             follow=True)
-        eq_(404, response.status_code)
-
-    def test_group_alias_redirection_middleware(self):
-        """Test GroupAlias redirection middleware."""
-        staff_group = Group.objects.get(name='staff')
-        GroupAlias.objects.create(name='ffats', url='ffats', alias=staff_group)
-        response = self.mozillian_client.get(reverse('group', args=['ffats']),
-                                             follow=True)
-        eq_(200, response.status_code)
-        eq_('staff', response.context['group'].name)
+    def test_not_existing_group_404s(self):
+        url = '/group/111-invalid/'
+        with self.login(self.user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 404)

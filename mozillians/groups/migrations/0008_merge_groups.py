@@ -23,8 +23,7 @@ class Migration(DataMigration):
             similar_groups = groups[1:]
             _logger.info('Merging [%d %s] with %s' %
                          (master_group.id, master_group.name,
-                          ', '.join(map(lambda x: ('[%d %s]'
-                                                   % (x.id, x.name)),
+                          ', '.join(map(lambda x: ('[%d %s]' % (x.id, x.name)),
                                         similar_groups))))
             master_group.merge_groups(similar_groups)
 
