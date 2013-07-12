@@ -9,12 +9,12 @@ from funfactory.helpers import urlparams
 from mock import patch
 from nose.tools import eq_, ok_
 
-from mozillians.common.tests import (TestCase, UserFactory,
-                                     requires_login, requires_vouch)
+from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import Group
 from mozillians.groups.tests import (GroupFactory, GroupAliasFactory,
                                      LanguageFactory, SkillFactory)
 from mozillians.groups.views import _list_groups
+from mozillians.users.tests import UserFactory
 
 
 @patch('mozillians.groups.views.GROUPS_PER_PAGE', 1)

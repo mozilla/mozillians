@@ -1,10 +1,11 @@
 from mock import patch
 from nose.tools import eq_, ok_
 
-from mozillians.common.tests import TestCase, UserFactory
+from mozillians.common.tests import TestCase
 from mozillians.groups import tasks
 from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import GroupFactory, SkillFactory
+from mozillians.users.tests import UserFactory
 
 
 class TaskTests(TestCase):

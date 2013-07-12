@@ -1,7 +1,7 @@
 from nose.tools import ok_
 from test_utils import TestCase
 
-from mozillians.common.tests import UserFactory
+from mozillians.users.tests import UserFactory
 from mozillians.api.models import APIApp
 
 

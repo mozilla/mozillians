@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from nose.tools import eq_, ok_
 
-from mozillians.common.tests import TestCase, UserFactory
+from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias
 from mozillians.groups.tests import GroupFactory
+from mozillians.users.tests import UserFactory
 
 
 class GroupBaseTests(TestCase):

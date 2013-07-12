@@ -1,7 +1,7 @@
 import factory
 
 from mozillians.api.models import APIApp
-from mozillians.common.tests import UserFactory
+from mozillians.users.tests import UserFactory
 
 
 class APIAppFactory(factory.DjangoModelFactory):

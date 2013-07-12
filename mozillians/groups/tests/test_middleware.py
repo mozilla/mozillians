@@ -2,8 +2,9 @@ from django.core.urlresolvers import reverse
 
 from nose.tools import eq_
 
-from mozillians.common.tests import TestCase, UserFactory
+from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory
+from mozillians.users.tests import UserFactory
 
 
 class OldGroupRedirectionMiddlewareTests(TestCase):

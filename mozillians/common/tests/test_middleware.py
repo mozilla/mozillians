@@ -3,8 +3,8 @@ from django.test.client import Client
 
 from nose.tools import eq_
 
-from mozillians.common.tests import (TestCase, UserFactory,
-                                     requires_login, requires_vouch)
+from mozillians.common.tests import (TestCase, requires_login, requires_vouch)
+from mozillians.users.tests import UserFactory
 
 
 class StrongholdTests(TestCase):
