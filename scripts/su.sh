@@ -3,7 +3,7 @@
 echo -n "Enter your BrowserID email: "
 read USEREMAIL
 U=$(cat << _EOF_
-from apps.users.models import User, UserProfile
+from mozillians.users.models import User, UserProfile
 \nu = User.objects.get(email="$USEREMAIL")
 \nu.is_superuser = True
 \nu.is_staff = True

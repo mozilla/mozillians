@@ -1,6 +1,5 @@
 from django.conf import settings
 
-import commonware.log
 import cronjobs
 import pyes.exceptions
 
@@ -10,9 +9,6 @@ from elasticutils.contrib.django import get_es
 
 from mozillians.users.tasks import index_objects
 from mozillians.users.models import PUBLIC, UserProfile
-
-
-log = commonware.log.getLogger('m.cron')
 
 
 @cronjobs.register

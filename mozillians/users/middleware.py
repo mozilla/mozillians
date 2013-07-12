@@ -13,10 +13,10 @@ class RegisterMiddleware():
     def process_request(self, request):
         user = request.user
         path = request.path
-        allow_urls = [r'^/[\w-]+{0}'.format(reverse('logout')),
-                      r'^/[\w-]+{0}'.format(reverse('login')),
+        allow_urls = [r'^/[\w-]+{0}'.format(reverse('users:logout')),
                       r'^/[\w-]+{0}'.format(reverse('profile.edit')),
                       r'^/browserid/',
+                      r'^/[\w-]+{0}'.format(reverse('login')),
                       r'^/[\w-]+/jsi18n/']
 
         if settings.DEBUG:

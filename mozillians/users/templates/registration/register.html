@@ -25,7 +25,7 @@
         </ol>
       </div>
     {% endif %}
-    <form action="{{ url('register') }}"
+    <form action="{{ url('users:register') }}"
           method="POST" enctype="multipart/form-data"
           class="form-horizontal well">
       {{ csrf() }}

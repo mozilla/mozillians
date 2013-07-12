@@ -105,7 +105,7 @@
                           </li>
                         {% endif %}
                         <li>
-                          <a id="logout" class="browserid-logout" href="{{ url('logout') }}">
+                          <a id="logout" class="browserid-logout" href="{{ url('users:logout') }}">
                             <i class="icon-reply"></i>
                             {{ _('Log Out') }}
                           </a>
@@ -113,7 +113,7 @@
                       </ul>
                     </div>
                   {% else %}
-                    <a id="logout" class="browserid-logout no-profile" href="{{ url('logout') }}">
+                    <a id="logout" class="browserid-logout no-profile" href="{{ url('users:logout') }}">
                       <i class="icon-reply"></i>
                       {{ _('Log Out') }}
                     </a>

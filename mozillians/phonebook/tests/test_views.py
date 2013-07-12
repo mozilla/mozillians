@@ -449,7 +449,7 @@ def _logged_in_html(response):
 def _create_new_user():
     newbie_client = test.Client()
     newbie_email = '%s@test.net' % str(uuid4())[0:8]
-    reg_url = reverse('register')
+    reg_url = reverse('users:register')
     params = dict(username=str(uuid4())[0:8],
                   email=newbie_email,
                   password='asdfasdf',

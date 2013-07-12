@@ -15,8 +15,7 @@ from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.paginator import Paginator
 from mozillians.api.resources import ClientCachedResource
-
-from models import UserProfile
+from mozillians.users.models import UserProfile
 
 
 class UserResource(ClientCachedResource, ModelResource):

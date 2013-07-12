@@ -276,7 +276,7 @@ class TestThingsForPeople(ESTestCase):
                         'Anonymous users can access the homepage to '
                         'begin registration flow')
 
-        r = self.mozillian_client.get(reverse('register'))
+        r = self.mozillian_client.get(reverse('users:register'))
         eq_(302, r.status_code,
             'Authenticated users are redirected from registration.')
 

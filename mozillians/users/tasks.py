@@ -22,6 +22,7 @@ BASKET_NEWSLETTER = getattr(settings, 'BASKET_NEWSLETTER', False)
 BASKET_ENABLED = all([BASKET_URL, BASKET_NEWSLETTER])
 INCOMPLETE_ACC_MAX_DAYS = 7
 
+
 def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
     if not getattr(settings, 'BASKET_MANAGERS', False):

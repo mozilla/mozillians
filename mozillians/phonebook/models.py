@@ -36,7 +36,7 @@ class Invite(models.Model):
 
     def get_url(self, absolute=True):
         """A url that can be used to redeem this invite."""
-        return absolutify(reverse('register')) + '?code=' + self.code
+        return absolutify(reverse('users:register')) + '?code=' + self.code
 
     def send(self, sender=None):
         """Mail this invite to the specified user.
@@ -71,7 +71,7 @@ class Invite(models.Model):
         message = template.render({
             'inviter' : self.inviter.full_name,
             'friend' : self.redeemer.full_name,
-            'profile' : absolutify(reverse('profile', args=(self.redeemer.user,)))})        
+            'profile' : absolutify(reverse('profile', args=(self.redeemer.user,)))})
         filtered_message = message.replace('&#34;', '"').replace('&#39;',"'")
 
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,

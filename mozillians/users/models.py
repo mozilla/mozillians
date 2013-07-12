@@ -20,11 +20,11 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
 from mozillians.groups.models import (Group, GroupAlias,
-                                Skill, SkillAlias,
-                                Language, LanguageAlias)
+                                      Skill, SkillAlias,
+                                      Language, LanguageAlias)
+from mozillians.users.tasks import (update_basket_task, index_objects,
+                                    unindex_objects)
 
-
-from tasks import update_basket_task, index_objects, unindex_objects
 
 COUNTRIES = product_details.get_regions('en-US')
 

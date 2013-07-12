@@ -1,8 +1,6 @@
 import csv
 from datetime import datetime, timedelta
 
-from celery.task.sets import TaskSet
-from functools import update_wrapper
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.contrib import messages
@@ -12,13 +10,17 @@ from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseRedirect
-from sorl.thumbnail.admin import AdminImageMixin
 
 import autocomplete_light
+from celery.task.sets import TaskSet
+from functools import update_wrapper
+from sorl.thumbnail.admin import AdminImageMixin
 
-import tasks
-from cron import index_all_profiles
-from models import COUNTRIES, PUBLIC, UserProfile, UsernameBlacklist
+import mozillians.users.tasks
+from mozillians.users.cron import index_all_profiles
+from mozillians.users.models import (COUNTRIES, PUBLIC, UserProfile,
+                                     UsernameBlacklist)
+
 
 admin.site.unregister(User)
 admin.site.unregister(Group)
@@ -72,7 +74,7 @@ for field in UserProfile._privacy_fields:
 def _update_basket(action, request, queryset):
     """Generic basket (un)subscribe for queryset."""
     userprofiles = UserProfile.objects.filter(user__in=queryset)
-    ts = [getattr(tasks, action).subtask(args=[profile.id])
+    ts = [getattr(mozillians.users.tasks, action).subtask(args=[profile.id])
           for profile in userprofiles]
     TaskSet(ts).apply_async()
     messages.success(request, 'Basket update started.')
