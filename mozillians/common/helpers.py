@@ -1,30 +1,32 @@
-import hashlib
-import logging
 import urllib
-
-from os import path
+from hashlib import md5
 
 from django.conf import settings
 from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
+
+from funfactory.helpers import urlparams
+from funfactory import utils
 from jingo import register
 from sorl.thumbnail import get_thumbnail
 
-from funfactory.utils import absolutify
 
-logger = logging.getLogger('common.helpers')
-absolutify = register.function(absolutify)
+GRAVATAR_URL = 'https://secure.gravatar.com/avatar/{emaildigest}'
 
 
-def gravatar(email, default=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
+@register.function
+def absolutify(url):
+    return utils.absolutify(url)
+
+
+def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL,
+             size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
-
-    return 'https://secure.gravatar.com/avatar/%s?%s' % (
-            hashlib.md5(email.lower()).hexdigest(),
-            urllib.urlencode({'d': absolutify(default),
-                              's': str(size),
-                              'r': rating}))
+    url = GRAVATAR_URL.format(emaildigest=md5(email).hexdigest())
+    url = urlparams(url, d=utils.absolutify(default_avatar_url),
+                    s=size, r=rating)
+    return url
 
 
 @register.function
@@ -56,20 +58,6 @@ def bootstrap(element):
         context = Context({'form': element})
 
     return mark_safe(template.render(context))
-
-
-@register.function
-def get_privacy_level(user):
-    """Return privacy level user."""
-    from mozillians.users.models import PUBLIC
-    if not user.is_authenticated():
-        return PUBLIC
-    return user.userprofile.level
-
-
-@register.function
-def media(url):
-    return path.join(settings.MEDIA_URL, url.lstrip('/'))
 
 
 @register.function

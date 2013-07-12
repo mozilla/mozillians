@@ -167,13 +167,13 @@ LESS_BIN = 'lessc'
 MIDDLEWARE_CLASSES = get_middleware(append=[
     'commonware.response.middleware.StrictTransportMiddleware',
 
-    # 'django_statsd.middleware.GraphiteMiddleware',
-    # 'django_statsd.middleware.GraphiteRequestTimingMiddleware',
-    # 'django_statsd.middleware.TastyPieRequestTimingMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware',
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
-    'mozillians.common.middleware.RegisterMiddleware',
-    'mozillians.common.middleware.UsernameRedirectionMiddleware',
+    'mozillians.users.middleware.RegisterMiddleware',
+    'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
 
 # StrictTransport

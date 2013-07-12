@@ -14,7 +14,6 @@ from tower import ugettext as _
 
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
-from mozillians.common.helpers import get_privacy_level
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.users.models import (COUNTRIES, EMPLOYEES, MOZILLIANS,
@@ -91,8 +90,7 @@ def view_profile(request, username):
             raise Http404
 
         profile = UserProfile.objects.get(user__username=username)
-        privacy_level = get_privacy_level(request.user)
-        profile.set_instance_privacy_level(privacy_level)
+        profile.set_instance_privacy_level(profile.privacy_level)
 
         if (not profile.is_vouched
             and request.user.is_authenticated()

@@ -403,7 +403,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return self.full_name
 
     @property
-    def level(self):
+    def privacy_level(self):
         """Return user privacy clearance."""
         if self.groups.filter(name='staff').exists():
             return EMPLOYEES
