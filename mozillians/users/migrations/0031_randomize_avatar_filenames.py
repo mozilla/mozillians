@@ -8,7 +8,7 @@ from south.db import db
 from south.v2 import DataMigration
 from django.db import models
 
-from apps.users.models import _calculate_photo_filename
+from mozillians.users.models import _calculate_photo_filename
 
 logger = logging.getLogger('users')
 

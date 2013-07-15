@@ -25,6 +25,11 @@ from mozillians.users.models import (COUNTRIES, PUBLIC, UserProfile,
 admin.site.unregister(User)
 admin.site.unregister(Group)
 
+Q_PUBLIC_PROFILES = Q()
+for field in UserProfile._privacy_fields:
+    key = 'userprofile__privacy_%s' % field
+    Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
+
 
 def export_as_csv_action(description=None, fields=None, exclude=None,
                          header=True):
@@ -64,12 +69,6 @@ def export_as_csv_action(description=None, fields=None, exclude=None,
 
     export_as_csv.short_description = (description or 'Export to CSV file')
     return export_as_csv
-
-Q_PUBLIC_PROFILES = Q()
-for field in UserProfile._privacy_fields:
-    key = 'userprofile__privacy_%s' % field
-    Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
-
 
 def _update_basket(action, request, queryset):
     """Generic basket (un)subscribe for queryset."""

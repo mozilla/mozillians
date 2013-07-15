@@ -6,9 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import Q
 from django.db.models import signals as dbsignals
-from django.db.models.query import QuerySet, ValuesQuerySet
 from django.dispatch import receiver
 
 from elasticutils.contrib.django import S, get_es
@@ -20,27 +18,18 @@ from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
-from mozillians.groups.models import (Group, GroupAlias,
-                                      Skill, SkillAlias,
+from mozillians.groups.models import (Group, GroupAlias, Skill, SkillAlias,
                                       Language, LanguageAlias)
+from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
+                                       MOZILLIANS, PRIVACY_CHOICES, PUBLIC,
+                                       PUBLIC_INDEXABLE_FIELDS,
+                                       UserProfileManager)
 from mozillians.users.tasks import (update_basket_task, index_objects,
                                     unindex_objects)
 
 
 COUNTRIES = product_details.get_regions('en-US')
-
-USERNAME_MAX_LENGTH = 30
 AVATAR_SIZE = (300, 300)
-
-PRIVILEGED = 1
-EMPLOYEES = 2
-MOZILLIANS = 3
-PUBLIC = 4
-PRIVACY_CHOICES = (# (PRIVILEGED, 'Privileged'),
-                   # (EMPLOYEES, 'Employees'),
-                   (MOZILLIANS, 'Mozillians'),
-                   (PUBLIC, 'Public'))
-PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 
 
 def _calculate_photo_filename(instance, filename):
@@ -55,118 +44,6 @@ class PrivacyField(models.PositiveSmallIntegerField):
         myargs.update(kwargs)
         return super(PrivacyField, self).__init__(*args, **myargs)
 add_introspection_rules([], ["^mozillians\.users\.models\.PrivacyField"])
-
-
-class UserProfileValuesQuerySet(ValuesQuerySet):
-    """Custom ValuesQuerySet to support privacy.
-
-    Note that when you specify fields in values() you need to include
-    the related privacy field in your query.
-
-    E.g. .values('first_name', 'privacy_first_name')
-
-    """
-
-    def _clone(self, *args, **kwargs):
-        c = super(UserProfileValuesQuerySet, self)._clone(*args, **kwargs)
-        c._privacy_level = getattr(self, '_privacy_level', None)
-        return c
-
-    def iterator(self):
-        # Purge any extra columns that haven't been explicitly asked for
-        extra_names = self.query.extra_select.keys()
-        field_names = self.field_names
-        aggregate_names = self.query.aggregate_select.keys()
-
-        names = extra_names + field_names + aggregate_names
-
-        privacy_fields = [
-            (names.index('privacy_%s' % field), names.index(field), field)
-            for field in set(UserProfile._privacy_fields) & set(names)]
-
-        for row in self.query.get_compiler(self.db).results_iter():
-            row = list(row)
-            for levelindex, fieldindex, field in privacy_fields:
-                if row[levelindex] < self._privacy_level:
-                    row[fieldindex] = UserProfile._privacy_fields[field]
-            yield dict(zip(names, row))
-
-
-class UserProfileQuerySet(QuerySet):
-    """Custom QuerySet to support privacy."""
-
-    def __init__(self, *args, **kwargs):
-        self.public_q = Q()
-        for field in UserProfile._privacy_fields:
-            key = 'privacy_%s' % field
-            self.public_q |= Q(**{key: PUBLIC})
-
-        self.public_index_q = Q()
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            key = 'privacy_%s' % field
-            if field == 'email':
-                field = 'user__email'
-            self.public_index_q |= (Q(**{key: PUBLIC}) & ~Q(**{field: ''}))
-
-        return super(UserProfileQuerySet, self).__init__(*args, **kwargs)
-
-    def privacy_level(self, level=MOZILLIANS):
-        """Set privacy level for query set."""
-        self._privacy_level = level
-        return self.all()
-
-    def public(self):
-        """Return profiles with at least one PUBLIC field."""
-        return self.filter(self.public_q)
-
-    def vouched(self):
-        """Return complete and vouched profiles."""
-        return self.complete().filter(is_vouched=True)
-
-    def complete(self):
-        """Return complete profiles."""
-        return self.exclude(full_name='')
-
-    def public_indexable(self):
-        """Return public indexable profiles."""
-        return self.complete().filter(self.public_index_q)
-
-    def not_public_indexable(self):
-        return self.complete().exclude(self.public_index_q)
-
-    def _clone(self, *args, **kwargs):
-        """Custom _clone with privacy level propagation."""
-        if kwargs.get('klass', None) == ValuesQuerySet:
-            kwargs['klass'] = UserProfileValuesQuerySet
-        c = super(UserProfileQuerySet, self)._clone(*args, **kwargs)
-        c._privacy_level = getattr(self, '_privacy_level', None)
-        return c
-
-    def iterator(self):
-        """Custom QuerySet iterator which sets privacy level in every
-        object returned.
-
-        """
-
-        def _generator():
-            self._iterator = super(UserProfileQuerySet, self).iterator()
-            while True:
-                obj = self._iterator.next()
-                obj._privacy_level = getattr(self, '_privacy_level', None)
-                yield obj
-        return _generator()
-
-
-class UserProfileManager(models.Manager):
-    """Custom Manager for UserProfile."""
-
-    use_for_related_fields = True
-
-    def get_query_set(self):
-        return UserProfileQuerySet(self.model)
-
-    def __getattr__(self, name):
-        return getattr(self.get_query_set(), name)
 
 
 class PrivacyAwareS(S):
@@ -192,21 +69,7 @@ class PrivacyAwareS(S):
 
 
 class UserProfilePrivacyModel(models.Model):
-    _privacy_fields = {'photo': None,
-                       'full_name': '',
-                       'ircname': '',
-                       'email': '',
-                       'website': '',
-                       'bio': '',
-                       'city': '',
-                       'region': '',
-                       'country': '',
-                       'groups': Group.objects.none(),
-                       'skills': Skill.objects.none(),
-                       'languages': Language.objects.none(),
-                       'vouched_by': None,
-                       'date_mozillian': None,
-                       'timezone': ''}
+    _privacy_fields = DEFAULT_PRIVACY_FIELDS
     _privacy_level = None
 
     privacy_photo = PrivacyField()
@@ -439,10 +302,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return self.display_name
 
     def get_absolute_url(self):
-        return reverse('profile', args=[self.user.username])
+        return reverse('phonebook:profile', args=[self.user.username])
 
     def anonymize(self):
-        """Remove personal info from a user"""
+        """Remove personal info from a user
+
+        TODO: to be removed after fixing bug 885504.
+        """
 
         for name in ['first_name', 'last_name', 'email']:
             setattr(self.user, name, '')
@@ -504,7 +370,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             else:
                 group = model.objects.create(name=g)
 
-            if not getattr(g, 'system', False):
+            if not getattr(group, 'system', False):
                 groups_to_add.append(group)
 
         m2mfield.add(*groups_to_add)
@@ -523,7 +389,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         If privacy allows and photo set return local photo link.
         If privacy doesn't allow return default local link.
         """
-        if not self.photo and self.privacy_photo >= self._privacy_level:
+        privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
+        if (not self.photo and self.privacy_photo >= privacy_level):
             return gravatar(self.user.email, size=geometry)
         return self.get_photo_thumbnail(geometry, **kwargs).url
 
@@ -553,7 +420,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if any(email.endswith('@' + x) for x in
                settings.AUTO_VOUCH_DOMAINS):
             self.groups.add(staff)
-        elif staff in self.groups.all():
+        elif self.groups.filter(pk=staff.pk).exists():
             self.groups.remove(staff)
 
     def _email_now_vouched(self):
@@ -622,18 +489,18 @@ def update_basket(sender, instance, **kwargs):
           dispatch_uid='update_search_index_sig')
 def update_search_index(sender, instance, **kwargs):
     if instance.is_complete:
-        index_objects.delay(sender, [instance.id], public=False)
+        index_objects.delay(sender, [instance.id], public_index=False)
         if instance.is_public_indexable:
             index_objects.delay(sender, [instance.id], public_index=True)
         else:
-            unindex_objects(UserProfile, [instance.id], public_index=True)
+            unindex_objects.delay(UserProfile, [instance.id], public_index=True)
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile,
           dispatch_uid='remove_from_search_index_sig')
 def remove_from_search_index(sender, instance, **kwargs):
-    unindex_objects(UserProfile, [instance.id], public_index=False)
-    unindex_objects(UserProfile, [instance.id], public_index=True)
+    unindex_objects.delay(UserProfile, [instance.id], public_index=False)
+    unindex_objects.delay(UserProfile, [instance.id], public_index=True)
 
 
 class UsernameBlacklist(models.Model):

@@ -13,6 +13,7 @@ from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
 
 from mozillians.groups.models import Group
+from mozillians.users.managers import PUBLIC
 
 
 BASKET_TASK_RETRY_DELAY = 120 # 2 minutes
@@ -82,9 +83,8 @@ def update_basket_task(instance_id):
             result = basket.subscribe(instance.user.email,
                                       settings.BASKET_NEWSLETTER,
                                       trigger_welcome='N')
-            instance.basket_token = result['token']
-            instance.save()
-
+            (UserProfile.objects
+             .filter(pk=instance_id).update(basket_token=result['token']))
         request('post', 'custom_update_phonebook',
                 token=instance.basket_token, data=data)
     except (requests.exceptions.RequestException,
@@ -125,14 +125,13 @@ def remove_from_basket_task(instance_id):
                                    exception.message)
 
 @task
-def index_objects(model, ids, public_index=False, **kwargs):
+def index_objects(model, ids, public_index, **kwargs):
     if getattr(settings, 'ES_DISABLED', False):
         return
 
     es = get_es()
     qs = model.objects.filter(id__in=ids)
     if public_index:
-        from models import PUBLIC
         qs = model.objects.privacy_level(PUBLIC).filter(id__in=ids)
 
     for item in qs:

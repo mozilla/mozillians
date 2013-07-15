@@ -7,7 +7,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from ..models import USERNAME_MAX_LENGTH
+from mozillians.users.helpers import USERNAME_MAX_LENGTH
 
 class Migration(SchemaMigration):
 
@@ -19,10 +19,10 @@ class Migration(SchemaMigration):
                 while User.objects.filter(username=new_username).exists():
                     new_username += '_'
 
-                    if username > USERNAME_MAX_LENGTH:
+                    if new_username > USERNAME_MAX_LENGTH:
                         # We failed to calculate a name for you, default to a
                         # email digest.
-                        username = hashlib.sha1(user.email).hexdigest()
+                        new_username = hashlib.sha1(user.email).hexdigest()
 
                 if new_username != user.username[2:]:
                     print 'WARNING: Renaming %s to %s' % (user.username[2:],

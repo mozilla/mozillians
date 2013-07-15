@@ -39,7 +39,6 @@ urlpatterns = patterns(
     '',
     url(r'^browserid/', include('django_browserid.urls')),
     url(r'^api/', include('mozillians.api.urls')),
-    url(r'', include('mozillians.users.urls', 'users')),
     url(r'', include('mozillians.groups.urls', 'groups')),
     url(r'', include('mozillians.phonebook.urls')),
 

@@ -10,12 +10,16 @@ from nose.tools import make_decorator, ok_
 from test_utils import TestCase as BaseTestCase
 
 
-AUTHENTICATION_BACKENDS =(
+AUTHENTICATION_BACKENDS = (
     'mozillians.common.tests.authentication.DummyAuthenticationBackend',
     )
+ES_INDEXES = {
+    'default': 'mozillians-test',
+    'public': 'mozillians-public-test'
+    }
 
-
-@override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS)
+@override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
+                   ES_INDEXES=ES_INDEXES)
 class TestCase(BaseTestCase):
     @contextmanager
     def login(self, user):
@@ -48,7 +52,7 @@ def requires_vouch():
                           wraps=redirect)) as (messages_mock, redirect_mock):
                 func(*args, **kwargs)
             ok_(messages_mock.called, 'messages.warning() was not called.')
-            redirect_mock.assert_called_with('home')
+            redirect_mock.assert_called_with('phonebook:home')
         newfunc = make_decorator(func)(newfunc)
         return newfunc
     return decorate

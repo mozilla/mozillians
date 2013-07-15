@@ -172,7 +172,7 @@ MIDDLEWARE_CLASSES = get_middleware(append=[
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
-    'mozillians.users.middleware.RegisterMiddleware',
+    'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
 

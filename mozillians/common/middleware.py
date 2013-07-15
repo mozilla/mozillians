@@ -45,7 +45,7 @@ class StrongholdMiddleware(object):
             return None
 
         messages.error(request, GET_VOUCHED_MESSAGE)
-        return redirect('home')
+        return redirect('phonebook:home')
 
 
 @contextmanager

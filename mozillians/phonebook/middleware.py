@@ -1,11 +1,39 @@
+import re
+
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.urlresolvers import is_valid_path
+from django.core.urlresolvers import is_valid_path, reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+
+from tower import ugettext as _
 
 from mozillians.common.middleware import safe_query_string
 
 
-class UsernameRedirectionMiddleware(object):
+class RegisterMiddleware():
+    """Redirect authenticated users with incomplete profile to register view."""
+    def process_request(self, request):
+        user = request.user
+        path = request.path
+        allow_urls = [r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
+                      r'^/[\w-]+{0}'.format(reverse('phonebook:profile.edit')),
+                      r'^/browserid/',
+                      r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
+                      r'^/[\w-]+/jsi18n/']
+
+        if settings.DEBUG:
+            allow_urls.append(settings.MEDIA_URL)
+
+        if (user.is_authenticated() and not user.userprofile.is_complete
+            and not filter(lambda url: re.match(url, path), allow_urls)):
+            messages.warning(request, _('Please complete registration '
+                                        'before proceeding.'))
+            return redirect('phonebook:profile.edit')
+
+
+class UsernameRedirectionMiddleware():
     """
     Redirect requests for user profiles from /<username> to
     /u/<username> to avoid breaking profile urls with the new url
