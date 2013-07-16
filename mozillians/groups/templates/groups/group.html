@@ -121,35 +121,24 @@
         </p>
       </div>
     {% else %}
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
       <h3>{{ _('Group Members') }}</h3>
       <div class="row">
         {% for people_slice in people|slice(3) -%}
             {% for person in people_slice %}
               {{ search_result(person) }}
             {% endfor %}
-          {% endfor %}
-        {% if show_pagination %}
-          <div data-pages={{ num_pages }} class="pagination">
-            {% for page in people.paginator.page_range %}
-              {% if page == people.number %}
-                <span>{{ page }}</span>
-              {% else %}
-                <a href="#">{{ page }}</a>
-              {% endif %}
-            {% endfor %}
-          </div>
-          <div id="final-result">
-            <span>
-              {% trans count = people.paginator.count %}
-                Showing all {{ count }} results.
-              {% endtrans %}
-            </span>
-          </div>
-        {% endif %}
-     {% endif %}
-</div>
+        {% endfor %}
+      </div>
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
+    {% endif %}
+
 {% endblock content %}
 
 {% block page_js %}
-  {{ js('search') }}
+  {{ js('groups') }}
 {% endblock %}

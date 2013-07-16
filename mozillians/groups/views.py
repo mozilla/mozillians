@@ -23,7 +23,10 @@ log = commonware.log.getLogger('m.groups')
 
 def _list_groups(request, template, query):
     """Lists groups from given query."""
+
     sort_form = SortForm(request.GET)
+    show_pagination = False
+
     if sort_form.is_valid():
         query = query.order_by(sort_form.cleaned_data['sort'], 'name')
     else:
@@ -39,7 +42,10 @@ def _list_groups(request, template, query):
     except EmptyPage:
         groups = paginator.page(paginator.num_pages)
 
-    data = dict(groups=groups, sort_form=sort_form)
+    if paginator.count > forms.PAGINATION_LIMIT_LARGE:
+        show_pagination = True
+
+    data = dict(groups=groups, page=page, sort_form=sort_form, show_pagination=show_pagination)
     return render(request, template, data)
 
 

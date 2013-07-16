@@ -16,7 +16,7 @@
   <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
     <input type="text" name="q" id="q"
            placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
-           value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
+           value="{% if search_form.cleaned_data %}{{ search_form.cleaned_data.q }}{% endif %}">
            <input type="hidden" name="limit" id="limit" value="{{ limit }}">
              <button type="submit">
                <span class="icon-search"></span>
@@ -28,15 +28,15 @@
              </button>
              <div class="search-options">
                {% for f in ['include_non_vouched'] %}
-                 <div id="{{ form[f].name }}-container"
-                      class="field {{ form[f].field.widget.attrs['class'] }}">
-                      {{ form[f] }}
-                      {{ form[f].label_tag() }}
+                 <div id="{{ search_form[f].name }}-container"
+                      class="field {{ search_form[f].field.widget.attrs['class'] }}">
+                      {{ search_form[f] }}
+                      {{ search_form[f].label_tag() }}
                  </div>
                {% endfor %}
              </div>
   </form>
-  {% if not form.cleaned_data %}
+  {% if not search_form.cleaned_data %}
     <div class="well">
       {% trans %}
         <h2>Search For a Mozillian</h2>
@@ -65,30 +65,23 @@
     {% endif %}
     {% if people %}
       <h2>{{ _('Mozillians') }}</h2>
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
       <div class="row">
-        {% for person in people %}
-          {{ search_result(person) }}
-        {% endfor %}
-        {% if show_pagination %}
-          <div data-pages={{ num_pages }} class="pagination">
-            {% for page in people.paginator.page_range %}
-              {% if page == people.number %}
-                <span>{{ page }}</span>
-              {% else %}
-                <a href="{{ url('phonebook:search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
-              {% endif %}
-            {% endfor %}
-          </div>
-          <div id="final-result">
-            <span>Showing all {{ people.paginator.count }} results.</span>
-          </div>
-        {% endif %}
+      {% for person in people %}
+        {{ search_result(person) }}
+      {% endfor %}
       </div>
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
     {% endif %}
+
     {% if not people and not groups %}
       <div class="well">
         <p id="not-found">
-          {% trans query=form.cleaned_data.q %}
+          {% trans query=search_form.cleaned_data.q %}
             Sorry, we cannot find a group or person related to "{{ query }}".
           {% endtrans %}
         </p>

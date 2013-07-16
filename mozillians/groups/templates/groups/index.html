@@ -27,6 +27,9 @@
       {% endtrans %}
     {% endblock %}
     </p>
+    {% with items=groups %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
     <div class="groups-areas">
       <ul class="group-list">
       {% for group_slice in groups|slice(3) -%}
@@ -42,28 +45,12 @@
       {% endfor %}
       </ul>
     </div>
-    <div class="pagination">
-      <ul>
-        {% if groups.has_previous() %}
-          <li>
-            <a href="{{ '#'|urlparams(page=groups.previous_page_number(),
-                                      sort=sort_form.data['sort']) }}">
-            {{ _('Back') }}
-            </a>
-          </li>
-        {% endif %}
-
-        <li>{{ groups.number }} / {{ groups.paginator.num_pages }}</li>
-
-        {% if groups.has_next() %}
-          <li>
-            <a href="{{ '#'|urlparams(page=groups.next_page_number(),
-                                      sort=sort_form.data['sort']) }}">
-              {{ _('Next') }}
-            </a>
-          </li>
-        {% endif %}
-      </ul>
-    </div>
+    {% with items=groups %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
   {% endif %}
 {% endblock content %}
+
+{% block page_js %}
+  {{ js('groups') }}
+{% endblock %}

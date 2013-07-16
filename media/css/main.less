@@ -263,18 +263,17 @@ dl, dd {
 }
 
 .pagination {
-    margin-top: 50px;
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        li {
-            padding-right: 8px;
-            margin: 0;
-            float: left;
-            font-size: 18px;
-            a { .button; }
-        }
+    margin: 25px 0;
+    .clearfix;
+    form {
+        float: left;
+        margin-right: 15px;
+    }
+    a {
+        margin: 3px 15px 0 0;
+        float: left;
+        font-size: 18px;
+        &.next, &.prev { .button; }
     }
 }
 
