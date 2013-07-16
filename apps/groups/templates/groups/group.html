@@ -1,8 +1,9 @@
-{% extends "base-old.html" %}
+{% extends "base.html" %}
 
 {% block page_title %}{{ _('Group: {name}')|f(name=group.name) }}{% endblock %}
 
 {% block body_id %}group-show{% endblock %}
+
 {% block body_class %}
   {{ super() }}
   search-page
@@ -101,7 +102,7 @@
         <form action="{{ url('group_toggle', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
-        <button class="btn{{ ('-danger' if in_group else '-primary') }}">
+        <button class="button button{{ ('-negative' if in_group) }}">
           {% if not in_group %}
             {{ _('Join Group') }}
           {% else %}
@@ -122,9 +123,11 @@
     {% else %}
       <h3>{{ _('Group Members') }}</h3>
       <div class="row">
-        {% for person in people %}
-          {{ search_result(person) }}
-        {% endfor %}
+        {% for people_slice in people|slice(3) -%}
+            {% for person in people_slice %}
+              {{ search_result(person) }}
+            {% endfor %}
+          {% endfor %}
         {% if show_pagination %}
           <div data-pages={{ num_pages }} class="pagination">
             {% for page in people.paginator.page_range %}

@@ -1,7 +1,9 @@
-{% extends "base-old.html" %}
+{% extends "base.html" %}
 
 {% block page_title %}{{ _('Search Results') }}{% endblock %}
+
 {% block body_id %}search{% endblock %}
+
 {% block body_class %}
   {{ super() }}
   search-page
@@ -16,11 +18,11 @@
            placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
            value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
            <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-             <button type="submit" class="btn primary">
+             <button type="submit">
                <span class="icon-search"></span>
                {{ _('Search') }}
              </button>
-             <button type="button" id="advanced" class="btn primary">
+             <button type="button" id="advanced">
                <span class="icon-chevron-down"></span>
                {{ _('Advanced Options') }}
              </button>
