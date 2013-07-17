@@ -156,8 +156,7 @@
         <div id="skills" class="p-category category">
           <h3>{{ _('Skills') }}</h3>
             {% for skill in profile.skills.all() %}
-                <a href="{{ url('search') }}?q={{ skill.name }}">{{ skill.name }}</a>
-                {% if not loop.last %},{% endif %}
+                <a href="{{ url('search') }}?q={{ skill.name }}">{{ skill.name }}</a>{% if not loop.last %},{% endif %}
             {% endfor %}
         </div>
       {% endif %}
