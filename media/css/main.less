@@ -160,8 +160,7 @@ body {
         input[type=text] {
             .open-sans-light;
             font-style: italic;
-            font-size: 18px;
-            border: none;
+            font-size: 15px;
             .border-radius(8px);
         }
         select {
@@ -1155,11 +1154,17 @@ body#edit-profile {
                     .button-sand;
                 }
             }
-            &#groups, &#skills {
-                label {
-                    font-style: italic;
-                    font-weight: normal;
+            &#groups, &#skills, &#languages {
+                .help_text {
+                    label {
+                        font-style: italic;
+                        font-weight: normal;
+                    }
                 }
+            }
+            &#delete {
+                margin-top: 50px;
+                border: none;
             }
             #id_photo_delete {
                 margin: 10px 0 0 130px;
