@@ -23,7 +23,7 @@ class RegisterMiddleware(object):
         user = request.user
         path = request.path
         allow_urls = [r'^/[\w-]+{0}'.format(reverse('logout')),
-                      r'^/[\w-]+{0}'.format(reverse('register')),
+                      r'^/[\w-]+{0}'.format(reverse('profile.edit')),
                       r'^/browserid/',
                       r'^/[\w-]+/jsi18n/',
                       r'^/csp/',]
@@ -35,7 +35,7 @@ class RegisterMiddleware(object):
             and not filter(lambda url: re.match(url, path), allow_urls)):
             messages.warning(request, _('Please complete registration '
                                         'before proceeding.'))
-            return redirect('register')
+            return redirect('profile.edit')
 
 
 class StrongholdMiddleware(object):
