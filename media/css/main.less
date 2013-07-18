@@ -1078,6 +1078,15 @@ body#edit-profile {
             input, textarea {
                 border: 1px solid lighten(@black,90%);
             }
+            .error {
+                input, textarea, select {
+                    border: 1px solid #CD0000;
+                    color: #CD0000;
+                }
+                label, .error-message {
+                    color: #CD0000;
+                }
+            }
 
             label {
                 margin-right: 8px;
