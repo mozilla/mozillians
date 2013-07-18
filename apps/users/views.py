@@ -37,32 +37,7 @@ def register(request):
     """
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
-        return redirect('home')
-
-    user = request.user
-    if not user.is_authenticated() or user.userprofile.is_complete:
-        return redirect('home')
-
-    user_form = UserForm(request.POST or None, instance=user)
-    profile_form = RegisterForm(request.POST or None,
-                                instance=user.get_profile())
-
-    if (user_form.is_valid() and profile_form.is_valid()):
-        user_form.save()
-        profile_form.save()
-        auth.login(request, user)
-        _update_invites(request)
-        messages.info(request, _(u'Your account has been created.'))
-        return redirect(reverse('profile', args=[request.user.username]))
-
-    # 'user' object must be passed in because we are not logged in
-    return render(request, 'registration/register.html',
-                  dict(profile_form=profile_form,
-                       user_form=user_form,
-                       edit_form_action=reverse('register'),
-                       mode='new',
-                       profile=user.get_profile(),
-                       user=user))
+    return redirect('home')
 
 
 def _update_invites(request):

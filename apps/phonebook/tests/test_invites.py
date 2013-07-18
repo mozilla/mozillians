@@ -20,16 +20,16 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
     # Assertion doesn't matter since we monkey patched it for testing
     fake_assertion = 'mrfusionsomereallylongstring'
     fake_invite_message = 'Join Mozilla'
-  
+
     fake_user = None
-  
+
     def create_fake_user(self):
             fake_user = User.objects.create(email=self.fake_email3, username='mozymike')
             profile = fake_user.get_profile()
             profile.is_vouched = True
             profile.full_name='Michal Mozillianin'
             profile.country = 'pl'
-            profile.save()        
+            profile.save()
 
     def invite_someone(self, email, invite_message):
         """This method will invite a user.
@@ -79,12 +79,13 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
         # Now let's register
-        d = dict(full_name='Desaaaaaaai',
+        d = self.data_privacy_fields.copy()
+        d.update(full_name='Desaaaaaaai',
                  username='aakash',
                  country='pl',
                  optin=True)
         with mock_browserid(email):
-            self.client.post(reverse('register'), d, follow=True)
+            self.client.post(reverse('profile.edit'), d, follow=True)
 
         # Return the New Users Profile
         invited_user_profile = User.objects.get(email=email).get_profile()
@@ -141,7 +142,7 @@ class InviteFlowTest(apps.common.tests.init.ESTestCase):
         # Verify is email was sent to inviter.
         eq_(len(mail.outbox), 4, "email wasn't sent to inviter")
 
-        # Verify is email was sent to correct person.        
+        # Verify is email was sent to correct person.
         assert 'Amandeep McIlrath' in mail.outbox[3].body, \
                 'email was sent to wrong person.'
 

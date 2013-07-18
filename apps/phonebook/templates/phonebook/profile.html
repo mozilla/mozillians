@@ -83,21 +83,32 @@
       <img src="{{ shown_user.userprofile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
     </div>
     <div class="stats">
-      <section id="membership">
-          <div class="status">
-            <i class="icon-calendar"></i> {{ _('Mozillian for 4 years') }}
-            <span><b></b>May 29, 2009</span>
-          </div>
-      </section>
+      {% set mozillian_years = get_mozillian_years(profile) %}
+      {% if not mozillian_years is none %}
+        <section id="membership">
+            <div class="status">
+              <i class="icon-calendar"></i>
+              {% if mozillian_years > 0 %}
+                {% trans %}
+                  Mozillian for {{ mozillian_years }} years
+                {% endtrans %}
+              {% else %}
+                  Mozillian for less than a year
+              {% endif %}
+              <span>{{ shown_user.userprofile.date_mozillian.strftime('%b %d, %Y') }}</span>
+            </div>
+        </section>
+      {% endif %}
       {% if profile.country or profile.region or profile.city %}
         <section id="location">
           <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
         </section>
       {% endif %}
-      {# Placeholder for user timezone #}
-      <section id="timezone">
-        <i class="icon-time"></i> {{ _('Pacific (UTC-7/8)') }}
-      </section>
+      {% if profile.timezone %}
+        <section id="timezone">
+          <i class="icon-time"></i> {{ profile.timezone }}
+        </section>
+      {% endif %}
      </div>
   </article>
 
@@ -171,14 +182,14 @@
             {% endfor %}
         </div>
       {% endif %}
-    </section> 
+    </section>
 
     <section id="profile-contact">
       <div class="contact-details">
         <ul>
           {% if profile.email %}
             <li class="u-email email">
-              <i class="icon-envelope"></i> 
+              <i class="icon-envelope"></i>
               {{ profile.email }}
             </li>
           {% endif %}
@@ -190,7 +201,7 @@
                 </a>
             </li>
           {% endif %}
-          {# Placeholder forloop, as the sketch outlines 
+          {# Placeholder forloop, as the sketch outlines
           that users may have > 1 website #}
           {#  {% if profile.websites.count() %}
               {% for website in profile.websites.all %} #}
@@ -206,7 +217,7 @@
               {% endfor %} #}
         </ul>
       </div>
-      {# Placeholder for account lists 
+      {# Placeholder for account lists
       {% if profile.accounts.count() %}
         <div class="u-accounts accounts">
           <h3>{{ _('Accounts') }}</h3>
