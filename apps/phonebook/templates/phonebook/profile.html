@@ -14,7 +14,7 @@
       {% for message in messages %}
         {% with %}
           {% set label = message.tags in ['error', 'success', 'info'] %}
-          <div class="alert{% if label %} alert-{{ message.tags }}{% endif %} offset1 span8">{{ message }}</div>
+          <div class="alert{% if label %} alert-{{ message.tags }}{% endif %}">{{ message }}</div>
         {% endwith %}
       {% endfor %}
   {% endif %}
