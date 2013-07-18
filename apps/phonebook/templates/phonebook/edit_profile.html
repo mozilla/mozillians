@@ -232,6 +232,124 @@
       </div>
     </fieldset>
 
+    <fieldset id="services">
+      <legend>{{ _('Services') }}</legend>
+      <p class="field_description">
+        {% trans bugzilla_url='http://bugzilla.mozilla.org',
+                 reps_url='http://reps.mozilla.org' %}
+          The Phonebook offers an API to help authorize
+          contributors and share profile data to other tools
+          and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
+          <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
+        {% endtrans %}
+      <h5>{{ _('Other Sites') }}</h5>
+      {{ bootstrap(profile_form.allows_community_sites) }}
+      {{ bootstrap(profile_form.allows_mozilla_sites) }}
+      {% if user.get_profile().is_vouched %}
+        <h5>{{ _('Developers') }}</h5>
+        <p class="field_description">
+          {% trans api_schema_url='https://wiki.mozilla.org/Mozillians/API-Specification',
+                   bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                         'product=Data%20Safety&cc=williamr@mozilla.com'
+                                         '&short_desc=Phonebook%20API%20Usage%20Request'),
+                   dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
+            Take a look at the list of
+            the <a href="{{ api_schema_url }}">API methods we've
+            made available</a>. To use this API, you'll need to
+            get approval from the Privacy team. To get started,
+            <a href="{{ bugzilla_request_url }}">file
+            a bug</a>. If you have any questions, talk to us in
+            our <a href="{{ dev_form_url }}">
+            development forum</a>.
+          {% endtrans %}
+        </p>
+        <ul>
+          <strong>{{ _('Your approved apps:') }}</strong>
+          {% for app in apps %}
+            <li>{{ app.name }} {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}<br>
+              <small><strong>{{ _('Key') }}:</strong> {{ app.key }}</small>
+            </li>
+          {% else %}
+            {{ _('You have no registered, active apps.') }}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </fieldset>
+
+    <fieldset id="invites">
+      <legend>{{ _('Vouches & Invites') }}</legend>
+      <h5>{{ _('Vouched By') }}</h5>
+      {% if profile.vouched_by %}
+        <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
+          {{ profile.vouched_by.display_name }}
+        </a>
+      {% elif profile.is_vouched %}
+        {{ _('You are automatically vouched!') }}
+      {% else %}
+        {% trans profile_url=absolutify(url('profile', user.username)) %}
+          You aren't vouched! Send this link to a mozillian
+          who can vouch for your contributions:
+          <em class="underline" title="Your profile URL">
+            {{ profile_url }}
+          </em>
+        {% endtrans %}
+      {% endif %}
+      {% if my_vouches %}
+        <h5>{{ _('Vouchees') }}</h5>
+        <ul class="vouchees">
+          {% for vouchee in my_vouches %}
+            <li>
+              <a href="{{ url('profile', vouchee.user.username) }}" class="vouched">
+                {{ vouchee.display_name }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {# <div class="control-group">
+          
+          <div class="controls">
+            <span class="label-text">
+              {% if profile.vouched_by %}
+                <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
+                  {{ profile.vouched_by.display_name }}
+                </a>
+              {% elif profile.is_vouched %}
+                {{ _('You are automatically vouched!') }}
+              {% else %}
+                {% trans profile_url=absolutify(url('profile', user.username)) %}
+                  You aren't vouched! Send this link to a mozillian
+                  who can vouch for your contributions:
+                  <em class="underline" title="Your profile URL">
+                    {{ profile_url }}
+                  </em>
+                {% endtrans %}
+              {% endif %}
+            </span>
+          </div>
+        </div>
+        {% if my_vouches %}
+        <hr>
+          <div class="control-group">
+            <label class="control-label">{{ _('Vouchees') }}</label>
+            <div class="controls">
+              <ul class="vouchees">
+                {% for vouchee in my_vouches %}
+                  <li class="label-text">
+                    <a href="{{ url('profile', vouchee.user.username) }}" class="vouched">
+                      {{ vouchee.display_name }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div> #}
+    </fieldset>
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
       <label>{{ _('Province/State') }}</label>
