@@ -35,15 +35,15 @@
           <p>
             Your profile is waiting to be vouched. Send the link below to someone who
             is familiar with your contributions and ask them to vouch for you.
+            <br>
+            <em class="underline" title="Your profile URL">{{ profile_url }}</em>
           </p>
           <p>
             If you are new to the Mozilla community,
             <a href="{{ contribute_url }}">get involved</a>.
             The chances of being vouched increase as you finish tasks in our community.
           </p>
-          <em class="underline" title="Your profile URL">
-            {{ profile_url }}
-          </em>
+          
         {% endtrans %}
       {% else %}
         {% if vouch_form %}
