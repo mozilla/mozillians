@@ -199,7 +199,7 @@ BROWSERID_USERNAME_ALGO = calculate_username
 
 # On Login, we redirect through register.
 LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/register/'
+LOGIN_REDIRECT_URL = '/user/edit/'
 
 INSTALLED_APPS = list(base.INSTALLED_APPS) + [
     # These need to go in order of migration.

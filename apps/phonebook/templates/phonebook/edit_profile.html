@@ -54,12 +54,10 @@
     {% endif %}
   </header>
 
-  <form action="{{ url('profile.edit') }}"
-          method="POST"
-          enctype="multipart/form-data"
-          class="edit-profile">
+  <form action="{{ url('profile.edit') }}" method="POST" enctype="multipart/form-data"
+        class="edit-profile">
     {{ csrf() }}
-    
+
     <fieldset class="privacy-all">
       <label>{{ _('Make all of my profile fields visible to:') }}</label>
       <select id="privacy-global-settings">
@@ -68,7 +66,7 @@
         <option value="4">{{ _('Public') }}</option>
       </select>
     </fieldset>
-    
+
     <fieldset id="photo">
       {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
       <label>{{ _('Profile Photo') }}</label>
@@ -83,12 +81,12 @@
         </div>
       {% endif %}
     </fieldset>
-    
+
     <fieldset>
       <label>{{ _('Username') }}<span>*</span></label>
       {{ user_form.username }}
     </fieldset>
-    
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
       <label>{{ _('Full Name') }}<span>*</span></label>
@@ -98,7 +96,7 @@
     <fieldset>
       {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
       <label>{{ _('Email') }}</label>
-      <input type="text" disabled="disabled" maxlength="30" 
+      <input type="text" disabled="disabled" maxlength="30"
              value="{{ profile.user.email }}" name="email" id="id_email">
     </fieldset>
 
@@ -152,61 +150,16 @@
       </select>
       <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a>
     </fieldset>
-    
-    <fieldset> 
+
+    <fieldset>
       {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
       <label>{{ _('IRC Nickname') }}</label>
       {{ profile_form.ircname }}
     </fieldset>
 
     <fieldset>
-      {# Placeholder for privacy control below #}
-      <div class="privacy-controls">
-        <div class="control-group">
-            <label class="control-label">Visible to:</label>
-            <div class="controls">
-                <select label="Visible to:" name="privacy_website" class="privacy-choice" data-privacy-original="3" id="id_privacy_website">
-                    <option selected="selected" value="3">Mozillians</option>
-                    <option value="4">Public</option>
-                </select>
-            </div>
-        </div>
-      </div>
-      <select>
-        <option>Month</option>
-        <option value="1">January</option>
-        <option value="2">February</option>
-        <option value="3">March</option>
-        <option value="4">April</option>
-        <option value="5">May</option>
-        <option value="6">June</option>
-        <option value="7">July</option>
-        <option value="8">August</option>
-        <option value="9">September</option>
-        <option value="10">October</option>
-        <option value="11">November</option>
-        <option value="12">December</option>
-      </select>
-      
-      <select>
-        <option>Year</option>
-        <option value="current_year">Current Year</option>
-        <option value="2012">2012</option>
-        <option value="2011">2011</option>
-        <option value="2010">2010</option>
-        <option value="2009">2009</option>
-        <option value="2008">2008</option>
-        <option value="2007">2007</option>
-        <option value="2006">2006</option>
-        <option value="2005">2005</option>
-        <option value="2004">2004</option>
-        <option value="2003">2003</option>
-        <option value="2002">2002</option>
-        <option value="2001">2001</option>
-        <option value="2000">2000</option>
-        <option value="1999">1999</option>
-        <option value="1998">1998</option>
-      </select> 
+      {{ privacy_field(profile_form.privacy_date_mozillian, profile.privacy_date_mozillian) }}
+      {{ profile_form.date_mozillian }}
       <label>{{ _('When did you get involved with Mozilla?') }}</label>
     </fieldset>
 
@@ -235,7 +188,7 @@
           both.
         {% endtrans %}
       </p>
-    
+
       {{ privacy_field(profile_form.privacy_skills, profile.privacy_skills) }}
       {{ profile_form.skills }}
       <div class="help_text">
@@ -265,11 +218,11 @@
         {% endfor %}
       </select>
       <label>{{ _("Preferred Language") }}</label>
-      
+
     </fieldset>
     {% endif %}
     #}
-    
+
     <fieldset id="languages">
       <legend>{{ _('Languages') }}</legend>
       <p class="field_description">
@@ -292,66 +245,22 @@
       <label>{{ _('Province/State') }}</label>
       {{ profile_form.region }}
     </fieldset>
-   
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
       <label>{{ _('City') }}</label>
       {{ profile_form.city }}
     </fieldset>
-    
+
     <fieldset>
-      {# Placeholder for privacy control below #}
-      <div class="privacy-controls">
-        <div class="control-group">
-            <label class="control-label">Visible to:</label>
-            <div class="controls">
-                <select label="Visible to:" name="privacy_website" class="privacy-choice" data-privacy-original="3" id="id_privacy_website">
-                    <option selected="selected" value="3">Mozillians</option>
-                    <option value="4">Public</option>
-                </select>
-            </div>
-        </div>
-      </div>
+      {{ privacy_field(profile_form.privacy_timezone, profile.privacy_timezone) }}
       <label>{{ _('Timezone') }}</label>
-      {# Below is a placeholder for timezone options #}
-      <select>
-        <option value="-12.0">(GMT -12:00) Eniwetok, Kwajalein</option>
-        <option value="-11.0">(GMT -11:00) Midway Island, Samoa</option>
-        <option value="-10.0">(GMT -10:00) Hawaii</option>
-        <option value="-9.0">(GMT -9:00) Alaska</option>
-        <option value="-8.0" selected>(GMT -8:00) Pacific Time (US & Canada)</option>
-        <option value="-7.0">(GMT -7:00) Mountain Time (US & Canada)</option>
-        <option value="-6.0">(GMT -6:00) Central Time (US & Canada), Mexico City</option>
-        <option value="-5.0">(GMT -5:00) Eastern Time (US & Canada), Bogota, Lima</option>
-        <option value="-4.0">(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz</option>
-        <option value="-3.5">(GMT -3:30) Newfoundland</option>
-        <option value="-3.0">(GMT -3:00) Brazil, Buenos Aires, Georgetown</option>
-        <option value="-2.0">(GMT -2:00) Mid-Atlantic</option>
-        <option value="-1.0">(GMT -1:00 hour) Azores, Cape Verde Islands</option>
-        <option value="0.0">(GMT) Western Europe Time, London, Lisbon, Casablanca</option>
-        <option value="1.0">(GMT +1:00 hour) Brussels, Copenhagen, Madrid, Paris</option>
-        <option value="2.0">(GMT +2:00) Kaliningrad, South Africa</option>
-        <option value="3.0">(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg</option>
-        <option value="3.5">(GMT +3:30) Tehran</option>
-        <option value="4.0">(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi</option>
-        <option value="4.5">(GMT +4:30) Kabul</option>
-        <option value="5.0">(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent</option>
-        <option value="5.5">(GMT +5:30) Bombay, Calcutta, Madras, New Delhi</option>
-        <option value="5.75">(GMT +5:45) Kathmandu</option>
-        <option value="6.0">(GMT +6:00) Almaty, Dhaka, Colombo</option>
-        <option value="7.0">(GMT +7:00) Bangkok, Hanoi, Jakarta</option>
-        <option value="8.0">(GMT +8:00) Beijing, Perth, Singapore, Hong Kong</option>
-        <option value="9.0">(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk</option>
-        <option value="9.5">(GMT +9:30) Adelaide, Darwin</option>
-        <option value="10.0">(GMT +10:00) Eastern Australia, Guam, Vladivostok</option>
-        <option value="11.0">(GMT +11:00) Magadan, Solomon Islands, New Caledonia</option>
-        <option value="12.0">(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka</option>
-      </select>
+      {{ profile_form.timezone }}
     </fieldset>
 
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
-        <input type="checkbox">
+        {{ profile_form.optin }}
         <label>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
             I'm okay with you handling this info as you explain
@@ -360,7 +269,7 @@
           {% endtrans %}
         </label>
       </fieldset>
-    
+
       <p class="alert-info">
         {% trans %}
           You will begin to receive email communications from Mozilla
@@ -380,7 +289,7 @@
           <button type="submit">{{ _('Create Profile') }}</button>
         {% endif %}
     </fieldset>
-    
+
     {% if profile.is_complete %}
       <fieldset id="delete">
         <legend>{{ _('Delete Profile') }}</legend>
@@ -394,7 +303,7 @@
         <a href="{{ url('profile.delete_confirm') }}" class="delete">
           {{ _('Delete Profile') }}
         </a>
-      </fieldset> 
+      </fieldset>
     {% endif %}
   </form>
 

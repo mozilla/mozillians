@@ -47,12 +47,14 @@ class RegistrationTest(ESTestCase):
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
-        d = dict(username='ad',
+        d = self.data_privacy_fields.copy()
+        d.update(dict(username='ad',
                  email='mrfusion@mozilla.com',
                  full_name='Akaaaaaaash Desaaaaaaai',
-                 optin=True)
+                 country='pl',
+                 optin=True))
         with browserid_mock.mock_browserid('mrfusion@mozilla.com'):
-            r = self.client.post(reverse('register'), d, follow=True)
+            r = self.client.post(reverse('profile.edit'), d, follow=True)
 
         doc = pq(r.content)
 
@@ -71,12 +73,14 @@ class RegistrationTest(ESTestCase):
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
-        d = dict(username='ad',
+        d = self.data_privacy_fields.copy()
+        d.update(dict(username='ad',
                  email=email,
                  full_name='Akaaaaaaash Desaaaaaaai',
-                 optin=True)
+                 country='pl',
+                 optin=True))
         with browserid_mock.mock_browserid(email):
-            self.client.post(reverse('register'), d, follow=True)
+            self.client.post(reverse('profile.edit'), d, follow=True)
 
         assert User.objects.filter(email=d['email'])
 
@@ -90,13 +94,15 @@ class RegistrationTest(ESTestCase):
         d = dict(assertion=self.fake_assertion)
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_login'), d, follow=True)
-        d = dict(email=email,
+
+        d = self.data_privacy_fields.copy()
+        d.update(email=email,
                  username='mrfusion',
                  full_name='Akaaaaaaash Desaaaaaaai',
                  country='pl',
                  optin=True)
         with browserid_mock.mock_browserid(email):
-            r = self.client.post(reverse('register'), d)
+            r = self.client.post(reverse('profile.edit'), d)
         eq_(r.status_code, 302, "Problems if we didn't redirect...")
         u = User.objects.filter(email=d['email'])[0]
         eq_(u.username, 'mrfusion', "Username didn't get set.")
@@ -117,13 +123,14 @@ class RegistrationTest(ESTestCase):
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
-        d = dict(email=email,
+        d = self.data_privacy_fields.copy()
+        d.update(email=email,
                  username=username,
                  full_name='Akaaaaaaash Desaaaaaaai',
                  country='pl',
                  optin=True)
         with browserid_mock.mock_browserid(email):
-            r = self.client.post(reverse('register'), d)
+            r = self.client.post(reverse('profile.edit'), d)
         eq_(r.status_code, 302, (
                 'Registration flow should finish with a redirect.'))
         u = User.objects.get(email=d['email'])
@@ -141,13 +148,15 @@ class RegistrationTest(ESTestCase):
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
-        d = dict(email=bad_user_email,
+        d = self.data_privacy_fields.copy()
+        d.update(email=bad_user_email,
                  username=bad_username,
+                 country='pl',
                  full_name='Akaaaaaaash Desaaaaaaai',
                  optin=True)
         with browserid_mock.mock_browserid(email):
-            r = self.client.post(reverse('register'), d)
-        eq_(r.status_code, 302, (
+            r = self.client.post(reverse('profile.edit'), d, follow=True)
+        eq_(r.status_code, 400, (
                 'Registration flow should fail; username is bad.'))
         assert not User.objects.filter(email=d['email']), (
                 "User shouldn't exist; username was bad.")
@@ -168,14 +177,16 @@ class RegistrationTest(ESTestCase):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
         for name in badnames:
-            d = dict(email=email,
+            d = self.data_privacy_fields.copy()
+            d.update(dict(email=email,
                      username=name,
+                     country='pl',
                      full_name='Akaaaaaaash Desaaaaaaai',
-                     optin=True)
+                     optin=True))
             with browserid_mock.mock_browserid(email):
-                r = self.client.post(reverse('register'), d)
+                r = self.client.post(reverse('profile.edit'), d)
 
-            eq_(r.status_code, 200,
+            eq_(r.status_code, 400,
                 'This form should fail for "%s", and say so.' % name)
             assert r.context['user_form'].errors, (
                 "Didn't raise errors for %s" % name)
@@ -196,7 +207,8 @@ class RegistrationTest(ESTestCase):
 
     def test_repeat_username(self):
         """Verify one cannot repeat email adresses."""
-        register = dict(username='repeatedun',
+        register = self.data_privacy_fields.copy()
+        register.update(username='repeatedun',
                         full_name='Akaaaaaaash Desaaaaaaai',
                         country='pl',
                         optin=True)
@@ -209,7 +221,7 @@ class RegistrationTest(ESTestCase):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
         with browserid_mock.mock_browserid(email1):
-            self.client.post(reverse('register'), register, follow=True)
+            self.client.post(reverse('profile.edit'), register, follow=True)
 
         self.client.logout()
         # Create a different user
@@ -219,7 +231,7 @@ class RegistrationTest(ESTestCase):
             self.client.post(reverse('browserid_login'), d, follow=True)
 
         with browserid_mock.mock_browserid(email2):
-            r = self.client.post(reverse('register'), register, follow=True)
+            r = self.client.post(reverse('profile.edit'), register, follow=True)
 
         # Make sure we can't use the same username twice
         assert r.context['user_form'].errors, "Form should throw errors."
@@ -358,13 +370,14 @@ class TestUser(ESTestCase):
         username = 'thisisatest'
         email = 'test@example.com'
         register = dict(username=username,
+                        country='pl',
                         full_name='David Teststhings',
                         optin=True)
         d = {'assertion': 'rarrr'}
 
         with browserid_mock.mock_browserid(email):
             self.client.post(reverse('browserid_login'), d, follow=True)
-            self.client.post(reverse('register'), register, follow=True)
+            self.client.post(reverse('profile.edit'), register, follow=True)
 
         u = User.objects.filter(email=email)[0]
         p = u.get_profile()
@@ -380,7 +393,9 @@ class TestMigrateRegistration(ESTestCase):
             """Given an invite_url go to it and redeem an invite."""
             # Lettuce make sure we have a clean slate
 
-            info = dict(full_name='Akaaaaaaash Desaaaaaaai', optin=True)
+            info = self.data_privacy_fields.copy()
+            info.update(full_name='Akaaaaaaash Desaaaaaaai', country='pl',
+                        optin=True)
             self.client.logout()
             u = User.objects.create(username='robot1337', email=self.email)
             p = u.get_profile()
@@ -399,7 +414,7 @@ class TestMigrateRegistration(ESTestCase):
 
             # Now let's register
             with browserid_mock.mock_browserid(self.email):
-                r = self.client.post(reverse('register'), info, follow=True)
+                r = self.client.post(reverse('profile.edit'), info, follow=True)
 
             eq_(r.status_code, 200)
 
