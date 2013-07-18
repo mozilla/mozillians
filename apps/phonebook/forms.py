@@ -84,21 +84,23 @@ class UserForm(happyforms.ModelForm):
         return username
 
 
-class BaseProfileForm(happyforms.ModelForm):
+class ProfileForm(happyforms.ModelForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
 
+    groups = forms.CharField(
+        label=_lazy(u'Start typing to add a group (example: Marketing, '
+                    'Support, WebDev, Thunderbird)'), required=False)
+    languages = forms.CharField(
+        label=_lazy(u'Start typing to add a language you speak (example: '
+                    'English, French, German)'), required=False)
     skills = forms.CharField(
         label=_lazy(u'Start typing to add a skill (example: Python, '
                     'javascript, Graphic Design, User Research)'),
         required=False)
-    languages = forms.CharField(
-        label=_lazy(u'Start typing to add a language you speak (example: '
-                    'English, French, German)'), required=False)
 
     class Meta:
-        # Model form stuff
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites',
@@ -112,46 +114,11 @@ class BaseProfileForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         locale = kwargs.pop('locale', 'en-US')
 
-        super(BaseProfileForm, self).__init__(*args, **kwargs)
+        super(ProfileForm, self).__init__(*args, **kwargs)
         country_list = product_details.get_regions(locale).items()
         country_list = sorted(country_list, key=lambda country: country[1])
         country_list.insert(0, ('', '----'))
         self.fields['country'].choices = country_list
-
-    def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
-            raise forms.ValidationError(_(u'Skills can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
-        skills = self.cleaned_data['skills']
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          skills.lower().split(',')))
-
-    def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
-                        self.cleaned_data['languages']):
-            raise forms.ValidationError(_(u'Languages can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
-        languages = self.cleaned_data['languages']
-
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          languages.lower().split(',')))
-
-    def save(self):
-        """Save the data to profile."""
-        self.instance.set_membership(Group, self.cleaned_data['groups'])
-        self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        self.instance.set_membership(Language, self.cleaned_data['languages'])
-        super(BaseProfileForm, self).save()
-
-
-class ProfileForm(BaseProfileForm):
-    groups = forms.CharField(
-        label=_lazy(u'Start typing to add a group (example: Marketing, '
-                    'Support, WebDev, Thunderbird)'), required=False)
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and
@@ -171,27 +138,40 @@ class ProfileForm(BaseProfileForm):
 
         return system_groups + new_groups
 
+    def clean_languages(self):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
+                        self.cleaned_data['languages']):
+            raise forms.ValidationError(_(u'Languages can only contain '
+                                           'alphanumeric characters, dashes, '
+                                           'spaces.'))
+        languages = self.cleaned_data['languages']
 
-class RegisterForm(BaseProfileForm):
+        return filter(lambda x: x,
+                      map(lambda x: x.strip() or False,
+                          languages.lower().split(',')))
+
+    def clean_skills(self):
+        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+            raise forms.ValidationError(_(u'Skills can only contain '
+                                           'alphanumeric characters, dashes, '
+                                           'spaces.'))
+        skills = self.cleaned_data['skills']
+        return filter(lambda x: x,
+                      map(lambda x: x.strip() or False,
+                          skills.lower().split(',')))
+
+    def save(self):
+        """Save the data to profile."""
+        self.instance.set_membership(Group, self.cleaned_data['groups'])
+        self.instance.set_membership(Skill, self.cleaned_data['skills'])
+        self.instance.set_membership(Language, self.cleaned_data['languages'])
+        super(ProfileForm, self).save()
+
+
+class RegisterForm(ProfileForm):
     optin = forms.BooleanField(
-        label=_lazy(u"I'm okay with you handling this info as you "
-                    u"explain in Mozilla's privacy policy."),
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
-
-    groups = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple,
-        label=_lazy(u'Please indicate the functional areas you are currently '
-                    'contributing to or would like to contribute to:'),
-        queryset=Group.get_curated(), required=False)
-
-    class Meta:
-        # Model form stuff
-        model = UserProfile
-        fields = ('full_name', 'ircname', 'website', 'bio', 'photo',
-                  'country', 'region', 'city')
-        exclude = ('display_name', )
-        widgets = {'bio': forms.Textarea()}
 
 
 class VouchForm(happyforms.Form):

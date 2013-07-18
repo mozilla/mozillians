@@ -54,12 +54,10 @@
     {% endif %}
   </header>
 
-  <form action="{{ url('profile.edit') }}"
-          method="POST"
-          enctype="multipart/form-data"
-          class="edit-profile">
+  <form action="{{ url('profile.edit') }}" method="POST" enctype="multipart/form-data"
+        class="edit-profile">
     {{ csrf() }}
-    
+
     <fieldset class="privacy-all">
       <label>{{ _('Make all of my profile fields visible to:') }}</label>
       <select id="privacy-global-settings">
@@ -68,7 +66,7 @@
         <option value="4">{{ _('Public') }}</option>
       </select>
     </fieldset>
-    
+
     <fieldset id="photo">
       {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
       <label>{{ _('Profile Photo') }}</label>
@@ -83,12 +81,12 @@
         </div>
       {% endif %}
     </fieldset>
-    
+
     <fieldset>
       <label>{{ _('Username') }}<span>*</span></label>
       {{ user_form.username }}
     </fieldset>
-    
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
       <label>{{ _('Full Name') }}<span>*</span></label>
@@ -98,7 +96,7 @@
     <fieldset>
       {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
       <label>{{ _('Email') }}</label>
-      <input type="text" disabled="disabled" maxlength="30" 
+      <input type="text" disabled="disabled" maxlength="30"
              value="{{ profile.user.email }}" name="email" id="id_email">
     </fieldset>
 
@@ -152,8 +150,8 @@
       </select>
       <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a>
     </fieldset>
-    
-    <fieldset> 
+
+    <fieldset>
       {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
       <label>{{ _('IRC Nickname') }}</label>
       {{ profile_form.ircname }}
@@ -187,7 +185,7 @@
         <option value="11">November</option>
         <option value="12">December</option>
       </select>
-      
+
       <select>
         <option>Year</option>
         <option value="current_year">Current Year</option>
@@ -206,7 +204,7 @@
         <option value="2000">2000</option>
         <option value="1999">1999</option>
         <option value="1998">1998</option>
-      </select> 
+      </select>
       <label>{{ _('When did you get involved with Mozilla?') }}</label>
     </fieldset>
 
@@ -235,7 +233,7 @@
           both.
         {% endtrans %}
       </p>
-    
+
       {{ privacy_field(profile_form.privacy_skills, profile.privacy_skills) }}
       {{ profile_form.skills }}
       <div class="help_text">
@@ -265,11 +263,11 @@
         {% endfor %}
       </select>
       <label>{{ _("Preferred Language") }}</label>
-      
+
     </fieldset>
     {% endif %}
     #}
-    
+
     <fieldset id="languages">
       <legend>{{ _('Languages') }}</legend>
       <p class="field_description">
@@ -292,13 +290,13 @@
       <label>{{ _('Province/State') }}</label>
       {{ profile_form.region }}
     </fieldset>
-   
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
       <label>{{ _('City') }}</label>
       {{ profile_form.city }}
     </fieldset>
-    
+
     <fieldset>
       {# Placeholder for privacy control below #}
       <div class="privacy-controls">
@@ -351,7 +349,7 @@
 
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
-        <input type="checkbox">
+        {{ profile_form.optin }}
         <label>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
             I'm okay with you handling this info as you explain
@@ -360,7 +358,7 @@
           {% endtrans %}
         </label>
       </fieldset>
-    
+
       <p class="alert-info">
         {% trans %}
           You will begin to receive email communications from Mozilla
@@ -380,7 +378,7 @@
           <button type="submit">{{ _('Create Profile') }}</button>
         {% endif %}
     </fieldset>
-    
+
     {% if profile.is_complete %}
       <fieldset id="delete">
         <legend>{{ _('Delete Profile') }}</legend>
@@ -394,7 +392,7 @@
         <a href="{{ url('profile.delete_confirm') }}" class="delete">
           {{ _('Delete Profile') }}
         </a>
-      </fieldset> 
+      </fieldset>
     {% endif %}
   </form>
 
