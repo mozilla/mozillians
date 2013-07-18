@@ -15,15 +15,7 @@
 {% block content %}
   {% if profile_form.errors or user_form.errors  %}
       <div class="alert alert-error">
-        {{ _('Please correct the following errors:') }}
-        <ol>
-        {% for error in user_form.errors %}
-          <li>{{ error|escape }}</li>
-        {% endfor %}
-        {% for error in profile_form.errors %}
-          <li>{{ error|escape }}</li>
-        {% endfor %}
-        </ol>
+        {{ _('Please correct the errors below.') }}
       </div>
   {% endif %}
 
@@ -84,13 +76,13 @@
 
     <fieldset>
       <label>{{ _('Username') }}<span>*</span></label>
-      {{ user_form.username }}
+      {{ bootstrap(user_form.username) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
       <label>{{ _('Full Name') }}<span>*</span></label>
-      {{ profile_form.full_name }}
+      {{ bootstrap(profile_form.full_name) }} 
     </fieldset>
 
     <fieldset>
@@ -103,7 +95,7 @@
     <fieldset>
       {{ privacy_field(profile_form.privacy_country, profile.privacy_country) }}
       <label>{{ _('Country') }}<span>*</span></label>
-      {{ profile_form.country }}
+      {{ bootstrap(profile_form.country) }}
     </fieldset>
 
     <fieldset>
@@ -260,7 +252,7 @@
 
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
-        {{ profile_form.optin }}
+        {{ bootstrap(profile_form.optin) }} 
         <label>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
             I'm okay with you handling this info as you explain

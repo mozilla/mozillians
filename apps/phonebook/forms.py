@@ -56,7 +56,7 @@ class UserForm(happyforms.ModelForm):
 
     """
     username = forms.CharField(label=_lazy(u'Username'),
-                               max_length=30, required=False)
+                               max_length=30, required=True)
 
     class Meta:
         model = User
