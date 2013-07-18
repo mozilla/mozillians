@@ -194,7 +194,8 @@ class UserProfilePrivacyModel(models.Model):
                        'groups': Group.objects.none(),
                        'skills': Skill.objects.none(),
                        'languages': Language.objects.none(),
-                       'vouched_by': None}
+                       'vouched_by': None,
+                       'date_mozillian': None}
     _privacy_level = None
 
     privacy_photo = models.PositiveIntegerField(default=MOZILLIANS,
@@ -223,6 +224,8 @@ class UserProfilePrivacyModel(models.Model):
                                                     choices=PRIVACY_CHOICES)
     privacy_vouched_by = models.PositiveIntegerField(default=MOZILLIANS,
                                                      choices=PRIVACY_CHOICES)
+    privacy_date_mozillian = models.PositiveIntegerField(
+        default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:
         abstract=True
@@ -269,6 +272,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         verbose_name=_lazy(u'Allow Mozilla sites to access my profile data?'),
         choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
     basket_token = models.CharField(max_length=1024, default='', blank=True)
+    date_mozillian = models.DateField('When was involved with Mozilla',
+                                      null=True, blank=True, default=None)
 
     class Meta:
         db_table = 'profile'

@@ -1,6 +1,9 @@
 import re
+from datetime import date
+
 import jinja2
 from jingo import register
+
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -18,3 +21,11 @@ def search_result(context, profile):
     d = dict(context.items())
     d.update(profile=profile)
     return d
+
+
+@register.function
+def get_mozillian_years(userprofile):
+    if userprofile.date_mozillian:
+        year_difference = date.today().year - userprofile.date_mozillian.year
+        return year_difference
+    return None

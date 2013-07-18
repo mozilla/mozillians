@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from django import forms
 from django.utils.safestring import mark_safe
@@ -8,6 +9,7 @@ from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from apps.groups.models import Group, Skill, Language
+from apps.phonebook.widgets import MonthYearWidget
 from apps.users.helpers import validate_username
 from apps.users.models import User, UserProfile
 
@@ -88,7 +90,10 @@ class ProfileForm(happyforms.ModelForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
-
+    date_mozillian = forms.DateField(
+        required=False,
+        widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
+                               required=False))
     groups = forms.CharField(
         label=_lazy(u'Start typing to add a group (example: Marketing, '
                     'Support, WebDev, Thunderbird)'), required=False)
@@ -104,11 +109,12 @@ class ProfileForm(happyforms.ModelForm):
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites',
-                  'allows_mozilla_sites', 'privacy_photo', 'privacy_full_name',
-                  'privacy_ircname', 'privacy_email', 'privacy_website',
-                  'privacy_bio', 'privacy_city', 'privacy_region',
-                  'privacy_country', 'privacy_groups', 'privacy_skills',
-                  'privacy_languages')
+                  'allows_mozilla_sites', 'date_mozillian', 'privacy_photo',
+                  'privacy_full_name', 'privacy_ircname', 'privacy_email',
+                  'privacy_website', 'privacy_bio', 'privacy_city',
+                  'privacy_region', 'privacy_country', 'privacy_groups',
+                  'privacy_skills', 'privacy_languages',
+                  'privacy_date_mozillian')
         widgets = {'bio': forms.Textarea()}
 
     def __init__(self, *args, **kwargs):
