@@ -191,7 +191,9 @@
           {% if profile.email %}
             <li class="u-email email">
               <i class="icon-envelope"></i>
-              {{ profile.email }}
+              {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                {{ profile.email }}
+              {% if user != shown_user %}</a>{% endif %}
             </li>
           {% endif %}
           {% if profile.ircname %}
