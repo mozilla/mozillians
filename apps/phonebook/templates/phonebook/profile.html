@@ -104,10 +104,11 @@
           <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
         </section>
       {% endif %}
-      {# Placeholder for user timezone #}
-      <section id="timezone">
-        <i class="icon-time"></i> {{ _('Pacific (UTC-7/8)') }}
-      </section>
+      {% if profile.timezone %}
+        <section id="timezone">
+          <i class="icon-time"></i> {{ profile.timezone }}
+        </section>
+      {% endif %}
      </div>
   </article>
 

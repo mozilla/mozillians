@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 
 import happyforms
 from product_details import product_details
+from pytz import common_timezones
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from apps.groups.models import Group, Skill, Language
@@ -104,13 +105,15 @@ class ProfileForm(happyforms.ModelForm):
         label=_lazy(u'Start typing to add a skill (example: Python, '
                     'javascript, Graphic Design, User Research)'),
         required=False)
+    timezone = forms.ChoiceField(choices=zip(common_timezones, common_timezones))
 
     class Meta:
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites',
-                  'allows_mozilla_sites', 'date_mozillian', 'privacy_photo',
-                  'privacy_full_name', 'privacy_ircname', 'privacy_email',
+                  'allows_mozilla_sites', 'date_mozillian', 'timezone',
+                  'privacy_photo', 'privacy_full_name', 'privacy_ircname',
+                  'privacy_email', 'privacy_timezone',
                   'privacy_website', 'privacy_bio', 'privacy_city',
                   'privacy_region', 'privacy_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',

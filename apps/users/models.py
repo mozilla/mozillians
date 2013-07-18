@@ -195,7 +195,8 @@ class UserProfilePrivacyModel(models.Model):
                        'skills': Skill.objects.none(),
                        'languages': Language.objects.none(),
                        'vouched_by': None,
-                       'date_mozillian': None}
+                       'date_mozillian': None,
+                       'timezone': ''}
     _privacy_level = None
 
     privacy_photo = models.PositiveIntegerField(default=MOZILLIANS,
@@ -225,6 +226,8 @@ class UserProfilePrivacyModel(models.Model):
     privacy_vouched_by = models.PositiveIntegerField(default=MOZILLIANS,
                                                      choices=PRIVACY_CHOICES)
     privacy_date_mozillian = models.PositiveIntegerField(
+        default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy_timezone = models.PositiveIntegerField(
         default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:
@@ -274,6 +277,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     basket_token = models.CharField(max_length=1024, default='', blank=True)
     date_mozillian = models.DateField('When was involved with Mozilla',
                                       null=True, blank=True, default=None)
+    timezone = models.CharField(max_length=100, blank=True, default='')
 
     class Meta:
         db_table = 'profile'
