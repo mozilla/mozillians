@@ -20,6 +20,7 @@ from apps.groups.models import Group
 from apps.users.models import (COUNTRIES, EMPLOYEES, MOZILLIANS,
                                PUBLIC, PRIVILEGED, UserProfile)
 from apps.users.tasks import remove_from_basket_task
+from apps.users.views import _update_invites
 
 
 import forms
@@ -109,36 +110,42 @@ def edit_profile(request):
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
-    profile_form = forms.ProfileForm(
-        request.POST or None, request.FILES or None, instance=profile,
-        initial=dict(groups=user_groups, skills=user_skills,
-                     languages=user_languages),
-        locale=request.locale)
+    new_profile = False
+    form = forms.ProfileForm
+    if not profile.is_complete:
+        new_profile = True
+        form = forms.RegisterForm
 
-    if request.method == 'POST':
-        if (user_form.is_valid() and profile_form.is_valid()):
-            old_username = request.user.username
-            user_form.save()
-            profile_form.save()
+    profile_form = form(request.POST or None, request.FILES or None,
+                        instance=profile, locale=request.locale,
+                        initial=dict(groups=user_groups, skills=user_skills,
+                                     languages=user_languages))
 
-            # Notify the user that their old profile URL won't work.
-            if user.username != old_username:
-                messages.info(request, _(u'You changed your username; please '
-                                         'note your profile URL has also '
-                                         'changed.'))
-            return redirect(reverse('profile', args=[user.username]))
+    if (user_form.is_valid() and profile_form.is_valid()):
+        old_username = request.user.username
+        user_form.save()
+        profile_form.save()
 
-    d = dict(profile_form=profile_form,
-             user_form=user_form,
-             mode='edit',
-             user_groups=user_groups,
-             my_vouches=UserProfile.objects.filter(vouched_by=profile),
-             profile=profile,
-             apps=user.apiapp_set.filter(is_active=True))
+        # Notify the user that their old profile URL won't work.
+        if new_profile:
+            _update_invites(request)
+            messages.info(request, _(u'Your account has been created.'))
+        elif user.username != old_username:
+            messages.info(request,
+                          _(u'You changed your username; please note your '
+                            'profile URL has also changed.'))
+        return redirect(reverse('profile', args=[user.username]))
+
+    data = dict(profile_form=profile_form,
+                user_form=user_form,
+                user_groups=user_groups,
+                my_vouches=UserProfile.objects.filter(vouched_by=profile),
+                profile=request.user.userprofile,
+                apps=user.apiapp_set.filter(is_active=True))
 
     # If there are form errors, don't send a 200 OK.
     status = 400 if (profile_form.errors or user_form.errors) else 200
-    return render(request, 'phonebook/edit_profile.html', d, status=status)
+    return render(request, 'phonebook/edit_profile.html', data, status=status)
 
 
 @allow_unvouched

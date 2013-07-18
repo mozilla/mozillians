@@ -78,8 +78,8 @@
         background: -ms-linear-gradient(@direction, @startColor, @endColor);
         background: -webkit-linear-gradient(@direction, @startColor, @endColor);
         background: -o-linear-gradient(@direction, @startColor, @endColor);
-        background: linear-gradient(@direction, @startColor, @endColor); 
-        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@startColor', 
+        background: linear-gradient(@direction, @startColor, @endColor);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='@startColor',
             endColorstr='@endColor',GradientType=1 ); /* IE6-9 */
     }
 }
@@ -119,12 +119,12 @@ body {
         #content-wrapper {
             background: @white;
         }
-        #main { 
+        #main {
             padding: 25px 0 50px;
             min-height: 500px;
             @media (max-width: @breakTablet) {
                 padding: 25px 20px 50px 20px;
-            } 
+            }
         }
         &.old {
             #main {
@@ -153,10 +153,10 @@ body {
 #outer-wrapper {
     background: url("/media/img/sandstone/bg-sky.png") #eaeff2;
     form {
-        textarea, 
-        input[type=email], 
-        input[type=password], 
-        input[type=search], 
+        textarea,
+        input[type=email],
+        input[type=password],
+        input[type=search],
         input[type=text] {
             .open-sans-light;
             font-style: italic;
@@ -171,7 +171,7 @@ body {
             line-height: 30px;
             color: @gray;
             .border-radius(4px);
-            vertical-align: middle; 
+            vertical-align: middle;
             background-color: @white;
             border: 1px solid #CCCCCC;
             margin-bottom: 0;
@@ -238,7 +238,7 @@ body {
 }
 .alert-block p + p {
     margin-top: 5px;
-} 
+}
 
 dl, dd {
     margin-bottom: 15px !important;
@@ -309,7 +309,7 @@ nav {
             padding-right: 15px;
         }
     }
-    // Note: These !important tags in here are to override Bootstrap 
+    // Note: These !important tags in here are to override Bootstrap
     // styles imported from older templates w/out new stylings.
     form.navbar-search {
         margin-top: 0 !important;
@@ -322,7 +322,7 @@ nav {
             padding: 0 0 0 30px !important;
             .open-sans-light !important;
             width: 275px;
-        } 
+        }
     }
     #nav-main {
         float: right;
@@ -349,7 +349,7 @@ nav {
                 width: 24px;
                 height: 24px;
                 .transform(scale(0.707) rotate(45deg));
-                .border-radius(0 3px 0 50px);  
+                .border-radius(0 3px 0 50px);
                 background-color: #43a6e2;
                 background-image: -moz-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
                 background-image: -ms-linear-gradient(left top, #43a6e2, #3691d2, #287cc2);
@@ -434,7 +434,7 @@ nav {
         font-weight: bold;
         padding: 0 10px 0 20px;
         position: relative;
-        
+
         &:after {
             content:'';
             position: absolute;
@@ -444,7 +444,7 @@ nav {
             height: 24px;
             z-index: 1;
             .transform(scale(0.707) rotate(45deg));
-            .border-radius(0 3px 0 50px);  
+            .border-radius(0 3px 0 50px);
         }
         &.icon {
             padding-left: 3px;
@@ -470,7 +470,7 @@ nav {
             &:after {
                 #gradient .vertical(#56565a, #3a3a3a);
                 z-index: -1;
-            } 
+            }
         }
     }
 }
@@ -506,12 +506,12 @@ footer#colophon {
         margin: 20px 0;
         position: relative;
         background: transparent;
-        background-image: -moz-linear-gradient(left, rgba(71,72,76,0) 0%, rgba(71,72,76,0) 10%, 
+        background-image: -moz-linear-gradient(left, rgba(71,72,76,0) 0%, rgba(71,72,76,0) 10%,
             rgba(71,72,76,0.65) 50%, rgba(71,72,76,0) 90%, rgba(71,72,76,0) 100%); /* FF3.6+ */
         background-image: -ms-linear-gradient(left, rgba(187,196,204,0) 0%,rgba(187,196,204,0) 10%,
             rgba(71,72,76,0.65) 50%,rgba(71,72,76,0) 90%,rgba(71,72,76,0) 100%); /* IE10+ */
-        background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(187,196,204,0)), 
-            color-stop(10%,rgba(71,72,76,0)), color-stop(50%,rgba(71,72,76,0.65)), 
+        background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(187,196,204,0)),
+            color-stop(10%,rgba(71,72,76,0)), color-stop(50%,rgba(71,72,76,0.65)),
             color-stop(90%,rgba(71,72,76,0)), color-stop(100%,rgba(71,72,76,0))); /* Chrome,Safari4+ */
         background-image: -webkit-linear-gradient(left, rgba(71,72,76,0) 0%,rgba(71,72,76,0) 10%,
             rgba(71,72,76,0.65) 50%,rgba(71,72,76,0) 90%,rgba(71,72,76,0) 100%); /* Chrome10+,Safari5.1+ */
@@ -558,8 +558,8 @@ footer#colophon {
 ==================== */
 body#home {
     &.loggedout {
-        #main {  
-        padding: 0; 
+        #main {
+        padding: 0;
             &.container {
                 width: auto;
                 padding-right: 0;
@@ -581,13 +581,13 @@ body#home {
                 display: block;
             }
             @media (min-width: 1200px) {
-                ul { 
+                ul {
                     max-height: 300px;
                     overflow: hidden;
                 }
             }
             @media (max-width: 1024px) {
-                ul { 
+                ul {
                     max-height: 295px;
                     overflow: hidden;
                 }
@@ -598,7 +598,7 @@ body#home {
             text-align: center;
             padding: 60px 0;
             z-index: 11;
-            @media (max-width: @breakMobileLandscape) { 
+            @media (max-width: @breakMobileLandscape) {
                 padding: 40px 0;
             }
             hr {
@@ -607,12 +607,12 @@ body#home {
                 margin: 20px 0;
                 position:relative;
                 background: transparent;
-                background-image: -moz-linear-gradient(left, rgba(187,196,204,0) 0%, rgba(187,196,204,0) 10%, 
+                background-image: -moz-linear-gradient(left, rgba(187,196,204,0) 0%, rgba(187,196,204,0) 10%,
                     rgba(187,196,204,0.65) 50%, rgba(187,196,204,0) 90%, rgba(187,196,204,0) 100%); /* FF3.6+ */
                 background-image: -ms-linear-gradient(left, rgba(187,196,204,0) 0%,rgba(187,196,204,0) 10%,
                     rgba(187,196,204,0.65) 50%,rgba(187,196,204,0) 90%,rgba(187,196,204,0) 100%); /* IE10+ */
-                background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(187,196,204,0)), 
-                    color-stop(10%,rgba(187,196,204,0)), color-stop(50%,rgba(187,196,204,0.65)), 
+                background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(187,196,204,0)),
+                    color-stop(10%,rgba(187,196,204,0)), color-stop(50%,rgba(187,196,204,0.65)),
                     color-stop(90%,rgba(187,196,204,0)), color-stop(100%,rgba(187,196,204,0))); /* Chrome,Safari4+ */
                 background-image: -webkit-linear-gradient(left, rgba(187,196,204,0) 0%,rgba(187,196,204,0) 10%,
                     rgba(187,196,204,0.65) 50%,rgba(187,196,204,0) 90%,rgba(187,196,204,0) 100%); /* Chrome10+,Safari5.1+ */
@@ -637,7 +637,7 @@ body#home {
                         width: 250px;
                         font-size: 18px;
                     }
-                } 
+                }
             }
         }
 
@@ -727,7 +727,7 @@ body#home {
                 }
             }
         }
-        
+
         #get-involved {
             color: @white;
             background: url("/media/img/homepage-getinvolved-bkg.png") repeat-x;
@@ -812,13 +812,13 @@ body#home {
                         background: @white url("/media/img/spyglass.png") no-repeat 5px 50% !important;
                         padding: 0 0 0 30px !important;
                         display: block;
-                        @media (max-width: @breakDesktop) { 
+                        @media (max-width: @breakDesktop) {
                             width: 95%;
                         }
-                        @media (max-width: @breakTablet) { 
+                        @media (max-width: @breakTablet) {
                             width: 400px;
                         }
-                        @media (max-width: @breakMobileLandscape) { 
+                        @media (max-width: @breakMobileLandscape) {
                             width: 91%;
                             font-size: 16px;
                         }
@@ -835,7 +835,7 @@ body#home {
                 .announcements-mozfacts {
                     .clearfix;
                     margin: 50px 0;
-                    img { 
+                    img {
                         min-width: 60px;
                         min-height: 60px;
                         margin-right: 15px;
@@ -948,7 +948,7 @@ body#profile {
                             padding: 5px 15px;
                             opacity: 0;
                             visibility: hidden;
-                            width: 90px;
+                            width: 100px;
                             z-index: 10;
                             position: absolute;
                             top: 0;
@@ -986,13 +986,13 @@ body#profile {
                                 .box-shadow(inset -1px 1px 0 @white);
                                 .transform(rotate(135deg));
                             }
-                        } 
+                        }
                         &:hover span {
                             opacity: 1;
                             visibility: visible;
                             overflow: visible;
                             margin-top: -40px;
-                        } 
+                        }
                     }
                 }
             }
@@ -1026,7 +1026,7 @@ body#profile {
                 h2 { margin: 30px 0 10px; }
                 h3 { font-size: 24px; }
             }
-            #profile-details { 
+            #profile-details {
                 width: 370px;
                 padding-right: 30px;
                 margin: 0;
@@ -1041,7 +1041,7 @@ body#profile {
                     padding: 0;
                 }
             }
-            #profile-contact { 
+            #profile-contact {
                 width: 220px;
                 float: left;
                 ul {
@@ -1078,7 +1078,7 @@ body#edit-profile {
             input, textarea {
                 border: 1px solid lighten(@black,90%);
             }
-            
+
             label {
                 margin-right: 8px;
                 float: left;
@@ -1104,8 +1104,8 @@ body#edit-profile {
                 font-weight: bold;
                 line-height: 36px;
             }
-            .add { 
-                display: block; 
+            .add {
+                display: block;
                 margin: 10px 0 0 130px;
                 cursor: pointer;
                 width: 100px;
@@ -1224,7 +1224,7 @@ body.search-page {
                 padding: 0;
                 line-height: 18px;
                 overflow: hidden;
-                text-overflow: ellipsis; 
+                text-overflow: ellipsis;
             }
         }
     }
@@ -1345,13 +1345,13 @@ body#group-show {
                 line-height: 18px;
                 overflow: hidden;
             }
-            @media (max-width: @breakMobileLandscape) { 
+            @media (max-width: @breakMobileLandscape) {
                 width: 100%;
             }
         }
         .steward {
             .span(5);
-            @media (max-width: @breakMobileLandscape) { 
+            @media (max-width: @breakMobileLandscape) {
                 width: 100%;
             }
             .avatar {
@@ -1381,7 +1381,7 @@ body#group-show {
         margin-bottom: 20px;
         padding: 15px 0 3px;
     }
-    li { 
+    li {
         margin-left: 0;
     }
     button {
