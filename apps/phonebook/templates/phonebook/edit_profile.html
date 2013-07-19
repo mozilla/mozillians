@@ -82,7 +82,7 @@
     <fieldset>
       {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
       <label>{{ _('Full Name') }}<span>*</span></label>
-      {{ bootstrap(profile_form.full_name) }} 
+      {{ bootstrap(profile_form.full_name) }}
     </fieldset>
 
     <fieldset>
@@ -96,6 +96,24 @@
       {{ privacy_field(profile_form.privacy_country, profile.privacy_country) }}
       <label>{{ _('Country') }}<span>*</span></label>
       {{ bootstrap(profile_form.country) }}
+    </fieldset>
+
+    <fieldset>
+      {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
+      <label>{{ _('Province / State') }}</label>
+      {{ profile_form.region }}
+    </fieldset>
+
+    <fieldset>
+      {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
+      <label>{{ _('City') }}</label>
+      {{ profile_form.city }}
+    </fieldset>
+
+    <fieldset>
+      {{ privacy_field(profile_form.privacy_timezone, profile.privacy_timezone) }}
+      <label>{{ _('Timezone') }}</label>
+      {{ profile_form.timezone }}
     </fieldset>
 
     <fieldset>
@@ -308,7 +326,7 @@
       {% endif %}
 
       {# <div class="control-group">
-          
+
           <div class="controls">
             <span class="label-text">
               {% if profile.vouched_by %}
@@ -350,27 +368,9 @@
     </div> #}
     </fieldset>
 
-    <fieldset>
-      {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
-      <label>{{ _('Province/State') }}</label>
-      {{ profile_form.region }}
-    </fieldset>
-
-    <fieldset>
-      {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
-      <label>{{ _('City') }}</label>
-      {{ profile_form.city }}
-    </fieldset>
-
-    <fieldset>
-      {{ privacy_field(profile_form.privacy_timezone, profile.privacy_timezone) }}
-      <label>{{ _('Timezone') }}</label>
-      {{ profile_form.timezone }}
-    </fieldset>
-
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
-        {{ bootstrap(profile_form.optin) }} 
+        {{ bootstrap(profile_form.optin) }}
         <label>
           <span>*</span>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
