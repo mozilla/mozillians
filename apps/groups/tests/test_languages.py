@@ -45,7 +45,7 @@ class LanguagesTest(apps.common.tests.init.ESTestCase):
         assert not profile.languages.all(), 'User should have no languages.'
         data = self.data_privacy_fields.copy()
         data.update(dict(full_name='McAwesomepants', country='pl',
-                          languages='frenchie'))
+                         username='McAwesomepants', languages='frenchie'))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.languages.all(), (

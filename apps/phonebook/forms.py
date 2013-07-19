@@ -105,7 +105,8 @@ class ProfileForm(happyforms.ModelForm):
         label=_lazy(u'Start typing to add a skill (example: Python, '
                     'javascript, Graphic Design, User Research)'),
         required=False)
-    timezone = forms.ChoiceField(choices=zip(common_timezones, common_timezones))
+    timezone = forms.ChoiceField(
+        required=False, choices=zip(common_timezones, common_timezones))
 
     class Meta:
         model = UserProfile

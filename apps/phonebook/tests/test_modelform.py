@@ -17,7 +17,8 @@ class ModelForms(ESTestCase):
 
         bad_data = self.data_privacy_fields.copy()
         bad_data.update(dict(full_name='BadLaRue', country='pl',
-                              bio='Rides the rails', is_vouched=True))
+                             username='badlarue',
+                             bio='Rides the rails', is_vouched=True))
 
         bad_edit = newbie_client.post(edit_profile_url, bad_data, follow=True)
         eq_(bad_edit.status_code, 200)
@@ -28,7 +29,7 @@ class ModelForms(ESTestCase):
 
     def test_username_filled_in(self):
         """The username field should have a type and value."""
-        newbie = user(username='sam', email='sam@sam.com')
+        newbie = user(username='sam', country='pl', email='sam@sam.com')
 
         url = reverse('profile.edit')
         assert self.client.login(email=newbie.email)

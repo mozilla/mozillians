@@ -17,7 +17,8 @@ class EditProfileTests(ESTestCase):
     def test_geographic_fields_increasing(self):
         """Geographic fields exist and require increasing specificity."""
         data = self.data_privacy_fields.copy()
-        data.update({'city': 'New York', 'full_name': 'Foobar'})
+        data.update({'city': 'New York', 'username': 'foobar',
+                     'full_name': 'Foobar'})
         url = reverse('profile.edit')
         response = self.mozillian_client.post(url, data)
         eq_(400, response.status_code)
@@ -33,7 +34,7 @@ class EditProfileTests(ESTestCase):
     def test_geographic_fields_without_region(self):
         """Sets a city and a country, but no region."""
         data = self.data_privacy_fields.copy()
-        data.update({'city': 'New York', 'country': 'us', 
+        data.update({'city': 'New York', 'country': 'us', 'username': 'foobar',
                      'full_name': 'Foobar'})
         url = reverse('profile.edit')
         response = self.mozillian_client.post(url, data, follow=True)
@@ -41,7 +42,7 @@ class EditProfileTests(ESTestCase):
 
     def test_invalid_country(self):
         """Not every country is a real country."""
-        data = {'country': 'xyz', 'full_name': 'Foobar'}
+        data = {'country': 'xyz', 'full_name': 'Foobar', 'username': 'foobar'}
         response = self.mozillian_client.post(reverse('profile.edit'), data)
         eq_(400, response.status_code)
 
@@ -50,7 +51,8 @@ class EditProfileTests(ESTestCase):
                                 'profile-φωτο.jpg')
         with open(filename, 'rb') as f:
             data = self.data_privacy_fields.copy()
-            data.update({'full_name': 'Mozillian', 'country': 'pl', 'photo': f})
+            data.update({'full_name': 'Mozillian', 'username': 'foobar',
+                         'country': 'pl', 'photo': f})
             response = self.mozillian_client.post(reverse('profile.edit'),
                                                   data, follow=True)
 

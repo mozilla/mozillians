@@ -45,7 +45,7 @@ class SkillsTest(apps.common.tests.init.ESTestCase):
 
         data = self.data_privacy_fields.copy()
         data.update(dict(full_name='McAwesomepants', country='pl',
-                          skills='Awesome foo Bar'))
+                         username='McAwesomepants', skills='Awesome foo Bar'))
         self.pending_client.post(reverse('profile.edit'), data, follow=True)
 
         assert profile.skills.all(), (

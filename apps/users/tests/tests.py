@@ -395,7 +395,7 @@ class TestMigrateRegistration(ESTestCase):
 
             info = self.data_privacy_fields.copy()
             info.update(full_name='Akaaaaaaash Desaaaaaaai', country='pl',
-                        optin=True)
+                        username='desaaai', optin=True)
             self.client.logout()
             u = User.objects.create(username='robot1337', email=self.email)
             p = u.get_profile()
