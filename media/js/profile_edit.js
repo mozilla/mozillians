@@ -12,6 +12,24 @@ $(function() {
         }
     });
 
+    // Make deleting harder
+    var $ack = $('#delete input:checkbox');
+    var $del = $('#delete .delete');
+    $del.click(function(e) {
+        if (! $ack.is(':checked')) {
+            e.preventDefault(); 
+        }
+    });
+    $ack.click(function(e) {
+        if ($ack.is(':checked')) {
+            $del.css({opacity: 1});
+        }
+        else {
+            $del.css({opacity: 0.2});
+        }
+    });
+
+
     // Adding and removing fields from create/edit profile form
     $('#websites .addField').click(function() {
         $('<div class="newField"><input type="text" value="" placeholder="" /></label> <a href="#" class="removeField"> <i class="icon-minus-sign"></i> Remove</a></div>').appendTo('#websites');
