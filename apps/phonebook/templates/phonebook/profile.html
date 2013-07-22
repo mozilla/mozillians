@@ -44,7 +44,7 @@
           <p>
             The chances of being vouched increase as you finish tasks in our community.
           </p>
-          
+
         {% endtrans %}
       {% else %}
         {% if vouch_form %}
@@ -154,12 +154,10 @@
             {% for group in profile.groups.all() %}
               {% if (user.is_authenticated() and
                      user.get_profile().is_vouched) %}
-                <a href="{{ url('group', group.url) }}">
-                  {{ group.name }}
-                </a>
-              {% else %}
+                <a href="{{ url('group', group.url) }}">{{ group.name }}</a>
+              {%- else -%}
                 {{ group.name }}
-              {% endif %}
+              {%- endif -%}
               {% if not loop.last %},{% endif %}
             {% endfor %}
         </div>
@@ -168,18 +166,17 @@
         <div id="skills" class="p-category category">
           <h3>{{ _('Skills') }}</h3>
             {% for skill in profile.skills.all() %}
-                <a href="{{ url('search') }}?q={{ skill.name }}">{{ skill.name }}</a>{% if not loop.last %},{% endif %}
+              {{ skill.name }}
+              {%- if not loop.last %},{% endif %}
             {% endfor %}
         </div>
       {% endif %}
       {% if profile.languages.count() %}
         <div id="languages" class="p-category category">
           <h3>{{ _('Languages') }}</h3>
-            {% for language in profile.languages.all() %}
-                <a href="{{ url('search') }}?q={{ language.name }}">{{ language.name }}</a>
-                {# Placeholder for preferred language #}
-                {% if language.preferred %}(preferred){% endif %}
-                {% if not loop.last %},{% endif %}
+            {% for language in profile.languages.all() -%}
+              {{ language.name }}
+              {%- if not loop.last %},{% endif %}
             {% endfor %}
         </div>
       {% endif %}
