@@ -44,7 +44,7 @@
           <p>
             The chances of being vouched increase as you finish tasks in our community.
           </p>
-          
+
         {% endtrans %}
       {% else %}
         {% if vouch_form %}
@@ -96,7 +96,7 @@
               {% else %}
                   Mozillian for less than a year
               {% endif %}
-              <span>{{ shown_user.userprofile.date_mozillian.strftime('%b %d, %Y') }}</span>
+              <span>{{ shown_user.userprofile.date_mozillian.strftime('%b %Y') }}</span>
             </div>
         </section>
       {% endif %}
