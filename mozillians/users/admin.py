@@ -70,21 +70,16 @@ def export_as_csv_action(description=None, fields=None, exclude=None,
     export_as_csv.short_description = (description or 'Export to CSV file')
     return export_as_csv
 
-def _update_basket(action, request, queryset):
-    """Generic basket (un)subscribe for queryset."""
-    userprofiles = UserProfile.objects.filter(user__in=queryset)
-    ts = [getattr(mozillians.users.tasks, action).subtask(args=[profile.id])
-          for profile in userprofiles]
-    TaskSet(ts).apply_async()
-    messages.success(request, 'Basket update started.')
-
-
 def subscribe_to_basket_action():
     """Subscribe to Basket action."""
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
-        _update_basket('update_basket_task', request, queryset)
+        ts = [(mozillians.users.tasks.update_basket_task
+               .subtask(args=[user.userprofile.id]))
+              for user in queryset]
+        TaskSet(ts).apply_async()
+        messages.success(request, 'Basket update started.')
     subscribe_to_basket.short_description = 'Subscribe to or Update Basket'
     return subscribe_to_basket
 
@@ -94,7 +89,11 @@ def unsubscribe_from_basket_action():
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
-        _update_basket('remove_from_basket_task', request, queryset)
+        ts = [(mozillians.users.tasks.remove_from_basket_task
+               .subtask(user.email, user.userprofile.basket_token))
+              for user in queryset]
+        TaskSet(ts).apply_async()
+        messages.success(request, 'Basket update started.')
     unsubscribe_from_basket.short_description = 'Unsubscribe from Basket'
     return unsubscribe_from_basket
 

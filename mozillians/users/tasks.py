@@ -78,15 +78,17 @@ def update_basket_task(instance_id):
     if instance.city:
         data['city'] = instance.city
 
+    token = instance.basket_token
     try:
-        if not instance.basket_token:
+        if not token:
             result = basket.subscribe(instance.user.email,
                                       settings.BASKET_NEWSLETTER,
                                       trigger_welcome='N')
+            token = result['token']
             (UserProfile.objects
-             .filter(pk=instance_id).update(basket_token=result['token']))
+             .filter(pk=instance_id).update(basket_token=token))
         request('post', 'custom_update_phonebook',
-                token=instance.basket_token, data=data)
+                token=token, data=data)
     except (requests.exceptions.RequestException,
             basket.BasketException), exception:
         try:
@@ -98,7 +100,7 @@ def update_basket_task(instance_id):
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY,
       max_retries=BASKET_TASK_MAX_RETRIES)
-def remove_from_basket_task(instance_id):
+def remove_from_basket_task(email, basket_token):
     """Remove from Basket Task.
 
     This task unsubscribes a user to Basket. The task retries on
@@ -107,22 +109,18 @@ def remove_from_basket_task(instance_id):
     settings.BASKET_MANAGERS with details.
 
     """
-    from models import UserProfile
-    instance = UserProfile.objects.get(pk=instance_id)
-
-    if not BASKET_ENABLED:
+    if not BASKET_ENABLED or not basket_token:
         return
 
     try:
-        basket.unsubscribe(instance.basket_token, instance.user.email,
+        basket.unsubscribe(basket_token, email,
                            newsletters=settings.BASKET_NEWSLETTER)
     except (requests.exceptions.RequestException,
             basket.BasketException), exception:
         try:
             remove_from_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
-            _email_basket_managers('subscribe', instance.user.email,
-                                   exception.message)
+            _email_basket_managers('subscribe', email, exception.message)
 
 @task
 def index_objects(model, ids, public_index, **kwargs):
