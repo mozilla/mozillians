@@ -1,4 +1,0 @@
-coverage==3.5.2
-mock==0.8.0
-lxml==2.1
-pyquery==1.1.1
