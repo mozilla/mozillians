@@ -13,7 +13,7 @@
 
 {% block content %}
   <h1>{{ _('Search') }}</h1>
-  <form method="GET" id="search-form" action="{{ url('search') }}">
+  <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
     <input type="text" name="q" id="q"
            placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
            value="{% if form.cleaned_data %}{{ form.cleaned_data.q }}{% endif %}">
@@ -75,7 +75,7 @@
               {% if page == people.number %}
                 <span>{{ page }}</span>
               {% else %}
-                <a href="{{ url('search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
+                <a href="{{ url('phonebook:search')|urlparams(q=form.cleaned_data.q, page=page, limit=limit) }}">{{ page }}</a>
               {% endif %}
             {% endfor %}
           </div>
@@ -94,7 +94,7 @@
         </p>
         {% if user.is_authenticated() %}
           <p>
-            {% trans invite=url('invite') %}
+            {% trans invite=url('phonebook:invite') %}
               Maybe they're not a Mozillian yet?
               <a href="{{ invite }}">Invite this person</a> to create a profile.
             {% endtrans %}

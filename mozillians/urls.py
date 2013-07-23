@@ -40,7 +40,7 @@ urlpatterns = patterns(
     url(r'^browserid/', include('django_browserid.urls')),
     url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.groups.urls', 'groups')),
-    url(r'', include('mozillians.phonebook.urls')),
+    url(r'', include('mozillians.phonebook.urls', 'phonebook')),
 
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),

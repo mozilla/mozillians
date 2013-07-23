@@ -18,7 +18,7 @@
   <link rel="shortcut icon" type="image/ico" href="{{ MEDIA_URL }}img/favicon.ico">
 
   <link rel="search" type="application/opensearchdescription+xml"
-        title="{{ _('Mozillians') }}" href="{{ url('search_plugin') }}">
+        title="{{ _('Mozillians') }}" href="{{ url('phonebook:search_plugin') }}">
 
   {% block site_css %}
     {{ css('common', 'screen') }}
@@ -61,12 +61,12 @@
           </ul>
           {% block site_header_nav %}
             <nav role="navigation">
-                <a class="brand" href="{{ url('home') }}">
+                <a class="brand" href="{{ url('phonebook:home') }}">
                     <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
                 </a>
                 {% block search %}
                   <form class="navbar-search"
-                      action="{{ url('search') }}" method="GET">
+                      action="{{ url('phonebook:search') }}" method="GET">
                     <input type="text" name="q" class="search-query"
                         placeholder="{{ _('Search for people, groups and more') }}">
                   </form>
@@ -85,27 +85,27 @@
                       </a>
                       <ul class="dropdown-menu">
                         <li>
-                          <a id="profile" href="{{ url('profile', user.username) }}">
+                          <a id="profile" href="{{ url('phonebook:profile_view', user.username) }}">
                             <i class="icon-eye-open"></i>
                             {{ _('View Profile') }}
                           </a>
                         </li>
                         <li class="edit_profile">
-                          <a href="{{ url('profile.edit') }}">
+                          <a href="{{ url('phonebook:profile_edit') }}">
                             <i class="icon-pencil"></i>
                             {{ _('Edit Your Profile') }}
                           </a>
                         </li>
                         {% if user.get_profile().is_vouched %}
                           <li>
-                            <a id="invite" href="{{ url('invite') }}">
+                            <a id="invite" href="{{ url('phonebook:invite') }}">
                               <i class="icon-group"></i>
                               {{ _('Invite') }}
                             </a>
                           </li>
                         {% endif %}
                         <li>
-                          <a id="logout" class="browserid-logout" href="{{ url('users:logout') }}">
+                          <a id="logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
                             <i class="icon-reply"></i>
                             {{ _('Log Out') }}
                           </a>
@@ -113,7 +113,7 @@
                       </ul>
                     </div>
                   {% else %}
-                    <a id="logout" class="browserid-logout no-profile" href="{{ url('users:logout') }}">
+                    <a id="logout" class="browserid-logout no-profile" href="{{ url('phonebook:logout') }}">
                       <i class="icon-reply"></i>
                       {{ _('Log Out') }}
                     </a>
@@ -196,7 +196,7 @@
             </div>
 
             <ul class="footer-nav details">
-              <li><a href="{{ url('about') }}">{{_('About Mozillians')}}</a></li>
+              <li><a href="{{ url('phonebook:about') }}">{{_('About Mozillians')}}</a></li>
               <li><a href="http://mozilla.org/privacy-policy.html">{{_('Privacy Policy')}}</a></li>
               <li><a href="http://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
               <li><a href="http://mozilla.org/legal/fraud-report/index.html">{{_('Report Trademark Abuse')}}</a></li>

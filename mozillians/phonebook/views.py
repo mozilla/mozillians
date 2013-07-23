@@ -1,5 +1,7 @@
+import datetime
+
+from django.contrib import auth
 from django.contrib import messages
-from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -12,18 +14,16 @@ import commonware.log
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
+import mozillians.phonebook.forms as forms
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
-from mozillians.users.models import (COUNTRIES, EMPLOYEES, MOZILLIANS,
-                               PUBLIC, PRIVILEGED, UserProfile)
+from mozillians.phonebook.models import Invite
+from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
+from mozillians.users.models import COUNTRIES, UserProfile
 from mozillians.users.tasks import remove_from_basket_task
-from mozillians.users.views import _update_invites
 
-
-import forms
-from models import Invite
 
 log = commonware.log.getLogger('m.phonebook')
 BAD_VOUCHER = 'Unknown Voucher'
@@ -32,17 +32,17 @@ BAD_VOUCHER = 'Unknown Voucher'
 @allow_unvouched
 def login(request):
     if request.user.userprofile.is_complete:
-        return redirect('home')
-    return redirect('profile.edit')
+        return redirect('phonebook:home')
+    return redirect('phonebook:profile_edit')
 
 
 @never_cache
 @allow_public
 def home(request):
     if request.user.is_authenticated():
-        profile = request.user.get_profile()
+        profile = request.user.userprofile
         user_groups = profile.groups.all().order_by('name')
-        data = dict(user_groups = user_groups)
+        data = dict(user_groups=user_groups)
         return render(request, 'phonebook/home.html', data)
     else:
         return render(request, 'phonebook/home.html')
@@ -84,7 +84,7 @@ def view_profile(request, username):
             if not request.user.userprofile.is_vouched:
                 # you have to be vouched to continue
                 messages.error(request, GET_VOUCHED_MESSAGE)
-                return redirect('home')
+                return redirect('phonebook:home')
 
         if not profile_exists or not profile_complete:
             raise Http404
@@ -109,7 +109,7 @@ def edit_profile(request):
     """Edit user profile view."""
     # Don't user request.user
     user = User.objects.get(pk=request.user.id)
-    profile = user.get_profile()
+    profile = user.userprofile
     user_groups = stringify_groups(profile.groups.all().order_by('name'))
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
@@ -139,7 +139,7 @@ def edit_profile(request):
             messages.info(request,
                           _(u'You changed your username; please note your '
                             'profile URL has also changed.'))
-        return redirect(reverse('profile', args=[user.username]))
+        return redirect(reverse('phonebook:profile_view', args=[user.username]))
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
@@ -167,12 +167,12 @@ def confirm_delete(request):
 @never_cache
 @require_POST
 def delete(request):
-    user_profile = request.user.get_profile()
+    user_profile = request.user.userprofile
     remove_from_basket_task.delay(user_profile.id)
     user_profile.anonymize()
     log.info('Deleting %d' % user_profile.user.id)
-    logout(request)
-    return redirect(reverse('home'))
+    auth.logout(request)
+    return redirect('phonebook:home')
 
 
 @allow_public
@@ -209,7 +209,7 @@ def search(request):
             people = paginator.page(paginator.num_pages)
 
         if profiles.count() == 1 and not groups:
-            return redirect(reverse('profile', args=[people[0].user.username]))
+            return redirect('phonebook:profile_view', people[0].user.username)
 
         if paginator.count > forms.PAGINATION_LIMIT:
             show_pagination = True
@@ -248,7 +248,7 @@ def invite(request):
                  "with instructions on how to join. You can "
                  "invite another Mozillian if you like." % invite.recipient)
         messages.success(request, msg)
-        return redirect(reverse('profile', args=[request.user.username]))
+        return redirect('phonebook:profile_view', request.user.username)
 
     return render(request, 'phonebook/invite.html',
                   {'invite_form': invite_form})
@@ -261,13 +261,13 @@ def vouch(request):
 
     if form.is_valid():
         p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.get_profile())
+        p.vouch(request.user.userprofile)
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
                  'This user is now vouched!')
         messages.info(request, msg)
-        return redirect(reverse('profile', args=[p.user.username]))
+        return redirect('phonebook:profile_view', p.user.username)
 
     return HttpResponseForbidden
 
@@ -286,3 +286,45 @@ def list_mozillians_in_location(request, country, region=None, city=None):
             'city_name': city,
             'region_name': region}
     return render(request, 'phonebook/location-list.html', data)
+
+@allow_unvouched
+def logout(request, **kwargs):
+    """Logout view that wraps Django's logout but always redirects.
+
+    Django's contrib.auth.views logout method renders a template if
+    the `next_page` argument is `None`, which we don't want. This view
+    always returns an HTTP redirect instead.
+
+    """
+    return auth.views.logout(request, next_page=reverse('phonebook:home'), **kwargs)
+
+
+@allow_public
+def register(request):
+    """Registers Users.
+
+    Pulls out an invite code if it exists and auto validates the user
+    if so. Single-purpose view.
+    """
+    if 'code' in request.GET:
+        request.session['invite-code'] = request.GET['code']
+        return redirect('phonebook:home')
+
+def _update_invites(request):
+    code = request.session.get('invite-code')
+    if code:
+        try:
+            invite = Invite.objects.get(code=code, redeemed=None)
+            voucher = invite.inviter
+        except Invite.DoesNotExist:
+            return
+    else:
+        # If there is no invite, lets get out of here.
+        return
+
+    redeemer = request.user.userprofile
+    redeemer.vouch(voucher)
+    invite.redeemed = datetime.datetime.now()
+    invite.redeemer = redeemer
+    invite.send_thanks()
+    invite.save()

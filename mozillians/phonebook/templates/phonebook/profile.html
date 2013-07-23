@@ -30,7 +30,7 @@
   {% if not profile.is_vouched %}
     <div id="pending-approval">
       {% if user == shown_user %}
-        {% trans profile_url=absolutify(url('profile', user.username)),
+        {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)),
                  contribute_url='http://www.mozilla.org/contribute' %}
           <p>
             Your profile is waiting to be vouched. Send the link below to someone who
@@ -48,7 +48,7 @@
         {% endtrans %}
       {% else %}
         {% if vouch_form %}
-          <form action="{{ url('vouch') }}" method="POST"
+          <form action="{{ url('phonebook:vouch') }}" method="POST"
                 id="vouch-form">
             {{ csrf() }}
             {{ vouch_form }}
@@ -71,7 +71,7 @@
 
   {% if privacy_mode == 'anonymous' and not profile.is_public %}
     <div id="anonymous">
-      {% trans edit_url=url('profile.edit') %}
+      {% trans edit_url=url('phonebook:profile_edit') %}
         Your profile is not public. If you <a href="{{ edit_url }}">edit
         your profile</a> to have at least one public field,
         your public profile will be viewable.
@@ -120,15 +120,15 @@
           <form method="GET" action=".">
             <label>{{ _('View as:') }}</label>
             <select id="view-privacy-mode">
-                <option value="{{ url('profile', shown_user.username) }}"
+                <option value="{{ url('phonebook:profile_view', shown_user.username) }}"
                         {% if privacy_mode == 'myself' %} selected {% endif %}>
                   {{ _('Myself') }}
                 </option>
-                <option value="{{ url('profile', shown_user.username)|urlparams(view_as='mozillian') }}"
+                <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='mozillian') }}"
                         {% if privacy_mode == 'mozillian' %} selected {% endif %} >
                   {{ _('Mozillian') }}
                 </option>
-                <option value="{{ url('profile', shown_user.username)|urlparams(view_as='anonymous') }}"
+                <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='anonymous') }}"
                         {% if privacy_mode == 'anonymous' %} selected {% endif %}>
                   {{ _('Public') }}
                 </option>

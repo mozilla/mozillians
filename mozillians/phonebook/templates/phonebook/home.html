@@ -16,7 +16,7 @@
     <hgroup id="main-feature">
       <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
       <hr>
-      <form id="homepage-search" action="{{ url('search') }}" method="GET">
+      <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input type="text" name="q" class="search-query"
           placeholder="{{ _('Search for people, groups and more') }}">
        </form>
@@ -96,7 +96,7 @@
 
     {# This is where the logged in homepage view starts. #}
     <article id="profile-info">
-      <a class="profile-photo" href="{{ url('profile', user.username) }}">
+      <a class="profile-photo" href="{{ url('phonebook:profile_view', user.username) }}">
         <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
       </a>
       <div class="profile-details">
@@ -149,11 +149,11 @@
     </article>
     <article id="content-info">
       <h1>{{ _('Hello!') }}</h1>
-      <form id="homepage-search" action="{{ url('search') }}" method="GET">
+      <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
         <input type="text" name="q" class="search-query"
                placeholder="{{ _('Search for people, groups and more') }}">
         <small>{{ _('Examples:') }}
-          {% trans search_url=url('search') %}
+          {% trans search_url=url('phonebook:search') %}
           <a href="{{ search_url }}?q=python">python</a>,
           <a href="{{ search_url }}?q=berlin">Berlin</a>,
           <a href="{{ search_url }}?q=mbrandt">mbrandt</a>

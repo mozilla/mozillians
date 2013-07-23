@@ -18,7 +18,7 @@ class RegisterMiddleware():
         user = request.user
         path = request.path
         allow_urls = [r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
-                      r'^/[\w-]+{0}'.format(reverse('phonebook:profile.edit')),
+                      r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
                       r'^/browserid/',
                       r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
                       r'^/[\w-]+/jsi18n/']
@@ -30,7 +30,7 @@ class RegisterMiddleware():
             and not filter(lambda url: re.match(url, path), allow_urls)):
             messages.warning(request, _('Please complete registration '
                                         'before proceeding.'))
-            return redirect('phonebook:profile.edit')
+            return redirect('phonebook:profile_edit')
 
 
 class UsernameRedirectionMiddleware():

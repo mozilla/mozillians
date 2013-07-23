@@ -6,7 +6,7 @@
 {% block content %}
 <h1>{{ _('Confirm Profile Deletion') }}</h1>
 
-<form action="{{ url('profile.delete') }}" method="POST"
+<form action="{{ url('phonebook:profile_delete') }}" method="POST"
       class="blue-pastels">
   {{ csrf() }}
   <h2>{{ _('Are You Sure You Want to Leave Mozillians?') }}</h2>
@@ -18,7 +18,7 @@
     {% endtrans %}
   </p>
   <div id="actions">
-    <a href="{{ url('profile.edit') }}"
+    <a href="{{ url('phonebook:profile_edit') }}"
        class="btn" id="cancel-action">
       {{ _("No: don't delete my profile") }}
     </a>

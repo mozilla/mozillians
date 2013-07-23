@@ -11,32 +11,18 @@ from tower import ugettext as _
 
 
 class Invite(models.Model):
-    #: The person doing the inviting.
     inviter = models.ForeignKey('users.UserProfile', related_name='invites',
                                 null=True)
-
-    #: This is the email address of where the invitation is sent.
     recipient = models.EmailField()
-
-    # This is the message sent alongside the invite. "Hey you're cool."
     message = models.TextField(blank=True)
-
-    #: The person who redeemed this invite.
     redeemer = models.OneToOneField('users.UserProfile', null=True)
-
-    #: Randomly generated invite code.  This code is used in the
-    #: :ref:`registration` system.
     code = models.CharField(max_length=32, editable=False, unique=True)
-
-    #: The date the invite was redeemed.
     redeemed = models.DateTimeField(null=True, editable=False)
-
-    #: The date the invite was created.
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
     def get_url(self, absolute=True):
         """A url that can be used to redeem this invite."""
-        return absolutify(reverse('users:register')) + '?code=' + self.code
+        return absolutify(reverse('phonebook:register')) + '?code=' + self.code
 
     def send(self, sender=None):
         """Mail this invite to the specified user.
@@ -68,10 +54,11 @@ class Invite(models.Model):
         """Sends email to person who friend accepted invitation."""
         template = get_template('phonebook/invite_accepted.txt')
         subject = _('%s created a Mozillians profile' % self.redeemer.full_name)
+        profile_url = reverse('profile_view', args=(self.redeemer.user.username,))
         message = template.render({
             'inviter' : self.inviter.full_name,
             'friend' : self.redeemer.full_name,
-            'profile' : absolutify(reverse('profile', args=(self.redeemer.user,)))})
+            'profile' : absolutify(profile_url)})
         filtered_message = message.replace('&#34;', '"').replace('&#39;',"'")
 
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,

@@ -49,7 +49,7 @@
     {% endif %}
   </header>
 
-  <form action="{{ url('profile.edit') }}" method="POST" enctype="multipart/form-data"
+  <form action="{{ url('phonebook:profile_edit') }}" method="POST" enctype="multipart/form-data"
         class="edit-profile">
     {{ csrf() }}
 
@@ -267,13 +267,13 @@
       <legend>{{ _('Vouches & Invites') }}</legend>
       <h5>{{ _('Vouched By') }}</h5>
       {% if profile.vouched_by %}
-        <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
+        <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}" class="vouched">
           {{ profile.vouched_by.display_name }}
         </a>
       {% elif profile.is_vouched %}
         {{ _('You are automatically vouched!') }}
       {% else %}
-        {% trans profile_url=absolutify(url('profile', user.username)) %}
+        {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)) %}
           You aren't vouched! Send this link to a mozillian
           who can vouch for your contributions:
           <em class="underline" title="Your profile URL">
@@ -286,7 +286,7 @@
         <ul class="vouchees">
           {% for vouchee in my_vouches %}
             <li>
-              <a href="{{ url('profile', vouchee.user.username) }}" class="vouched">
+              <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
                 {{ vouchee.display_name }}
               </a>
             </li>
@@ -299,13 +299,13 @@
           <div class="controls">
             <span class="label-text">
               {% if profile.vouched_by %}
-                <a href="{{ url('profile', profile.vouched_by.user.username) }}" class="vouched">
+                <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}" class="vouched">
                   {{ profile.vouched_by.display_name }}
                 </a>
               {% elif profile.is_vouched %}
                 {{ _('You are automatically vouched!') }}
               {% else %}
-                {% trans profile_url=absolutify(url('profile', user.username)) %}
+                {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)) %}
                   You aren't vouched! Send this link to a mozillian
                   who can vouch for your contributions:
                   <em class="underline" title="Your profile URL">
@@ -324,7 +324,7 @@
               <ul class="vouchees">
                 {% for vouchee in my_vouches %}
                   <li class="label-text">
-                    <a href="{{ url('profile', vouchee.user.username) }}" class="vouched">
+                    <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
                       {{ vouchee.display_name }}
                     </a>
                   </li>
@@ -366,7 +366,7 @@
     <fieldset id="edit_controls">
         {% if profile.is_complete %}
           <button type="submit">{{ _('Update Profile') }}</button>
-          <a class="cancel" href="{{ url('profile', user.username) }}">
+          <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
             {{ _('Cancel') }}{# L10n: Cancel editing #}
           </a>
         {% else %}
@@ -385,7 +385,7 @@
             other members of the Mozilla community.
           {% endtrans %}
         </p>
-        <a href="{{ url('profile.delete_confirm') }}" class="delete">
+        <a href="{{ url('phonebook:profile_confirm_delete') }}" class="delete">
           {{ _('Delete Profile') }}
         </a>
       </fieldset>

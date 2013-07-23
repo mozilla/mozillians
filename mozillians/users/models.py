@@ -302,7 +302,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return self.display_name
 
     def get_absolute_url(self):
-        return reverse('phonebook:profile', args=[self.user.username])
+        return reverse('phonebook:profile_view', args=[self.user.username])
 
     def anonymize(self):
         """Remove personal info from a user
