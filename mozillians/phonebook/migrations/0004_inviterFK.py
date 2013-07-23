@@ -9,7 +9,7 @@ import commonware.log
 from south.db import db
 from south.v2 import DataMigration
 
-from users.models import UserProfile
+from mozillians.users.models import UserProfile
 
 log = commonware.log.getLogger('m.migrator')
 

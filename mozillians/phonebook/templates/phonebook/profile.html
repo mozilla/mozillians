@@ -81,7 +81,7 @@
 
   <article id="profile-stats">
     <div class="profile-photo">
-      <img src="{{ shown_user.userprofile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
+      <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
     </div>
     <div class="stats">
       {% set mozillian_years = get_mozillian_years(profile) %}
@@ -96,7 +96,7 @@
               {% else %}
                   Mozillian for less than a year
               {% endif %}
-              <span>{{ shown_user.userprofile.date_mozillian.strftime('%b %Y') }}</span>
+              <span>{{ profile.date_mozillian.strftime('%b %Y') }}</span>
             </div>
         </section>
       {% endif %}

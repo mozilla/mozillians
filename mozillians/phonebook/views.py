@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -22,7 +22,7 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, UserProfile
-from mozillians.users.tasks import remove_from_basket_task
+from mozillians.users.tasks import remove_from_basket_task, unindex_objects
 
 
 log = commonware.log.getLogger('m.phonebook')
@@ -39,13 +39,7 @@ def login(request):
 @never_cache
 @allow_public
 def home(request):
-    if request.user.is_authenticated():
-        profile = request.user.userprofile
-        user_groups = profile.groups.all().order_by('name')
-        data = dict(user_groups=user_groups)
-        return render(request, 'phonebook/home.html', data)
-    else:
-        return render(request, 'phonebook/home.html')
+    return render(request, 'phonebook/home.html')
 
 
 @allow_public
@@ -90,7 +84,10 @@ def view_profile(request, username):
             raise Http404
 
         profile = UserProfile.objects.get(user__username=username)
-        profile.set_instance_privacy_level(profile.privacy_level)
+        profile.set_instance_privacy_level(PUBLIC)
+        if request.user.is_authenticated():
+            profile.set_instance_privacy_level(
+                request.user.userprofile.privacy_level)
 
         if (not profile.is_vouched
             and request.user.is_authenticated()
@@ -167,10 +164,12 @@ def confirm_delete(request):
 @never_cache
 @require_POST
 def delete(request):
-    user_profile = request.user.userprofile
-    remove_from_basket_task.delay(user_profile.id)
-    user_profile.anonymize()
-    log.info('Deleting %d' % user_profile.user.id)
+    user = request.user
+    unindex_objects.delay(UserProfile, [user.userprofile.id], public_index=False)
+    unindex_objects.delay(UserProfile, [user.userprofile.id], public_index=True)
+    remove_from_basket_task.delay(user.email, user.userprofile.basket_token)
+    user.userprofile.anonymize()
+    log.info('Deleting %d' % user.id)
     auth.logout(request)
     return redirect('phonebook:home')
 
@@ -269,8 +268,7 @@ def vouch(request):
         messages.info(request, msg)
         return redirect('phonebook:profile_view', p.user.username)
 
-    return HttpResponseForbidden
-
+    return HttpResponseBadRequest()
 
 def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
@@ -306,9 +304,12 @@ def register(request):
     Pulls out an invite code if it exists and auto validates the user
     if so. Single-purpose view.
     """
+    # TODO already vouched users can be re-vouched?
+
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
-        return redirect('phonebook:home')
+    return redirect('phonebook:home')
+
 
 def _update_invites(request):
     code = request.session.get('invite-code')

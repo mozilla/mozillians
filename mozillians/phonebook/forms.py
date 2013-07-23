@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from django import forms
+from django.contrib.auth.models import User
 from django.utils.safestring import mark_safe
 
 import happyforms
@@ -11,9 +12,9 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group, Skill, Language
 from mozillians.phonebook.models import Invite
+from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.helpers import validate_username
-from mozillians.users.models import User, UserProfile
+from mozillians.users.models import UserProfile
 
 
 PAGINATION_LIMIT = 20
