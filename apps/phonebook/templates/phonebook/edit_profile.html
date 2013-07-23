@@ -169,8 +169,8 @@
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_date_mozillian, profile.privacy_date_mozillian) }}
-      {{ profile_form.date_mozillian }}
       <label>{{ _('When did you get involved with Mozilla?') }}</label>
+      {{ bootstrap(profile_form.date_mozillian) }}
     </fieldset>
 
     <fieldset id="groups">
