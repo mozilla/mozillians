@@ -7,6 +7,7 @@ import views
 
 urlpatterns = patterns('',
     url('^$', views.home, name='home'),
+    url('^login/$', views.login, name='login'),
     url('^user/edit/$', views.edit_profile,
         name='profile.edit'),
     url('^confirm-delete/$', views.confirm_delete,

@@ -23,6 +23,7 @@ class RegisterMiddleware(object):
         user = request.user
         path = request.path
         allow_urls = [r'^/[\w-]+{0}'.format(reverse('logout')),
+                      r'^/[\w-]+{0}'.format(reverse('login')),
                       r'^/[\w-]+{0}'.format(reverse('profile.edit')),
                       r'^/browserid/',
                       r'^/[\w-]+/jsi18n/',
