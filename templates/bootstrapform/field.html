@@ -1,33 +1,34 @@
 {% load bootstrap %}
 
-<div class="control-group{% if field.errors %} error{% endif %}">
-    {% if field|is_checkbox %}
-        <div class="controls">
-            <label class="checkbox">
-                {{ field }}
-            </label>
-            {% for error in field.errors %}
-                <span class="error-message">{{ error }}</span>
-            {% endfor %}
-            {% if field.help_text %}
-            <p class="help-block">
-                {{ field.help_text }}
-            </p>
-            {% endif %}
-        </div>
-    {% else %}
-        <div class="controls">
-            {{ field }}
+{% if field|is_checkbox %}
+  <label class="checkbox">
+    {{ field }} <span>{{ field.label }}</span>
+  </label>
+{% else %}
+  {{ field.label_tag }}
+{% endif %}
 
-            {% for error in field.errors %}
-                <span class="error-message">{{ error }}</span>
-            {% endfor %}
-
-            {% if field.help_text %}
-            <p class="help-block">
-                {{ field.help_text }}
-            </p>
-            {% endif %}
-        </div>
+<div class="{% if field.errors %} error{% endif %}">
+  {% if field|is_checkbox %}
+    {% for error in field.errors %}
+      <span class="error-message">{{ error }}</span>
+    {% endfor %}
+    {% if field.help_text %}
+      <p class="help-block">
+        {{ field.help_text }}
+       </p>
     {% endif %}
+  {% else %}
+    {{ field }}
+
+    {% for error in field.errors %}
+      <span class="error-message">{{ error }}</span>
+    {% endfor %}
+
+    {% if field.help_text %}
+      <p class="help-block">
+        {{ field.help_text }}
+      </p>
+    {% endif %}
+  {% endif %}
 </div>
