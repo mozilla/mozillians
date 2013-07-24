@@ -113,7 +113,8 @@
           <section class="groups">
             <h4>{{ _('Member of:') }}</h4>
             {% for group in user_groups %}
-              <a href="{{ url('group', group.url) }}">{{ group }}</a>{% if not loop.last %},{% endif %}
+              <a href="{{ url('group', group.url) }}">{{ group }}</a>
+              {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
         {% endif %}
@@ -122,7 +123,7 @@
             <h4>{{ _('Languages') }}</h4>
             {% for language in user.userprofile.languages.all() %}
               {{ language|capitalize }}
-              {% if not loop.last %},{% endif %}
+              {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
         {% endif %}
