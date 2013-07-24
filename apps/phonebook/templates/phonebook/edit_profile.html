@@ -210,7 +210,6 @@
     {#
     {% if profile.languages.count() %}
     <fieldset>
-
       <div class="privacy-controls">
         <div class="control-group">
             <label class="control-label">Visible to:</label>
@@ -261,8 +260,15 @@
           <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
         {% endtrans %}
       <h5>{{ _('Other Sites') }}</h5>
-      {{ bootstrap(profile_form.allows_community_sites) }}
-      {{ bootstrap(profile_form.allows_mozilla_sites) }}
+      <p>
+        {{ profile_form.allows_community_sites.label_tag() }}
+        {{ profile_form.allows_community_sites }}
+      </p>
+      <p>
+        {{ profile_form.allows_community_sites.label_tag() }}
+        {{ profile_form.allows_mozilla_sites }}
+      </p>
+
       {% if user.get_profile().is_vouched %}
         <h5>{{ _('Developers') }}</h5>
         <p class="field_description">
