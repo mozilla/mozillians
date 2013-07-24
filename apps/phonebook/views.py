@@ -30,6 +30,13 @@ log = commonware.log.getLogger('m.phonebook')
 BAD_VOUCHER = 'Unknown Voucher'
 
 
+@allow_unvouched
+def login(request):
+    if request.user.userprofile.is_complete:
+        return redirect('home')
+    return redirect('profile.edit')
+
+
 @never_cache
 @allow_public
 def home(request):
