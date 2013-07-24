@@ -8,8 +8,11 @@
   {{ bootstrap(field_with_attrs(name,
                                 **{'class':'privacy-choice',
                                    'label': _('Visible to:'),
-                                   'data-privacy-original':original_value})) }}
+                                   'data-privacy-original': original_value})) }}
 </div>
+{% endmacro %}
+{% macro required_field(field) %}
+  {{ bootstrap(field_with_attrs(field, **{'label': (field.label + '<span> *</span>')|safe  })) }}
 {% endmacro %}
 
 {% block content %}
@@ -75,14 +78,12 @@
     </fieldset>
 
     <fieldset>
-      <label>{{ _('Username') }}<span>*</span></label>
-      {{ bootstrap(user_form.username) }}
+      {{ required_field(user_form.username) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
-      <label>{{ _('Full Name') }}<span>*</span></label>
-      {{ bootstrap(profile_form.full_name) }}
+      {{ required_field(profile_form.full_name) }}
     </fieldset>
 
     <fieldset>
@@ -94,51 +95,45 @@
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_country, profile.privacy_country) }}
-      <label>{{ _('Country') }}<span>*</span></label>
-      {{ bootstrap(profile_form.country) }}
+      {{ required_field(profile_form.country) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
-      <label>{{ _('Province / State') }}</label>
-      {{ profile_form.region }}
+      {{ bootstrap(profile_form.region) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
-      <label>{{ _('City') }}</label>
-      {{ profile_form.city }}
+      {{ bootstrap(profile_form.city) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_timezone, profile.privacy_timezone) }}
-      <label>{{ _('Timezone') }}</label>
-      {{ profile_form.timezone }}
+      {{ bootstrap(profile_form.timezone) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_bio, profile.privacy_bio) }}
-      <label>{{ _('Bio') }}</label>
-      {{ profile_form.bio }}
+      {{ bootstrap(profile_form.bio) }}
     </fieldset>
 
     <fieldset id="websites">
-        {{ privacy_field(profile_form.privacy_website, profile.privacy_website) }}
-        <label>{{ _('Websites') }}</label>
-        {{ profile_form.website }}
-        <a href="#" class="addField"><i class="icon-plus-sign"></i> Add website</a>
+      {{ privacy_field(profile_form.privacy_website, profile.privacy_website) }}
+      {{ bootstrap(profile_form.website) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
-      <label>{{ _('IRC Nickname') }}</label>
-      {{ profile_form.ircname }}
+      {{ bootstrap(profile_form.ircname) }}
     </fieldset>
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_date_mozillian, profile.privacy_date_mozillian) }}
-      <label>{{ _('When did you get involved with Mozilla?') }}</label>
-      {{ bootstrap(profile_form.date_mozillian) }}
+      {{ bootstrap(
+           field_with_attrs(
+             profile_form.date_mozillian,
+             **{'label': _('When did you get involved with Mozilla?')})) }}
     </fieldset>
 
     <fieldset id="groups">
@@ -344,7 +339,11 @@
 
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
-        {{ bootstrap(profile_form.optin) }}
+        <div class="controls">
+          <label class="checkbox">
+            {{ profile_form.optin }}
+          </label>
+        </div>
         <label>
           <span>*</span>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
