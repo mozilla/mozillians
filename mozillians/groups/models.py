@@ -86,10 +86,6 @@ class Group(GroupBase):
         return cls.objects.exclude(steward=None).annotate(
             num_members=models.Count('members'))
 
-    class Meta:
-        db_table = 'group'
-
-
 
 class SkillAlias(GroupAliasBase):
     alias = models.ForeignKey('Skill', related_name='aliases')
