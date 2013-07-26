@@ -3,7 +3,6 @@ from datetime import datetime
 
 from django import forms
 from django.contrib.auth.models import User
-from django.utils.safestring import mark_safe
 
 import happyforms
 from product_details import product_details
@@ -40,15 +39,6 @@ class SearchForm(happyforms.Form):
         return limit
 
 
-class UsernameWidget(forms.widgets.TextInput):
-    """A TextInput with some special markup to indicate a URL."""
-
-    def render(self, *args, **kwargs):
-        return mark_safe(u'<span class="label-text">'
-                          'http://mozillians.org/u/ </span>%s' %
-                super(UsernameWidget, self).render(*args, **kwargs))
-
-
 class UserForm(happyforms.ModelForm):
     """Instead of just inhereting form a UserProfile model form, this
     base class allows us to also abstract over methods that have to do
@@ -56,13 +46,11 @@ class UserForm(happyforms.ModelForm):
     Profile.
 
     """
-    username = forms.CharField(label=_lazy(u'Username'),
-                               max_length=30, required=True)
+    username = forms.CharField(label=_lazy(u'Username'))
 
     class Meta:
         model = User
         fields = ['username']
-        widgets = {'username': UsernameWidget()}
 
     def clean_username(self):
         username = self.cleaned_data['username']
