@@ -37,6 +37,8 @@ def register(request):
     """
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
+        messages.warning(request, _('You must login to register an account '
+                                    'and use your invite code.'))
     return redirect('home')
 
 
