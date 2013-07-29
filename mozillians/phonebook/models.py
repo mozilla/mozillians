@@ -9,16 +9,20 @@ from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from tower import ugettext as _
 
+from mozillians.users.models import UserProfile
+
 
 class Invite(models.Model):
-    inviter = models.ForeignKey('users.UserProfile', related_name='invites',
-                                null=True)
+    inviter = models.ForeignKey(UserProfile, related_name='invites', null=True)
     recipient = models.EmailField()
     message = models.TextField(blank=True)
-    redeemer = models.OneToOneField('users.UserProfile', null=True)
+    redeemer = models.OneToOneField(UserProfile, blank=True, null=True)
     code = models.CharField(max_length=32, editable=False, unique=True)
     redeemed = models.DateTimeField(null=True, editable=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __unicode__(self):
+        return 'Invite {0} for {1}'.format(self.id, self.recipient)
 
     def get_url(self, absolute=True):
         """A url that can be used to redeem this invite."""
@@ -63,9 +67,6 @@ class Invite(models.Model):
 
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
             [self.inviter.email])
-
-    class Meta:
-        db_table = 'invite'
 
 
 @receiver(models.signals.pre_save, sender=Invite)
