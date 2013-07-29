@@ -184,10 +184,10 @@ class InviteForm(happyforms.ModelForm):
         recipient = self.cleaned_data['recipient']
         if User.objects.filter(email=recipient,
                                userprofile__is_vouched=True).exists():
-            raise forms.ValidationError(_(u'You cannot invite someone who '
-                                          'has already been vouched.'))
+            raise forms.ValidationError(
+                _(u'You cannot invite someone who has already been vouched.'))
         return recipient
 
     class Meta:
         model = Invite
-        exclude = ('redeemer', 'inviter')
+        fields = ['recipient', 'message']

@@ -445,6 +445,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return settings.ES_INDEXES['default']
 
     @classmethod
+    def refresh_index(cls, timesleep=0, es=None, public_index=False):
+        if es is None:
+            es = get_es()
+
+        es.refresh(cls.get_index(public_index), timesleep=timesleep)
+
+    @classmethod
     def index(cls, document, id_=None, bulk=False, force_insert=False,
               es=None, public_index=False):
         """ Overide elasticutils.index() to support more than one index

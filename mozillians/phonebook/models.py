@@ -5,6 +5,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.template.loader import get_template
 
+from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
 from tower import ugettext as _
@@ -26,7 +27,8 @@ class Invite(models.Model):
 
     def get_url(self, absolute=True):
         """A url that can be used to redeem this invite."""
-        return absolutify(reverse('phonebook:register')) + '?code=' + self.code
+        return absolutify(
+            urlparams(reverse('phonebook:register'), code=self.code))
 
     def send(self, sender=None):
         """Mail this invite to the specified user.
@@ -58,7 +60,8 @@ class Invite(models.Model):
         """Sends email to person who friend accepted invitation."""
         template = get_template('phonebook/invite_accepted.txt')
         subject = _('%s created a Mozillians profile' % self.redeemer.full_name)
-        profile_url = reverse('profile_view', args=(self.redeemer.user.username,))
+        profile_url = reverse('phonebook:profile_view',
+                              kwargs={'username': self.redeemer.user.username})
         message = template.render({
             'inviter' : self.inviter.full_name,
             'friend' : self.redeemer.full_name,

@@ -1,6 +1,9 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 
 import factory
+
+from mozillians.users.models import UserProfile
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -11,6 +14,14 @@ class UserFactory(factory.DjangoModelFactory):
     email = factory.LazyAttribute(
         lambda a: '{0}.{1}@example.com'.format(
             a.first_name, a.last_name.replace(' ', '.')))
+
+    @classmethod
+    def create(cls, **kwargs):
+        """After creating User object, update ElasticSearch index."""
+        user = super(UserFactory, cls).create(**kwargs)
+        UserProfile.refresh_index(public_index=False)
+        UserProfile.refresh_index(public_index=True)
+        return user
 
     @factory.post_generation
     def userprofile(self, create, extracted, **kwargs):

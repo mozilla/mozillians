@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib import auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -20,6 +18,7 @@ from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
+from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, UserProfile
 from mozillians.users.tasks import remove_from_basket_task, unindex_objects
@@ -130,7 +129,7 @@ def edit_profile(request):
 
         # Notify the user that their old profile URL won't work.
         if new_profile:
-            _update_invites(request)
+            update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
             messages.info(request,
@@ -247,7 +246,7 @@ def invite(request):
                  "with instructions on how to join. You can "
                  "invite another Mozillian if you like." % invite.recipient)
         messages.success(request, msg)
-        return redirect('phonebook:profile_view', request.user.username)
+        return redirect('phonebook:home')
 
     return render(request, 'phonebook/invite.html',
                   {'invite_form': invite_form})
@@ -270,6 +269,7 @@ def vouch(request):
 
     return HttpResponseBadRequest()
 
+
 def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, country)
@@ -284,6 +284,7 @@ def list_mozillians_in_location(request, country, region=None, city=None):
             'city_name': city,
             'region_name': region}
     return render(request, 'phonebook/location-list.html', data)
+
 
 @allow_unvouched
 def logout(request, **kwargs):
@@ -308,24 +309,8 @@ def register(request):
 
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
+        if (request.user.is_authenticated()
+            and not request.user.userprofile.is_vouched):
+            update_invites(request)
+
     return redirect('phonebook:home')
-
-
-def _update_invites(request):
-    code = request.session.get('invite-code')
-    if code:
-        try:
-            invite = Invite.objects.get(code=code, redeemed=None)
-            voucher = invite.inviter
-        except Invite.DoesNotExist:
-            return
-    else:
-        # If there is no invite, lets get out of here.
-        return
-
-    redeemer = request.user.userprofile
-    redeemer.vouch(voucher)
-    invite.redeemed = datetime.datetime.now()
-    invite.redeemer = redeemer
-    invite.send_thanks()
-    invite.save()
