@@ -6,3 +6,5 @@ python-memcached==1.45
 # pyes
 urllib3
 
+# autoslugfield
+unidecode
