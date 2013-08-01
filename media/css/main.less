@@ -375,17 +375,20 @@ nav {
                     color: @linkBlue;
                 }
             }
+            &.dropdown-toggle {
+                width: 500px;
+            }
         }
         ul.dropdown-menu {
             position: absolute;
-            left: -44px;
             background-color: @white;
             border: 1px solid rgba(0, 0, 0, 0.2);
             .border-radius(6px);
             .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
-            min-width: 190px;
+            min-width: 170px;
             margin: 5px 0 0 0;
             top: 100%;
+            right: -15px;
             z-index: 1000;
             display: none;
             li {
