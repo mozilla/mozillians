@@ -95,7 +95,6 @@ class UserProfilePrivacyModel(models.Model):
     class Meta:
         abstract=True
 
-
 class UserProfile(UserProfilePrivacyModel, SearchMixin):
     objects = UserProfileManager()
 
@@ -265,6 +264,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             s = s.filter(is_vouched=True)
 
         return s
+
+    @property
+    def accounts(self):
+        if self._privacy_level:
+            return self.externalaccount_set.filter(privacy__gte=self._privacy_level)
+        return self.externalaccount_set.all()
 
     @property
     def email(self):
@@ -514,3 +519,37 @@ class UsernameBlacklist(models.Model):
 
     class Meta:
         ordering = ['value']
+
+
+class ExternalAccount(models.Model):
+    ACCOUNT_TYPES = (
+        {'name': 'AMO', 'url': 'https://addons.mozilla.org/user/%s'},
+        {'name': 'Bugzilla', 'url': ''},
+        {'name': 'Github', 'url': 'https://www.github.com/%s'},
+        {'name': 'MDN', 'url': ''},
+        {'name': 'SUMO', 'url': ''},
+        {'name': 'Facebook', 'url': ''},
+        {'name': 'Twitter', 'url': ''},
+        {'name': 'AIM', 'url': ''},
+        {'name': 'Google Talk', 'url': ''},
+        {'name': 'Skype', 'url': ''},
+        {'name': 'Yahoo!', 'url': ''},
+    )
+
+    user = models.ForeignKey(UserProfile)
+    username = models.CharField(max_length=255, default='', blank=True,
+                                verbose_name=_lazy('Account Username'))
+    type = models.PositiveIntegerField(
+        default=0, choices=enumerate(account['name'] for account in ACCOUNT_TYPES),
+        verbose_name=_lazy('Account Type'))
+    privacy = models.PositiveIntegerField(default=MOZILLIANS,
+                                          choices=PRIVACY_CHOICES)
+
+    @property
+    def typename(self):
+        return self.ACCOUNT_TYPES[self.type]['name']
+
+    def get_username_url(self):
+        if self.ACCOUNT_TYPES[self.type]['url']:
+            return self.ACCOUNT_TYPES[self.type]['url'] % self.username
+        return ''

@@ -129,6 +129,29 @@
       {{ bootstrap(profile_form.website) }}
     </fieldset>
 
+    <fieldset id="accounts">
+      <label>{{ _('Accounts') }}</label>
+      {{ accounts_formset.management_form }}
+      {% for account_form in accounts_formset %}
+        <div class='newField'>
+          {% for field in account_form %}
+            {% if field.name == 'privacy' %}
+              <div class="privacy-controls">
+                {{field}}
+              </div>
+            {% else %}
+              {{ field.errors }}
+              {% if field.name == 'DELETE' %}
+                <i class="icon-minus-sign"></i> {{ _('Delete') }}
+              {% endif %}
+              {{ field }}
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a> 
+    </fieldset>
+
     <fieldset>
       {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
       {{ bootstrap(profile_form.ircname) }}

@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page, never_cache
@@ -20,8 +21,7 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import COUNTRIES, UserProfile
-
+from mozillians.users.models import COUNTRIES, ExternalAccount, UserProfile
 
 log = commonware.log.getLogger('m.phonebook')
 BAD_VOUCHER = 'Unknown Voucher'
@@ -38,7 +38,6 @@ def login(request):
 @allow_public
 def home(request):
     return render(request, 'phonebook/home.html')
-
 
 @allow_public
 @never_cache
@@ -110,6 +109,8 @@ def edit_profile(request):
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
+    AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount, extra=1)
+    accounts_formset = AccountsFormset(request.POST or None, instance=profile)
     new_profile = False
     form = forms.ProfileForm
     if not profile.is_complete:
@@ -121,10 +122,11 @@ def edit_profile(request):
                         initial=dict(groups=user_groups, skills=user_skills,
                                      languages=user_languages))
 
-    if (user_form.is_valid() and profile_form.is_valid()):
+    if (user_form.is_valid() and profile_form.is_valid() and accounts_formset.is_valid()):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
+        accounts_formset.save()
 
         # Notify the user that their old profile URL won't work.
         if new_profile:
@@ -138,6 +140,7 @@ def edit_profile(request):
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
+                accounts_formset = accounts_formset,
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
