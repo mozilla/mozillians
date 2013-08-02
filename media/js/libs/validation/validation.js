@@ -48,7 +48,7 @@ var Validator = function() {
         },
         validateGroup: function(group, field) {
             var name = group.children('span').text();
-            if (name.match(/^[a-zA-Z0-9 .:,-]*$/g) === null) {
+            if (name.match(/^[a-zA-Z0-9\u0000-\u9FB0 .:,-]*$/g)	=== null) {
                 displayError(field, gettext('Groups can only contain ' +
                                             'alphanumeric characters, dashes, ' +
                                             'spaces.'));

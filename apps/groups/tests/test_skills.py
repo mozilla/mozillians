@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 
 from django.contrib.auth.models import User
@@ -50,3 +51,16 @@ class SkillsTest(apps.common.tests.init.ESTestCase):
 
         assert profile.skills.all(), (
                 "Pending user should be able to edit skills.")
+
+    def test_unicode_skills(self):
+        """Users can add skills like c++ and φωτογραφία."""
+        profile = self.pending.get_profile()
+        assert not profile.skills.all(), 'User should have no skills.'
+
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='McAwesomepants', country='pl',
+                         username='McAwesomepants', skills='c++ φωτογραφί'))
+        self.pending_client.post(reverse('profile.edit'), data, follow=True)
+		
+        assert "c++" in profile.skills.all()[0].name
+        assert u"φωτογραφί" in profile.skills.all()[0].name
