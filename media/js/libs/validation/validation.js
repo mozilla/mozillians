@@ -48,10 +48,10 @@ var Validator = function() {
         },
         validateGroup: function(group, field) {
             var name = group.children('span').text();
-            if (name.match(/^[a-zA-Z0-9 .:,-]*$/g) === null) {
+            if (name.match(/^[a-zA-Z0-9 +.:,-]*$/g) === null) {
                 displayError(field, gettext('Groups can only contain ' +
-                                            'alphanumeric characters, dashes, ' +
-                                            'spaces.'));
+                                            'alphanumeric characters, dashes, spaces' +
+                                            'and + . : ,'));
                 // HACK: Do this without dirty DOM manipulation.
                 group.children('a.tagit-close').click();
             }

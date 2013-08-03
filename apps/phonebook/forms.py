@@ -135,10 +135,10 @@ class ProfileForm(happyforms.ModelForm):
         consistent.
 
         """
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
+        if not re.match(r'^[a-zA-Z0-9 +.:,-]*$', self.cleaned_data['groups']):
             raise forms.ValidationError(_(u'Groups can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
+                                           'alphanumeric characters, dashes, spaces, '
+                                           'and + . : ,'))
         system_groups = [g.name for g in self.instance.groups.all()
                          if g.system]
         groups = self.cleaned_data['groups']
@@ -161,10 +161,10 @@ class ProfileForm(happyforms.ModelForm):
                           languages.lower().split(',')))
 
     def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+        if not re.match(r'^[a-zA-Z0-9 \+.:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
+                                           'alphanumeric characters, dashes, spaces'
+                                           'and + . : ,'))
         skills = self.cleaned_data['skills']
         return filter(lambda x: x,
                       map(lambda x: x.strip() or False,

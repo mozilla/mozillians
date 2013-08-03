@@ -98,6 +98,19 @@ class GroupTest(apps.common.tests.init.ESTestCase):
             assert g.name == g.name.lower(), (
                     'Group search is case-insensitive.')
 
+    def test_groups_can_use_plus_character(self):
+        """Ensure that groups can contain the '+' character"""
+        group = Group.objects.get_or_create(name="c++")[0]
+        profile = self.mozillian.get_profile()
+        data = self.data_privacy_fields.copy()
+        data.update(dict(full_name='tofumatt', country='pl',
+                         username='tofumatt',
+                         groups='C++'))
+        self.mozillian_client.post(reverse('profile.edit'), data, follow=True)
+
+        assert group in profile.groups.all(), (
+                    'C++ group should have been added to user profile.')
+
     def test_pending_user_can_add_groups(self):
         """Ensure pending users can add/edit groups."""
         profile = self.pending.get_profile()
