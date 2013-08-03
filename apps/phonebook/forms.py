@@ -135,7 +135,7 @@ class ProfileForm(happyforms.ModelForm):
         consistent.
 
         """
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
+        if not re.match(r'^[a-zA-Z0-9 \+.:,-]*$', self.cleaned_data['groups']):
             raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
@@ -161,7 +161,7 @@ class ProfileForm(happyforms.ModelForm):
                           languages.lower().split(',')))
 
     def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+        if not re.match(r'^[a-zA-Z0-9 \+.:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
