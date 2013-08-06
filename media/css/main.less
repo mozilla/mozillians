@@ -661,6 +661,9 @@ body#home {
             h2 {
                 height: 72px;
                 margin: 0;
+                @media (max-width: @breakMobileLandscape) {
+                    height: auto;
+                }
             }
             #quote, #mozfacts {
                 .span(2);
@@ -682,6 +685,7 @@ body#home {
                     width: auto;
                 }
                 @media (max-width: @breakMobileLandscape) {
+                    margin: 0 20px;
                     h2 {
                         margin-bottom: 20px;
                     }
