@@ -1,0 +1,31 @@
+{% extends "base-old.html" %}
+
+{% block page_title %}{{ _('Invite a Mozillian') }}{% endblock %}
+{% block body_id %}invite{% endblock %}
+
+{% block content %}
+  <h1>{{ _('Invite a Mozillian') }}</h1>
+
+  <p>
+    {% trans %}
+      If you'd like to invite a Mozillian to create a profile, please enter
+      their email address here:
+    {% endtrans %}
+  </p>
+
+  <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
+    {{ csrf() }}
+    {{ bootstrap(invite_form.recipient) }}
+    {{ bootstrap(invite_form.message) }}
+    <button type="submit" class="btn bump-button">
+      {{ _('Send invite') }}
+    </button>
+    <p>
+      {% trans %}
+        <strong>Note:</strong>
+        Your name and email will be sent to whomever you invite.
+      {% endtrans %}
+      </p>
+  </form>
+
+{% endblock %}
