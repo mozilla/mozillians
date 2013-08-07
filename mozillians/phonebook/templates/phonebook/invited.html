@@ -1,0 +1,16 @@
+{% extends "base-old.html" %}
+
+{% block page_title %}{{ _('Invitation Sent') }}{% endblock %}
+
+{% block body_id %}invited{% endblock %}
+
+{% block content %}
+  <h1>{{ _('Invitation Sent!') }}</h1>
+  <p>
+	{% trans invite_url=url('phonebook:invite') %}
+	  {{ recipient }} has been invited to Mozillians. They'll receive an email
+	  with instructions on how to join. You can <a href="{{ invite_url }}">
+	  invite another Mozillian</a> if you like.
+	{% endtrans %}
+  </p>
+{% endblock %}

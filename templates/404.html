@@ -12,7 +12,7 @@
          title="{{ _('Tumbeasts by Matthew Inman of The Oatmeal') }}">
   </a>
 
-  {% trans home_url=url('home') %}
+  {% trans home_url=url('phonebook:home') %}
     <p>
       The page you requested couldn't be found. You can head to the <a
       href="{{ home_url }}">Mozillians home page</a> to learn more about our
@@ -22,7 +22,7 @@
   {% endtrans %}
 
   {% if user.is_anonymous() %}
-    {% trans join_url=url('register') %}
+    {% trans join_url=url('phonebook:register') %}
       <p>
         Because you aren't authenticated, you may not have access to
         private profiles in the phonebook. You should log in in case

@@ -27,16 +27,11 @@ if [ ! -d "$VENV" ]; then
     virtualenv $VENV --no-site-packages
 fi
 source $VENV/bin/activate
-pip install -r requirements/tests-compiled.txt
+pip install -r requirements/dev.txt
 pip install -r requirements/compiled.txt
 
-cat > settings/local.py <<SETTINGS
-import logging
-from settings import *
-
-ROOT_URLCONF = 'workspace.urls'
-
-# For absoluate urls
+cat > mozillians/settings/local.py <<SETTINGS
+ROOT_URLCONF = 'mozillians.urls'
 DOMAIN = "localhost"
 PROTOCOL = "http://"
 PORT = 8001
@@ -60,9 +55,6 @@ DATABASES = {
 # Disable BrowserID Cert Checking
 BROWSERID_DISABLE_CERT_CHECK = True
 
-#Serve Profile Photos from django
-UPLOAD_URL = '/media/uploads'
-
 # Statsd Defaults -- adjust as needed
 STATSD_HOST = 'localhost'
 STATSD_PORT = 8125
@@ -83,7 +75,7 @@ DEBUG = TEMPLATE_DEBUG = True
 # ElasticSearch
 ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
-ES_INDEXES = dict(default='test_${JOB_NAME}')
+ES_INDEXES = dict(default='test_${JOB_NAME}', public='test_${JOB_NAME}_public')
 ES_TIMEOUT = 60
 SETTINGS
 
@@ -102,10 +94,10 @@ echo "Starting tests..."
 export FORCE_DB=1
 
 if [ -z $COVERAGE ]; then
-    python manage.py test --noinput --with-xunit --logging-clear-handlers
+    python manage.py test --noinput
 else
-    coverage run --omit='*migrations*' manage.py test --noinput --with-xunit --logging-clear-handlers
-    coverage xml --omit='*migrations*' $(find apps lib -name '*.py')
+    coverage run --omit='*migrations*' manage.py test --noinput
+    coverage xml --omit='*migrations*' $(find mozillians -name '*.py')
 fi
 
 echo "FIN"

@@ -1,4 +1,4 @@
-settings_local.py
+mozillians/settings/local.py
 *.py[co]
 *.sw[po]
 .coverage

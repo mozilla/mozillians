@@ -1,0 +1,28 @@
+<div class="result">
+  <a class="js-btn" href="{{ url('phonebook:profile_view', profile.user.username) }}">
+    <div class="avatar">
+      <img class="profile-photo"
+           src="{{ profile.get_photo_url('70x70') }}"
+           alt="{{ _('Profile Photo') }}">
+    </div>
+    <div class="details">
+      <ul>
+        <li>
+          <h2>
+            {{ profile.display_name }}
+          </h2>
+        </li>
+        {% if profile.email %}
+          <li>
+            {{ _('Email:') }} {{ profile.email }}
+          </li>
+        {% endif %}
+        {% if profile.user.username %}
+          <li>
+            {{ _('Username:') }} {{ profile.user.username }}
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </a>
+</div>
