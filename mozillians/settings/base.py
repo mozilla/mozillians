@@ -247,11 +247,6 @@ INSTALLED_APPS = (
     'south',
 )
 
-INSTALLED_APPS = get_apps(append=[
-    # These need to go in order of migration.
-
-])
-
 ## Auth
 PWD_ALGORITHM = 'bcrypt'
 HMAC_KEYS = {
