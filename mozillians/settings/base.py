@@ -205,9 +205,27 @@ BROWSERID_USERNAME_ALGO = calculate_username
 # On Login, we redirect through register.
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/login/'
+INSTALLED_APPS = (
+    # Local apps
+    'funfactory',
+    'compressor',
 
-INSTALLED_APPS = get_apps(append=[
-    # These need to go in order of migration.
+    'tower',
+    'cronjobs',
+
+    # Django contrib apps
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.staticfiles',
+
+    'commonware.response.cookies',
+    'djcelery',
+    'django_nose',
+    'session_csrf',
+
+    'product_details',
+    
     'jingo_minify',
 
     'mozillians.users',
@@ -223,13 +241,15 @@ INSTALLED_APPS = get_apps(append=[
     'autocomplete_light',
 
     'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.staticfiles',
     'django_browserid',
     'bootstrapform',
-
     # DB migrations
     'south',
+)
+
+INSTALLED_APPS = get_apps(append=[
+    # These need to go in order of migration.
+
 ])
 
 ## Auth
