@@ -55,7 +55,7 @@ def database(ctx):
 @task
 def update_es_indexes(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python2.6 manage.py cron index_all_profiles")
+        ctx.local("python2.6 manage.py cron index_all_profiles &")
 
 @task
 def validate_fun_facts(ctx):
