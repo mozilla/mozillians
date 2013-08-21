@@ -136,11 +136,6 @@ MINIFY_BUNDLES = {
             'js/libs/tag-it/js/tag-it.js',
             'js/register.js',
         ),
-        'search': (
-            'js/libs/jquery.endless-scroll.js',
-            'js/infinite.js',
-            'js/expand.js',
-        ),
         'backbone': (
             'js/libs/underscore.js',
             'js/libs/backbone.js',
@@ -157,6 +152,13 @@ MINIFY_BUNDLES = {
         ),
         'google_analytics': (
             'js/google-analytics.js',
+        ),
+        'search': (
+            'js/search.js',
+            'js/pagination.js',
+        ),
+        'groups': (
+            'js/pagination.js',
         ),
     }
 }

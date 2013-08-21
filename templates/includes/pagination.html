@@ -1,0 +1,78 @@
+{% if show_pagination %}
+  <div class="pagination">
+    {% if items.has_previous() %}
+      {% if sort_form %}
+        <a class="prev" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
+                                    page=items.previous_page_number()) }}">
+      {% elif search_form %}
+          {% if search_form.cleaned_data['include_non_vouched'] %}
+            <a class="prev" href="{{ '#'|urlparams(
+            q=search_form.cleaned_data.q,
+            include_non_vouched='on',
+            page=items.previous_page_number()) }}">
+          {% else %}
+            <a class="prev" href="{{ '#'|urlparams(
+            q=search_form.cleaned_data.q,
+            page=items.previous_page_number()) }}">
+          {% endif %}
+      {% else %}
+        <a class="prev" href="?page={{ items.previous_page_number() }}">
+      {% endif %}
+        <i class="icon icon-arrow-left"></i>
+        {{ _('Previous') }}
+      </a>
+    {% endif %}
+
+    <form action="." method="post" id="pagination-form">
+      <label>Page</label>
+      <select class="page-list">
+        {% for page in items.paginator.page_range %}
+          <option {% if page == items.number %}selected{% endif %}
+            {% if sort_form %}
+              value="{{ '#'|urlparams(
+              sort=sort_form.data['sort'],
+              page=page) }}">
+            {% elif search_form %}
+              {% if search_form.cleaned_data['include_non_vouched'] %}
+                value="{{ '#'|urlparams(
+                q=search_form.cleaned_data.q,
+                include_non_vouched='on',
+                page=page) }}">
+              {% else %}
+                value="{{ '#'|urlparams(
+                page=page,
+                q=search_form.cleaned_data.q) }}">
+              {% endif %}
+            {% else %}
+                value="?page={{ page }}">
+            {% endif %}
+            {{  page }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+
+    {% if items.has_next() %}
+        {% if sort_form %}
+          <a class="next" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
+                                    page=items.next_page_number()) }}">
+        {% elif search_form %}
+          {% if search_form.cleaned_data['include_non_vouched'] %}
+            <a class="next" href="{{ '#'|urlparams(
+            q=search_form.cleaned_data.q,
+            include_non_vouched='on',
+            page=items.next_page_number()) }}">
+          {% else %}
+            <a class="next" href="{{ '#'|urlparams(
+            q=search_form.cleaned_data.q,
+            page=items.next_page_number()) }}">
+          {% endif %}
+        {% else %}
+          <a class="next" href="?page={{ items.next_page_number() }}">
+        {% endif %}
+          {{ _('Next') }}
+          <i class="icon icon-arrow-right"></i>
+        </a>
+    {% endif %}
+  </div>
+{% endif %}
