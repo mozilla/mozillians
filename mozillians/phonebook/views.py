@@ -214,7 +214,7 @@ def search(request):
             num_pages = len(people.paginator.page_range)
 
     d = dict(people=people,
-             form=form,
+             search_form=form,
              limit=limit,
              show_pagination=show_pagination,
              num_pages=num_pages,
