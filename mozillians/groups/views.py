@@ -17,7 +17,7 @@ from mozillians.phonebook import forms
 from mozillians.users.tasks import update_basket_task
 
 
-GROUPS_PER_PAGE = 1
+GROUPS_PER_PAGE = 20
 log = commonware.log.getLogger('m.groups')
 
 
