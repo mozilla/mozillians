@@ -306,12 +306,17 @@
 
     {% if not profile.is_complete %}
       <fieldset id="privacy-verify">
+        {% if profile_form.optin.errors %}
+          <div class="error">
+            {{ _('This field is required.') }}
+          </div>
+        {% endif %}
         <div class="controls">
           <label class="checkbox">
             {{ profile_form.optin }}
           </label>
         </div>
-        <label>
+        <label{% if profile_form.optin.errors %} class="error"{% endif %}>
           <span>*</span>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
             I'm okay with you handling this info as you explain
