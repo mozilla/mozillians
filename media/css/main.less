@@ -1269,6 +1269,57 @@ body#edit-profile {
                     }
                 }
             }
+            &#shirts {
+                .tshirt-option { float: left; }
+                label {
+                    float: none;
+                    font-weight: normal;
+                }
+                .straightcut, .fitted {
+                    .clearfix;
+                    margin-top: 30px;
+                }
+                .tshirt-info {
+                    cursor: pointer;
+                    position: relative;
+                    display: inline;
+                    span {
+                        padding: 5px 15px;
+                        opacity: 0;
+                        visibility: hidden;
+                        width: 200px;
+                        z-index: 10;
+                        position: absolute;
+                        top: -5px;
+                        left: 0px;
+                        font-size: 14px;
+                        background: @white;
+                        .border-radius(3px);
+                        .box-shadow(2px 2px 2px @gray);
+                        border: 1px solid lighten(@black,90%);
+                        text-align: center;
+                        -webkit-transition-property:opacity, margin-left, visibility, margin-left;
+                        -webkit-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                        -webkit-transition-timing-function: ease-in-out;
+                        -moz-transition-property:opacity, margin-left, visibility, margin-left;
+                        -moz-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                        -moz-transition-timing-function: ease-in-out;
+                        -o-transition-property:opacity, margin-left, visibility, margin-left;
+                        -o-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                        -o-transition-timing-function: ease-in-out;
+                        transition-property:opacity, margin-left, visibility, margin-left;
+                        transition-duration:0.4s 0.3s;
+                        transition-timing-function: ease-in-out;
+
+                    }
+                    &.active span {
+                        opacity: 1;
+                        visibility: visible;
+                        overflow: visible;
+                        margin-left: 30px;
+                    }
+                }
+            }
         }
     }
 }
