@@ -93,13 +93,14 @@ class ProfileForm(happyforms.ModelForm):
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites', 'tshirt',
-                  'allows_mozilla_sites', 'date_mozillian', 'timezone',
+                  'title', 'allows_mozilla_sites',
+                  'date_mozillian', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_email', 'privacy_timezone', 'privacy_tshirt',
                   'privacy_website', 'privacy_bio', 'privacy_city',
                   'privacy_region', 'privacy_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',
-                  'privacy_date_mozillian')
+                  'privacy_date_mozillian', 'privacy_title')
         widgets = {'bio': forms.Textarea()}
 
     def __init__(self, *args, **kwargs):

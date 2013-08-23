@@ -143,6 +143,11 @@
     </fieldset>
 
     <fieldset>
+      {{ privacy_field(profile_form.privacy_title, profile.privacy_title) }}
+      {{ bootstrap(profile_form.title) }}
+    </fieldset>
+
+    <fieldset>
       {{ privacy_field(profile_form.privacy_tshirt, profile.privacy_tshirt) }}
       {{ bootstrap(profile_form.tshirt) }}
     </fieldset>
