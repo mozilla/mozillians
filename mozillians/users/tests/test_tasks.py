@@ -21,16 +21,22 @@ from mozillians.users.tests import UserFactory
 class IncompleteAccountsTests(TestCase):
     """Incomplete accounts removal tests."""
 
-    def test_remove_incomplete_accounts(self):
+    @patch('mozillians.users.tasks.datetime')
+    def test_remove_incomplete_accounts(self, datetime_mock):
         """Test remove incomplete accounts."""
-        complete_user = UserFactory.create()
+        complete_user = UserFactory.create(
+            date_joined=datetime(2012, 01, 01))
         complete_vouched_user = UserFactory.create(
+            date_joined=datetime(2013, 01, 01),
             userprofile={'is_vouched': True})
         incomplete_user_not_old = UserFactory.create(
+            date_joined=datetime(2013, 01, 01),
             userprofile={'full_name': ''})
         incomplete_user_old = UserFactory.create(
             date_joined=datetime(2012, 01, 01),
             userprofile={'full_name': ''})
+
+        datetime_mock.now.return_value = datetime(2013, 01, 01)
 
         remove_incomplete_accounts(days=0)
         ok_(User.objects.filter(id=complete_user.id).exists())
