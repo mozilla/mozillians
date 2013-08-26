@@ -21,8 +21,8 @@ from mozillians.common.helpers import gravatar
 from mozillians.groups.models import (Group, GroupAlias, Skill, SkillAlias,
                                       Language, LanguageAlias)
 from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
-                                       MOZILLIANS, PRIVACY_CHOICES, PUBLIC,
-                                       PUBLIC_INDEXABLE_FIELDS,
+                                       MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
+                                       PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager)
 from mozillians.users.tasks import (update_basket_task, index_objects,
                                     unindex_objects)
@@ -263,6 +263,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def privacy_level(self):
         """Return user privacy clearance."""
+        if self.groups.filter(name='privileged').exists():
+            return PRIVILEGED
         if self.groups.filter(name='staff').exists():
             return EMPLOYEES
         if self.is_vouched:
