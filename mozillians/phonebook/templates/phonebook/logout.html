@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>Logging out...</title>
+    {{ js('common') }}
+    {{ browserid_js() }}
+    {{ js('logout_view') }}
+  </head>
+  <body>
+    Logging you out...
+    <a id="logout" class="browserid-logout" href="{{ url('phonebook:home') }}"></a>
+  </body>
+</html>

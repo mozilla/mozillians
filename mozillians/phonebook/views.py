@@ -287,7 +287,7 @@ def list_mozillians_in_location(request, country, region=None, city=None):
 
 
 @allow_unvouched
-def logout(request, **kwargs):
+def logout(request):
     """Logout view that wraps Django's logout but always redirects.
 
     Django's contrib.auth.views logout method renders a template if
@@ -295,7 +295,7 @@ def logout(request, **kwargs):
     always returns an HTTP redirect instead.
 
     """
-    return auth.views.logout(request, next_page=reverse('phonebook:home'), **kwargs)
+    return auth.views.logout(request, template_name='phonebook/logout.html')
 
 
 @allow_public
