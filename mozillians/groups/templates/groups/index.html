@@ -35,10 +35,11 @@
       {% for group_slice in groups|slice(3) -%}
           {% for group in group_slice %}
             <li class="group-item">
-              <a href="{{ url('groups:show', group.url) }}" class="group-name">
-                {{ group.name|truncate(20, True) }} &mdash;
-                <i class="icon-user-md"></i>
-                {{ group.num_members }}
+              <a href="{{ url('groups:show', group.url) }}"
+                 class="group-name" title="{{ group.name }}">
+                {{ group.name|truncate(20, True) }}<br>
+                <i class="icon-group"></i>
+                {{ group.num_members }} {{ _('members') }}
               </a>
             </li>
           {% endfor %}

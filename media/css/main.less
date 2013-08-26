@@ -1309,19 +1309,26 @@ body.search-page {
                 float: left;
                 margin: 20px 20px 0 0;
                 padding: 0;
-                width: 220px;
+                width: 290px;
+                height: 75px;
                 @media (max-width: @breakTablet) {
                     float: none;
+                    height: auto;
                 }
                 a {
                     .button;
                     .button-sand;
                     color: @grayDark;
                     font-weight: normal;
+                    width: 200px;
+                    padding: 10px !important;
+                    word-wrap: break-word;
                     &:hover {
                         color: @grayDark;
                     }
-
+                    i {
+                        padding-top: 8px;
+                    }
                 }
             }
         }
