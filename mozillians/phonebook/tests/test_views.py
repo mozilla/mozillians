@@ -8,15 +8,15 @@ from django.shortcuts import redirect
 from django.test.client import Client
 
 from funfactory.helpers import urlparams
-from mock import patch
+from mock import call, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.tests import InviteFactory
 from mozillians.phonebook.utils import update_invites
-from mozillians.users.cron import index_all_profiles
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PRIVILEGED, PUBLIC
+from mozillians.users.models import UserProfile
 from mozillians.users.tests import UserFactory
 
 
@@ -312,33 +312,45 @@ class ViewsTests(TestCase):
         client = Client()
         client.post(reverse('phonebook:profile_delete'), follow=True)
 
-    @patch('mozillians.phonebook.views.remove_from_basket_task.delay')
-    @patch('mozillians.phonebook.views.auth.logout', wraps=auth.logout)
-    def test_delete_unvouched(self, logout_mock, remove_from_basket_task_mock):
+    @patch('mozillians.users.models.remove_from_basket_task.delay')
+    @patch('mozillians.users.models.unindex_objects.delay')
+    def test_delete_unvouched(self, unindex_objects_mock,
+                              remove_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
-        ok_(logout_mock.called)
-        remove_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token)
+        self.assertTemplateUsed(response, 'phonebook/logout.html')
 
-    @patch('mozillians.phonebook.views.remove_from_basket_task.delay')
-    @patch('mozillians.phonebook.views.auth.logout', wraps=auth.logout)
-    def test_delete_vouched(self, logout_mock, remove_from_basket_task_mock):
+        remove_from_basket_task_mock.assert_called_with(
+            user.email, user.userprofile.basket_token)
+        unindex_objects_mock.assert_has_calls([
+            call(UserProfile, [user.userprofile.id], public_index=False),
+            call(UserProfile, [user.userprofile.id], public_index=True)
+            ])
+        ok_(not User.objects.filter(username=user.username).exists())
+
+    @patch('mozillians.users.models.remove_from_basket_task.delay')
+    @patch('mozillians.users.models.unindex_objects.delay')
+    def test_delete_vouched(self, unindex_objects_mock,
+                              remove_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
-        ok_(logout_mock.called)
+        self.assertTemplateUsed(response, 'phonebook/logout.html')
+
         remove_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
+        unindex_objects_mock.assert_has_calls([
+            call(UserProfile, [user.userprofile.id], public_index=False),
+            call(UserProfile, [user.userprofile.id], public_index=True)
+            ])
+        ok_(not User.objects.filter(username=user.username).exists())
 
     def test_search_plugin_anonymous(self):
         client = Client()
@@ -574,7 +586,7 @@ class ViewsTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/logout.html')
         ok_(logout_mock.called)
 
     @patch('mozillians.phonebook.views.auth.views.logout', wraps=logout_view)
@@ -583,7 +595,7 @@ class ViewsTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/logout.html')
         ok_(logout_mock.called)
 
     def test_register_anonymous(self):

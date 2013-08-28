@@ -21,7 +21,6 @@ from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, UserProfile
-from mozillians.users.tasks import remove_from_basket_task, unindex_objects
 
 
 log = commonware.log.getLogger('m.phonebook')
@@ -163,14 +162,13 @@ def confirm_delete(request):
 @never_cache
 @require_POST
 def delete(request):
-    user = request.user
-    unindex_objects.delay(UserProfile, [user.userprofile.id], public_index=False)
-    unindex_objects.delay(UserProfile, [user.userprofile.id], public_index=True)
-    remove_from_basket_task.delay(user.email, user.userprofile.basket_token)
-    user.userprofile.anonymize()
-    log.info('Deleting %d' % user.id)
-    auth.logout(request)
-    return redirect('phonebook:home')
+    request.user.delete()
+    messages.info(request, _('Your account has been deleted. '
+                             'Thanks for being a Mozillian!'))
+    # We don't redirect to logout view, because delete already logs
+    # out user. Instead we render the logout template to BrowserID
+    # logout.
+    return render(request, 'phonebook/logout.html')
 
 
 @allow_public
