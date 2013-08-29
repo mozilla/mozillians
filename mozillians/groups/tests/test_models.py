@@ -3,7 +3,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias
-from mozillians.groups.tests import GroupFactory
+from mozillians.groups.tests import GroupAliasFactory, GroupFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -54,6 +54,11 @@ class GroupBaseTests(TestCase):
         group_2 = GroupFactory.create(name='lolo', auto_complete=False)
         eq_(set(Group.search('lo', auto_complete_only=False)),
             set([group_1, group_2]))
+
+    def test_search_matches_alias(self):
+        group_1 = GroupFactory.create(name='lalo', auto_complete=True)
+        GroupAliasFactory.create(alias=group_1, name='foo')
+        eq_(set(Group.search('foo')), set([group_1]))
 
 
 class GroupTests(TestCase):
