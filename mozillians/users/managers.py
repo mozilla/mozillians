@@ -8,10 +8,8 @@ PRIVILEGED = 1
 EMPLOYEES = 2
 MOZILLIANS = 3
 PUBLIC = 4
-PRIVACY_CHOICES = (# (PRIVILEGED, 'Privileged'),
-    # (EMPLOYEES, 'Employees'),
-    (MOZILLIANS, 'Mozillians'),
-    (PUBLIC, 'Public'))
+PRIVACY_CHOICES = ((MOZILLIANS, 'Mozillians'),
+                   (PUBLIC, 'Public'))
 PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 DEFAULT_PRIVACY_FIELDS = {
     'photo': None,
