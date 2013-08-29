@@ -27,7 +27,7 @@ class GroupBase(models.Model):
         if not query:
             return []
         query = query.lower()
-        results = cls.objects.filter(name__contains=query)
+        results = cls.objects.filter(aliases__name__contains=query)
         if auto_complete_only:
             results = results.filter(auto_complete=auto_complete_only)
         return results
