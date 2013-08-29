@@ -100,10 +100,10 @@ class ProfileForm(happyforms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
-                  'region', 'city', 'allows_community_sites',
+                  'region', 'city', 'allows_community_sites', 'tshirt',
                   'allows_mozilla_sites', 'date_mozillian', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                  'privacy_email', 'privacy_timezone',
+                  'privacy_email', 'privacy_timezone', 'privacy_tshirt',
                   'privacy_website', 'privacy_bio', 'privacy_city',
                   'privacy_region', 'privacy_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',

@@ -87,6 +87,8 @@ class UserProfilePrivacyModel(models.Model):
     privacy_vouched_by = PrivacyField()
     privacy_date_mozillian = PrivacyField()
     privacy_timezone = PrivacyField()
+    privacy_tshirt = PrivacyField(choices=((PRIVILEGED, 'Privileged'),),
+                                  default=PRIVILEGED)
 
     class Meta:
         abstract=True
@@ -136,6 +138,16 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     date_mozillian = models.DateField('When was involved with Mozilla',
                                       null=True, blank=True, default=None)
     timezone = models.CharField(max_length=100, blank=True, default='')
+    tshirt = models.IntegerField(
+        blank=True, null=True,
+        choices=(
+            (1, 'Fitted Small'), (2, 'Fitted Medium'),
+            (3, 'Fitted Large'), (4, 'Fitted X-Large'),
+            (5, 'Fitted XX-Large'), (6, 'Fitted XXX-Large'),
+            (7, 'Straight-cut Small'), (8, 'Straight-cut Medium'),
+            (9, 'Straight-cut Large'), (10, 'Straight-cut X-Large'),
+            (11, 'Straight-cut XX-Large'), (12, 'Straight-cut XXX-Large')
+        ))
 
     class Meta:
         db_table = 'profile'
