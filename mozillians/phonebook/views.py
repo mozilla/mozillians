@@ -309,8 +309,11 @@ def register(request):
 
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
-        if (request.user.is_authenticated()
-            and not request.user.userprofile.is_vouched):
-            update_invites(request)
+        if request.user.is_authenticated():
+            if not request.user.userprofile.is_vouched:
+                update_invites(request)
+        else:
+            messages.info(request, _("You've been invited to join Mozillians.org!"
+                                     "Sign in and then you can create a profile."))
 
     return redirect('phonebook:home')
