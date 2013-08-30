@@ -1,4 +1,3 @@
-import django.contrib.auth as auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
@@ -8,16 +7,70 @@ from django.shortcuts import redirect
 from django.test.client import Client
 
 from funfactory.helpers import urlparams
-from mock import call, patch
+from mock import Mock, call, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.tests import InviteFactory
 from mozillians.phonebook.utils import update_invites
+from mozillians.phonebook.views import BrowserIDVerify
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PRIVILEGED, PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tests import UserFactory
+
+
+class BrowserIDVerifyTests(TestCase):
+    @patch('mozillians.phonebook.views.Verify.form_valid')
+    def test_form_valid_anonymous(self, form_valid_mock):
+        Verify = BrowserIDVerify()
+        request_mock = Mock()
+        request_mock.user.is_authenticated.return_value = False
+        Verify.request = request_mock
+        form = Mock()
+        Verify.form_valid(form)
+        form_valid_mock.assert_called_with(form)
+
+    @patch('mozillians.phonebook.views.get_audience')
+    @patch('mozillians.phonebook.views.verify')
+    def test_form_valid_authenticated(self, verify_mock, get_audience_mock):
+        user = UserFactory.create()
+        Verify = BrowserIDVerify()
+        request_mock = Mock()
+        request_mock.user.is_authenticated.return_value = True
+        request_mock.user = user
+        Verify.request = request_mock
+        form = Mock()
+        form.cleaned_data = {'assertion': 'assertion'}
+        get_audience_mock.return_value = 'audience'
+        verify_mock.return_value = {'email': 'foo@bar.com'}
+
+        Verify.form_valid(form)
+
+        verify_mock.assert_called_with('assertion', 'audience')
+        get_audience_mock.assert_called_with(request_mock)
+        eq_(user.email, 'foo@bar.com')
+
+    @patch('mozillians.phonebook.views.get_audience')
+    @patch('mozillians.phonebook.views.verify')
+    def test_form_valid_email_exists(self, verify_mock, get_audience_mock):
+        UserFactory.create(email='foo@bar.com')
+        user = UserFactory.create(email='la@example.com')
+        Verify = BrowserIDVerify()
+        request_mock = Mock()
+        request_mock.user.is_authenticated.return_value = True
+        request_mock.user = user
+        Verify.request = request_mock
+        form = Mock()
+        form.cleaned_data = {'assertion': 'assertion'}
+        get_audience_mock.return_value = 'audience'
+        verify_mock.return_value = {'email': 'foo@bar.com'}
+
+        Verify.form_valid(form)
+
+        verify_mock.assert_called_with('assertion', 'audience')
+        get_audience_mock.assert_called_with(request_mock)
+        eq_(user.email, 'la@example.com')
 
 
 class ViewsTests(TestCase):
@@ -658,3 +711,21 @@ class ViewsTests(TestCase):
         ok_(not self.client.session.get('invite-code'))
         self.assertTemplateUsed(response, 'phonebook/home.html')
         eq_(response.status_code, 200)
+
+    @patch('mozillians.phonebook.views.forms.ProfileForm')
+    def test_email_change_verification_redirection(self, profile_form_mock):
+        profile_form_mock().is_valid.return_value = True
+        user = UserFactory.create(email='old@example.com',
+                                  userprofile={'is_vouched': True})
+        data = {'full_name': 'foobar',
+                'email': 'new@example.com',
+                'country': 'gr',
+                'username': user.username,
+                'externalaccount_set-MAX_NUM_FORMS': '1000',
+                'externalaccount_set-INITIAL_FORMS': '0',
+                'externalaccount_set-TOTAL_FORMS': '0'}
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        self.assertTemplateUsed(response, 'phonebook/verify_email.html')
+        eq_(user.email, 'old@example.com')
