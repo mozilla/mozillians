@@ -359,3 +359,17 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 SECRET_KEY = ''
 
 JINGO_MINIFY_USE_STATIC = False
+
+def _request_args():
+    from django.conf import settings
+    from tower import ugettext_lazy as _lazy
+
+    args = {
+        'siteName': _lazy('Mozillians'),
+    }
+
+    if settings.SITE_URL.startswith('https'):
+        args['siteLogo'] = '/media/img/apple-touch-icon-144.png'
+
+    return args
+BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
