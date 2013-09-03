@@ -142,6 +142,11 @@
              **{'label': _('When did you get involved with Mozilla?')})) }}
     </fieldset>
 
+    <fieldset>
+      {{ privacy_field(profile_form.privacy_tshirt, profile.privacy_tshirt) }}
+      {{ bootstrap(profile_form.tshirt) }}
+    </fieldset>
+
     <fieldset id="groups">
       <legend>{{ _('Groups') }}</legend>
       <p class="field_description">
