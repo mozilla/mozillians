@@ -24,8 +24,8 @@ from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager)
-from mozillians.users.tasks import (update_basket_task, index_objects,
-                                    unindex_objects)
+from mozillians.users.tasks import (index_objects, remove_from_basket_task,
+                                    update_basket_task, unindex_objects)
 
 
 COUNTRIES = product_details.get_regions('en-US')
@@ -318,36 +318,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def get_absolute_url(self):
         return reverse('phonebook:profile_view', args=[self.user.username])
 
-    def anonymize(self):
-        """Remove personal info from a user
-
-        TODO: to be removed after fixing bug 885504.
-        """
-
-        for name in ['first_name', 'last_name', 'email']:
-            setattr(self.user, name, '')
-        self.full_name = ''
-
-        # Give a random username
-        self.user.username = uuid.uuid4().hex[:30]
-        self.user.is_active = False
-
-        self.user.save()
-
-        for f in self._meta.fields:
-            if not f.editable or f.name in ['id', 'user']:
-                continue
-
-            if f.default == models.fields.NOT_PROVIDED:
-                raise Exception('No default value for %s' % f.name)
-
-            setattr(self, f.name, f.default)
-
-        for f in self._meta.many_to_many:
-            getattr(self, f.name).clear()
-
-        self.save()
-
     def set_instance_privacy_level(self, level):
         """Sets privacy level of instance."""
         self._privacy_level = level
@@ -517,11 +487,17 @@ def update_search_index(sender, instance, **kwargs):
             unindex_objects.delay(UserProfile, [instance.id], public_index=True)
 
 
-@receiver(dbsignals.post_delete, sender=UserProfile,
+@receiver(dbsignals.pre_delete, sender=UserProfile,
           dispatch_uid='remove_from_search_index_sig')
 def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfile, [instance.id], public_index=False)
     unindex_objects.delay(UserProfile, [instance.id], public_index=True)
+
+@receiver(dbsignals.pre_delete, sender=User,
+          dispatch_uid='remove_from_basket_sig')
+def remove_from_basket(sender, instance, **kwargs):
+    remove_from_basket_task.delay(instance.email,
+                                  instance.userprofile.basket_token)
 
 
 class UsernameBlacklist(models.Model):

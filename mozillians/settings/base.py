@@ -160,6 +160,9 @@ MINIFY_BUNDLES = {
         'groups': (
             'js/pagination.js',
         ),
+        'logout_view': (
+            'js/logout_view.js',
+        ),
     }
 }
 
@@ -227,7 +230,7 @@ INSTALLED_APPS = (
     'session_csrf',
 
     'product_details',
-    
+
     'jingo_minify',
 
     'mozillians.users',
