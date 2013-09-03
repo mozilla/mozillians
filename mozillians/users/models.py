@@ -139,7 +139,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                       null=True, blank=True, default=None)
     timezone = models.CharField(max_length=100, blank=True, default='')
     tshirt = models.IntegerField(
-        blank=True, null=True,
+        blank=True, null=True, default=None,
         choices=(
             (1, 'Fitted Small'), (2, 'Fitted Medium'),
             (3, 'Fitted Large'), (4, 'Fitted X-Large'),
