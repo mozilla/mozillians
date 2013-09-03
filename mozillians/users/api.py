@@ -21,6 +21,7 @@ from mozillians.users.models import UserProfile
 class UserResource(ClientCachedResource, ModelResource):
     """User Resource."""
     email = fields.CharField(attribute='user__email', null=True, readonly=True)
+    username = fields.CharField(attribute='user__username', null=True, readonly=True)
     vouched_by = fields.IntegerField(attribute='vouched_by__id',
                                      null=True, readonly=True)
     groups = fields.CharField()
