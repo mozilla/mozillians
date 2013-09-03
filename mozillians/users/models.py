@@ -13,6 +13,7 @@ from elasticutils.contrib.django import S, get_es
 from elasticutils.contrib.django.models import SearchMixin
 from funfactory.urlresolvers import reverse
 from product_details import product_details
+from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
 from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -137,9 +138,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     basket_token = models.CharField(max_length=1024, default='', blank=True)
     date_mozillian = models.DateField('When was involved with Mozilla',
                                       null=True, blank=True, default=None)
-    timezone = models.CharField(max_length=100, blank=True, default='')
+    timezone = models.CharField(max_length=100, blank=True, default='',
+                                choices=zip(common_timezones, common_timezones))
     tshirt = models.IntegerField(
-        blank=True, null=True,
+        blank=True, null=True, default=None,
         choices=(
             (1, 'Fitted Small'), (2, 'Fitted Medium'),
             (3, 'Fitted Large'), (4, 'Fitted X-Large'),
