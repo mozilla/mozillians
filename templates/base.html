@@ -76,11 +76,13 @@
                     <div id="nav-main">
                       <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
                       <a href="#" class="dropdown-toggle">
-                        {% if user.userprofile.full_name %}
-                          {{ user.userprofile.full_name }}
-                        {% else %}
-                          {{ user.username }}
-                        {% endif %}
+                        <span class="username">
+                          {% if user.userprofile.full_name %}
+                            {{ user.userprofile.full_name }}
+                          {% else %}
+                            {{ user.username }}
+                          {% endif %}
+                        </span>
                         <i class="icon-reorder"></i>
                       </a>
                       <ul class="dropdown-menu">
@@ -120,10 +122,10 @@
                   {% endif %}
                 {% else %}
                   <a href="#" id="create_profile" class="persona-button browserid-login"
-                     title="{{_('Sign in with Persona')}}"
+                     title="{{_('Sign in')}}"
                      data-next="{{ request.REQUEST.next }}">
                     <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
-                    <span class="signin">{{ _('Sign in with Persona') }}</span>
+                    <span class="signin">{{ _('Sign in') }}</span>
                   </a>
                 {% endif %}
             </nav>
