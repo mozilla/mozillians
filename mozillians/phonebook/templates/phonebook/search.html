@@ -14,27 +14,25 @@
 {% block content %}
   <h1>{{ _('Search') }}</h1>
   <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
-    <input type="text" name="q" id="q"
-           placeholder="{{ _('Name, IRC Nick, Email or Location') }}" autofocus
-           value="{% if search_form.cleaned_data %}{{ search_form.cleaned_data.q }}{% endif %}">
-           <input type="hidden" name="limit" id="limit" value="{{ limit }}">
-             <button type="submit">
-               <span class="icon-search"></span>
-               {{ _('Search') }}
-             </button>
-             <button type="button" id="advanced">
-               <span class="icon-chevron-down"></span>
-               {{ _('Advanced Options') }}
-             </button>
-             <div class="search-options">
-               {% for f in ['include_non_vouched'] %}
-                 <div id="{{ search_form[f].name }}-container"
-                      class="field {{ search_form[f].field.widget.attrs['class'] }}">
-                      {{ search_form[f] }}
-                      {{ search_form[f].label_tag() }}
-                 </div>
-               {% endfor %}
-             </div>
+    {{ field_with_attrs(search_form.q,
+                        placeholder=_('Name, IRC Nick, Email or Location'),
+                        autofocus='autofocus') }}
+
+    {{ search_form.limit }}
+    <button type="submit">
+      <span class="icon-search"></span>
+      {{ _('Search') }}
+    </button>
+    <button type="button" id="advanced">
+      <span class="icon-chevron-down"></span>
+      {{ _('Advanced Options') }}
+    </button>
+    <div class="search-options">
+      <div class="field">
+        {{ search_form.include_non_vouched }}
+        {{ search_form.include_non_vouched.label_tag() }}
+      </div>
+    </div>
   </form>
   {% if not search_form.cleaned_data %}
     <div class="well">

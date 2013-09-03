@@ -22,20 +22,15 @@ REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 
 
 class SearchForm(happyforms.Form):
-    q = forms.CharField(widget=forms.HiddenInput, required=False)
-    limit = forms.CharField(widget=forms.HiddenInput, required=False)
+    q = forms.CharField(required=False)
+    limit = forms.IntegerField(
+        widget=forms.HiddenInput, required=False, min_value=1,
+        max_value=PAGINATION_LIMIT)
     include_non_vouched = forms.BooleanField(
         label=_lazy(u'Include non-vouched'), required=False)
 
     def clean_limit(self):
-        """Validate that this limit is numeric and greater than 1."""
-        limit = self.cleaned_data['limit']
-
-        if not limit:
-            limit = PAGINATION_LIMIT
-        elif not REGEX_NUMERIC.match(str(limit)) or int(limit) < 1:
-            limit = PAGINATION_LIMIT
-
+        limit = self.cleaned_data['limit'] or PAGINATION_LIMIT
         return limit
 
 
