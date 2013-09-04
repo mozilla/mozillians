@@ -116,6 +116,12 @@
 ==================== */
 body {
     &.loggedin {
+        #masthead {
+            @media (min-width: @breakMobileLandscape) and
+            (max-width: @breakTablet) {
+                padding-bottom: 0;
+            }
+        }
         #content-wrapper {
             background: @white;
         }
@@ -125,6 +131,17 @@ body {
             @media (max-width: @breakTablet) {
                 padding: 25px 20px 50px 20px;
             }
+        }
+        #nav-main {
+            @media (max-width: @breakTablet) {
+                float: none;
+                i { font-size: 30px; }
+                span {
+                    &.username { display: none; }
+                    &.icon { display: none;}
+                }
+            }
+
         }
         &.old {
             #main {
@@ -300,6 +317,9 @@ nav {
     #create_profile {
         float: right;
         padding-right: 5px;
+        @media (max-width: @breakTablet) {
+            float: none;
+        }
     }
     .brand {
         float: left;
@@ -308,19 +328,27 @@ nav {
             padding-right: 15px;
         }
     }
-    // Note: These !important tags in here are to override Bootstrap
-    // styles imported from older templates w/out new stylings.
     form.navbar-search {
-        margin-top: 0 !important;
+        margin-top: 0;
         input {
             float: left;
             background: @white url("/media/img/spyglass.png") no-repeat 5px 50%;
-            .border-radius(8px) !important;
+            .border-radius(8px);
             height: 30px;
-            font-size: 16px !important;
-            padding: 0 0 0 30px !important;
-            .open-sans-light !important;
+            font-size: 16px;
+            padding: 0 0 0 30px;
+            .open-sans-light();
             width: 275px;
+            @media (max-width: @breakDesktop) {
+                width: 225px;
+                font-size: 14px !important;
+            }
+            @media (max-width: @breakTablet) {
+                margin: 10px 0 15px 0;
+            }
+            @media (max-width: @breakMobile) {
+                margin: 10px 0 0 0;
+            }
         }
     }
     #nav-main {
@@ -416,6 +444,18 @@ nav {
                 top: -8px;
                 right: 11px;
                 z-index: -100;
+                @media (max-width: @breakTablet) {
+                    right: 6px;
+                }
+                @media (max-width: @breakMobileLandscape) {
+                    right: 100%;
+                    left: 4px;
+                }
+            }
+            @media (max-width: @breakTablet) {
+                left: 0;
+                right: auto;
+                i { font-size: 15px; }
             }
         }
     }
@@ -600,12 +640,17 @@ body#home {
                 }
             }
         }
+        .brand {
+            @media (max-width: @breakTablet) {
+                display: none;
+            }
+        }
 
         #main-feature {
             text-align: center;
             padding: 60px 0;
             z-index: 11;
-            @media (max-width: @breakMobileLandscape) {
+            @media (max-width: @breakTablet) {
                 padding: 40px 0;
             }
             hr {
@@ -642,7 +687,7 @@ body#home {
                     }
                     @media (max-width: @breakMobileLandscape) {
                         width: 250px;
-                        font-size: 18px;
+                        font-size: 16px;
                     }
                 }
             }
@@ -825,9 +870,6 @@ body#home {
                         display: block;
                         @media (max-width: @breakDesktop) {
                             width: 95%;
-                        }
-                        @media (max-width: @breakTablet) {
-                            width: 400px;
                         }
                         @media (max-width: @breakMobileLandscape) {
                             width: 91%;
