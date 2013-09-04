@@ -90,6 +90,7 @@ class UserProfilePrivacyModel(models.Model):
     privacy_timezone = PrivacyField()
     privacy_tshirt = PrivacyField(choices=((PRIVILEGED, 'Privileged'),),
                                   default=PRIVILEGED)
+    privacy_title = PrivacyField()
 
     class Meta:
         abstract=True
@@ -141,7 +142,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     timezone = models.CharField(max_length=100, blank=True, default='',
                                 choices=zip(common_timezones, common_timezones))
     tshirt = models.IntegerField(
-        blank=True, null=True, default=None,
+        _lazy(u'T-Shirt'), blank=True, null=True, default=None,
         choices=(
             (1, 'Fitted Small'), (2, 'Fitted Medium'),
             (3, 'Fitted Large'), (4, 'Fitted X-Large'),
@@ -150,6 +151,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             (9, 'Straight-cut Large'), (10, 'Straight-cut X-Large'),
             (11, 'Straight-cut XX-Large'), (12, 'Straight-cut XXX-Large')
         ))
+    title = models.CharField(_lazy(u'What do you do for Mozilla?'),
+                             max_length=70, blank=True, default='')
 
     class Meta:
         db_table = 'profile'
