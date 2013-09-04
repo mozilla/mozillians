@@ -26,7 +26,8 @@ DEFAULT_PRIVACY_FIELDS = {
     'languages': Language.objects.none(),
     'vouched_by': None,
     'date_mozillian': None,
-    'timezone': ''}
+    'timezone': '',
+    'title': ''}
 
 
 class UserProfileValuesQuerySet(ValuesQuerySet):

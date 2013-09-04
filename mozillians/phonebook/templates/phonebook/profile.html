@@ -141,9 +141,9 @@
       <h1 class="p-name fn">
         {{ profile.display_name|default(shown_user.username, true) }}
       </h1>
-      {# Placeholder text in <h2> below
-      <h2>I make tools for Mozillians</h2>
-      #}
+      {% if profile.title %}
+        <h2>{{ profile.title }}</h2>
+      {% endif %}
     </header>
     <section id="profile-details">
       {% if profile.bio %}
