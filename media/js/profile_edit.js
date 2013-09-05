@@ -17,7 +17,7 @@ $(function() {
     var $del = $('#delete .delete');
     $del.click(function(e) {
         if (! $ack.is(':checked')) {
-            e.preventDefault(); 
+            e.preventDefault();
         }
     });
     $ack.click(function(e) {
@@ -45,4 +45,10 @@ $(function() {
         $(this).parents('.newField').remove();
         return false;
     });
+
+    $('.tshirt-info').click(function() {
+        $(this).toggleClass('active');
+        return false;
+    });
+
 });
