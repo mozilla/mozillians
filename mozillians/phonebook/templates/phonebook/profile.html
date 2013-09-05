@@ -219,6 +219,12 @@
           {% endif %}
           {#  {% endif %}
               {% endfor %} #}
+
+          {# TODO: Change tshirt size to display string instead of value. #}
+          {% if profile.tshirt %}
+            <li>T-Shirt Size: {{ profile.tshirt }}</li>
+          {% endif %}
+
         </ul>
       </div>
     </section>
