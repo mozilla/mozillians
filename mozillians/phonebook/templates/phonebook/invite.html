@@ -1,9 +1,10 @@
-{% extends "base-old.html" %}
+{% extends "base.html" %}
 
 {% block page_title %}{{ _('Invite a Mozillian') }}{% endblock %}
 {% block body_id %}invite{% endblock %}
 
 {% block content %}
+
   <h1>{{ _('Invite a Mozillian') }}</h1>
 
   <p>
@@ -17,7 +18,7 @@
     {{ csrf() }}
     {{ bootstrap(invite_form.recipient) }}
     {{ bootstrap(invite_form.message) }}
-    <button type="submit" class="btn bump-button">
+    <button type="submit">
       {{ _('Send invite') }}
     </button>
     <p>

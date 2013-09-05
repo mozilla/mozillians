@@ -9,7 +9,15 @@
 {% endif %}
 {% endblock mosaic %}
 
-{% block search %}{% endblock %}
+{% block search %}
+  {% if user.is_authenticated() %}
+    <form class="navbar-search"
+        action="{{ url('phonebook:search') }}" method="GET">
+      <input type="text" name="q" class="search-query"
+          placeholder="{{ _('Search for people, groups and more') }}">
+    </form>
+  {% endif %}
+{% endblock %}
 
 {% block content %}
   {% if not user.is_authenticated() %}
