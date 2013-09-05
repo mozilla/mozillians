@@ -6,13 +6,156 @@ from django.test.client import Client
 from django.test.utils import override_settings
 
 from funfactory.helpers import urlparams
+from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory, LanguageFactory, SkillFactory
+from mozillians.users.api import CustomQuerySet
 from mozillians.users.tests import UserFactory
 
+
+class CityResourceTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.resource_url = reverse(
+            'api_dispatch_list',
+            kwargs={'api_name': 'v1', 'resource_name': 'cities'})
+        self.app = APIAppFactory.create(owner=self.user,
+                                        is_mozilla_app=True)
+        self.resource_url = urlparams(self.resource_url,
+                                      app_name=self.app.name,
+                                      app_key=self.app.key)
+
+    def test_get_list(self):
+        UserFactory.create(userprofile={'is_vouched': True,
+                                        'country': 'gr',
+                                        'city': 'Athens'})
+        UserFactory.create(userprofile={'is_vouched': False,
+                                        'country': 'gr',
+                                        'city': 'Athens'})
+        client = Client()
+        response = client.get(self.resource_url, follow=True)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['meta']['total_count'], 1, 'Unvouched users get listed!')
+        eq_(data['objects'][0]['city'], 'Athens')
+        eq_(data['objects'][0]['country'], 'gr')
+        eq_(data['objects'][0]['country_name'], 'Greece')
+        eq_(data['objects'][0]['population'], 1)
+
+    def test_get_details(self):
+        client = Client()
+        url = reverse('api_dispatch_detail',
+                      kwargs={'api_name': 'v1',
+                              'resource_name': 'cities', 'pk': 1})
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 405)
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_default_ordering(self, order_by_mock):
+        client = Client()
+        client.get(self.resource_url, follow=True)
+        order_by_mock.assert_called_with('country', 'city')
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_custom_ordering(self, order_by_mock):
+        client = Client()
+        url = urlparams(self.resource_url, order_by='-population')
+        client.get(url, follow=True)
+        order_by_mock.assert_called_with('-population')
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_custom_invalid_ordering(self, order_by_mock):
+        client = Client()
+        url = urlparams(self.resource_url, order_by='foo')
+        client.get(url, follow=True)
+        order_by_mock.assert_called_with('country', 'city')
+
+    @patch('mozillians.users.api.CustomQuerySet.filter',
+           wraps=CustomQuerySet.filter)
+    def test_filtering(self, filter_mock):
+        url = urlparams(self.resource_url, city='athens')
+        client = Client()
+        client.get(url, follow=True)
+        ok_(filter_mock.called)
+        call_arg = filter_mock.call_args[0][0]
+        eq_(call_arg.children, [('city__iexact', 'athens')])
+
+    @patch('mozillians.users.api.CustomQuerySet.filter',
+           wraps=CustomQuerySet.filter)
+    def test_invalid_filtering(self, filter_mock):
+        url = urlparams(self.resource_url, foo='bar')
+        client = Client()
+        client.get(url, follow=True)
+        ok_(not filter_mock.called)
+
+
+class CountryResourceTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.resource_url = reverse(
+            'api_dispatch_list',
+            kwargs={'api_name': 'v1', 'resource_name': 'countries'})
+        self.app = APIAppFactory.create(owner=self.user,
+                                        is_mozilla_app=True)
+        self.resource_url = urlparams(self.resource_url,
+                                      app_name=self.app.name,
+                                      app_key=self.app.key)
+
+    def test_get_list(self):
+        UserFactory.create(userprofile={'is_vouched': False, 'country': 'gr'})
+        client = Client()
+        response = client.get(self.resource_url, follow=True)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['meta']['total_count'], 1, 'Unvouched users get listed!')
+        eq_(data['objects'][0]['country'], 'gr')
+        eq_(data['objects'][0]['country_name'], 'Greece')
+        eq_(data['objects'][0]['population'], 1)
+
+    def test_get_details(self):
+        client = Client()
+        url = reverse('api_dispatch_detail',
+                      kwargs={'api_name': 'v1',
+                              'resource_name': 'countries', 'pk': 1})
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 405)
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_default_ordering(self, order_by_mock):
+        client = Client()
+        client.get(self.resource_url, follow=True)
+        order_by_mock.assert_called_with('country')
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_custom_ordering(self, order_by_mock):
+        client = Client()
+        url = urlparams(self.resource_url, order_by='-population')
+        client.get(url, follow=True)
+        order_by_mock.assert_called_with('-population')
+
+    @patch('mozillians.users.api.CustomQuerySet.order_by',
+           wraps=CustomQuerySet.order_by)
+    def test_custom_invalid_ordering(self, order_by_mock):
+        client = Client()
+        url = urlparams(self.resource_url, order_by='foo')
+        client.get(url, follow=True)
+        order_by_mock.assert_called_with('country')
+
+    @patch('mozillians.users.api.CustomQuerySet.filter',
+           wraps=CustomQuerySet.filter)
+    def test_filtering(self, filter_mock):
+        url = urlparams(self.resource_url, country='gr')
+        client = Client()
+        client.get(url, follow=True)
+        ok_(not filter_mock.called)
 
 class UserResourceTests(TestCase):
     def setUp(self):

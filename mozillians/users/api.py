@@ -1,21 +1,160 @@
+from collections import namedtuple
 from urllib2 import unquote
 from urlparse import urljoin
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.conf import settings
 
 from tastypie import fields
 from tastypie import http
 from tastypie.bundle import Bundle
 from tastypie.exceptions import ImmediateHttpResponse
-from tastypie.resources import ModelResource
+from tastypie.resources import ModelResource, Resource
 from tastypie.serializers import Serializer
 
 from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.paginator import Paginator
 from mozillians.api.resources import ClientCachedResource
-from mozillians.users.models import UserProfile
+from mozillians.users.models import COUNTRIES, UserProfile
+
+
+Country = namedtuple('Country', ['country', 'country_name', 'population'])
+City = namedtuple('City', ['city', 'country', 'country_name', 'population'])
+
+
+class CustomQuerySet(object):
+    """A custom queryset class.
+
+    Supports database count() on len(), order_by, filter, array
+    slicing.
+
+    """
+
+    def __init__(self, queryset):
+        self._query = queryset
+
+    def __len__(self):
+        return self._query.count()
+
+    def order_by(self, *args):
+        return self._query.order_by(*args)
+
+    def filter(self, *args, **kwargs):
+        return self._query.filter(*args, **kwargs)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self._query[key.start:key.stop]
+        return self._query[key]
+
+
+class LocationCustomResource(Resource):
+
+    class Meta:
+        authentication = AppAuthentication()
+        authorization = MozillaOfficialAuthorization()
+        list_allowed_methods = ['get']
+        serializer = Serializer(formats=['json', 'jsonp'])
+        paginator_class = Paginator
+
+    def get_object_list(self):
+        queryset = self.Meta.queryset
+        return CustomQuerySet(queryset)
+
+    def apply_sorting(self, queryset, **kwargs):
+        sort_list = [order_value for order_value
+                     in  kwargs['options'].get('order_by', '').split(',')
+                     if order_value.strip('-') in self.Meta.ordering]
+
+        if not sort_list:
+            sort_list = self.Meta.default_order
+
+        return queryset.order_by(*sort_list)
+
+    def obj_get_list(self, request=None, **kwargs):
+        obj_list = self.get_object_list()
+        filters = self.build_filters(getattr(request, 'GET', None))
+        if filters:
+            obj_list = self.apply_filters(obj_list, filters)
+        return obj_list
+
+    def apply_filters(self, obj_list, applicable_filters):
+        mega_filter = Q()
+        for db_filter in applicable_filters.values():
+            mega_filter &= db_filter
+        return obj_list.filter(mega_filter)
+
+
+class CountryResource(LocationCustomResource):
+    country = fields.CharField(attribute='country')
+    country_name = fields.CharField(attribute='country_name')
+    population = fields.IntegerField(attribute='population')
+
+    class Meta:
+        resource_name = 'countries'
+        ordering = ['country', 'population']
+        queryset = (UserProfile.objects
+                    .vouched()
+                    .exclude(country='')
+                    .values('country', 'privacy_country')
+                    .annotate(population=Count('country')))
+        default_order = ('country',)
+        object_class = Country
+        include_resource_uri = False
+        detail_allowed_methods = []
+
+    def build_filters(self, filters=None):
+        return None
+
+    def full_dehydrate(self, queryset):
+        queryset.obj =  self.Meta.object_class(
+            country=queryset.obj['country'],
+            population=queryset.obj['population'],
+            country_name=COUNTRIES[queryset.obj['country']])
+        return super(LocationCustomResource, self).full_dehydrate(queryset)
+
+
+class CityResource(LocationCustomResource):
+    city = fields.CharField(attribute='city')
+    country = fields.CharField(attribute='country')
+    country_name = fields.CharField(attribute='country_name')
+    population = fields.IntegerField(attribute='population')
+
+    class Meta:
+        resource_name = 'cities'
+        ordering = ['city', 'country', 'population']
+        queryset = (UserProfile.objects
+                    .vouched()
+                    .exclude(city='')
+                    .exclude(country='')
+                    .values('city', 'privacy_city',
+                            'country', 'privacy_country')
+                    .annotate(population=Count('city')))
+        default_order = ('country', 'city')
+        object_class = City
+        include_resource_uri = False
+        detail_allowed_methods = []
+
+    def build_filters(self, filters=None):
+        database_filters = {}
+        valid_filters = [f for f in filters if f in ['country', 'city']]
+        getvalue = lambda x: unquote(filters[x].lower())
+
+        for valid_filter in valid_filters:
+            database_filters[valid_filter] = (
+                Q(**{'{0}__iexact'.format(valid_filter):
+                     getvalue(valid_filter) }))
+
+        return database_filters
+
+    def full_dehydrate(self, queryset):
+        queryset.obj =  self.Meta.object_class(
+            country=queryset.obj['country'],
+            country_name=COUNTRIES[queryset.obj['country']],
+            population=queryset.obj['population'],
+            city=queryset.obj['city'])
+        return super(LocationCustomResource, self).full_dehydrate(queryset)
 
 
 class UserResource(ClientCachedResource, ModelResource):
