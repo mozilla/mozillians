@@ -44,22 +44,15 @@ def home(request):
 def view_profile(request, username):
     """View a profile by username."""
     data = {}
+    privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
+                        'privileged': PRIVILEGED, 'myself': None}
+    privacy_level = None
+
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
         view_as = request.GET.get('view_as', 'myself')
-        profile = request.user.userprofile
-        if view_as == 'anonymous':
-            profile = (UserProfile.objects
-                       .privacy_level(PUBLIC).get(user__username=username))
-        elif view_as == 'mozillian':
-            profile = (UserProfile.objects
-                       .privacy_level(MOZILLIANS).get(user__username=username))
-        elif view_as == 'employee':
-            profile = (UserProfile.objects
-                       .privacy_level(EMPLOYEES).get(user__username=username))
-        elif view_as == 'privileged':
-            profile = (UserProfile.objects
-                       .privacy_level(PRIVILEGED).get(user__username=username))
+        privacy_level = privacy_mappings.get(view_as, None)
+        profile = UserProfile.objects.privacy_level(privacy_level).get(user__username=username)
         data['privacy_mode'] = view_as
     else:
         userprofile_query = UserProfile.objects.filter(user__username=username)
