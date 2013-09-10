@@ -80,12 +80,12 @@
       {% endtrans %}
     </div>
   {% endif %}
-
+<div class="vcard h-card">
   <article id="profile-stats">
     <div class="profile-photo">
-      <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
+      <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}" class="photo">
     </div>
-    <div class="stats">
+    <div class="stats adr">
       {% set mozillian_years = get_mozillian_years(profile) %}
       {% if not mozillian_years is none %}
         <section id="membership">
@@ -147,13 +147,14 @@
     </header>
     <section id="profile-details">
       {% if profile.bio %}
-        <div id="bio" class="p-note note">
+        <div id="bio">
             <h3>{{ _('Bio') }}</h3>
-            <p>{{ profile.bio }}</p>
+            <p class="note">{{ profile.bio }}</p>
         </div>
       {% endif %}
+        <span style="display:none;" class="category">Mozillians</span>
       {% if profile.groups.count() %}
-        <div id="groups" class="p-category category">
+        <div id="groups">
           <h3>{{ _('Groups') }}</h3>
             {% for group in profile.groups.all() %}
               {% if (user.is_authenticated() and
@@ -198,10 +199,10 @@
             </li>
           {% endif %}
           {% if profile.ircname %}
-            <li class="p-nickname nickname">
+            <li class="p-nickname">
               IRC
               <a href="irc://irc.mozilla.org/">
-                  {{ profile.ircname }}
+                  <span class="nickname">{{ profile.ircname }}</span>
                 </a>
             </li>
           {% endif %}
@@ -229,6 +230,7 @@
       </div>
     </section>
   </article>
+</div>
 {% endblock %}
 
 {% block page_js %}
