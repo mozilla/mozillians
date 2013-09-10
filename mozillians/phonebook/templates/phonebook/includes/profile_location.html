@@ -1,25 +1,26 @@
 {% if profile.city %}
   {% if profile.country and user.is_authenticated() %}
     <a href="{{ url('phonebook:list_city', country=profile.country, city=profile.city) }}">
-      {{ profile.city }}</a>,
-  {% else %}
-    {{ profile.city }},
-  {% endif %}
+      <span class="locality">{{ profile.city }}</span></a>
+  {%- else -%}
+    <span class="locality">{{ profile.city }}</span>
+  {%- endif -%},
 {% endif %}
 {% if profile.region %}
   {% if profile.country and user.is_authenticated() %}
     <a href="{{ url('phonebook:list_region', country=profile.country, region=profile.region) }}">
-      {{ profile.region }}</a>,
-  {% else %}
-     {{ profile.region }},
-  {% endif %}
+      <span class="region">{{ profile.region }}</span></a>
+  {%- else -%}
+     <span class="region">{{ profile.region }}</span>
+  {%- endif -%},
 {% endif %}
 {% if profile.country %}
   {% if user.is_authenticated() %}
     <a href="{{ url('phonebook:list_country', country=profile.country) }}">
+    <span class="country-name">{{ profile.get_country_display() }}<span></a>
+  {%- else -%}
+    <span class="country-name">
       {{ profile.get_country_display() }}
-    </a>
-  {% else %}
-      {{ profile.get_country_display() }}
-  {% endif %}
+    </span>
+  {%- endif -%}
 {% endif %}

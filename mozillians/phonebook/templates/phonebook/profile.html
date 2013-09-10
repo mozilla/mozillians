@@ -80,168 +80,150 @@
       {% endtrans %}
     </div>
   {% endif %}
-
-  <article id="profile-stats">
-    <div class="profile-photo">
-      <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}">
-    </div>
-    <div class="stats">
-      {% set mozillian_years = get_mozillian_years(profile) %}
-      {% if not mozillian_years is none %}
-        <section id="membership">
-            <div class="status">
-              <i class="icon-calendar"></i>
-              {% if mozillian_years > 0 %}
-                {% trans %}
-                  Mozillian for {{ mozillian_years }} years
-                {% endtrans %}
-              {% else %}
-                  Mozillian for less than a year
-              {% endif %}
-              <span>{{ profile.date_mozillian.strftime('%b %Y') }}</span>
-            </div>
-        </section>
-      {% endif %}
-      {% if profile.country or profile.region or profile.city %}
-        <section id="location">
-          <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
-        </section>
-      {% endif %}
-      {% if profile.timezone %}
-        <section id="timezone">
-          <i class="icon-time"></i> {{ profile.timezone }}
-        </section>
-      {% endif %}
-     </div>
-  </article>
-
-  <article id="profile-info">
-    <header>
-      {% if user == shown_user %}
-        <div class="privacy-view">
-          <form method="GET" action=".">
-            <label>{{ _('View as:') }}</label>
-            <select id="view-privacy-mode">
-                <option value="{{ url('phonebook:profile_view', shown_user.username) }}"
-                        {% if privacy_mode == 'myself' %} selected {% endif %}>
-                  {{ _('Myself') }}
-                </option>
-                <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='mozillian') }}"
-                        {% if privacy_mode == 'mozillian' %} selected {% endif %} >
-                  {{ _('Mozillian') }}
-                </option>
-                <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='anonymous') }}"
-                        {% if privacy_mode == 'anonymous' %} selected {% endif %}>
-                  {{ _('Public') }}
-                </option>
-            </select>
-          </form>
-        </div>
-      {% endif %}
-      <h1 class="p-name fn">
-        {{ profile.display_name|default(shown_user.username, true) }}
-      </h1>
-      {% if profile.title %}
-        <h2>{{ profile.title }}</h2>
-      {% endif %}
-    </header>
-    <section id="profile-details">
-      {% if profile.bio %}
-        <div id="bio" class="p-note note">
-            <h3>{{ _('Bio') }}</h3>
-            <p>{{ profile.bio }}</p>
-        </div>
-      {% endif %}
-      {% if profile.groups.count() %}
-        <div id="groups" class="p-category category">
-          <h3>{{ _('Groups') }}</h3>
-            {% for group in profile.groups.all() %}
-              {% if (user.is_authenticated() and
-                     user.get_profile().is_vouched) %}
-                <a href="{{ url('groups:show', group.url) }}">{{ group.name }}</a>
-              {%- else -%}
-                {{ group.name }}
-              {%- endif -%}
-              {% if not loop.last %},{% endif %}
-            {% endfor %}
-        </div>
-      {% endif %}
-      {% if profile.skills.count() %}
-        <div id="skills" class="p-category category">
-          <h3>{{ _('Skills') }}</h3>
-            {% for skill in profile.skills.all() %}
-              {{ skill.name }}
-              {%- if not loop.last %},{% endif %}
-            {% endfor %}
-        </div>
-      {% endif %}
-      {% if profile.languages.count() %}
-        <div id="languages" class="p-category category">
-          <h3>{{ _('Languages') }}</h3>
-            {% for language in profile.languages.all() -%}
-              {{ language.name }}
-              {%- if not loop.last %},{% endif %}
-            {% endfor %}
-        </div>
-      {% endif %}
-      {% if profile.accounts.count() %}
-        <div id="externalaccounts" class="p-category category">
-          <h3>{{ _('External Accounts') }}</h3>
-            {% for account in profile.accounts %}
-              {{ account.get_type_display() }}:
-                {% if account.get_username_url() -%}
-                  <a href="{{ account.get_username_url() }}">{{ account.username }}</a>
-                {%- else -%}
-                  {{ account.username }}
-                {%- endif -%}
-              {% if not loop.last %},{% endif %}
-            {% endfor %}
-        </div>
-      {% endif %}
-    </section>
-
-    <section id="profile-contact">
-      <div class="contact-details">
-        <ul>
-          {% if profile.email %}
-            <li class="u-email email">
-              <i class="icon-envelope"></i>
-              {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
-                {{ profile.email }}
-              {% if user != shown_user %}</a>{% endif %}
-            </li>
-          {% endif %}
-          {% if profile.ircname %}
-            <li class="p-nickname nickname">
-              IRC
-              <a href="irc://irc.mozilla.org/">
-                  {{ profile.ircname }}
-                </a>
-            </li>
-          {% endif %}
-          {# Placeholder forloop, as the sketch outlines
-          that users may have > 1 website #}
-          {#  {% if profile.websites.count() %}
-              {% for website in profile.websites.all %} #}
-          {% if profile.website %}
-            <li class="u-url url">
-              <i class="icon-link"></i>
-              <a href="{{ profile.website }}">
-                {{ profile.website }}
-              </a>
-            </li>
-          {% endif %}
-          {#  {% endif %}
-              {% endfor %} #}
-
-          {% if profile.tshirt %}
-            <li>T-Shirt Size: {{ profile.get_tshirt_display() }}</li>
-          {% endif %}
-
-        </ul>
+  <div class="vcard h-card">
+    <article id="profile-stats">
+      <div class="profile-photo">
+        <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}" class="photo">
       </div>
-    </section>
-  </article>
+      <div class="stats">
+        {% set mozillian_years = get_mozillian_years(profile) %}
+        {% if not mozillian_years is none %}
+          <section id="membership">
+              <div class="status">
+                <i class="icon-calendar"></i>
+                {% if mozillian_years > 0 %}
+                  {% trans %}
+                    Mozillian for {{ mozillian_years }} years
+                  {% endtrans %}
+                {% else %}
+                    Mozillian for less than a year
+                {% endif %}
+                <span>{{ profile.date_mozillian.strftime('%b %Y') }}</span>
+              </div>
+          </section>
+        {% endif %}
+        {% if profile.country or profile.region or profile.city %}
+          <section id="location" class="adr">
+            <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
+          </section>
+        {% endif %}
+        {% if profile.timezone %}
+          <section id="timezone">
+            <i class="icon-time"></i> {{ profile.timezone }}
+          </section>
+        {% endif %}
+       </div>
+    </article>
+
+    <article id="profile-info">
+      <header>
+        {% if user == shown_user %}
+          <div class="privacy-view">
+            <form method="GET" action=".">
+              <label>{{ _('View as:') }}</label>
+              <select id="view-privacy-mode">
+                  <option value="{{ url('phonebook:profile_view', shown_user.username) }}"
+                          {% if privacy_mode == 'myself' %} selected {% endif %}>
+                    {{ _('Myself') }}
+                  </option>
+                  <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='mozillian') }}"
+                          {% if privacy_mode == 'mozillian' %} selected {% endif %} >
+                    {{ _('Mozillian') }}
+                  </option>
+                  <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='anonymous') }}"
+                          {% if privacy_mode == 'anonymous' %} selected {% endif %}>
+                    {{ _('Public') }}
+                  </option>
+              </select>
+            </form>
+          </div>
+        {% endif %}
+        <h1 class="p-name">
+          <span class="fn">{{ profile.display_name|default(shown_user.username, true) }}</span>
+        </h1>
+        {% if profile.title %}
+          <h2><span class="title">{{ profile.title }}</span></h2>
+        {% endif %}
+      </header>
+      <section id="profile-details">
+        {% if profile.bio %}
+          <div id="bio">
+              <h3>{{ _('Bio') }}</h3>
+              <p>
+                <span class="note">{{ profile.bio }}</span>
+              </p>
+          </div>
+        {% endif %}
+        {% if profile.groups.count() %}
+          <div id="groups">
+            <h3>{{ _('Groups') }}</h3>
+              {% for group in profile.groups.all() %}
+                {% if (user.is_authenticated() and
+                       user.get_profile().is_vouched) %}
+                  <a href="{{ url('groups:show', group.url) }}">{{ group.name }}</a>
+                {%- else -%}
+                  {{ group.name }}
+                {%- endif -%}
+                {% if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+        {% if profile.skills.count() %}
+          <div id="skills" class="p-category category">
+            <h3>{{ _('Skills') }}</h3>
+              {% for skill in profile.skills.all() %}
+                {{ skill.name }}
+                {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+        {% if profile.languages.count() %}
+          <div id="languages" class="p-category category">
+            <h3>{{ _('Languages') }}</h3>
+              {% for language in profile.languages.all() -%}
+                {{ language.name }}
+                {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="profile-contact">
+        <div class="contact-details">
+          <ul>
+            {% if profile.email %}
+              <li class="u-email">
+                <i class="icon-envelope"></i>
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
+              </li>
+            {% endif %}
+            {% if profile.ircname %}
+              <li class="p-nickname">
+                IRC
+                <a href="irc://irc.mozilla.org/">
+                    <span class="nickname">{{ profile.ircname }}</span>
+                  </a>
+              </li>
+            {% endif %}
+            {% if profile.website %}
+              <li class="u-url">
+                <i class="icon-link"></i>
+                <a href="{{ profile.website }}">
+                  <span class="url">{{ profile.website }}</span>
+                </a>
+              </li>
+            {% endif %}
+            {% if profile.tshirt %}
+              <li>T-Shirt Size: {{ profile.get_tshirt_display() }}</li>
+            {% endif %}
+          </ul>
+        </div>
+      </section>
+    </article>
+    <span class="hidden category">Mozillians</span>
+  </div>
 {% endblock %}
 
 {% block page_js %}
