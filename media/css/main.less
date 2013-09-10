@@ -96,9 +96,10 @@
     .box-shadow(0px 0px 2px rgba(0, 2px, 2px, 0.2));
     width: 150px;
     height: 150px;
-    display: inline;
     img {
         .border-radius(100%);
+        width: 100%;
+        height: auto;
     }
 }
 
@@ -826,7 +827,16 @@ body#home {
                 a.profile-photo {
                     .rounded-image;
                     @media (max-width: @breakDesktop) {
-                        margin-left: -85px;
+                        left: 40%;
+                    }
+                    @media (max-width: @breakTablet) {
+                         left: 35%;
+                    }
+                    @media (max-width: @breakMobileLandscape) {
+                         left: 32%;
+                    }
+                    @media (max-width: @breakMobile) {
+                         left: 62px;
                     }
                 }
                 .profile-details {
@@ -977,7 +987,16 @@ body#profile {
             .profile-photo {
                 .rounded-image;
                 @media (max-width: @breakDesktop) {
-                    margin-left: -85px;
+                    left: 40%;
+                }
+                @media (max-width: @breakTablet) {
+                     left: 35%;
+                }
+                @media (max-width: @breakMobileLandscape) {
+                     left: 32%;
+                }
+                @media (max-width: @breakMobile) {
+                     left: 62px;
                 }
             }
             .stats {
