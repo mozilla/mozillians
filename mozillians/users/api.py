@@ -15,7 +15,8 @@ from tastypie.serializers import Serializer
 from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.paginator import Paginator
-from mozillians.api.resources import ClientCachedResource
+from mozillians.api.resources import (AdvancedSortingResourceMixIn,
+                                      ClientCacheResourceMixIn)
 from mozillians.users.models import COUNTRIES, UserProfile
 
 
@@ -49,7 +50,8 @@ class CustomQuerySet(object):
         return self._query[key]
 
 
-class LocationCustomResource(Resource):
+class LocationCustomResource(AdvancedSortingResourceMixIn,
+                             ClientCacheResourceMixIn, Resource):
 
     class Meta:
         authentication = AppAuthentication()
@@ -57,20 +59,13 @@ class LocationCustomResource(Resource):
         list_allowed_methods = ['get']
         serializer = Serializer(formats=['json', 'jsonp'])
         paginator_class = Paginator
+        include_resource_uri = False
+        detail_allowed_methods = []
+        cache_control = {'max-age': 0}
 
     def get_object_list(self):
         queryset = self.Meta.queryset
         return CustomQuerySet(queryset)
-
-    def apply_sorting(self, queryset, **kwargs):
-        sort_list = [order_value for order_value
-                     in  kwargs['options'].get('order_by', '').split(',')
-                     if order_value.strip('-') in self.Meta.ordering]
-
-        if not sort_list:
-            sort_list = self.Meta.default_order
-
-        return queryset.order_by(*sort_list)
 
     def obj_get_list(self, request=None, **kwargs):
         obj_list = self.get_object_list()
@@ -91,7 +86,7 @@ class CountryResource(LocationCustomResource):
     country_name = fields.CharField(attribute='country_name')
     population = fields.IntegerField(attribute='population')
 
-    class Meta:
+    class Meta(LocationCustomResource.Meta):
         resource_name = 'countries'
         ordering = ['country', 'population']
         queryset = (UserProfile.objects
@@ -101,8 +96,6 @@ class CountryResource(LocationCustomResource):
                     .annotate(population=Count('country')))
         default_order = ('country',)
         object_class = Country
-        include_resource_uri = False
-        detail_allowed_methods = []
 
     def build_filters(self, filters=None):
         return None
@@ -121,7 +114,7 @@ class CityResource(LocationCustomResource):
     country_name = fields.CharField(attribute='country_name')
     population = fields.IntegerField(attribute='population')
 
-    class Meta:
+    class Meta(LocationCustomResource.Meta):
         resource_name = 'cities'
         ordering = ['city', 'country', 'population']
         queryset = (UserProfile.objects
@@ -133,8 +126,6 @@ class CityResource(LocationCustomResource):
                     .annotate(population=Count('city')))
         default_order = ('country', 'city')
         object_class = City
-        include_resource_uri = False
-        detail_allowed_methods = []
 
     def build_filters(self, filters=None):
         database_filters = {}
@@ -157,7 +148,7 @@ class CityResource(LocationCustomResource):
         return super(LocationCustomResource, self).full_dehydrate(queryset)
 
 
-class UserResource(ClientCachedResource, ModelResource):
+class UserResource(ClientCacheResourceMixIn, ModelResource):
     """User Resource."""
     email = fields.CharField(attribute='user__email', null=True, readonly=True)
     username = fields.CharField(attribute='user__username', null=True, readonly=True)
