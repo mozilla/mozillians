@@ -44,7 +44,7 @@ $(function() {
         });
         total++;
         $('#id_' + type + '-TOTAL_FORMS').val(total);
-        $(selector).after(newElement);
+        $(selector).after($newElement);
     }
 
     // Adding and removing fields from create/edit profile form
