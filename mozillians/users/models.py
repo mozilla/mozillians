@@ -523,13 +523,18 @@ class UsernameBlacklist(models.Model):
 
 class ExternalAccount(models.Model):
     ACCOUNT_TYPES = (
-        {'name': 'AMO', 'url': 'https://addons.mozilla.org/user/%s'},
-        {'name': 'Bugzilla', 'url': ''},
+        {'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/%s'},
+        # All bugs assigned to or reported by the user.
+        {'name': 'Bugzilla', 'url': 'https://bugzilla.mozilla.org/'
+                                    'buglist.cgi?emailtype1=exact'
+                                    '&query_format=advanced'
+                                    '&emailassigned_to1=1'
+                                    '&email1=%s'},
         {'name': 'Github', 'url': 'https://www.github.com/%s'},
-        {'name': 'MDN', 'url': ''},
-        {'name': 'SUMO', 'url': ''},
-        {'name': 'Facebook', 'url': ''},
-        {'name': 'Twitter', 'url': ''},
+        {'name': 'MDN', 'url': 'https://developer.mozilla.org/en-US/profiles/%s'},
+        {'name': 'Mozilla Support', 'url': ''},
+        {'name': 'Facebook', 'url': 'https://www.facebook.com/%s'},
+        {'name': 'Twitter', 'url': 'https://www.twitter.com/%s'},
         {'name': 'AIM', 'url': ''},
         {'name': 'Google Talk', 'url': ''},
         {'name': 'Skype', 'url': ''},
