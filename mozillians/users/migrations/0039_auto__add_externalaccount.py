@@ -136,6 +136,7 @@ class Migration(SchemaMigration):
             'privacy_region': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_skills': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_timezone': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_title': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_tshirt': ('mozillians.users.models.PrivacyField', [], {'default': '1'}),
             'privacy_vouched_by': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_website': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
@@ -143,6 +144,7 @@ class Migration(SchemaMigration):
             'skills': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Skill']"}),
             'timezone': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'tshirt': ('django.db.models.fields.IntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '70', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
             'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'}),
             'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
