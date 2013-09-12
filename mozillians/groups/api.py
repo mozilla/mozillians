@@ -1,9 +1,11 @@
+from django.core.urlresolvers import reverse
 from django.db.models import Sum
 
+from funfactory import utils
+from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
-from tastypie import fields
 from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.resources import (AdvancedSortingResourceMixIn,
@@ -31,6 +33,7 @@ class GroupBaseResource(AdvancedSortingResourceMixIn, ClientCacheResourceMixIn,
 
 
 class GroupResource(GroupBaseResource):
+    url = fields.CharField()
 
     class Meta(GroupBaseResource.Meta):
         resource_name = 'groups'
@@ -39,6 +42,11 @@ class GroupResource(GroupBaseResource):
         queryset = (Group.objects
                     .annotate(number_of_members=Sum('members__is_vouched'))
                     .filter(number_of_members__gt=0))
+
+
+    def dehydrate_url(self, bundle):
+        url = reverse('groups:show', args=[bundle.obj.url])
+        return utils.absolutify(url)
 
 
 class LanguageResource(GroupBaseResource):

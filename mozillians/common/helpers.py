@@ -1,4 +1,3 @@
-import urllib
 from hashlib import md5
 
 from django.conf import settings

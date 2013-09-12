@@ -2,9 +2,11 @@ from collections import namedtuple
 from urllib2 import unquote
 from urlparse import urljoin
 
-from django.db.models import Count, Q
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.db.models import Count, Q
 
+from funfactory import utils
 from tastypie import fields
 from tastypie import http
 from tastypie.bundle import Bundle
@@ -85,6 +87,7 @@ class CountryResource(LocationCustomResource):
     country = fields.CharField(attribute='country')
     country_name = fields.CharField(attribute='country_name')
     population = fields.IntegerField(attribute='population')
+    url = fields.CharField()
 
     class Meta(LocationCustomResource.Meta):
         resource_name = 'countries'
@@ -107,12 +110,17 @@ class CountryResource(LocationCustomResource):
             country_name=COUNTRIES[queryset.obj['country']])
         return super(LocationCustomResource, self).full_dehydrate(queryset)
 
+    def dehydrate_url(self, bundle):
+        url = reverse('phonebook:list_country', args=[bundle.obj.country])
+        return utils.absolutify(url)
+
 
 class CityResource(LocationCustomResource):
     city = fields.CharField(attribute='city')
     country = fields.CharField(attribute='country')
     country_name = fields.CharField(attribute='country_name')
     population = fields.IntegerField(attribute='population')
+    url = fields.CharField()
 
     class Meta(LocationCustomResource.Meta):
         resource_name = 'cities'
@@ -147,6 +155,11 @@ class CityResource(LocationCustomResource):
             city=queryset.obj['city'])
         return super(LocationCustomResource, self).full_dehydrate(queryset)
 
+    def dehydrate_url(self, bundle):
+        url = reverse('phonebook:list_city',
+                      args=[bundle.obj.country, bundle.obj.city])
+        return utils.absolutify(url)
+
 
 class UserResource(ClientCacheResourceMixIn, ModelResource):
     """User Resource."""
@@ -157,6 +170,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
     groups = fields.CharField()
     skills = fields.CharField()
     languages = fields.CharField()
+    url = fields.CharField()
 
     class Meta:
         queryset = UserProfile.objects.all()
@@ -238,6 +252,11 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         if bundle.obj.photo:
             return urljoin(settings.SITE_URL, bundle.obj.photo.url)
         return ''
+
+    def dehydrate_url(self, bundle):
+        url = reverse('phonebook:profile_view',
+                      args=[bundle.obj.user.username])
+        return utils.absolutify(url)
 
     def get_detail(self, request, **kwargs):
         if request.GET.get('restricted', False):
