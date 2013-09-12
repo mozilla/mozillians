@@ -2,25 +2,27 @@
   <a class="js-btn" title="{{ profile.display_name }}"
      href="{{ url('phonebook:profile_view', profile.user.username) }}">
     <div class="avatar">
-      <img class="profile-photo"
+      <span>
+        <img class="profile-photo"
            src="{{ profile.get_photo_url('70x70') }}"
            alt="{{ _('Profile Photo') }}">
+      </span>
     </div>
     <div class="details">
       <ul>
         <li>
           <h2>
-            {{ profile.display_name }}
+            {{ profile.display_name|truncate(20, True) }}
           </h2>
         </li>
         {% if profile.email %}
           <li>
-            {{ _('Email:') }} {{ profile.email }}
+            <i class="icon-envelope"></i> {{ profile.email|truncate(20, True) }}
           </li>
         {% endif %}
         {% if profile.user.username %}
           <li>
-            {{ _('Username:') }} {{ profile.user.username }}
+            <i class="icon-user"></i> {{ profile.user.username|truncate(20, True) }}
           </li>
         {% endif %}
       </ul>
