@@ -6,6 +6,7 @@ from django.test.client import Client
 from django.test.utils import override_settings
 
 from funfactory.helpers import urlparams
+from funfactory.utils import absolutify
 from mock import patch
 from nose.tools import eq_, ok_
 
@@ -44,6 +45,8 @@ class CityResourceTests(TestCase):
         eq_(data['objects'][0]['country'], 'gr')
         eq_(data['objects'][0]['country_name'], 'Greece')
         eq_(data['objects'][0]['population'], 1)
+        eq_(data['objects'][0]['url'],
+            absolutify(reverse('phonebook:list_city', args=['gr', 'Athens'])))
 
     def test_get_details(self):
         client = Client()
@@ -117,6 +120,8 @@ class CountryResourceTests(TestCase):
         eq_(data['objects'][0]['country'], 'gr')
         eq_(data['objects'][0]['country_name'], 'Greece')
         eq_(data['objects'][0]['population'], 1)
+        eq_(data['objects'][0]['url'],
+            absolutify(reverse('phonebook:list_country', args=['gr'])))
 
     def test_get_details(self):
         client = Client()
@@ -225,6 +230,9 @@ class UserResourceTests(TestCase):
         eq_(data['timezone'], profile.timezone)
         eq_(data['tshirt'], profile.tshirt)
         eq_(data['email'], profile.email)
+        eq_(data['url'],
+            absolutify(reverse('phonebook:profile_view',
+                               args=[profile.user.username])))
 
     def test_get_detail_community_app(self):
         client = Client()
