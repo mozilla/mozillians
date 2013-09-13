@@ -1,62 +1,64 @@
-{% extends "base-old.html" %}
+{% extends "base.html" %}
 
 {% block page_title %}{{ _('About Mozillians') }}{% endblock %}
 {% block body_id %}about{% endblock %}
 
 {% block content %}
-  <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
-       alt="{{ _('Photo collage of Mozillians') }}">
-    <h1>{{ _('About Mozillians') }}</h1>
-    {% trans wiki_roadmap_url='https://wiki.mozilla.org/Mozillians#Roadmap',
-             wiki_get_involved_url='https://wiki.mozilla.org/Mozillians#Get_Involved' %}
-      <p>
-        Mozillians are people who volunteer their time to advance the Mozilla
-        mission. They're dedicated to promoting openness, innovation and
-        opportunity on the Web and they form the core of our community.
-      </p>
-      <p>
-        This directory is a resource to make it easy for Mozillians to learn
-        who is involved, what they do and how to connect with them. It also
-        allows you to receive email communications from Mozilla.
-      </p>
-      <p>
-        Want to find Mozillians in Auckland for a meetup? Need an expert XPCOM
-        hacker to review a patch? That's exactly what this site is for.
-      </p>
-      <p>
-        <a href="{{ wiki_roadmap_url }}">These features</a>, and
-        others, are currently in development. If you'd like to help
-        us out with these, find out how you can <a href="{{
-        wiki_get_involved_url }}"> get involved</a>.
-      </p>
-    {% endtrans %}
-  <section id="privacy" class="key-info">
-    <h2>{{ _('Privacy First') }}</h2>
-    <p>
-      {% trans privacy_policy_url=('http://www.mozilla.org/'
-                                   + LANG +'/privacy-policy.html') %}
-        Privacy has been an important part of this directory from the very
-        beginning. We want to make sure we provide Mozillians with the best
-        experience possible, from the way the site is built to the way we
-        vouch for new users before they can access data that should only be
-        available to other Mozillians. Read our
-        <a href="{{ privacy_policy_url }}">
-          Privacy Policy
-        </a> for more information.
+  <div class="container">
+    <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
+         alt="{{ _('Photo collage of Mozillians') }}">
+      <h1>{{ _('About Mozillians') }}</h1>
+      {% trans wiki_roadmap_url='https://wiki.mozilla.org/Mozillians#Roadmap',
+               wiki_get_involved_url='https://wiki.mozilla.org/Mozillians#Get_Involved' %}
+        <p>
+          Mozillians are people who volunteer their time to advance the Mozilla
+          mission. They're dedicated to promoting openness, innovation and
+          opportunity on the Web and they form the core of our community.
+        </p>
+        <p>
+          This directory is a resource to make it easy for Mozillians to learn
+          who is involved, what they do and how to connect with them. It also
+          allows you to receive email communications from Mozilla.
+        </p>
+        <p>
+          Want to find Mozillians in Auckland for a meetup? Need an expert XPCOM
+          hacker to review a patch? That's exactly what this site is for.
+        </p>
+        <p>
+          <a href="{{ wiki_roadmap_url }}">These features</a>, and
+          others, are currently in development. If you'd like to help
+          us out with these, find out how you can <a href="{{
+          wiki_get_involved_url }}"> get involved</a>.
+        </p>
       {% endtrans %}
-    </p>
-  </section>
-  <section id="get-involved" class="key-info">
-    <h2>{{ _('Get Involved') }}</h2>
-    <p>
-      {% trans google_groups_url='https://groups.google.com/forum/?fromgroups#!forum/mozilla.dev.community-tools' %}
-        The community directory is also a community project and you are
-        welcome to get involved to help us make it even better or to
-        integrate it into other community tools. Get in touch with us on the
-        <a href="{{ google_groups_url }}">
-          Mozillians forums
-        </a> to learn how.
-      {% endtrans %}
-    </p>
-  </section>
+    <section id="privacy" class="key-info">
+      <h2>{{ _('Privacy First') }}</h2>
+      <p>
+        {% trans privacy_policy_url=('http://www.mozilla.org/'
+                                     + LANG +'/privacy-policy.html') %}
+          Privacy has been an important part of this directory from the very
+          beginning. We want to make sure we provide Mozillians with the best
+          experience possible, from the way the site is built to the way we
+          vouch for new users before they can access data that should only be
+          available to other Mozillians. Read our
+          <a href="{{ privacy_policy_url }}">
+            Privacy Policy
+          </a> for more information.
+        {% endtrans %}
+      </p>
+    </section>
+    <section id="get-involved" class="key-info">
+      <h2>{{ _('Get Involved') }}</h2>
+      <p>
+        {% trans google_groups_url='https://groups.google.com/forum/?fromgroups#!forum/mozilla.dev.community-tools' %}
+          The community directory is also a community project and you are
+          welcome to get involved to help us make it even better or to
+          integrate it into other community tools. Get in touch with us on the
+          <a href="{{ google_groups_url }}">
+            Mozillians forums
+          </a> to learn how.
+        {% endtrans %}
+      </p>
+    </section>
+  </div>
 {% endblock %}
