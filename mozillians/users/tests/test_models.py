@@ -231,8 +231,10 @@ class UserProfileTests(TestCase):
                 'Field {0} not set'.format(field))
         user = User.objects.get(id=user.id)
         for field in UserProfile._privacy_fields:
+            # Compare to default privacy setting for each field.
+            f = UserProfile._meta.get_field_by_name('privacy_{0}'.format(field))[0]
             eq_(getattr(user.userprofile, 'privacy_{0}'.format(field)),
-                MOZILLIANS, 'Field {0} not set'.format(field))
+                f.default, 'Field {0} not set'.format(field))
 
     def test_set_instance_privacy_level(self):
         user = UserFactory.create()
@@ -255,6 +257,12 @@ class UserProfileTests(TestCase):
         public_profile = user.userprofile
         public_profile.set_instance_privacy_level(PUBLIC)
         eq_(public_profile.email, user.email)
+    
+    def test_tshirt_public(self):
+        user = UserFactory.create(userprofile={'tshirt': 9})
+        public_profile = user.userprofile
+        public_profile.set_instance_privacy_level(PUBLIC)
+        eq_(public_profile.tshirt, DEFAULT_PRIVACY_FIELDS['tshirt'])
 
     def test_privacy_level_employee(self):
         user = UserFactory.create()
