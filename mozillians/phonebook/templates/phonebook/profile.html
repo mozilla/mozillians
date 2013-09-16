@@ -234,9 +234,8 @@
           {#  {% endif %}
               {% endfor %} #}
 
-          {# TODO: Change tshirt size to display string instead of value. #}
           {% if profile.tshirt %}
-            <li>T-Shirt Size: {{ profile.tshirt }}</li>
+            <li>T-Shirt Size: {{ profile.get_tshirt_display() }}</li>
           {% endif %}
 
         </ul>
