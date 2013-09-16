@@ -27,7 +27,8 @@ DEFAULT_PRIVACY_FIELDS = {
     'vouched_by': None,
     'date_mozillian': None,
     'timezone': '',
-    'title': ''}
+    'title': '',
+    'tshirt': None,}
 
 
 class UserProfileValuesQuerySet(ValuesQuerySet):
