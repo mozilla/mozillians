@@ -1234,17 +1234,35 @@ body#edit-profile {
             }
             &#photo {
                 position: relative;
+                height: 100px;
+                @media (max-width: @breakMobileLandscape) {
+                    height: 190px;
+                }
                 .profile-photo {
                     .rounded-image;
                     width: 70px;
                     height: 70px;
-                    top: -10px;
+                    margin-left: 120px;
                     @media (max-width: @breakMobileLandscape) {
-                        top: 40px;
+                        margin-left: 0;
+                        top: 75px;
                     }
+                }
+                label {
+                   @media (max-width: @breakMobileLandscape) {
+                    float: left;
+                   }
                 }
                 input {
                     margin-top: 90px;
+                    @media (max-width: @breakTablet) {
+                        margin-top: 60px;
+                        margin-left: 120px;
+                    }
+                    @media (max-width: @breakMobileLandscape) {
+                        margin-left: 0;
+                        margin-top: 90px;
+                    }
                 }
             }
             .privacy-controls {
