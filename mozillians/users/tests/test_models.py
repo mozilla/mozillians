@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 
 from mock import Mock, call, patch
@@ -16,7 +17,7 @@ from mozillians.groups.tests import  (GroupAliasFactory, GroupFactory,
 from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
                                        MOZILLIANS, PUBLIC,
                                        PUBLIC_INDEXABLE_FIELDS)
-from mozillians.users.models import UserProfile, _calculate_photo_filename
+from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
 from mozillians.users.tests import UserFactory
 
 
@@ -176,6 +177,20 @@ class UserProfileTests(TestCase):
         ok_(call().privacy_level().indexes().boost()
             .query().order_by().filter(is_vouched=True)
             not in PrivacyAwareSMock.mock_calls)
+
+    def test_accounts_access(self):
+        user = UserFactory.create()
+        user.userprofile.externalaccount_set.create(type=4, username='test')
+        ok_(isinstance(user.userprofile.accounts, QuerySet))
+        eq_(user.userprofile.accounts.filter(username='test')[0].username, 'test')
+
+    def test_accounts_public_mozillians(self):
+        profile = UserFactory.create().userprofile
+        profile.set_instance_privacy_level(PUBLIC)
+        profile.externalaccount_set.create(type=4, username='test', privacy=MOZILLIANS)
+        eq_(profile.accounts.count(), 0)
+        profile.set_instance_privacy_level(MOZILLIANS)
+        eq_(profile.accounts.count(), 1)
 
     @patch('mozillians.users.models.UserProfile.auto_vouch')
     def test_auto_vouch_on_profile_save(self, auto_vouch_mock):
@@ -426,3 +441,15 @@ class CalculatePhotoFilenameTests(TestCase):
         ok_(result.endswith('.jpg'))
         ok_(result.startswith(settings.USER_AVATAR_DIR))
         ok_(uuid4_mock.called)
+
+
+class ExternalAccountTests(TestCase):
+    def test_get_url(self):
+        profile = UserFactory.create().userprofile
+        profile.externalaccount_set.create(type=3, username='sammy')
+        ok_('sammy' in profile.accounts.get(username='sammy').get_username_url())
+
+    def test_urls_contain_usernames(self):
+        for value, account in ExternalAccount.ACCOUNT_TYPES.iteritems():
+            if account['url']:
+                ok_('{username}' in account['url'])
