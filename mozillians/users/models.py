@@ -522,39 +522,31 @@ class UsernameBlacklist(models.Model):
 
 
 class ExternalAccount(models.Model):
-    ACCOUNT_TYPES = (
-        {'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/%s'},
+    ACCOUNT_TYPES = {
+        0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}'},
         # All bugs assigned to or reported by the user.
-        {'name': 'Bugzilla', 'url': 'https://bugzilla.mozilla.org/'
+        1:{'name': 'Bugzilla', 'url': 'https://bugzilla.mozilla.org/'
                                     'buglist.cgi?emailtype1=exact'
                                     '&query_format=advanced'
                                     '&emailassigned_to1=1'
-                                    '&email1=%s'},
-        {'name': 'Github', 'url': 'https://www.github.com/%s'},
-        {'name': 'MDN', 'url': 'https://developer.mozilla.org/en-US/profiles/%s'},
-        {'name': 'Mozilla Support', 'url': ''},
-        {'name': 'Facebook', 'url': 'https://www.facebook.com/%s'},
-        {'name': 'Twitter', 'url': 'https://www.twitter.com/%s'},
-        {'name': 'AIM', 'url': ''},
-        {'name': 'Google Talk', 'url': ''},
-        {'name': 'Skype', 'url': ''},
-        {'name': 'Yahoo!', 'url': ''},
-    )
-
+                                    '&email1={username}'},
+        2:{'name': 'Github', 'url': 'https://www.github.com/{username}'},
+        3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/en-US/profiles/{username}'},
+        4:{'name': 'Mozilla Support', 'url': ''},
+        5:{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
+        6:{'name': 'Twitter', 'url': 'https://www.twitter.com/{username}'},
+        7:{'name': 'AIM', 'url': ''},
+        8:{'name': 'Google Talk', 'url': ''},
+        9:{'name': 'Skype', 'url': ''},
+        10:{'name': 'Yahoo!', 'url': ''},
+    }
     user = models.ForeignKey(UserProfile)
-    username = models.CharField(max_length=255, default='', blank=True,
-                                verbose_name=_lazy('Account Username'))
+    username = models.CharField(max_length=255, verbose_name=_lazy('Account Username'))
     type = models.PositiveIntegerField(
-        default=0, choices=enumerate(account['name'] for account in ACCOUNT_TYPES),
+        choices=sorted([(k, v['name']) for (k, v) in sorted(ACCOUNT_TYPES.iteritems())], key=lambda x: x[1]),
         verbose_name=_lazy('Account Type'))
     privacy = models.PositiveIntegerField(default=MOZILLIANS,
                                           choices=PRIVACY_CHOICES)
 
-    @property
-    def typename(self):
-        return self.ACCOUNT_TYPES[self.type]['name']
-
     def get_username_url(self):
-        if self.ACCOUNT_TYPES[self.type]['url']:
-            return self.ACCOUNT_TYPES[self.type]['url'] % self.username
-        return ''
+        return self.ACCOUNT_TYPES[self.type]['url'].format(username=self.username)
