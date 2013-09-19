@@ -67,7 +67,7 @@
                 {% block search %}
                   <form class="navbar-search"
                       action="{{ url('phonebook:search') }}" method="GET">
-                    <input type="text" name="q" class="search-query"
+                    <input autofocus type="text" name="q" class="search-query"
                         placeholder="{{ _('Search for people, groups and more') }}">
                   </form>
                 {% endblock %}
