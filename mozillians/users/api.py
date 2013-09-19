@@ -277,4 +277,4 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         if request.GET.get('restricted', False):
             mega_filter &= Q(allows_community_sites=True)
 
-        return UserProfile.objects.filter(mega_filter).order_by('id')
+        return UserProfile.objects.complete().filter(mega_filter).order_by('id')

@@ -162,6 +162,7 @@ class CountryResourceTests(TestCase):
         client.get(url, follow=True)
         ok_(not filter_mock.called)
 
+
 class UserResourceTests(TestCase):
     def setUp(self):
         voucher = UserFactory.create(userprofile={'is_vouched': True})
@@ -499,3 +500,13 @@ class UserResourceTests(TestCase):
         eq_(response.status_code, 200)
         eq_(len(data['objects']), 1)
         eq_(data['objects'][0]['email'], user.email)
+
+    def test_only_completed_profiles(self):
+        user = UserFactory.create(userprofile={'is_vouched': True, 'full_name': ''})
+        client = Client()
+        response = client.get(self.mozilla_resource_url, follow=True)
+        data = json.loads(response.content)
+        eq_(response.status_code, 200)
+        eq_(len(data['objects']), 2)
+        for obj in data['objects']:
+            ok_(obj['email'] != user.email)
