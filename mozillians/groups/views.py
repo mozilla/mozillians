@@ -116,11 +116,13 @@ def show(request, url):
                 num_pages=num_pages)
 
     if group.steward:
-        # Get the 15 most globally popular skills that appear in the group
+        """ Get the most globally popular skills that appear in the group
+            Sort them with most members first
+        """
         skills = (Skill.objects
                   .filter(members__in=profiles)
                   .annotate(no_users=Count('members'))
-                  .order_by('no_users'))
+                  .order_by('-no_users'))
         data.update(skills=skills)
         data.update(irc_channels=group.irc_channel.split(' '))
         data.update(members=profiles.count())
