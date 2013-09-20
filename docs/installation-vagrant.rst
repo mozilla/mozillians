@@ -9,7 +9,7 @@ Vagrant Installation
 
 .. note::
     Installing Mozillians might be daunting.  Ask for help in #mozillians on
-    irc.mozilla.org.  tofumatt or tallOwen will be happy to help.
+    irc.mozilla.org.  
 
 You'll need ruby, vagrant, Virtualbox and git.  The following steps will help
 you:
