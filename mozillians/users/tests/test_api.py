@@ -229,7 +229,6 @@ class UserResourceTests(TestCase):
         eq_(data['city'], profile.city)
         eq_(data['date_mozillian'], profile.date_mozillian)
         eq_(data['timezone'], profile.timezone)
-        eq_(data['tshirt'], profile.tshirt)
         eq_(data['email'], profile.email)
         eq_(data['url'],
             absolutify(reverse('phonebook:profile_view',
