@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseBadRequest
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -15,6 +15,7 @@ from tower import ugettext as _
 
 import mozillians.phonebook.forms as forms
 from mozillians.common.decorators import allow_public, allow_unvouched
+from mozillians.common.helpers import redirect
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
@@ -38,6 +39,7 @@ def login(request):
 @allow_public
 def home(request):
     return render(request, 'phonebook/home.html')
+
 
 @allow_public
 @never_cache
@@ -64,7 +66,9 @@ def view_profile(request, username):
             if not request.user.is_authenticated():
                 # you have to be authenticated to continue
                 messages.warning(request, LOGIN_MESSAGE)
-                return login_required(view_profile)(request, username)
+                return (login_required(view_profile, login_url=reverse('phonebook:home'))
+                        (request, username))
+
             if not request.user.userprofile.is_vouched:
                 # you have to be vouched to continue
                 messages.error(request, GET_VOUCHED_MESSAGE)
