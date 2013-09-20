@@ -187,8 +187,8 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         fields = ['id', 'full_name', 'is_vouched', 'website', 'vouched_by',
                   'date_vouched', 'groups', 'skills', 'languages',
                   'bio', 'photo', 'ircname', 'country', 'region', 'city',
-                  'date_mozillian', 'timezone', 'tshirt', 'email',
-                  'allows_mozilla_sites', 'allows_community_sites']
+                  'date_mozillian', 'timezone', 'email', 'allows_mozilla_sites',
+                  'allows_community_sites']
 
     def build_filters(self, filters=None):
         database_filters = {}
