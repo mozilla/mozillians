@@ -60,6 +60,14 @@ class GroupBaseTests(TestCase):
         GroupAliasFactory.create(alias=group_1, name='foo')
         eq_(set(Group.search('foo')), set([group_1]))
 
+    def test_search_distict_results(self):
+        group_1 = GroupFactory.create(name='automation', auto_complete=True)
+        GroupAliasFactory.create(alias=group_1, name='automation development')
+        GroupAliasFactory.create(alias=group_1, name='automation services')
+        results = Group.search('automation')
+        eq_(len(results), 1)
+        eq_(results[0], group_1)
+
 
 class GroupTests(TestCase):
     def test_get_curated(self):

@@ -30,6 +30,7 @@ class GroupBase(models.Model):
         results = cls.objects.filter(aliases__name__contains=query)
         if auto_complete_only:
             results = results.filter(auto_complete=auto_complete_only)
+        results = results.distinct()
         return results
 
     def save(self, *args, **kwargs):
