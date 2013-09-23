@@ -15,7 +15,7 @@ class OldGroupRedirectionMiddlewareTests(TestCase):
         """Valid group with name that matches the old group regex doens't redirect."""
         group = GroupFactory.create(name='111-foo')
         GroupFactory.create(name='foo')
-        url = reverse('groups:show', kwargs={'url': group.url})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
         with self.login(self.user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)

@@ -53,9 +53,9 @@
           {% for group in groups %}
             <li class="tagit-choice ui-widget-content ui-state-default
                        ui-corner-all">
-                       <a href="{{ url('groups:show', group.url) }}">
-                         {{ group.name }}
-                       </a>
+                <a href="{{ url('groups:show_group', group.url) }}">
+                  {{ group.name }}
+                </a>
             </li>
           {% endfor %}
         </ul>
@@ -97,9 +97,9 @@
               {% for group in curated_groups %}
                 <li class="tagit-choice ui-widget-content ui-state-default
                            ui-corner-all p-category category">
-                           <a href="{{ url('groups:show', group.url) }}">
-                             {{ group.name }}
-                           </a>
+                  <a href="{{ url('groups:show_group', group.url) }}">
+                    {{ group.name }}
+                  </a>
                 </li>
               {% endfor %}
             </ul>

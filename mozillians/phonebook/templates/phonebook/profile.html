@@ -160,7 +160,7 @@
               {% for group in profile.groups.all() %}
                 {% if (user.is_authenticated() and
                        user.get_profile().is_vouched) %}
-                  <a href="{{ url('groups:show', group.url) }}">{{ group.name }}</a>
+                  <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
                 {%- else -%}
                   {{ group.name }}
                 {%- endif -%}
@@ -172,7 +172,12 @@
           <div id="skills" class="p-category category">
             <h3>{{ _('Skills') }}</h3>
               {% for skill in profile.skills.all() %}
-                {{ skill.name }}
+                {% if (user.is_authenticated() and
+                       user.get_profile().is_vouched) %}
+                  <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
+                {%- else -%}
+                  {{ skill.name }}
+                {%- endif -%}
                 {%- if not loop.last %},{% endif %}
               {% endfor %}
           </div>
