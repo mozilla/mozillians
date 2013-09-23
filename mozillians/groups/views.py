@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Count
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -7,18 +8,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
-import commonware.log
 from funfactory.urlresolvers import reverse
 
 from mozillians.common.decorators import allow_unvouched
 from mozillians.groups.models import Group, GroupAlias, Skill
 from mozillians.groups.forms import SortForm
-from mozillians.phonebook import forms
 from mozillians.users.tasks import update_basket_task
-
-
-GROUPS_PER_PAGE = 21
-log = commonware.log.getLogger('m.groups')
 
 
 def _list_groups(request, template, query):
@@ -32,7 +27,7 @@ def _list_groups(request, template, query):
     else:
         query = query.order_by('name')
 
-    paginator = Paginator(query, GROUPS_PER_PAGE)
+    paginator = Paginator(query, settings.ITEMS_PER_PAGE)
 
     page = request.GET.get('page', 1)
     try:
@@ -42,7 +37,7 @@ def _list_groups(request, template, query):
     except EmptyPage:
         groups = paginator.page(paginator.num_pages)
 
-    if paginator.count > forms.PAGINATION_LIMIT_LARGE:
+    if paginator.count > settings.ITEMS_PER_PAGE:
         show_pagination = True
 
     data = dict(groups=groups, page=page, sort_form=sort_form, show_pagination=show_pagination)
@@ -89,11 +84,10 @@ def show(request, url):
         return redirect('groups:show', url=group_alias.alias.url)
 
     group = group_alias.alias
-    limit = forms.PAGINATION_LIMIT
     in_group = (group.members.filter(user=request.user).exists())
     profiles = group.members.vouched()
     page = request.GET.get('page', 1)
-    paginator = Paginator(profiles, limit)
+    paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
     people = []
     try:
         people = paginator.page(page)
@@ -104,14 +98,13 @@ def show(request, url):
 
     show_pagination = False
     num_pages = 0
-    if paginator.count > forms.PAGINATION_LIMIT:
+    if paginator.count > settings.ITEMS_PER_PAGE:
         show_pagination = True
         num_pages = len(people.paginator.page_range)
 
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
-                limit=limit,
                 show_pagination=show_pagination,
                 num_pages=num_pages)
 

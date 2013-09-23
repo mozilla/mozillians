@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.models import User
 
 import happyforms
@@ -15,8 +16,6 @@ from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users.models import UserProfile
 
 
-PAGINATION_LIMIT = 20
-PAGINATION_LIMIT_LARGE = 50
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
 
 
@@ -24,12 +23,12 @@ class SearchForm(happyforms.Form):
     q = forms.CharField(required=False)
     limit = forms.IntegerField(
         widget=forms.HiddenInput, required=False, min_value=1,
-        max_value=PAGINATION_LIMIT)
+        max_value=settings.ITEMS_PER_PAGE)
     include_non_vouched = forms.BooleanField(
         label=_lazy(u'Include non-vouched'), required=False)
 
     def clean_limit(self):
-        limit = self.cleaned_data['limit'] or PAGINATION_LIMIT
+        limit = self.cleaned_data['limit'] or settings.ITEMS_PER_PAGE
         return limit
 
 

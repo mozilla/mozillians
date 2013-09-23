@@ -248,15 +248,12 @@ def search(request):
         if profiles.count() == 1 and not groups:
             return redirect('phonebook:profile_view', people[0].user.username)
 
-        if paginator.count > forms.PAGINATION_LIMIT:
-            show_pagination = True
-            num_pages = len(people.paginator.page_range)
+        show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
     d = dict(people=people,
              search_form=form,
              limit=limit,
              show_pagination=show_pagination,
-             num_pages=num_pages,
              groups=groups,
              curated_groups=curated_groups)
 
