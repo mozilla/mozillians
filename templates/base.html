@@ -123,7 +123,7 @@
                 {% else %}
                   <a href="#" id="create_profile" class="persona-button browserid-login"
                      title="{{_('Sign in')}}"
-                     data-next="{{ request.REQUEST.next }}">
+                     data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}">
                     <span class="icon"><img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon"></span>
                     <span class="signin">{{ _('Sign in') }}</span>
                   </a>

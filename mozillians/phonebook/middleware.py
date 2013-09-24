@@ -5,10 +5,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import is_valid_path, reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-
 from tower import ugettext as _
 
+from mozillians.common.helpers import redirect
 from mozillians.common.middleware import safe_query_string
 
 

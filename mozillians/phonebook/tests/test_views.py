@@ -4,13 +4,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseBadRequest, HttpResponseNotAllowed
-from django.shortcuts import redirect
 from django.test.client import Client
 
 from funfactory.helpers import urlparams
 from mock import call, patch
 from nose.tools import eq_, ok_
 
+from mozillians.common.helpers import redirect
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.tests import InviteFactory
