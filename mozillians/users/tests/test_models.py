@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from datetime import datetime
 from uuid import uuid4
 
@@ -446,8 +448,13 @@ class CalculatePhotoFilenameTests(TestCase):
 class ExternalAccountTests(TestCase):
     def test_get_url(self):
         profile = UserFactory.create().userprofile
-        profile.externalaccount_set.create(type=3, username='sammy')
-        ok_('sammy' in profile.accounts.get(username='sammy').get_username_url())
+        account = profile.externalaccount_set.create(type=3, username='sammy')
+        ok_('sammy' in account.get_username_url())
+
+    def test_get_url_unicode(self):
+        profile = UserFactory.create().userprofile
+        account = profile.externalaccount_set.create(type=3, username=u'sammyウ')
+        ok_('%E3%82%A6' in account.get_username_url())        
 
     def test_urls_contain_usernames(self):
         for value, account in ExternalAccount.ACCOUNT_TYPES.iteritems():
