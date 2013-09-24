@@ -523,18 +523,18 @@ class UsernameBlacklist(models.Model):
 
 class ExternalAccount(models.Model):
     ACCOUNT_TYPES = {
-        0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}'},
+        0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}/'},
         # All bugs assigned to or reported by the user.
-        1:{'name': 'Bugzilla', 'url': 'https://bugzilla.mozilla.org/'
-                                    'buglist.cgi?emailtype1=exact'
-                                    '&query_format=advanced'
-                                    '&emailassigned_to1=1'
-                                    '&email1={username}'},
-        2:{'name': 'Github', 'url': 'https://www.github.com/{username}'},
-        3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/en-US/profiles/{username}'},
+        1:{'name': 'Bugzilla', 'url': ('https://bugzilla.mozilla.org/'
+                                       'buglist.cgi?emailtype1=exact'
+                                       '&query_format=advanced'
+                                       '&emailassigned_to1=1'
+                                       '&email1={username}')},
+        2:{'name': 'Github', 'url': 'https://github.com/{username}'},
+        3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
         4:{'name': 'Mozilla Support', 'url': ''},
         5:{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
-        6:{'name': 'Twitter', 'url': 'https://www.twitter.com/{username}'},
+        6:{'name': 'Twitter', 'url': 'https://twitter.com/{username}'},
         7:{'name': 'AIM', 'url': ''},
         8:{'name': 'Google Talk', 'url': ''},
         9:{'name': 'Skype', 'url': ''},
@@ -543,7 +543,8 @@ class ExternalAccount(models.Model):
     user = models.ForeignKey(UserProfile)
     username = models.CharField(max_length=255, verbose_name=_lazy('Account Username'))
     type = models.PositiveIntegerField(
-        choices=sorted([(k, v['name']) for (k, v) in sorted(ACCOUNT_TYPES.iteritems())], key=lambda x: x[1]),
+        choices=sorted([(k, v['name'])
+                        for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
         verbose_name=_lazy('Account Type'))
     privacy = models.PositiveIntegerField(default=MOZILLIANS,
                                           choices=PRIVACY_CHOICES)
