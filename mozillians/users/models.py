@@ -109,6 +109,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                    on_delete=models.SET_NULL, blank=True,
                                    related_name='vouchees')
     date_vouched = models.DateTimeField(null=True, blank=True, default=None)
+    dialog = models.CharField(max_length=20, default='', blank=True, 
+                              verbose_name=u'Healthy Dialog')
     groups = models.ManyToManyField(Group, blank=True, related_name='members')
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
     languages = models.ManyToManyField(Language, blank=True,
