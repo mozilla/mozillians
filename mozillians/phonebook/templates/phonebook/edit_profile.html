@@ -94,9 +94,7 @@
 
     <fieldset>
       {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
-      <label>{{ _('Email') }}</label>
-      <input type="text" disabled="disabled" maxlength="30"
-             value="{{ profile.user.email }}" name="email" id="id_email">
+      {{ required_field(email_form.email) }}
     </fieldset>
 
     <fieldset>
@@ -149,7 +147,7 @@
           {% endfor %}
         </div>
       {% endfor %}
-      <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a> 
+      <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a>
     </fieldset>
 
     <fieldset>

@@ -53,7 +53,7 @@ $(function() {
         return false;
     });
 
-    $('#accounts .addField').click(function() { 
+    $('#accounts .addField').click(function() {
         cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set')
         return false;
     });
@@ -62,5 +62,4 @@ $(function() {
         $(this).toggleClass('active');
         return false;
     });
-
 });

@@ -160,6 +160,20 @@ class ProfileForm(happyforms.ModelForm):
         super(ProfileForm, self).save()
 
 
+class EmailForm(forms.Form):
+    email = forms.EmailField()
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if (User.objects
+            .exclude(pk=self.initial['user_id']).filter(email=email).exists()):
+            raise forms.ValidationError(_('Email already in the database.'))
+        return email
+
+    def email_changed(self):
+        return self.cleaned_data['email'] != self.initial['email']
+
+
 class RegisterForm(ProfileForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),

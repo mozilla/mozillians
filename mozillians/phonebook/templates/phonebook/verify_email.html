@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+{{ _('Change Your Email') }}
+{% endblock %}
+{% block body_id %}edit-profile{% endblock %}
+
+{% block content %}
+<header>
+  <h1>{{ _('Verify Your Email') }}</h1>
+</header>
+<p>
+  {% trans %}
+  To complete the email change, please use Persona
+  to login with your <em>{{ email }}</em> email address.
+  {% endtrans %}
+</p>
+<a href="#" id="create_profile" class="persona-button browserid-login"
+   title="{{_('Verify Email' )}}">
+  <span class="icon">
+    <img src="{{ MEDIA_URL }}img/persona-person-white.png" alt="persona icon">
+  </span>
+  <span class="signin">{{ _('Verify Email') }}</span>
+</a>
+
+{% endblock %}
