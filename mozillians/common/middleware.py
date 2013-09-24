@@ -1,12 +1,15 @@
 import re
 from contextlib import contextmanager
-from django.conf import settings
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.encoding import iri_to_uri
-from django.shortcuts import redirect
+
+from funfactory.urlresolvers import reverse
 from tower import ugettext_lazy as _lazy
+
+from mozillians.common.helpers import redirect
 
 
 LOGIN_MESSAGE = _lazy(u'You must be logged in to continue.')
@@ -34,8 +37,8 @@ class StrongholdMiddleware(object):
 
         if not request.user.is_authenticated():
             messages.warning(request, LOGIN_MESSAGE)
-            return login_required(view_func)(request, *view_args,
-                                             **view_kwargs)
+            return (login_required(view_func, login_url=reverse('phonebook:home'))
+                    (request, *view_args, **view_kwargs))
 
         if request.user.userprofile.is_vouched:
             return None

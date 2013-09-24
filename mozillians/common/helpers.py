@@ -1,11 +1,13 @@
 from hashlib import md5
 
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
 from funfactory.helpers import urlparams
+from funfactory.urlresolvers import reverse
 from funfactory import utils
 from jingo import register
 from sorl.thumbnail import get_thumbnail
@@ -63,3 +65,9 @@ def bootstrap(element):
 def thumbnail(img, geometry, **kwargs):
     """Proxy to solr's get_thumbnail."""
     return get_thumbnail(img, geometry, **kwargs)
+
+
+def redirect(to, *args, **kwargs):
+    """Redirect with locale support."""
+    url = reverse(to, args=args, kwargs=kwargs)
+    return HttpResponseRedirect(url)
