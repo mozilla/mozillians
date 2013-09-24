@@ -376,3 +376,4 @@ def _request_args():
 
     return args
 BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
+BROWSERID_VERIFY_CLASS = 'mozillians.phonebook.views.BrowserIDVerify'

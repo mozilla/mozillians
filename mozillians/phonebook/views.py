@@ -9,7 +9,9 @@ from django.shortcuts import render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
-import commonware.log
+from django_browserid.base import get_audience, verify
+from django_browserid.views import Verify
+from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
@@ -24,8 +26,37 @@ from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, ExternalAccount, UserProfile
 
-log = commonware.log.getLogger('m.phonebook')
-BAD_VOUCHER = 'Unknown Voucher'
+class BrowserIDVerify(Verify):
+    def form_valid(self, form):
+        """Custom form validation to support email changing.
+
+        If user is already authenticated and reaches this points, it's
+        an email changing procedure. Validate that email is good and
+        save it in the database.
+
+        Otherwise continue with the default django-browserid verification.
+        """
+        if not self.request.user.is_authenticated():
+            return super(BrowserIDVerify, self).form_valid(form)
+
+        failure_url = urlparams(reverse('phonebook:profile_edit'), bid_login_failed=1)
+        self.assertion = form.cleaned_data['assertion']
+        self.audience = get_audience(self.request)
+        result = verify(self.assertion, self.audience)
+        if not result:
+            messages.error(self.request, _('Authentication failed.'))
+            return redirect(failure_url)
+
+        email = result['email']
+
+        if User.objects.filter(email=email).exists():
+            messages.error(self.request, _('Email already exists in the database.'))
+            return redirect('phonebook:logout')
+
+        user = self.request.user
+        user.email = email
+        user.save()
+        return redirect('phonebook:profile_view', user.username)
 
 
 @allow_unvouched
@@ -119,7 +150,12 @@ def edit_profile(request):
                         initial=dict(groups=user_groups, skills=user_skills,
                                      languages=user_languages))
 
-    if (user_form.is_valid() and profile_form.is_valid() and accounts_formset.is_valid()):
+    email_form = forms.EmailForm(request.POST or None,
+                                 initial={'email': request.user.email,
+                                          'user_id': request.user.id})
+
+    if (user_form.is_valid() and profile_form.is_valid() and accounts_formset.is_valid() and
+        email_form.is_valid()):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
@@ -133,11 +169,16 @@ def edit_profile(request):
             messages.info(request,
                           _(u'You changed your username; please note your '
                             'profile URL has also changed.'))
-        return redirect(reverse('phonebook:profile_view', args=[user.username]))
+
+        if email_form.email_changed():
+            return render(request, 'phonebook/verify_email.html',
+                          {'email': email_form.cleaned_data['email']})
+        return redirect('phonebook:profile_view', user.username)
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
                 accounts_formset = accounts_formset,
+                email_form = email_form,
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
