@@ -13,11 +13,11 @@ from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import Group
 from mozillians.groups.tests import (GroupFactory, GroupAliasFactory,
                                      LanguageFactory, SkillFactory)
-from mozillians.groups.views import GROUPS_PER_PAGE, _list_groups
+from mozillians.groups.views import _list_groups
 from mozillians.users.tests import UserFactory
 
 
-@patch('mozillians.groups.views.GROUPS_PER_PAGE', 1)
+@patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
 @patch('mozillians.groups.views.render')
 class ListTests(TestCase):
     def setUp(self):
@@ -373,7 +373,3 @@ class ToggleSubscriptionTests(TestCase):
             client.post(url, follow=True)
         system_group = Group.objects.get(id=system_group.id)
         ok_(not system_group.members.filter(pk=self.user.pk).exists())
-
-    def test_groups_per_page(self):
-        """GROUPS_PER_PAGE should be multiple of 3."""
-        eq_(GROUPS_PER_PAGE % 3, 0)
