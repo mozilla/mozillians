@@ -8,6 +8,8 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models import signals as dbsignals
 from django.dispatch import receiver
+from django.utils.encoding import iri_to_uri
+from django.utils.http import urlquote
 
 from elasticutils.contrib.django import S, get_es
 from elasticutils.contrib.django.models import SearchMixin
@@ -551,4 +553,5 @@ class ExternalAccount(models.Model):
                                           choices=PRIVACY_CHOICES)
 
     def get_username_url(self):
-        return self.ACCOUNT_TYPES[self.type]['url'].format(username=self.username)
+        url = self.ACCOUNT_TYPES[self.type]['url'].format(username=urlquote(self.username))
+        return iri_to_uri(url)
