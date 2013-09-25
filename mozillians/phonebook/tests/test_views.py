@@ -1,3 +1,5 @@
+import os.path
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
@@ -16,7 +18,7 @@ from mozillians.phonebook.tests import InviteFactory
 from mozillians.phonebook.utils import update_invites
 from mozillians.phonebook.views import BrowserIDVerify
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PRIVILEGED, PUBLIC
-from mozillians.users.models import UserProfile
+from mozillians.users.models import UserProfile, UserProfilePrivacyModel
 from mozillians.users.tests import UserFactory
 
 
@@ -729,3 +731,31 @@ class ViewsTests(TestCase):
             response = client.post(url, data=data, follow=True)
         self.assertTemplateUsed(response, 'phonebook/verify_email.html')
         eq_(user.email, 'old@example.com')
+
+    def test_handling_of_broken_image(self):
+        """Handling of broken EXIF in images.
+
+        Images with bad EXIF data caused our app to crash. Test that
+        our workaround is working. Related bug 919736.
+        """
+
+        user = UserFactory.create(email='old@example.com',
+                                  userprofile={'is_vouched': True})
+        file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
+        data = {'full_name': user.userprofile.full_name,
+                'email': user.email,
+                'country': user.userprofile.country,
+                'username': user.username,
+                'photo': open(file_path, 'rb'),
+                'externalaccount_set-MAX_NUM_FORMS': '1000',
+                'externalaccount_set-INITIAL_FORMS': '0',
+                'externalaccount_set-TOTAL_FORMS': '0'}
+
+        for field in UserProfilePrivacyModel._meta._fields():
+            data[field.name] = MOZILLIANS
+        data['privacy_tshirt'] = PRIVILEGED
+
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        eq_(response.status_code, 200)
