@@ -536,7 +536,7 @@ class ExternalAccount(models.Model):
                                     '&email1={username}'},
         2:{'name': 'Github', 'url': 'https://www.github.com/{username}'},
         3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/en-US/profiles/{username}'},
-        4:{'name': 'Mozilla Support', 'url': ''},
+        4:{'name': 'Mozilla Support', 'url': 'https://support.mozilla.org/en-US/user/{username}'},
         5:{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
         6:{'name': 'Twitter', 'url': 'https://www.twitter.com/{username}'},
         7:{'name': 'AIM', 'url': ''},
