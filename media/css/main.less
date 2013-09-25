@@ -114,6 +114,7 @@
 /* Generic
 ==================== */
 body {
+    #content-wrapper { background: @white; }
     &.loggedin {
         #masthead {
             @media (max-width: @breakTablet) {
@@ -122,9 +123,6 @@ body {
             @media (max-width: @breakMobile) {
                 padding-bottom: 20px;
             }
-        }
-        #content-wrapper {
-            background: @white;
         }
         #main {
             padding: 25px 0 50px;
@@ -637,6 +635,9 @@ footer#colophon {
 ==================== */
 body#home {
     &.loggedout {
+        #content-wrapper {
+            background: inherit;
+        }
         #main {
         padding: 0;
             &.container {
