@@ -6,11 +6,11 @@ VirtualEnv Installation
 .. note::
 
    Installing Mozillians might be daunting.  Ask for help in
-   #commtools on irc.mozilla.org. Ping `giorgos`, he will be happy to
-   help.
+   #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`, 
+   they will be happy to help.
 
 
-**Prerequisites:** You 'll need python, virtualenv and pip.
+**Prerequisites:** You 'll need python 2, virtualenv and pip. You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
 
 When you want to start contributing...
 
