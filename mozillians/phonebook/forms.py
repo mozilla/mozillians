@@ -1,4 +1,5 @@
 import re
+from cStringIO import StringIO
 from datetime import datetime
 
 from django import forms
@@ -6,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 import happyforms
+from PIL import Image
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
@@ -110,6 +112,23 @@ class ProfileForm(happyforms.ModelForm):
         country_list = sorted(country_list, key=lambda country: country[1])
         country_list.insert(0, ('', '----'))
         self.fields['country'].choices = country_list
+
+    def clean_photo(self):
+        """Clean possible bad Image data.
+
+        Try to load EXIF data from image. If that fails, remove EXIF
+        data by re-saving the image. Related bug 919736.
+
+        """
+        photo = self.cleaned_data['photo']
+        image = Image.open(photo.file)
+        try:
+            image._get_exif()
+        except (AttributeError, IOError, KeyError, IndexError):
+            cleaned_photo = StringIO()
+            image.save(cleaned_photo, format='JPEG', quality=95)
+            photo.file = cleaned_photo
+        return photo
 
     def clean_groups(self):
         """Groups are saved in lowercase because it's easy and
