@@ -40,6 +40,18 @@ DATABASES = {
 ## L10n
 LOCALE_PATHS = [path('locale')]
 
+# Tells the extract script what files to parse for strings and what functions to use.
+DOMAIN_METHODS = {
+    'messages': [
+        ('mozillians/**.py',
+            'tower.management.commands.extract.extract_tower_python'),
+        ('mozillians/**/templates/**.html',
+            'tower.management.commands.extract.extract_tower_template'),
+        ('templates/**.html',
+            'tower.management.commands.extract.extract_tower_template'),
+    ],
+}
+
 # Accepted locales
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'zh-TW',
