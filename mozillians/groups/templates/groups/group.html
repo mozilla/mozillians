@@ -71,9 +71,11 @@
             <div class="steward">
               <h3>{{ _('Community Steward') }}</h3>
               <div class="avatar">
-                <img class="profile-photo"
-                     src="{{ group.steward.get_photo_url('70x70') }}"
-                     alt="{{ _('Profile Photo') }}">
+                <a href="{{ url('phonebook:profile_view', group.steward.user.username) }}">
+                  <img class="profile-photo"
+                       src="{{ group.steward.get_photo_url('70x70') }}"
+                       alt="{{ _('Profile Photo') }}">
+                </a>
               </div>
               <div class="details">
                   <ul>
@@ -86,6 +88,7 @@
                     </li>
                     <li>
                       <a href="mailto:{{ group.steward.user.email }}">
+                         <i class="icon-envelope"></i>
                         {{ group.steward.user.email }}
                       </a>
                     </li>
