@@ -1,4 +1,4 @@
-{% extends "base-old.html" %}
+{% extends "base.html" %}
 
 {% block page_title %}{{ _('Confirm Profile Deletion') }}{% endblock %}
 {% block body_id %}confirm-delete{% endblock %}
@@ -19,10 +19,10 @@
   </p>
   <div id="actions">
     <a href="{{ url('phonebook:profile_edit') }}"
-       class="btn" id="cancel-action">
+       class="button" id="cancel-action">
       {{ _("No: don't delete my profile") }}
     </a>
-    <button class="btn btn-danger" id="delete-action">
+    <button class="button button-negative" id="delete-action">
       {{ _("I'm sure: delete my profile") }}
     </button>
   </div>
