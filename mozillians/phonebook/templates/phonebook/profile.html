@@ -186,6 +186,23 @@
               {% endfor %}
           </div>
         {% endif %}
+        {% if profile.accounts.count() %}
+          <div id="externalaccounts" class="p-category category">
+            <h3>{{ _('External Accounts') }}</h3>
+            <ul>
+              {% for account in profile.accounts %}
+                <li>
+                  {{ account.get_type_display() }}:
+                  {% if account.get_username_url() -%}
+                    <a href="{{ account.get_username_url() }}">{{ account.username }}</a>
+                  {%- else -%}
+                    {{ account.username }}
+                  {%- endif -%}
+                {% endfor %}
+              </li>
+            </ul>
+          </div>
+        {% endif %}
       </section>
 
       <section id="profile-contact">
