@@ -509,3 +509,17 @@ class UserResourceTests(TestCase):
         eq_(len(data['objects']), 2)
         for obj in data['objects']:
             ok_(obj['email'] != user.email)
+
+    def test_distinct_results(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group_1 = GroupFactory.create()
+        group_2 = GroupFactory.create()
+        group_1.members.add(user.userprofile)
+        group_2.members.add(user.userprofile)
+        client = Client()
+        url = urlparams(self.mozilla_resource_url,
+                        groups=','.join([group_1.name, group_2.name]))
+        response = client.get(url, follow=True)
+        data = json.loads(response.content)
+        eq_(response.status_code, 200)
+        eq_(len(data['objects']), 1)
