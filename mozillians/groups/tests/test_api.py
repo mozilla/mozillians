@@ -43,7 +43,7 @@ class GroupResourceTests(TestCase):
             'List includes unvouched users')
         eq_(int(data['objects'][0]['id']), group.id)
         eq_(data['objects'][0]['url'],
-            absolutify(reverse('groups:show', args=[group.url])))
+            absolutify(reverse('groups:show_group', args=[group.url])))
 
 
 class SkillResourceTests(TestCase):

@@ -45,7 +45,7 @@ class GroupResource(GroupBaseResource):
 
 
     def dehydrate_url(self, bundle):
-        url = reverse('groups:show', args=[bundle.obj.url])
+        url = reverse('groups:show_group', args=[bundle.obj.url])
         return utils.absolutify(url)
 
 

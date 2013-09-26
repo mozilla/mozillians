@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from funfactory.urlresolvers import reverse
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.groups.models import Group, GroupAlias, Skill
+from mozillians.groups.models import Group, Skill
 from mozillians.groups.forms import SortForm
 from mozillians.users.tasks import update_basket_task
 
@@ -44,18 +44,26 @@ def _list_groups(request, template, query):
     return render(request, template, data)
 
 
-def index(request):
+def index_groups(request):
     """Lists all public groups (in use) on Mozillians."""
     query = (Group.objects.filter(members__is_vouched=True)
              .annotate(num_members=Count('members')))
-    template = 'groups/index.html'
+    template = 'groups/index_groups.html'
+    return _list_groups(request, template, query)
+
+
+def index_skills(request):
+    """Lists all public groups (in use) on Mozillians."""
+    query = (Skill.objects.filter(members__is_vouched=True)
+             .annotate(num_members=Count('members')))
+    template = 'groups/index_skills.html'
     return _list_groups(request, template, query)
 
 
 def index_functional_areas(request):
     """Lists all curated groups."""
     query = Group.get_curated()
-    template = 'groups/areas.html'
+    template = 'groups/index_areas.html'
     return _list_groups(request, template, query)
 
 
@@ -77,18 +85,19 @@ def search(request, searched_object=Group):
 
 
 @never_cache
-def show(request, url):
+def show(request, url, alias_model, template):
     """List all vouched users with this group."""
-    group_alias = get_object_or_404(GroupAlias, url=url)
+    group_alias = get_object_or_404(alias_model, url=url)
     if group_alias.alias.url != url:
-        return redirect('groups:show', url=group_alias.alias.url)
+        return redirect('groups:show_group', url=group_alias.alias.url)
 
     group = group_alias.alias
-    in_group = (group.members.filter(user=request.user).exists())
+    in_group = group.members.filter(user=request.user).exists()
     profiles = group.members.vouched()
+
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
-    people = []
+
     try:
         people = paginator.page(page)
     except PageNotAnInteger:
@@ -96,19 +105,13 @@ def show(request, url):
     except EmptyPage:
         people = paginator.page(paginator.num_pages)
 
-    show_pagination = False
-    num_pages = 0
-    if paginator.count > settings.ITEMS_PER_PAGE:
-        show_pagination = True
-        num_pages = len(people.paginator.page_range)
-
+    show_pagination = paginator.count > settings.ITEMS_PER_PAGE
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
-                show_pagination=show_pagination,
-                num_pages=num_pages)
+                show_pagination=show_pagination)
 
-    if group.steward:
+    if isinstance(group, Group) and group.steward:
         """ Get the most globally popular skills that appear in the group
             Sort them with most members first
         """
@@ -120,14 +123,11 @@ def show(request, url):
         data.update(irc_channels=group.irc_channel.split(' '))
         data.update(members=profiles.count())
 
-    if request.is_ajax():
-        return render(request, 'search_ajax.html', data)
-
-    return render(request, 'groups/group.html', data)
+    return render(request, template, data)
 
 
 @require_POST
-def toggle_subscription(request, url):
+def toggle_group_subscription(request, url):
     """Toggle the current user's membership of a group."""
     group = get_object_or_404(Group, url=url)
     profile = request.user.userprofile
@@ -138,7 +138,20 @@ def toggle_subscription(request, url):
             profile.groups.remove(group)
         else:
             profile.groups.add(group)
-
         update_basket_task.delay(profile.id)
 
-    return redirect(reverse('groups:show', args=[group.url]))
+    return redirect(reverse('groups:show_group', args=[group.url]))
+
+
+@require_POST
+def toggle_skill_subscription(request, url):
+    """Toggle the current user's membership of a group."""
+    skill = get_object_or_404(Skill, url=url)
+    profile = request.user.userprofile
+
+    if profile.skills.filter(id=skill.id).exists():
+        profile.skills.remove(skill)
+    else:
+        profile.skills.add(skill)
+
+    return redirect(reverse('groups:show_skill', args=[skill.url]))

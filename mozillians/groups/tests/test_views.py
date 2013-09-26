@@ -10,7 +10,7 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.models import Group
+from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import (GroupFactory, GroupAliasFactory,
                                      LanguageFactory, SkillFactory)
 from mozillians.groups.views import _list_groups
@@ -95,7 +95,7 @@ class ListTests(TestCase):
 
 class IndexTests(TestCase):
     def setUp(self):
-        self.url = reverse('groups:index')
+        self.url = reverse('groups:index_groups')
 
     def test_index(self):
         user_1 = UserFactory.create(userprofile={'is_vouched': True})
@@ -110,7 +110,7 @@ class IndexTests(TestCase):
         with self.login(user_1) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'groups/index.html')
+        self.assertTemplateUsed(response, 'groups/index_groups.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([group_1, group_2]))
 
@@ -141,7 +141,7 @@ class IndexFunctionalAreasTests(TestCase):
         with self.login(user) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'groups/areas.html')
+        self.assertTemplateUsed(response, 'groups/index_areas.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([group_1]))
 
@@ -152,6 +152,37 @@ class IndexFunctionalAreasTests(TestCase):
 
     @requires_vouch()
     def test_index_functional_areas_unvouched(self):
+        user = UserFactory.create()
+        with self.login(user) as client:
+            client.get(self.url, follow=True)
+
+
+class IndexSkillsTests(TestCase):
+    def setUp(self):
+        self.url = reverse('groups:index_skills')
+
+    def test_index_skills(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        skill_1 = SkillFactory.create()
+        skill_2 = SkillFactory.create()
+        SkillFactory.create()
+        skill_1.members.add(user.userprofile)
+        skill_2.members.add(user.userprofile)
+
+        with self.login(user) as client:
+            response = client.get(self.url, follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/index_skills.html')
+        eq_(set(response.context['groups'].paginator.object_list),
+            set([skill_1, skill_2]))
+
+    @requires_login()
+    def test_index_skills_anonymous(self):
+        client = Client()
+        client.get(self.url, follow=True)
+
+    @requires_vouch()
+    def test_index_skills_unvouched(self):
         user = UserFactory.create()
         with self.login(user) as client:
             client.get(self.url, follow=True)
@@ -250,7 +281,7 @@ class SearchTests(TestCase):
 class ShowTests(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
-        self.url = reverse('groups:show', kwargs={'url': self.group.url})
+        self.url = reverse('groups:show_group', kwargs={'url': self.group.url})
         self.user_1 = UserFactory.create(userprofile={'is_vouched': True})
         self.user_2 = UserFactory.create(userprofile={'is_vouched': True})
         self.group.members.add(self.user_2.userprofile)
@@ -276,10 +307,9 @@ class ShowTests(TestCase):
         eq_(context['people'].paginator.count, 1)
         eq_(context['people'][0], self.user_2.userprofile)
 
-
     def test_show_empty_group(self):
         group = GroupFactory.create()
-        url = reverse('groups:show', kwargs={'url': group.url})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
@@ -298,7 +328,7 @@ class ShowTests(TestCase):
             client.get(self.url, follow=True)
 
     def test_nonexistant_group(self):
-        url = reverse('groups:show', kwargs={'url': 'invalid'})
+        url = reverse('groups:show_group', kwargs={'url': 'invalid'})
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 404)
@@ -307,19 +337,19 @@ class ShowTests(TestCase):
         user = UserFactory.create(userprofile={'is_vouched': True})
         group = GroupFactory.create()
         group_alias = GroupAliasFactory.create(alias=group)
-        url = reverse('groups:show', kwargs={'url': group_alias.url})
+        url = reverse('groups:show_group', kwargs={'url': group_alias.url})
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['group'], group)
 
 
-class ToggleSubscriptionTests(TestCase):
+class ToggleGroupSubscriptionTests(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        self.url = reverse('groups:toggle_subscription', prefix='/en-US/',
+        self.url = reverse('groups:toggle_group_subscription', prefix='/en-US/',
                            kwargs={'url': self.group.url})
         self.user = UserFactory.create(userprofile={'is_vouched': True})
 
@@ -341,14 +371,14 @@ class ToggleSubscriptionTests(TestCase):
         basket_task_mock.assert_called_with(self.user.userprofile.id)
 
     def test_nonexistant_group(self):
-        url = reverse('groups:toggle_subscription', prefix='/en-US/',
+        url = reverse('groups:toggle_group_subscription', prefix='/en-US/',
                       kwargs={'url': 'invalid'})
         with self.login(self.user) as client:
             response = client.post(url, follow=True)
         eq_(response.status_code, 404)
 
     def test_get(self):
-        url = reverse('groups:toggle_subscription',
+        url = reverse('groups:toggle_group_subscription',
                       kwargs={'url': self.group.url})
         with self.login(self.user) as client:
             response = client.get(url, follow=True)
@@ -367,9 +397,57 @@ class ToggleSubscriptionTests(TestCase):
 
     def test_system_group(self):
         system_group = GroupFactory.create(system=True)
-        url = reverse('groups:toggle_subscription', prefix='/en-US/',
+        url = reverse('groups:toggle_group_subscription', prefix='/en-US/',
                       kwargs={'url': system_group.url})
         with self.login(self.user) as client:
             client.post(url, follow=True)
         system_group = Group.objects.get(id=system_group.id)
         ok_(not system_group.members.filter(pk=self.user.pk).exists())
+
+
+class ToggleSkillSubscriptionTests(TestCase):
+    def setUp(self):
+        self.skill = SkillFactory.create()
+        # We must request the full path, with language, or the
+        # LanguageMiddleware will convert the request to GET.
+        self.url = reverse('groups:toggle_skill_subscription', prefix='/en-US/',
+                           kwargs={'url': self.skill.url})
+        self.user = UserFactory.create(userprofile={'is_vouched': True})
+
+    def test_skill_subscription(self):
+        with self.login(self.user) as client:
+            client.post(self.url, follow=True)
+        skill = Skill.objects.get(id=self.skill.id)
+        ok_(skill.members.filter(id=self.user.userprofile.id).exists())
+
+    def test_skill_unsubscription(self):
+        self.skill.members.add(self.user.userprofile)
+        with self.login(self.user) as client:
+            client.post(self.url, follow=True)
+        skill = Skill.objects.get(id=self.skill.id)
+        ok_(not skill.members.filter(id=self.user.userprofile.id).exists())
+
+    def test_nonexistant_skill(self):
+        url = reverse('groups:toggle_skill_subscription', prefix='/en-US/',
+                      kwargs={'url': 'invalid'})
+        with self.login(self.user) as client:
+            response = client.post(url, follow=True)
+        eq_(response.status_code, 404)
+
+    def test_get(self):
+        url = reverse('groups:toggle_skill_subscription',
+                      kwargs={'url': self.skill.url})
+        with self.login(self.user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 405)
+
+    @requires_vouch()
+    def test_unvouched(self):
+        user = UserFactory.create()
+        with self.login(user) as client:
+            client.post(self.url, follow=True)
+
+    @requires_login()
+    def test_anonymous(self):
+        client = Client()
+        client.post(self.url, follow=True)

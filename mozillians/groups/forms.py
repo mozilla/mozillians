@@ -13,7 +13,7 @@ from mozillians.groups.models import Group
 class SortForm(forms.Form):
     """Group Index Sort Form."""
     sort = forms.ChoiceField(required=False,
-                             choices=(('name', _lazy(u'Group Name A-Z')),
+                             choices=(('name', _lazy(u'Name A-Z')),
                                       ('-num_members', _lazy(u'Most Members')),
                                       ('num_members', _lazy(u'Fewest Members'))))
 
