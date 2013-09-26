@@ -121,13 +121,14 @@ class ProfileForm(happyforms.ModelForm):
 
         """
         photo = self.cleaned_data['photo']
-        image = Image.open(photo.file)
-        try:
-            image._get_exif()
-        except (AttributeError, IOError, KeyError, IndexError):
-            cleaned_photo = StringIO()
-            image.save(cleaned_photo, format='JPEG', quality=95)
-            photo.file = cleaned_photo
+        if photo:
+            image = Image.open(photo.file)
+            try:
+                image._get_exif()
+            except (AttributeError, IOError, KeyError, IndexError):
+                cleaned_photo = StringIO()
+                image.save(cleaned_photo, format='JPEG', quality=95)
+                photo.file = cleaned_photo
         return photo
 
     def clean_groups(self):
