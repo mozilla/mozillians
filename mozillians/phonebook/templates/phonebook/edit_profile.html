@@ -147,7 +147,7 @@
           {% endfor %}
         </div>
       {% endfor %}
-      <a href="#" class="addField"><i class="icon-plus-sign"></i> Add account</a>
+      <a href="#" class="addField"><i class="icon-plus-sign"></i>{{ _('Add account') }}</a>
     </fieldset>
 
     <fieldset>
@@ -180,12 +180,14 @@
         <div class="sizing">
           <div class="fitted">
             <h4>
-              Fitted
+              {{ _('Fitted') }}
               <div class="tshirt-info">
                 <i class="icon-info-sign"></i>
                 <span>
                   {% trans %}
-                    A fitted-cut tshirt has a curved side hem which comes in at the waist and goes out at the upper and lower ends. Also known as "women's".
+                    A fitted-cut tshirt has a curved side hem which
+                    comes in at the waist and goes out at the upper
+                    and lower ends. Also known as "women's".
                   {% endtrans %}
                 </span>
               </div>
@@ -200,12 +202,13 @@
           </div>
           <div class="straightcut">
             <h4>
-              Straight-cut
+              {{ _('Straight-cut') }}
               <div class="tshirt-info">
                 <i class="icon-info-sign"></i>
                 <span>
                   {% trans %}
-                    A straight-cut shirt has wide shoulders and a body which is almost square. Often known as "men's" or "unisex".
+                    A straight-cut shirt has wide shoulders and a body
+                    which is almost square. Often known as "men's" or "unisex".
                   {% endtrans %}
                 </span>
               </div>
