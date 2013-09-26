@@ -9,12 +9,12 @@
 {% endblock %}
 {% block body_id %}edit-profile{% endblock %}
 
-{% macro privacy_field(name, original_value) %}
+{% macro privacy_field(field) %}
 <div class="privacy-controls">
-  {{ bootstrap(field_with_attrs(name,
+  {{ bootstrap(field_with_attrs(field,
                                 **{'class':'privacy-choice',
                                    'label': _('Visible to:'),
-                                   'data-privacy-original': original_value})) }}
+                                   'data-privacy-original': field.value()})) }}
 </div>
 {% endmacro %}
 {% macro required_field(field) %}
@@ -56,7 +56,7 @@
   </header>
 
   <form action="{{ url('phonebook:profile_edit') }}" method="POST" enctype="multipart/form-data"
-        class="edit-profile">
+        id="edit-profile-form" class="edit-profile">
     {{ csrf() }}
 
     <fieldset class="privacy-all">
@@ -69,7 +69,7 @@
     </fieldset>
 
     <fieldset id="photo">
-      {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
+      {{ privacy_field(profile_form.privacy_photo) }}
       <label>{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
         <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
@@ -88,42 +88,42 @@
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_full_name, profile.privacy_full_name) }}
+      {{ privacy_field(profile_form.privacy_full_name) }}
       {{ required_field(profile_form.full_name) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_email, profile.privacy_email) }}
+      {{ privacy_field(profile_form.privacy_email) }}
       {{ required_field(email_form.email) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_country, profile.privacy_country) }}
+      {{ privacy_field(profile_form.privacy_country) }}
       {{ required_field(profile_form.country) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_region, profile.privacy_region) }}
+      {{ privacy_field(profile_form.privacy_region) }}
       {{ bootstrap(profile_form.region) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_city, profile.privacy_city) }}
+      {{ privacy_field(profile_form.privacy_city) }}
       {{ bootstrap(profile_form.city) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_timezone, profile.privacy_timezone) }}
+      {{ privacy_field(profile_form.privacy_timezone) }}
       {{ bootstrap(profile_form.timezone) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_bio, profile.privacy_bio) }}
+      {{ privacy_field(profile_form.privacy_bio) }}
       {{ bootstrap(profile_form.bio) }}
     </fieldset>
 
     <fieldset id="websites">
-      {{ privacy_field(profile_form.privacy_website, profile.privacy_website) }}
+      {{ privacy_field(profile_form.privacy_website) }}
       {{ bootstrap(profile_form.website) }}
     </fieldset>
 
@@ -131,12 +131,10 @@
       <label>{{ _('Accounts') }}</label>
       {{ accounts_formset.management_form }}
       {% for account_form in accounts_formset %}
-        <div class='newField'>
+        <div class='externalaccount-fieldrow'>
           {% for field in account_form %}
             {% if field.name == 'privacy' %}
-              <div class="privacy-controls">
-                {{field}}
-              </div>
+              {{ privacy_field(field) }}
             {% else %}
               {{ field.errors }}
               {% if field.name == 'DELETE' %}
@@ -151,12 +149,12 @@
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_ircname, profile.privacy_ircname) }}
+      {{ privacy_field(profile_form.privacy_ircname) }}
       {{ bootstrap(profile_form.ircname) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_date_mozillian, profile.privacy_date_mozillian) }}
+      {{ privacy_field(profile_form.privacy_date_mozillian) }}
       {{ bootstrap(
            field_with_attrs(
              profile_form.date_mozillian,
@@ -164,12 +162,12 @@
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_title, profile.privacy_title) }}
+      {{ privacy_field(profile_form.privacy_title) }}
       {{ bootstrap(profile_form.title) }}
     </fieldset>
 
     <fieldset id="shirts">
-      {{ privacy_field(profile_form.privacy_tshirt, profile.privacy_tshirt) }}
+      {{ privacy_field(profile_form.privacy_tshirt) }}
       <legend>{{ _('T-Shirt Size') }}</legend>
       <p class="field_description">
         {% trans %}
@@ -230,7 +228,7 @@
           or sub-community.
         {% endtrans %}
       </p>
-      {{ privacy_field(profile_form.privacy_groups, profile.privacy_groups) }}
+      {{ privacy_field(profile_form.privacy_groups) }}
       {{ profile_form.groups }}
       <div class="help_text">
         {{ profile_form.groups.label_tag() }}
@@ -247,7 +245,7 @@
         {% endtrans %}
       </p>
 
-      {{ privacy_field(profile_form.privacy_skills, profile.privacy_skills) }}
+      {{ privacy_field(profile_form.privacy_skills) }}
       {{ profile_form.skills }}
       <div class="help_text">
         {{ profile_form.skills.label_tag() }}
@@ -290,7 +288,7 @@
         {% endtrans %}
       </p>
 
-      {{ privacy_field(profile_form.privacy_languages, profile.privacy_languages) }}
+      {{ privacy_field(profile_form.privacy_languages) }}
       {{ profile_form.languages }}
       <div class="help_text">
         {{ profile_form.languages.label_tag() }}
@@ -416,7 +414,7 @@
 
     <fieldset id="edit_controls">
         {% if profile.is_complete %}
-          <button type="submit">{{ _('Update Profile') }}</button>
+          <button id="form-submit" type="submit">{{ _('Update Profile') }}</button>
           <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
             {{ _('Cancel') }}{# L10n: Cancel editing #}
           </a>
