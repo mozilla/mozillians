@@ -29,6 +29,18 @@ $(function() {
         }
     });
 
+    // Reset unused externalaccount fields to default privacy.
+    $('#form-submit').on('click', function(event) {
+        event.preventDefault();
+        $('.externalaccount-fieldrow').each(function(index, obj) {
+            if ($(obj).children('[id$=username]').val() === '') {
+                privacy_field = $(obj).find('[id$=privacy]');
+                privacy_field.val(privacy_field.data('privacy-original'));
+            }
+        });
+        $('#edit-profile-form').submit();
+    });
+
     // takes a jquery selector and the type of a formset to duplicate fields
     function cloneFormsetField(selector, type) {
         var $newElement = $(selector).clone(true);
@@ -46,12 +58,6 @@ $(function() {
         $('#id_' + type + '-TOTAL_FORMS').val(total);
         $(selector).after($newElement);
     }
-
-    // Adding and removing fields from create/edit profile form
-    $('#websites .addField').click(function() {
-        $('<div class="newField"><input type="text" value="" placeholder="" /></label> <a href="#" class="removeField"> <i class="icon-minus-sign"></i> Remove</a></div>').appendTo('#websites');
-        return false;
-    });
 
     $('#accounts .addField').click(function() {
         cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set')
