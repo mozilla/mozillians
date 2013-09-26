@@ -22,7 +22,7 @@ class OldGroupRedirectionMiddleware(object):
             and group_url
             and (Group.objects.filter(url=group_url.group('url')).exists())):
 
-            newurl = reverse('groups:show',
+            newurl = reverse('groups:show_group',
                              kwargs={'url': group_url.group('url')})
             if request.GET:
                 with safe_query_string(request):

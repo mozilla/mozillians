@@ -13,10 +13,11 @@
 
     <h1>
     {% if group.steward %}
-        {{ _('Curated Group: {name}')|f(name=group.name) }}
+        {{ _('Curated Group') }}:
     {% else %}
-        {{ _('Group: {name}')|f(name=group.name) }}
+        {{ _('Group') }}:
     {% endif %}
+     {{ group.name }}
     </h1>
 
     {% if group.steward %}
@@ -102,7 +103,7 @@
     {% endif %}
 
     {% if not group.system %}
-        <form action="{{ url('groups:toggle_subscription', group.url) }}"
+        <form action="{{ url('groups:toggle_group_subscription', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
         <button class="button button{{ ('-negative' if in_group) }}">

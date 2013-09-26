@@ -121,7 +121,7 @@
           <section class="groups">
             <h4>{{ _('Member of:') }}</h4>
             {% for group in user.userprofile.groups.all() %}
-              <a href="{{ url('groups:show', group.url) }}">{{ group }}</a>
+              <a href="{{ url('groups:show_group', group.url) }}">{{ group }}</a>
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
@@ -203,7 +203,7 @@
           <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
         </span>
         <h2>{{ _('Groups') }}</h2>
-        {% trans group_url=url('groups:index') %}
+        {% trans group_url=url('groups:index_groups') %}
           <p>
             Find and join groups centered around interests,
             technologies, geographies and more.
