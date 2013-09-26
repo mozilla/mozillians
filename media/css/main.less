@@ -170,7 +170,25 @@ body {
         }
     }
     &.loggedout {
-        #masthead { z-index: 1000; }
+        #masthead { 
+            z-index: 1000; 
+            nav {
+                @media (max-width: @breakTablet) {
+                    margin-left: 0;
+                }
+                @media (min-width: @breakMobileLandscape) and (max-width: @breakTablet) {
+                    #create_profile {
+                        position: absolute;
+                        top: 12px;
+                    }
+                }
+                @media (min-width: @breakMobileLandscape) and (max-width: @breakTablet) {
+                    #create_profile {
+                        position: normal;
+                    }
+                }
+            }
+        }
         #main {
             padding: 25px 0 50px;
             min-height: 500px;
@@ -637,6 +655,11 @@ body#home {
     &.loggedout {
         #content-wrapper {
             background: inherit;
+        }
+        nav #create_profile {
+            @media (max-width: @breakTablet) {
+                float: none;
+            }
         }
         #main {
         padding: 0;
