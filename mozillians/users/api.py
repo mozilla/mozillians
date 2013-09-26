@@ -240,13 +240,16 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         return bundle
 
     def dehydrate_groups(self, bundle):
-        return bundle.obj.groups.values_list('name')
+        groups = bundle.obj.groups.values_list('name', flat=True)
+        return list(groups)
 
     def dehydrate_skills(self, bundle):
-        return bundle.obj.skills.values_list('name')
+        skills = bundle.obj.skills.values_list('name', flat=True)
+        return list(skills)
 
     def dehydrate_languages(self, bundle):
-        return bundle.obj.languages.values_list('name')
+        languages = bundle.obj.languages.values_list('name', flat=True)
+        return list(languages)
 
     def dehydrate_photo(self, bundle):
         if bundle.obj.photo:
