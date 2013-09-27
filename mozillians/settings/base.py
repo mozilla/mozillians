@@ -160,26 +160,18 @@ MINIFY_BUNDLES = {
 
 LESS_PREPROCESS = False
 LESS_BIN = 'lessc'
-MIDDLEWARE_CLASSES = (
-    'funfactory.middleware.LocaleURLMiddleware',
-    'multidb.middleware.PinningRouterMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'session_csrf.CsrfMiddleware', # Must be after auth middleware.
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'commonware.middleware.FrameOptionsHeader',
-    'mobility.middleware.DetectMobileMiddleware',
-    'mobility.middleware.XMobileMiddleware',
+
+MIDDLEWARE_CLASSES = get_middleware(append=[
     'commonware.response.middleware.StrictTransportMiddleware',
+
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
+
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
-    'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
-)
+    'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
 
 # StrictTransport
 STS_SUBDOMAINS = True
