@@ -18,9 +18,9 @@
     {{ csrf() }}
     <button class="button button{{ ('-negative' if in_group) }}">
       {% if not in_group %}
-        {{ _('Join Group') }}
+        {{ _('Add Skill') }}
       {% else %}
-        {{ _('Leave Group') }}
+        {{ _('Remove Skill') }}
       {% endif %}
     </button>
   </form>
