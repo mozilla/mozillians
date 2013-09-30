@@ -137,11 +137,13 @@
         {% endif %}
 
         {% if user.userprofile.skills.count() %}
-          {% trans skill_count=user.userprofile.skills.count() %}
-            <h4>Has {{ skill_count }} skill</h4>
-            {% pluralize %}
-            <h4>Has {{ skill_count }} skills</h4>
-          {% endtrans %}
+          <section class="skills">	
+            <h4>{{ _('Skills') }}</h4>
+          	{% for skill in user.userprofile.skills.all() %}
+              <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
+              {%- if not loop.last %},{% endif %}
+            {% endfor %}
+          </section>
         {% endif %}
 
         {# Using this placeholder code for now.
