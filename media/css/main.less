@@ -465,6 +465,7 @@ nav {
             z-index: 1000;
             display: none;
             li {
+                overflow: hidden;
                 display: block;
                 line-height: 32px;
                 margin: 0;
@@ -479,11 +480,17 @@ nav {
                         color: @white;
                     }
                 }
-                &:first-child a {
+                &:first-child {
                     .border-radius(5px 5px 0px 0px);
+                    a {
+                        .border-radius(5px 5px 0px 0px); 
+                    }
                 }
-                &:last-child a {
+                &:last-child {
                     .border-radius(0px 0px 5px 5px);
+                    a {
+                        .border-radius(0px 0px 5px 5px);
+                    }
                 }
             }
             &:after {
