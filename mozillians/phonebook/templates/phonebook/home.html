@@ -142,6 +142,12 @@
             {% pluralize %}
             <h4>Has {{ skill_count }} skills</h4>
           {% endtrans %}
+          <div id="skills">
+              {% for skill in user.userprofile.skills.all() %}
+                  <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
+                {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
         {% endif %}
 
         {# Using this placeholder code for now.
