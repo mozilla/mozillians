@@ -556,3 +556,6 @@ class ExternalAccount(models.Model):
     def get_username_url(self):
         url = self.ACCOUNT_TYPES[self.type]['url'].format(username=urlquote(self.username))
         return iri_to_uri(url)
+
+    class Meta:
+        ordering = ['type']
