@@ -732,16 +732,10 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/verify_email.html')
         eq_(user.email, 'old@example.com')
 
-    def test_handling_of_broken_image(self):
-        """Handling of broken EXIF in images.
-
-        Images with bad EXIF data caused our app to crash. Test that
-        our workaround is working. Related bug 919736.
-        """
-
+    def _upload_photo(self, file_path):
+        """Helper for the next methods."""
         user = UserFactory.create(email='old@example.com',
                                   userprofile={'is_vouched': True})
-        file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
         data = {'full_name': user.userprofile.full_name,
                 'email': user.email,
                 'country': user.userprofile.country,
@@ -759,3 +753,27 @@ class ViewsTests(TestCase):
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
+
+    def test_exif_broken(self):
+        """Test image with broken EXIF data."""
+        file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
+        self._upload_photo(file_path)
+
+    def test_converted_larger_image(self):
+        """Test image which gets cleaned in forms.py.
+
+        Bug 921243 was caused of a valid image, without EXIF
+        data. That caused image._get_exif() in
+        phonebook.forms.ProfileForm.clean_photo to raise an
+        AttributeError and clean the image.
+
+        Cleaning the image (by re-saving) did not set the new file
+        size in the `photo` variable. If the cleaned image was larger
+        than the original image, this behavior resulted in corrupted
+        images being fed into PIL, which raises IOErrors.
+
+        This test reproduces that behavior and should fail if we don't
+        update the size of `photo` with the new cleaned image size.
+        """
+        file_path = os.path.join(os.path.dirname(__file__), 'broken_marshal.jpg')
+        self._upload_photo(file_path)
