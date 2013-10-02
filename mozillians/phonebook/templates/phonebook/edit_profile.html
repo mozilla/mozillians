@@ -120,6 +120,12 @@
     <fieldset>
       {{ privacy_field(profile_form.privacy_bio) }}
       {{ bootstrap(profile_form.bio) }}
+
+      <span class="under-input-field">
+        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+        {% endtrans %}
+      </span>
     </fieldset>
 
     <fieldset id="websites">
@@ -145,7 +151,9 @@
           {% endfor %}
         </div>
       {% endfor %}
-      <a href="#" class="addField"><i class="icon-plus-sign"></i>{{ _('Add account') }}</a>
+      <span class="under-input-field">
+        <a href="#" class="addField"><i class="icon-plus-sign"></i>{{ _('Add account') }}</a>
+      </span>
     </fieldset>
 
     <fieldset>
