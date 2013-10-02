@@ -150,7 +150,7 @@
           <div id="bio">
               <h3>{{ _('Bio') }}</h3>
               <p>
-                <span class="note">{{ profile.bio }}</span>
+                <span class="note">{{ profile.bio|markdown }}</span>
               </p>
           </div>
         {% endif %}

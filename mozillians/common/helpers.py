@@ -6,10 +6,13 @@ from django.template import Context
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
+import bleach
+import markdown as markdown_module
 from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from funfactory import utils
 from jingo import register
+from jinja2 import Markup
 from sorl.thumbnail import get_thumbnail
 
 
@@ -71,3 +74,16 @@ def redirect(to, *args, **kwargs):
     """Redirect with locale support."""
     url = reverse(to, args=args, kwargs=kwargs)
     return HttpResponseRedirect(url)
+
+
+@register.filter
+def markdown(text, allowed_tags=None, allowed_attributes=None, allowed_styles=None):
+    if not allowed_tags:
+        allowed_tags = ['p', 'em', 'li', 'ul', 'a', 'strong']
+    if not allowed_attributes:
+        allowed_attributes = ['href']
+    if not allowed_styles:
+        allowed_styles = []
+    text = markdown_module.markdown(text, safe_mode='remove')
+    clean_text = bleach.clean(text, allowed_tags, allowed_attributes, allowed_styles, strip=True)
+    return Markup(clean_text)
