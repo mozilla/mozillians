@@ -92,9 +92,15 @@
               <div class="status">
                 <i class="icon-calendar"></i>
                 {% if mozillian_years > 0 %}
-                  {% trans %}
-                    Mozillian for {{ mozillian_years }} years
-                  {% endtrans %}
+                  {% if mozillian_years  == 1 %}
+                    {% trans %}
+                      Mozillian for {{ mozillian_years }} year
+                    {% endtrans %}
+                  {% else %}
+                    {% trans %}
+                      Mozillian for {{ mozillian_years }} years
+                    {% endtrans %}
+                  {% endif %}
                 {% else %}
                     Mozillian for less than a year
                 {% endif %}
