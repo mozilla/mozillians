@@ -80,6 +80,6 @@ class MonthYearWidget(Widget):
         m = data.get(self.month_field % name)
         if y == m == "0":
             return None
-        if y and m:
-            return '%s-%s-%s' % (y, m, 1)
+        if y and m and y.isdigit() and m.isdigit():
+            return datetime.date(int(y), int(m), 1)
         return data.get(name, None)

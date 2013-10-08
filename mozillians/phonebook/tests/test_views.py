@@ -732,6 +732,16 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/verify_email.html')
         eq_(user.email, 'old@example.com')
 
+    def _get_privacy_fields(self, privacy_level):
+        """Helper which returns a dict with privacy fields set to privacy_level"""
+        data = {}
+        for field in UserProfilePrivacyModel._meta._fields():
+            data[field.name] = privacy_level
+
+        # privacy_tshirt field has only one level of privacy available
+        data['privacy_tshirt'] = PRIVILEGED
+        return data
+
     def _upload_photo(self, user, file_path):
         """Helper for the next methods."""
         data = {'full_name': user.userprofile.full_name,
@@ -742,11 +752,7 @@ class ViewsTests(TestCase):
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
                 'externalaccount_set-TOTAL_FORMS': '0'}
-
-        for field in UserProfilePrivacyModel._meta._fields():
-            data[field.name] = MOZILLIANS
-        data['privacy_tshirt'] = PRIVILEGED
-
+        data.update(self._get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
@@ -802,6 +808,29 @@ class ViewsTests(TestCase):
         data['privacy_tshirt'] = PRIVILEGED
 
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        eq_(response.status_code, 200)
+
+    def test_date_mozillian_validates_in_different_locales(self):
+        """Tests if date_mozillian validates when profile language is e.g. 'es'.
+
+        Related bug 914448.
+        """
+        user = UserFactory.create(email='es@example',
+                                  userprofile={'is_vouched': True})
+        data = {'full_name': user.userprofile.full_name,
+                'email': user.email,
+                'username': user.username,
+                'country': 'es',
+                'date_mozillian_year': '2013',
+                'date_mozillian_month': '1',
+                'externalaccount_set-MAX_NUM_FORMS': '1000',
+                'externalaccount_set-INITIAL_FORMS': '0',
+                'externalaccount_set-TOTAL_FORMS': '0'}
+        data.update(self._get_privacy_fields(MOZILLIANS))
+
+        url = reverse('phonebook:profile_edit', prefix='/es/')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
