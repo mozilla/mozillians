@@ -69,7 +69,7 @@
     </fieldset>
 
     <fieldset id="photo">
-      {{ privacy_field(profile_form.privacy_photo) }}
+      
       <label>{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
         <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
@@ -81,6 +81,7 @@
           <label>{{ _('Remove Profile Photo') }}</label>
         </div>
       {% endif %}
+      {{ privacy_field(profile_form.privacy_photo) }}
     </fieldset>
 
     <fieldset>
@@ -88,49 +89,48 @@
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_full_name) }}
       {{ required_field(profile_form.full_name) }}
+      {{ privacy_field(profile_form.privacy_full_name) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_email) }}
       {{ required_field(email_form.email) }}
+      {{ privacy_field(profile_form.privacy_email) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_country) }}
       {{ required_field(profile_form.country) }}
+      {{ privacy_field(profile_form.privacy_country) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_region) }}
       {{ bootstrap(profile_form.region) }}
+      {{ privacy_field(profile_form.privacy_region) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_city) }}
       {{ bootstrap(profile_form.city) }}
+      {{ privacy_field(profile_form.privacy_city) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_timezone) }}
       {{ bootstrap(profile_form.timezone) }}
+      {{ privacy_field(profile_form.privacy_timezone) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_bio) }}
       {{ bootstrap(profile_form.bio) }}
-
       <span class="under-input-field">
         {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
           Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
         {% endtrans %}
       </span>
+      {{ privacy_field(profile_form.privacy_bio) }}
     </fieldset>
 
     <fieldset id="websites">
-      {{ privacy_field(profile_form.privacy_website) }}
       {{ bootstrap(profile_form.website) }}
+      {{ privacy_field(profile_form.privacy_website) }}
     </fieldset>
 
     <fieldset id="accounts">
@@ -139,14 +139,14 @@
       {% for account_form in accounts_formset %}
         <div class='externalaccount-fieldrow'>
           {% for field in account_form %}
-            {% if field.name == 'privacy' %}
-              {{ privacy_field(field) }}
-            {% else %}
+            {% if not field.name == 'privacy' %}
               {{ field.errors }}
+              {{ field }}
               {% if field.name == 'DELETE' %}
                 <i class="icon-minus-sign"></i> {{ _('Delete') }}
               {% endif %}
-              {{ field }}
+            {% else %}
+              {{ privacy_field(field) }}
             {% endif %}
           {% endfor %}
         </div>
@@ -157,25 +157,24 @@
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_ircname) }}
       {{ bootstrap(profile_form.ircname) }}
+      {{ privacy_field(profile_form.privacy_ircname) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_date_mozillian) }}
       {{ bootstrap(
            field_with_attrs(
              profile_form.date_mozillian,
              **{'label': _('When did you get involved with Mozilla?')})) }}
+      {{ privacy_field(profile_form.privacy_date_mozillian) }}
     </fieldset>
 
     <fieldset>
-      {{ privacy_field(profile_form.privacy_title) }}
       {{ bootstrap(profile_form.title) }}
+      {{ privacy_field(profile_form.privacy_title) }}
     </fieldset>
 
     <fieldset id="shirts">
-      {{ privacy_field(profile_form.privacy_tshirt) }}
       <legend>{{ _('T-Shirt Size') }}</legend>
       <p class="field_description">
         {% trans %}
@@ -226,8 +225,10 @@
                 <label>{{ t_select.1 }}</label>
               </div>
             {% endfor %}
+          </div>
         </div>
       {% endwith %}
+      {{ privacy_field(profile_form.privacy_tshirt) }}
     </fieldset>
 
     <fieldset id="groups">
@@ -239,11 +240,11 @@
           or sub-community.
         {% endtrans %}
       </p>
-      {{ privacy_field(profile_form.privacy_groups) }}
       {{ profile_form.groups }}
       <div class="help_text">
         {{ profile_form.groups.label_tag() }}
       </div>
+      {{ privacy_field(profile_form.privacy_groups) }}
     </fieldset>
 
     <fieldset id="skills">
@@ -255,12 +256,11 @@
           both.
         {% endtrans %}
       </p>
-
-      {{ privacy_field(profile_form.privacy_skills) }}
       {{ profile_form.skills }}
       <div class="help_text">
         {{ profile_form.skills.label_tag() }}
       </div>
+      {{ privacy_field(profile_form.privacy_skills) }}
     </fieldset>
 
     {# Leaving code as placeholder, for when we are ready to add preferred language. #}
@@ -298,12 +298,11 @@
           easily by other Mozillians.
         {% endtrans %}
       </p>
-
-      {{ privacy_field(profile_form.privacy_languages) }}
       {{ profile_form.languages }}
       <div class="help_text">
         {{ profile_form.languages.label_tag() }}
       </div>
+      {{ privacy_field(profile_form.privacy_languages) }}
     </fieldset>
 
     <fieldset id="services">
