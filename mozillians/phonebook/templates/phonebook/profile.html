@@ -93,6 +93,8 @@
                 <i class="icon-calendar"></i>
                 {% if mozillian_years > 0 %}
                   {% trans %}
+                    Mozillian for {{ mozillian_years }} year
+                    {% pluralize %}
                     Mozillian for {{ mozillian_years }} years
                   {% endtrans %}
                 {% else %}
