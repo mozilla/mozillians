@@ -82,7 +82,7 @@
 
 				_self._init( options );
 
-			} ).attr( 'src', '/media/img/mosaic/loading.gif' );
+			} ).attr( 'src', '/static/img/mosaic/loading.gif' );
 
 		}
 		
