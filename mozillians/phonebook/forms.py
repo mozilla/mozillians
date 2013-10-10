@@ -5,6 +5,7 @@ from datetime import datetime
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import UploadedFile
 
 import happyforms
 from PIL import Image
@@ -121,7 +122,7 @@ class ProfileForm(happyforms.ModelForm):
 
         """
         photo = self.cleaned_data['photo']
-        if photo:
+        if photo and isinstance(photo, UploadedFile):
             image = Image.open(photo.file)
             try:
                 image._get_exif()
