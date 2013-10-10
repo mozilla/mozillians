@@ -27,6 +27,7 @@ from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, ExternalAccount, UserProfile
 
+
 class BrowserIDVerify(Verify):
     def form_valid(self, form):
         """Custom form validation to support email changing.
@@ -40,7 +41,8 @@ class BrowserIDVerify(Verify):
         if not self.request.user.is_authenticated():
             return super(BrowserIDVerify, self).form_valid(form)
 
-        failure_url = urlparams(reverse('phonebook:profile_edit'), bid_login_failed=1)
+        failure_url = urlparams(reverse('phonebook:profile_edit'),
+                                bid_login_failed=1)
         self.assertion = form.cleaned_data['assertion']
         self.audience = get_audience(self.request)
         result = verify(self.assertion, self.audience)
@@ -51,7 +53,8 @@ class BrowserIDVerify(Verify):
         email = result['email']
 
         if User.objects.filter(email=email).exists():
-            messages.error(self.request, _('Email already exists in the database.'))
+            messages.error(self.request,
+                           _('Email already exists in the database.'))
             return redirect('phonebook:logout')
 
         user = self.request.user
@@ -78,15 +81,18 @@ def home(request):
 def view_profile(request, username):
     """View a profile by username."""
     data = {}
-    privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
-                        'privileged': PRIVILEGED, 'myself': None}
+    privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS,
+                        'employee': EMPLOYEES, 'privileged': PRIVILEGED,
+                        'myself': None}
     privacy_level = None
 
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
         view_as = request.GET.get('view_as', 'myself')
         privacy_level = privacy_mappings.get(view_as, None)
-        profile = UserProfile.objects.privacy_level(privacy_level).get(user__username=username)
+        profile = (UserProfile.objects
+                              .privacy_level(privacy_level)
+                              .get(user__username=username))
         data['privacy_mode'] = view_as
     else:
         userprofile_query = UserProfile.objects.filter(user__username=username)
@@ -98,7 +104,8 @@ def view_profile(request, username):
             if not request.user.is_authenticated():
                 # you have to be authenticated to continue
                 messages.warning(request, LOGIN_MESSAGE)
-                return (login_required(view_profile, login_url=reverse('phonebook:home'))
+                return (login_required(view_profile,
+                        login_url=reverse('phonebook:home'))
                         (request, username))
 
             if not request.user.userprofile.is_vouched:
@@ -117,7 +124,7 @@ def view_profile(request, username):
 
         if (not profile.is_vouched
             and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
+                and request.user.userprofile.is_vouched):
             data['vouch_form'] = (
                 forms.VouchForm(initial={'vouchee': profile.pk}))
 
@@ -138,7 +145,8 @@ def edit_profile(request):
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
-    AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount, extra=1)
+    AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
+                                            extra=1)
     accounts_formset = AccountsFormset(request.POST or None, instance=profile)
     new_profile = False
     form = forms.ProfileForm
@@ -155,8 +163,8 @@ def edit_profile(request):
                                  initial={'email': request.user.email,
                                           'user_id': request.user.id})
 
-    if (user_form.is_valid() and profile_form.is_valid() and accounts_formset.is_valid() and
-        email_form.is_valid()):
+    if (user_form.is_valid() and profile_form.is_valid() and
+            accounts_formset.is_valid() and email_form.is_valid()):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
@@ -178,8 +186,8 @@ def edit_profile(request):
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
-                accounts_formset = accounts_formset,
-                email_form = email_form,
+                accounts_formset=accounts_formset,
+                email_form=email_form,
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
@@ -215,7 +223,6 @@ def delete(request):
 
 @allow_public
 def search(request):
-    num_pages = 0
     limit = None
     people = []
     show_pagination = False
@@ -280,8 +287,8 @@ def invite(request):
         invite = invite_form.save()
         invite.send(sender=profile)
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
-                 "with instructions on how to join. You can "
-                 "invite another Mozillian if you like." % invite.recipient)
+                "with instructions on how to join. You can "
+                "invite another Mozillian if you like." % invite.recipient)
         messages.success(request, msg)
         return redirect('phonebook:home')
 
@@ -300,7 +307,7 @@ def vouch(request):
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                 'This user is now vouched!')
+                'This user is now vouched!')
         messages.info(request, msg)
         return redirect('phonebook:profile_view', p.user.username)
 
@@ -311,15 +318,32 @@ def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, country)
     queryset = UserProfile.objects.vouched().filter(country=country)
+    show_pagination = False
+
     if city:
         queryset = queryset.filter(city__iexact=city)
     if region:
         queryset = queryset.filter(region__iexact=region)
 
-    data = {'people': queryset,
+    paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
+    page = request.GET.get('page', 1)
+
+    try:
+        people = paginator.page(page)
+    except PageNotAnInteger:
+        people = paginator.page(1)
+    except EmptyPage:
+        people = paginator.page(paginator.num_pages)
+
+    if paginator.count > settings.ITEMS_PER_PAGE:
+        show_pagination = True
+
+    data = {'people': people,
             'country_name': country_name,
             'city_name': city,
-            'region_name': region}
+            'region_name': region,
+            'page': page,
+            'show_pagination': show_pagination}
     return render(request, 'phonebook/location-list.html', data)
 
 
@@ -350,7 +374,8 @@ def register(request):
             if not request.user.userprofile.is_vouched:
                 update_invites(request)
         else:
-            messages.info(request, _("You've been invited to join Mozillians.org!"
-                                     "Sign in and then you can create a profile."))
+            messages.info(request,
+                          _("You've been invited to join Mozillians.org!"
+                            "Sign in and then you can create a profile."))
 
     return redirect('phonebook:home')
