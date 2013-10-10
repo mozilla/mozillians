@@ -10,7 +10,12 @@ VirtualEnv Installation
    they will be happy to help.
 
 
-**Prerequisites:** You 'll need python 2, virtualenv and pip. You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
+**Prerequisites:** You 'll need python 2, virtualenv and pip.  You'll also need
+mysql-dev (or the equivalent on your system) (even if you aren't using MySQL
+locally), and MySQL server if you want to use MySQL instead of the local default
+of sqlite.
+
+You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
 
 When you want to start contributing...
 
@@ -55,7 +60,7 @@ When you want to start contributing...
 
 #. Configure your local mozillians installation::
 
-     (venv)$ cp settings/local.py-devdist settings/local.py
+     (venv)$ cp mozillians/settings/local.py-devdist mozillians/settings/local.py
 
    .. note::
 
@@ -67,8 +72,11 @@ When you want to start contributing...
 #. Download and run elastic search::
 
      (venv)$ wget http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.19.4.tar.gz -O /tmp/es.tar.gz
-     (venv)$ tar xvf /tmp/es.tar.gz -C venv/
-     (venv)$ ./venv/elasticsearch-0.19.4/bin/elasticsearch -p venv/es.pid >/dev/null 2>&1
+     (venv)$ tar xvf /tmp/es.tar.gz -C $VIRTUAL_ENV
+     (venv)$ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
+
+That will start elastic search in the background; be sure to see the instructions
+later on for stopping it when you're done working on Mozillians.
 
 #. Update product details::
 
@@ -76,7 +84,15 @@ When you want to start contributing...
 
 #. Sync DB::
 
-     (venv)$ ./manage.py syncdb --noinput && ./manage.py migrate
+You ought to be able to do::
+
+     (venv)$ ./manage.py syncdb --noinput --migrate
+
+but the migrations currently don't work from scratch, so you can get to the
+same state this way::
+
+     (venv)$ ./manage.py syncdb --noinput --all
+     (venv)$ ./manage.py migrate --fake
 
 #. Create user:
 
@@ -84,7 +100,7 @@ When you want to start contributing...
 
         ./manage.py runserver 127.0.0.1:8000
 
-     #. Load http://127.0.0.1:8000 and sign in with BrowserID, then create your profile.
+     #. Load http://127.0.0.1:8000 and sign in with Persona, then create your profile.
      #. Automatically vouch your account and convert it to superuser::
 
         ./scripts/su.sh
@@ -96,7 +112,7 @@ When you want to start contributing...
    done with your coding session, do not forget to kill the `elastic
    search` process::
 
-     (venv)$ kill `cat venv/es.pid`
+     (venv)$ kill `cat $VIRTUAL_ENV/es.pid`
 
    and deactivate your virtual python environment by running::
 
@@ -105,11 +121,11 @@ When you want to start contributing...
    Next time, before starting you will need to start `elasticsearch`
    server again::
 
-     $ ./venv/elasticsearch-0.19.4/bin/elasticsearch -p venv/es.pid >/dev/null 2>&1
+     $ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid >/dev/null 2>&1
 
    and activate your environment by typing::
 
-     $ source venv/bin/activate
+     $ . $VIRTUAL_ENV/bin/activate
 
    Have fun!
 
