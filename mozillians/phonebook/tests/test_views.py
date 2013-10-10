@@ -732,10 +732,8 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/verify_email.html')
         eq_(user.email, 'old@example.com')
 
-    def _upload_photo(self, file_path):
+    def _upload_photo(self, user, file_path):
         """Helper for the next methods."""
-        user = UserFactory.create(email='old@example.com',
-                                  userprofile={'is_vouched': True})
         data = {'full_name': user.userprofile.full_name,
                 'email': user.email,
                 'country': user.userprofile.country,
@@ -756,8 +754,9 @@ class ViewsTests(TestCase):
 
     def test_exif_broken(self):
         """Test image with broken EXIF data."""
+        user = UserFactory.create(userprofile={'is_vouched': True})
         file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
-        self._upload_photo(file_path)
+        self._upload_photo(user, file_path)
 
     def test_converted_larger_image(self):
         """Test image which gets cleaned in forms.py.
@@ -775,5 +774,34 @@ class ViewsTests(TestCase):
         This test reproduces that behavior and should fail if we don't
         update the size of `photo` with the new cleaned image size.
         """
+        user = UserFactory.create(userprofile={'is_vouched': True})
         file_path = os.path.join(os.path.dirname(__file__), 'broken_marshal.jpg')
-        self._upload_photo(file_path)
+        self._upload_photo(user, file_path)
+
+    def test_save_profile_with_existing_photo(self):
+        """Test profiles saves when keep the existing photo.
+
+        Related bug 925256.
+        """
+        # Set a user with a photo
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        file_path = os.path.join(os.path.dirname(__file__), 'normal_photo.jpg')
+        self._upload_photo(user, file_path)
+
+        # Re-save profile without uploading a new photo.
+        data = {'full_name': user.userprofile.full_name,
+                'email': user.email,
+                'country': user.userprofile.country,
+                'username': user.username,
+                'externalaccount_set-MAX_NUM_FORMS': '1000',
+                'externalaccount_set-INITIAL_FORMS': '0',
+                'externalaccount_set-TOTAL_FORMS': '0'}
+
+        for field in UserProfilePrivacyModel._meta._fields():
+            data[field.name] = MOZILLIANS
+        data['privacy_tshirt'] = PRIVILEGED
+
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        eq_(response.status_code, 200)
