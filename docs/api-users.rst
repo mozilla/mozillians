@@ -61,7 +61,7 @@ Parameters
         *Optional* **string (comma-separated list)** - Return users with matching languages
 
     ``groups``
-        *Optional* **string (comma-separated list)** - Return users with matching languages
+        *Optional* **string (comma-separated list)** - Return users with matching groups
 
     ``limit``
         *Optional* **integer** - Return some number of results **Max: 500, Default: 20**
