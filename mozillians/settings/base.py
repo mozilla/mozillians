@@ -105,7 +105,7 @@ MINIFY_BUNDLES = {
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.8.3.min.js',
+            'js/libs/jquery-1.7.2.js',
             'js/libs/jquery-ui-1.8.7.custom.min.js',
             'js/libs/jquery.placeholder.min.js',
             'js/main.js',
