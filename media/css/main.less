@@ -1236,6 +1236,7 @@ body#edit-profile {
             margin-bottom: 20px;
             padding-bottom: 20px;
             border-bottom: 1px solid lighten(@black,90%);
+            position: relative;
             input, textarea {
                 border: 1px solid lighten(@black,90%);
             }
@@ -1295,7 +1296,7 @@ body#edit-profile {
                 position: relative;
                 height: 150px;
                 @media (max-width: @breakMobileLandscape) {
-                    height: 220px;
+                    height: 200px;
                 }
                 .profile-photo {
                     .rounded-image;
@@ -1304,7 +1305,7 @@ body#edit-profile {
                     margin-left: 120px;
                     @media (max-width: @breakMobileLandscape) {
                         margin-left: 0;
-                        top: 75px;
+                        top: 30px;
                     }
                 }
                 label {
@@ -1314,28 +1315,25 @@ body#edit-profile {
                 }
                 input {
                     margin-top: 90px;
-                    @media (max-width: @breakTablet) {
-                        margin-top: 60px;
-                        margin-left: 120px;
-                    }
                     @media (max-width: @breakMobileLandscape) {
                         margin-left: 0;
-                        margin-top: 90px;
+                        margin-top: 100px;
                     }
                 }
             }
             .privacy-controls {
-                float: right;
+                position: absolute;
+                top: 0;
+                right: 0;
                 width: 190px;
                 text-align: right;
-                .clearfix;
                 label { margin-top: 3px; }
-                @media (max-width: @breakMobileLandscape) {
-                    text-align: left;
-                    float: none;
-                    width: auto;
-                    margin-bottom: 20px;
-                    label { margin: 0; }
+                @media (max-width: @breakTablet) {
+                    position: relative;
+                    top: auto;
+                    right: auto;
+                    padding-top: 25px;
+                    label { margin: 0 8px 0 0; }
                 }
             }
             &#edit_controls {
@@ -1354,6 +1352,9 @@ body#edit-profile {
                         font-style: italic;
                         font-weight: normal;
                     }
+                    @media (max-width: @breakMobileLandscape) {
+                        padding-bottom: 25px;
+                    }
                 }
             }
             &#delete {
@@ -1370,10 +1371,21 @@ body#edit-profile {
                     float: none;
                 }
             }
-            .externalaccount-fieldrow {
-                margin: 10px 0 10px 130px;
-                @media (max-width: 700px) {
-                    margin: 10px 0;
+            &#accounts {
+                .externalaccount-fieldrow {
+                    margin: 10px 0 10px 130px;
+                    @media (max-width: @breakTablet) {
+                        margin: 0;
+                        padding: 25px 0;
+                    }
+                }
+                .privacy-controls {
+                    position: relative;
+                    float: right;
+                    .clearfix;
+                    @media (max-width: @breakTablet) {
+                        float: none;
+                    }
                 }
             }
             &#services, &#invites {
@@ -1396,7 +1408,7 @@ body#edit-profile {
             }
             &#shirts {
                 .tshirt-option { float: left; }
-                label {
+                .sizing label {
                     float: none;
                     font-weight: normal;
                 }
