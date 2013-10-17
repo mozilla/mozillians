@@ -1,6 +1,8 @@
 from django.db.models import Q, Manager
 from django.db.models.query import QuerySet, ValuesQuerySet
 
+from tower import ugettext_lazy as _lazy
+
 from mozillians.groups.models import Group, Language, Skill
 
 
@@ -8,8 +10,8 @@ PRIVILEGED = 1
 EMPLOYEES = 2
 MOZILLIANS = 3
 PUBLIC = 4
-PRIVACY_CHOICES = ((MOZILLIANS, 'Mozillians'),
-                   (PUBLIC, 'Public'))
+PRIVACY_CHOICES = ((MOZILLIANS, _lazy(u'Mozillians')),
+                   (PUBLIC, _lazy(u'Public')))
 PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 DEFAULT_PRIVACY_FIELDS = {
     'photo': None,
