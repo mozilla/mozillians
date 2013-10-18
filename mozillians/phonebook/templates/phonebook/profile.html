@@ -210,6 +210,14 @@
             </ul>
           </div>
         {% endif %}
+        {% if profile.vouched_by %}
+          <div id="vouched_by" class="p-category category">
+            <h3>{{ _('Vouched By') }}</h3>
+            <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}" class="vouched">
+              {{ profile.vouched_by.display_name }}
+            </a> 
+          </div>
+        {% endif %}
       </section>
 
       <section id="profile-contact">
