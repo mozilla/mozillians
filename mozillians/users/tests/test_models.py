@@ -274,7 +274,7 @@ class UserProfileTests(TestCase):
         public_profile = user.userprofile
         public_profile.set_instance_privacy_level(PUBLIC)
         eq_(public_profile.email, user.email)
-    
+
     def test_tshirt_public(self):
         user = UserFactory.create(userprofile={'tshirt': 9})
         public_profile = user.userprofile
@@ -436,6 +436,31 @@ class UserProfileTests(TestCase):
         ok_(email_vouched_mock.called)
 
 
+    def test_voucher_public(self):
+        voucher = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'vouched_by': voucher.userprofile})
+        voucher_profile = voucher.userprofile
+        voucher_profile.privacy_full_name = PUBLIC
+        voucher_profile.save()
+
+        user_profile = user.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+
+        eq_(user_profile.vouched_by, voucher.userprofile)
+
+    def test_voucher_nonpublic(self):
+        voucher = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'vouched_by': voucher.userprofile})
+        user_profile = user.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+
+        eq_(user_profile.vouched_by, None)
+
+
 class CalculatePhotoFilenameTests(TestCase):
     @patch('mozillians.users.models.uuid.uuid4', wraps=uuid4)
     def test_base(self, uuid4_mock):
@@ -454,7 +479,7 @@ class ExternalAccountTests(TestCase):
     def test_get_url_unicode(self):
         profile = UserFactory.create().userprofile
         account = profile.externalaccount_set.create(type=3, username=u'sammyウ')
-        ok_('%E3%82%A6' in account.get_username_url())        
+        ok_('%E3%82%A6' in account.get_username_url())
 
     def test_urls_contain_usernames(self):
         for value, account in ExternalAccount.ACCOUNT_TYPES.iteritems():

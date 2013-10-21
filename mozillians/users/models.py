@@ -160,15 +160,52 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         ordering = ['full_name']
 
     def __getattribute__(self, attrname):
-        _getattr = (lambda x:
-                    super(UserProfile, self).__getattribute__(x))
+        """Special privacy aware __getattribute__ method.
+
+        This method returns the real value of the attribute of object,
+        if the privacy_level of the attribute is at least as large as
+        the _privacy_level attribute.
+
+        Otherwise it returns a default privacy respecting value for
+        the attribute, as defined in the privacy_fields dictionary.
+
+        Special case is the vouched_by attribute:
+
+        Since vouched_by refers to another UserProfile object with
+        different privacy settings per attribute, we need to load that
+        object and check if any of its privacy enabled attributes are
+        available in the current privacy level.
+
+        If yes, we return the real UserProfile object, making sure
+        that we set the privacy_level of the returned instance to the
+        same privacy level as this instance.
+
+        If the object is not available in the current privacy level,
+        we return None.
+
+        """
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         privacy_fields = _getattr('_privacy_fields')
         privacy_level = _getattr('_privacy_level')
-        if privacy_level is not None and attrname in privacy_fields:
-            field_privacy = _getattr('privacy_%s' % attrname)
-            if field_privacy < privacy_level:
-                return privacy_fields.get(attrname)
-        return super(UserProfile, self).__getattribute__(attrname)
+
+        if not privacy_level or attrname not in privacy_fields:
+            return _getattr(attrname)
+
+        if attrname == 'vouched_by':
+            voucher = _getattr('vouched_by')
+            if voucher:
+                voucher.set_instance_privacy_level(privacy_level)
+                for field in privacy_fields:
+                    if ((getattr(voucher, 'privacy_%s' % field) >=
+                         privacy_level)):
+                        return voucher
+            return None
+
+        field_privacy = _getattr('privacy_%s' % attrname)
+        if field_privacy < privacy_level:
+            return privacy_fields.get(attrname)
+
+        return _getattr(attrname)
 
     @classmethod
     def extract_document(cls, obj_id, obj=None):
