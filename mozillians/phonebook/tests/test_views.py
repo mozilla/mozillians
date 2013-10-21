@@ -764,6 +764,16 @@ class ViewsTests(TestCase):
         file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
         self._upload_photo(user, file_path)
 
+    def test_no_rgb_colorspace(self):
+        """Test with image not in RGB colorspace.
+
+        Related bug 928959.
+        """
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        file_path = os.path.join(os.path.dirname(__file__),
+                                 'broken_colorspace.gif')
+        self._upload_photo(user, file_path)
+
     def test_converted_larger_image(self):
         """Test image which gets cleaned in forms.py.
 
