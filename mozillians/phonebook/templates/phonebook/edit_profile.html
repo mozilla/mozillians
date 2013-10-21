@@ -137,10 +137,13 @@
       <label>{{ _('Accounts') }}</label>
       {{ accounts_formset.management_form }}
       {% for account_form in accounts_formset %}
-        <div class='externalaccount-fieldrow'>
+        <div class="externalaccount-fieldrow
+                    {% if account_form.errors %} error{% endif %}">
+          {% for field in account_form %}
+            {{ field.errors }}
+          {% endfor %}
           {% for field in account_form %}
             {% if not field.name == 'privacy' %}
-              {{ field.errors }}
               {{ field }}
               {% if field.name == 'DELETE' %}
                 <i class="icon-minus-sign"></i> {{ _('Delete') }}
@@ -152,7 +155,7 @@
         </div>
       {% endfor %}
       <span class="under-input-field">
-        <a href="#" class="addField"><i class="icon-plus-sign"></i>{{ _('Add account') }}</a>
+        <a href="#" class="addField"><i class="icon-plus-sign"></i> {{ _('Add account') }}</a>
       </span>
     </fieldset>
 
