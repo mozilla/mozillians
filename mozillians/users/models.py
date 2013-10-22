@@ -527,11 +527,11 @@ class ExternalAccount(models.Model):
     ACCOUNT_TYPES = {
         0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}/'},
         # All bugs assigned to or reported by the user.
-        1:{'name': 'Bugzilla', 'url': ('https://bugzilla.mozilla.org/'
-                                       'buglist.cgi?emailtype1=exact'
-                                       '&query_format=advanced'
-                                       '&emailassigned_to1=1'
-                                       '&email1={username}')},
+        1:{'name': 'Bugzilla (BMO)', 'url': ('https://bugzilla.mozilla.org/'
+                                             'buglist.cgi?emailtype1=exact'
+                                             '&query_format=advanced'
+                                             '&emailassigned_to1=1'
+                                             '&email1={username}')},
         2:{'name': 'Github', 'url': 'https://github.com/{username}'},
         3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
         4:{'name': 'Mozilla Support', 'url': ''},
@@ -540,7 +540,7 @@ class ExternalAccount(models.Model):
         7:{'name': 'AIM', 'url': ''},
         8:{'name': 'Google Talk', 'url': ''},
         9:{'name': 'Skype', 'url': ''},
-        10:{'name': 'Yahoo!', 'url': ''},
+        10:{'name': 'Yahoo! Messenger', 'url': ''},
     }
     user = models.ForeignKey(UserProfile)
     username = models.CharField(max_length=255, verbose_name=_lazy('Account Username'))
