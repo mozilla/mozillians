@@ -1373,11 +1373,16 @@ body#edit-profile {
             }
             &#accounts {
                 .externalaccount-fieldrow {
-                    margin: 10px 0 10px 130px;
+                    margin: 0 0 25px 130px;
                     @media (max-width: @breakTablet) {
                         margin: 0;
                         padding: 25px 0;
                     }
+                    input, select {
+                        float: left;
+                    }
+                    input { margin-right: 8px; }
+                    .error-message { margin: 0; }
                 }
                 .privacy-controls {
                     position: relative;
