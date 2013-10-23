@@ -22,7 +22,7 @@
 {% block content %}
   {% if not user.is_authenticated() %}
     <hgroup id="main-feature">
-      <img id="mozillians-logo" src="{{ MEDIA_URL }}img/mozillians-logo.png" alt="Mozillians">
+      <img id="mozillians-logo" src="{{ static('img/mozillians-logo.png') }}" alt="Mozillians">
       <hr>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input autofocus type="text" name="q" class="search-query"
@@ -34,7 +34,7 @@
       <div class="container">
         <section id="quote">
             <span>
-              <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ MEDIA_URL }}img/homequote-mitchell-baker.png">
+              <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ static('img/homequote-mitchell-baker.png') }}">
             </span>
             <blockquote>
               <p>
@@ -188,7 +188,7 @@
       </section>
       <section class="functional-areas">
         <span class="icon">
-          <img src="{{ MEDIA_URL }}img/homepage-funcareas.jpg" alt="Functional areas">
+          <img src="{{ static('img/homepage-funcareas.jpg') }}" alt="Functional areas">
         </span>
         <h2>{{ _('Functional areas') }}</h2>
         {% trans areas_url=url('groups:index_functional_areas') %}
@@ -202,7 +202,7 @@
       </section>
       <section class="groups">
         <span class="icon">
-          <img src="{{ MEDIA_URL }}img/homepage-groups.jpg" alt="Groups">
+          <img src="{{ static('img/homepage-groups.jpg') }}" alt="Groups">
         </span>
         <h2>{{ _('Groups') }}</h2>
         {% trans group_url=url('groups:index_groups') %}
