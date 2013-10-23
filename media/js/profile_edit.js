@@ -57,6 +57,7 @@ $(function() {
         total++;
         $('#id_' + type + '-TOTAL_FORMS').val(total);
         $newElement.find('.errorlist').remove();
+        $newElement.removeClass('error');
         $(selector).after($newElement);
     }
 
