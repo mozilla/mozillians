@@ -53,8 +53,8 @@ When you want to start contributing...
 
    .. note::
 
-      Since you are using a virtual environment all the python
-      packages you will install while the environment is active,
+      Since you are using a virtual environment, all the python
+      packages you will install while the environment is active
       will be available only within this environment. Your system's
       python libraries will remain intact.
 
@@ -75,21 +75,21 @@ When you want to start contributing...
      (venv)$ tar xvf /tmp/es.tar.gz -C $VIRTUAL_ENV
      (venv)$ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
 
-That will start elastic search in the background; be sure to see the instructions
-later on for stopping it when you're done working on Mozillians.
+   That will start elastic search in the background; be sure to see the instructions
+   later on for stopping it when you're done working on Mozillians.
 
 #. Update product details::
 
      (venv)$ ./manage.py update_product_details -f
 
-#. Sync DB::
+#. Sync DB:
 
-You ought to be able to do::
+   You ought to be able to do::
 
      (venv)$ ./manage.py syncdb --noinput --migrate
 
-but the migrations currently don't work from scratch, so you can get to the
-same state this way::
+   but the migrations currently don't work from scratch, so you can get to the
+   same state this way::
 
      (venv)$ ./manage.py syncdb --noinput --all
      (venv)$ ./manage.py migrate --fake
@@ -108,8 +108,11 @@ same state this way::
 
 #. Develop!
 
-   Now you can start :doc:`contributing to Mozillians </contribute>`. When you are
-   done with your coding session, do not forget to kill the `elastic
+   Now you can start :doc:`contributing to Mozillians </contribute>`.
+
+#. When you're done
+
+   When you are done with your coding session, do not forget to kill the `elastic
    search` process::
 
      (venv)$ kill `cat $VIRTUAL_ENV/es.pid`
@@ -117,6 +120,8 @@ same state this way::
    and deactivate your virtual python environment by running::
 
      (venv)$ deactivate
+
+#. Next time
 
    Next time, before starting you will need to start `elasticsearch`
    server again::

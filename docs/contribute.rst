@@ -31,7 +31,7 @@ When you want to start contributing, you should :doc:`follow the installation in
 
 #. Run the tests::
 
-    $ ./manage.py tests
+    $ ./manage.py test
 
 #. When you're done, figure out how many commits you've made::
 
