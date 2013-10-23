@@ -225,6 +225,7 @@ INSTALLED_APPS = (
 
     'jingo_minify',
 
+    'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
     'mozillians.groups',
@@ -344,9 +345,9 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/api/']
 
 # Set default avatar for user profiles
-DEFAULT_AVATAR= 'img/unknown.png'
-DEFAULT_AVATAR_URL = urljoin(STATIC_URL, DEFAULT_AVATAR)
-DEFAULT_AVATAR_PATH = os.path.join(STATIC_ROOT, DEFAULT_AVATAR)
+DEFAULT_AVATAR= 'img/default_avatar.png'
+DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
+DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
