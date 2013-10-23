@@ -90,7 +90,7 @@ class UserProfilePrivacyModel(models.Model):
     privacy_vouched_by = PrivacyField()
     privacy_date_mozillian = PrivacyField()
     privacy_timezone = PrivacyField()
-    privacy_tshirt = PrivacyField(choices=((PRIVILEGED, 'Privileged'),),
+    privacy_tshirt = PrivacyField(choices=((PRIVILEGED, _lazy(u'Privileged')),),
                                   default=PRIVILEGED)
     privacy_title = PrivacyField()
 
@@ -145,12 +145,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     tshirt = models.IntegerField(
         _lazy(u'T-Shirt'), blank=True, null=True, default=None,
         choices=(
-            (1, 'Fitted Small'), (2, 'Fitted Medium'),
-            (3, 'Fitted Large'), (4, 'Fitted X-Large'),
-            (5, 'Fitted XX-Large'), (6, 'Fitted XXX-Large'),
-            (7, 'Straight-cut Small'), (8, 'Straight-cut Medium'),
-            (9, 'Straight-cut Large'), (10, 'Straight-cut X-Large'),
-            (11, 'Straight-cut XX-Large'), (12, 'Straight-cut XXX-Large')
+            (1, _lazy(u'Fitted Small')), (2, _lazy(u'Fitted Medium')),
+            (3, _lazy(u'Fitted Large')), (4, _lazy(u'Fitted X-Large')),
+            (5, _lazy(u'Fitted XX-Large')), (6, _lazy(u'Fitted XXX-Large')),
+            (7, _lazy(u'Straight-cut Small')), (8, _lazy(u'Straight-cut Medium')),
+            (9, _lazy(u'Straight-cut Large')), (10, _lazy(u'Straight-cut X-Large')),
+            (11, _lazy(u'Straight-cut XX-Large')), (12, _lazy(u'Straight-cut XXX-Large'))
         ))
     title = models.CharField(_lazy(u'What do you do for Mozilla?'),
                              max_length=70, blank=True, default='')

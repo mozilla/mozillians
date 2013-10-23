@@ -182,7 +182,7 @@ class ProfileForm(happyforms.ModelForm):
 
 
 class EmailForm(happyforms.Form):
-    email = forms.EmailField()
+    email = forms.EmailField(label=_lazy(u'Email'))
 
     def clean_email(self):
         email = self.cleaned_data['email']
