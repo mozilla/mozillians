@@ -128,6 +128,8 @@ class ProfileForm(happyforms.ModelForm):
                 image._get_exif()
             except (AttributeError, IOError, KeyError, IndexError):
                 cleaned_photo = StringIO()
+                if image.mode != 'RGB':
+                    image = image.convert('RGB')
                 image.save(cleaned_photo, format='JPEG', quality=95)
                 photo.file = cleaned_photo
                 photo.size = cleaned_photo.tell()
