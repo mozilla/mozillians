@@ -10,12 +10,12 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="apple-touch-icon" sizes="72x72" href="{{ static('img/apple-touch-icon-72.png') }}">
-  <link rel="apple-touch-icon" sizes="114x114" href="{{ static('img/apple-touch-icon-114.png') }}">
-  <link rel="apple-touch-icon" sizes="144x144" href="{{ static('img/apple-touch-icon-144.png') }}>
-  <link rel="apple-touch-icon" href="{{ static('img/apple-touch-icon.png') }}>
+  <link rel="apple-touch-icon" sizes="72x72" href="{{ static('mozillians/img/apple-touch-icon-72.png') }}">
+  <link rel="apple-touch-icon" sizes="114x114" href="{{ static('mozillians/img/apple-touch-icon-114.png') }}">
+  <link rel="apple-touch-icon" sizes="144x144" href="{{ static('mozillians/img/apple-touch-icon-144.png') }}>
+  <link rel="apple-touch-icon" href="{{ static('mozillians/img/apple-touch-icon.png') }}>
 
-  <link rel="shortcut icon" type="image/ico" href="{{ static('img/favicon.ico') }}>
+  <link rel="shortcut icon" type="image/ico" href="{{ static('mozillians/img/favicon.ico') }}>
 
   <link rel="search" type="application/opensearchdescription+xml"
         title="{{ _('Mozillians') }}" href="{{ url('phonebook:search_plugin') }}">
@@ -26,7 +26,7 @@
   <link rel="stylesheet" type="text/css" href="//www.mozilla.org/tabzilla/media/css/tabzilla.css" media="screen" />
 
   <!--[if lt IE 9]>
-    <script src="{{ static('js/libs/html5shiv.js') }}"></script>
+    <script src="{{ static('mozillians/js/libs/html5shiv.js') }}"></script>
   <![endif]-->
 
   <!--[if IE]>
@@ -62,7 +62,7 @@
           {% block site_header_nav %}
             <nav role="navigation">
                 <a class="brand" href="{{ url('phonebook:home') }}">
-                    <img id="mozillians-logo" src="{{ static('img/mozillians-logo.png') }}" alt="Mozillians">
+                    <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
                 </a>
                 {% block search %}
                   <form class="navbar-search"
@@ -74,7 +74,7 @@
                 {% if user.is_authenticated() %}
                   {% if user.userprofile.is_complete %}
                     <div id="nav-main">
-                      <span class="icon"><img src="{{ static('img/persona-person-white.png') }}" alt="persona icon"></span>
+                      <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
                       <a href="#" class="dropdown-toggle">
                         <span class="username">
                           {% if user.userprofile.full_name %}
@@ -124,7 +124,7 @@
                   <a href="#" id="create_profile" class="persona-button browserid-login"
                      title="{{_('Sign in')}}"
                      data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}">
-                    <span class="icon"><img src="{{ static('img/persona-person-white.png') }}" alt="persona icon"></span>
+                    <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
                     <span class="signin">{{ _('Sign in') }}</span>
                   </a>
                 {% endif %}
@@ -157,7 +157,7 @@
       <div id="content-wrapper">
         <div id="main" class="container">
           {% block content %}{% endblock %}
-          <a href="#" id="back-to-top"><img src="{{ static('img/back-to-top-arrow.png') }}" alt="Back to top"></a>
+          <a href="#" id="back-to-top"><img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top"></a>
         </div>
       </div>
     {% endblock %}
@@ -183,7 +183,7 @@
             <hr>
 
             <div class="footer-logo">
-              <a href="http://mozilla.org"><img src="{{ static('img/footer-mozilla.png') }}" alt="mozilla"></a>
+              <a href="http://mozilla.org"><img src="{{ static('mozillians/img/footer-mozilla.png') }}" alt="mozilla"></a>
             </div>
 
             <div class="footer-license">

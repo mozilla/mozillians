@@ -33,21 +33,21 @@
 ==================== */
 @font-face {
     font-family: 'Open Sans Extrabold';
-    src: url('/static/fonts/OpenSans-Extrabold-webfont.eot');
-    src: url('/static/fonts/OpenSans-Extrabold-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/fonts/OpenSans-Extrabold-webfont.woff') format('woff'),
-         url('/static/fonts/OpenSans-Extrabold-webfont.ttf') format('truetype'),
-         url('/static/fonts/OpenSans-Extrabold-webfont.svg#OpenSansItalic') format('svg');
+    src: url('/static/mozillians/fonts/OpenSans-Extrabold-webfont.eot');
+    src: url('/static/mozillians/fonts/OpenSans-Extrabold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/static/mozillians/fonts/OpenSans-Extrabold-webfont.woff') format('woff'),
+         url('/static/mozillians/fonts/OpenSans-Extrabold-webfont.ttf') format('truetype'),
+         url('/static/mozillians/fonts/OpenSans-Extrabold-webfont.svg#OpenSansItalic') format('svg');
     font-weight: normal;
 }
 
 @font-face {
     font-family: 'Open Sans Extrabold';
-    src: url('/static/fonts/OpenSans-ExtraboldItalic-webfont.eot');
-    src: url('/static/fonts/OpenSans-ExtraboldItalic-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/fonts/OpenSans-ExtraboldItalic-webfont.woff') format('woff'),
-         url('/static/fonts/OpenSans-ExtraboldItalic-webfont.ttf') format('truetype'),
-         url('/static/fonts/OpenSans-ExtraboldItalic-webfont.svg#OpenSansItalic') format('svg');
+    src: url('/static/mozillians/fonts/OpenSans-ExtraboldItalic-webfont.eot');
+    src: url('/static/mozillians/fonts/OpenSans-ExtraboldItalic-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/static/mozillians/fonts/OpenSans-ExtraboldItalic-webfont.woff') format('woff'),
+         url('/static/mozillians/fonts/OpenSans-ExtraboldItalic-webfont.ttf') format('truetype'),
+         url('/static/mozillians/fonts/OpenSans-ExtraboldItalic-webfont.svg#OpenSansItalic') format('svg');
     font-weight: normal;
     font-style: italic;
 }
@@ -171,8 +171,8 @@ body {
         }
     }
     &.loggedout {
-        #masthead { 
-            z-index: 1000; 
+        #masthead {
+            z-index: 1000;
             nav {
                 @media (max-width: @breakTablet) {
                     margin-left: 0;
@@ -198,7 +198,7 @@ body {
 }
 
 #outer-wrapper {
-    background: url("/static/img/sandstone/bg-sky.png") #eaeff2;
+    background: url("/static/mozillians/img/sandstone/bg-sky.png") #eaeff2;
     form {
         textarea,
         input[type=email],
@@ -378,7 +378,7 @@ nav {
         margin-top: 0;
         input {
             float: left;
-            background: @white url("/static/img/spyglass.png") no-repeat 5px 50%;
+            background: @white url("/static/mozillians/img/spyglass.png") no-repeat 5px 50%;
             .border-radius(8px);
             height: 30px;
             font-size: 16px;
@@ -487,7 +487,7 @@ nav {
                 &:first-child {
                     .border-radius(5px 5px 0px 0px);
                     a {
-                        .border-radius(5px 5px 0px 0px); 
+                        .border-radius(5px 5px 0px 0px);
                     }
                 }
                 &:last-child {
@@ -602,7 +602,7 @@ a#back-to-top {
 /* Footer
 ==================== */
 footer#colophon {
-    background: url("/static/img/footer-bkg.png");
+    background: url("/static/mozillians/img/footer-bkg.png");
     .box-shadow(inset -10px 25px 10px -10px rgba(0, 0, 0, 0.09));
     background-color: #57585c;
     color: @white;
@@ -633,7 +633,7 @@ footer#colophon {
         width: 200px;
         height: 25px;
         overflow: hidden;
-        background: url("/static/img/select-arrow.png") no-repeat scroll 96% 8px #FFFFFF;
+        background: url("/static/mozillians/img/select-arrow.png") no-repeat scroll 96% 8px #FFFFFF;
         .border-radius(5px);
         .box-shadow(0px 2px 4px rgba(0, 0, 0, 0.42));
         select {
@@ -686,7 +686,7 @@ body#home {
             position: absolute;
             top: 0;
             span {
-                background: transparent url('/static/img/mosaic_overlay.png') 0 0 repeat-x;
+                background: transparent url('/static/mozillians/img/mosaic_overlay.png') 0 0 repeat-x;
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -744,7 +744,7 @@ body#home {
             }
             form {
                 input {
-                    background: @white url("/static/img/spyglass.png") no-repeat 8px 50%;
+                    background: @white url("/static/mozillians/img/spyglass.png") no-repeat 8px 50%;
                     background-color: @white;
                     height: 50px;
                     width: 525px;
@@ -854,7 +854,7 @@ body#home {
 
         #get-involved {
             color: @white;
-            background: url("/static/img/homepage-getinvolved-bkg.png") repeat-x;
+            background: url("/static/mozillians/img/homepage-getinvolved-bkg.png") repeat-x;
             background-color: #2c80c5;
             float: none;
             .content {
@@ -918,11 +918,11 @@ body#home {
                     h2 { margin: 0 0 8px 0; }
                     h4 { margin: 20px 0 0;  }
                     @media (max-width: @breakDesktop) {
-                        h4 { 
+                        h4 {
                             margin: 0 0 6px 0;
                             font-size: 22px;
                         }
-                        section { 
+                        section {
                             padding-top: 20px;
                             &.location { padding: 0; }
                         }
@@ -953,7 +953,7 @@ body#home {
                         height: 40px;
                         border: 1px solid lighten(@black,90%);
                         font-size: 20px;
-                        background: @white url("/static/img/spyglass.png") no-repeat 5px 50% !important;
+                        background: @white url("/static/mozillians/img/spyglass.png") no-repeat 5px 50% !important;
                         padding: 0 0 0 30px !important;
                         display: block;
                         @media (max-width: @breakDesktop) {
@@ -1047,7 +1047,7 @@ body#home {
 body#about {
     #photo-collage {
         float: right;
-        padding: 10px 0 10px 15px; 
+        padding: 10px 0 10px 15px;
     }
 }
 
