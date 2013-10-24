@@ -363,7 +363,7 @@ def _request_args():
     }
 
     if settings.SITE_URL.startswith('https'):
-        args['siteLogo'] = 'urljoin(STATIC_URL, "img/apple-touch-icon-144.png")'
+        args['siteLogo'] = urljoin(STATIC_URL, "mozillians/img/apple-touch-icon-144.png")
 
     return args
 BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
