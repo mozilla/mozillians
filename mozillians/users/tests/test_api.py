@@ -14,6 +14,7 @@ from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory, LanguageFactory, SkillFactory
 from mozillians.users.api import CustomQuerySet
+from mozillians.users.managers import MOZILLIANS, PUBLIC
 from mozillians.users.tests import UserFactory
 
 
@@ -47,6 +48,26 @@ class CityResourceTests(TestCase):
         eq_(data['objects'][0]['population'], 1)
         eq_(data['objects'][0]['url'],
             absolutify(reverse('phonebook:list_city', args=['gr', 'Athens'])))
+
+    def test_not_duplicated(self):
+        # Ensure if there are users from the same city with different
+        # privacy settings, the city API only returns that city once.
+        # Also, the population should be the total.
+        # Note that setUp() already created one User, but that User has
+        # no city and so should not show up in these results.
+        UserFactory.create(userprofile={'is_vouched': True,
+                                        'privacy_city': MOZILLIANS,
+                                        'city': 'Athens'})
+        UserFactory.create(userprofile={'is_vouched': True,
+                                        'privacy_city': PUBLIC,
+                                        'city': 'Athens'})
+        client = Client()
+        response = client.get(self.resource_url, follow=True)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        eq_(data['meta']['total_count'], 1)
+        eq_(data['objects'][0]['population'], 2)
+        eq_(data['objects'][0]['city'], 'Athens')
 
     def test_get_details(self):
         client = Client()
@@ -122,6 +143,44 @@ class CountryResourceTests(TestCase):
         eq_(data['objects'][0]['population'], 1)
         eq_(data['objects'][0]['url'],
             absolutify(reverse('phonebook:list_country', args=['gr'])))
+
+    def test_not_duplicated(self):
+        # If mozillians from the same country have different privacy_country
+        # settings, make sure we don't return the country twice in the API
+        # result.
+        # Also, the population should be the total.
+
+        # NOTE: There's already one Greek created in setUp()
+
+        # Create a couple more Greeks with each privacy setting.  We should
+        # still get back Greece only once.
+        for i in xrange(2):
+            UserFactory.create(userprofile={'is_vouched': True,
+                                            'country': 'gr',
+                                            'privacy_country': MOZILLIANS})
+        for i in xrange(2):
+            UserFactory.create(userprofile={'is_vouched': True,
+                                            'country': 'gr',
+                                            'privacy_country': PUBLIC})
+
+        # One person from another country, to make sure that country shows up too.
+        UserFactory.create(userprofile={'is_vouched': True,
+                                        'country': 'us',
+                                        'privacy_country': MOZILLIANS})
+
+        client = Client()
+        response = client.get(self.resource_url, follow=True)
+        eq_(response.status_code, 200)
+        data = json.loads(response.content)
+        # We should get back Gr and Us
+        eq_(data['meta']['total_count'], 2)
+        for obj in data['objects']:
+            if obj['country'] == 'gr':
+                # 5 greeks
+                eq_(obj['population'], 5)
+            else:
+                # 1 USian
+                eq_(obj['population'], 1)
 
     def test_get_details(self):
         client = Client()
