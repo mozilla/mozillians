@@ -5,7 +5,7 @@
 
 {% block content %}
   <div class="container">
-    <img id="photo-collage" src="{{ MEDIA_URL }}img/about-photo-collage.png"
+    <img id="photo-collage" src="{{ static('img/about-photo-collage.png') }}"
          alt="{{ _('Photo collage of Mozillians') }}">
       <h1>{{ _('About Mozillians') }}</h1>
       {% trans wiki_roadmap_url='https://wiki.mozilla.org/Mozillians#Roadmap',

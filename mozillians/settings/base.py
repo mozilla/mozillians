@@ -64,10 +64,7 @@ RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 PROTOCOL = "https://"
 PORT = 443
 
-## Media and templates.
-
-STATIC_ROOT = path('media/static')
-STATIC_URL = MEDIA_URL + 'static/'
+## Templates.
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -228,6 +225,7 @@ INSTALLED_APPS = (
 
     'jingo_minify',
 
+    'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
     'mozillians.groups',
@@ -347,7 +345,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/api/']
 
 # Set default avatar for user profiles
-DEFAULT_AVATAR= 'img/unknown.png'
+DEFAULT_AVATAR= 'img/default_avatar.png'
 DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
@@ -355,8 +353,6 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
-
-JINGO_MINIFY_USE_STATIC = False
 
 def _request_args():
     from django.conf import settings
@@ -367,7 +363,7 @@ def _request_args():
     }
 
     if settings.SITE_URL.startswith('https'):
-        args['siteLogo'] = '/media/img/apple-touch-icon-144.png'
+        args['siteLogo'] = 'urljoin(STATIC_URL, "img/apple-touch-icon-144.png")'
 
     return args
 BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
