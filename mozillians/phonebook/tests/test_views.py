@@ -96,7 +96,7 @@ class ViewsTests(TestCase):
 
     def test_login_incomplete_profile(self):
         user = UserFactory.create(userprofile={'is_vouched': True,
-         'full_name': ''})
+                                               'full_name': ''})
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
@@ -155,8 +155,8 @@ class ViewsTests(TestCase):
         eq_(response.context['profile'], lookup_user.userprofile)
 
     def test_view_vouched_profile_public_anonymous(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True, 'privacy_full_name': PUBLIC})
         client = Client()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
@@ -168,8 +168,8 @@ class ViewsTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_unvouched(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True, 'privacy_full_name': PUBLIC})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
@@ -182,8 +182,8 @@ class ViewsTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_vouched(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True, 'privacy_full_name': PUBLIC})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
@@ -390,7 +390,7 @@ class ViewsTests(TestCase):
     @patch('mozillians.users.models.remove_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
     def test_delete_vouched(self, unindex_objects_mock,
-                              remove_from_basket_task_mock):
+                            remove_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -530,7 +530,7 @@ class ViewsTests(TestCase):
 
     def test_list_mozillians_in_location_country_vouched(self):
         user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it'})
+                                                      'country': 'it'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
@@ -543,79 +543,80 @@ class ViewsTests(TestCase):
         eq_(response.context['country_name'], 'Italy')
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], None)
-        eq_(response.context['people'].count(), 1)
+        eq_(response.context['people'].paginator.count, 1)
         eq_(response.context['people'][0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_region_vouched(self):
         user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'florence'})
+                                                      'country': 'it',
+                                                      'region': 'florence'})
         UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'foo'})
+                                        'country': 'it',
+                                        'region': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
-            url = reverse('phonebook:list_region', kwargs={'country': 'it',
-             'region': 'Florence'})
+            url = reverse('phonebook:list_region',
+                          kwargs={'country': 'it', 'region': 'Florence'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')
         eq_(response.context['country_name'], 'Italy')
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], 'Florence')
-        eq_(response.context['people'].count(), 1)
+        eq_(response.context['people'].paginator.count, 1)
         eq_(response.context['people'][0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_city_vouched(self):
         user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'city': 'madova'})
+                                                      'country': 'it',
+                                                      'city': 'madova'})
         UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'city': 'foo'})
+                                        'country': 'it',
+                                        'city': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
             url = reverse('phonebook:list_city', kwargs={'country': 'it',
-             'city': 'Madova'})
+                                                         'city': 'Madova'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')
         eq_(response.context['country_name'], 'Italy')
         eq_(response.context['city_name'], 'Madova')
         eq_(response.context['region_name'], None)
-        eq_(response.context['people'].count(), 1)
+        eq_(response.context['people'].paginator.count, 1)
         eq_(response.context['people'][0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_region_n_city_vouched(self):
         user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'Florence',
-         'city': 'madova'})
+                                                      'country': 'it',
+                                                      'region': 'Florence',
+                                                      'city': 'madova'})
         UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'florence',
-         'city': 'foo'})
+                                        'country': 'it',
+                                        'region': 'florence',
+                                        'city': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
-            url = reverse('phonebook:list_region_city', kwargs={'country': 'it',
-             'region': 'florence',
-             'city': 'Madova'})
+            url = reverse('phonebook:list_region_city',
+                          kwargs={'country': 'it',
+                                  'region': 'florence',
+                                  'city': 'Madova'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')
         eq_(response.context['country_name'], 'Italy')
         eq_(response.context['city_name'], 'Madova')
         eq_(response.context['region_name'], 'florence')
-        eq_(response.context['people'].count(), 1)
+        eq_(response.context['people'].paginator.count, 1)
         eq_(response.context['people'][0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_invalid_country(self):
@@ -628,7 +629,7 @@ class ViewsTests(TestCase):
         eq_(response.context['country_name'], 'invalid')
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], None)
-        eq_(response.context['people'].count(), 0)
+        eq_(response.context['people'].paginator.count, 0)
 
     @requires_login()
     def test_logout_anonymous(self):
@@ -791,7 +792,8 @@ class ViewsTests(TestCase):
         update the size of `photo` with the new cleaned image size.
         """
         user = UserFactory.create(userprofile={'is_vouched': True})
-        file_path = os.path.join(os.path.dirname(__file__), 'broken_marshal.jpg')
+        file_path = os.path.join(os.path.dirname(__file__),
+                                 'broken_marshal.jpg')
         self._upload_photo(user, file_path)
 
     def test_save_profile_with_existing_photo(self):
