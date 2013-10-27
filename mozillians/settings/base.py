@@ -69,6 +69,9 @@ PORT = 443
 STATIC_ROOT = path('media/static')
 STATIC_URL = MEDIA_URL + 'static/'
 
+# Absolute path to the directory for the humans.txt file.
+HUMANSTXT_ROOT = path('.')
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'jingo.Loader',
@@ -236,6 +239,7 @@ INSTALLED_APPS = (
     'mozillians.mozspaces',
     'mozillians.funfacts',
     'mozillians.announcements',
+    'mozillians.humans',
 
     'sorl.thumbnail',
     'autocomplete_light',
