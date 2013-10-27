@@ -240,8 +240,7 @@
               </li>
             {% endif %}
             {% if profile.tshirt %}
-              <li><i class="icon-shopping-cart"</i>  
-              {{ profile.get_tshirt_display() }}</li>
+              <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
             {% endif %}
           </ul>
         </div>
