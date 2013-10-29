@@ -150,7 +150,7 @@
       <section id="profile-details">
         {% if profile.bio %}
           <div id="bio">
-              <h3>{{ _('Bio') }}</h3>
+              <h3><i class="icon-user"></i> {{ _('Bio') }}</h3>
               <p>
                 <span class="note">{{ profile.bio|markdown }}</span>
               </p>
@@ -158,7 +158,7 @@
         {% endif %}
         {% if profile.groups.count() %}
           <div id="groups">
-            <h3>{{ _('Groups') }}</h3>
+            <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
               {% for group in profile.groups.all() %}
                 {% if (user.is_authenticated() and
                        user.get_profile().is_vouched) %}
@@ -172,7 +172,7 @@
         {% endif %}
         {% if profile.skills.count() %}
           <div id="skills" class="p-category category">
-            <h3>{{ _('Skills') }}</h3>
+            <h3><i class="icon-wrench"></i> {{ _('Skills') }}</h3>
               {% for skill in profile.skills.all() %}
                 {% if (user.is_authenticated() and
                        user.get_profile().is_vouched) %}
@@ -186,7 +186,7 @@
         {% endif %}
         {% if profile.languages.count() %}
           <div id="languages" class="p-category category">
-            <h3>{{ _('Languages') }}</h3>
+            <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages.all() -%}
                 {{ language.name }}
                 {%- if not loop.last %},{% endif %}
@@ -195,7 +195,7 @@
         {% endif %}
         {% if profile.accounts.count() %}
           <div id="externalaccounts" class="p-category category">
-            <h3>{{ _('External Accounts') }}</h3>
+            <h3><i class="icon-external-link"></i> {{ _('External Accounts') }}</h3>
             <ul>
               {% for account in profile.accounts %}
                 <li>
@@ -225,7 +225,7 @@
             {% endif %}
             {% if profile.ircname %}
               <li class="p-nickname">
-                IRC
+                <i class="icon-comments-alt"></i> IRC : 
                 <a href="irc://irc.mozilla.org/">
                     <span class="nickname">{{ profile.ircname }}</span>
                   </a>
