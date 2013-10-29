@@ -87,6 +87,7 @@ def view_profile(request, username):
         view_as = request.GET.get('view_as', 'myself')
         privacy_level = privacy_mappings.get(view_as, None)
         profile = UserProfile.objects.privacy_level(privacy_level).get(user__username=username)
+        vouchees = UserProfile.objects.filter(vouched_by=profile)
         data['privacy_mode'] = view_as
     else:
         userprofile_query = UserProfile.objects.filter(user__username=username)
@@ -110,6 +111,7 @@ def view_profile(request, username):
             raise Http404
 
         profile = UserProfile.objects.get(user__username=username)
+        vouchees = UserProfile.objects.filter(vouched_by=profile)
         profile.set_instance_privacy_level(PUBLIC)
         if request.user.is_authenticated():
             profile.set_instance_privacy_level(
@@ -123,6 +125,7 @@ def view_profile(request, username):
 
     data['shown_user'] = profile.user
     data['profile'] = profile
+<<<<<<< HEAD
     data['groups'] = profile.get_annotated_groups()
     data['locale'] = request.locale
 
@@ -132,6 +135,9 @@ def view_profile(request, username):
             and (request.user.username == username or request.user.is_superuser)):
         data['groups'] = [grp for grp in data['groups'] if not grp.pending]
 
+=======
+    data['vouchees'] = vouchees
+>>>>>>> 3820ffd... [fix Bug 931359]Adds vouchees info to the profile page
     return render(request, 'phonebook/profile.html', data)
 
 

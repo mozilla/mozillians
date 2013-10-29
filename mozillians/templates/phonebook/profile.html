@@ -215,6 +215,19 @@
             <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}">
               {{ profile.vouched_by.display_name|default(profile.vouched_by.user.username, true)}}
             </a>
+        </div>
+        {% if profile.vouchees %}
+          <div id="vouchees" class="p-category category">
+            <h3>{{ _('Vouchees') }}</h3>
+            <ul class="vouchees">
+              {% for vouchee in profile.vouchees %}
+                <li>
+                  <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
+                    {{ vouchee.display_name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         {% endif %}
       </section>
