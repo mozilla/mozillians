@@ -95,6 +95,9 @@ When you want to start contributing...
      (venv)$ ./manage.py migrate --fake
 
 #. Create user:
+     #. Minify assets. Otherwise you won't have the actual JavaScript/CSS to serve to the browser::
+
+        ./manage.py compress_assets
 
      #. Run server::
 
