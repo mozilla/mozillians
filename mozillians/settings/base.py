@@ -64,13 +64,10 @@ RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 PROTOCOL = "https://"
 PORT = 443
 
-## Media and templates.
-
-STATIC_ROOT = path('media/static')
-STATIC_URL = MEDIA_URL + 'static/'
+## Templates.
 
 # Absolute path to the directory for the humans.txt file.
-HUMANSTXT_ROOT = path('.')
+HUMANSTXT_ROOT = STATIC_ROOT
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -95,71 +92,71 @@ JINGO_EXCLUDE_APPS = [
 MINIFY_BUNDLES = {
     'css': {
         'common': (
-            'css/main.less',
-            'css/jquery-ui-1.8.16.custom.css',
-            'js/libs/tag-it/css/jquery.tagit.css',
+            'mozillians/css/main.less',
+            'mozillians/css/jquery-ui-1.8.16.custom.css',
+            'mozillians/js/libs/tag-it/css/jquery.tagit.css',
         ),
         'api': (
-            'css/prettify.css',
+            'mozillians/css/prettify.css',
         ),
         'test': (
-            'css/qunit.css',
+            'mozillians/css/qunit.css',
         ),
     },
     'js': {
         'common': (
-            'js/libs/jquery-1.7.2.js',
-            'js/libs/jquery-ui-1.8.7.custom.min.js',
-            'js/libs/jquery.placeholder.min.js',
-            'js/main.js',
-            'js/libs/validation/validation.js',
+            'mozillians/js/libs/jquery-1.7.2.js',
+            'mozillians/js/libs/jquery-ui-1.8.7.custom.min.js',
+            'mozillians/js/libs/jquery.placeholder.min.js',
+            'mozillians/js/main.js',
+            'mozillians/js/libs/validation/validation.js',
         ),
         'homepage': (
-            'js/libs/modernizr.custom.26887.js',
-            'js/libs/jquery.transit.js',
-            'js/libs/jquery.gridrotator.js',
-            'js/libs/jquery.smooth-scroll.min.js',
-            'js/homepage.js'
+            'mozillians/js/libs/modernizr.custom.26887.js',
+            'mozillians/js/libs/jquery.transit.js',
+            'mozillians/js/libs/jquery.gridrotator.js',
+            'mozillians/js/libs/jquery.smooth-scroll.min.js',
+            'mozillians/js/homepage.js'
         ),
         'api': (
-            'js/libs/prettify.js',
-            'js/api.js'
+            'mozillians/js/libs/prettify.js',
+            'mozillians/js/api.js'
         ),
         'edit_profile': (
-            'js/libs/tag-it/js/tag-it.js',
-            'js/profile_edit.js',
-            'js/groups.js'
+            'mozillians/js/libs/tag-it/js/tag-it.js',
+            'mozillians/js/profile_edit.js',
+            'mozillians/js/groups.js'
         ),
         'register': (
-            'js/libs/tag-it/js/tag-it.js',
-            'js/register.js',
+            'mozillians/js/libs/tag-it/js/tag-it.js',
+            'mozillians/js/register.js',
         ),
         'backbone': (
-            'js/libs/underscore.js',
-            'js/libs/backbone.js',
-            'js/libs/backbone.localStorage.js',
-            'js/profiles.js',
+            'mozillians/js/libs/underscore.js',
+            'mozillians/js/libs/backbone.js',
+            'mozillians/js/libs/backbone.localStorage.js',
+            'mozillians/js/profiles.js',
         ),
         'test': (
-            'js/libs/qunit.js',
-            'js/tests/test.js',
+            'mozillians/js/libs/qunit.js',
+            'mozillians/js/tests/test.js',
         ),
         'profile_view': (
-            'js/libs/tag-it/js/tag-it.js',
-            'js/profile_view.js',
+            'mozillians/js/libs/tag-it/js/tag-it.js',
+            'mozillians/js/profile_view.js',
         ),
         'google_analytics': (
-            'js/google-analytics.js',
+            'mozillians/js/google-analytics.js',
         ),
         'search': (
-            'js/search.js',
-            'js/pagination.js',
+            'mozillians/js/search.js',
+            'mozillians/js/pagination.js',
         ),
         'groups': (
-            'js/pagination.js',
+            'mozillians/js/pagination.js',
         ),
         'logout_view': (
-            'js/logout_view.js',
+            'mozillians/js/logout_view.js',
         ),
     }
 }
@@ -231,6 +228,7 @@ INSTALLED_APPS = (
 
     'jingo_minify',
 
+    'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
     'mozillians.groups',
@@ -351,7 +349,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/api/']
 
 # Set default avatar for user profiles
-DEFAULT_AVATAR= 'img/unknown.png'
+DEFAULT_AVATAR= 'img/default_avatar.png'
 DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
@@ -359,8 +357,6 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
-
-JINGO_MINIFY_USE_STATIC = False
 
 def _request_args():
     from django.conf import settings
@@ -371,7 +367,7 @@ def _request_args():
     }
 
     if settings.SITE_URL.startswith('https'):
-        args['siteLogo'] = '/media/img/apple-touch-icon-144.png'
+        args['siteLogo'] = urljoin(STATIC_URL, "mozillians/img/apple-touch-icon-144.png")
 
     return args
 BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()

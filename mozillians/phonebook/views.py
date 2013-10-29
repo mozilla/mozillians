@@ -311,15 +311,32 @@ def list_mozillians_in_location(request, country, region=None, city=None):
     country = country.lower()
     country_name = COUNTRIES.get(country, country)
     queryset = UserProfile.objects.vouched().filter(country=country)
+    show_pagination = False
+
     if city:
         queryset = queryset.filter(city__iexact=city)
     if region:
         queryset = queryset.filter(region__iexact=region)
 
-    data = {'people': queryset,
+    paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
+    page = request.GET.get('page', 1)
+
+    try:
+        people = paginator.page(page)
+    except PageNotAnInteger:
+        people = paginator.page(1)
+    except EmptyPage:
+        people = paginator.page(paginator.num_pages)
+
+    if paginator.count > settings.ITEMS_PER_PAGE:
+        show_pagination = True
+
+    data = {'people': people,
             'country_name': country_name,
             'city_name': city,
-            'region_name': region}
+            'region_name': region,
+            'page': page,
+            'show_pagination': show_pagination}
     return render(request, 'phonebook/location-list.html', data)
 
 

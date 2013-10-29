@@ -1,10 +1,13 @@
 """ https://github.com/mozilla/kuma/blob/master/apps/humans/models.py """
 import json
-import urllib
-from django.conf import settings
 import subprocess
 
-GITHUB_REPOS = 'https://api.github.com/repos/mozilla/mozillians/contributors'
+from django.conf import settings
+
+import requests
+
+
+GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
 
 
 class Human:
@@ -15,15 +18,15 @@ class Human:
 
 class HumansTXT:
     def generate_file(self):
-        githubbers = self.get_github(json.load(urllib.urlopen(GITHUB_REPOS)))
+        githubbers = self.get_github(json.loads(requests.get(GITHUB_REPO).text))
         localizers = self.get_locales()
 
         target = open('%s/humans.txt' % settings.HUMANSTXT_ROOT, 'w')
 
         self.write_to_file(githubbers, target, 'Contributors on Github',
-            'Developer')
+                           'Developer')
         self.write_to_file(localizers, target, 'Localization Contributors',
-            'Localizer')
+                           'Localizer')
 
         target.close()
 
@@ -38,7 +41,7 @@ class HumansTXT:
 
     def get_github(self, data=None):
         if not data:
-            raw_data = json.load(urllib.urlopen(GITHUB_REPOS))
+            raw_data = json.loads(requests.get(GITHUB_REPO).text)
         else:
             raw_data = data
 
@@ -61,8 +64,9 @@ class HumansTXT:
 
     def get_locales(self):
         p = subprocess.Popen("svn log --quiet https://svn.mozilla.org/projects/\
-            l10n-misc/trunk/mozillians/locales/ | grep '^r' | awk '{print $3}' | sort | uniq",
-            shell=True, stdout=subprocess.PIPE)
+                              l10n-misc/trunk/mozillians/locales/\
+                              | grep '^r' | awk '{print $3}' | sort | uniq",
+                              shell=True, stdout=subprocess.PIPE)
         localizers_list = p.communicate()[0].rstrip().split('\n', -1)
 
         humans = []

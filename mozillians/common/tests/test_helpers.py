@@ -16,7 +16,7 @@ class HelperTests(TestCase):
         avatar_url = helpers.gravatar('fo', size=80, rating='bar')
         eq_(avatar_url, ('https://secure.gravatar.com/avatar/eed8070249'
                          '39b808083f0031a56e9872?s=80&r=bar&d=http%3A%2F%'
-                         '2Ffoobar%2Fmedia%2Fimg%2Funknown.png'))
+                         '2Ffoobar%2Fmedia%2Fimg%2Fdefault_avatar.png'))
 
     @patch('mozillians.common.helpers.markdown_module.markdown', wraps=markdown)
     @patch('mozillians.common.helpers.bleach.clean', wraps=clean)

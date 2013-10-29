@@ -1,8 +1,8 @@
-import cronjobs
+from celery.task import task
 
 from models import HumansTXT
 
-@cronjobs.register
+@task
 def humans_txt():
     humans = HumansTXT()
     humans.generate_file()

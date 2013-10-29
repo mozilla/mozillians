@@ -78,8 +78,11 @@ class MonthYearWidget(Widget):
     def value_from_datadict(self, data, files, name):
         y = data.get(self.year_field % name)
         m = data.get(self.month_field % name)
-        if y == m == "0":
+
+        if not y or not m or y == m == '0':
             return None
-        if y and m and y.isdigit() and m.isdigit():
+
+        try:
             return datetime.date(int(y), int(m), 1)
-        return data.get(name, None)
+        except (TypeError, ValueError):
+            return '%s-%s-%s' % (y, m, 1)

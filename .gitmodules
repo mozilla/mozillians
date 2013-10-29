@@ -1,7 +1,3 @@
-[submodule "media/js/libs/tag-it"]
-        ignore = dirty
-	path = media/js/libs/tag-it
-	url = git://github.com/aehlke/tag-it.git
 [submodule "vendor-local/src/django-statsd"]
 	path = vendor-local/src/django-statsd
 	url = https://github.com/andymckay/django-statsd/
