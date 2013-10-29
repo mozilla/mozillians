@@ -19,12 +19,20 @@
     {% endfor %}
     {{ country_name }}
   </h2>
-  {% if people %}
+  {% if people.paginator.count %}
+    {% with items=people %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
     <div class="row">
-      {% for person in people %}
-        {{ search_result(person) }}
+      {% for people_slice in people|slice(3) -%}
+        {% for person in people_slice %}
+          {{ search_result(person) }}
+        {% endfor %}
       {% endfor %}
     </div>
+    {% with items=people %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
   {% else %}
     <div class="well">
         <p id="not-found">
