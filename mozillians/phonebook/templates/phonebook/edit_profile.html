@@ -69,7 +69,6 @@
     </fieldset>
 
     <fieldset id="photo">
-      
       <label>{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
         <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
@@ -457,5 +456,9 @@
 {% endblock %}
 
 {% block page_js %}
-  {{ js('edit_profile') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
+    <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
+    <script src="{{ static('mozillians/js/tag-it-groups.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

@@ -43,4 +43,3 @@ ES_INDEXES = {'default': 'mozillians-dev',
 CELERY_ALWAYS_EAGER = True
 
 JAVA_BIN = '/usr/bin/java'
-

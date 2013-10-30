@@ -142,5 +142,7 @@
 {% endblock content %}
 
 {% block page_js %}
-  {{ js('groups') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

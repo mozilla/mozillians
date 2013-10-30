@@ -63,4 +63,4 @@ BASKET_MANAGERS = None # or list of email addresses.
 
 GA_ACCOUNT_CODE = None
 
-LESS_PREPROCESS = True
+COMPRESS_ENABLED = False

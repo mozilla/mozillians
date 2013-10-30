@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block page_title %}{{ _('Group Listing') }}{% endblock %}
 
 {% block body_id %}group-index{% endblock %}
@@ -51,5 +50,7 @@
 {% endblock content %}
 
 {% block page_js %}
-  {{ js('groups') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

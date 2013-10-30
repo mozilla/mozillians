@@ -34,7 +34,8 @@
       <div class="container">
         <section id="quote">
             <span>
-              <img alt="Mitchell Baker, Chair of the Mozilla Foundation" src="{{ static('mozillians/img/homequote-mitchell-baker.png') }}">
+              <img alt="Mitchell Baker, Chair of the Mozilla Foundation"
+                   src="{{ static('mozillians/img/homequote-mitchell-baker.png') }}">
             </span>
             <blockquote>
               <p>
@@ -220,5 +221,11 @@
 {% endblock content %}
 
 {% block page_js %}
-  {{ js('homepage') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/libs/modernizr.custom.26887.js') }}"></script>
+    <script src="{{ static('mozillians/js/libs/jquery.transit.js') }}"></script>
+    <script src="{{ static('mozillians/js/libs/jquery.gridrotator.js') }}"></script>
+    <script src="{{ static('mozillians/js/libs/jquery.smooth-scroll.min.js') }}"></script>
+    <script src="{{ static('mozillians/js/homepage.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

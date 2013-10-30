@@ -8,3 +8,5 @@ urllib3
 
 # autoslugfield
 unidecode
+
+BeautifulSoup<4.0

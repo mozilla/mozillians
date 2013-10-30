@@ -8,8 +8,6 @@ src/pyes
 src/django-tastypie
 src/pystatsd
 src/happyforms
-
-# Remove
 src/django-csp
 src/django-browserid
-
+src/django-jingo-offline-compressor
