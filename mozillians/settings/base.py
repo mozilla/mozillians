@@ -66,6 +66,9 @@ PORT = 443
 
 ## Templates.
 
+# Absolute path to the directory for the humans.txt file.
+HUMANSTXT_ROOT = path('.')
+
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'jingo.Loader',
@@ -210,6 +213,7 @@ INSTALLED_APPS = get_apps(append=[
     'mozillians.mozspaces',
     'mozillians.funfacts',
     'mozillians.announcements',
+    'mozillians.humans',
 
     'sorl.thumbnail',
     'autocomplete_light',

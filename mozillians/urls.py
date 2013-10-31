@@ -49,6 +49,8 @@ urlpatterns = patterns(
     url(r'^jsi18n/$',
         allow_public(cache_page(60 * 60 * 24 * 365)(javascript_catalog)),
         {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
+    (r'^humans.txt$', 'django.views.static.serve',
+        {'document_root': settings.HUMANSTXT_ROOT, 'path': 'humans.txt'}),
 )
 
 # In DEBUG mode, serve media files through Django, and serve error pages

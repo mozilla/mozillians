@@ -30,3 +30,5 @@ mozillians.db
 media/static
 locale*
 *.less.css
+humans.txt
+mozillians/humans/tmp
