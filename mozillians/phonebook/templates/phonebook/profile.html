@@ -210,6 +210,20 @@
             </ul>
           </div>
         {% endif %}
+        {% if vouchees %}
+          <div id="vouchees" class="p-category category">
+            <h3>{{ _('Vouchees') }}</h3>
+            <ul class="vouchees">
+              {% for vouchee in vouchees %}
+                <li>
+                  <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
+                    {{ vouchee.display_name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
       </section>
 
       <section id="profile-contact">
