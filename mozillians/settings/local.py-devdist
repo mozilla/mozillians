@@ -10,12 +10,19 @@ SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'mozillians.db',
-        'USER': '',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mozillians',
+        'USER': 'mozillians',
         'PASSWORD': '',
         'HOST': '',
         'PORT': '',
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=InnoDB',
+            'charset': 'utf8',
+            'use_unicode': True,
+        },
+        'TEST_CHARSET': 'utf8',
+        'TEST_COLLATION': 'utf8_general_ci',
     },
 }
 
