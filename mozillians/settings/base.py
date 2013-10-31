@@ -160,26 +160,19 @@ MINIFY_BUNDLES = {
 
 LESS_PREPROCESS = False
 LESS_BIN = 'lessc'
-MIDDLEWARE_CLASSES = (
-    'funfactory.middleware.LocaleURLMiddleware',
-    'multidb.middleware.PinningRouterMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'session_csrf.CsrfMiddleware', # Must be after auth middleware.
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'commonware.middleware.FrameOptionsHeader',
-    'mobility.middleware.DetectMobileMiddleware',
-    'mobility.middleware.XMobileMiddleware',
+
+MIDDLEWARE_CLASSES = get_middleware(append=[
     'commonware.response.middleware.StrictTransportMiddleware',
+    'csp.middleware.CSPMiddleware',
+
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
+
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
-    'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
-)
+    'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
 
 # StrictTransport
 STS_SUBDOMAINS = True
@@ -202,28 +195,11 @@ BROWSERID_USERNAME_ALGO = calculate_username
 # On Login, we redirect through register.
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/login/'
-INSTALLED_APPS = (
-    # Local apps
-    'funfactory',
-    'compressor',
 
-    'tower',
-    'cronjobs',
-
-    # Django contrib apps
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.staticfiles',
-
-    'commonware.response.cookies',
-    'djcelery',
-    'django_nose',
-    'session_csrf',
-
-    'product_details',
-
+INSTALLED_APPS = get_apps(append=[
+    'csp',
     'jingo_minify',
+    'django.contrib.admin',
 
     'mozillians',
     'mozillians.users',
@@ -238,12 +214,11 @@ INSTALLED_APPS = (
     'sorl.thumbnail',
     'autocomplete_light',
 
-    'django.contrib.admin',
-    'django_browserid',
     'bootstrapform',
+
     # DB migrations
     'south',
-)
+])
 
 ## Auth
 PWD_ALGORITHM = 'bcrypt'
@@ -278,25 +253,30 @@ SOUTH_TESTS_MIGRATE = False
 # Django-CSP
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_FONT_SRC = ("'self'",
-                'https://*.mozilla.org',
+                'http://*.mozilla.net',
                 'https://*.mozilla.net')
 CSP_FRAME_SRC = ("'self'",
                  'https://login.persona.org',)
 CSP_IMG_SRC = ("'self'",
                'data:',
+               'http://*.mozilla.net',
                'https://*.mozilla.net',
-               'https://*.google-analytics.com',
-               'https://*.gravatar.com',
-               'https://i1.wp.com')
+               '*.google-analytics.com',
+               '*.gravatar.com',
+               'i1.wp.com')
 CSP_SCRIPT_SRC = ("'self'",
-                  'https://*.mozilla.org',
+                  'http://www.mozilla.org',
+                  'https://www.mozilla.org',
+                  'http://*.mozilla.net',
                   'https://*.mozilla.net',
                   'https://*.google-analytics.com',
                   'https://login.persona.org',)
 CSP_STYLE_SRC = ("'self'",
                  "'unsafe-inline'",
-                 'https://*.mozilla.org',
-                 'https://*.mozilla.net',)
+                 'http://www.mozilla.org',
+                 'https://www.mozilla.org',
+                 'http://*.mozilla.net',
+                 'https://*.mozilla.net')
 
 # Elasticutils settings
 ES_DISABLED = True
