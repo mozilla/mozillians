@@ -86,80 +86,7 @@ JINGO_EXCLUDE_APPS = [
     'browserid'
 ]
 
-MINIFY_BUNDLES = {
-    'css': {
-        'common': (
-            'mozillians/css/main.less',
-            'mozillians/css/jquery-ui-1.8.16.custom.css',
-            'mozillians/js/libs/tag-it/css/jquery.tagit.css',
-        ),
-        'api': (
-            'mozillians/css/prettify.css',
-        ),
-        'test': (
-            'mozillians/css/qunit.css',
-        ),
-    },
-    'js': {
-        'common': (
-            'mozillians/js/libs/jquery-1.7.2.js',
-            'mozillians/js/libs/jquery-ui-1.8.7.custom.min.js',
-            'mozillians/js/libs/jquery.placeholder.min.js',
-            'mozillians/js/main.js',
-            'mozillians/js/libs/validation/validation.js',
-        ),
-        'homepage': (
-            'mozillians/js/libs/modernizr.custom.26887.js',
-            'mozillians/js/libs/jquery.transit.js',
-            'mozillians/js/libs/jquery.gridrotator.js',
-            'mozillians/js/libs/jquery.smooth-scroll.min.js',
-            'mozillians/js/homepage.js'
-        ),
-        'api': (
-            'mozillians/js/libs/prettify.js',
-            'mozillians/js/api.js'
-        ),
-        'edit_profile': (
-            'mozillians/js/libs/tag-it/js/tag-it.js',
-            'mozillians/js/profile_edit.js',
-            'mozillians/js/groups.js'
-        ),
-        'register': (
-            'mozillians/js/libs/tag-it/js/tag-it.js',
-            'mozillians/js/register.js',
-        ),
-        'backbone': (
-            'mozillians/js/libs/underscore.js',
-            'mozillians/js/libs/backbone.js',
-            'mozillians/js/libs/backbone.localStorage.js',
-            'mozillians/js/profiles.js',
-        ),
-        'test': (
-            'mozillians/js/libs/qunit.js',
-            'mozillians/js/tests/test.js',
-        ),
-        'profile_view': (
-            'mozillians/js/libs/tag-it/js/tag-it.js',
-            'mozillians/js/profile_view.js',
-        ),
-        'google_analytics': (
-            'mozillians/js/google-analytics.js',
-        ),
-        'search': (
-            'mozillians/js/search.js',
-            'mozillians/js/pagination.js',
-        ),
-        'groups': (
-            'mozillians/js/pagination.js',
-        ),
-        'logout_view': (
-            'mozillians/js/logout_view.js',
-        ),
-    }
-}
 
-LESS_PREPROCESS = False
-LESS_BIN = 'lessc'
 
 MIDDLEWARE_CLASSES = get_middleware(append=[
     'commonware.response.middleware.StrictTransportMiddleware',
@@ -198,9 +125,6 @@ LOGIN_REDIRECT_URL = '/login/'
 
 INSTALLED_APPS = get_apps(append=[
     'csp',
-    'jingo_minify',
-    'django.contrib.admin',
-
     'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
@@ -214,6 +138,9 @@ INSTALLED_APPS = get_apps(append=[
     'sorl.thumbnail',
     'autocomplete_light',
 
+    'django.contrib.admin',
+    'django_browserid',
+    'jingo_offline_compressor',
     'bootstrapform',
 
     # DB migrations
@@ -351,3 +278,6 @@ BROWSERID_VERIFY_CLASS = 'mozillians.phonebook.views.BrowserIDVerify'
 
 # Pagination: Items per page.
 ITEMS_PER_PAGE = 21
+
+COMPRESS_OFFLINE = True
+COMPRESS_ENABLED = True

@@ -111,5 +111,8 @@
 {% endblock %}
 
 {% block page_js %}
-  {{ js('search') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/search.js') }}"></script>
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

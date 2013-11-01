@@ -3,7 +3,6 @@ from django.conf.urls.defaults import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
-from django.views.generic.base import TemplateView
 from django.views.i18n import javascript_catalog
 
 import autocomplete_light
@@ -18,6 +17,24 @@ patch()
 
 autocomplete_light.autodiscover()
 admin.autodiscover()
+
+# From socorro
+# funfactory puts the more limited CompressorExtension extension in
+# but we need the one from jingo_offline_compressor.jinja2ext otherwise we
+# might an error like this:
+#
+# AttributeError: 'CompressorExtension' object has no attribute 'nodelist'
+#
+from jingo_offline_compressor.jinja2ext import CompressorExtension
+import jingo
+try:
+    jingo.env.extensions.pop(
+        'compressor.contrib.jinja2ext.CompressorExtension'
+    )
+except KeyError:
+    # happens if the urlconf is loaded twice
+    pass
+jingo.env.add_extension(CompressorExtension)
 
 
 def error_page(request, template, status=None):
@@ -55,15 +72,10 @@ urlpatterns = patterns(
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
-    media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
     urlpatterns += patterns('',
-        (r'^%s/(?P<path>.*)' % media_url, 'django.views.static.serve',
-         {'document_root': settings.MEDIA_ROOT}),
         # Add the 404, 500, and csrf pages for testing
-        (r'^404/$', handler404),
-        (r'^500/$', handler500),
-        (r'^csrf/$', handler_csrf),
-
-        url(r'^test/qunit/$', TemplateView.as_view(template_name='qunit.html'),
-            name="qunit_test"),
-    )
+        url(r'^404/$', handler404),
+        url(r'^500/$', handler500),
+        url(r'^csrf/$', handler_csrf),
+        url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}))

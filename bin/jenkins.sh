@@ -77,6 +77,9 @@ ES_DISABLED = False
 ES_HOSTS = ['127.0.0.1:9200']
 ES_INDEXES = dict(default='test_${JOB_NAME}', public='test_${JOB_NAME}_public')
 ES_TIMEOUT = 60
+
+COMPRESS_ENABLED = False
+
 SETTINGS
 
 echo "Database name: ${JOB_NAME}"

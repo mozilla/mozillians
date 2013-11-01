@@ -233,7 +233,7 @@
             {% endif %}
             {% if profile.ircname %}
               <li class="p-nickname">
-                <i class="icon-comments-alt"></i> IRC : 
+                <i class="icon-comments-alt"></i> IRC :
                 <span class="nickname">{{ profile.ircname }}</span>
               </li>
             {% endif %}
@@ -257,5 +257,7 @@
 {% endblock %}
 
 {% block page_js %}
-  {{ js('profile_view') }}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/profile_view.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

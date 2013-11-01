@@ -12,16 +12,19 @@
 
   <link rel="apple-touch-icon" sizes="72x72" href="{{ static('mozillians/img/apple-touch-icon-72.png') }}">
   <link rel="apple-touch-icon" sizes="114x114" href="{{ static('mozillians/img/apple-touch-icon-114.png') }}">
-  <link rel="apple-touch-icon" sizes="144x144" href="{{ static('mozillians/img/apple-touch-icon-144.png') }}>
-  <link rel="apple-touch-icon" href="{{ static('mozillians/img/apple-touch-icon.png') }}>
-
-  <link rel="shortcut icon" type="image/ico" href="{{ static('mozillians/img/favicon.ico') }}>
+  <link rel="apple-touch-icon" sizes="144x144" href="{{ static('mozillians/img/apple-touch-icon-144.png') }}">
+  <link rel="apple-touch-icon" href="{{ static('mozillians/img/apple-touch-icon.png') }}">
+  <link rel="shortcut icon" type="image/ico" href="{{ static('mozillians/img/favicon.ico') }}">
 
   <link rel="search" type="application/opensearchdescription+xml"
         title="{{ _('Mozillians') }}" href="{{ url('phonebook:search_plugin') }}">
 
   {% block site_css %}
-    {{ css('common', 'screen') }}
+    {% compress css %}
+      <link href="{{ static('mozillians/css/main.less') }}" type="text/less" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/css/jquery-ui-1.8.16.custom.css') }}" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/js/libs/tag-it/css/jquery.tagit.css') }}" rel="stylesheet" media="screen" />
+    {% endcompress %}
   {% endblock %}
   <link rel="stylesheet" type="text/css" href="//www.mozilla.org/tabzilla/media/css/tabzilla.css" media="screen" />
 
@@ -37,7 +40,9 @@
   {% block extrahead %}{% endblock %}
 
   {% block google_analytics %}
-    {{ js('google_analytics') }}
+    {% compress js %}
+      <script src="{{ static('mozillians/js/google-analytics.js') }}"></script>
+    {% endcompress %}
   {% endblock %}
 </head>
 
@@ -212,13 +217,19 @@
   <script src="{{ url('jsi18n') }}"></script>
 
   {% block site_js %}
-    {{ js('common') }}
+    {% compress js %}
+      <script src="{{ static('mozillians/js/libs/jquery-1.7.2.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/jquery-ui-1.8.7.custom.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/jquery.placeholder.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/main.js') }}" rel="stylesheet"></script>
+      <script src="{{ static('mozillians/js/libs/validation/validation.js') }}"></script>
+    {% endcompress %}
     <script src="//www.mozilla.org/tabzilla/media/js/tabzilla.js"></script>
     {% block browserid_form %}
       {{ browserid_js() }}
     {% endblock %}
+    {% block page_js %}{% endblock %}
   {% endblock %}
 
-  {% block page_js %}{% endblock %}
 </body>
 </html>
