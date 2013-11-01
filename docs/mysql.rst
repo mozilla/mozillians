@@ -6,9 +6,11 @@ MySQL setup
 
 Setting up a MySQL user and database for development:
 
-#. Install the `MySQL server`_.
+#. Install the MySQL server. Many Linux distributions provide an installable
+   package. If your OS does not, you can find downloadable install packages
+   on the `MySQL site`_.
 
-.. _MySQL server: http://dev.mysql.com/downloads/mysql/
+.. _MySQL site: http://dev.mysql.com/downloads/mysql/
 
 #. Start the mysql client program as the mysql root user::
 
