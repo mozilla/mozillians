@@ -3,9 +3,11 @@
     <title>Logging out...</title>
       {% compress js %}
         <script src="{{ static('mozillians/js/libs/jquery-1.7.2.js') }}"></script>
-        <script src="{{ static('mozillians/js/logout_view.js') }}"></script>
       {% endcompress %}
       {{ browserid_js() }}
+      {% compress js %}
+        <script src="{{ static('mozillians/js/logout_view.js') }}"></script>
+      {% endcompress %}
   </head>
   <body>
     Logging you out...
