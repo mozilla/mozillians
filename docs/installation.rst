@@ -8,4 +8,4 @@ Installation
 
    installation-virtualenv
    installation-vagrant
-
+   mysql

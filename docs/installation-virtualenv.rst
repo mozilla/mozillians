@@ -11,9 +11,7 @@ VirtualEnv Installation
 
 
 **Prerequisites:** You 'll need python 2, virtualenv and pip.  You'll also need
-mysql-dev (or the equivalent on your system) (even if you aren't using MySQL
-locally), and MySQL server if you want to use MySQL instead of the local default
-of sqlite.
+mysql-dev (or the equivalent on your system), and MySQL server.
 
 You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
 
@@ -23,8 +21,9 @@ When you want to start contributing...
 
 #.  Clone your fork to your local machine::
 
-    $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
-    $ cd mozillians
+       $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
+       (lots of output - be patient...)
+       $ cd mozillians
 
     .. note::
 
@@ -39,17 +38,19 @@ When you want to start contributing...
 #. Activate your python virtual environment::
 
      $ source venv/bin/activate
+     (venv) $
+
+   .. note::
+
+      When you activate your python virtual environment, 'venv'
+      (virtual environment's root directory name) will be prepended
+      to your PS1.
 
 #. Install development and compiled requirements::
 
      (venv)$ pip install -r requirements/compiled.txt -r requirements/dev.txt
-
-   .. note::
-
-      When you activate your python virtual environment 'venv'
-      (virtual environment's root directory name) will be prepended
-      to your PS1.
-
+     (lots more output - be patient again...)
+     (venv) $
 
    .. note::
 
@@ -62,12 +63,9 @@ When you want to start contributing...
 
      (venv)$ cp mozillians/settings/local.py-devdist mozillians/settings/local.py
 
-   .. note::
-
-      The provided configuration uses a sqlite database with the
-      filename `mozillians.db` and assumes that server listens to
-      `127.0.0.1:8000`. You can alter the configuration to fit your
-      own needs.
+   The provided configuration uses a MySQL database named `mozillians` and
+   accesses it locally using the user `mozillians`.  You can see
+   :doc:`mysql` if you need help creating a user and database.
 
 #. Download and run elastic search::
 
@@ -82,17 +80,9 @@ When you want to start contributing...
 
      (venv)$ ./manage.py update_product_details -f
 
-#. Sync DB:
-
-   You ought to be able to do::
+#. Sync DB and apply migrations::
 
      (venv)$ ./manage.py syncdb --noinput --migrate
-
-   but the migrations currently don't work from scratch, so you can get to the
-   same state this way::
-
-     (venv)$ ./manage.py syncdb --noinput --all
-     (venv)$ ./manage.py migrate --fake
 
 #. Create user:
 
@@ -101,16 +91,15 @@ When you want to start contributing...
         ./manage.py runserver 127.0.0.1:8000
 
      #. Load http://127.0.0.1:8000 and sign in with Persona, then create your profile.
-     #. Automatically vouch your account and convert it to superuser::
+     #. Vouch your account and convert it to superuser::
 
         ./scripts/su.sh
-
 
 #. Develop!
 
    Now you can start :doc:`contributing to Mozillians </contribute>`.
 
-#. When you're done
+#. When you're done:
 
    When you are done with your coding session, do not forget to kill the `elastic
    search` process::
@@ -120,18 +109,18 @@ When you want to start contributing...
    and deactivate your virtual python environment by running::
 
      (venv)$ deactivate
+     $
 
-#. Next time
+#. Next time:
 
-   Next time, before starting you will need to start `elasticsearch`
-   server again::
-
-     $ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid >/dev/null 2>&1
-
-   and activate your environment by typing::
+   Next time, before starting you will need to activate your environment by typing::
 
      $ . $VIRTUAL_ENV/bin/activate
 
-   Have fun!
+   and start the `elasticsearch` server again::
+
+     $ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
+
+Have fun!
 
 .. _Fork the main Mozillians repository: https://github.com/mozilla/mozillians/fork_select
