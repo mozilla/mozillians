@@ -9,17 +9,7 @@
   {% if not profile.is_vouched %}pending{% endif %}
 {% endblock %}
 
-{% block messages %}{% endblock %}
-
 {% block content %}
-  {% if messages %}
-      {% for message in messages %}
-        {% with %}
-          {% set label = message.tags in ['error', 'success', 'info'] %}
-          <div class="alert{% if label %} alert-{{ message.tags }}{% endif %}">{{ message }}</div>
-        {% endwith %}
-      {% endfor %}
-  {% endif %}
   <div class="alert">
     {% if user.username == shown_user.username %}
       {{ _('Your Profile') }}

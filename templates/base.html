@@ -144,25 +144,22 @@
 
     {% block mosaic %}{% endblock %}
 
-    {% block messages %}
-      {% if messages %}
-        {% for message in messages %}
-          {% with %}
-            {% set label = message.tags in ['error', 'success', 'info'] %}
-              <div class="alert{% if label %} alert-{{ message.tags }}{% endif %}"
-                   id="pending-approval">
-                {{ message }}
-              </div>
-          {% endwith %}
-        {% endfor %}
-      {% endif %}
-    {% endblock messages %}
-
     {% block content_wrapper %}
       <div id="content-wrapper">
         <div id="main" class="container">
+          {% block messages %}
+            {% for message in messages %}
+              {% with label = message.tags in ['error', 'success', 'info', 'warning'] %}
+                <div class="alert {% if label %}alert-{{ message.tags }}{% endif %}">
+                  {{ message }}
+                </div>
+              {% endwith %}
+            {% endfor %}
+          {% endblock messages %}
           {% block content %}{% endblock %}
-          <a href="#" id="back-to-top"><img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top"></a>
+          <a href="#" id="back-to-top">
+            <img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top">
+          </a>
         </div>
       </div>
     {% endblock %}
