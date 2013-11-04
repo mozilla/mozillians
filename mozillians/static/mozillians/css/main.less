@@ -1206,11 +1206,21 @@ body#profile {
                 width: 220px;
                 float: left;
                 ul {
+                    width:100%;
+                    word-wrap: break-word;
                     list-style: none;
                     float: left;
                     li {
+                        position:relative;
                         margin: 0 15px 0 0;
                     }
+                }
+                .pre-break-bullet{
+                    position:absolute;
+                }
+                .u-url a{
+                    display:block;
+                    text-indent:1.25em;
                 }
                 @media (max-width: @breakDesktop) {
                     text-align: center;
