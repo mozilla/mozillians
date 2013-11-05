@@ -565,10 +565,7 @@ class ExternalAccount(models.Model):
         0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}/'},
         # All bugs assigned to or reported by the user.
         1:{'name': 'Bugzilla (BMO)', 'url': ('https://bugzilla.mozilla.org/'
-                                             'buglist.cgi?emailtype1=exact'
-                                             '&query_format=advanced'
-                                             '&emailassigned_to1=1'
-                                             '&email1={username}')},
+                                             'user_profile?login={username}')},
         2:{'name': 'Github', 'url': 'https://github.com/{username}'},
         3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
         4:{'name': 'Mozilla Support', 'url': ''},
