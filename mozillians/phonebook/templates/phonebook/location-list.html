@@ -45,3 +45,9 @@
     </div>
   {% endif %}
 {% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
+{% endblock %}
