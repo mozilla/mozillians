@@ -14,6 +14,7 @@ echo "Starting build on executor $EXECUTOR_NUMBER..."
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;
 
+rm -rf  vendor-local
 git submodule sync
 git submodule update --init --recursive
 
