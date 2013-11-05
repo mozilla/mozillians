@@ -100,7 +100,7 @@
     </article><!-- .group-meta -->
     {% endif %}
 
-    {% if not group.system %}
+    {% if not group.system and not hide_leave_group_button %}
         <form action="{{ url('groups:toggle_group_subscription', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}

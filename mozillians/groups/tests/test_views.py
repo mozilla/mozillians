@@ -343,6 +343,42 @@ class ShowTests(TestCase):
         eq_(response.status_code, 200)
         eq_(response.context['group'], group)
 
+    def test_show_leave_group_button_value_with_steward(self):
+        steward_user = UserFactory.create(userprofile={'is_vouched': True})
+        group = GroupFactory.create(steward=steward_user.userprofile)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(steward_user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['hide_leave_group_button'], True)
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['hide_leave_group_button'], False)
+
+    def test_show_leave_group_button_value_without_steward(self):
+        group = GroupFactory.create()
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['hide_leave_group_button'], False)
+
+    def test_show_leave_group_button_value_skill(self):
+        skill = SkillFactory.create()
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_skill', kwargs={'url': skill.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['hide_leave_group_button'], False)
+
 
 class ToggleGroupSubscriptionTests(TestCase):
     def setUp(self):

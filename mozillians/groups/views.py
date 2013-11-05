@@ -106,10 +106,15 @@ def show(request, url, alias_model, template):
         people = paginator.page(paginator.num_pages)
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
+
+    profile = request.user.userprofile
+    hide_leave_group_button = (hasattr(group, 'steward')
+        and (profile == group.steward))
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
-                show_pagination=show_pagination)
+                show_pagination=show_pagination,
+                hide_leave_group_button=hide_leave_group_button)
 
     if isinstance(group, Group) and group.steward:
         """ Get the most globally popular skills that appear in the group
