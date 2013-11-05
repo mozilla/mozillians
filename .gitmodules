@@ -1,9 +1,6 @@
 [submodule "vendor-local/src/django-statsd"]
 	path = vendor-local/src/django-statsd
 	url = https://github.com/andymckay/django-statsd/
-[submodule "vendor-local/src/basket-client"]
-	path = vendor-local/src/basket-client
-	url = git://github.com/mozilla/basket-client.git
 [submodule "vendor-local/src/django-autocomplete-light"]
 	path = vendor-local/src/django-autocomplete-light
 	url = git://github.com/yourlabs/django-autocomplete-light
@@ -38,3 +35,6 @@
 [submodule "vendor-local/src/django-jingo-offline-compressor"]
 	path = vendor-local/src/django-jingo-offline-compressor
 	url = https://github.com/peterbe/django-jingo-offline-compressor.git
+[submodule "vendor-local/src/basket-client-submodule"]
+	path = vendor-local/src/basket-client-submodule
+	url = git://github.com/mozilla/basket-client.git
