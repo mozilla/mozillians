@@ -1,0 +1,7 @@
+databases:
+    mozillians:
+
+        tables:
+            auth_user:
+                random_email_noadmin:
+                    - email

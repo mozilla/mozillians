@@ -23,6 +23,7 @@ Contents:
    invites
    contribute
    api
+   mysql-anonymize
 
 Indices and tables
 ------------------
