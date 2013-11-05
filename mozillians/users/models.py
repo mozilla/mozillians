@@ -568,12 +568,12 @@ class ExternalAccount(models.Model):
                                              'user_profile?login={username}')},
         2:{'name': 'Github', 'url': 'https://github.com/{username}'},
         3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
-        4:{'name': 'Mozilla Support', 'url': ''},
+        4:{'name': 'Mozilla Support', 'url': 'https://support.mozilla.org/user/{username}'},
         5:{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
         6:{'name': 'Twitter', 'url': 'https://twitter.com/{username}'},
-        7:{'name': 'AIM', 'url': ''},
-        8:{'name': 'Google Talk', 'url': ''},
-        9:{'name': 'Skype', 'url': ''},
+        7:{'name': 'AIM', 'url': 'aim:{username}'},
+        8:{'name': 'Google Talk', 'url': 'gtalk:chat?jid={username}@gmail.com'},
+        9:{'name': 'Skype', 'url': 'skype:{username}?add'},
         10:{'name': 'Yahoo! Messenger', 'url': ''},
     }
     user = models.ForeignKey(UserProfile)
