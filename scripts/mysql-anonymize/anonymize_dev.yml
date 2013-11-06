@@ -1,0 +1,31 @@
+databases:
+    mozillians:
+
+        tables:
+            auth_user:
+                nullify:
+                    - first_name
+                    - last_name
+                random_email_noadmin:
+                    - email
+                random_username:
+                    - username
+
+            profile:
+                hash_value:
+                    - full_name
+                    - title
+                empty_string:
+                    - bio
+                    - photo
+                    - region
+                    - city
+                    - basket_token
+                nullify:
+                    - tshirt
+                random_username:
+                    - ircname
+
+            users_externalaccount:
+                random_username:
+                    - username
