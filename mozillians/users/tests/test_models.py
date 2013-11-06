@@ -182,14 +182,14 @@ class UserProfileTests(TestCase):
 
     def test_accounts_access(self):
         user = UserFactory.create()
-        user.userprofile.externalaccount_set.create(type=4, username='test')
+        user.userprofile.externalaccount_set.create(type='SUMO', username='test')
         ok_(isinstance(user.userprofile.accounts, QuerySet))
         eq_(user.userprofile.accounts.filter(username='test')[0].username, 'test')
 
     def test_accounts_public_mozillians(self):
         profile = UserFactory.create().userprofile
         profile.set_instance_privacy_level(PUBLIC)
-        profile.externalaccount_set.create(type=4, username='test', privacy=MOZILLIANS)
+        profile.externalaccount_set.create(type='SUMO', username='test', privacy=MOZILLIANS)
         eq_(profile.accounts.count(), 0)
         profile.set_instance_privacy_level(MOZILLIANS)
         eq_(profile.accounts.count(), 1)
@@ -473,12 +473,12 @@ class CalculatePhotoFilenameTests(TestCase):
 class ExternalAccountTests(TestCase):
     def test_get_url(self):
         profile = UserFactory.create().userprofile
-        account = profile.externalaccount_set.create(type=3, username='sammy')
+        account = profile.externalaccount_set.create(type='MDN', username='sammy')
         ok_('sammy' in account.get_username_url())
 
     def test_get_url_unicode(self):
         profile = UserFactory.create().userprofile
-        account = profile.externalaccount_set.create(type=3, username=u'sammyウ')
+        account = profile.externalaccount_set.create(type='MDN', username=u'sammyウ')
         ok_('%E3%82%A6' in account.get_username_url())
 
     def test_urls_contain_usernames(self):

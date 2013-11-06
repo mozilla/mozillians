@@ -562,23 +562,23 @@ class UsernameBlacklist(models.Model):
 
 class ExternalAccount(models.Model):
     ACCOUNT_TYPES = {
-        0:{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}/'},
-        # All bugs assigned to or reported by the user.
-        1:{'name': 'Bugzilla (BMO)', 'url': ('https://bugzilla.mozilla.org/'
-                                             'user_profile?login={username}')},
-        2:{'name': 'Github', 'url': 'https://github.com/{username}'},
-        3:{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
-        4:{'name': 'Mozilla Support', 'url': ''},
-        5:{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
-        6:{'name': 'Twitter', 'url': 'https://twitter.com/{username}'},
-        7:{'name': 'AIM', 'url': ''},
-        8:{'name': 'Google Talk', 'url': ''},
-        9:{'name': 'Skype', 'url': ''},
-        10:{'name': 'Yahoo! Messenger', 'url': ''},
-    }
+        'AMO':{'name': 'Mozilla Add-ons', 'url': 'https://addons.mozilla.org/user/{username}/'},
+        'BMO':{'name': 'Bugzilla (BMO)', 'url': ('https://bugzilla.mozilla.org/'
+                                                 'user_profile?login={username}')},
+        'GITHUB':{'name': 'Github', 'url': 'https://github.com/{username}'},
+        'MDN':{'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{username}'},
+        'SUMO':{'name': 'Mozilla Support', 'url': ''},
+        'FACEBOOK':{'name': 'Facebook', 'url': 'https://www.facebook.com/{username}'},
+        'TWITTER':{'name': 'Twitter', 'url': 'https://twitter.com/{username}'},
+        'AIM':{'name': 'AIM', 'url': ''},
+        'GTALK':{'name': 'Google Talk', 'url': ''},
+        'SKYPE':{'name': 'Skype', 'url': ''},
+        'YAHOO':{'name': 'Yahoo! Messenger', 'url': ''},}
+
     user = models.ForeignKey(UserProfile)
     username = models.CharField(max_length=255, verbose_name=_lazy('Account Username'))
-    type = models.PositiveIntegerField(
+    type = models.CharField(
+        max_length=30,
         choices=sorted([(k, v['name'])
                         for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
         verbose_name=_lazy('Account Type'))
