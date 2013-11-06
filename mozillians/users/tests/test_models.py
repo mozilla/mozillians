@@ -94,8 +94,7 @@ class UserProfileTests(TestCase):
         skill_2 = SkillFactory.create()
         language_1 = LanguageFactory.create()
         language_2 = LanguageFactory.create()
-        user = UserFactory.create(userprofile={'website': 'bestplaceonthenet.com',
-                                               'city': 'athens',
+        user = UserFactory.create(userprofile={'city': 'athens',
                                                'region': 'attika',
                                                'allows_community_sites': False,
                                                'allows_mozilla_sites': False,
@@ -114,7 +113,6 @@ class UserProfileTests(TestCase):
         ok_(isinstance(result, dict))
         eq_(result['id'], profile.id)
         eq_(result['is_vouched'], profile.is_vouched)
-        eq_(result['website'], profile.website)
         eq_(result['region'], profile.region)
         eq_(result['city'], profile.city)
         eq_(result['allows_community_sites'], profile.allows_community_sites)
@@ -182,17 +180,34 @@ class UserProfileTests(TestCase):
 
     def test_accounts_access(self):
         user = UserFactory.create()
-        user.userprofile.externalaccount_set.create(type='SUMO', username='test')
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                                    identifier='test')
         ok_(isinstance(user.userprofile.accounts, QuerySet))
-        eq_(user.userprofile.accounts.filter(username='test')[0].username, 'test')
+        eq_(user.userprofile.accounts.filter(identifier='test')[0].identifier, 'test')
 
     def test_accounts_public_mozillians(self):
         profile = UserFactory.create().userprofile
         profile.set_instance_privacy_level(PUBLIC)
-        profile.externalaccount_set.create(type='SUMO', username='test', privacy=MOZILLIANS)
+        profile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                           identifier='test',
+                                           privacy=MOZILLIANS)
         eq_(profile.accounts.count(), 0)
         profile.set_instance_privacy_level(MOZILLIANS)
         eq_(profile.accounts.count(), 1)
+
+    def test_websites(self):
+        profile = UserFactory.create().userprofile
+        profile.set_instance_privacy_level(MOZILLIANS)
+        profile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                           identifier='test',
+                                           privacy=MOZILLIANS)
+        profile.externalaccount_set.create(type=ExternalAccount.TYPE_WEBSITE,
+                                           identifier='http://google.com',
+                                           privacy=MOZILLIANS)
+        eq_(profile.accounts.count(), 1)
+        eq_(profile.websites.count(), 1)
+        profile.set_instance_privacy_level(PUBLIC)
+        eq_(profile.websites.count(), 0)
 
     @patch('mozillians.users.models.UserProfile.auto_vouch')
     def test_auto_vouch_on_profile_save(self, auto_vouch_mock):
@@ -473,15 +488,17 @@ class CalculatePhotoFilenameTests(TestCase):
 class ExternalAccountTests(TestCase):
     def test_get_url(self):
         profile = UserFactory.create().userprofile
-        account = profile.externalaccount_set.create(type='MDN', username='sammy')
-        ok_('sammy' in account.get_username_url())
+        account = profile.externalaccount_set.create(type=ExternalAccount.TYPE_MDN,
+                                                     identifier='sammy')
+        ok_('sammy' in account.get_identifier_url())
 
     def test_get_url_unicode(self):
         profile = UserFactory.create().userprofile
-        account = profile.externalaccount_set.create(type='MDN', username=u'sammyウ')
-        ok_('%E3%82%A6' in account.get_username_url())
+        account = profile.externalaccount_set.create(type=ExternalAccount.TYPE_MDN,
+                                                     identifier=u'sammyウ')
+        ok_('%E3%82%A6' in account.get_identifier_url())
 
-    def test_urls_contain_usernames(self):
+    def test_urls_contain_identifiers(self):
         for value, account in ExternalAccount.ACCOUNT_TYPES.iteritems():
             if account['url']:
-                ok_('{username}' in account['url'])
+                ok_('{identifier}' in account['url'])

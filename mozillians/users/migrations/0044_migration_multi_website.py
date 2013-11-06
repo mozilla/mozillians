@@ -6,29 +6,21 @@ from django.db import models
 
 class Migration(DataMigration):
 
-    type_map = {'0': 'AMO',
-                '1': 'BMO',
-                '2': 'GITHUB',
-                '3': 'MDN',
-                '4': 'SUMO',
-                '5': 'FACEBOOK',
-                '6': 'TWITTER',
-                '7': 'AIM',
-                '8': 'GTALK',
-                '9': 'SKYPE',
-                '10': 'YAHOO'}
-
-    reverse_type_map = {v: k for k, v in type_map.items()}
-
     def forwards(self, orm):
-        for account in orm.ExternalAccount.objects.all():
-            account.type = self.type_map[account.type]
-            account.save()
+        for profile in orm.UserProfile.objects.exclude(website=''):
+            profile.externalaccount_set.create(type='WEBSITE',
+                                               username=profile.website,
+                                               privacy=profile.privacy_website)
 
     def backwards(self, orm):
-        for account in orm.ExternalAccount.objects.all():
-            account.type = self.reverse_type_map[account.type]
-            account.save()
+        # This migration is necessarily lossy if users have created multiple Sites.
+        for profile in orm.UserProfile.objects.all():
+            sites = profile.externalaccount_set.filter(type='WEBSITE')
+            if sites.exists():
+                profile.website = sites[0].username
+                profile.privacy_website = sites[0].privacy
+                profile.save()
+        orm.ExternalAccount.objects.filter(type='WEBSITE').delete()
 
     models = {
         'auth.group': {
@@ -101,7 +93,7 @@ class Migration(DataMigration):
             'Meta': {'ordering': "['type']", 'object_name': 'ExternalAccount'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'privacy': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3'}),
-            'type': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
+            'type': ('django.db.models.fields.CharField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"}),
             'username': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },

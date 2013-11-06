@@ -1,34 +1,31 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
 
-    type_map = {'0': 'AMO',
-                '1': 'BMO',
-                '2': 'GITHUB',
-                '3': 'MDN',
-                '4': 'SUMO',
-                '5': 'FACEBOOK',
-                '6': 'TWITTER',
-                '7': 'AIM',
-                '8': 'GTALK',
-                '9': 'SKYPE',
-                '10': 'YAHOO'}
-
-    reverse_type_map = {v: k for k, v in type_map.items()}
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        for account in orm.ExternalAccount.objects.all():
-            account.type = self.type_map[account.type]
-            account.save()
+        # Deleting field 'UserProfile.website'
+        db.delete_column('profile', 'website')
+
+        # Deleting field 'UserProfile.privacy_website'
+        db.delete_column('profile', 'privacy_website')
+
 
     def backwards(self, orm):
-        for account in orm.ExternalAccount.objects.all():
-            account.type = self.reverse_type_map[account.type]
-            account.save()
+        # Adding field 'UserProfile.website'
+        db.add_column('profile', 'website',
+                      self.gf('django.db.models.fields.URLField')(default='', max_length=200, blank=True),
+                      keep_default=False)
+
+        # Adding field 'UserProfile.privacy_website'
+        db.add_column('profile', 'privacy_website',
+                      self.gf('mozillians.users.models.PrivacyField')(default=3),
+                      keep_default=False)
+
 
     models = {
         'auth.group': {
@@ -101,7 +98,7 @@ class Migration(DataMigration):
             'Meta': {'ordering': "['type']", 'object_name': 'ExternalAccount'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'privacy': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3'}),
-            'type': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
+            'type': ('django.db.models.fields.CharField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"}),
             'username': ('django.db.models.fields.CharField', [], {'max_length': '255'})
         },
@@ -145,17 +142,14 @@ class Migration(DataMigration):
             'privacy_title': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_tshirt': ('mozillians.users.models.PrivacyField', [], {'default': '1'}),
             'privacy_vouched_by': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
-            'privacy_website': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'region': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'skills': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Skill']"}),
             'timezone': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '70', 'blank': 'True'}),
             'tshirt': ('django.db.models.fields.IntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
-            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'}),
-            'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
+            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'})
         }
     }
 
     complete_apps = ['users']
-    symmetrical = True

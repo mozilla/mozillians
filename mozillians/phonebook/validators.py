@@ -1,6 +1,10 @@
 import re
 
-from mozillians.users.models import UsernameBlacklist
+from django.core.validators import URLValidator
+from django.db.models.loading import get_model
+from django.forms import ValidationError
+
+from tower import ugettext_lazy as _lazy
 
 
 def validate_username(username):
@@ -10,6 +14,7 @@ def validate_username(username):
 
     """
     username = username.lower()
+    UsernameBlacklist = get_model('users', 'UsernameBlacklist')
 
     if (UsernameBlacklist.
         objects.filter(value=username, is_regex=False).exists()):
@@ -20,3 +25,19 @@ def validate_username(username):
             return False
 
     return True
+
+
+def validate_website(url):
+    """Validate and return a properly formatted website url."""
+
+    validate_url = URLValidator()
+
+    if url and '://' not in url:
+        url = u'http://%s' % url
+
+    try:
+        validate_url(url)
+    except ValidationError:
+        raise ValidationError(_lazy('Enter a valid URL.'))
+
+    return url

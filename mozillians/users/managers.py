@@ -18,7 +18,6 @@ DEFAULT_PRIVACY_FIELDS = {
     'full_name': '',
     'ircname': '',
     'email': '',
-    'website': '',
     'bio': '',
     'city': '',
     'region': '',

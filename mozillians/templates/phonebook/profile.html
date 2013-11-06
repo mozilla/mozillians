@@ -190,10 +190,10 @@
               {% for account in profile.accounts %}
                 <li>
                   {{ account.get_type_display() }}:
-                  {% if account.get_username_url() -%}
-                    <a href="{{ account.get_username_url() }}">{{ account.username }}</a>
+                  {% if account.get_identifier_url() -%}
+                    <a href="{{ account.get_identifier_url() }}">{{ account.identifier }}</a>
                   {%- else -%}
-                    {{ account.username }}
+                    {{ account.identifier }}
                   {%- endif -%}
                 {% endfor %}
               </li>
@@ -227,14 +227,14 @@
                 <span class="nickname">{{ profile.ircname }}</span>
               </li>
             {% endif %}
-            {% if profile.website %}
+            {% for site in profile.websites %}
               <li class="u-url">
-                <i class="icon-link pre-break-bullet"></i>
-                <a href="{{ profile.website }}">
-                  <span class="url">{{ profile.website }}</span>
+                <i class="icon-link"></i>
+                <a href="{{ site.identifier }}">
+                  <span class="url">{{ site.identifier }}</span>
                 </a>
               </li>
-            {% endif %}
+            {% endfor %}
             {% if profile.tshirt %}
               <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
             {% endif %}

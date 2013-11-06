@@ -127,17 +127,13 @@
       {{ privacy_field(profile_form.privacy_bio) }}
     </fieldset>
 
-    <fieldset id="websites">
-      {{ bootstrap(profile_form.website) }}
-      {{ privacy_field(profile_form.privacy_website) }}
-    </fieldset>
-
     <fieldset id="accounts">
       <label>{{ _('Accounts') }}</label>
       {{ accounts_formset.management_form }}
       {% for account_form in accounts_formset %}
         <div class="externalaccount-fieldrow
                     {% if account_form.errors %} error{% endif %}">
+          {{ account_form.non_field_errors() }}
           {% for field in account_form %}
             {{ field.errors }}
           {% endfor %}
