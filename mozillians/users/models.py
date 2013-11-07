@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import signals as dbsignals
+from django.db.models import signals as dbsignals, ManyToManyField
 from django.dispatch import receiver
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
@@ -24,7 +24,7 @@ from mozillians.common.helpers import gravatar
 from mozillians.groups.models import (Group, GroupAlias, Skill, SkillAlias,
                                       Language, LanguageAlias)
 from mozillians.phonebook.validators import validate_website
-from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
+from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager)
@@ -46,8 +46,8 @@ class PrivacyField(models.PositiveSmallIntegerField):
         myargs = {'default': MOZILLIANS,
                   'choices': PRIVACY_CHOICES}
         myargs.update(kwargs)
-        return super(PrivacyField, self).__init__(*args, **myargs)
-add_introspection_rules([], ["^mozillians\.users\.models\.PrivacyField"])
+        super(PrivacyField, self).__init__(*args, **myargs)
+add_introspection_rules([], ['^mozillians\.users\.models\.PrivacyField'])
 
 
 class PrivacyAwareS(S):
@@ -64,6 +64,7 @@ class PrivacyAwareS(S):
 
     def __iter__(self):
         self._iterator = super(PrivacyAwareS, self).__iter__()
+
         def _generator():
             while True:
                 obj = self._iterator.next()
@@ -73,7 +74,6 @@ class PrivacyAwareS(S):
 
 
 class UserProfilePrivacyModel(models.Model):
-    _privacy_fields = DEFAULT_PRIVACY_FIELDS
     _privacy_level = None
 
     privacy_photo = PrivacyField()
@@ -94,8 +94,50 @@ class UserProfilePrivacyModel(models.Model):
                                   default=PRIVILEGED)
     privacy_title = PrivacyField()
 
+    CACHED_PRIVACY_FIELDS = None
+
     class Meta:
-        abstract=True
+        abstract = True
+
+    @classmethod
+    def clear_privacy_fields_cache(cls):
+        """
+        Clear any caching of the privacy fields.
+        (This is only used in testing.)
+        """
+        cls.CACHED_PRIVACY_FIELDS = None
+
+    @classmethod
+    def privacy_fields(cls):
+        """
+        Return a dictionary whose keys are the names of the fields in this
+        model that are privacy-controlled, and whose values are the default
+        values to use for those fields when the user is not privileged to
+        view their actual value.
+        """
+        # Cache on the class object
+        if cls.CACHED_PRIVACY_FIELDS is None:
+            privacy_fields = {}
+            field_names = cls._meta.get_all_field_names()
+            for name in field_names:
+                if name.startswith('privacy_') or not 'privacy_%s' % name in field_names:
+                    # skip privacy fields and uncontrolled fields
+                    continue
+                field = cls._meta.get_field(name)
+                # Okay, this is a field that is privacy-controlled
+                # Figure out a good default value for it (to show to users
+                # who aren't privileged to see the actual value)
+                if isinstance(field, ManyToManyField):
+                    default = field.related.parent_model.objects.none()
+                else:
+                    default = field.get_default()
+                privacy_fields[name] = default
+            # HACK: There's not really an email field on UserProfile, but it's faked with a property
+            if 'privacy_email' in field_names:
+                privacy_fields['email'] = u''
+            cls.CACHED_PRIVACY_FIELDS = privacy_fields
+        return cls.CACHED_PRIVACY_FIELDS
+
 
 class UserProfile(UserProfilePrivacyModel, SearchMixin):
     objects = UserProfileManager()
@@ -183,7 +225,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         """
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
-        privacy_fields = _getattr('_privacy_fields')
+        privacy_fields = UserProfile.privacy_fields()
         privacy_level = _getattr('_privacy_level')
 
         if not privacy_level or attrname not in privacy_fields:
@@ -319,7 +361,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def email(self):
         """Privacy aware email property."""
         if self._privacy_level and self.privacy_email < self._privacy_level:
-            return self._privacy_fields['email']
+            return type(self).privacy_fields()['email']
         return self.user.email
 
     @property
@@ -348,7 +390,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def is_public(self):
         """Return True is any of the privacy protected fields is PUBLIC."""
-        for field in self._privacy_fields:
+        for field in type(self).privacy_fields():
             if getattr(self, 'privacy_%s' % field, None) == PUBLIC:
                 return True
         return False
@@ -361,7 +403,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """
         for field in PUBLIC_INDEXABLE_FIELDS:
             if (getattr(self, 'privacy_%s' % field, None) == PUBLIC and
-                getattr(self, field, None)):
+                    getattr(self, field, None)):
                 return True
         return False
 
@@ -378,7 +420,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def set_privacy_level(self, level, save=True):
         """Sets all privacy enabled fields to 'level'."""
-        for field in self._privacy_fields:
+        for field in type(self).privacy_fields():
             setattr(self, 'privacy_%s' % field, level)
         if save:
             self.save()
@@ -464,9 +506,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
-        message = _(u"You've now been vouched on Mozillians.org. "
-                     "You'll now be able to search, vouch "
-                     "and invite other Mozillians onto the site.")
+        message = _(u'You\'ve now been vouched on Mozillians.org. '
+                    u'You\'ll now be able to search, vouch '
+                    u'and invite other Mozillians onto the site.')
         send_mail(subject, message, settings.FROM_NOREPLY,
                   [self.user.email])
 
@@ -546,6 +588,7 @@ def update_search_index(sender, instance, **kwargs):
 def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfile, [instance.id], public_index=False)
     unindex_objects.delay(UserProfile, [instance.id], public_index=True)
+
 
 @receiver(dbsignals.pre_delete, sender=User,
           dispatch_uid='remove_from_basket_sig')

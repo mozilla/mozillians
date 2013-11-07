@@ -1,9 +1,7 @@
-from django.db.models import Q, Manager
+from django.db.models import Q, Manager, get_model
 from django.db.models.query import QuerySet, ValuesQuerySet
 
 from tower import ugettext_lazy as _lazy
-
-from mozillians.groups.models import Group, Language, Skill
 
 
 PRIVILEGED = 1
@@ -13,23 +11,6 @@ PUBLIC = 4
 PRIVACY_CHOICES = ((MOZILLIANS, _lazy(u'Mozillians')),
                    (PUBLIC, _lazy(u'Public')))
 PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
-DEFAULT_PRIVACY_FIELDS = {
-    'photo': None,
-    'full_name': '',
-    'ircname': '',
-    'email': '',
-    'bio': '',
-    'city': '',
-    'region': '',
-    'country': '',
-    'groups': Group.objects.none(),
-    'skills': Skill.objects.none(),
-    'languages': Language.objects.none(),
-    'vouched_by': None,
-    'date_mozillian': None,
-    'timezone': '',
-    'title': '',
-    'tshirt': None,}
 
 
 class UserProfileValuesQuerySet(ValuesQuerySet):
@@ -55,15 +36,17 @@ class UserProfileValuesQuerySet(ValuesQuerySet):
 
         names = extra_names + field_names + aggregate_names
 
+        model_privacy_fields = self.model.privacy_fields()
+
         privacy_fields = [
             (names.index('privacy_%s' % field), names.index(field), field)
-            for field in set(DEFAULT_PRIVACY_FIELDS) & set(names)]
+            for field in set(model_privacy_fields) & set(names)]
 
         for row in self.query.get_compiler(self.db).results_iter():
             row = list(row)
             for levelindex, fieldindex, field in privacy_fields:
                 if row[levelindex] < self._privacy_level:
-                    row[fieldindex] = DEFAULT_PRIVACY_FIELDS[field]
+                    row[fieldindex] = model_privacy_fields[field]
             yield dict(zip(names, row))
 
 
@@ -72,7 +55,8 @@ class UserProfileQuerySet(QuerySet):
 
     def __init__(self, *args, **kwargs):
         self.public_q = Q()
-        for field in DEFAULT_PRIVACY_FIELDS:
+        UserProfile = get_model('users', 'UserProfile')
+        for field in UserProfile.privacy_fields():
             key = 'privacy_%s' % field
             self.public_q |= Q(**{key: PUBLIC})
 
@@ -83,7 +67,7 @@ class UserProfileQuerySet(QuerySet):
                 field = 'user__email'
             self.public_index_q |= (Q(**{key: PUBLIC}) & ~Q(**{field: ''}))
 
-        return super(UserProfileQuerySet, self).__init__(*args, **kwargs)
+        super(UserProfileQuerySet, self).__init__(*args, **kwargs)
 
     def privacy_level(self, level=MOZILLIANS):
         """Set privacy level for query set."""

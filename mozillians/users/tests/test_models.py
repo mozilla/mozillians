@@ -7,18 +7,17 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.test.utils import override_settings
+from django.utils import unittest
 
 from mock import Mock, call, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, Language, Skill
-from mozillians.groups.tests import  (GroupAliasFactory, GroupFactory,
-                                      LanguageAliasFactory, LanguageFactory,
-                                      SkillAliasFactory, SkillFactory)
-from mozillians.users.managers import (DEFAULT_PRIVACY_FIELDS, EMPLOYEES,
-                                       MOZILLIANS, PUBLIC,
-                                       PUBLIC_INDEXABLE_FIELDS)
+from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
+                                     LanguageAliasFactory, LanguageFactory,
+                                     SkillAliasFactory, SkillFactory)
+from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
 from mozillians.users.tests import UserFactory
 
@@ -65,23 +64,23 @@ class SignaledFunctionsTests(TestCase):
 
 
 class UserProfileTests(TestCase):
-    @patch('mozillians.users.models.UserProfile._privacy_fields',
-           {'full_name': ''})
-    def test_get_attribute_without_privacy_level(self):
+    @patch('mozillians.users.models.UserProfile.privacy_fields')
+    def test_get_attribute_without_privacy_level(self, mock_privacy_fields):
+        mock_privacy_fields.return_value = {'full_name': ''}
         user = UserFactory.create(userprofile={'full_name': 'foobar'})
         eq_(user.userprofile.full_name, 'foobar')
 
-    @patch('mozillians.users.models.UserProfile._privacy_fields',
-           {'full_name': ''})
-    def test_get_attribute_with_public_level(self):
+    @patch('mozillians.users.models.UserProfile.privacy_fields')
+    def test_get_attribute_with_public_level(self, mock_privacy_fields):
+        mock_privacy_fields.return_value = {'full_name': ''}
         user = UserFactory.create(userprofile={'full_name': 'foobar'})
         profile = user.userprofile
         profile.set_instance_privacy_level(PUBLIC)
         eq_(profile.full_name, '')
 
-    @patch('mozillians.users.models.UserProfile._privacy_fields',
-           {'full_name': ''})
-    def test_get_attribute_with_employee_level(self):
+    @patch('mozillians.users.models.UserProfile.privacy_fields')
+    def test_get_attribute_with_employee_level(self, mock_privacy_fields):
+        mock_privacy_fields.return_value = {'full_name': ''}
         user = UserFactory.create(userprofile={'full_name': 'foobar'})
         profile = user.userprofile
         profile.set_instance_privacy_level(EMPLOYEES)
@@ -251,18 +250,18 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         user.userprofile.set_privacy_level(9)
         user = User.objects.get(id=user.id)
-        for field in UserProfile._privacy_fields:
+        for field in UserProfile.privacy_fields():
             eq_(getattr(user.userprofile, 'privacy_{0}'.format(field)), 9,
                 'Field {0} not set'.format(field))
 
     def test_set_privacy_level_without_save(self):
         user = UserFactory.create()
         user.userprofile.set_privacy_level(9, save=False)
-        for field in UserProfile._privacy_fields:
+        for field in UserProfile.privacy_fields():
             eq_(getattr(user.userprofile, 'privacy_{0}'.format(field)), 9,
                 'Field {0} not set'.format(field))
         user = User.objects.get(id=user.id)
-        for field in UserProfile._privacy_fields:
+        for field in UserProfile.privacy_fields():
             # Compare to default privacy setting for each field.
             f = UserProfile._meta.get_field_by_name('privacy_{0}'.format(field))[0]
             eq_(getattr(user.userprofile, 'privacy_{0}'.format(field)),
@@ -273,7 +272,6 @@ class UserProfileTests(TestCase):
         user.userprofile.set_instance_privacy_level(9)
         eq_(user.userprofile._privacy_level, 9)
 
-
     def test_email_no_privacy(self):
         user = UserFactory.create()
         eq_(user.userprofile.email, user.email)
@@ -282,7 +280,7 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         public_profile = user.userprofile
         public_profile.set_instance_privacy_level(PUBLIC)
-        eq_(public_profile.email, DEFAULT_PRIVACY_FIELDS['email'])
+        eq_(public_profile.email, UserProfile.privacy_fields()['email'])
 
     def test_email_public(self):
         user = UserFactory.create(userprofile={'privacy_email': PUBLIC})
@@ -294,7 +292,7 @@ class UserProfileTests(TestCase):
         user = UserFactory.create(userprofile={'tshirt': 9})
         public_profile = user.userprofile
         public_profile.set_instance_privacy_level(PUBLIC)
-        eq_(public_profile.tshirt, DEFAULT_PRIVACY_FIELDS['tshirt'])
+        eq_(public_profile.tshirt, UserProfile.privacy_fields()['tshirt'])
 
     def test_privacy_level_employee(self):
         user = UserFactory.create()
@@ -319,7 +317,7 @@ class UserProfileTests(TestCase):
         ok_(not user.userprofile.is_complete)
 
     def test_is_public(self):
-        for field in UserProfile._privacy_fields:
+        for field in UserProfile.privacy_fields():
             user = UserFactory.create(
                 userprofile={'privacy_{0}'.format(field): PUBLIC})
             ok_(user.userprofile.is_public,
@@ -342,12 +340,12 @@ class UserProfileTests(TestCase):
         group_2 = GroupFactory.create(name='lo')
         GroupAliasFactory.create(alias=group_2, name='bar')
         user = UserFactory.create()
-        user.userprofile.set_membership(Group, ['foo','bar'])
+        user.userprofile.set_membership(Group, ['foo', 'bar'])
         eq_(set(user.userprofile.groups.all()), set([group_1, group_2]))
 
     def test_set_membership_group_new_group(self):
         user = UserFactory.create()
-        user.userprofile.set_membership(Group, ['foo','bar'])
+        user.userprofile.set_membership(Group, ['foo', 'bar'])
         ok_(user.userprofile.groups.filter(name='foo').exists())
         ok_(user.userprofile.groups.filter(name='bar').exists())
 
@@ -363,12 +361,12 @@ class UserProfileTests(TestCase):
         group_2 = LanguageFactory.create(name='lo')
         LanguageAliasFactory.create(alias=group_2, name='bar')
         user = UserFactory.create()
-        user.userprofile.set_membership(Language, ['foo','bar'])
+        user.userprofile.set_membership(Language, ['foo', 'bar'])
         eq_(set(user.userprofile.languages.all()), set([group_1, group_2]))
 
     def test_set_membership_language_new_group(self):
         user = UserFactory.create()
-        user.userprofile.set_membership(Language, ['foo','bar'])
+        user.userprofile.set_membership(Language, ['foo', 'bar'])
         ok_(user.userprofile.languages.filter(name='foo').exists())
         ok_(user.userprofile.languages.filter(name='bar').exists())
 
@@ -377,12 +375,12 @@ class UserProfileTests(TestCase):
         group_2 = SkillFactory.create(name='lo')
         SkillAliasFactory.create(alias=group_2, name='bar')
         user = UserFactory.create()
-        user.userprofile.set_membership(Skill, ['foo','bar'])
+        user.userprofile.set_membership(Skill, ['foo', 'bar'])
         eq_(set(user.userprofile.skills.all()), set([group_1, group_2]))
 
     def test_set_membership_skill_new_group(self):
         user = UserFactory.create()
-        user.userprofile.set_membership(Skill, ['foo','bar'])
+        user.userprofile.set_membership(Skill, ['foo', 'bar'])
         ok_(user.userprofile.skills.filter(name='foo').exists())
         ok_(user.userprofile.skills.filter(name='bar').exists())
 
@@ -450,7 +448,6 @@ class UserProfileTests(TestCase):
         ok_(not user_2.userprofile.date_vouched)
         ok_(email_vouched_mock.called)
 
-
     def test_voucher_public(self):
         voucher = UserFactory.create(userprofile={'is_vouched': True})
         user = UserFactory.create(
@@ -502,3 +499,29 @@ class ExternalAccountTests(TestCase):
         for value, account in ExternalAccount.ACCOUNT_TYPES.iteritems():
             if account['url']:
                 ok_('{identifier}' in account['url'])
+
+
+class PrivacyModelTests(unittest.TestCase):
+    def setUp(self):
+        UserProfile.clear_privacy_fields_cache()
+
+    def test_profile_model(self):
+        fields = UserProfile.privacy_fields()
+        eq_('', fields['ircname'])
+        eq_('', fields['email'])
+        ok_('is_vouched' not in fields)
+        ok_('date_vouched' not in fields)
+        ok_(fields['tshirt'] is None)
+
+    def test_caching(self):
+        # It would be better if this test didn't need to know how the
+        # caching worked.
+        # To compute the privacy fields, the code has to get all the
+        # field names. Use mock so we can tell if that gets called.
+        with patch.object(UserProfile._meta, 'get_all_field_names') as mock_get_all_field_names:
+            UserProfile.privacy_fields()
+        ok_(mock_get_all_field_names.called)
+        # If we call privacy_fields() again, it shouldn't need to compute it all again
+        with patch.object(UserProfile._meta, 'get_all_field_names') as mock_get_all_field_names:
+            UserProfile.privacy_fields()
+        ok_(not mock_get_all_field_names.called)
