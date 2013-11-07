@@ -1,4 +1,5 @@
 from collections import namedtuple
+from operator import itemgetter
 from urllib2 import unquote
 from urlparse import urljoin
 
@@ -52,6 +53,25 @@ class CustomQuerySet(object):
         return self._query[key]
 
 
+class FakeQuerySet(object):
+    """
+    Wrap an iterable and make it work like a pretty dumb queryset.
+    """
+    def __init__(self, iterable):
+        # We won't be able to get the data out of this without evaluating
+        # the iterable (to sort or index it), so we might as well evaluate
+        # it once now.
+        self.values = list(iterable)
+
+    def order_by(self, *args):
+        return sorted(self.values, key=itemgetter(*args))
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.values[key.start:key.stop]
+        return self.values[key]
+
+
 class LocationCustomResource(AdvancedSortingResourceMixIn,
                              ClientCacheResourceMixIn, Resource):
 
@@ -83,6 +103,51 @@ class LocationCustomResource(AdvancedSortingResourceMixIn,
         return obj_list.filter(mega_filter)
 
 
+def collapse_locations(obj_list, keyname):
+    """
+    Given a CustomQuerySet object, filter/aggregate it down
+    so we just have one item per country or city.
+
+    keyname is 'country' or 'city'.
+
+    Also drop the 'privacy_country' or 'privacy_city' field.
+
+    On input, we might have:
+
+       country   privacy_country  population
+         Gr             1            27
+         Gr             2            16
+         Us             1            13
+         Us             2            12
+
+    and we want to end up with
+
+       country   population
+         Gr          43
+         Us          25
+
+    Returns a CustomQuerySet.
+    """
+
+    locations = {}
+    delkey = 'privacy_%s' % keyname
+    for item in obj_list:
+        location = item[keyname]
+        if location in locations:
+            locations[location]['population'] += item['population']
+        else:
+            if delkey in item:
+                del item[delkey]
+            locations[location] = item
+    # Turn the dictionary into an iterable of the dict values.
+    locations = locations.itervalues()
+    # Now we have an iterable of dicts, but an iterable is not a queryset
+    queryset = FakeQuerySet(locations)
+     # And let's make it a CustomQuerySet again
+    queryset = CustomQuerySet(queryset)
+    return queryset
+
+
 class CountryResource(LocationCustomResource):
     country = fields.CharField(attribute='country')
     country_name = fields.CharField(attribute='country_name')
@@ -99,6 +164,10 @@ class CountryResource(LocationCustomResource):
                     .annotate(population=Count('country')))
         default_order = ('country',)
         object_class = Country
+
+    def obj_get_list(self, request=None, **kwargs):
+        obj_list = super(CountryResource, self).obj_get_list(request, **kwargs)
+        return collapse_locations(obj_list, 'country')
 
     def build_filters(self, filters=None):
         return None
@@ -134,6 +203,10 @@ class CityResource(LocationCustomResource):
                     .annotate(population=Count('city')))
         default_order = ('country', 'city')
         object_class = City
+
+    def obj_get_list(self, request=None, **kwargs):
+        obj_list = super(CityResource, self).obj_get_list(request, **kwargs)
+        return collapse_locations(obj_list, 'city')
 
     def build_filters(self, filters=None):
         database_filters = {}
