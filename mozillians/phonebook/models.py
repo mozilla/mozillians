@@ -8,16 +8,18 @@ from django.template.loader import get_template
 from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
-from tower import ugettext as _
+from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.users.models import UserProfile
 
 
 class Invite(models.Model):
-    inviter = models.ForeignKey(UserProfile, related_name='invites', null=True)
-    recipient = models.EmailField()
-    message = models.TextField(blank=True)
-    redeemer = models.OneToOneField(UserProfile, blank=True, null=True)
+    inviter = models.ForeignKey(UserProfile, related_name='invites', null=True,
+                                verbose_name=_lazy(u"Inviter"))
+    recipient = models.EmailField(verbose_name=_lazy(u"Recipient"))
+    message = models.TextField(blank=True, verbose_name=_lazy(u"Message"))
+    redeemer = models.OneToOneField(UserProfile, blank=True, null=True,
+                                    verbose_name=_lazy(u"Redeemer"))
     code = models.CharField(max_length=32, editable=False, unique=True)
     redeemed = models.DateTimeField(null=True, editable=False)
     created = models.DateTimeField(auto_now_add=True, editable=False)
