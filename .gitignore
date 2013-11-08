@@ -19,3 +19,5 @@ locale*
 /static/
 /media/uploads/
 mozillians/settings/local.py
+/media/humans.txt
+mozillians/humans/tmp
