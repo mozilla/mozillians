@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 import autocomplete_light
 
@@ -64,7 +64,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
-    list_display = ['name', 'member_count']
+    list_display = ['name', 'member_count', 'vouched_member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter]
     readonly_fields = ['url']
@@ -78,12 +78,20 @@ class GroupBaseAdmin(admin.ModelAdmin):
 
     def queryset(self, request):
         return (super(GroupBaseAdmin, self)
-                .queryset(request).annotate(member_count=Count('members')))
+                .queryset(request)
+                .annotate(member_count=Count('members'))
+                .annotate(vouched_member_count=Sum('members__is_vouched')))
 
     def member_count(self, obj):
         """Return number of members in group."""
         return obj.member_count
     member_count.admin_order_field = 'member_count'
+
+    def vouched_member_count(self, obj):
+        if obj.vouched_member_count:
+            return int(obj.vouched_member_count)
+        return 0
+    vouched_member_count.admin_order_field = 'vouched_member_count'
 
 
 class GroupAliasInline(admin.StackedInline):
@@ -110,7 +118,7 @@ class GroupAdmin(GroupBaseAdmin):
                                                     form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'steward', 'wiki', 'website', 'irc_channel',
-                    'member_count']
+                    'member_count', 'vouched_member_count']
     list_filter = [CurratedGroupFilter, EmptyGroupFilter]
 
 
