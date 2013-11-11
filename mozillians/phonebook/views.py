@@ -367,7 +367,7 @@ def register(request):
             if not request.user.userprofile.is_vouched:
                 update_invites(request)
         else:
-            messages.info(request, _("You've been invited to join Mozillians.org!"
+            messages.info(request, _("You've been invited to join Mozillians.org! "
                                      "Sign in and then you can create a profile."))
 
     return redirect('phonebook:home')
