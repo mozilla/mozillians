@@ -63,6 +63,12 @@ def validate_fun_facts(ctx):
         ctx.local("python2.6 manage.py cron validate_fun_facts")
 
 
+@task
+def generate_humanstxt(ctx):
+    with ctx.lcd(settings.SRC_DIR):
+        ctx.local("python2.6 manage.py cron generate_humanstxt &")
+
+
 #@task
 #def install_cron(ctx):
 #    with ctx.lcd(settings.SRC_DIR):
@@ -142,6 +148,7 @@ def deploy(ctx):
     update_celery()
     update_es_indexes()
     validate_fun_facts()
+    generate_humanstxt()
 
 
 @task

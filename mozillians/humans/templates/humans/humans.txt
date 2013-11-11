@@ -1,0 +1,27 @@
+Mozillians.org
+--------------
+
+  Site: https://mozillians.org
+  GitHub Repo: https://github.com/mozilla/mozillians
+
+
+Contributors on Github
+----------------------
+
+{% for contributor in githubbers|sort %}
+  {{ contributor }}
+{% endfor %}
+
+
+Localizers
+----------
+
+{% for contributor in localizers|sort %}
+  {{ contributor }}
+{% endfor %}
+
+
+This file lists only contributors on GitHub and SVN. Many others have
+helped in numerous ways.
+
+Last updated: {{ last_update }}
