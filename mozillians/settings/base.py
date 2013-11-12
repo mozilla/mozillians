@@ -66,7 +66,10 @@ PORT = 443
 
 ## Templates.
 
-# List of callables that know how to import templates from various sources.
+# Absolute path to the directory for the humans.txt file.
+HUMANS_TXT= os.path.join(MEDIA_ROOT, 'humans.txt')
+
+#List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
@@ -134,6 +137,7 @@ INSTALLED_APPS = get_apps(append=[
     'mozillians.mozspaces',
     'mozillians.funfacts',
     'mozillians.announcements',
+    'mozillians.humans',
 
     'sorl.thumbnail',
     'autocomplete_light',
