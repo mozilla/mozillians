@@ -352,7 +352,8 @@ class UserProfileTests(TestCase):
         ok_(user.userprofile.groups.filter(name='bar').exists())
 
     def test_set_membership_system_group(self):
-        group_1 = GroupFactory.create(system=True)
+        # a "system" group is invisible and cannot be joined or left
+        group_1 = GroupFactory.create(visible=False, members_can_leave=False, accepting_new_members='no')
         user = UserFactory.create()
         user.userprofile.set_membership(Group, [group_1.name, 'bar'])
         ok_(user.userprofile.groups.filter(name='bar').exists())

@@ -12,7 +12,9 @@
 {% block content %}
 
     <h1>
-    {% if group.steward %}
+    {% if group.functional_area %}
+        {{ _('Functional Area') }}:
+    {% elif group.curator %}
         {{ _('Curated Group') }}:
     {% else %}
         {{ _('Group') }}:
@@ -20,7 +22,6 @@
      {{ group.name }}
     </h1>
 
-    {% if group.steward %}
     <article class="group-meta">
 
         {% if group.description %}
@@ -67,45 +68,46 @@
                 {% endif %}
             </ul><!-- .curated-group-details -->
 
-            <div class="steward">
-              <h3>{{ _('Community Steward') }}</h3>
-              <div class="avatar">
-                <a href="{{ url('phonebook:profile_view', group.steward.user.username) }}">
-                  <img class="profile-photo"
-                       src="{{ group.steward.get_photo_url('70x70') }}"
-                       alt="{{ _('Profile Photo') }}">
-                </a>
-              </div>
-              <div class="details">
-                  <ul>
-                    <li>
-                      <span>
-                        <a href="{{ url('phonebook:profile_view', group.steward.user.username) }}">
-                          {{ group.steward.display_name }}
+            {% if group.curator %}
+              <div class="curator">
+                <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
+                <div class="avatar">
+                  <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
+                    <img class="profile-photo"
+                         src="{{ group.curator.get_photo_url('70x70') }}"
+                         alt="{{ _('Profile Photo') }}">
+                  </a>
+                </div>
+                <div class="details">
+                    <ul>
+                      <li>
+                        <span>
+                          <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
+                            {{ group.curator.display_name }}
+                          </a>
+                        </span>
+                      </li>
+                      <li>
+                        <a href="mailto:{{ group.curator.user.email }}">
+                           <i class="icon-envelope"></i>
+                          {{ group.curator.user.email }}
                         </a>
-                      </span>
-                    </li>
-                    <li>
-                      <a href="mailto:{{ group.steward.user.email }}">
-                         <i class="icon-envelope"></i>
-                        {{ group.steward.user.email }}
-                      </a>
-                    </li>
-                  </ul>
-                </div><!-- details -->
-            </div><!-- .steward -->
+                      </li>
+                    </ul>
+                  </div><!-- details -->
+              </div><!-- .curator -->
+            {% endif %}
 
         </div><!-- .row -->
 
     </article><!-- .group-meta -->
-    {% endif %}
 
-    {% if not group.system and not hide_leave_group_button %}
+    {% if show_join_button or show_leave_button %}
         <form action="{{ url('groups:toggle_group_subscription', group.url) }}"
               id="toggle-group" method="post">
           {{ csrf() }}
         <button class="button button{{ ('-negative' if in_group) }}">
-          {% if not in_group %}
+          {% if show_join_button %}
             {{ _('Join Group') }}
           {% else %}
             {{ _('Leave Group') }}
@@ -126,7 +128,13 @@
       {% with items=people %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
-      <h3>{{ _('Group Members') }}</h3>
+      <h3>
+        {% if group.functional_area %}
+          {{ _('Functional Area Members') }}
+        {% else %}
+          {{ _('Group Members') }}
+        {% endif %}
+      </h3>
       <div class="row">
         {% for people_slice in people|slice(3) -%}
             {% for person in people_slice %}
