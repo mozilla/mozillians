@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ profile.display_name|default(shown_user.username, true) }}
+{% endblock %}
+{% block body_id %}profile{% endblock %}
+{% block body_class %}
+  {{ super() }}
+  {% if not profile.is_vouched %}pending{% endif %}
+{% endblock %}
+
+{% block content %}
+  <div class="alert">
+    {% if user.username == shown_user.username %}
+      {{ _('Your Profile') }}
+    {% elif profile.is_vouched %}
+      {{ _('Mozillian Profile') }}
+    {% else %}
+      {{ _('Pending Profile') }}
+    {% endif %}
+  </div>
+  {% if not profile.is_vouched %}
+    <div id="pending-approval">
+      {% if user == shown_user %}
+        {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)),
+                 contribute_url='http://www.mozilla.org/contribute' %}
+          <p>
+            Your profile is waiting to be vouched. Send the link below to someone who
+            is familiar with your contributions and ask them to vouch for you:
+            <em class="underline" title="Your profile URL">{{ profile_url }}</em>
+          </p>
+          <p>
+            If you are new to the Mozilla community,
+            <a class="button" href="{{ contribute_url }}">get involved</a>
+          </p>
+          <p>
+            The chances of being vouched increase as you finish tasks in our community.
+          </p>
+
+        {% endtrans %}
+      {% else %}
+        {% if vouch_form %}
+          <form action="{{ url('phonebook:vouch') }}" method="POST"
+                id="vouch-form">
+            {{ csrf() }}
+            {{ vouch_form }}
+            {% trans name=profile.display_name %}
+                <button type="submit">
+                  Vouch for {{ name }}
+                </button>
+            {% endtrans %}
+          </form>
+        {% endif %}
+        {% trans %}
+          <p>This profile is waiting for approval.</p>
+          <p>Because our community directory is for Mozillians who
+            are 13 and older, please don't vouch for anyone under
+            13.</p>
+        {% endtrans %}
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if privacy_mode == 'anonymous' and not profile.is_public %}
+    <div id="anonymous">
+      {% trans edit_url=url('phonebook:profile_edit') %}
+        Your profile is not public. If you <a href="{{ edit_url }}">edit
+        your profile</a> to have at least one public field,
+        your public profile will be viewable.
+      {% endtrans %}
+    </div>
+  {% endif %}
+  <div class="vcard h-card">
+    <article id="profile-stats">
+      <div class="profile-photo">
+        <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}" class="photo">
+      </div>
+      <div class="stats">
+        {% set mozillian_years = get_mozillian_years(profile) %}
+        {% if not mozillian_years is none %}
+          <section id="membership">
+              <div class="status">
+                <i class="icon-calendar"></i>
+                {% if mozillian_years > 0 %}
+                  {% trans %}
+                    Mozillian for {{ mozillian_years }} year
+                    {% pluralize %}
+                    Mozillian for {{ mozillian_years }} years
+                  {% endtrans %}
+                {% else %}
+                    Mozillian for less than a year
+                {% endif %}
+                <span>{{ profile.date_mozillian.strftime('%b %Y') }}</span>
+              </div>
+          </section>
+        {% endif %}
+        {% if profile.country or profile.region or profile.city %}
+          <section id="location" class="adr">
+            <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
+          </section>
+        {% endif %}
+        {% if profile.timezone %}
+          <section id="timezone">
+            <i class="icon-time"></i> {{ profile.timezone }}
+          </section>
+        {% endif %}
+       </div>
+    </article>
+
+    <article id="profile-info">
+      <header>
+        {% if user == shown_user %}
+          <div class="privacy-view">
+            <form method="GET" action=".">
+              <label>{{ _('View as:') }}</label>
+              <select id="view-privacy-mode">
+                  <option value="{{ url('phonebook:profile_view', shown_user.username) }}"
+                          {% if privacy_mode == 'myself' %} selected {% endif %}>
+                    {{ _('Myself') }}
+                  </option>
+                  <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='mozillian') }}"
+                          {% if privacy_mode == 'mozillian' %} selected {% endif %} >
+                    {{ _('Mozillian') }}
+                  </option>
+                  <option value="{{ url('phonebook:profile_view', shown_user.username)|urlparams(view_as='anonymous') }}"
+                          {% if privacy_mode == 'anonymous' %} selected {% endif %}>
+                    {{ _('Public') }}
+                  </option>
+              </select>
+            </form>
+          </div>
+        {% endif %}
+        <h1 class="p-name">
+          <span class="fn">{{ profile.display_name|default(shown_user.username, true) }}</span>
+        </h1>
+        {% if profile.title %}
+          <h2><span class="title">{{ profile.title }}</span></h2>
+        {% endif %}
+      </header>
+      <section id="profile-details">
+        {% if profile.bio %}
+          <div id="bio">
+              <h3><i class="icon-user"></i> {{ _('Bio') }}</h3>
+              <p>
+                <span class="note">{{ profile.bio|markdown }}</span>
+              </p>
+          </div>
+        {% endif %}
+        {% if profile.groups.count() %}
+          <div id="groups">
+            <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
+              {% for group in profile.groups.all() %}
+                {% if (user.is_authenticated() and
+                       user.get_profile().is_vouched) %}
+                  <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
+                {%- else -%}
+                  {{ group.name }}
+                {%- endif -%}
+                {% if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+        {% if profile.skills.count() %}
+          <div id="skills" class="p-category category">
+            <h3><i class="icon-wrench"></i> {{ _('Skills') }}</h3>
+              {% for skill in profile.skills.all() %}
+                {% if (user.is_authenticated() and
+                       user.get_profile().is_vouched) %}
+                  <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
+                {%- else -%}
+                  {{ skill.name }}
+                {%- endif -%}
+                {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+        {% if profile.languages.count() %}
+          <div id="languages" class="p-category category">
+            <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
+              {% for language in profile.languages.all() -%}
+                {{ language.name }}
+                {%- if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+        {% if profile.accounts.count() %}
+          <div id="externalaccounts" class="p-category category">
+            <h3><i class="icon-external-link"></i> {{ _('External Accounts') }}</h3>
+            <ul>
+              {% for account in profile.accounts %}
+                <li>
+                  {{ account.get_type_display() }}:
+                  {% if account.get_username_url() -%}
+                    <a href="{{ account.get_username_url() }}">{{ account.username }}</a>
+                  {%- else -%}
+                    {{ account.username }}
+                  {%- endif -%}
+                {% endfor %}
+              </li>
+            </ul>
+          </div>
+        {% endif %}
+        {% if profile.vouched_by %}
+          <div id="vouched_by" class="p-category category">
+            <h3>{{ _('Vouched By') }}</h3>
+            <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}">
+              {{ profile.vouched_by.display_name|default(profile.vouched_by.user.username, true)}}
+            </a>
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="profile-contact">
+        <div class="contact-details">
+          <ul>
+            {% if profile.email %}
+              <li class="u-email">
+                <i class="icon-envelope"></i>
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
+              </li>
+            {% endif %}
+            {% if profile.ircname %}
+              <li class="p-nickname">
+                <i class="icon-comments-alt"></i> IRC :
+                <span class="nickname">{{ profile.ircname }}</span>
+              </li>
+            {% endif %}
+            {% if profile.website %}
+              <li class="u-url">
+                <i class="icon-link pre-break-bullet"></i>
+                <a href="{{ profile.website }}">
+                  <span class="url">{{ profile.website }}</span>
+                </a>
+              </li>
+            {% endif %}
+            {% if profile.tshirt %}
+              <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
+            {% endif %}
+          </ul>
+        </div>
+      </section>
+    </article>
+    <span class="hidden category">Mozillians</span>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/profile_view.js') }}"></script>
+  {% endcompress %}
+{% endblock %}
