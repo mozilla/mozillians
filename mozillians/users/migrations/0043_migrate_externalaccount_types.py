@@ -18,7 +18,7 @@ class Migration(DataMigration):
                 '9': 'SKYPE',
                 '10': 'YAHOO'}
 
-    reverse_type_map = {v: k for k, v in type_map.items()}
+    reverse_type_map = dict((v, k) for k, v in type_map.items())
 
     def forwards(self, orm):
         for account in orm.ExternalAccount.objects.all():
