@@ -257,7 +257,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         resource_name = 'users'
         restrict_fields = False
         restricted_fields = ['email', 'is_vouched']
-        fields = ['id', 'full_name', 'is_vouched', 'website', 'vouched_by',
+        fields = ['id', 'full_name', 'is_vouched', 'vouched_by',
                   'date_vouched', 'groups', 'skills', 'languages',
                   'bio', 'photo', 'ircname', 'country', 'region', 'city',
                   'date_mozillian', 'timezone', 'email', 'allows_mozilla_sites',

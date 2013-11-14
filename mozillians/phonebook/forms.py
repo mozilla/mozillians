@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
+from django.forms.models import inlineformset_factory
 
 import happyforms
 from PIL import Image
@@ -16,10 +17,30 @@ from mozillians.groups.models import Group, Skill, Language
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.models import UserProfile
+from mozillians.users.models import ExternalAccount, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
+
+
+class ExternalAccountForm(happyforms.ModelForm):
+    class Meta:
+        model = ExternalAccount
+        fields = ['type', 'identifier', 'privacy']
+
+    def clean(self):
+        cleaned_data = super(ExternalAccountForm, self).clean()
+        identifier = cleaned_data.get('identifier')
+        type = cleaned_data.get('type')
+
+        if type:
+            validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
+            if validator:
+                cleaned_data['identifier'] = validator(identifier)
+        return cleaned_data
+
+AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
+                                        form=ExternalAccountForm, extra=1)
 
 
 class SearchForm(happyforms.Form):
@@ -93,14 +114,14 @@ class ProfileForm(happyforms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('full_name', 'ircname', 'website', 'bio', 'photo', 'country',
+        fields = ('full_name', 'ircname', 'bio', 'photo', 'country',
                   'region', 'city', 'allows_community_sites', 'tshirt',
                   'title', 'allows_mozilla_sites',
                   'date_mozillian', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_email', 'privacy_timezone', 'privacy_tshirt',
-                  'privacy_website', 'privacy_bio', 'privacy_city',
-                  'privacy_region', 'privacy_country', 'privacy_groups',
+                  'privacy_bio', 'privacy_city', 'privacy_region',
+                  'privacy_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',
                   'privacy_date_mozillian', 'privacy_title')
         widgets = {'bio': forms.Textarea()}

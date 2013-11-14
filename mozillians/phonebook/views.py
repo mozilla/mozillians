@@ -138,8 +138,7 @@ def edit_profile(request):
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
-    AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount, extra=1)
-    accounts_formset = AccountsFormset(request.POST or None, instance=profile)
+    accounts_formset = forms.AccountsFormset(request.POST or None, instance=profile)
     new_profile = False
     form = forms.ProfileForm
     if not profile.is_complete:

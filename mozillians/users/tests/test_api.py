@@ -274,7 +274,6 @@ class UserResourceTests(TestCase):
         eq_(data['id'], unicode(profile.id))
         eq_(data['full_name'], profile.full_name)
         eq_(data['is_vouched'], profile.is_vouched)
-        eq_(data['website'], profile.website)
         eq_(data['vouched_by'], profile.vouched_by.user.id)
         eq_(data['date_vouched'], profile.date_vouched)
         eq_(data['groups'], list(profile.groups.values_list('name', flat=True)))
