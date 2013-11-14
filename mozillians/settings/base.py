@@ -190,7 +190,7 @@ CSP_IMG_SRC = ("'self'",
                'https://*.mozilla.net',
                '*.google-analytics.com',
                '*.gravatar.com',
-               'i1.wp.com')
+               '*.wp.com')
 CSP_SCRIPT_SRC = ("'self'",
                   'http://www.mozilla.org',
                   'https://www.mozilla.org',
