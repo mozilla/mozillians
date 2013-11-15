@@ -26,9 +26,6 @@
 [submodule "vendor-local/src/django-csp"]
 	path = vendor-local/src/django-csp
 	url = git://github.com/mozilla/django-csp
-[submodule "vendor-local/src/django-browserid"]
-	path = vendor-local/src/django-browserid
-	url = git://github.com/mozilla/django-browserid
 [submodule "vendor-local/src/happyforms"]
 	path = vendor-local/src/happyforms
 	url = https://github.com/mozilla/happyforms.git
