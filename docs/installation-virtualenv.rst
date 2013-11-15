@@ -10,7 +10,7 @@ VirtualEnv Installation
    they will be happy to help.
 
 
-**Prerequisites:** You 'll need python 2, virtualenv and pip.  You'll also need
+**Prerequisites:** You 'll need python 2.6, virtualenv and pip.  You'll also need
 mysql-dev (or the equivalent on your system), and MySQL server.
 
 You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
