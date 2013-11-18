@@ -31,7 +31,6 @@
         "pk": 1,
         "model": "users.userprofile",
         "fields": {
-            "website": "",
             "bio": "",
             "vouched_by": null,
             "last_updated": "2012-11-06T08:10:25",
