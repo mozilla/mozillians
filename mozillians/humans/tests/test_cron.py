@@ -10,6 +10,7 @@ from mozillians.humans.cron import generate_humanstxt
 
 class TestCron(TestCase):
     def test_generate(self):
-        os.remove(settings.HUMANSTXT_FILE)
+        if os.path.exists(settings.HUMANSTXT_FILE):
+            os.remove(settings.HUMANSTXT_FILE)
         generate_humanstxt()
         ok_(os.path.exists(settings.HUMANSTXT_FILE))
