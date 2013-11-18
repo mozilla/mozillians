@@ -65,7 +65,6 @@ PROTOCOL = "https://"
 PORT = 443
 
 ## Templates.
-
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'jingo.Loader',
@@ -111,6 +110,7 @@ SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
     'browserid',
     'admin',
     'autocomplete',
+    'humans.txt'
 ]
 
 AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
@@ -134,6 +134,7 @@ INSTALLED_APPS = get_apps(append=[
     'mozillians.mozspaces',
     'mozillians.funfacts',
     'mozillians.announcements',
+    'mozillians.humans',
 
     'sorl.thumbnail',
     'autocomplete_light',
@@ -281,3 +282,8 @@ ITEMS_PER_PAGE = 21
 
 COMPRESS_OFFLINE = True
 COMPRESS_ENABLED = True
+
+HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
+HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales'
+HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
+HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
