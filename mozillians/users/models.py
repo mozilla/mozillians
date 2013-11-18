@@ -23,7 +23,7 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from mozillians.common.helpers import gravatar
 from mozillians.groups.models import (Group, GroupAlias, Skill, SkillAlias,
                                       Language, LanguageAlias)
-from mozillians.phonebook.validators import validate_website
+from mozillians.phonebook.validators import validate_twitter, validate_website
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
@@ -632,7 +632,9 @@ class ExternalAccount(models.Model):
         TYPE_MDN: {'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{identifier}'},
         TYPE_SUMO: {'name': 'Mozilla Support', 'url': ''},
         TYPE_FACEBOOK: {'name': 'Facebook', 'url': 'https://www.facebook.com/{identifier}'},
-        TYPE_TWITTER: {'name': 'Twitter', 'url': 'https://twitter.com/{identifier}'},
+        TYPE_TWITTER: {'name': 'Twitter',
+                       'url': 'https://twitter.com/{identifier}',
+                       'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
         TYPE_GTALK: {'name': 'Google Talk', 'url': ''},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
