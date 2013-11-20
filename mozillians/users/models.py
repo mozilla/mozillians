@@ -600,18 +600,25 @@ class ExternalAccount(models.Model):
     }
 
     user = models.ForeignKey(UserProfile)
-    identifier = models.CharField(max_length=255, verbose_name=_lazy('Account Username'))
+    identifier = models.CharField(max_length=255, verbose_name=_lazy(u'Account Username'))
     type = models.CharField(
         max_length=30,
         choices=sorted([(k, v['name'])
                         for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
-        verbose_name=_lazy('Account Type'))
+        verbose_name=_lazy(u'Account Type'))
     privacy = models.PositiveIntegerField(default=MOZILLIANS,
                                           choices=PRIVACY_CHOICES)
+
+    class Meta:
+        ordering = ['type']
+        unique_together = ('identifier', 'type', 'user')
 
     def get_identifier_url(self):
         url = self.ACCOUNT_TYPES[self.type]['url'].format(identifier=urlquote(self.identifier))
         return iri_to_uri(url)
 
-    class Meta:
-        ordering = ['type']
+    def unique_error_message(self, model_class, unique_check):
+        if model_class == type(self) and unique_check == ('identifier', 'type', 'user'):
+            return _('You already have an account with this name and type.')
+        else:
+            return super(ExternalAccount, self).unique_error_message(model_class, unique_check)
