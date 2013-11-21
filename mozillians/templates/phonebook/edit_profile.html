@@ -21,6 +21,13 @@
   {{ bootstrap(field_with_attrs(field, **{'label': (field.label + '<span> *</span>')|safe  })) }}
 {% endmacro %}
 
+{% block extrahead %}
+  {% compress css %}
+    {{ profile_form.media.css }}
+    <link href="{{ static('mozillians/css/profile_edit.less') }}" type="text/less" rel="stylesheet" media="screen" />
+  {% endcompress %}
+{% endblock extrahead %}
+
 {% block content %}
   {% if profile_form.errors or user_form.errors or accounts_formset.errors  %}
       <div class="alert alert-error">
@@ -240,7 +247,9 @@
       </p>
       {{ profile_form.groups }}
       <div class="help_text">
-        {{ profile_form.groups.label_tag() }}
+        <p>
+          {{ profile_form.groups.label_tag() }}
+        </p>
       </div>
       {{ privacy_field(profile_form.privacy_groups) }}
     </fieldset>
@@ -456,5 +465,6 @@
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
     <script src="{{ static('mozillians/js/tag-it-groups.js') }}"></script>
+    {{ profile_form.media.js }}
   {% endcompress %}
 {% endblock %}

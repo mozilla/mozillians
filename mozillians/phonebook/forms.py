@@ -9,10 +9,12 @@ from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import inlineformset_factory
 
 import happyforms
+import selectable
 from PIL import Image
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
+from mozillians.groups.lookups import GroupLookup
 from mozillians.groups.models import Group, Skill, Language
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
@@ -101,9 +103,16 @@ class ProfileForm(happyforms.ModelForm):
         required=False,
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
-    groups = forms.CharField(
+    groups = selectable.forms.fields.AutoCompleteSelectMultipleField(
         label=_lazy(u'Start typing to add a group (example: Marketing, '
-                    'Support, WebDev, Thunderbird)'), required=False)
+                    u'Support, WebDev, Thunderbird)'),
+        lookup_class=GroupLookup,
+        required=False,
+        widget=selectable.forms.widgets.AutoCompleteSelectMultipleWidget(
+            lookup_class=GroupLookup,
+            position='top-inline'
+        )
+    )
     languages = forms.CharField(
         label=_lazy(u'Start typing to add a language you speak (example: '
                     'English, French, German)'), required=False)
@@ -161,18 +170,11 @@ class ProfileForm(happyforms.ModelForm):
         consistent.
 
         """
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
-            raise forms.ValidationError(_(u'Groups can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
-        system_groups = [g.name for g in self.instance.groups.all()
-                         if g.system]
-        groups = self.cleaned_data['groups']
-        new_groups = filter(lambda x: x,
-                            map(lambda x: x.strip() or False,
-                                groups.lower().split(',')))
+        user_system_group_names = [g.name.lower() for g in self.instance.groups.all()
+                                   if g.system]
+        user_non_system_group_names = [g.name.lower() for g in self.cleaned_data['groups']]
 
-        return system_groups + new_groups
+        return user_system_group_names + user_non_system_group_names
 
     def clean_languages(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
