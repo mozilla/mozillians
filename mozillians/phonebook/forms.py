@@ -165,14 +165,14 @@ class ProfileForm(happyforms.ModelForm):
             raise forms.ValidationError(_(u'Groups can only contain '
                                            'alphanumeric characters, dashes, '
                                            'spaces.'))
-        system_groups = [g.name for g in self.instance.groups.all()
-                         if g.system]
+        invisible_groups = [g.name for g in self.instance.groups.all()
+                            if not g.is_visible]
         groups = self.cleaned_data['groups']
         new_groups = filter(lambda x: x,
                             map(lambda x: x.strip() or False,
                                 groups.lower().split(',')))
 
-        return system_groups + new_groups
+        return invisible_groups + new_groups
 
     def clean_languages(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$',

@@ -132,7 +132,8 @@ class IndexFunctionalAreasTests(TestCase):
 
     def test_index_functional_areas(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
-        group_1 = GroupFactory.create(steward=user.userprofile)
+        group_1 = GroupFactory.create(curator=user.userprofile,
+                                      functional_area=True)
         group_2 = GroupFactory.create()
         GroupFactory.create()
         group_1.members.add(user.userprofile)
@@ -191,7 +192,7 @@ class IndexSkillsTests(TestCase):
 class SearchTests(TestCase):
     def test_search_existing_group(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
-        group_1 = GroupFactory.create(auto_complete=True)
+        group_1 = GroupFactory.create(visible=True)
         GroupFactory.create()
         url = urlparams(reverse('groups:search_groups'), term=group_1.name)
         with self.login(user) as client:
@@ -218,7 +219,7 @@ class SearchTests(TestCase):
 
     def test_search_unvouched(self):
         user = UserFactory.create()
-        group = GroupFactory.create(auto_complete=True)
+        group = GroupFactory.create(visible=True)
         url = urlparams(reverse('groups:search_groups'), term=group.name)
         with self.login(user) as client:
             response = client.get(url, follow=True,
@@ -234,7 +235,7 @@ class SearchTests(TestCase):
 
     def test_search_skills(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
-        skill_1 = SkillFactory.create(auto_complete=True)
+        skill_1 = SkillFactory.create()
         SkillFactory.create()
         url = urlparams(reverse('groups:search_skills'), term=skill_1.name)
         with self.login(user) as client:
@@ -249,7 +250,7 @@ class SearchTests(TestCase):
 
     def test_search_languages(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
-        language_1 = LanguageFactory.create(auto_complete=True)
+        language_1 = LanguageFactory.create()
         LanguageFactory.create()
         url = urlparams(reverse('groups:search_languages'), term=language_1.name)
         with self.login(user) as client:
@@ -343,41 +344,140 @@ class ShowTests(TestCase):
         eq_(response.status_code, 200)
         eq_(response.context['group'], group)
 
-    def test_show_leave_group_button_value_with_steward(self):
-        steward_user = UserFactory.create(userprofile={'is_vouched': True})
-        group = GroupFactory.create(steward=steward_user.userprofile)
+    def test_show_leave_button_value_with_curator(self):
+        curator_user = UserFactory.create(userprofile={'is_vouched': True})
+        group = GroupFactory.create(curator=curator_user.userprofile)
         user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
-        with self.login(steward_user) as client:
+        with self.login(curator_user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        eq_(response.context['hide_leave_group_button'], True)
+        eq_(response.context['show_leave_button'], False)
 
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        eq_(response.context['hide_leave_group_button'], False)
+        eq_(response.context['show_leave_button'], True)
 
-    def test_show_leave_group_button_value_without_steward(self):
+    def test_show_leave_button_value_without_curator(self):
         group = GroupFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        eq_(response.context['hide_leave_group_button'], False)
+        eq_(response.context['show_leave_button'], True)
 
-    def test_show_leave_group_button_value_skill(self):
+    def test_show_leave_button_value_members_cant_leave(self):
+        """
+        Don't show leave button for a group whose members_can_leave flag
+        is False, even for group member
+        """
+        group = GroupFactory.create(members_can_leave=False)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_leave_button'], False)
+
+    def test_show_leave_button_value_members_can_leave(self):
+        """
+        Do show leave button for a group whose members_can_leave flag
+        is True, for group member
+        """
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_leave_button'], True)
+
+    def test_show_leave_button_value_members_can_leave_non_member(self):
+        """
+        Don't show leave button for a group whose members_can_leave flag
+        is True, if not group member
+        """
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_leave_button'], False)
+
+    def test_show_join_button_accepting_members_yes(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_join_button'], True)
+
+    def test_show_join_button_accepting_members_yes_member(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_join_button'], False)
+
+    def test_show_join_button_accepting_members_by_request(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_join_button'], True)
+
+    def test_show_join_button_accepting_members_by_request_member(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.members.add(user.userprofile)
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_join_button'], False)
+
+    def test_show_join_button_accepting_members_no(self):
+        group = GroupFactory.create(accepting_new_members='no')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        eq_(response.context['show_join_button'], False)
+
+    def test_show_leave_button_value_skill(self):
         skill = SkillFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
+        skill.members.add(user.userprofile)
         url = reverse('groups:show_skill', kwargs={'url': skill.url})
 
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        eq_(response.context['hide_leave_group_button'], False)
+        eq_(response.context['show_leave_button'], True)
 
 
 class ToggleGroupSubscriptionTests(TestCase):
@@ -431,14 +531,14 @@ class ToggleGroupSubscriptionTests(TestCase):
         client = Client()
         client.post(self.url, follow=True)
 
-    def test_system_group(self):
-        system_group = GroupFactory.create(system=True)
+    def test_unjoinable_group(self):
+        group = GroupFactory.create(accepting_new_members='no')
         url = reverse('groups:toggle_group_subscription', prefix='/en-US/',
-                      kwargs={'url': system_group.url})
+                      kwargs={'url': group.url})
         with self.login(self.user) as client:
             client.post(url, follow=True)
-        system_group = Group.objects.get(id=system_group.id)
-        ok_(not system_group.members.filter(pk=self.user.pk).exists())
+        group = Group.objects.get(id=group.id)
+        ok_(not group.members.filter(pk=self.user.pk).exists())
 
 
 class ToggleSkillSubscriptionTests(TestCase):

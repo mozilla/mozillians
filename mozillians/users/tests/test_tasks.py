@@ -138,8 +138,8 @@ class BasketTests(TestCase):
                                                'city': 'athens',
                                                'basket_token': 'token'})
         group = GroupFactory.create(name='Web Development',
-                                    steward=user.userprofile)
-        GroupFactory.create(name='Marketing', steward=user.userprofile)
+                                    curator=user.userprofile)
+        GroupFactory.create(name='Marketing', curator=user.userprofile)
         group.members.add(user.userprofile)
         data = {'country': 'gr',
                 'city': 'athens',
@@ -162,8 +162,8 @@ class BasketTests(TestCase):
                                                'country': 'gr',
                                                'city': 'athens',})
         group = GroupFactory.create(
-            name='Web Development', steward=user.userprofile)
-        GroupFactory.create(name='Marketing', steward=user.userprofile)
+            name='Web Development', curator=user.userprofile)
+        GroupFactory.create(name='Marketing', curator=user.userprofile)
         group.members.add(user.userprofile)
         data = {'country': 'gr',
                 'city': 'athens',

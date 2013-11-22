@@ -660,19 +660,19 @@ footer div.container {
     margin: 0;
 }
 
-.group-skills, .steward {
+.group-skills, .curator {
     margin-bottom: 20px;
 }
 
-.steward h3, .group-skills h3 {
+.curator h3, .group-skills h3 {
     margin-bottom: 10px;
 }
 
-.steward .avatar, .steward ul {
+.curator .avatar, .curator ul {
     float: left;
 }
 
-.steward ul {
+.curator ul {
     list-style: none;
     margin: 10px 0 10px 5px;
 }

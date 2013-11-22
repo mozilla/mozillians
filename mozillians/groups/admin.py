@@ -29,7 +29,7 @@ class EmptyGroupFilter(SimpleListFilter):
         return queryset.filter(no_profiles=0)
 
 
-class CurratedGroupFilter(SimpleListFilter):
+class CuratedGroupFilter(SimpleListFilter):
     """Admin filter for curated groups."""
     title = 'curated'
     parameter_name = 'curated'
@@ -42,7 +42,39 @@ class CurratedGroupFilter(SimpleListFilter):
         if self.value() is None:
             return queryset
         value = self.value() == 'True'
-        return queryset.filter(steward__isnull=value)
+        return queryset.filter(curator__isnull=value)
+
+
+class FunctionalAreaFilter(SimpleListFilter):
+    """Admin filter for functional areas."""
+    title = 'functional_areas'
+    parameter_name = 'functional_area'
+
+    def lookups(self, request, model_admin):
+        return (('0', 'Not functional area'),
+                ('1', 'Functional area'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        value = self.value() == '1'
+        return queryset.filter(functional_area=value)
+
+
+class VisibleGroupFilter(SimpleListFilter):
+    """Admin filter for visible groups."""
+    title = 'visible_groups'
+    parameter_name = 'visible'
+
+    def lookups(self, request, model_admin):
+        return (('0', 'Not visible group'),
+                ('1', 'Visible group'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        value = self.value() == '1'
+        return queryset.filter(visible=value)
 
 
 class GroupBaseEditAdminForm(forms.ModelForm):
@@ -124,9 +156,10 @@ class GroupAdmin(GroupBaseAdmin):
     add_form = autocomplete_light.modelform_factory(Group,
                                                     form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
-    list_display = ['name', 'steward', 'wiki', 'website', 'irc_channel',
+    list_display = ['name', 'curator', 'wiki', 'website', 'irc_channel',
+                    'functional_area', 'accepting_new_members', 'members_can_leave', 'visible',
                     'member_count', 'vouched_member_count']
-    list_filter = [CurratedGroupFilter, EmptyGroupFilter]
+    list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter]
 
 
 class SkillAliasInline(admin.StackedInline):

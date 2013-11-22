@@ -67,7 +67,7 @@ def update_basket_task(instance_id):
         return
 
     data = {}
-    for group in Group.objects.exclude(steward=None):
+    for group in Group.objects.exclude(curator=None):
         name = group.name.upper().replace(' ', '_')
         data[name] = 'N'
         if instance.groups.filter(pk=group.id).exists():

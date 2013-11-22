@@ -46,14 +46,15 @@ def _list_groups(request, template, query):
 
 def index_groups(request):
     """Lists all public groups (in use) on Mozillians."""
-    query = (Group.objects.filter(members__is_vouched=True)
-             .annotate(num_members=Count('members')))
+    # Omit functional areas, invisible groups, and groups with
+    # no vouched members
+    query = Group.get_non_functional_areas().filter(members__is_vouched=True)
     template = 'groups/index_groups.html'
     return _list_groups(request, template, query)
 
 
 def index_skills(request):
-    """Lists all public groups (in use) on Mozillians."""
+    """Lists all public skills (in use) on Mozillians."""
     query = (Skill.objects.filter(members__is_vouched=True)
              .annotate(num_members=Count('members')))
     template = 'groups/index_skills.html'
@@ -61,8 +62,8 @@ def index_skills(request):
 
 
 def index_functional_areas(request):
-    """Lists all curated groups."""
-    query = Group.get_curated()
+    """Lists all functional areas."""
+    query = Group.get_functional_areas()
     template = 'groups/index_areas.html'
     return _list_groups(request, template, query)
 
@@ -107,19 +108,18 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    profile = request.user.userprofile
-    hide_leave_group_button = (hasattr(group, 'steward') and
-                               profile == group.steward)
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
                 show_pagination=show_pagination,
-                hide_leave_group_button=hide_leave_group_button)
+                show_join_button=group.user_can_join(request.user),
+                show_leave_button=group.user_can_leave(request.user),
+                )
 
-    if isinstance(group, Group) and group.steward:
-        """ Get the most globally popular skills that appear in the group
-            Sort them with most members first
-        """
+    if isinstance(group, Group) and group.functional_area:
+        # Get the most globally popular skills that appear in the group
+        # Sort them with most members first
+        #
         skills = (Skill.objects
                   .filter(members__in=profiles)
                   .annotate(no_users=Count('members'))
@@ -137,12 +137,12 @@ def toggle_group_subscription(request, url):
     group = get_object_or_404(Group, url=url)
     profile = request.user.userprofile
 
-    # We don't operate on system groups using this view.
-    if not group.system:
-        if profile.groups.filter(id=group.id).exists():
-            profile.groups.remove(group)
-        else:
-            profile.groups.add(group)
+    in_group = profile.groups.filter(id=group.id).exists()
+    if in_group and group.user_can_leave(request.user):
+        profile.groups.remove(group)
+        update_basket_task.delay(profile.id)
+    elif not in_group and group.user_can_join(request.user):
+        profile.groups.add(group)
         update_basket_task.delay(profile.id)
 
     return redirect(reverse('groups:show_group', args=[group.url]))
