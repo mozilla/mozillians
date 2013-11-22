@@ -26,7 +26,7 @@ admin.site.unregister(User)
 admin.site.unregister(Group)
 
 Q_PUBLIC_PROFILES = Q()
-for field in UserProfile._privacy_fields:
+for field in UserProfile.privacy_fields():
     key = 'userprofile__privacy_%s' % field
     Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
 
@@ -69,6 +69,7 @@ def export_as_csv_action(description=None, fields=None, exclude=None,
 
     export_as_csv.short_description = (description or 'Export to CSV file')
     return export_as_csv
+
 
 def subscribe_to_basket_action():
     """Subscribe to Basket action."""
@@ -132,6 +133,7 @@ class PublicProfileFilter(SimpleListFilter):
             return queryset.filter(Q_PUBLIC_PROFILES)
 
         return queryset.exclude(Q_PUBLIC_PROFILES)
+
 
 class CompleteProfileFilter(SimpleListFilter):
     """Admin filter for complete profiles."""

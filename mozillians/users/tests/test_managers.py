@@ -12,9 +12,9 @@ class UserProfileQuerySetTests(TestCase):
         queryset = UserProfile.objects.all().privacy_level(99)
         eq_(queryset._privacy_level, 99)
 
-    @patch('mozillians.users.managers.DEFAULT_PRIVACY_FIELDS',
-           {'full_name': '', 'email': ''})
-    def test_public(self):
+    @patch('mozillians.users.models.UserProfile.privacy_fields')
+    def test_public(self, mock_privacy_fields):
+        mock_privacy_fields.return_value = {'full_name': '', 'email': ''}
         UserFactory.create()
         UserFactory.create(userprofile={'is_vouched': True})
         public_user_1 = UserFactory.create(
