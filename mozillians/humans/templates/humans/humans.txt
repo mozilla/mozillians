@@ -5,7 +5,7 @@ Mozillians.org
   GitHub Repo: https://github.com/mozilla/mozillians
 
 
-Contributors on Github
+Contributors on GitHub
 ----------------------
 
 {% for contributor in githubbers|sort %}
