@@ -628,7 +628,7 @@ class ExternalAccount(models.Model):
                    'url': 'https://addons.mozilla.org/user/{identifier}/'},
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
                    'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}'},
-        TYPE_GITHUB: {'name': 'Github', 'url': 'https://github.com/{identifier}'},
+        TYPE_GITHUB: {'name': 'GitHub', 'url': 'https://github.com/{identifier}'},
         TYPE_MDN: {'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{identifier}'},
         TYPE_SUMO: {'name': 'Mozilla Support', 'url': ''},
         TYPE_FACEBOOK: {'name': 'Facebook', 'url': 'https://www.facebook.com/{identifier}'},
