@@ -7,6 +7,7 @@ import sys
 
 from funfactory.manage import path
 from funfactory.settings_base import *
+from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
 
 from mozillians.users.helpers import calculate_username
@@ -85,6 +86,10 @@ JINGO_EXCLUDE_APPS = [
     'browserid'
 ]
 
+def JINJA_CONFIG():
+    config = funfactory_JINJA_CONFIG()
+    config['extensions'].append('jingo_offline_compressor.jinja2ext.CompressorExtension')
+    return config
 
 
 MIDDLEWARE_CLASSES = get_middleware(append=[
