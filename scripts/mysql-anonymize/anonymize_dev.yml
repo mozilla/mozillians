@@ -1,5 +1,5 @@
 databases:
-    mozillians:
+    sanitize_dev_mozillians_org:
 
         tables:
             auth_user:
