@@ -1,6 +1,8 @@
+from django.template import Context
 from django.test.utils import override_settings
 
 from bleach import clean
+from jingo import env
 from markdown import markdown
 from mock import patch
 from nose.tools import eq_, ok_
@@ -25,3 +27,23 @@ class HelperTests(TestCase):
         eq_(returned_text, '<strong>foo</strong>')
         ok_(clean_mock.called)
         ok_(markdown_mock.called)
+
+    @override_settings(DEBUG=True,
+                       TEMPLATE_LOADERS=('jingo.Loader',))
+    def test_display_context(self):
+        # With DEBUG on,  display_context() inserts the values of context vars
+        t = env.from_string('START{{ display_context() }}END')
+        c = Context({'testkey': 'testvalue'})
+        s = t.render(c)
+        ok_('START<dl' in s)
+        ok_('</dl>END' in s)
+        ok_("<dt>testkey</dt><dd>'testvalue'</dd>" in s)
+
+    @override_settings(DEBUG=False,
+                       TEMPLATE_LOADERS=('jingo.Loader',))
+    def test_display_context_production(self):
+        # With DEBUG off, display_context() is empty
+        t = env.from_string('START{{ display_context() }}END')
+        c = Context({'testkey': 'testvalue'})
+        s = t.render(c)
+        eq_('STARTEND', s)
