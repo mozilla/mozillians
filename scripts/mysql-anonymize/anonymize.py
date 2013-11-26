@@ -70,11 +70,11 @@ def get_updates(config):
                     updates.append('%s = CONCAT("_user_", id)' % field)
             elif operation == 'hash_value':
                 for field in listify(details):
-                    updates.append('%(field)s = MD5(CONCAT(@common_hash_secret, %(field)s))'
+                    updates.append('%(field)s = SHA1(CONCAT(@common_hash_secret, %(field)s))'
                                    % dict(field=field))
             elif operation == 'hash_email':
                 for field in listify(details):
-                    updates.append('%(field)s = CONCAT(MD5(CONCAT(@common_hash_secret, %(field)s)), "@mozilla.com")'
+                    updates.append('%(field)s = CONCAT(SHA1(CONCAT(@common_hash_secret, %(field)s)), "@mozilla.com")'
                                    % dict(field=field))
             elif operation == 'empty_string':
                 for field in listify(details):
