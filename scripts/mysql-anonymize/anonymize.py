@@ -18,7 +18,7 @@ def get_drops(config):
     drops = database.get('drop', [])
     sql = []
     for drop in drops:
-        sql.append('DROP %s IF EXISTS' % drop)
+        sql.append('DROP TABLE IF EXISTS %s' % drop)
     return sql
 
 def get_truncates(config):
