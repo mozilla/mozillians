@@ -13,6 +13,13 @@ import random
 log = logging.getLogger('anonymize')
 common_hash_secret = '%016x' % (random.getrandbits(128))
 
+def get_drops(config):
+    database = config.get('database', {})
+    drops = database.get('drop', [])
+    sql = []
+    for drop in drops:
+        sql.append('DROP %s IF EXISTS' % drop)
+    return sql
 
 def get_truncates(config):
     database = config.get('database', {})
@@ -97,6 +104,7 @@ def anonymize(config):
     print 'SET FOREIGN_KEY_CHECKS=0;'
 
     sql = []
+    sql.extend(get_drops(config))
     sql.extend(get_truncates(config))
     sql.extend(get_deletes(config))
     sql.extend(get_updates(config))
