@@ -1,6 +1,26 @@
 databases:
     sanitize_dev_mozillians_org:
 
+        drop:
+            - api_apiapp
+            - celery_taskmeta
+            - celery_tasksetmeta
+            - django_admin_log
+            - django_session
+            - djcelery_crontabschedule
+            - djcelery_intervalschedule
+            - djcelery_periodictask
+            - djcelery_periodictasks
+            - djcelery_taskstate
+            - djcelery_workerstate
+            - schema_migration
+            - south_migrationhistory
+            - taskboard_task
+            - taskboard_task_groups
+            - tastypie_apiaccess
+            - tastypie_apikey
+            - thumbnail_kvstore
+
         tables:
             auth_user:
                 nullify:
@@ -28,4 +48,4 @@ databases:
 
             users_externalaccount:
                 random_username:
-                    - username
+                    - identifier
