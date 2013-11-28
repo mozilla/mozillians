@@ -230,7 +230,8 @@ STATSD_CLIENT = 'django_statsd.clients.normal'
 if 'test' in sys.argv:
     BASKET_URL = 'http://127.0.0.1'
 else:
-    BASKET_URL = 'http://basket.mozilla.com'
+    # Basket requires SSL now for some calls
+    BASKET_URL = 'https://basket.mozilla.com'
 BASKET_NEWSLETTER = 'mozilla-phone'
 
 USER_AVATAR_DIR = 'uploads/userprofile'

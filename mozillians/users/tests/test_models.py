@@ -9,6 +9,7 @@ from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 from django.utils import unittest
 
+import basket
 from mock import Mock, call, patch
 from nose.tools import eq_, ok_
 
@@ -471,6 +472,39 @@ class UserProfileTests(TestCase):
         user_profile.set_instance_privacy_level(PUBLIC)
 
         eq_(user_profile.vouched_by, None)
+
+    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
+    def test_lookup_token_registered(self, mock_lookup_user):
+        # Lookup token for a user with registered email
+        # basket returns response with data, lookup_basket_token returns the token
+        user = User(email='fake@example.com')
+        profile = UserProfile(user=user)
+        mock_lookup_user.return_value = {'status': 'ok', 'token': 'FAKETOKEN'}
+        result = profile.lookup_basket_token()
+        eq_('FAKETOKEN', result)
+
+
+    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
+    def test_lookup_token_unregistered(self, mock_lookup_user):
+        # Lookup token for a user with no registered email
+        # Basket raises unknown user exception, then lookup-token returns None
+        user = User(email='fake@example.com')
+        profile = UserProfile(user=user)
+        mock_lookup_user.side_effect = basket.BasketException(code=basket.errors.BASKET_UNKNOWN_EMAIL)
+        result = profile.lookup_basket_token()
+        ok_(result is None)
+
+    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
+    def test_lookup_token_exceptions(self, mock_lookup_user):
+        # If basket raises any exception other than BASKET_UNKNOWN_EMAIL when
+        # we call lookup_basket_token, lookup_basket_token passes it up the chain
+        class SomeException(Exception):
+            pass
+        user = User(email='fake@example.com')
+        profile = UserProfile(user=user)
+        mock_lookup_user.side_effect = SomeException
+        with self.assertRaises(SomeException):
+            profile.lookup_basket_token()
 
 
 class CalculatePhotoFilenameTests(TestCase):

@@ -11,6 +11,7 @@ from django.dispatch import receiver
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 
+import basket
 from elasticutils.contrib.django import S, get_es
 from elasticutils.contrib.django.models import SearchMixin
 from funfactory.urlresolvers import reverse
@@ -97,7 +98,7 @@ class UserProfilePrivacyModel(models.Model):
     CACHED_PRIVACY_FIELDS = None
 
     class Meta:
-        abstract = True
+        abstract=True
 
     @classmethod
     def clear_privacy_fields_cache(cls):
@@ -512,6 +513,24 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         send_mail(subject, message, settings.FROM_NOREPLY,
                   [self.user.email])
 
+    def lookup_basket_token(self):
+        """
+        Query Basket for this user's token.  If Basket doesn't find the user,
+        returns None. If Basket does find the token, returns it. Otherwise,
+        there must have been some error from the network or basket, and this
+        method just lets that exception propagate so the caller can decide how
+        best to handle it.
+
+        (Does not update the token field on the UserProfile.)
+        """
+        try:
+            result = basket.lookup_user(email=self.user.email)
+        except basket.BasketException as exception:
+            if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
+                return None
+            raise
+        return result['token']
+
     def save(self, *args, **kwargs):
         self._privacy_level = None
         self.auto_vouch()
@@ -588,6 +607,7 @@ def update_search_index(sender, instance, **kwargs):
 def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfile, [instance.id], public_index=False)
     unindex_objects.delay(UserProfile, [instance.id], public_index=True)
+
 
 
 @receiver(dbsignals.pre_delete, sender=User,
