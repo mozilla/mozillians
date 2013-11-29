@@ -409,6 +409,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 return True
         return False
 
+    @property
+    def nglanguages(self):
+        """Return user languages based on privacy settings."""
+        if self._privacy_level >= self.privacy_languages:
+            return self.nglanguage_set.none()
+        return self.nglanguage_set.all()
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
@@ -574,6 +581,18 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             es = get_es()
 
         es.delete(cls.get_index(public_index), cls.get_mapping_type(), id)
+
+
+class NGLanguage(models.Model):
+    language_code = models.CharField(max_length=63)
+    user = models.ForeignKey(UserProfile)
+
+    class Meta:
+        ordering = ['language_code']
+        unique_together = ('language_code', 'user')
+
+    def __unicode__(self):
+        return self.language_code
 
 
 @receiver(dbsignals.post_save, sender=User,

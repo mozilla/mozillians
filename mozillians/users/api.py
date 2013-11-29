@@ -301,7 +301,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
                     **{'{0}__iexact'.format(possible_filter):
                        getvalue(possible_filter)})
 
-        for group_filter in ['groups', 'languages', 'skills']:
+        for group_filter in ['groups', 'skills']:
             if group_filter in valid_filters:
                 database_filters[group_filter] = Q(
                     **{'{0}__name__in'.format(group_filter):

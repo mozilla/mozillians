@@ -62,7 +62,13 @@ $(function() {
     }
 
     $('#accounts .addField').click(function() {
-        cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set')
+        cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set');
+        return false;
+    });
+
+    $('#nglanguages .addField').click(function() {
+        'use strict';
+        cloneFormsetField('fieldset#nglanguages > div:last', 'nglanguage_set');
         return false;
     });
 

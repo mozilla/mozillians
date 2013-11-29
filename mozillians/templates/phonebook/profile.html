@@ -174,11 +174,13 @@
               {% endfor %}
           </div>
         {% endif %}
-        {% if profile.languages.count() %}
+        {% if profile.nglanguages %}
           <div id="languages" class="p-category category">
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
-              {% for language in profile.languages.all() -%}
-                {{ language.name }}
+              {% for language_code in profile.nglanguages -%}
+                {% if language_code|get_language %}
+                  {{ language_code|get_language }}
+                {% endif %}
                 {%- if not loop.last %},{% endif %}
               {% endfor %}
           </div>

@@ -5,19 +5,21 @@ from datetime import datetime
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
 import happyforms
 from PIL import Image
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group, Skill, Language
+from mozillians.groups.models import Group, Skill
+from mozillians.phonebook import ENGLISH_LANGUAGE_CHOICES
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.models import ExternalAccount, UserProfile
+from mozillians.users.models import ExternalAccount, NGLanguage, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -105,9 +107,6 @@ class ProfileForm(happyforms.ModelForm):
     groups = forms.CharField(
         label=_lazy(u'Start typing to add a group (example: Marketing, '
                     u'Support, WebDev, Thunderbird)'), required=False)
-    languages = forms.CharField(
-        label=_lazy(u'Start typing to add a language you speak (example: '
-                    u'English, French, German)'), required=False)
     skills = forms.CharField(
         label=_lazy(u'Start typing to add a skill (example: Python, '
                     u'javascript, Graphic Design, User Research)'),
@@ -175,18 +174,6 @@ class ProfileForm(happyforms.ModelForm):
 
         return system_groups + new_groups
 
-    def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
-                        self.cleaned_data['languages']):
-            raise forms.ValidationError(_(u'Languages can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
-        languages = self.cleaned_data['languages']
-
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          languages.lower().split(',')))
-
     def clean_skills(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
@@ -201,8 +188,49 @@ class ProfileForm(happyforms.ModelForm):
         """Save the data to profile."""
         self.instance.set_membership(Group, self.cleaned_data['groups'])
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        self.instance.set_membership(Language, self.cleaned_data['languages'])
         super(ProfileForm, self).save()
+
+
+class NGLanguageForm(happyforms.ModelForm):
+    """ Languages model form."""
+    languages = ENGLISH_LANGUAGE_CHOICES
+    languages.insert(0, ('', '-----'))
+    language_code = forms.ChoiceField(choices=languages, required=False)
+
+    def clean(self):
+        return super(NGLanguageForm, self).clean()
+
+    class Meta:
+        models = NGLanguage
+        fields = ['language_code']
+
+
+class BaseLanguagesFormset(BaseInlineFormSet):
+
+    def clean(self):
+        """Clean form.
+
+        Check if the language has already been added.
+        """
+        if any(self.errors):
+            return
+        lang_codes = []
+        for i, form in enumerate(self.forms):
+            if 'language_code' in form.cleaned_data:
+                lang_code = form.cleaned_data['language_code']
+                if (lang_code in lang_codes and not
+                        form.cleaned_data['DELETE']):
+                    msg = u'This language is already selected'
+                    self.errors[i]['language_code'] = msg
+                    raise ValidationError({'language_code': ['Error']})
+                lang_codes.append(lang_code)
+        return super(BaseLanguagesFormset, self).clean()
+
+
+LanguagesFormset = inlineformset_factory(UserProfile, NGLanguage,
+                                         form=NGLanguageForm,
+                                         formset=BaseLanguagesFormset,
+                                         extra=1)
 
 
 class EmailForm(happyforms.Form):

@@ -12,7 +12,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
-from mozillians.groups.tests import GroupFactory, LanguageFactory, SkillFactory
+from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.api import CustomQuerySet
 from mozillians.users.managers import MOZILLIANS, PUBLIC
 from mozillians.users.models import ExternalAccount
@@ -233,10 +233,6 @@ class UserResourceTests(TestCase):
         self.user.userprofile.groups.add(group)
         skill = SkillFactory.create()
         self.user.userprofile.skills.add(skill)
-        language = LanguageFactory.create()
-        self.user.userprofile.languages.add(language)
-        self.user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
-                                                         identifier='Apitest')
 
         self.resource_url = reverse(
             'api_dispatch_list',
@@ -375,7 +371,7 @@ class UserResourceTests(TestCase):
         user_2.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
                                                       identifier='AccountTest')
 
-        url = urlparams(self.mozilla_resource_url, accounts='countt')
+        url = urlparams(self.mozilla_resource_url, accounts='count')
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 2)

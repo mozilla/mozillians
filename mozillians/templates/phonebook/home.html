@@ -127,11 +127,13 @@
             {% endfor %}
           </section>
         {% endif %}
-        {% if user.userprofile.languages.count() %}
+        {% if user.userprofile.nglanguages.exists() %}
           <section class="languages">
             <h4>{{ _('Languages') }}</h4>
-            {% for language in user.userprofile.languages.all() %}
-              {{ language|capitalize }}
+            {% for language_code in user.userprofile.nglanguages %}
+              {% if language_code|get_language %}
+                {{ language_code|get_language|capitalize }}
+              {% endif %}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>

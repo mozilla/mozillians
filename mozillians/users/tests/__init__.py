@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 
 import factory
 
-from mozillians.users.models import UserProfile
+from mozillians.users.models import NGLanguage, UserProfile
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -30,3 +30,8 @@ class UserFactory(factory.DjangoModelFactory):
             for key, value in extracted.items():
                 setattr(self.userprofile, key, value)
         self.userprofile.save()
+
+
+class LanguageFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = NGLanguage
+    name = factory.Sequence(lambda n: 'Language {0}'.format(n))
