@@ -8,7 +8,7 @@
     <Image width="72" height="72" type="image/png">{{ absolutify(static('mozillians/img/apple-touch-icon-72.png')) }}</Image>
     <Url type="application/opensearchdescription+xml" rel="self"
          template="{{ absolutify(url('phonebook:search_plugin')) }}"/>
-    <Url type="application/rss+xml"
+    <Url type="text/html"
          template="{{ absolutify(url('phonebook:search')) }}?q={searchTerms}"/>
     <Tags>mozillians mozilla {{ _('mozillians') }}</Tags>
     <Query role="example" searchTerms="python" />
