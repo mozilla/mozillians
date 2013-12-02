@@ -63,6 +63,65 @@ If you're asked to change your commit message, you can amend the message and for
 
 If you need more Git expertise, a good resource is the `Git book`_.
 
+Templates
+---------
+
+Mozillians.org uses `Jinja <http://jinja.pocoo.org/docs/>`_ templates, which
+are similar to Django templates but have some differences.
+
+Some helpers are available in all Jinja templates in Mozillians.org.
+
+display_context
+~~~~~~~~~~~~~~~
+
+Return a marked-up chunk of content containing the items
+in the template context, if ``settings.DEBUG`` is True.
+Otherwise returns an empty string.
+
+By default, callables are omitted. Pass include_callables=True
+to include them.
+
+The format of the result is::
+
+        <dl class="jinja-context">
+          <dt>key</dt><dd>value</dd>
+          <dt>key</dt><dd>value</dd>
+          ...
+        </dl>
+
+``repr`` is applied to the values to format them.
+
+Example usage::
+
+        {{ display_context() }}
+
+        {{ display_context(include_callables=True) }}
+
+get_context
+~~~~~~~~~~~
+Provide access to the Jinja :class:`Context` object in case
+you want to do more complicated things with it. Typically,
+``display_context()`` is easier to use.
+
+If ``settings.DEBUG`` is not True, returns an empty dictionary.
+
+Example usage::
+
+    {% set context=get_context() %}
+    {% for k, v in context|dictsort %}
+        {% if not is_callable(v) %}
+            {{ k }}: {{ v }}<br/>
+        {% endif %}
+    {% endfor %}
+
+is_callable
+~~~~~~~~~~~
+
+Return True if thing is callable.
+
+See get_context() for example usage.
+
+
 Server architecture
 -------------------
 **Dev**

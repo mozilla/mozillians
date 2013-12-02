@@ -12,7 +12,7 @@ from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from funfactory import utils
 from jingo import register
-from jinja2 import Markup
+from jinja2 import Markup, contextfunction
 from sorl.thumbnail import get_thumbnail
 
 
@@ -87,3 +87,77 @@ def markdown(text, allowed_tags=None, allowed_attributes=None, allowed_styles=No
     text = markdown_module.markdown(text, safe_mode='remove')
     clean_text = bleach.clean(text, allowed_tags, allowed_attributes, allowed_styles, strip=True)
     return Markup(clean_text)
+
+
+@register.function
+@contextfunction
+def display_context(context, include_callables=False):
+    """
+    Return a marked-up chunk of content containing the items
+    in the template context, if ``settings.DEBUG`` is True.
+    Otherwise returns an empty string.
+
+    By default, callables are omitted. Pass include_callables=True
+    to include them.
+
+    The format of the result is::
+
+        <dl class="jinja-context">
+          <dt>key</dt><dd>value</dd>
+          <dt>key</dt><dd>value</dd>
+          ...
+        </dl>
+
+    ``repr`` is applied to the values to format them.
+
+    Example usage::
+
+        {{ display_context() }}
+
+        {{ display_context(include_callables=True) }}
+
+    """
+    if not settings.DEBUG:
+        return ""
+    keys = sorted(context.keys())
+    parts = [
+        '<dt>{key}</dt><dd>{value}</dd>'.format(key=key, value=repr(context[key]))
+        for key in keys
+        if include_callables or not callable(context[key])
+    ]
+    html = '<dl class="jinja-context">{parts}</dl>'.format(parts=''.join(parts))
+    return Markup(html)
+
+
+@register.function
+@contextfunction
+def get_context(context):
+    """
+    Provide access to the Jinja :class:`Context` object in case
+    you want to do more complicated things with it. Typically,
+    ``display_context()`` is easier to use.
+
+    If ``settings.DEBUG`` is not True, returns an empty dictionary.
+
+    Example usage::
+
+        {% set context=get_context() %}
+        {% for k, v in context|dictsort %}
+            {% if not is_callable(v) %}
+                {{ k }}: {{ v }}<br/>
+            {% endif %}
+        {% endfor %}
+    """
+    if not settings.DEBUG:
+        return {}
+    return context
+
+
+@register.function
+def is_callable(thing):
+    """
+    Return True if thing is callable.
+
+    See get_context() for example usage.
+    """
+    return callable(thing)
