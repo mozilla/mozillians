@@ -34,34 +34,27 @@ class GroupBaseTests(TestCase):
             ok_(not Group.objects.filter(pk=group.pk).exists())
 
     def test_search(self):
-        group = GroupFactory.create(auto_complete=True)
-        GroupFactory.create(auto_complete=False)
+        group = GroupFactory.create(visible=True)
+        GroupFactory.create(visible=False)
 
         eq_(set(Group.search(group.name)), set([group]))
         eq_(set(Group.search('roup'.format(group.name))), set([group]))
 
     def test_search_case_insensitive(self):
-        group = GroupFactory.create(auto_complete=True)
+        group = GroupFactory.create(visible=True)
         query = 'GROUP'
         eq_(set(Group.search(query)), set([group]))
 
     def test_search_no_query(self):
         eq_(len(Group.search('invalid')), 0)
 
-    def test_search_include_all(self):
-        """Test Group searching not limited to auto_complete_only."""
-        group_1 = GroupFactory.create(name='lola', auto_complete=True)
-        group_2 = GroupFactory.create(name='lolo', auto_complete=False)
-        eq_(set(Group.search('lo', auto_complete_only=False)),
-            set([group_1, group_2]))
-
     def test_search_matches_alias(self):
-        group_1 = GroupFactory.create(name='lalo', auto_complete=True)
+        group_1 = GroupFactory.create(name='lalo', visible=True)
         GroupAliasFactory.create(alias=group_1, name='foo')
         eq_(set(Group.search('foo')), set([group_1]))
 
     def test_search_distict_results(self):
-        group_1 = GroupFactory.create(name='automation', auto_complete=True)
+        group_1 = GroupFactory.create(name='automation', visible=True)
         GroupAliasFactory.create(alias=group_1, name='automation development')
         GroupAliasFactory.create(alias=group_1, name='automation services')
         results = Group.search('automation')
@@ -70,22 +63,29 @@ class GroupBaseTests(TestCase):
 
 
 class GroupTests(TestCase):
-    def test_get_curated(self):
+    def test_get_non_functional_areas(self):
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
+        cgroup_1 = GroupFactory.create(functional_area=True)
+        cgroup_2 = GroupFactory.create(functional_area=False)
+        eq_(set(Group.get_non_functional_areas()), set([cgroup_2]))
+
+    def test_get_functional_areas(self):
         GroupFactory.create()
         GroupFactory.create()
         user_1 = UserFactory.create()
         user_2 = UserFactory.create()
-        cgroup_1 = GroupFactory.create(steward=user_1.userprofile)
-        cgroup_2 = GroupFactory.create(steward=user_2.userprofile)
-        eq_(set(Group.get_curated()), set([cgroup_1, cgroup_2]))
+        cgroup_1 = GroupFactory.create(functional_area=True)
+        cgroup_2 = GroupFactory.create(functional_area=False)
+        eq_(set(Group.get_functional_areas()), set([cgroup_1]))
 
-    def test_deleted_steward_sets_null(self):
+    def test_deleted_curator_sets_null(self):
         user = UserFactory.create()
-        group = GroupFactory.create(steward=user.userprofile)
+        group = GroupFactory.create(curator=user.userprofile)
 
         user.delete()
         group = Group.objects.get(id=group.id)
-        eq_(group.steward, None)
+        eq_(group.curator, None)
 
 
 class GroupAliasBaseTests(TestCase):

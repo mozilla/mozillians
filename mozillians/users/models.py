@@ -438,10 +438,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             m2mfield = self.languages
             alias_model = LanguageAlias
 
-        # Remove any non-system groups that weren't supplied in this list.
+        # Remove any visible groups that weren't supplied in this list.
         m2mfield.remove(*[g for g in m2mfield.all()
                           if g.name not in membership_list
-                          and not getattr(g, 'system', False)])
+                          and g.is_visible])
 
         # Add/create the rest of the groups
         groups_to_add = []
@@ -451,7 +451,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             else:
                 group = model.objects.create(name=g)
 
-            if not getattr(group, 'system', False):
+            if group.is_visible:
                 groups_to_add.append(group)
 
         m2mfield.add(*groups_to_add)
@@ -497,7 +497,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def add_to_staff_group(self):
         """Keep users in the staff group if they're autovouchable."""
         email = self.user.email
-        staff, created = Group.objects.get_or_create(name='staff', system=True)
+        staff, created = Group.objects.get_or_create(
+            name='staff',
+            defaults=dict(visible=False,
+                          members_can_leave=False,
+                          accepting_new_members='no')
+        )
         if any(email.endswith('@' + x) for x in
                settings.AUTO_VOUCH_DOMAINS):
             self.groups.add(staff)
