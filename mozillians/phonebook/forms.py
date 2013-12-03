@@ -170,9 +170,13 @@ class ProfileForm(happyforms.ModelForm):
         consistent.
 
         """
+        # We don't display system groups, but include any the user is already
+        # a member of as though they were returned from the form
         user_system_group_names = [g.name.lower() for g in self.instance.groups.all()
-                                   if g.is_visible]
-        user_non_system_group_names = [g.name.lower() for g in self.cleaned_data['groups']]
+                                   if not g.is_visible]
+        # List of non-system groups the user selected on the form
+        user_non_system_group_names = [g.name.lower() for g in self.cleaned_data['groups']
+                                       if g.is_visible]
 
         return user_system_group_names + user_non_system_group_names
 
