@@ -112,11 +112,10 @@ def update_basket_phonebook_task(user_pk):
         return
 
     data = {}
-
     # What groups is the user in?
     user_group_pks = instance.groups.all().values_list('pk', flat=True)
     # FIXME: This will need changing for bug 936569
-    for group in Group.objects.exclude(steward=None):
+    for group in Group.objects.exclude(curator=None):
         name = group.name.upper().replace(' ', '_')
         data[name] = 'Y' if group.id in user_group_pks else 'N'
 

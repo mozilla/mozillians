@@ -53,7 +53,7 @@ class GroupField(forms.CharField):
         for g in values:
             (group, created) = Group.objects.get_or_create(name=g)
 
-            if not group.system:
+            if group.is_visible:
                 groups.append(group)
 
         return groups
