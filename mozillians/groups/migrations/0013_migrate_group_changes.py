@@ -1,19 +1,34 @@
 # -*- coding: utf-8 -*-
+import datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
+from django.db import models
 
-
-class Migration(SchemaMigration):
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Adding field 'Group.visible'
-        db.add_column('groups_group', 'visible',
-                      self.gf('django.db.models.fields.BooleanField')(default=True),
-                      keep_default=False)
+        # If system group, then members can't leave or join,
+        # and the group defaults to not being visible.
+        orm.Group.objects.filter(system=True).update(members_can_leave=False,
+                                                     accepting_new_members="no",
+                                                     visible=False)
+
+        # If has steward, then is functional area
+        # Also, copy stewards to curator field
+        for group in orm.Group.objects.filter(steward__isnull=False):
+            group.functional_area = True
+            group.curator = group.steward
+            group.save()
 
     def backwards(self, orm):
-        # Deleting field 'Group.visible'
-        db.delete_column('groups_group', 'visible')
+        # make sure invisible groups are marked as system groups
+        orm.Group.objects.filter(visible=False).update(system=True)
+
+        # If functional area, set steward to be the curator
+        for group in orm.Group.objects.filter(functional_area=True):
+            group.steward = group.curator
+            group.save()
+
 
     models = {
         'auth.group': {
@@ -55,8 +70,6 @@ class Migration(SchemaMigration):
         'groups.group': {
             'Meta': {'ordering': "['name']", 'object_name': 'Group'},
             'accepting_new_members': ('django.db.models.fields.CharField', [], {'default': "'by_request'", 'max_length': '10'}),
-            'always_auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'curator': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'groups_curated'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['users.UserProfile']"}),
             'description': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'functional_area': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
@@ -64,6 +77,7 @@ class Migration(SchemaMigration):
             'irc_channel': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
             'members_can_leave': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
+            'steward': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'system': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'}),
             'visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -79,8 +93,6 @@ class Migration(SchemaMigration):
         },
         'groups.language': {
             'Meta': {'ordering': "['name']", 'object_name': 'Language'},
-            'always_auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
@@ -94,8 +106,6 @@ class Migration(SchemaMigration):
         },
         'groups.skill': {
             'Meta': {'ordering': "['name']", 'object_name': 'Skill'},
-            'always_auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
             'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
@@ -141,16 +151,15 @@ class Migration(SchemaMigration):
             'privacy_title': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'privacy_tshirt': ('mozillians.users.models.PrivacyField', [], {'default': '1'}),
             'privacy_vouched_by': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
-            'privacy_website': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
             'region': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'skills': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Skill']"}),
             'timezone': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '70', 'blank': 'True'}),
             'tshirt': ('django.db.models.fields.IntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
-            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'}),
-            'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
+            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'})
         }
     }
 
     complete_apps = ['groups']
+    symmetrical = True
