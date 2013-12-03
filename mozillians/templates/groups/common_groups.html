@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block page_title %}{{ _('Group Listing') }}{% endblock %}
+
+{% block body_id %}group-index{% endblock %}
+
+{% block body_class %}
+  {{ super() }}
+  search-page
+{% endblock %}
+
+{% block content %}
+  <h1>{% block page_header %}{{ _('Groups') }}{% endblock %}</h1>
+  <div class="sort">
+    <form method="get" class="sort-form">
+        {{ sort_form }}
+        <input type="submit" value="{{ _('Sort') }}" />
+    </form>
+  </div>
+
+  <p>
+  {% block description %}
+    {% trans %}
+      Mozillians work on all sorts of different things! From Add-on
+      developers to localizers, find Mozillians who work on similar things
+      using user-created groups.
+    {% endtrans %}
+  {% endblock %}
+  </p>
+  {% with items=groups %}
+    {% include 'includes/pagination.html' %}
+  {% endwith %}
+  <div class="groups-areas">
+    <ul class="group-list">
+    {% for group_slice in groups|slice(3) -%}
+        {% for group in group_slice %}
+          <li class="group-item">
+            <a href="{{ url('groups:show_group', group.url) }}"
+               class="group-name" title="{{ group.name }}">
+              {{ group.name|truncate(20, True) }}<br>
+              <i class="icon-group"></i>
+              {{ group.num_members }} {{ _('members') }}
+            </a>
+          </li>
+        {% endfor %}
+    {% endfor %}
+    </ul>
+  </div>
+  {% with items=groups %}
+    {% include 'includes/pagination.html' %}
+  {% endwith %}
+{% endblock content %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
+{% endblock %}

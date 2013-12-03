@@ -114,6 +114,11 @@
 
 /* Generic
 ==================== */
+
+.left{float:left;}
+.right{float:right;}
+.clear{clear:both;}
+
 body {
     #content-wrapper { background: @white; }
     &.loggedin {
@@ -578,6 +583,17 @@ nav {
                 z-index: -1;
             }
         }
+    }
+}
+
+.large.button{
+    padding:5px 1em;
+    margin-top:0.3em;
+    letter-spacing: normal;
+    font-size: 125%;
+    line-height:1.6em;
+    @media (max-width: @breakMobileLandscape) {
+        font-size: 100%;
     }
 }
 
