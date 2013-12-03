@@ -133,7 +133,7 @@ def edit_profile(request):
     # Don't user request.user
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
-    user_groups = stringify_groups(profile.groups.all().order_by('name'))
+    user_groups = profile.groups.all().order_by('name')
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 

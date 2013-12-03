@@ -35,3 +35,6 @@
 [submodule "vendor-local/src/basket-client-submodule"]
 	path = vendor-local/src/basket-client-submodule
 	url = git://github.com/mozilla/basket-client.git
+[submodule "vendor-local/src/django-selectable"]
+	path = vendor-local/src/django-selectable
+	url = git://github.com/mlavin/django-selectable.git

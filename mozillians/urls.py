@@ -68,6 +68,7 @@ urlpatterns = patterns(
         {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
 
     url(r'', include('mozillians.humans.urls', 'humans')),
+    (r'^selectable/', include('selectable.urls')),
 )
 
 # In DEBUG mode, serve media files through Django, and serve error pages

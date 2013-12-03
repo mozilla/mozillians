@@ -148,6 +148,7 @@ INSTALLED_APPS = get_apps(append=[
     'django_browserid',
     'jingo_offline_compressor',
     'bootstrapform',
+    'selectable',
 
     # DB migrations
     'south',
