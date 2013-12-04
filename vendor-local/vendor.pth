@@ -2,7 +2,6 @@ src/django-statsd
 src/mimeparse
 src/basket-client-submodule
 src/django-autocomplete-light
-src/django-bootstrap-form
 src/elasticutils
 src/pyes
 src/django-tastypie

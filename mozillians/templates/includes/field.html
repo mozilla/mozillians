@@ -1,0 +1,35 @@
+{% if privacy %}
+  <div class="privacy-controls">
+{% endif %}
+
+  {% if field|is_checkbox %}
+    {# for checkbox only, include the control inside the label element and before the label text #}
+    <label class="checkbox{% if field.field.required %} required{% endif %}">
+      {{ field }} <span>{{ field.label }}</span>
+    </label>
+  {% elif field.field.required %}
+    {# put a required class on the label, in case we want to style it #}
+    {{ field.label_tag(attrs={'class': 'required'}) }}
+  {% else %}
+    {{ field.label_tag() }}
+  {% endif %}
+
+  <div class="{% if field.errors %} error{% endif %}">
+    {% if not field|is_checkbox %}
+      {{ field }}
+    {% endif %}
+
+    {% for error in field.errors %}
+      <span class="error-message">{{ error }}</span>
+    {% endfor %}
+
+    {% if field.help_text %}
+      <p class="help-block">
+        {{ field.help_text }}
+      </p>
+    {% endif %}
+  </div>
+
+{% if privacy %}
+  </div>
+{% endif %}

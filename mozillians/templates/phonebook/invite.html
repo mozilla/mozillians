@@ -14,10 +14,16 @@
     {% endtrans %}
   </p>
 
+  {% if invite_form.errors %}
+    <div class="alert alert-error">
+      {{ _('Please correct the errors below.') }}
+    </div>
+  {% endif %}
+
   <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
     {{ csrf() }}
-    {{ bootstrap(invite_form.recipient) }}
-    {{ bootstrap(invite_form.message) }}
+    {{ mozillians_field(invite_form.recipient) }}
+    {{ mozillians_field(invite_form.message) }}
     <button type="submit">
       {{ _('Send invite') }}
     </button>

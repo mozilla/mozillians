@@ -99,6 +99,7 @@ class ProfileForm(happyforms.ModelForm):
                                       required=False)
     date_mozillian = forms.DateField(
         required=False,
+        label=_lazy(u'When did you get involved with Mozilla?'),
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
     groups = forms.CharField(
