@@ -195,6 +195,21 @@ body {
             min-height: 500px;
         }
     }
+    form {
+        .error {
+            input, textarea, select {
+                border: 1px solid #CD0000;
+                color: #CD0000;
+            }
+            label, .error-message {
+                color: #CD0000;
+            }
+        }
+    }
+    label.required:after {
+      content: " *";
+      color: @linkRed;
+    }
 }
 
 #outer-wrapper {
@@ -1250,15 +1265,6 @@ body#edit-profile {
             input, textarea {
                 border: 1px solid lighten(@black,90%);
             }
-            .error {
-                input, textarea, select {
-                    border: 1px solid #CD0000;
-                    color: #CD0000;
-                }
-                label, .error-message {
-                    color: #CD0000;
-                }
-            }
 
             label {
                 margin-right: 8px;
@@ -1338,6 +1344,9 @@ body#edit-profile {
                 width: 190px;
                 text-align: right;
                 label { margin-top: 3px; }
+                label.required:after {  // No need to mark the privacy controls required, they always have some value.
+                  content: '';
+                }
                 @media (max-width: @breakTablet) {
                     position: relative;
                     top: auto;
@@ -1700,4 +1709,5 @@ body#invite {
         }
     }
     input { margin-bottom: 25px; }
+
 }

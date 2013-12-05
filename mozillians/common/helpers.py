@@ -14,6 +14,7 @@ from funfactory import utils
 from jingo import register
 from jinja2 import Markup, contextfunction
 from sorl.thumbnail import get_thumbnail
+from tower import ugettext as _
 
 
 GRAVATAR_URL = 'https://secure.gravatar.com/avatar/{emaildigest}'
@@ -47,19 +48,39 @@ def field_with_attrs(bfield, **kwargs):
 
 
 @register.function
-def bootstrap(element):
-    """Renders bootstrap forms in jinja2.
+def mozillians_field(element):
+    """Renders fields in jinja2.
 
-    Takes an element that is either a field or an entire form and
-    renders the appropriate bootstrap elements.
+    Takes a field and renders the appropriate elements.
     """
-    element_type = element.__class__.__name__.lower()
-    if element_type == 'boundfield':
-        template = get_template("bootstrapform/field.html")
-        context = Context({'field': element})
-    else:
-        template = get_template("bootstrapform/form.html")
-        context = Context({'form': element})
+    template = get_template('includes/field.html')
+    context = Context({'field': element})
+
+    return mark_safe(template.render(context))
+
+
+@register.function
+def privacy_field(element):
+    element = field_with_attrs(
+        element,
+        **{'class': 'privacy-choice',
+           'data-privacy-original': element.value(),
+           'label': _('Visible to:')}
+    )
+    template = get_template('includes/field.html')
+    context = Context({'field': element,
+                       'privacy': True})
+    return mark_safe(template.render(context))
+
+
+@register.function
+def mozillians_form(element):
+    """Renders forms in jinja2
+
+    Takes a form and renders the appropriate elements.
+    """
+    template = get_template('includes/form.html')
+    context = Context({'form': element})
 
     return mark_safe(template.render(context))
 
@@ -118,7 +139,7 @@ def display_context(context, include_callables=False):
 
     """
     if not settings.DEBUG:
-        return ""
+        return ''
     keys = sorted(context.keys())
     parts = [
         '<dt>{key}</dt><dd>{value}</dd>'.format(key=key, value=repr(context[key]))
@@ -161,3 +182,13 @@ def is_callable(thing):
     See get_context() for example usage.
     """
     return callable(thing)
+
+
+@register.filter
+def is_checkbox(field):
+    return field.field.widget.__class__.__name__.lower() == 'checkboxinput'
+
+
+@register.filter
+def is_radio(field):
+    return field.field.widget.__class__.__name__.lower() == 'radioselect'
