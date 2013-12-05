@@ -4,9 +4,6 @@
 [submodule "vendor-local/src/django-autocomplete-light"]
 	path = vendor-local/src/django-autocomplete-light
 	url = git://github.com/yourlabs/django-autocomplete-light
-[submodule "vendor-local/src/django-bootstrap-form"]
-	path = vendor-local/src/django-bootstrap-form
-	url = https://github.com/tallowen/django-bootstrap-form
 [submodule "vendor"]
         ignore = dirty
 	path = vendor

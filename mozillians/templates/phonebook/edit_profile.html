@@ -91,41 +91,41 @@
     </fieldset>
 
     <fieldset>
-      {{ required_field(user_form.username) }}
+      {{ mozillians_field(user_form.username) }}
     </fieldset>
 
     <fieldset>
-      {{ required_field(profile_form.full_name) }}
+      {{ mozillians_field(profile_form.full_name) }}
       {{ privacy_field(profile_form.privacy_full_name) }}
     </fieldset>
 
     <fieldset>
-      {{ required_field(email_form.email) }}
+      {{ mozillians_field(email_form.email) }}
       {{ privacy_field(profile_form.privacy_email) }}
     </fieldset>
 
     <fieldset>
-      {{ required_field(profile_form.country) }}
+      {{ mozillians_field(profile_form.country) }}
       {{ privacy_field(profile_form.privacy_country) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.region) }}
+      {{ mozillians_field(profile_form.region) }}
       {{ privacy_field(profile_form.privacy_region) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.city) }}
+      {{ mozillians_field(profile_form.city) }}
       {{ privacy_field(profile_form.privacy_city) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.timezone) }}
+      {{ mozillians_field(profile_form.timezone) }}
       {{ privacy_field(profile_form.privacy_timezone) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.bio) }}
+      {{ mozillians_field(profile_form.bio) }}
       <span class="under-input-field">
         {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
           Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
@@ -162,20 +162,17 @@
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.ircname) }}
+      {{ mozillians_field(profile_form.ircname) }}
       {{ privacy_field(profile_form.privacy_ircname) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(
-           field_with_attrs(
-             profile_form.date_mozillian,
-             **{'label': _('When did you get involved with Mozilla?')})) }}
+      {{ mozillians_field(profile_form.date_mozillian) }}
       {{ privacy_field(profile_form.privacy_date_mozillian) }}
     </fieldset>
 
     <fieldset>
-      {{ bootstrap(profile_form.title) }}
+      {{ mozillians_field(profile_form.title) }}
       {{ privacy_field(profile_form.privacy_title) }}
     </fieldset>
 

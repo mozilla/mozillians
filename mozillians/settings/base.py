@@ -80,7 +80,6 @@ TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
 
 
 JINGO_EXCLUDE_APPS = [
-    'bootstrapform',
     'admin',
     'autocomplete_light',
     'browserid'
@@ -147,7 +146,6 @@ INSTALLED_APPS = get_apps(append=[
     'django.contrib.admin',
     'django_browserid',
     'jingo_offline_compressor',
-    'bootstrapform',
     'selectable',
 
     # DB migrations

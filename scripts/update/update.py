@@ -6,6 +6,8 @@ the systems that need it.
 """
 
 import os
+import random
+import re
 import sys
 import urllib
 import urllib2
@@ -18,6 +20,7 @@ import commander_settings as settings
 
 
 NEW_RELIC_URL = 'https://rpm.newrelic.com/deployments.xml'
+GITHUB_URL = 'https://github.com/mozilla/mozillians/compare/{oldrev}...{newrev}'
 
 
 @task
@@ -52,6 +55,42 @@ def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local("python2.6 manage.py syncdb")                             # South (new)
         ctx.local("python2.6 manage.py migrate")                            # South (new)
+
+
+@task
+def update_revision_files(ctx):
+    with ctx.lcd(settings.SRC_DIR):
+        ctx.local("mv media/revision.txt media/prev-revision.txt")
+        ctx.local("git rev-parse HEAD > media/revision.txt")
+
+
+@task
+def ping_newrelic(ctx):
+    if settings.NEW_RELIC_API_KEY and settings.NEW_RELIC_APP_ID:
+        with ctx.lcd(settings.SRC_DIR):
+            oldrev = ctx.local('cat media/prev-revision.txt').out.strip()
+            newrev = ctx.local('cat media/revision.txt').out.strip()
+            log_cmd = 'git log --oneline {0}..{1}'.format(oldrev, newrev)
+            changelog = ctx.local(log_cmd).out.strip()
+
+        print 'Post deployment to New Relic'
+        desc = generate_desc(oldrev, newrev, changelog)
+        if changelog:
+            github_url = GITHUB_URL.format(oldrev=oldrev, newrev=newrev)
+            changelog = '{0}\n\n{1}'.format(changelog, github_url)
+        data = urllib.urlencode({
+            'deployment[description]': desc,
+            'deployment[revision]': newrev,
+            'deployment[app_id]': settings.NEW_RELIC_APP_ID,
+            'deployment[changelog]': changelog,
+        })
+        headers = {'x-api-key': settings.NEW_RELIC_API_KEY}
+        try:
+            request = urllib2.Request(NEW_RELIC_URL, data, headers)
+            urllib2.urlopen(request)
+        except urllib.URLError as exp:
+            print 'Error notifying New Relic: {0}'.format(exp)
+
 
 @task
 def update_es_indexes(ctx):
@@ -112,20 +151,6 @@ def update_info(ctx, tag):
             ctx.local("svn info")
             ctx.local("svn status")
 
-        ctx.local("git rev-parse HEAD > media/revision.txt")
-
-        if settings.NEW_RELIC_API_KEY and settings.NEW_RELIC_APP_ID:
-            print 'Post deploy event to NewRelic'
-            data = urllib.urlencode(
-                {'deployment[revision]': tag,
-                 'deployment[app_id]': settings.NEW_RELIC_APP_ID})
-            headers = {'x-api-key': settings.NEW_RELIC_API_KEY}
-            try:
-                request = urllib2.Request(NEW_RELIC_URL, data, headers)
-                urllib2.urlopen(request)
-            except urllib.URLError as exp:
-                print 'Error notifing NewRelic: {0}'.format(exp)
-
 
 @task
 def pre_update(ctx, ref=settings.UPDATE_REF):
@@ -146,6 +171,9 @@ def deploy(ctx):
     checkin_changes()
     deploy_app()
     prime_app()
+# Things run below here should not break the deployment if they fail.
+    update_revision_files()
+    ping_newrelic()
     update_celery()
     update_es_indexes()
     validate_fun_facts()
@@ -157,3 +185,41 @@ def update_mozillians(ctx, tag):
     """Do typical mozillians update"""
     pre_update(tag)
     update()
+
+
+## utility functions ##
+# shamelessly stolen from https://github.com/mythmon/chief-james/
+
+
+def get_random_desc():
+    return random.choice([
+        'No bugfixes--must be adding infinite loops.',
+        'No bugfixes--must be rot13ing function names for code security.',
+        'No bugfixes--must be demonstrating our elite push technology.',
+        'No bugfixes--must be testing james.',
+    ])
+
+
+def extract_bugs(changelog):
+    """Takes output from git log --oneline and extracts bug numbers."""
+    bug_regexp = re.compile(r'\bbug (\d+)\b', re.I)
+    bugs = []
+    for line in changelog:
+        for bug in bug_regexp.findall(line):
+            bugs.append(bug)
+
+    return sorted(bugs)
+
+
+def generate_desc(from_commit, to_commit, changelog):
+    """Figures out a good description based on what we're pushing out."""
+    if from_commit.startswith(to_commit):
+        desc = 'Pushing {0} again'.format(to_commit)
+    else:
+        bugs = extract_bugs(changelog.split('\n'))
+        if bugs:
+            bugs = ['bug #{0}'.format(bug) for bug in bugs]
+            desc = 'Fixing: {0}'.format(', '.join(bugs))
+        else:
+            desc = get_random_desc()
+    return desc
