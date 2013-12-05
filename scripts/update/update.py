@@ -203,12 +203,12 @@ def get_random_desc():
 def extract_bugs(changelog):
     """Takes output from git log --oneline and extracts bug numbers."""
     bug_regexp = re.compile(r'\bbug (\d+)\b', re.I)
-    bugs = []
+    bugs = set()
     for line in changelog:
         for bug in bug_regexp.findall(line):
-            bugs.append(bug)
+            bugs.add(bug)
 
-    return sorted(bugs)
+    return sorted(list(bugs))
 
 
 def generate_desc(from_commit, to_commit, changelog):
