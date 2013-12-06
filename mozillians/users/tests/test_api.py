@@ -229,7 +229,7 @@ class UserResourceTests(TestCase):
             userprofile={'is_vouched': True,
                          'vouched_by': voucher.userprofile})
         group = GroupFactory.create()
-        self.user.userprofile.groups.add(group)
+        group.add_member(self.user.userprofile)
         skill = SkillFactory.create()
         self.user.userprofile.skills.add(skill)
         language = LanguageFactory.create()
@@ -412,9 +412,9 @@ class UserResourceTests(TestCase):
         group_1 = GroupFactory.create()
         group_2 = GroupFactory.create()
         user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_1.userprofile.groups.add(group_1)
+        group_1.add_member(user_1.userprofile)
         user_2 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2.userprofile.groups.add(group_2)
+        group_2.add_member(user_2.userprofile)
 
         url = urlparams(self.mozilla_resource_url, groups=group_1.name)
         response = client.get(url, follow=True)
@@ -572,8 +572,8 @@ class UserResourceTests(TestCase):
         user = UserFactory.create(userprofile={'is_vouched': True})
         group_1 = GroupFactory.create()
         group_2 = GroupFactory.create()
-        group_1.members.add(user.userprofile)
-        group_2.members.add(user.userprofile)
+        group_1.add_member(user.userprofile)
+        group_2.add_member(user.userprofile)
         client = Client()
         url = urlparams(self.mozilla_resource_url,
                         groups=','.join([group_1.name, group_2.name]))

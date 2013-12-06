@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page, never_cache
@@ -25,7 +24,8 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import COUNTRIES, ExternalAccount, UserProfile
+from mozillians.users.models import COUNTRIES, UserProfile
+
 
 class BrowserIDVerify(Verify):
     def form_valid(self, form):
@@ -118,11 +118,19 @@ def view_profile(request, username):
         if (not profile.is_vouched
             and request.user.is_authenticated()
             and request.user.userprofile.is_vouched):
-            data['vouch_form'] = (
-                forms.VouchForm(initial={'vouchee': profile.pk}))
+                data['vouch_form'] = (
+                    forms.VouchForm(initial={'vouchee': profile.pk}))
 
     data['shown_user'] = profile.user
     data['profile'] = profile
+    data['groups'] = profile.get_annotated_groups()
+
+    # Only show pending groups if user is looking at their own profile,
+    # or current user is a superuser
+    if not (request.user.is_authenticated()
+            and (request.user.username == username or request.user.is_superuser)):
+        data['groups'] = [grp for grp in data['groups'] if not grp.pending]
+
     return render(request, 'phonebook/profile.html', data)
 
 
@@ -147,7 +155,7 @@ def edit_profile(request):
 
     profile_form = form(request.POST or None, request.FILES or None,
                         instance=profile, locale=request.locale,
-                        initial=dict(groups=user_groups, skills=user_skills,
+                        initial=dict(skills=user_skills,
                                      languages=user_languages))
 
     email_form = forms.EmailForm(request.POST or None,
@@ -177,8 +185,8 @@ def edit_profile(request):
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
-                accounts_formset = accounts_formset,
-                email_form = email_form,
+                accounts_formset=accounts_formset,
+                email_form=email_form,
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
@@ -214,7 +222,6 @@ def delete(request):
 
 @allow_public
 def search(request):
-    num_pages = 0
     limit = None
     people = []
     show_pagination = False

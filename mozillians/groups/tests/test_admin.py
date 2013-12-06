@@ -2,7 +2,7 @@ from django.contrib.admin.sites import site
 from django.http import HttpRequest
 
 from mock import Mock
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.admin import GroupAdmin
@@ -27,9 +27,9 @@ class TestGroupAdmin(TestCase):
         # Create group with 1 vouched member and 1 unvouched member
         group = GroupFactory()
         user = UserFactory(userprofile={'is_vouched': False})
-        group.members.add(user.userprofile)
+        group.add_member(user.userprofile)
         user2 = UserFactory(userprofile={'is_vouched': True})
-        group.members.add(user2.userprofile)
+        group.add_member(user2.userprofile)
 
         admin = GroupAdmin(model=Group, admin_site=site)
         mock_request = Mock(spec=HttpRequest)

@@ -30,8 +30,8 @@ class GroupResourceTests(TestCase):
         unvouched_user = UserFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
         group = Group.objects.get(name='staff')
-        group.members.add(unvouched_user.userprofile)
-        group.members.add(user.userprofile)
+        group.add_member(unvouched_user.userprofile)
+        group.add_member(user.userprofile)
 
         client = Client()
         response = client.get(self.resource_url, follow=True)
@@ -73,6 +73,7 @@ class SkillResourceTests(TestCase):
         eq_(data['objects'][0]['number_of_members'], 1,
             'List includes unvouched users')
         eq_(int(data['objects'][0]['id']), skill.id)
+
 
 class LanguageResourceTests(TestCase):
     def setUp(self):

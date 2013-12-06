@@ -1,6 +1,9 @@
 from django import forms
 
+import happyforms
 from tower import ugettext_lazy as _lazy
+
+from mozillians.groups.models import Group
 
 
 class SortForm(forms.Form):
@@ -15,3 +18,23 @@ class SortForm(forms.Form):
             return 'name'
         return self.cleaned_data['sort']
 
+
+class GroupForm(happyforms.ModelForm):
+
+    class Meta:
+        model = Group
+        fields = ['name', 'description', 'irc_channel',
+                  'website', 'wiki']
+
+
+class SuperuserGroupForm(happyforms.ModelForm):
+    """Form used by superusers (admins) when editing a group"""
+    class Meta:
+        model = Group
+        fields = ['name', 'description', 'irc_channel',
+                  'website', 'wiki',
+                  'visible',
+                  'functional_area',
+                  'members_can_leave',
+                  'accepting_new_members',
+                  ]

@@ -102,8 +102,8 @@ class UserProfileTests(TestCase):
                                                'full_name': 'Nikos Koukos',
                                                'bio': 'This is my bio'})
         profile = user.userprofile
-        profile.groups.add(group_1)
-        profile.groups.add(group_2)
+        group_1.add_member(profile)
+        group_2.add_member(profile)
         profile.skills.add(skill_1)
         profile.skills.add(skill_2)
         profile.languages.add(language_1)
@@ -228,7 +228,7 @@ class UserProfileTests(TestCase):
     def test_add_to_staff_group_invalid_domain(self):
         user = UserFactory.create(email='foobar@not_valid.com')
         staff_group, _ = Group.objects.get_or_create(name='staff')
-        user.userprofile.groups.add(staff_group)
+        staff_group.add_member(user.userprofile)
         user.userprofile.add_to_staff_group()
         ok_(not user.userprofile.groups.filter(name='staff').exists())
 
@@ -298,7 +298,7 @@ class UserProfileTests(TestCase):
     def test_privacy_level_employee(self):
         user = UserFactory.create()
         group, _ = Group.objects.get_or_create(name='staff')
-        group.members.add(user.userprofile)
+        group.add_member(user.userprofile)
         eq_(user.userprofile.privacy_level, EMPLOYEES)
 
     def test_privacy_level_vouched(self):
@@ -352,7 +352,8 @@ class UserProfileTests(TestCase):
 
     def test_set_membership_system_group(self):
         # a "system" group is invisible and cannot be joined or left
-        group_1 = GroupFactory.create(visible=False, members_can_leave=False, accepting_new_members='no')
+        group_1 = GroupFactory.create(visible=False, members_can_leave=False,
+                                      accepting_new_members='no')
         user = UserFactory.create()
         user.userprofile.set_membership(Group, [group_1.name, 'bar'])
         ok_(user.userprofile.groups.filter(name='bar').exists())
@@ -484,14 +485,14 @@ class UserProfileTests(TestCase):
         result = profile.lookup_basket_token()
         eq_('FAKETOKEN', result)
 
-
     @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
     def test_lookup_token_unregistered(self, mock_lookup_user):
         # Lookup token for a user with no registered email
         # Basket raises unknown user exception, then lookup-token returns None
         user = User(email='fake@example.com')
         profile = UserProfile(user=user)
-        mock_lookup_user.side_effect = basket.BasketException(code=basket.errors.BASKET_UNKNOWN_EMAIL)
+        mock_lookup_user.side_effect = \
+            basket.BasketException(code=basket.errors.BASKET_UNKNOWN_EMAIL)
         result = profile.lookup_basket_token()
         ok_(result is None)
 

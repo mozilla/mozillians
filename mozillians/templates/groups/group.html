@@ -24,9 +24,14 @@
 
     <article class="group-meta">
 
+        {% if is_curator or request.user.is_superuser %}
+          <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
+        {% endif %}
+
         {% if group.description %}
           <p>{{ group.description }}</p>
         {% endif %}
+
 
         <div class="row">
 
@@ -68,7 +73,7 @@
                 {% endif %}
             </ul><!-- .curated-group-details -->
 
-            {% if group.curator %}
+            {% if group.curator %}  {# curated group #}
               <div class="curator">
                 <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
                 <div class="avatar">
@@ -102,16 +107,22 @@
 
     </article><!-- .group-meta -->
 
-    {% if show_join_button or show_leave_button %}
-        <form action="{{ url('groups:toggle_group_subscription', group.url) }}"
-              id="toggle-group" method="post">
+    {% if show_join_button %}
+        <form action="{{ url('groups:join_group', group.pk) }}"
+              id="join-group" method="post">
           {{ csrf() }}
         <button class="button button{{ ('-negative' if in_group) }}">
-          {% if show_join_button %}
-            {{ _('Join Group') }}
-          {% else %}
-            {{ _('Leave Group') }}
-          {% endif %}
+          {{ _('Join Group') }}
+        </button>
+      </form>
+    {% endif %}
+
+    {% if show_leave_button %}
+        <form action="{{ url('groups:remove_member', group.pk, user.userprofile.pk) }}"
+              id="leave-group" method="post">
+          {{ csrf() }}
+          <button class="button button{{ ('-negative' if in_group) }}">
+          {{ _('Leave Group') }}
         </button>
       </form>
     {% endif %}

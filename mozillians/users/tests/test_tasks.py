@@ -139,7 +139,7 @@ class BasketTests(TestCase):
         group = GroupFactory.create(name='Web Development',
                                     curator=user.userprofile)
         GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.members.add(user.userprofile)
+        group.add_member(user.userprofile)
         data = {'country': 'gr',
                 'city': 'athens',
                 'WEB_DEVELOPMENT': 'Y',
@@ -168,7 +168,7 @@ class BasketTests(TestCase):
         group = GroupFactory.create(
             name='Web Development', curator=user.userprofile)
         GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.members.add(user.userprofile)
+        group.add_member(user.userprofile)
         data = {'country': 'gr',
                 'city': 'athens',
                 'WEB_DEVELOPMENT': 'Y',

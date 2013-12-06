@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Confirm removing member') }}{% endblock %}
+
+{% block body_id %}group-confirm-remove-member{% endblock %}
+
+{% block body_class %}
+  {{ super() }}
+  search-page
+{% endblock %}
+
+{% block content %}
+
+  <h1>{{ _('Confirm removing member') }}</h1>
+
+  <p>
+    {% if user.userprofile == profile %}
+      {% trans %} Really leave group {{ group }}? {% endtrans %}
+    {% else %}
+      {% trans %} Really remove user {{profile}} from group {{ group }}? {% endtrans %}
+    {% endif %}
+  </p>
+
+   <form action="{{ url('groups:remove_member', group_pk=group.pk, user_pk=profile.pk) }}" method="POST">
+     {{ csrf() }}
+     <button class="button remove" type="submit">{{ _('Remove') }}</button>
+  </form>
+
+  <a href="{{ url('groups:show_group', group.url) }}">{{ _('Return to group') }}</a>
+
+{% endblock content %}

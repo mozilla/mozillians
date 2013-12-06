@@ -71,12 +71,12 @@ TEMPLATE_LOADERS = (
     'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-	append=['django_browserid.context_processors.browserid',
-                'mozillians.common.context_processors.current_year'])
+    append=['django_browserid.context_processors.browserid',
+            'mozillians.common.context_processors.current_year'])
 
 
 JINGO_EXCLUDE_APPS = [
@@ -146,7 +146,6 @@ INSTALLED_APPS = get_apps(append=[
     'django.contrib.admin',
     'django_browserid',
     'jingo_offline_compressor',
-    'selectable',
 
     # DB migrations
     'south',
@@ -160,7 +159,7 @@ HMAC_KEYS = {
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-SESSION_COOKIE_NAME='mozillians_sessionid'
+SESSION_COOKIE_NAME = 'mozillians_sessionid'
 ANON_ALWAYS = True
 
 # Email
@@ -245,7 +244,7 @@ def _allowed_hosts():
     from django.conf import settings
     from urlparse import urlparse
 
-    host = urlparse(settings.SITE_URL).netloc # Remove protocol and path
+    host = urlparse(settings.SITE_URL).netloc  # Remove protocol and path
     host = host.rsplit(':', 1)[0]  # Remove port
     return [host]
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
@@ -258,7 +257,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/api/']
 
 # Set default avatar for user profiles
-DEFAULT_AVATAR= 'img/default_avatar.png'
+DEFAULT_AVATAR = 'img/default_avatar.png'
 DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
@@ -266,6 +265,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
+
 
 def _request_args():
     from django.conf import settings

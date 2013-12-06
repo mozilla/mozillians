@@ -146,16 +146,18 @@
               </p>
           </div>
         {% endif %}
-        {% if profile.groups.count() %}
+        {% if groups %}
           <div id="groups">
             <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
-              {% for group in profile.groups.all() %}
+              {% for group in groups %}
                 {% if (user.is_authenticated() and
                        user.get_profile().is_vouched) %}
-                  <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
+                  <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}
+                    {%- if group.pending %} {{ _('(membership requested)') }}{% endif %}</a>
                 {%- else -%}
                   {{ group.name }}
                 {%- endif -%}
+
                 {% if not loop.last %},{% endif %}
               {% endfor %}
           </div>

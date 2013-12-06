@@ -6,7 +6,7 @@ from django.db.models import Count, Sum
 
 import autocomplete_light
 
-from mozillians.groups.models import (Group, GroupAlias,
+from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Language, LanguageAlias,
                                       Skill, SkillAlias)
 
@@ -79,7 +79,7 @@ class VisibleGroupFilter(SimpleListFilter):
 
 class GroupBaseEditAdminForm(forms.ModelForm):
     merge_with = forms.ModelMultipleChoiceField(
-        required=False, queryset = None,
+        required=False, queryset=None,
         widget=FilteredSelectMultiple('Merge', False))
 
     def __init__(self, *args, **kwargs):
@@ -162,6 +162,10 @@ class GroupAdmin(GroupBaseAdmin):
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter]
 
 
+class GroupMembershipAdmin(admin.ModelAdmin):
+    list_display = ['group', 'userprofile']
+
+
 class SkillAliasInline(admin.StackedInline):
     model = SkillAlias
 
@@ -206,5 +210,6 @@ class LanguageAdmin(GroupBaseAdmin):
     inlines = [LanguageAliasInline]
 
 admin.site.register(Group, GroupAdmin)
+admin.site.register(GroupMembership, GroupMembershipAdmin)
 admin.site.register(Language, LanguageAdmin)
 admin.site.register(Skill, SkillAdmin)

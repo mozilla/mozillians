@@ -5,6 +5,7 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.db.models import get_model
 
 import basket
 import requests
@@ -14,7 +15,6 @@ from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
 
-from mozillians.groups.models import Group
 from mozillians.users.managers import PUBLIC
 
 
@@ -111,10 +111,12 @@ def update_basket_phonebook_task(user_pk):
     if not BASKET_ENABLED or not instance.is_vouched:
         return
 
+    GroupMembership = get_model('groups', 'GroupMembership')
+    Group = get_model('groups', 'Group')
     data = {}
     # What groups is the user in?
-    user_group_pks = instance.groups.all().values_list('pk', flat=True)
-    # FIXME: This will need changing for bug 936569
+    user_group_pks = (instance.groups.filter(groupmembership__status=GroupMembership.MEMBER)
+                      .values_list('pk', flat=True))
     for group in Group.objects.exclude(curator=None):
         name = group.name.upper().replace(' ', '_')
         data[name] = 'Y' if group.id in user_group_pks else 'N'

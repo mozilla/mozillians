@@ -15,6 +15,6 @@
 {% endblock %}
 
 {% block content %}
-  <a class="large button right" href="/group/edit/">{{ _('Create Group') }} &nbsp; <i class="icon-group"></i> +</a>
+  <a class="large button right" href="{{ url('groups:group_add') }}">{{ _('Create Group') }} &nbsp; <i class="icon-group"></i> +</a>
   {{ super() }}
 {% endblock content %}
