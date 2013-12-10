@@ -198,7 +198,7 @@ class LastLoginFilter(SimpleListFilter):
 class UserProfileInline(AdminImageMixin, admin.StackedInline):
     """UserProfile Inline model for UserAdmin."""
     model = UserProfile
-    readonly_fields = ['date_vouched', 'vouched_by', 'basket_token']
+    readonly_fields = ['date_vouched', 'vouched_by']
     form = autocomplete_light.modelform_factory(UserProfile)
 
 
