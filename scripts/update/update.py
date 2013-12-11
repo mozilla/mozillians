@@ -60,27 +60,28 @@ def database(ctx):
 @task
 def update_revision_files(ctx):
     with ctx.lcd(settings.SRC_DIR):
+        global OLDREV, NEWREV
+        NEWREV = ctx.local("git rev-parse HEAD").out.strip()
+        OLDREV = ctx.local("cat media/revision.txt").out.strip()
         ctx.local("mv media/revision.txt media/prev-revision.txt")
-        ctx.local("git rev-parse HEAD > media/revision.txt")
+        ctx.local("echo '%s' > media/revision.txt" % NEWREV)
 
 
 @task
 def ping_newrelic(ctx):
     if settings.NEW_RELIC_API_KEY and settings.NEW_RELIC_APP_ID:
         with ctx.lcd(settings.SRC_DIR):
-            oldrev = ctx.local('cat media/prev-revision.txt').out.strip()
-            newrev = ctx.local('cat media/revision.txt').out.strip()
-            log_cmd = 'git log --oneline {0}..{1}'.format(oldrev, newrev)
+            log_cmd = 'git log --oneline {0}..{1}'.format(OLDREV, NEWREV)
             changelog = ctx.local(log_cmd).out.strip()
 
         print 'Post deployment to New Relic'
-        desc = generate_desc(oldrev, newrev, changelog)
+        desc = generate_desc(OLDREV, NEWREV, changelog)
         if changelog:
-            github_url = GITHUB_URL.format(oldrev=oldrev, newrev=newrev)
+            github_url = GITHUB_URL.format(oldrev=OLDREV, newrev=NEWREV)
             changelog = '{0}\n\n{1}'.format(changelog, github_url)
         data = urllib.urlencode({
             'deployment[description]': desc,
-            'deployment[revision]': newrev,
+            'deployment[revision]': NEWREV,
             'deployment[app_id]': settings.NEW_RELIC_APP_ID,
             'deployment[changelog]': changelog,
         })
@@ -167,17 +168,20 @@ def update(ctx):
 
 @task
 def deploy(ctx):
-#    install_cron()
+    # install_cron()
     checkin_changes()
     deploy_app()
     prime_app()
-# Things run below here should not break the deployment if they fail.
+    # Things run below here should not break the deployment if they fail.
     update_revision_files()
-    ping_newrelic()
-    update_celery()
-    update_es_indexes()
-    validate_fun_facts()
-    generate_humanstxt()
+    if 'mozillians-dev' not in settings.REMOTE_HOSTNAME or not OLDREV.startswith(NEWREV):
+        # On dev, this script runs every 15 minutes. If we're pushing the same
+        # revision we don't need to churn the index, ping new relic, or any of this.
+        ping_newrelic()
+        update_celery()
+        update_es_indexes()
+        validate_fun_facts()
+        generate_humanstxt()
 
 
 @task
