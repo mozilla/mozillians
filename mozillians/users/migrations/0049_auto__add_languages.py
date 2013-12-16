@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'NGLanguage'
         db.create_table('users_nglanguage', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('language_code', self.gf('django.db.models.fields.CharField')(default='', max_length=63, blank=True)),
+            ('language_code', self.gf('django.db.models.fields.CharField')(max_length=63)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.UserProfile'])),
         ))
         db.send_create_signal('users', ['NGLanguage'])
@@ -100,7 +100,7 @@ class Migration(SchemaMigration):
         'users.nglanguage': {
             'Meta': {'ordering': "['language_code']", 'object_name': 'NGLanguage'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'language_code': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
+            'language_code': ('django.db.models.fields.CharField', [], {'max_length': '63'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
         'users.usernameblacklist': {

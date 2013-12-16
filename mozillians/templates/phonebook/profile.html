@@ -174,7 +174,7 @@
               {% endfor %}
           </div>
         {% endif %}
-        {% if profile.nglanguages %}
+        {% if profile.nglanguages.exists() %}
           <div id="languages" class="p-category category">
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
               {% for language_code in profile.nglanguages -%}

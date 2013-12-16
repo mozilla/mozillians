@@ -34,4 +34,4 @@ class UserFactory(factory.DjangoModelFactory):
 
 class LanguageFactory(factory.DjangoModelFactory):
     FACTORY_FOR = NGLanguage
-    name = factory.Sequence(lambda n: 'Language {0}'.format(n))
+    language_code = factory.Sequence(lambda n: 'Language {0}'.format(n))

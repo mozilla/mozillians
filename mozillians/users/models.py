@@ -589,7 +589,6 @@ class NGLanguage(models.Model):
 
     class Meta:
         ordering = ['language_code']
-        unique_together = ('language_code', 'user')
 
     def __unicode__(self):
         return self.language_code
