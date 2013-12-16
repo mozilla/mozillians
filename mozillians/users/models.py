@@ -589,9 +589,17 @@ class NGLanguage(models.Model):
 
     class Meta:
         ordering = ['language_code']
+        unique_together = ('language_code', 'user')
 
     def __unicode__(self):
         return self.language_code
+
+    def unique_error_message(self, model_class, unique_check):
+        if (model_class == type(self) and
+                unique_check == ('language_code', 'user')):
+            return _('This language has already been selected.')
+        return (super(NGLanguage, self)
+                .unique_error_message(model_class, unique_check))
 
 
 @receiver(dbsignals.post_save, sender=User,

@@ -5,9 +5,8 @@ from datetime import datetime
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.forms.models import BaseInlineFormSet, inlineformset_factory
+from django.forms.models import inlineformset_factory
 
 import happyforms
 from PIL import Image
@@ -197,39 +196,13 @@ class NGLanguageForm(happyforms.ModelForm):
     languages.insert(0, ('', '-----'))
     language_code = forms.ChoiceField(choices=languages, required=False)
 
-    def clean(self):
-        return super(NGLanguageForm, self).clean()
-
     class Meta:
         models = NGLanguage
         fields = ['language_code']
 
 
-class BaseLanguagesFormset(BaseInlineFormSet):
-
-    def clean(self):
-        """Clean form.
-
-        Check if the language has already been added.
-        """
-        if any(self.errors):
-            return
-        lang_codes = []
-        for i, form in enumerate(self.forms):
-            if 'language_code' in form.cleaned_data:
-                lang_code = form.cleaned_data['language_code']
-                if (lang_code in lang_codes and not
-                        form.cleaned_data['DELETE']):
-                    msg = u'This language is already selected'
-                    self.errors[i]['language_code'] = msg
-                    raise ValidationError({'language_code': ['Error']})
-                lang_codes.append(lang_code)
-        return super(BaseLanguagesFormset, self).clean()
-
-
 LanguagesFormset = inlineformset_factory(UserProfile, NGLanguage,
                                          form=NGLanguageForm,
-                                         formset=BaseLanguagesFormset,
                                          extra=1)
 
 

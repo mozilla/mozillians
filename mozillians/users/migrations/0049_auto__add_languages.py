@@ -16,8 +16,14 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('users', ['NGLanguage'])
 
+        # Adding unique constraint on 'NGLanguage', fields ['language_code', 'user']
+        db.create_unique('users_nglanguage', ['language_code', 'user_id'])
+
 
     def backwards(self, orm):
+        # Removing unique constraint on 'NGLanguage', fields ['language_code', 'user']
+        db.delete_unique('users_nglanguage', ['language_code', 'user_id'])
+
         # Deleting model 'NGLanguage'
         db.delete_table('users_nglanguage')
 
@@ -98,7 +104,7 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
         'users.nglanguage': {
-            'Meta': {'ordering': "['language_code']", 'object_name': 'NGLanguage'},
+            'Meta': {'ordering': "['language_code']", 'unique_together': "(('language_code', 'user'),)", 'object_name': 'NGLanguage'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'language_code': ('django.db.models.fields.CharField', [], {'max_length': '63'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
