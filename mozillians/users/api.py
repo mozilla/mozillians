@@ -244,6 +244,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
     skills = fields.CharField()
     languages = fields.CharField()
     url = fields.CharField()
+    accounts = fields.CharField()
 
     class Meta:
         queryset = UserProfile.objects.all()
@@ -268,8 +269,12 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         valid_filters =  [f for f in filters if f in
                           ['email', 'country', 'region', 'city', 'ircname',
                            'username', 'groups', 'languages', 'skills',
-                           'is_vouched', 'name']]
+                           'is_vouched', 'name', 'accounts']]
         getvalue = lambda x: unquote(filters[x].lower())
+
+        if 'accounts' in valid_filters:
+            database_filters['accounts'] = Q(
+                externalaccount__identifier__icontains=getvalue('accounts'))
 
         if 'email' in valid_filters:
             database_filters['email'] = Q(
@@ -311,6 +316,11 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
                 data[key] = bundle.data[key]
             bundle = Bundle(obj=bundle.obj, data=data, request=bundle.request)
         return bundle
+
+    def dehydrate_accounts(self, bundle):
+        accounts = [{'identifier':a.identifier, 'type':a.type}
+                    for a in bundle.obj.externalaccount_set.all()]
+        return accounts
 
     def dehydrate_groups(self, bundle):
         groups = bundle.obj.groups.values_list('name', flat=True)

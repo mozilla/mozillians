@@ -15,6 +15,7 @@ from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory, LanguageFactory, SkillFactory
 from mozillians.users.api import CustomQuerySet
 from mozillians.users.managers import MOZILLIANS, PUBLIC
+from mozillians.users.models import ExternalAccount
 from mozillians.users.tests import UserFactory
 
 
@@ -234,6 +235,8 @@ class UserResourceTests(TestCase):
         self.user.userprofile.skills.add(skill)
         language = LanguageFactory.create()
         self.user.userprofile.languages.add(language)
+        self.user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                                         identifier='Apitest')
 
         self.resource_url = reverse(
             'api_dispatch_list',
@@ -279,6 +282,9 @@ class UserResourceTests(TestCase):
         eq_(data['groups'], list(profile.groups.values_list('name', flat=True)))
         eq_(data['skills'], list(profile.skills.values_list('name', flat=True)))
         eq_(data['languages'], list(profile.languages.values_list('name', flat=True)))
+        eq_(data['accounts'],
+            [{'identifier':a.identifier, 'type':a.type}
+             for a in profile.externalaccount_set.all()])
         eq_(data['bio'], profile.bio)
         eq_(data['photo'], profile.photo)
         eq_(data['ircname'], profile.ircname)
@@ -359,6 +365,21 @@ class UserResourceTests(TestCase):
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+
+    def test_search_accounts(self):
+        client = Client()
+        user_1 = UserFactory.create(userprofile={'is_vouched': True})
+        user_1.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                                      identifier='AccountTest')
+        user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        user_2.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
+                                                      identifier='AccountTest')
+
+        url = urlparams(self.mozilla_resource_url, accounts='countt')
+        response = client.get(url, follow=True)
+        data = json.loads(response.content)
+        eq_(len(data['objects']), 2)
+        eq_(data['objects'][0]['accounts'][0]['identifier'], 'AccountTest')
 
     def test_search_languages(self):
         client = Client()
