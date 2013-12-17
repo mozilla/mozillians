@@ -27,7 +27,7 @@ def calculate_username(email):
         if len(suggested_username) > USERNAME_MAX_LENGTH:
             # We failed to calculate a name for you, default to a
             # email digest.
-            return  base64.urlsafe_b64encode(
+            return base64.urlsafe_b64encode(
                 hashlib.sha1(email).digest()).rstrip('=')
 
     return suggested_username

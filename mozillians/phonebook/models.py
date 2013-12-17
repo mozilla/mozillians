@@ -65,13 +65,13 @@ class Invite(models.Model):
         profile_url = reverse('phonebook:profile_view',
                               kwargs={'username': self.redeemer.user.username})
         message = template.render({
-            'inviter' : self.inviter.full_name,
-            'friend' : self.redeemer.full_name,
-            'profile' : absolutify(profile_url)})
-        filtered_message = message.replace('&#34;', '"').replace('&#39;',"'")
+            'inviter': self.inviter.full_name,
+            'friend': self.redeemer.full_name,
+            'profile': absolutify(profile_url)})
+        filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
-            [self.inviter.email])
+                  [self.inviter.email])
 
 
 @receiver(models.signals.pre_save, sender=Invite)

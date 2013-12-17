@@ -14,6 +14,6 @@ v1_api.register(mozillians.groups.api.GroupResource())
 v1_api.register(mozillians.groups.api.LanguageResource())
 v1_api.register(mozillians.groups.api.SkillResource())
 
-urlpatterns = patterns('',
-    url(r'', include(v1_api.urls)),
-)
+urlpatterns = patterns(
+    '',
+    url(r'', include(v1_api.urls)),)

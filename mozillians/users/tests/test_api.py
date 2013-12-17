@@ -283,7 +283,7 @@ class UserResourceTests(TestCase):
         eq_(data['skills'], list(profile.skills.values_list('name', flat=True)))
         eq_(data['languages'], list(profile.languages.values_list('name', flat=True)))
         eq_(data['accounts'],
-            [{'identifier':a.identifier, 'type':a.type}
+            [{'identifier': a.identifier, 'type': a.type}
              for a in profile.externalaccount_set.all()])
         eq_(data['bio'], profile.bio)
         eq_(data['photo'], profile.photo)

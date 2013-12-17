@@ -12,13 +12,13 @@ class AnnouncementManager(models.Manager):
         """Return published announcements."""
         now = datetime.now()
         return (self.filter(publish_from__lte=now)
-                    .filter(Q(publish_until__isnull=True)|
+                    .filter(Q(publish_until__isnull=True) |
                             (Q(publish_until__isnull=False)
-                             &Q(publish_until__gt=now))))
+                             & Q(publish_until__gt=now))))
 
     def unpublished(self):
         """Return unpublished announcements."""
         now = datetime.now()
-        return self.filter(Q(publish_from__gt=now)|
+        return self.filter(Q(publish_from__gt=now) |
                            (Q(publish_until__isnull=False) &
                             Q(publish_until__lte=now)))

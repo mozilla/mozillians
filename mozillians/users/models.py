@@ -43,6 +43,7 @@ def _calculate_photo_filename(instance, filename):
 
 
 class PrivacyField(models.PositiveSmallIntegerField):
+
     def __init__(self, *args, **kwargs):
         myargs = {'default': MOZILLIANS,
                   'choices': PRIVACY_CHOICES}
@@ -98,7 +99,7 @@ class UserProfilePrivacyModel(models.Model):
     CACHED_PRIVACY_FIELDS = None
 
     class Meta:
-        abstract=True
+        abstract = True
 
     @classmethod
     def clear_privacy_fields_cache(cls):
@@ -607,7 +608,6 @@ def update_search_index(sender, instance, **kwargs):
 def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfile, [instance.id], public_index=False)
     unindex_objects.delay(UserProfile, [instance.id], public_index=True)
-
 
 
 @receiver(dbsignals.pre_delete, sender=User,

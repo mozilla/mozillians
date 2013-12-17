@@ -21,7 +21,6 @@ class GroupBase(models.Model):
         abstract = True
         ordering = ['name']
 
-
     @classmethod
     def search(cls, query, auto_complete_only=True):
         if not query:
@@ -70,16 +69,20 @@ class Group(GroupBase):
 
     system = models.BooleanField(db_index=True, default=False)
     # Has a steward taken ownership of this group?
-    description = models.TextField(max_length=255,
-            verbose_name=_lazy(u'Description'), default='', blank=True)
-    steward = models.ForeignKey('users.UserProfile',
-            blank=True, null=True, on_delete=models.SET_NULL)
-    irc_channel = models.CharField(max_length=63,
-            verbose_name=_lazy(u'IRC Channel'), default='', blank=True)
-    website = models.URLField(max_length=200, verbose_name=_lazy(u'Website'),
-            default='', blank=True)
-    wiki = models.URLField(max_length=200, verbose_name=_lazy(u'Wiki'),
-            default='', blank=True)
+    description = models.TextField(
+        max_length=255, verbose_name=_lazy(u'Description'), default='', blank=True)
+    steward = models.ForeignKey(
+        'users.UserProfile',
+        blank=True, null=True, on_delete=models.SET_NULL)
+    irc_channel = models.CharField(
+        max_length=63,
+        verbose_name=_lazy(u'IRC Channel'), default='', blank=True)
+    website = models.URLField(
+        max_length=200, verbose_name=_lazy(u'Website'),
+        default='', blank=True)
+    wiki = models.URLField(
+        max_length=200, verbose_name=_lazy(u'Wiki'),
+        default='', blank=True)
 
     @classmethod
     def get_curated(cls):
@@ -104,6 +107,7 @@ class LanguageAlias(GroupAliasBase):
 
     class Meta:
         verbose_name_plural = 'language aliases'
+
 
 class Language(GroupBase):
     ALIAS_MODEL = LanguageAlias

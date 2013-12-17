@@ -26,7 +26,7 @@ DATABASES = {
     },
 }
 
-#Serve Profile Photos from django
+# Serve Profile Photos from django
 UPLOAD_URL = '/media/uploads'
 
 # Statsd Defaults -- adjust as needed
@@ -34,7 +34,7 @@ STATSD_HOST = 'localhost'
 STATSD_PORT = 8125
 STATSD_PREFIX = 'mozillians'
 
-## Email
+# Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -66,7 +66,7 @@ STATSD_CLIENT = 'django_statsd.clients.log'
 # Basket
 BASKET_URL = 'http://127.0.0.1'
 BASKET_NEWSLETTER = 'mozilla-phone'
-BASKET_MANAGERS = None # or list of email addresses.
+BASKET_MANAGERS = None  # or list of email addresses.
 
 GA_ACCOUNT_CODE = None
 

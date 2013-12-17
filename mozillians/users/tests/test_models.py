@@ -483,14 +483,14 @@ class UserProfileTests(TestCase):
         result = profile.lookup_basket_token()
         eq_('FAKETOKEN', result)
 
-
     @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
     def test_lookup_token_unregistered(self, mock_lookup_user):
         # Lookup token for a user with no registered email
         # Basket raises unknown user exception, then lookup-token returns None
         user = User(email='fake@example.com')
         profile = UserProfile(user=user)
-        mock_lookup_user.side_effect = basket.BasketException(code=basket.errors.BASKET_UNKNOWN_EMAIL)
+        mock_lookup_user.side_effect = basket.BasketException(
+            code=basket.errors.BASKET_UNKNOWN_EMAIL)
         result = profile.lookup_basket_token()
         ok_(result is None)
 

@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.forms.models import inlineformset_factory
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page, never_cache
@@ -25,7 +24,8 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import update_invites
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import COUNTRIES, ExternalAccount, UserProfile
+from mozillians.users.models import COUNTRIES, UserProfile
+
 
 class BrowserIDVerify(Verify):
     def form_valid(self, form):
@@ -168,7 +168,7 @@ def edit_profile(request):
         elif user.username != old_username:
             messages.info(request,
                           _(u'You changed your username; please note your '
-                            'profile URL has also changed.'))
+                            u'profile URL has also changed.'))
 
         if email_form.email_changed():
             return render(request, 'phonebook/verify_email.html',
@@ -177,8 +177,8 @@ def edit_profile(request):
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
-                accounts_formset = accounts_formset,
-                email_form = email_form,
+                accounts_formset=accounts_formset,
+                email_form=email_form,
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
@@ -214,7 +214,6 @@ def delete(request):
 
 @allow_public
 def search(request):
-    num_pages = 0
     limit = None
     people = []
     show_pagination = False
@@ -279,8 +278,8 @@ def invite(request):
         invite = invite_form.save()
         invite.send(sender=profile)
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
-                 "with instructions on how to join. You can "
-                 "invite another Mozillian if you like." % invite.recipient)
+                u"with instructions on how to join. You can "
+                u"invite another Mozillian if you like." % invite.recipient)
         messages.success(request, msg)
         return redirect('phonebook:home')
 
@@ -299,7 +298,7 @@ def vouch(request):
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                 'This user is now vouched!')
+                u'This user is now vouched!')
         messages.info(request, msg)
         return redirect('phonebook:profile_view', p.user.username)
 

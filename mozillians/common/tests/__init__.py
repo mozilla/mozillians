@@ -18,6 +18,7 @@ ES_INDEXES = {
     'public': 'mozillians-public-test'
     }
 
+
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
                    ES_INDEXES=ES_INDEXES)
 class TestCase(BaseTestCase):
