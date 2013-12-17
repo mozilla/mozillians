@@ -377,38 +377,6 @@ class UserResourceTests(TestCase):
         eq_(len(data['objects']), 2)
         eq_(data['objects'][0]['accounts'][0]['identifier'], 'AccountTest')
 
-    def test_search_languages(self):
-        client = Client()
-        language_1 = LanguageFactory.create()
-        language_2 = LanguageFactory.create()
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_1.userprofile.languages.add(language_1)
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2.userprofile.languages.add(language_2)
-
-        url = urlparams(self.mozilla_resource_url, languages=language_1.name)
-        response = client.get(url, follow=True)
-        data = json.loads(response.content)
-        eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
-
-    def test_search_multiple_languages(self):
-        client = Client()
-        language_1 = LanguageFactory.create()
-        language_2 = LanguageFactory.create()
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_1.userprofile.languages.add(language_1)
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2.userprofile.languages.add(language_2)
-
-        url = urlparams(self.mozilla_resource_url,
-                        languages=','.join([language_1.name, language_2.name]))
-        response = client.get(url, follow=True)
-        data = json.loads(response.content)
-        eq_(len(data['objects']), 2)
-        eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
-        eq_(data['objects'][1]['id'], unicode(user_2.userprofile.id))
-
     def test_search_skills(self):
         client = Client()
         skill_1 = SkillFactory.create()

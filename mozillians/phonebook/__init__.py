@@ -1,7 +1,18 @@
-from product_details import product_details
+import babel
 
 
-ENGLISH_LANGUAGE_CHOICES = sorted(
-    [(key.lower(), value['English'])
-     for key, value in product_details.languages.items()],
-    key=lambda language: language[1])
+LANGUAGE_REFERENCE = babel.Locale('en_US').languages
+AVAILABLE_LANGUAGES = {}
+
+
+def get_translated_languages(locale):
+    if locale not in AVAILABLE_LANGUAGES:
+        local_lang = babel.Locale(locale).languages
+        diff = [lc for lc in LANGUAGE_REFERENCE.keys()
+                if lc not in local_lang.keys()]
+        for lc in diff:
+            local_lang[lc] = LANGUAGE_REFERENCE[lc]
+        AVAILABLE_LANGUAGES[locale] = sorted([(key, value) for key, value in
+                                             local_lang.items()],
+                                             key=lambda language: language[1])
+    return AVAILABLE_LANGUAGES[locale]

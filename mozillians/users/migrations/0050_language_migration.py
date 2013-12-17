@@ -7,7 +7,7 @@ from django.db import models
 LANGUAGES={'afrikaans': 'af',
            'arabic': 'ar',
            'arabe': 'ar',
-           'british english': 'en_US',
+           'british english': 'en_GB',
            'en': 'en_US',
            'esperanto': 'eo',
            'spanish': 'es',
@@ -83,22 +83,35 @@ LANGUAGES={'afrikaans': 'af',
            'taiwanese': 'zh_TW',
            'chinese traditional': 'zh_TW'}
 
+
 class Migration(DataMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
+        "Migrate matching languages to user's UserProfile."
         users = orm['users.UserProfile'].objects.all()
         for user in users:
-            languages = user.languages.all()
-            common_set = [l.name for l in languages
-                          if l.name in LANGUAGES.keys()]
+            common_set = user.languages.filter(name__in=LANGUAGES)
             for language in common_set:
                 (orm['users.NGLanguage']
                  .objects.create(user=user,
-                                 language_code=LANGUAGES[language]))
+                                 language_code=LANGUAGES[language.name]))
+            user.languages.clear()
+            orm['groups.Language'].objects.all().delete()
 
     def backwards(self, orm):
-        "Write your backwards methods here."
+        "Delete all the languaes from the UserProfile of a user."
+        users = orm['users.UserProfile'].objects.all()
+        for user in users:
+            languages = [k for k, v in LANGUAGES.iteritems()
+                         if (orm['users.NGLanguage']
+                             .objects.filter(user=user,
+                                             language_code__iexact=v))]
+            for language in languages:
+                if not orm['groups.Language'].objects.filter(name=language).exists():
+                    lang = orm['groups.Language'].objects.create(name=language)
+                else:
+                    lang = orm['groups.Language'].objects.get(name=language)
+                user.languages.add(lang)
         for language_code in orm['users.NGLanguage'].objects.all():
             language_code.delete()
 

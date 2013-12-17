@@ -141,7 +141,9 @@ def edit_profile(request):
     new_profile = False
     form = forms.ProfileForm
     language_formset = forms.LanguagesFormset(request.POST or None,
-                                              instance=profile)
+                                              instance=profile,
+                                              locale=request.locale)
+
     if not profile.is_complete:
         new_profile = True
         form = forms.RegisterForm

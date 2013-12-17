@@ -6,7 +6,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
-from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
 import happyforms
 from PIL import Image
@@ -14,7 +14,7 @@ from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group, Skill
-from mozillians.phonebook import ENGLISH_LANGUAGE_CHOICES
+from mozillians.phonebook import get_translated_languages
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
@@ -190,11 +190,19 @@ class ProfileForm(happyforms.ModelForm):
         super(ProfileForm, self).save()
 
 
-class NGLanguageForm(happyforms.ModelForm):
-    """ Languages model form."""
-    languages = ENGLISH_LANGUAGE_CHOICES
-    languages.insert(0, ('', '-----'))
-    language_code = forms.ChoiceField(choices=languages, required=False)
+class BaseLanguageFormSet(BaseInlineFormSet):
+
+    def __init__(self, *args, **kwargs):
+        self.locale = kwargs.pop('locale', 'en_US').replace('-', '_')
+        self.languages = get_translated_languages(self.locale)
+        if self.languages[0][1] != '-----':
+            self.languages.insert(0, ('', '-----'))
+        super(BaseLanguageFormSet, self).__init__(*args, **kwargs)
+
+    def add_fields(self, form, index):
+        super(BaseLanguageFormSet, self).add_fields(form, index)
+        form.fields['language_code'] = forms.ChoiceField()
+        form.fields['language_code'].choices = self.languages
 
     class Meta:
         models = NGLanguage
@@ -202,7 +210,7 @@ class NGLanguageForm(happyforms.ModelForm):
 
 
 LanguagesFormset = inlineformset_factory(UserProfile, NGLanguage,
-                                         form=NGLanguageForm,
+                                         formset=BaseLanguageFormSet,
                                          extra=1)
 
 

@@ -4,7 +4,7 @@ from datetime import date
 import jinja2
 from jingo import register
 
-from mozillians.phonebook import ENGLISH_LANGUAGE_CHOICES
+from mozillians.phonebook import AVAILABLE_LANGUAGES
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -35,7 +35,7 @@ def get_mozillian_years(userprofile):
 @register.filter
 def get_language(obj):
     try:
-        lang = dict(ENGLISH_LANGUAGE_CHOICES)[obj.language_code]
+        lang = dict(AVAILABLE_LANGUAGES)[obj.language_code]
         return lang
     except KeyError:
         return None
