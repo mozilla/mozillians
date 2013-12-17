@@ -15,6 +15,7 @@
   <link rel="apple-touch-icon" sizes="144x144" href="{{ static('mozillians/img/apple-touch-icon-144.png') }}">
   <link rel="apple-touch-icon" href="{{ static('mozillians/img/apple-touch-icon.png') }}">
   <link rel="shortcut icon" type="image/ico" href="{{ static('mozillians/img/favicon.ico') }}">
+  {% include 'includes/canonical-url.html' %}
 
   <link rel="search" type="application/opensearchdescription+xml"
         title="{{ _('Mozillians') }}" href="{{ url('phonebook:search_plugin') }}">
@@ -58,7 +59,7 @@
       <div class="wrapper">
         <header id="masthead">
 
-          <a href="http://www.mozilla.org/" id="tabzilla">{{ _('Mozilla') }}</a>
+          <a href="http://www.mozilla.org/" id="tabzilla" data-infobar="translation">{{ _('Mozilla') }}</a>
 
           <ul id="nav-access">
             <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
