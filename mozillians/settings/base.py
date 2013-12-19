@@ -54,6 +54,7 @@ DOMAIN_METHODS = {
 }
 
 # Accepted locales
+LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'sv', 'zh-TW',
                   'zh-CN', 'lt', 'ja')
@@ -75,9 +76,9 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-    append=['django_browserid.context_processors.browserid',
-            'mozillians.common.context_processors.current_year']
-)
+  append=['django_browserid.context_processors.browserid',
+          'mozillians.common.context_processors.current_year',
+          'mozillians.common.context_processors.canonical_path'])
 
 
 JINGO_EXCLUDE_APPS = [
