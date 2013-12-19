@@ -33,7 +33,7 @@ class MonthYearWidget(Widget):
             self.years = years
         else:
             this_year = datetime.date.today().year
-            self.years = range(this_year, this_year+10)
+            self.years = range(this_year, this_year + 10)
 
     def render(self, name, value, attrs=None):
         try:

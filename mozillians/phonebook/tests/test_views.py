@@ -95,8 +95,9 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
     def test_login_incomplete_profile(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-         'full_name': ''})
+        user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'full_name': ''})
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
@@ -155,8 +156,9 @@ class ViewsTests(TestCase):
         eq_(response.context['profile'], lookup_user.userprofile)
 
     def test_view_vouched_profile_public_anonymous(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'privacy_full_name': PUBLIC})
         client = Client()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
@@ -168,8 +170,9 @@ class ViewsTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_unvouched(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'privacy_full_name': PUBLIC})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
@@ -182,8 +185,9 @@ class ViewsTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_vouched(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True,
-         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'privacy_full_name': PUBLIC})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
@@ -278,7 +282,7 @@ class ViewsTests(TestCase):
         user = UserFactory.create(userprofile={'is_vouched': True})
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
-        url = urlparams(url,  view_as='mozillian')
+        url = urlparams(url, view_as='mozillian')
         with self.login(user) as client:
             response = client.get(url, follow=True)
         self.assertTemplateUsed(response, 'phonebook/profile.html')
@@ -390,7 +394,7 @@ class ViewsTests(TestCase):
     @patch('mozillians.users.models.remove_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
     def test_delete_vouched(self, unindex_objects_mock,
-                              remove_from_basket_task_mock):
+                            remove_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -530,8 +534,9 @@ class ViewsTests(TestCase):
 
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_vouched(self):
-        user_listed_1 = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it'})
+        user_listed_1 = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it'})
         UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
@@ -593,19 +598,22 @@ class ViewsTests(TestCase):
         eq_(response.context['people'].number, 1)
 
     def test_list_mozillians_in_location_region_vouched(self):
-        user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'florence'})
-        UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'foo'})
+        user_listed = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'region': 'florence'})
+        UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'region': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
-            url = reverse('phonebook:list_region', kwargs={'country': 'it',
-             'region': 'Florence'})
+            url = reverse(
+                'phonebook:list_region',
+                kwargs={'country': 'it', 'region': 'Florence'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')
@@ -616,19 +624,21 @@ class ViewsTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_city_vouched(self):
-        user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'city': 'madova'})
-        UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'city': 'foo'})
+        user_listed = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'city': 'madova'})
+        UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'city': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
-            url = reverse('phonebook:list_city', kwargs={'country': 'it',
-             'city': 'Madova'})
+            url = reverse('phonebook:list_city',
+                          kwargs={'country': 'it', 'city': 'Madova'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')
@@ -639,22 +649,23 @@ class ViewsTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_region_n_city_vouched(self):
-        user_listed = UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'Florence',
-         'city': 'madova'})
-        UserFactory.create(userprofile={'is_vouched': True,
-         'country': 'it',
-         'region': 'florence',
-         'city': 'foo'})
+        user_listed = UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'region': 'Florence',
+                         'city': 'madova'})
+        UserFactory.create(
+            userprofile={'is_vouched': True,
+                         'country': 'it',
+                         'region': 'florence',
+                         'city': 'foo'})
         UserFactory.create(userprofile={'is_vouched': True})
         UserFactory.create()
         UserFactory.create(userprofile={'country': 'gr'})
         user = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(user) as client:
-            url = reverse('phonebook:list_region_city', kwargs={'country': 'it',
-             'region': 'florence',
-             'city': 'Madova'})
+            url = reverse('phonebook:list_region_city',
+                          kwargs={'country': 'it', 'region': 'florence', 'city': 'Madova'})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/location-list.html')

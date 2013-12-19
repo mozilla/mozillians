@@ -6,14 +6,14 @@ import os.path
 import sys
 
 from funfactory.manage import path
-from funfactory.settings_base import *
+from funfactory.settings_base import *  # noqa
 from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
 
 from mozillians.users.helpers import calculate_username
 from django.utils.functional import lazy
 
-## Log settings
+# Log settings
 SYSLOG_TAG = "http_app_mozillians"
 LOGGING = {
     'loggers': {
@@ -22,7 +22,7 @@ LOGGING = {
     },
 }
 
-## Database settings
+# Database settings
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -38,7 +38,7 @@ DATABASES = {
     },
 }
 
-## L10n
+# L10n
 LOCALE_PATHS = [path('locale')]
 
 # Tells the extract script what files to parse for strings and what functions to use.
@@ -65,18 +65,19 @@ RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 PROTOCOL = "https://"
 PORT = 443
 
-## Templates.
+# Templates.
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'jingo.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-	append=['django_browserid.context_processors.browserid',
-                'mozillians.common.context_processors.current_year'])
+    append=['django_browserid.context_processors.browserid',
+            'mozillians.common.context_processors.current_year']
+)
 
 
 JINGO_EXCLUDE_APPS = [
@@ -84,6 +85,7 @@ JINGO_EXCLUDE_APPS = [
     'autocomplete_light',
     'browserid'
 ]
+
 
 def JINJA_CONFIG():
     config = funfactory_JINJA_CONFIG()
@@ -151,7 +153,7 @@ INSTALLED_APPS = get_apps(append=[
     'south',
 ])
 
-## Auth
+# Auth
 PWD_ALGORITHM = 'bcrypt'
 HMAC_KEYS = {
     '2011-01-01': 'cheesecake',
@@ -159,7 +161,7 @@ HMAC_KEYS = {
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
-SESSION_COOKIE_NAME='mozillians_sessionid'
+SESSION_COOKIE_NAME = 'mozillians_sessionid'
 ANON_ALWAYS = True
 
 # Email
@@ -240,11 +242,13 @@ ANNOUNCEMENTS_PHOTO_DIR = 'uploads/announcements'
 GA_ACCOUNT_CODE = 'UA-35433268-19'
 
 # Set ALLOWED_HOSTS based on SITE_URL.
+
+
 def _allowed_hosts():
     from django.conf import settings
     from urlparse import urlparse
 
-    host = urlparse(settings.SITE_URL).netloc # Remove protocol and path
+    host = urlparse(settings.SITE_URL).netloc  # Remove protocol and path
     host = host.rsplit(':', 1)[0]  # Remove port
     return [host]
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
@@ -257,7 +261,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/api/']
 
 # Set default avatar for user profiles
-DEFAULT_AVATAR= 'img/default_avatar.png'
+DEFAULT_AVATAR = 'img/default_avatar.png'
 DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
@@ -265,6 +269,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
+
 
 def _request_args():
     from django.conf import settings

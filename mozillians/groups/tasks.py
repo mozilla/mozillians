@@ -15,10 +15,11 @@ def assign_autocomplete_to_groups():
 
     """
     for model in [Group, Language, Skill]:
-        groups = (model.objects
-                 .filter(always_auto_complete=False)
-                 .annotate(no_members=Count('members'))
-                 .filter(no_members__gte=AUTO_COMPLETE_COUNT))
+        groups = (
+            model.objects
+            .filter(always_auto_complete=False)
+            .annotate(no_members=Count('members'))
+            .filter(no_members__gte=AUTO_COMPLETE_COUNT))
         if isinstance(model, Group):
             groups = groups.filter(system=False)
 
@@ -29,6 +30,7 @@ def assign_autocomplete_to_groups():
         (model.objects
          .filter(pk__in=list(groups.values_list('id', flat=True)))
          .update(auto_complete=True))
+
 
 @task
 def remove_empty_groups():

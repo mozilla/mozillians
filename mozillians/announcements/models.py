@@ -28,9 +28,9 @@ class Announcement(models.Model):
     title = models.CharField(max_length=255)
     text = models.TextField(max_length=750)
     image = ImageField(default='', blank=True,
-                       help_text = ('60x60 pixel image recommended. Image '
-                                    'will be rescaled automatically to '
-                                    'a square.'),
+                       help_text=('60x60 pixel image recommended. Image '
+                                  'will be rescaled automatically to '
+                                  'a square.'),
                        upload_to=_calculate_image_filename)
     publish_from = models.DateTimeField(
         help_text='Timezone is %s' % settings.TIME_ZONE)
@@ -47,7 +47,7 @@ class Announcement(models.Model):
     def published(self):
         now = datetime.now()
         return ((self.publish_from <= now) and
-                (self.publish_until > now if self.publish_until else True ))
+                (self.publish_until > now if self.publish_until else True))
 
     def __unicode__(self):
         return self.title

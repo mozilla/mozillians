@@ -2,7 +2,7 @@ from django.contrib.admin.sites import site
 from django.http import HttpRequest
 
 from mock import Mock
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.admin import GroupAdmin

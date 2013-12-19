@@ -43,7 +43,6 @@ class GroupResource(GroupBaseResource):
                     .annotate(number_of_members=Sum('members__is_vouched'))
                     .filter(number_of_members__gt=0))
 
-
     def dehydrate_url(self, bundle):
         url = reverse('groups:show_group', args=[bundle.obj.url])
         return utils.absolutify(url)

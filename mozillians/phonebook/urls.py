@@ -4,7 +4,8 @@ from django.views.generic.simple import direct_to_template
 from mozillians.common.decorators import allow_public
 
 
-urlpatterns = patterns('mozillians.phonebook',
+urlpatterns = patterns(
+    'mozillians.phonebook',
     url(r'^$', 'views.home', name='home'),
     url(r'^login/$', 'views.login', name='login'),
     url(r'^logout/$', 'views.logout', name='logout'),

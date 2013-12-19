@@ -19,8 +19,8 @@ def validate_twitter(username):
             raise ValidationError(_lazy('Twitter usernames cannot be longer than 15 characters.'))
 
         if not re.match('^\w+$', username):
-            raise ValidationError(_lazy('Twitter usernames must contain only alphanumeric characters'
-                                        ' and the underscore.'))
+            raise ValidationError(_lazy('Twitter usernames must contain only alphanumeric'
+                                        ' characters and the underscore.'))
     return username
 
 

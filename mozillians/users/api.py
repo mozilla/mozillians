@@ -57,6 +57,7 @@ class FakeQuerySet(object):
     """
     Wrap an iterable and make it work like a pretty dumb queryset.
     """
+
     def __init__(self, iterable):
         # We won't be able to get the data out of this without evaluating
         # the iterable (to sort or index it), so we might as well evaluate
@@ -173,7 +174,7 @@ class CountryResource(LocationCustomResource):
         return None
 
     def full_dehydrate(self, queryset):
-        queryset.obj =  self.Meta.object_class(
+        queryset.obj = self.Meta.object_class(
             country=queryset.obj['country'],
             population=queryset.obj['population'],
             country_name=COUNTRIES[queryset.obj['country']])
@@ -216,12 +217,12 @@ class CityResource(LocationCustomResource):
         for valid_filter in valid_filters:
             database_filters[valid_filter] = (
                 Q(**{'{0}__iexact'.format(valid_filter):
-                     getvalue(valid_filter) }))
+                     getvalue(valid_filter)}))
 
         return database_filters
 
     def full_dehydrate(self, queryset):
-        queryset.obj =  self.Meta.object_class(
+        queryset.obj = self.Meta.object_class(
             country=queryset.obj['country'],
             country_name=COUNTRIES[queryset.obj['country']],
             population=queryset.obj['population'],
@@ -266,10 +267,10 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
 
     def build_filters(self, filters=None):
         database_filters = {}
-        valid_filters =  [f for f in filters if f in
-                          ['email', 'country', 'region', 'city', 'ircname',
-                           'username', 'groups', 'languages', 'skills',
-                           'is_vouched', 'name', 'accounts']]
+        valid_filters = [f for f in filters if f in
+                         ['email', 'country', 'region', 'city', 'ircname',
+                          'username', 'groups', 'languages', 'skills',
+                          'is_vouched', 'name', 'accounts']]
         getvalue = lambda x: unquote(filters[x].lower())
 
         if 'accounts' in valid_filters:
@@ -318,7 +319,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         return bundle
 
     def dehydrate_accounts(self, bundle):
-        accounts = [{'identifier':a.identifier, 'type':a.type}
+        accounts = [{'identifier': a.identifier, 'type': a.type}
                     for a in bundle.obj.externalaccount_set.all()]
         return accounts
 

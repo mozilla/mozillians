@@ -24,9 +24,11 @@ class GroupAliasFactory(factory.DjangoModelFactory):
     FACTORY_FOR = GroupAlias
     url = factory.Sequence(lambda n: 'alias-{0}'.format(n))
 
+
 class LanguageAliasFactory(factory.DjangoModelFactory):
     FACTORY_FOR = LanguageAlias
     url = factory.Sequence(lambda n: 'alias-{0}'.format(n))
+
 
 class SkillAliasFactory(factory.DjangoModelFactory):
     FACTORY_FOR = SkillAlias

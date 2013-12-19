@@ -14,7 +14,7 @@ DATABASES['default']['NAME'] = 'mozillians_dev'
 DATABASES['default']['USER'] = 'root'
 DATABASES['default']['PASSWORD'] = ''
 
-#Serve Profile Photos from django
+# Serve Profile Photos from django
 UPLOAD_URL = '/media/uploads'
 
 # Statsd Defaults -- adjust as needed
@@ -22,7 +22,7 @@ STATSD_HOST = 'localhost'
 STATSD_PORT = 8125
 STATSD_PREFIX = 'mozillians'
 
-## Email
+# Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 

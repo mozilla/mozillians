@@ -79,17 +79,17 @@ class UserForm(happyforms.ModelForm):
         # happen is bad UI.
         if (User.objects.filter(username=username).
             exclude(pk=self.instance.id).exists()):
-            raise forms.ValidationError(_('This username is in use. Please try'
-                                          ' another.'))
+            raise forms.ValidationError(_(u'This username is in use. Please try'
+                                          u' another.'))
 
         # No funky characters in username.
         if not re.match(r'^[\w.@+-]+$', username):
-            raise forms.ValidationError(_('Please use only alphanumeric'
-                                          ' characters'))
+            raise forms.ValidationError(_(u'Please use only alphanumeric'
+                                          u' characters'))
 
         if not validate_username(username):
-            raise forms.ValidationError(_('This username is not allowed, '
-                                          'please choose another.'))
+            raise forms.ValidationError(_(u'This username is not allowed, '
+                                          u'please choose another.'))
         return username
 
 
@@ -104,13 +104,13 @@ class ProfileForm(happyforms.ModelForm):
                                required=False))
     groups = forms.CharField(
         label=_lazy(u'Start typing to add a group (example: Marketing, '
-                    'Support, WebDev, Thunderbird)'), required=False)
+                    u'Support, WebDev, Thunderbird)'), required=False)
     languages = forms.CharField(
         label=_lazy(u'Start typing to add a language you speak (example: '
-                    'English, French, German)'), required=False)
+                    u'English, French, German)'), required=False)
     skills = forms.CharField(
         label=_lazy(u'Start typing to add a skill (example: Python, '
-                    'javascript, Graphic Design, User Research)'),
+                    u'javascript, Graphic Design, User Research)'),
         required=False)
 
     class Meta:
@@ -164,8 +164,8 @@ class ProfileForm(happyforms.ModelForm):
         """
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
             raise forms.ValidationError(_(u'Groups can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
+                                          u'alphanumeric characters, dashes, '
+                                          u'spaces.'))
         system_groups = [g.name for g in self.instance.groups.all()
                          if g.system]
         groups = self.cleaned_data['groups']
@@ -179,8 +179,8 @@ class ProfileForm(happyforms.ModelForm):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
                         self.cleaned_data['languages']):
             raise forms.ValidationError(_(u'Languages can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
+                                          u'alphanumeric characters, dashes, '
+                                          u'spaces.'))
         languages = self.cleaned_data['languages']
 
         return filter(lambda x: x,
@@ -190,8 +190,8 @@ class ProfileForm(happyforms.ModelForm):
     def clean_skills(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
-                                           'alphanumeric characters, dashes, '
-                                           'spaces.'))
+                                          u'alphanumeric characters, dashes, '
+                                          u'spaces.'))
         skills = self.cleaned_data['skills']
         return filter(lambda x: x,
                       map(lambda x: x.strip() or False,
@@ -212,7 +212,7 @@ class EmailForm(happyforms.Form):
         email = self.cleaned_data['email']
         if (User.objects
             .exclude(pk=self.initial['user_id']).filter(email=email).exists()):
-            raise forms.ValidationError(_('Email is currently associated with another user.'))
+            raise forms.ValidationError(_(u'Email is currently associated with another user.'))
         return email
 
     def email_changed(self):

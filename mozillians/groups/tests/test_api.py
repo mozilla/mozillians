@@ -74,6 +74,7 @@ class SkillResourceTests(TestCase):
             'List includes unvouched users')
         eq_(int(data['objects'][0]['id']), skill.id)
 
+
 class LanguageResourceTests(TestCase):
     def setUp(self):
         self.resource_url = reverse(

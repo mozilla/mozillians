@@ -74,7 +74,8 @@ urlpatterns = patterns(
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
-    urlpatterns += patterns('',
+    urlpatterns += patterns(
+        '',
         # Add the 404, 500, and csrf pages for testing
         url(r'^404/$', handler404),
         url(r'^500/$', handler500),

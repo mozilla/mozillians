@@ -31,6 +31,8 @@ pip install -r requirements/dev.txt
 pip install -r requirements/compiled.txt
 
 cat > mozillians/settings/local.py <<SETTINGS
+# flake8: noqa
+
 ROOT_URLCONF = 'mozillians.urls'
 DOMAIN = "localhost"
 PROTOCOL = "http://"
@@ -92,6 +94,9 @@ echo "CREATE DATABASE IF NOT EXISTS ${JOB_NAME}"|mysql -u $DB_USER -h $DB_HOST
 echo "Updating product details."
 
 python manage.py update_product_details
+
+echo "Check PEP-8"
+flake8 mozillians
 
 echo "Starting tests..."
 export FORCE_DB=1

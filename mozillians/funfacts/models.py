@@ -1,13 +1,13 @@
+# Unused imports for user-defined queries to execute.
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Count, Avg, Min, Max
+from django.db.models import Count, Avg, Min, Max  # noqa
 
 import bleach
 
-from mozillians.groups.models import Group, Language, Skill
-from mozillians.mozspaces.models import MozSpace
-from mozillians.users.models import UserProfile
-
+from mozillians.groups.models import Group, Language, Skill  # noqa
+from mozillians.mozspaces.models import MozSpace  # noqa
+from mozillians.users.models import UserProfile  # noqa
 
 ALLOWED_TAGS = ['em', 'strong']
 
@@ -77,7 +77,7 @@ class FunFact(models.Model):
                 if self.divisor:
                     number = eval(self.number)['number']
                     divisor = eval(self.divisor)['number']
-                    return '%.0f%%' % (float(number)/divisor * 100)
+                    return '%.0f%%' % (float(number) / divisor * 100)
                 return '%d' % eval(self.number)['number']
             except Exception, exp:
                 return 'Error: %s' % exp

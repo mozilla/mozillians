@@ -47,7 +47,7 @@ class CurratedGroupFilter(SimpleListFilter):
 
 class GroupBaseEditAdminForm(forms.ModelForm):
     merge_with = forms.ModelMultipleChoiceField(
-        required=False, queryset = None,
+        required=False, queryset=None,
         widget=FilteredSelectMultiple('Merge', False))
 
     def __init__(self, *args, **kwargs):
