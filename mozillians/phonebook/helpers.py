@@ -4,7 +4,7 @@ from datetime import date
 import jinja2
 from jingo import register
 
-from mozillians.phonebook import AVAILABLE_LANGUAGES
+from mozillians.phonebook import get_translated_languages
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -32,10 +32,11 @@ def get_mozillian_years(userprofile):
     return None
 
 
-@register.filter
-def get_language(obj):
+@register.function
+def langcode_to_name(code, locale):
+    translated_languages = get_translated_languages(locale)
     try:
-        lang = dict(AVAILABLE_LANGUAGES)[obj.language_code]
-        return lang
+        lang = dict(translated_languages)[code]
     except KeyError:
-        return None
+        return ''
+    return lang

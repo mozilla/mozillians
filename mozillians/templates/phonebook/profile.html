@@ -174,12 +174,13 @@
               {% endfor %}
           </div>
         {% endif %}
-        {% if profile.nglanguages.exists() %}
+        {% if profile.languages.exists() %}
           <div id="languages" class="p-category category">
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
-              {% for language_code in profile.nglanguages -%}
-                {% if language_code|get_language %}
-                  {{ language_code|get_language }}
+              {% for language in profile.languages -%}
+                {% set language_name = langcode_to_name(language.language_code, locale) %}
+                {% if language_name %}
+                  {{ language_name }}
                 {% endif %}
                 {%- if not loop.last %},{% endif %}
               {% endfor %}

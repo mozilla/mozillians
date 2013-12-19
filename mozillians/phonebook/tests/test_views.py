@@ -783,9 +783,9 @@ class ViewsTests(TestCase):
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
                 'externalaccount_set-TOTAL_FORMS': '0',
-                'nglanguage_set-MAX_NUM_FORMS': '1000',
-                'nglanguage_set-INITIAL_FORMS': '0',
-                'nglanguage_set-TOTAL_FORMS': '0'}
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0'}
 
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -813,9 +813,9 @@ class ViewsTests(TestCase):
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
                 'externalaccount_set-TOTAL_FORMS': '0',
-                'nglanguage_set-MAX_NUM_FORMS': '1000',
-                'nglanguage_set-INITIAL_FORMS': '0',
-                'nglanguage_set-TOTAL_FORMS': '0'}
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0'}
         data.update(self._get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -876,9 +876,9 @@ class ViewsTests(TestCase):
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
                 'externalaccount_set-TOTAL_FORMS': '0',
-                'nglanguage_set-MAX_NUM_FORMS': '1000',
-                'nglanguage_set-INITIAL_FORMS': '0',
-                'nglanguage_set-TOTAL_FORMS': '0'}
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0'}
 
         for field in UserProfilePrivacyModel._meta._fields():
             data[field.name] = MOZILLIANS
@@ -905,9 +905,9 @@ class ViewsTests(TestCase):
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
                 'externalaccount_set-TOTAL_FORMS': '0',
-                'nglanguage_set-MAX_NUM_FORMS': '1000',
-                'nglanguage_set-INITIAL_FORMS': '0',
-                'nglanguage_set-TOTAL_FORMS': '0'}
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0'}
         data.update(self._get_privacy_fields(MOZILLIANS))
 
         url = reverse('phonebook:profile_edit', prefix='/es/')

@@ -2,7 +2,7 @@ from django.db.models import Count
 
 from celery.task import task
 
-from mozillians.groups.models import AUTO_COMPLETE_COUNT, Group, Language, Skill
+from mozillians.groups.models import AUTO_COMPLETE_COUNT, Group, Skill
 
 
 @task
@@ -14,7 +14,7 @@ def assign_autocomplete_to_groups():
     should count only vouched users.
 
     """
-    for model in [Group, Language, Skill]:
+    for model in [Group, Skill]:
         groups = (
             model.objects
             .filter(always_auto_complete=False)

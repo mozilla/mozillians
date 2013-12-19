@@ -66,9 +66,9 @@ $(function() {
         return false;
     });
 
-    $('#nglanguages .addField').click(function() {
+    $('#languages .addField').click(function() {
         'use strict';
-        cloneFormsetField('fieldset#nglanguages > div:last', 'nglanguage_set');
+        cloneFormsetField('fieldset#languages > div:last', 'language_set');
         return false;
     });
 

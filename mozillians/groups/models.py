@@ -12,7 +12,7 @@ class GroupBase(models.Model):
     name = models.CharField(db_index=True, max_length=50, unique=True)
     url = models.SlugField(blank=True)
 
-    # If this is true, this Group/Skill/Language will appear in the
+    # If this is true, this Group/Skill will appear in the
     # autocomplete list.
     auto_complete = models.BooleanField(db_index=True, default=False)
     always_auto_complete = models.BooleanField(default=False)
@@ -100,14 +100,3 @@ class SkillAlias(GroupAliasBase):
 
 class Skill(GroupBase):
     ALIAS_MODEL = SkillAlias
-
-
-class LanguageAlias(GroupAliasBase):
-    alias = models.ForeignKey('Language', related_name='aliases')
-
-    class Meta:
-        verbose_name_plural = 'language aliases'
-
-
-class Language(GroupBase):
-    ALIAS_MODEL = LanguageAlias

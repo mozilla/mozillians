@@ -123,6 +123,7 @@ def view_profile(request, username):
 
     data['shown_user'] = profile.user
     data['profile'] = profile
+    data['locale'] = request.locale
     return render(request, 'phonebook/profile.html', data)
 
 

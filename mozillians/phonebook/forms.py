@@ -18,7 +18,7 @@ from mozillians.phonebook import get_translated_languages
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.models import ExternalAccount, NGLanguage, UserProfile
+from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -205,11 +205,11 @@ class BaseLanguageFormSet(BaseInlineFormSet):
         form.fields['language_code'].choices = self.languages
 
     class Meta:
-        models = NGLanguage
+        models = Language
         fields = ['language_code']
 
 
-LanguagesFormset = inlineformset_factory(UserProfile, NGLanguage,
+LanguagesFormset = inlineformset_factory(UserProfile, Language,
                                          formset=BaseLanguageFormSet,
                                          extra=1)
 

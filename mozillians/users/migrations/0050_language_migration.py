@@ -95,7 +95,6 @@ class Migration(DataMigration):
                 (orm['users.NGLanguage']
                  .objects.create(user=user,
                                  language_code=LANGUAGES[language.name]))
-            user.languages.clear()
             orm['groups.Language'].objects.all().delete()
 
     def backwards(self, orm):
