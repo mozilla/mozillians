@@ -169,11 +169,11 @@ def update(ctx):
 @task
 def deploy(ctx):
     # install_cron()
+    update_revision_files()
     checkin_changes()
     deploy_app()
     prime_app()
     # Things run below here should not break the deployment if they fail.
-    update_revision_files()
     if 'mozillians-dev' not in settings.REMOTE_HOSTNAME or not OLDREV.startswith(NEWREV):
         # On dev, this script runs every 15 minutes. If we're pushing the same
         # revision we don't need to churn the index, ping new relic, or any of this.
