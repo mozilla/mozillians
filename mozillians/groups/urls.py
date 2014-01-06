@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 
-from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias, Language
+from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
 
 
 urlpatterns = patterns(
@@ -26,6 +26,4 @@ urlpatterns = patterns(
         dict(searched_object=Group), name='search_groups'),
     url('^skills/search/$', 'views.search',
         dict(searched_object=Skill), name='search_skills'),
-    url('^languages/search/$', 'views.search',
-        dict(searched_object=Language), name='search_languages'),
 )
