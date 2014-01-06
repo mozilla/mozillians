@@ -132,9 +132,7 @@
             <h4>{{ _('Languages') }}</h4>
             {% for language in user.userprofile.languages %}
               {% set language_name = langcode_to_name(language.language_code, locale) %}
-              {% if language_name %}
                 {{ language_name }}
-              {% endif %}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>

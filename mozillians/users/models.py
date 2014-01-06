@@ -23,7 +23,9 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
 from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
+from mozillians.phonebook.helpers import langcode_to_name
 from mozillians.phonebook.validators import validate_twitter, validate_website
+from mozillians.users import get_translated_languages
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
@@ -284,6 +286,14 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             for g in getattr(obj, attribute).all():
                 groups.extend(g.aliases.values_list('name', flat=True))
             d[attribute] = groups
+        # Add to search index language code, language name in English
+        # native lanugage name.
+        languages = []
+        for code in obj.languages.values_list('language_code', flat=True):
+            languages.append(code)
+            languages.append(langcode_to_name(code, 'en_US'))
+            languages.append(langcode_to_name(code, code))
+        d['languages'] = list(set(languages))
         return d
 
     @classmethod
@@ -576,25 +586,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         es.delete(cls.get_index(public_index), cls.get_mapping_type(), id)
 
 
-class Language(models.Model):
-    language_code = models.CharField(max_length=63)
-    user = models.ForeignKey(UserProfile)
-
-    class Meta:
-        ordering = ['language_code']
-        unique_together = ('language_code', 'user')
-
-    def __unicode__(self):
-        return self.language_code
-
-    def unique_error_message(self, model_class, unique_check):
-        if (model_class == type(self) and
-                unique_check == ('language_code', 'user')):
-            return _('This language has already been selected.')
-        return (super(Language, self)
-                .unique_error_message(model_class, unique_check))
-
-
 @receiver(dbsignals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, raw, **kwargs):
@@ -706,3 +697,23 @@ class ExternalAccount(models.Model):
             return _('You already have an account with this name and type.')
         else:
             return super(ExternalAccount, self).unique_error_message(model_class, unique_check)
+
+
+class Language(models.Model):
+    language_code = models.CharField(max_length=63,
+                                     choices=get_translated_languages('en'))
+    user = models.ForeignKey(UserProfile)
+
+    class Meta:
+        ordering = ['language_code']
+        unique_together = ('language_code', 'user')
+
+    def __unicode__(self):
+        return self.language_code
+
+    def unique_error_message(self, model_class, unique_check):
+        if (model_class == type(self) and
+                unique_check == ('language_code', 'user')):
+            return _('This language has already been selected.')
+        return (super(Language, self)
+                .unique_error_message(model_class, unique_check))

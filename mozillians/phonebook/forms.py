@@ -14,10 +14,10 @@ from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group, Skill
-from mozillians.phonebook import get_translated_languages
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
+from mozillians.users import get_translated_languages
 from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
@@ -193,16 +193,12 @@ class ProfileForm(happyforms.ModelForm):
 class BaseLanguageFormSet(BaseInlineFormSet):
 
     def __init__(self, *args, **kwargs):
-        self.locale = kwargs.pop('locale', 'en_US').replace('-', '_')
-        self.languages = get_translated_languages(self.locale)
-        if self.languages[0][1] != '-----':
-            self.languages.insert(0, ('', '-----'))
+        self.locale = kwargs.pop('locale', 'en')
         super(BaseLanguageFormSet, self).__init__(*args, **kwargs)
 
     def add_fields(self, form, index):
         super(BaseLanguageFormSet, self).add_fields(form, index)
-        form.fields['language_code'] = forms.ChoiceField()
-        form.fields['language_code'].choices = self.languages
+        form.fields['language_code'].choices = get_translated_languages(self.locale)
 
     class Meta:
         models = Language

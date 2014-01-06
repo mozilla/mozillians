@@ -4,7 +4,7 @@ from datetime import date
 import jinja2
 from jingo import register
 
-from mozillians.phonebook import get_translated_languages
+from mozillians.users import get_translated_languages
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -38,5 +38,5 @@ def langcode_to_name(code, locale):
     try:
         lang = dict(translated_languages)[code]
     except KeyError:
-        return ''
+        return code
     return lang

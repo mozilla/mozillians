@@ -179,9 +179,7 @@
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages -%}
                 {% set language_name = langcode_to_name(language.language_code, locale) %}
-                {% if language_name %}
                   {{ language_name }}
-                {% endif %}
                 {%- if not loop.last %},{% endif %}
               {% endfor %}
           </div>
