@@ -11,7 +11,6 @@ v1_api.register(mozillians.users.api.UserResource())
 v1_api.register(mozillians.users.api.CountryResource())
 v1_api.register(mozillians.users.api.CityResource())
 v1_api.register(mozillians.groups.api.GroupResource())
-v1_api.register(mozillians.groups.api.LanguageResource())
 v1_api.register(mozillians.groups.api.SkillResource())
 
 urlpatterns = patterns(
