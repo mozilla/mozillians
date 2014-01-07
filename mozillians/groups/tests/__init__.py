@@ -1,18 +1,11 @@
 import factory
 
-from mozillians.groups.models import (Group, GroupAlias,
-                                      Language, LanguageAlias,
-                                      Skill, SkillAlias)
+from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
 
 
 class GroupFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Group
     name = factory.Sequence(lambda n: 'Group {0}'.format(n))
-
-
-class LanguageFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = Language
-    name = factory.Sequence(lambda n: 'Language {0}'.format(n))
 
 
 class SkillFactory(factory.DjangoModelFactory):
@@ -22,11 +15,6 @@ class SkillFactory(factory.DjangoModelFactory):
 
 class GroupAliasFactory(factory.DjangoModelFactory):
     FACTORY_FOR = GroupAlias
-    url = factory.Sequence(lambda n: 'alias-{0}'.format(n))
-
-
-class LanguageAliasFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = LanguageAlias
     url = factory.Sequence(lambda n: 'alias-{0}'.format(n))
 
 

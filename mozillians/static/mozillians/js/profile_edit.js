@@ -62,7 +62,13 @@ $(function() {
     }
 
     $('#accounts .addField').click(function() {
-        cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set')
+        cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set');
+        return false;
+    });
+
+    $('#languages .addField').click(function() {
+        'use strict';
+        cloneFormsetField('fieldset#languages > div:last', 'language_set');
         return false;
     });
 

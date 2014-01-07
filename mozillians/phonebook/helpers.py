@@ -4,6 +4,7 @@ from datetime import date
 import jinja2
 from jingo import register
 
+from mozillians.users import get_translated_languages
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -29,3 +30,13 @@ def get_mozillian_years(userprofile):
         year_difference = date.today().year - userprofile.date_mozillian.year
         return year_difference
     return None
+
+
+@register.function
+def langcode_to_name(code, locale):
+    translated_languages = get_translated_languages(locale)
+    try:
+        lang = dict(translated_languages)[code]
+    except KeyError:
+        return code
+    return lang
