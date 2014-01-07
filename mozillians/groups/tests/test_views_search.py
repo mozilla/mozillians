@@ -4,7 +4,7 @@ from django.http import HttpResponseBadRequest
 from django.test import Client
 from funfactory.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.tests import GroupFactory, SkillFactory, LanguageFactory
+from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 from nose.tools import eq_, ok_
 
@@ -169,21 +169,6 @@ class SearchTests(TestCase):
         data = json.loads(response.content)
         eq_(len(data), 1, 'Non autocomplete skills are included in search')
         eq_(data[0], skill_1.name)
-
-    def test_search_languages(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
-        language_1 = LanguageFactory.create()
-        LanguageFactory.create()
-        url = urlparams(reverse('groups:search_languages'), term=language_1.name)
-        with self.login(user) as client:
-            response = client.get(url, follow=True,
-                                  **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
-        eq_(response.status_code, 200)
-        eq_(response.get('content-type'), 'application/json')
-
-        data = json.loads(response.content)
-        eq_(len(data), 1, 'Non autocomplete languages are included in search')
-        eq_(data[0], language_1.name)
 
     def test_search_no_ajax(self):
         user = UserFactory.create(userprofile={'is_vouched': True})

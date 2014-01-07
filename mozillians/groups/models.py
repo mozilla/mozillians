@@ -309,14 +309,3 @@ class SkillAlias(GroupAliasBase):
 
 class Skill(GroupBase):
     ALIAS_MODEL = SkillAlias
-
-
-class LanguageAlias(GroupAliasBase):
-    alias = models.ForeignKey('Language', related_name='aliases')
-
-    class Meta:
-        verbose_name_plural = 'language aliases'
-
-
-class Language(GroupBase):
-    ALIAS_MODEL = LanguageAlias

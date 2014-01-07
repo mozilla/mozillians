@@ -177,7 +177,11 @@ class EmailChangeTests(TestCase):
                 'username': user.username,
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
@@ -195,7 +199,11 @@ class ImageTests(TestCase):
                 'photo': open(file_path, 'rb'),
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         data.update(_get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -255,7 +263,11 @@ class ImageTests(TestCase):
                 'username': user.username,
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
 
         for field in UserProfilePrivacyModel._meta._fields():
             data[field.name] = MOZILLIANS
@@ -283,7 +295,11 @@ class DateValidationTests(TestCase):
                 'date_mozillian_month': '1',
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         data.update(_get_privacy_fields(MOZILLIANS))
 
         url = reverse('phonebook:profile_edit', prefix='/es/')

@@ -17,7 +17,8 @@
 {% endblock extrahead %}
 
 {% block content %}
-  {% if profile_form.errors or user_form.errors or accounts_formset.errors  %}
+  {% if profile_form.errors or user_form.errors or accounts_formset.errors
+     or language_formset.errors %}
       <div class="alert alert-error">
         {{ _('Please correct the errors below.') }}
       </div>
@@ -283,32 +284,6 @@
       {{ privacy_field(profile_form.privacy_skills) }}
     </fieldset>
 
-    {# Leaving code as placeholder, for when we are ready to add preferred language. #}
-    {#
-    {% if profile.languages.count() %}
-    <fieldset>
-      <div class="privacy-controls">
-        <div class="control-group">
-            <label class="control-label">Visible to:</label>
-            <div class="controls">
-                <select label="Visible to:" name="privacy_website" class="privacy-choice" data-privacy-original="3" id="id_privacy_website">
-                    <option selected="selected" value="3">Mozillians</option>
-                    <option value="4">Public</option>
-                </select>
-            </div>
-        </div>
-      </div>
-      <select>
-        {% for language in profile.languages.all() %}
-          <option value="{{ language }}">{{ language|capitalize }}</option>
-        {% endfor %}
-      </select>
-      <label>{{ _("Preferred Language") }}</label>
-
-    </fieldset>
-    {% endif %}
-    #}
-
     <fieldset id="languages">
       <legend>{{ _('Languages') }}</legend>
       <p class="field_description">
@@ -318,11 +293,33 @@
           easily by other Mozillians.
         {% endtrans %}
       </p>
-      {{ profile_form.languages }}
-      <div class="help_text">
-        {{ profile_form.languages.label_tag() }}
+      <div class="privacy-controls">
+        <div class="control-group">
+            <label class="control-label">{{ _('Visible to:') }}</label>
+            <div class="controls">
+              {{ privacy_field(profile_form.privacy_languages) }}
+            </div>
+        </div>
       </div>
-      {{ privacy_field(profile_form.privacy_languages) }}
+      {{ language_formset.management_form }}
+      {% for language_form in language_formset %}
+        <div class="language-fieldrow
+                    {% if language_form.errors %} error{% endif %}">
+          {{ language_form.non_field_errors() }}
+          {% for field in language_form %}
+            {{ field }}
+            {% if field.name == 'DELETE' %}
+              <i class="icon-minus-sign"></i> {{ _('Delete') }}
+            {% endif %}
+          {% endfor %}
+          <div class="error">
+            {% for field in language_form %}
+              {{ field.errors }}
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+      <a href="#" class="addField"><i class="icon-plus-sign"></i> {{ _('Add language') }}</a>
     </fieldset>
 
     <fieldset id="services">

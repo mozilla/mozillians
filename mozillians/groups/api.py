@@ -11,7 +11,7 @@ from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.resources import (AdvancedSortingResourceMixIn,
                                       ClientCacheResourceMixIn)
 from mozillians.api.paginator import Paginator
-from mozillians.groups.models import Group, Language, Skill
+from mozillians.groups.models import Group, Skill
 
 
 class GroupBaseResource(AdvancedSortingResourceMixIn, ClientCacheResourceMixIn,
@@ -46,15 +46,6 @@ class GroupResource(GroupBaseResource):
     def dehydrate_url(self, bundle):
         url = reverse('groups:show_group', args=[bundle.obj.url])
         return utils.absolutify(url)
-
-
-class LanguageResource(GroupBaseResource):
-
-    class Meta(GroupBaseResource.Meta):
-        resource_name = 'languages'
-        queryset = (Language.objects
-                    .annotate(number_of_members=Sum('members__is_vouched'))
-                    .filter(number_of_members__gt=0))
 
 
 class SkillResource(GroupBaseResource):

@@ -7,7 +7,6 @@ from django.db.models import Count, Sum
 import autocomplete_light
 
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
-                                      Language, LanguageAlias,
                                       Skill, SkillAlias)
 
 
@@ -230,28 +229,6 @@ class SkillAdmin(GroupBaseAdmin):
     inlines = [SkillAliasInline]
 
 
-class LanguageAliasInline(admin.StackedInline):
-    model = LanguageAlias
-
-
-class LanguageAddAdminForm(forms.ModelForm):
-
-    class Meta:
-        model = Language
-
-
-class LanguageEditAdminForm(GroupBaseEditAdminForm):
-
-    class Meta:
-        model = Language
-
-
-class LanguageAdmin(GroupBaseAdmin):
-    form = LanguageEditAdminForm
-    add_form = LanguageAddAdminForm
-    inlines = [LanguageAliasInline]
-
 admin.site.register(Group, GroupAdmin)
 admin.site.register(GroupMembership, GroupMembershipAdmin)
-admin.site.register(Language, LanguageAdmin)
 admin.site.register(Skill, SkillAdmin)

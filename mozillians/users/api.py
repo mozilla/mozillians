@@ -260,7 +260,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         restrict_fields = False
         restricted_fields = ['email', 'is_vouched']
         fields = ['id', 'full_name', 'is_vouched', 'vouched_by',
-                  'date_vouched', 'groups', 'skills', 'languages',
+                  'date_vouched', 'groups', 'skills',
                   'bio', 'photo', 'ircname', 'country', 'region', 'city',
                   'date_mozillian', 'timezone', 'email', 'allows_mozilla_sites',
                   'allows_community_sites']
@@ -269,7 +269,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         database_filters = {}
         valid_filters = [f for f in filters if f in
                          ['email', 'country', 'region', 'city', 'ircname',
-                          'username', 'groups', 'languages', 'skills',
+                          'username', 'groups', 'skills',
                           'is_vouched', 'name', 'accounts']]
         getvalue = lambda x: unquote(filters[x].lower())
 
@@ -301,7 +301,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
                     **{'{0}__iexact'.format(possible_filter):
                        getvalue(possible_filter)})
 
-        for group_filter in ['groups', 'languages', 'skills']:
+        for group_filter in ['groups', 'skills']:
             if group_filter in valid_filters:
                 database_filters[group_filter] = Q(
                     **{'{0}__name__in'.format(group_filter):
@@ -332,7 +332,7 @@ class UserResource(ClientCacheResourceMixIn, ModelResource):
         return list(skills)
 
     def dehydrate_languages(self, bundle):
-        languages = bundle.obj.languages.values_list('name', flat=True)
+        languages = bundle.obj.languages.values_list('code', flat=True)
         return list(languages)
 
     def dehydrate_photo(self, bundle):

@@ -14,9 +14,8 @@ from mock import Mock, call, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Group, Language, Skill
+from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
-                                     LanguageAliasFactory, LanguageFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
@@ -92,8 +91,6 @@ class UserProfileTests(TestCase):
         group_2 = GroupFactory.create()
         skill_1 = SkillFactory.create()
         skill_2 = SkillFactory.create()
-        language_1 = LanguageFactory.create()
-        language_2 = LanguageFactory.create()
         user = UserFactory.create(userprofile={'city': 'athens',
                                                'region': 'attika',
                                                'allows_community_sites': False,
@@ -106,8 +103,6 @@ class UserProfileTests(TestCase):
         group_2.add_member(profile)
         profile.skills.add(skill_1)
         profile.skills.add(skill_2)
-        profile.languages.add(language_1)
-        profile.languages.add(language_2)
 
         result = UserProfile.extract_document(user.userprofile.id)
         ok_(isinstance(result, dict))
@@ -124,7 +119,6 @@ class UserProfileTests(TestCase):
         eq_(result['has_photo'], False)
         eq_(result['groups'], [group_1.name, group_2.name])
         eq_(result['skills'], [skill_1.name, skill_2.name])
-        eq_(result['languages'], [language_1.name, language_2.name])
 
     def test_get_mapping(self):
         ok_(UserProfile.get_mapping())
@@ -387,20 +381,6 @@ class UserProfileTests(TestCase):
         ok_(user.userprofile.groups.filter(name='bar').exists())
         eq_(user.userprofile.groups.count(), 1)
 
-    def test_set_membership_language_matches_alias(self):
-        group_1 = LanguageFactory.create(name='foo')
-        group_2 = LanguageFactory.create(name='lo')
-        LanguageAliasFactory.create(alias=group_2, name='bar')
-        user = UserFactory.create()
-        user.userprofile.set_membership(Language, ['foo', 'bar'])
-        eq_(set(user.userprofile.languages.all()), set([group_1, group_2]))
-
-    def test_set_membership_language_new_group(self):
-        user = UserFactory.create()
-        user.userprofile.set_membership(Language, ['foo', 'bar'])
-        ok_(user.userprofile.languages.filter(name='foo').exists())
-        ok_(user.userprofile.languages.filter(name='bar').exists())
-
     def test_set_membership_skill_matches_alias(self):
         group_1 = SkillFactory.create(name='foo')
         group_2 = SkillFactory.create(name='lo')
@@ -535,6 +515,17 @@ class UserProfileTests(TestCase):
         mock_lookup_user.side_effect = SomeException
         with self.assertRaises(SomeException):
             profile.lookup_basket_token()
+
+
+class LanguageTests(TestCase):
+
+    def test_language_public_mozillians(self):
+        profile = UserFactory.create().userprofile
+        profile.set_instance_privacy_level(PUBLIC)
+        profile.language_set.create(code='en')
+        eq_(profile.languages.count(), 0)
+        profile.set_instance_privacy_level(MOZILLIANS)
+        eq_(profile.languages.count(), 1)
 
 
 class CalculatePhotoFilenameTests(TestCase):
