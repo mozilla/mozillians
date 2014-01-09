@@ -3,9 +3,12 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from autoslug.fields import AutoSlugField
+from funfactory.urlresolvers import reverse
+from funfactory.utils import absolutify
 from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.helpers import slugify
+from mozillians.groups.tasks import email_membership_change
 from mozillians.users.tasks import update_basket_task
 
 
@@ -44,8 +47,8 @@ class GroupBase(models.Model):
 
     def user_can_leave(self, userprofile):
         return (
-            # some groups don't allow leaving (but superuser can anyway)
-            (getattr(self, 'members_can_leave', True) or userprofile.user.is_superuser)
+            # some groups don't allow leaving
+            getattr(self, 'members_can_leave', True)
             and
             # curators cannot leave their own groups
             getattr(self, 'curator', None) != userprofile
@@ -57,9 +60,8 @@ class GroupBase(models.Model):
 
     def user_can_join(self, userprofile):
         return (
-            # some groups don't allow (but superuser can join anyway)
-            (getattr(self, 'accepting_new_members', 'yes') != 'no'
-             or userprofile.user.is_superuser)
+            # some groups don't allow
+            (getattr(self, 'accepting_new_members', 'yes') != 'no')
             and
             # only makes sense to join if not already a member (full or pending)
             not (self.has_member(userprofile=userprofile)
@@ -163,8 +165,14 @@ class Group(GroupBase):
     functional_area = models.BooleanField(default=False)
     visible = models.BooleanField(
         default=True,
-        help_text='Whether group is shown on the UI (in group lists, search, etc). Mainly '
-                  'intended to keep system groups like "staff" from cluttering up the interface.'
+        help_text=_lazy(u'Whether group is shown on the UI (in group lists, search, etc). Mainly '
+                        u'intended to keep system groups like "staff" from cluttering up the '
+                        u'interface.')
+    )
+    max_reminder = models.IntegerField(
+        default=0,
+        help_text=_lazy(u'The max PK of pending membership requests the last time we sent the '
+                        u'curator a reminder')
     )
 
     @classmethod
@@ -194,6 +202,9 @@ class Group(GroupBase):
         results = results.filter(visible=True)
         return results
 
+    def get_absolute_url(self):
+        return absolutify(reverse('groups:show_group', args=[self.url]))
+
     def add_member(self, userprofile, status=GroupMembership.MEMBER):
         """
         Add a user to this group. Optionally specify status other than member.
@@ -208,18 +219,29 @@ class Group(GroupBase):
         membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                                     group=self,
                                                                     defaults=defaults)
-        if created and status == GroupMembership.MEMBER:
-            # Joined
-            update_basket_task.delay(userprofile.id)
+        if created:
+            if status == GroupMembership.MEMBER:
+                # Joined
+                update_basket_task.delay(userprofile.id)
         elif not created and membership.status != status:
             # Status changed
+            old_status = membership.status
             membership.status = status
             membership.save()
             update_basket_task.delay(userprofile.id)
+            if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
+                # Request accepted
+                email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
 
-    def remove_member(self, userprofile):
-        GroupMembership.objects.filter(group=self, userprofile=userprofile).delete()
+    def remove_member(self, userprofile, send_email=True):
+        membership = GroupMembership.objects.get(group=self, userprofile=userprofile)
+        old_status = membership.status
+        membership.delete()
         update_basket_task.delay(userprofile.id)
+        if old_status == GroupMembership.PENDING and send_email:
+            # Request denied
+            email_membership_change.delay(self.pk, userprofile.user.pk,
+                                          old_status, None)
 
     def has_member(self, userprofile):
         """

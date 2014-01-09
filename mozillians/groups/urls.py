@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias, Language
 
@@ -30,7 +30,7 @@ urlpatterns = patterns(
     url('^languages/search/$', 'views.search',
         dict(searched_object=Language), name='search_languages'),
 
-    url('^group/(?P<group_pk>\d+)/join/(?P<user_pk>\d+)/$',
+    url('^group/(?P<group_pk>\d+)/join/$',
         'views.join_group', name='join_group'),
     url('^group/(?P<group_pk>\d+)/remove/(?P<user_pk>\d+)/$',
         'views.remove_member', name='remove_member'),

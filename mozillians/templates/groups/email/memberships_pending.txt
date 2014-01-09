@@ -1,0 +1,8 @@
+{% trans name=group.curator.full_name %}Hi {{ name }}, {% endtrans %}
+
+
+{% trans name=group.name %}There are {{ count }} outstanding requests to join your group "{{ name }}".{% endtrans %}
+
+{% trans %}View requests here:{% endtrans %}
+
+{{ group.get_absolute_url() }}

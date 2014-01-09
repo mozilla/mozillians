@@ -557,8 +557,7 @@ class ToggleGroupSubscriptionTests(TestCase):
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         self.join_url = reverse('groups:join_group', prefix='/en-US/',
-                                kwargs={'group_pk': self.group.pk,
-                                        'user_pk': self.user.userprofile.pk})
+                                kwargs={'group_pk': self.group.pk})
         self.leave_url = reverse('groups:remove_member', prefix='/en-US/',
                                  kwargs={'group_pk': self.group.pk,
                                          'user_pk': self.user.userprofile.pk})
@@ -582,7 +581,7 @@ class ToggleGroupSubscriptionTests(TestCase):
 
     def test_nonexistant_group(self):
         url = reverse('groups:join_group', prefix='/en-US/',
-                      kwargs={'group_pk': 32097, 'user_pk': self.user.userprofile.pk})
+                      kwargs={'group_pk': 32097})
         with self.login(self.user) as client:
             response = client.post(url, follow=True)
         eq_(response.status_code, 404)
@@ -591,7 +590,7 @@ class ToggleGroupSubscriptionTests(TestCase):
     def test_unvouched(self):
         user = UserFactory.create()
         join_url = reverse('groups:join_group', prefix='/en-US/',
-                           kwargs={'group_pk': self.group.pk, 'user_pk': user.userprofile.pk})
+                           kwargs={'group_pk': self.group.pk})
         with self.login(user) as client:
             client.post(join_url, follow=True)
 
@@ -603,7 +602,7 @@ class ToggleGroupSubscriptionTests(TestCase):
     def test_unjoinable_group(self):
         group = GroupFactory.create(accepting_new_members='no')
         join_url = reverse('groups:join_group', prefix='/en-US/',
-                           kwargs={'group_pk': group.pk, 'user_pk': self.user.userprofile.pk})
+                           kwargs={'group_pk': group.pk})
         with self.login(self.user) as client:
             client.post(join_url, follow=True)
         group = Group.objects.get(id=group.id)

@@ -108,7 +108,7 @@
     </article><!-- .group-meta -->
 
     {% if show_join_button %}
-        <form action="{{ url('groups:join_group', group.pk, user.userprofile.pk) }}"
+        <form action="{{ url('groups:join_group', group.pk) }}"
               id="join-group" method="post">
           {{ csrf() }}
         <button class="button button{{ ('-negative' if in_group) }}">

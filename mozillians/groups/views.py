@@ -174,7 +174,8 @@ def remove_member(request, group_pk, user_pk):
         return redirect('groups:show_group', url=group.url)
 
     if request.method == 'POST':
-        group.remove_member(profile_to_remove)
+        group.remove_member(profile_to_remove,
+                            send_email=(profile_to_remove != this_userprofile))
         if this_userprofile == profile_to_remove:
             messages.info(request, _('You have been removed from this group.'))
         else:
@@ -217,11 +218,10 @@ def edit(request, url, alias_model, template):
 
 
 @require_POST
-def join_group(request, group_pk, user_pk):
+def join_group(request, group_pk):
     """User request to join group."""
     group = get_object_or_404(Group, pk=group_pk)
-    profile_to_add = get_object_or_404(UserProfile, pk=user_pk)
-    is_superuser = request.user.is_superuser
+    profile_to_add = request.user.userprofile
 
     # TODO: this duplicates some of the logic in Group.user_can_join(), but we
     # want to give the user a message that's specific to the reason they can't join.
@@ -231,10 +231,10 @@ def join_group(request, group_pk, user_pk):
         messages.error(request, _('You are already in this group.'))
     elif group.has_pending_member(profile_to_add):
         messages.error(request, _('Your request to join this group is still pending.'))
-    elif group.accepting_new_members == 'no' and not is_superuser:
+    elif group.accepting_new_members == 'no':
         messages.error(request, _('This group is not accepting requests to join.'))
     else:
-        if group.accepting_new_members == 'yes' or is_superuser:
+        if group.accepting_new_members == 'yes':
             group.add_member(profile_to_add)
             messages.info(request, _('You have been added to this group.'))
         elif group.accepting_new_members == 'by_request':
