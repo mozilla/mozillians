@@ -10,13 +10,7 @@
 {% endblock mosaic %}
 
 {% block search %}
-  {% if user.is_authenticated() %}
-    <form class="navbar-search"
-        action="{{ url('phonebook:search') }}" method="GET">
-      <input type="text" name="q" class="search-query"
-          placeholder="{{ _('Search for people, groups and more') }}">
-    </form>
-  {% endif %}
+  {# Don't display search in navbar on home.html #}
 {% endblock %}
 
 {% block content %}
@@ -25,8 +19,8 @@
       <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
       <hr>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
-          <input autofocus type="text" name="q" class="search-query"
-          placeholder="{{ _('Search for people, groups and more') }}">
+          <input type="text" name="q" class="search-query"
+                 placeholder="{{ _('Search for people, groups and more') }}">
        </form>
     </hgroup>
 
@@ -161,7 +155,7 @@
     <article id="content-info">
       <h1>{{ _('Hello!') }}</h1>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
-        <input autofocus type="text" name="q" class="search-query"
+        <input type="text" name="q" class="search-query"
                placeholder="{{ _('Search for people, groups and more') }}">
         <small>{{ _('Examples:') }}
           {% trans search_url=url('phonebook:search') %}

@@ -73,8 +73,8 @@
                 {% block search %}
                   <form class="navbar-search"
                       action="{{ url('phonebook:search') }}" method="GET">
-                    <input autofocus type="text" name="q" class="search-query"
-                        placeholder="{{ _('Search for people, groups and more') }}">
+                    <input type="text" name="q" class="search-query"
+                           placeholder="{{ _('Search for people, groups and more') }}">
                   </form>
                 {% endblock %}
                 {% if user.is_authenticated() %}

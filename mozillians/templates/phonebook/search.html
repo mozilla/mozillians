@@ -29,8 +29,7 @@
   <h1>{{ _('Search') }}</h1>
   <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
     {{ field_with_attrs(search_form.q,
-                        placeholder=_('Name, IRC Nick, Email or Location'),
-                        autofocus='autofocus') }}
+                        placeholder=_('Search for people, groups and more')) }}
 
     {{ search_form.limit }}
     <button type="submit">
