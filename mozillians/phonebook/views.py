@@ -118,11 +118,19 @@ def view_profile(request, username):
         if (not profile.is_vouched
             and request.user.is_authenticated()
             and request.user.userprofile.is_vouched):
-            data['vouch_form'] = (
-                forms.VouchForm(initial={'vouchee': profile.pk}))
+                data['vouch_form'] = (
+                    forms.VouchForm(initial={'vouchee': profile.pk}))
 
     data['shown_user'] = profile.user
     data['profile'] = profile
+    data['groups'] = profile.get_annotated_groups()
+
+    # Only show pending groups if user is looking at their own profile,
+    # or current user is a superuser
+    if not (request.user.is_authenticated()
+            and (request.user.username == username or request.user.is_superuser)):
+        data['groups'] = [grp for grp in data['groups'] if not grp.pending]
+
     return render(request, 'phonebook/profile.html', data)
 
 
@@ -133,7 +141,7 @@ def edit_profile(request):
     # Don't user request.user
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
-    user_groups = stringify_groups(profile.groups.all().order_by('name'))
+    user_groups = profile.groups.all().order_by('name')
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
     user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
@@ -147,7 +155,7 @@ def edit_profile(request):
 
     profile_form = form(request.POST or None, request.FILES or None,
                         instance=profile, locale=request.locale,
-                        initial=dict(groups=user_groups, skills=user_skills,
+                        initial=dict(skills=user_skills,
                                      languages=user_languages))
 
     email_form = forms.EmailForm(request.POST or None,

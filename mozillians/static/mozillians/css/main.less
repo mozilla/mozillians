@@ -6,7 +6,7 @@
 // =====================
 // Imports
 // Fonts
-// Variables
+// Colors
 // Mixins
 // Generic
 // Navigation
@@ -28,6 +28,7 @@
 @import "sandstone/sandstone-resp.less";
 @import "mosaic.less";
 @import "font-awesome.less";
+@import "less-prefixer/prefixer.less";
 
 /* Fonts
 ==================== */
@@ -52,7 +53,7 @@
     font-style: italic;
 }
 
-/* Variables
+/* Colors
 ==================== */
 @white:       #FFFFFF;
 @black:       #000000;
@@ -60,15 +61,8 @@
 @gray:        #666666;
 @grayLight:   #F5F5F5;
 @grayLighter: #CCCCCC;
-
-/* Mixins
-==================== */
-.transform(@string){
-    -webkit-transform:  @string;
-    -moz-transform:     @string;
-    -ms-transform:      @string;
-    -o-transform:       @string;
-}
+@blueDark:    #277AC1;
+@blueLight:   #43A6E2;
 
 #gradient {
     .vertical-transparent-fade(@direction, @startColor, @endColor) {
@@ -114,6 +108,13 @@
 
 /* Generic
 ==================== */
+
+.left{float:left;}
+.right{float:right;}
+.html-rtl .left{float:right}
+.html-rtl .right{float:left;}
+.clear{clear:both;}
+
 body {
     #content-wrapper { background: @white; }
     &.loggedin {
@@ -367,7 +368,7 @@ dl, dd {
 }
 
 #nav-background {
-    #gradient .vertical(#4ba5dd, #3582bf);
+    .gradient(top, #4ba5dd, #3582bf);
 }
 
 nav {
@@ -429,7 +430,7 @@ nav {
             padding: 0 10px 0 3px;
             .border-radius(3px 0 0 3px);
             margin-right: 20px;
-            #gradient .vertical(#43a6e2, #287cc2);
+            .gradient(#43a6e2, #43a6e2, #287cc2);
             &:after {
                 content: '';
                 position: absolute;
@@ -593,6 +594,17 @@ nav {
                 z-index: -1;
             }
         }
+    }
+}
+
+.large.button{
+    padding:5px 1em;
+    margin-top:0.3em;
+    letter-spacing: normal;
+    font-size: 125%;
+    line-height:1.6em;
+    @media (max-width: @breakMobileLandscape) {
+        font-size: 100%;
     }
 }
 
@@ -1250,251 +1262,252 @@ body#profile {
     }
 }
 
+/* Fieldsets */
+form {
+    fieldset {
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid lighten(@black,90%);
+        position: relative;
+        input, textarea {
+            border: 1px solid lighten(@black,90%);
+        }
+
+        label {
+            margin-right: 8px;
+            float: left;
+            font-weight: bold;
+        }
+        > label {
+            min-width: 120px;
+            @media (max-width: @breakMobileLandscape) {
+                max-width: 100%;
+                float: none;
+            }
+        }
+        textarea {
+            @media (max-width: @breakMobileLandscape) {
+                width: 200px;
+            }
+        }
+        legend {
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 36px;
+        }
+        .add {
+            display: block;
+            margin: 10px 0 0 130px;
+            cursor: pointer;
+            width: 100px;
+            @media (max-width: @breakTablet) {
+            margin: 10px 0 0 0;
+            }
+        }
+        .delete {
+            .button;
+            .button-negative;
+            opacity: 0.2;
+        }
+        .acknowledge {
+            float:left;
+        }
+        &#photo {
+            position: relative;
+            height: 150px;
+            @media (max-width: @breakMobileLandscape) {
+                height: 200px;
+            }
+            .profile-photo {
+                .rounded-image;
+                width: 70px;
+                height: 70px;
+                margin-left: 120px;
+                @media (max-width: @breakMobileLandscape) {
+                    margin-left: 0;
+                    top: 30px;
+                }
+            }
+            label {
+               @media (max-width: @breakMobileLandscape) {
+                float: left;
+               }
+            }
+            input {
+                margin-top: 90px;
+                @media (max-width: @breakMobileLandscape) {
+                    margin-left: 0;
+                    margin-top: 100px;
+                }
+            }
+        }
+        .privacy-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 190px;
+            text-align: right;
+            label { margin-top: 3px; }
+            label.required:after {  // No need to mark the privacy controls required, they always have some value.
+              content: '';
+            }
+            @media (max-width: @breakTablet) {
+                position: relative;
+                top: auto;
+                right: auto;
+                padding-top: 25px;
+                label { margin: 0 8px 0 0; }
+            }
+        }
+        &#edit_controls {
+            border: none;
+            button, .cancel {
+                .button;
+                margin-right: 15px;
+            }
+            .cancel {
+                .button-sand;
+            }
+        }
+        &#groups, &#skills, &#languages {
+            .help_text {
+                label {
+                    font-style: italic;
+                    font-weight: normal;
+                }
+                @media (max-width: @breakMobileLandscape) {
+                    padding-bottom: 25px;
+                }
+            }
+        }
+        &#delete {
+            margin-top: 50px;
+            border: none;
+        }
+        #id_photo_delete {
+            margin: 10px 0 0 130px;
+            @media (max-width: @breakMobileLandscape) {
+                margin: 10px 0 0 0;
+            }
+            input { margin: 0; }
+            label {
+                float: none;
+            }
+        }
+        &#accounts {
+            .externalaccount-fieldrow {
+                margin: 0 0 25px 130px;
+                @media (max-width: @breakTablet) {
+                    margin: 0;
+                    padding: 25px 0;
+                }
+                input, select {
+                    float: left;
+                }
+                input { margin-right: 8px; }
+                .error-message { margin: 0; }
+            }
+            .privacy-controls {
+                position: relative;
+                float: right;
+                .clearfix;
+                @media (max-width: @breakTablet) {
+                    float: none;
+                }
+            }
+        }
+        &#services, &#invites {
+            h5 {
+                margin-top: 25px;
+                font-weight: bold;
+            }
+            .control-group { margin: 15px 0; }
+        }
+        &#privacy-verify {
+            .error {
+                color: #CD0000;
+                text-transform: none;
+                font-size: 14px;
+                a {
+                    color: #CD0000;
+                    text-decoration: underline;
+                }
+            }
+        }
+        &#shirts {
+            .tshirt-option { float: left; }
+            .sizing label {
+                float: none;
+                font-weight: normal;
+            }
+            .straightcut, .fitted {
+                .clearfix;
+                margin-top: 30px;
+            }
+            .tshirt-info {
+                cursor: pointer;
+                position: relative;
+                display: inline;
+                span {
+                    padding: 5px 15px;
+                    opacity: 0;
+                    visibility: hidden;
+                    width: 200px;
+                    z-index: 10;
+                    position: absolute;
+                    top: -5px;
+                    left: 0px;
+                    font-size: 14px;
+                    background: @white;
+                    .border-radius(3px);
+                    .box-shadow(2px 2px 2px @gray);
+                    border: 1px solid lighten(@black,90%);
+                    text-align: center;
+                    -webkit-transition-property:opacity, margin-left, visibility, margin-left;
+                    -webkit-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -webkit-transition-timing-function: ease-in-out;
+                    -moz-transition-property:opacity, margin-left, visibility, margin-left;
+                    -moz-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -moz-transition-timing-function: ease-in-out;
+                    -o-transition-property:opacity, margin-left, visibility, margin-left;
+                    -o-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -o-transition-timing-function: ease-in-out;
+                    transition-property:opacity, margin-left, visibility, margin-left;
+                    transition-duration:0.4s 0.3s;
+                    transition-timing-function: ease-in-out;
+
+                }
+                &.active span {
+                    opacity: 1;
+                    visibility: visible;
+                    overflow: visible;
+                    margin-left: 30px;
+                }
+            }
+        }
+        .under-input-field {
+            padding-left: 130px;
+            @media (max-width: @breakMobileLandscape) {
+                padding-left: 0px;
+            }
+        }
+    }
+}
+
 /* Profile create/edit
 ========================= */
 body#edit-profile {
     section {
         margin-bottom: 25px;
     }
-    form {
-        fieldset {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid lighten(@black,90%);
-            position: relative;
-            input, textarea {
-                border: 1px solid lighten(@black,90%);
-            }
-
-            label {
-                margin-right: 8px;
-                float: left;
-                font-weight: bold;
-                span {
-                    color: @linkRed;
-                }
-            }
-            > label {
-                min-width: 120px;
-                @media (max-width: @breakMobileLandscape) {
-                    max-width: 100%;
-                    float: none;
-                }
-            }
-            textarea {
-                @media (max-width: @breakMobileLandscape) {
-                    width: 200px;
-                }
-            }
-            legend {
-                font-size: 24px;
-                font-weight: bold;
-                line-height: 36px;
-            }
-            .add {
-                display: block;
-                margin: 10px 0 0 130px;
-                cursor: pointer;
-                width: 100px;
-                @media (max-width: @breakTablet) {
-                margin: 10px 0 0 0;
-                }
-            }
-            .delete {
-                .button;
-                .button-negative;
-                opacity: 0.2;
-            }
-            .acknowledge {
-                float:left;
-            }
-            &#photo {
-                position: relative;
-                height: 150px;
-                @media (max-width: @breakMobileLandscape) {
-                    height: 200px;
-                }
-                .profile-photo {
-                    .rounded-image;
-                    width: 70px;
-                    height: 70px;
-                    margin-left: 120px;
-                    @media (max-width: @breakMobileLandscape) {
-                        margin-left: 0;
-                        top: 30px;
-                    }
-                }
-                label {
-                   @media (max-width: @breakMobileLandscape) {
-                    float: left;
-                   }
-                }
-                input {
-                    margin-top: 90px;
-                    @media (max-width: @breakMobileLandscape) {
-                        margin-left: 0;
-                        margin-top: 100px;
-                    }
-                }
-            }
-            .privacy-controls {
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 190px;
-                text-align: right;
-                label { margin-top: 3px; }
-                label.required:after {  // No need to mark the privacy controls required, they always have some value.
-                  content: '';
-                }
-                @media (max-width: @breakTablet) {
-                    position: relative;
-                    top: auto;
-                    right: auto;
-                    padding-top: 25px;
-                    label { margin: 0 8px 0 0; }
-                }
-            }
-            &#edit_controls {
-                border: none;
-                button, .cancel {
-                    .button;
-                    margin-right: 15px;
-                }
-                .cancel {
-                    .button-sand;
-                }
-            }
-            &#groups, &#skills, &#languages {
-                .help_text {
-                    label {
-                        font-style: italic;
-                        font-weight: normal;
-                    }
-                    @media (max-width: @breakMobileLandscape) {
-                        padding-bottom: 25px;
-                    }
-                }
-            }
-            &#delete {
-                margin-top: 50px;
-                border: none;
-            }
-            #id_photo_delete {
-                margin: 10px 0 0 130px;
-                @media (max-width: @breakMobileLandscape) {
-                    margin: 10px 0 0 0;
-                }
-                input { margin: 0; }
-                label {
-                    float: none;
-                }
-            }
-            &#accounts {
-                .externalaccount-fieldrow {
-                    margin: 0 0 25px 130px;
-                    @media (max-width: @breakTablet) {
-                        margin: 0;
-                        padding: 25px 0;
-                    }
-                    input, select {
-                        float: left;
-                    }
-                    input { margin-right: 8px; }
-                    .error-message { margin: 0; }
-                }
-                .privacy-controls {
-                    position: relative;
-                    float: right;
-                    .clearfix;
-                    @media (max-width: @breakTablet) {
-                        float: none;
-                    }
-                }
-            }
-            &#services, &#invites {
-                h5 {
-                    margin-top: 25px;
-                    font-weight: bold;
-                }
-                .control-group { margin: 15px 0; }
-            }
-            &#privacy-verify {
-                .error {
-                    color: #CD0000;
-                    text-transform: none;
-                    font-size: 14px;
-                    a {
-                        color: #CD0000;
-                        text-decoration: underline;
-                    }
-                }
-            }
-            &#shirts {
-                .tshirt-option { float: left; }
-                .sizing label {
-                    float: none;
-                    font-weight: normal;
-                }
-                .straightcut, .fitted {
-                    .clearfix;
-                    margin-top: 30px;
-                }
-                .tshirt-info {
-                    cursor: pointer;
-                    position: relative;
-                    display: inline;
-                    span {
-                        padding: 5px 15px;
-                        opacity: 0;
-                        visibility: hidden;
-                        width: 200px;
-                        z-index: 10;
-                        position: absolute;
-                        top: -5px;
-                        left: 0px;
-                        font-size: 14px;
-                        background: @white;
-                        .border-radius(3px);
-                        .box-shadow(2px 2px 2px @gray);
-                        border: 1px solid lighten(@black,90%);
-                        text-align: center;
-                        -webkit-transition-property:opacity, margin-left, visibility, margin-left;
-                        -webkit-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
-                        -webkit-transition-timing-function: ease-in-out;
-                        -moz-transition-property:opacity, margin-left, visibility, margin-left;
-                        -moz-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
-                        -moz-transition-timing-function: ease-in-out;
-                        -o-transition-property:opacity, margin-left, visibility, margin-left;
-                        -o-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
-                        -o-transition-timing-function: ease-in-out;
-                        transition-property:opacity, margin-left, visibility, margin-left;
-                        transition-duration:0.4s 0.3s;
-                        transition-timing-function: ease-in-out;
-
-                    }
-                    &.active span {
-                        opacity: 1;
-                        visibility: visible;
-                        overflow: visible;
-                        margin-left: 30px;
-                    }
-                }
-            }
-            .under-input-field {
-                padding-left: 130px;
-                @media (max-width: @breakMobileLandscape) {
-                    padding-left: 0px;
-                }
-            }
-        }
-    }
+    
 }
 
 /* Generic Groups, Functional Areas and Search Results
 ====================================================== */
 body.search-page {
     .result {
+        position:relative;
         float: left;
         margin-left: 20px;
         height: 130px;
@@ -1504,10 +1517,9 @@ body.search-page {
         @media (max-width: @breakMobileLandscape) {
             width: 100%;
         }
-        a {
+        .card {
             margin-bottom: 15px;
-            .button;
-            .button-sand;
+            .well;
             padding: 8px 10px 5px;
             width: 278px;
             height: 100px;
@@ -1643,6 +1655,43 @@ body#group-show {
     button {
         .button;
     }
+    .button.remove{
+        position: absolute;
+        right: -10px;
+        top: -10px;
+        height: 21px;
+        line-height: 20px;
+        padding: 0 0 0 0.2em;
+        border-radius: 10px;
+        span{
+            font-weight:normal;
+        }
+    }
+    [class^="status"]{
+        position: absolute;
+        bottom: 1em;
+        right: 0;
+        line-height: 1em;
+        padding: 5px 16px;
+        margin: 1px 0;
+        border-radius: 4px 0;
+        color: #FFF;
+        border-width: 0 1px 1px 0;
+        border-style: solid;
+        .box-shadow(inset 0px 2px 6px rgba(0, 0, 0, 0.26));
+    }
+    [class$="member"]{
+        .gradient(#277AC1, #277AC1, #6CA2D3);
+        border-color: #88A2C4;
+    }
+    [class$="pending"]{
+        .gradient(#CCC, #BEBEBE, #D1D1D1);
+        border-color: #C5C5C5;
+    }
+    [class$="pending"]:hover{
+        .gradient(#277AC1, #277AC1, @blueDark);
+        .box-shadow(inset 0px 12px 24px 2px @blueLight);
+    }
     .group-meta {
         .well;
         span {
@@ -1669,7 +1718,7 @@ body#group-show {
                 width: 100%;
             }
         }
-        .steward {
+        .curator {
             .span(5);
             @media (max-width: @breakMobileLandscape) {
                 width: 100%;

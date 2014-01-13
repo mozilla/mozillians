@@ -76,9 +76,9 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-  append=['django_browserid.context_processors.browserid',
-          'mozillians.common.context_processors.current_year',
-          'mozillians.common.context_processors.canonical_path'])
+    append=['django_browserid.context_processors.browserid',
+            'mozillians.common.context_processors.current_year',
+            'mozillians.common.context_processors.canonical_path'])
 
 
 JINGO_EXCLUDE_APPS = [

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias, Language
 
@@ -10,11 +10,12 @@ urlpatterns = patterns(
     url('^functional-areas/$', 'views.index_functional_areas',
         name='index_functional_areas'),
 
+    url('^group_add/$', 'views.group_add_edit', name='group_add'),
+    url('^group_edit/(?P<url>[-\'\w]+)/$', 'views.group_add_edit', name='group_edit'),
+
     url('^group/(?P<url>[-\w]+)/$', 'views.show',
         {'alias_model': GroupAlias, 'template': 'groups/group.html'},
         name='show_group'),
-    url('^group/(?P<url>[-\w]+)/toggle/$', 'views.toggle_group_subscription',
-        name='toggle_group_subscription'),
 
     url('^skill/(?P<url>[-\w]+)/$', 'views.show',
         {'alias_model': SkillAlias, 'template': 'groups/skill.html'},
@@ -28,4 +29,11 @@ urlpatterns = patterns(
         dict(searched_object=Skill), name='search_skills'),
     url('^languages/search/$', 'views.search',
         dict(searched_object=Language), name='search_languages'),
+
+    url('^group/(?P<group_pk>\d+)/join/$',
+        'views.join_group', name='join_group'),
+    url('^group/(?P<group_pk>\d+)/remove/(?P<user_pk>\d+)/$',
+        'views.remove_member', name='remove_member'),
+    url('^group/(?P<group_pk>\d+)/confirm/(?P<user_pk>\d+)/$',
+        'views.confirm_member', name='confirm_member'),
 )

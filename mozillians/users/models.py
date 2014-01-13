@@ -22,8 +22,9 @@ from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
-from mozillians.groups.models import (Group, GroupAlias, Skill, SkillAlias,
-                                      Language, LanguageAlias)
+from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
+                                      Language, LanguageAlias,
+                                      Skill, SkillAlias)
 from mozillians.phonebook.validators import validate_twitter, validate_website
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -153,7 +154,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                    on_delete=models.SET_NULL, blank=True,
                                    related_name='vouchees')
     date_vouched = models.DateTimeField(null=True, blank=True, default=None)
-    groups = models.ManyToManyField(Group, blank=True, related_name='members')
+    groups = models.ManyToManyField(Group, blank=True, related_name='members',
+                                    through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
     languages = models.ManyToManyField(Language, blank=True,
                                        related_name='members')
@@ -439,10 +441,14 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             m2mfield = self.languages
             alias_model = LanguageAlias
 
-        # Remove any non-system groups that weren't supplied in this list.
-        m2mfield.remove(*[g for g in m2mfield.all()
-                          if g.name not in membership_list
-                          and not getattr(g, 'system', False)])
+        # Remove any visible groups that weren't supplied in this list.
+        if model is Group:
+            GroupMembership.objects.filter(userprofile=self, group__visible=True)\
+                .exclude(group__name__in=membership_list).delete()
+        else:
+            m2mfield.remove(*[g for g in m2mfield.all()
+                              if g.name not in membership_list
+                              and g.is_visible])
 
         # Add/create the rest of the groups
         groups_to_add = []
@@ -452,10 +458,14 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             else:
                 group = model.objects.create(name=g)
 
-            if not getattr(group, 'system', False):
+            if group.is_visible:
                 groups_to_add.append(group)
 
-        m2mfield.add(*groups_to_add)
+        if model is Group:
+            for group in groups_to_add:
+                group.add_member(self)
+        else:
+            m2mfield.add(*groups_to_add)
 
     def get_photo_thumbnail(self, geometry='160x160', **kwargs):
         if 'crop' not in kwargs:
@@ -498,12 +508,17 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def add_to_staff_group(self):
         """Keep users in the staff group if they're autovouchable."""
         email = self.user.email
-        staff, created = Group.objects.get_or_create(name='staff', system=True)
+        staff, created = Group.objects.get_or_create(
+            name='staff',
+            defaults=dict(visible=False,
+                          members_can_leave=False,
+                          accepting_new_members='no')
+        )
         if any(email.endswith('@' + x) for x in
                settings.AUTO_VOUCH_DOMAINS):
-            self.groups.add(staff)
+            staff.add_member(self)
         elif self.groups.filter(pk=staff.pk).exists():
-            self.groups.remove(staff)
+            staff.remove_member(self)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
@@ -531,6 +546,19 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 return None
             raise
         return result['token']
+
+    def get_annotated_groups(self):
+        """
+        Return a list of all the groups the user is a member of or pending
+        membership. The groups pending membership will have a .pending attribute
+        set to True, others will have it set False.
+        """
+        groups = []
+        for membership in GroupMembership.objects.filter(userprofile=self):
+            group = membership.group
+            group.pending = (membership.status == GroupMembership.PENDING)
+            groups.append(group)
+        return groups
 
     def save(self, *args, **kwargs):
         self._privacy_level = None

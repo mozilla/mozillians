@@ -13,7 +13,7 @@ from PIL import Image
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group, Skill, Language
+from mozillians.groups.models import Language, Skill
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
@@ -102,9 +102,6 @@ class ProfileForm(happyforms.ModelForm):
         label=_lazy(u'When did you get involved with Mozilla?'),
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
-    groups = forms.CharField(
-        label=_lazy(u'Start typing to add a group (example: Marketing, '
-                    u'Support, WebDev, Thunderbird)'), required=False)
     languages = forms.CharField(
         label=_lazy(u'Start typing to add a language you speak (example: '
                     u'English, French, German)'), required=False)
@@ -157,24 +154,6 @@ class ProfileForm(happyforms.ModelForm):
                 photo.size = cleaned_photo.tell()
         return photo
 
-    def clean_groups(self):
-        """Groups are saved in lowercase because it's easy and
-        consistent.
-
-        """
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['groups']):
-            raise forms.ValidationError(_(u'Groups can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
-        system_groups = [g.name for g in self.instance.groups.all()
-                         if g.system]
-        groups = self.cleaned_data['groups']
-        new_groups = filter(lambda x: x,
-                            map(lambda x: x.strip() or False,
-                                groups.lower().split(',')))
-
-        return system_groups + new_groups
-
     def clean_languages(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
                         self.cleaned_data['languages']):
@@ -199,7 +178,6 @@ class ProfileForm(happyforms.ModelForm):
 
     def save(self):
         """Save the data to profile."""
-        self.instance.set_membership(Group, self.cleaned_data['groups'])
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
         self.instance.set_membership(Language, self.cleaned_data['languages'])
         super(ProfileForm, self).save()

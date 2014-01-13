@@ -32,3 +32,6 @@
 [submodule "vendor-local/src/basket-client-submodule"]
 	path = vendor-local/src/basket-client-submodule
 	url = git://github.com/mozilla/basket-client.git
+[submodule "mozillians/static/mozillians/css/less-prefixer"]
+	path = mozillians/static/mozillians/css/less-prefixer
+	url = https://github.com/JoelSutherland/LESS-Prefixer.git

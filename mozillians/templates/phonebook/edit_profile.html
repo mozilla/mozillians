@@ -9,6 +9,13 @@
 {% endblock %}
 {% block body_id %}edit-profile{% endblock %}
 
+{% block extrahead %}
+  {% compress css %}
+    <link href="{{ static('mozillians/css/profile_edit.less') }}" type="text/less" rel="stylesheet" media="screen" />
+  {% endcompress %}
+  {{ profile_form.media.css }}
+{% endblock extrahead %}
+
 {% block content %}
   {% if profile_form.errors or user_form.errors or accounts_formset.errors  %}
       <div class="alert alert-error">
@@ -223,10 +230,23 @@
           or sub-community.
         {% endtrans %}
       </p>
-      {{ profile_form.groups }}
-      <div class="help_text">
-        {{ profile_form.groups.label_tag() }}
-      </div>
+      <p class="field_description">
+        {% trans browse=url('groups:index_groups') %}
+          To join a group, <a href="{{ browse }}">find the group's page</a>,
+          then click the Join Group button.
+        {% endtrans %}
+        {% trans %}
+          To leave a group, click its name below to go to its page, then click
+          the Leave Group button there.
+        {% endtrans %}
+      </p>
+      <ul class="tagit">
+        {% for group in user_groups %}
+          <li class="tagit-choice tagit-choice-read-only ui-corner-all ui-state-default">
+            <a href="{{ url('groups:show_group', group.url) }}"><span class="tagit-label">{{ group.name }}</span></a>
+          </li>
+        {% endfor %}
+      </ul>
       {{ privacy_field(profile_form.privacy_groups) }}
     </fieldset>
 
@@ -382,12 +402,11 @@
           </div>
         {% endif %}
         <div class="controls">
-          <label class="checkbox">
+          <label class="checkbox required">
             {{ profile_form.optin }}
           </label>
         </div>
-        <label{% if profile_form.optin.errors %} class="error"{% endif %}>
-          <span>*</span>
+        <label for="{{ profile_form.optin.id_for_label }}" {% if profile_form.optin.errors %}class="error"{% endif %}>
           {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
             I'm okay with you handling this info as you explain
             in <a href="{{ privacy_url }}">Mozilla's privacy
@@ -442,4 +461,5 @@
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
     <script src="{{ static('mozillians/js/tag-it-groups.js') }}"></script>
   {% endcompress %}
+  {{ profile_form.media.js }}
 {% endblock %}

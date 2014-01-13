@@ -30,8 +30,8 @@ class GroupResourceTests(TestCase):
         unvouched_user = UserFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
         group = Group.objects.get(name='staff')
-        group.members.add(unvouched_user.userprofile)
-        group.members.add(user.userprofile)
+        group.add_member(unvouched_user.userprofile)
+        group.add_member(user.userprofile)
 
         client = Client()
         response = client.get(self.resource_url, follow=True)

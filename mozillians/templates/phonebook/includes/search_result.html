@@ -1,6 +1,19 @@
 <div class="result">
-  <a class="js-btn" title="{{ profile.display_name }}"
-     href="{{ url('phonebook:profile_view', profile.user.username) }}">
+  {% if group and (is_curator or request.user.is_superuser) and (request.user != profile.user) %}
+    <form action="{{ url('groups:remove_member', group_pk=group.pk, user_pk=profile.pk) }}" method="GET">
+      {{ csrf() }}
+      <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
+    </form>
+    {% if profile.pending %}
+      <form action="{{ url('groups:confirm_member', group_pk=group.pk, user_pk=profile.pk) }}" method="POST">
+        {{ csrf() }}
+        <button type="submit" class="status-pending">{{ _('Requested') }}</span></button>
+      </form>
+    {% endif %}
+  {% elif request.user.userprofile == profile and profile.pending %}
+    <div class="status-pending">{{ _('Requested') }}</div>
+  {% endif %}
+  <div class="card">
     <div class="avatar">
       <span>
         <img class="profile-photo"
@@ -12,20 +25,26 @@
       <ul>
         <li>
           <h2>
-            {{ profile.display_name|truncate(20, True) }}
+            <a title="{{ profile.display_name }}" href="{{ url('phonebook:profile_view', profile.user.username) }}">
+              {{ profile.display_name|truncate(20, True) }}
+            </a>
           </h2>
         </li>
         {% if profile.email %}
           <li>
+            <a title="{{ profile.display_name }}" href="{{ profile.email }}">
             <i class="icon-envelope"></i> {{ profile.email|truncate(20, True) }}
+            </a>
           </li>
         {% endif %}
         {% if profile.user.username %}
           <li>
-            <i class="icon-user"></i> {{ profile.user.username|truncate(20, True) }}
+            <a title="{{ profile.display_name }}" href="{{ url('phonebook:profile_view', profile.user.username) }}">
+              <i class="icon-user"></i> {{ profile.user.username|truncate(20, True) }}
+            </a>
           </li>
         {% endif %}
       </ul>
     </div>
-  </a>
+  </div>
 </div>
