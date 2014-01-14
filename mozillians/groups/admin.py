@@ -150,12 +150,17 @@ class GroupEditAdminForm(GroupBaseEditAdminForm):
         model = Group
 
 
+class GroupMemberInline(admin.TabularInline):
+    model = GroupMembership
+    form = autocomplete_light.modelform_factory(GroupMembership)
+
+
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
     add_form = autocomplete_light.modelform_factory(Group,
                                                     form=GroupAddAdminForm)
-    inlines = [GroupAliasInline]
+    inlines = [GroupAliasInline, GroupMemberInline]
     list_display = ['name', 'curator', 'wiki', 'website', 'irc_channel',
                     'functional_area', 'accepting_new_members', 'members_can_leave', 'visible',
                     'member_count', 'vouched_member_count']
@@ -164,6 +169,12 @@ class GroupAdmin(GroupBaseAdmin):
 
 class GroupMembershipAdmin(admin.ModelAdmin):
     list_display = ['group', 'userprofile']
+    search_fields = ['group__name', 'group__url', 'group__description',
+                     'group__aliases__name', 'group__aliases__url',
+                     'userprofile__full_name', 'userprofile__ircname',
+                     'userprofile__region', 'userprofile__city', 'userprofile__country',
+                     'userprofile__user__username', 'userprofile__user__email'
+                     ]
 
 
 class SkillAliasInline(admin.StackedInline):
