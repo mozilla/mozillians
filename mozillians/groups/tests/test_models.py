@@ -87,6 +87,69 @@ class GroupBaseTests(TestCase):
         skill.members.add(user.userprofile)
         ok_(skill.has_member(userprofile=user.userprofile))
 
+    def test_can_join(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        ok_(group.user_can_join(user.userprofile))
+
+    def test_can_join_by_request(self):
+        group = GroupFactory.create(accepting_new_members='by_request')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        ok_(group.user_can_join(user.userprofile))
+
+    def test_unvouched_cant_join(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': False})
+        ok_(not group.user_can_join(user.userprofile))
+
+    def test_member_cant_join(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.add_member(user.userprofile)
+        ok_(not group.user_can_join(user.userprofile))
+
+    def test_pending_cant_join(self):
+        group = GroupFactory.create(accepting_new_members='yes')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.add_member(user.userprofile, GroupMembership.PENDING)
+        ok_(not group.user_can_join(user.userprofile))
+
+    def test_cant_join_antisocial_group(self):
+        group = GroupFactory.create(accepting_new_members='no')
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        ok_(not group.user_can_join(user.userprofile))
+
+    def test_member_can_leave(self):
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.add_member(user.userprofile)
+        ok_(group.user_can_leave(user.userprofile))
+
+    def test_pending_can_leave(self):
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.add_member(user.userprofile, GroupMembership.PENDING)
+        ok_(group.user_can_leave(user.userprofile))
+
+    def test_curator_cant_leave(self):
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.curator = user.userprofile
+        group.save()
+        group.add_member(user.userprofile)
+        ok_(not group.user_can_leave(user.userprofile))
+
+    def test_nonmember_cant_leave(self):
+        group = GroupFactory.create(members_can_leave=True)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        ok_(not group.user_can_leave(user.userprofile))
+
+    def test_cant_leave_unleavable_group(self):
+        group = GroupFactory.create(members_can_leave=False)
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        group.add_member(user.userprofile)
+        ok_(not group.user_can_leave(user.userprofile))
+
 
 class GroupTests(TestCase):
     def test_get_non_functional_areas(self):

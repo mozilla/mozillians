@@ -230,16 +230,24 @@
           or sub-community.
         {% endtrans %}
       </p>
-      <p class="field_description">
-        {% trans browse=url('groups:index_groups') %}
-          To join a group, <a href="{{ browse }}">find the group's page</a>,
-          then click the Join Group button.
-        {% endtrans %}
-        {% trans %}
-          To leave a group, click its name below to go to its page, then click
-          the Leave Group button there.
-        {% endtrans %}
-      </p>
+      {% if profile.is_vouched %}
+        <p class="field_description">
+          {% trans browse=url('groups:index_groups') %}
+            To join a group, <a href="{{ browse }}">find the group's page</a>,
+            then click the Join Group button.
+          {% endtrans %}
+          {% trans %}
+            To leave a group, click its name below to go to its page, then click
+            the Leave Group button there.
+          {% endtrans %}
+        </p>
+      {% else %}
+        <p class="field_description">
+          {% trans %}
+            After you are vouched, you will be able to join groups.
+          {% endtrans %}
+        </p>
+      {% endif %}
       <ul class="tagit">
         {% for group in user_groups %}
           <li class="tagit-choice tagit-choice-read-only ui-corner-all ui-state-default">
