@@ -69,9 +69,9 @@ When you want to start contributing...
 
 #. Download and run elastic search::
 
-     (venv)$ wget http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.19.4.tar.gz -O /tmp/es.tar.gz
+     (venv)$ wget http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.0.tar.gz -O /tmp/es.tar.gz
      (venv)$ tar xvf /tmp/es.tar.gz -C $VIRTUAL_ENV
-     (venv)$ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
+     (venv)$ $VIRTUAL_ENV/elasticsearch-0.20.0/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
 
    That will start elastic search in the background; be sure to see the instructions
    later on for stopping it when you're done working on Mozillians.
