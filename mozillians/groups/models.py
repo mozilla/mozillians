@@ -60,6 +60,9 @@ class GroupBase(models.Model):
 
     def user_can_join(self, userprofile):
         return (
+            # Must be vouched
+            userprofile.is_vouched
+            and
             # some groups don't allow
             (getattr(self, 'accepting_new_members', 'yes') != 'no')
             and
