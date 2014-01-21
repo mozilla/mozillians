@@ -670,6 +670,7 @@ class ExternalAccount(models.Model):
     TYPE_SKYPE = 'SKYPE'
     TYPE_YAHOO = 'YAHOO'
     TYPE_WEBSITE = 'WEBSITE'
+    TYPE_BITBUCKET = 'BITBUCKET'
 
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
@@ -677,6 +678,7 @@ class ExternalAccount(models.Model):
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
                    'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}'},
         TYPE_GITHUB: {'name': 'GitHub', 'url': 'https://github.com/{identifier}'},
+        TYPE_BITBUCKET: {'name': 'Bitbucket', 'url': 'https://bitbucket.org/{identifier}'},
         TYPE_MDN: {'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{identifier}'},
         TYPE_SUMO: {'name': 'Mozilla Support', 'url': ''},
         TYPE_FACEBOOK: {'name': 'Facebook', 'url': 'https://www.facebook.com/{identifier}'},
