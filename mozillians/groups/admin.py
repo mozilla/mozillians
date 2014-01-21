@@ -175,6 +175,7 @@ class GroupMembershipAdmin(admin.ModelAdmin):
                      'userprofile__region', 'userprofile__city', 'userprofile__country',
                      'userprofile__user__username', 'userprofile__user__email'
                      ]
+    form = autocomplete_light.modelform_factory(GroupMembership)
 
 
 class SkillAliasInline(admin.StackedInline):
