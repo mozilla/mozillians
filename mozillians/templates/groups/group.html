@@ -122,6 +122,18 @@
       </form>
     {% endif %}
 
+    {% if is_curator %}
+      <div class="filters right">
+        <form method="get">
+          <input id="members" name="m" type="checkbox" {% if m_selected %}checked{% endif %}>
+          <label for="members">members</label>
+          <input id="requests" name="r" type="checkbox" {% if r_selected %}checked{% endif %}>
+          <label for="requests">requests</label>
+          <input class="button" type="submit" value="filter">
+        </form>
+      </div>
+    {% endif %}
+
     {% if not people.paginator.count %}
       <div class="well">
         <p id="not-found">
@@ -134,6 +146,7 @@
       {% with items=people %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
+
       <h3 class="members-list-header">
         {% if group.functional_area %}
           {{ _('Functional Area Members') }}
@@ -145,6 +158,9 @@
       {% if is_pending %}
         <div class="group-pending-membership">{{ _('Your membership request is pending approval by the group curator.') }}</div>
       {% endif %}
+
+
+      <br class="clear">
 
       <div class="row">
         {% for people_slice in people|slice(3) -%}

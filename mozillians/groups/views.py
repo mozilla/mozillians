@@ -95,6 +95,7 @@ def show(request, url, alias_model, template):
         return redirect('groups:show_group', url=group_alias.alias.url)
 
     is_curator = False
+    m_selected = r_selected = False
     is_pending = False
 
     group = group_alias.alias
@@ -105,8 +106,17 @@ def show(request, url, alias_model, template):
         # Curator?
         is_curator = (group.curator == request.user.userprofile)
         if is_curator or request.user.is_superuser:
-            # include all member statuses
-            profiles = group.get_vouched_annotated_members()
+            m_selected = 'm' in request.GET
+            r_selected = 'r' in request.GET
+            if m_selected or r_selected:
+                statuses = []
+                if m_selected:
+                    statuses.append(GroupMembership.MEMBER)
+                if r_selected:
+                    statuses.append(GroupMembership.PENDING)
+            else:
+                statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
+            profiles = group.get_vouched_annotated_members(statuses=statuses)
         else:
             # only show full members, or this user
             profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
@@ -114,6 +124,7 @@ def show(request, url, alias_model, template):
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
     else:
+        # not a Group
         profiles = group.members.vouched()
 
     page = request.GET.get('page', 1)
@@ -136,6 +147,8 @@ def show(request, url, alias_model, template):
                 show_pagination=show_pagination,
                 show_join_button=group.user_can_join(request.user.userprofile),
                 show_leave_button=group.user_can_leave(request.user.userprofile),
+                m_selected=m_selected,
+                r_selected=r_selected,
                 )
 
     if isinstance(group, Group):
