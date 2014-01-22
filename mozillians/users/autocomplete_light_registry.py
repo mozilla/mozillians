@@ -6,7 +6,7 @@ from mozillians.users.models import UserProfile
 
 
 class VouchedUserProfileAutocomplete(autocomplete_light.AutocompleteModelBase):
-    search_fields = ['full_name', 'user__email']
+    search_fields = ['full_name', 'user__email', 'user__username']
     choices = UserProfile.objects.vouched()
 
 
