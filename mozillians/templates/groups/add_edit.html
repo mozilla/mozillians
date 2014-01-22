@@ -22,6 +22,19 @@
   <header>
     {% if creating %}
       <h1>{{ _('Add a curated group') }}</h1>
+      <p>
+        {% trans %}
+          Use this form to create a group on Mozillians.org. Before creating a group,
+          try searching for it. Someone else might already have created it.
+        {% endtrans %}
+      </p>
+      <p>
+        {% trans %}
+          Creating a group will make you the group's curator, letting you manage the
+          group settings and decide who can join. If you set the group to require
+          membership approval, you'll get a daily email with requests to join.
+        {% endtrans %}
+      </p>
     {% elif group.functional_area %}
       <h1>{{ _('Edit functional area') }}</h1>
     {% elif group.curator %}
@@ -29,11 +42,6 @@
     {% else %}
       <h1>{{ _('Edit group') }}</h1>
     {% endif %}
-    <p>
-      {% trans %}
-      some text about groups
-      {% endtrans %}
-    </p>
   </header>
 
   <form action="" method="POST" enctype="multipart/form-data"
