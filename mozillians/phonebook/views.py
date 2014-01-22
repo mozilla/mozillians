@@ -124,6 +124,7 @@ def view_profile(request, username):
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
+    data['locale'] = request.locale
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
@@ -143,31 +144,35 @@ def edit_profile(request):
     profile = user.userprofile
     user_groups = profile.groups.all().order_by('name')
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
-    user_languages = stringify_groups(profile.languages.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
     accounts_formset = forms.AccountsFormset(request.POST or None, instance=profile)
     new_profile = False
     form = forms.ProfileForm
+    language_formset = forms.LanguagesFormset(request.POST or None,
+                                              instance=profile,
+                                              locale=request.locale)
+
     if not profile.is_complete:
         new_profile = True
         form = forms.RegisterForm
 
     profile_form = form(request.POST or None, request.FILES or None,
                         instance=profile, locale=request.locale,
-                        initial=dict(skills=user_skills,
-                                     languages=user_languages))
+                        initial=dict(skills=user_skills))
 
     email_form = forms.EmailForm(request.POST or None,
                                  initial={'email': request.user.email,
                                           'user_id': request.user.id})
 
-    if (user_form.is_valid() and profile_form.is_valid() and accounts_formset.is_valid() and
-        email_form.is_valid()):
+    if (user_form.is_valid() and profile_form.is_valid() and
+        accounts_formset.is_valid() and email_form.is_valid() and
+            language_formset.is_valid()):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
         accounts_formset.save()
+        language_formset.save()
 
         # Notify the user that their old profile URL won't work.
         if new_profile:
@@ -190,7 +195,8 @@ def edit_profile(request):
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
-                apps=user.apiapp_set.filter(is_active=True))
+                apps=user.apiapp_set.filter(is_active=True),
+                language_formset=language_formset)
 
     # If there are form errors, don't send a 200 OK.
     status = 400 if (profile_form.errors or user_form.errors) else 200

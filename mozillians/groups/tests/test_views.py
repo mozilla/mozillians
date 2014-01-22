@@ -11,8 +11,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import Group, GroupAlias, GroupMembership, Skill
-from mozillians.groups.tests import (GroupFactory, GroupAliasFactory,
-                                     LanguageFactory, SkillFactory)
+from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
 from mozillians.groups.views import _list_groups
 from mozillians.users.tests import UserFactory
 
@@ -253,21 +252,6 @@ class SearchTests(TestCase):
         data = json.loads(response.content)
         eq_(len(data), 1, 'Non autocomplete skills are included in search')
         eq_(data[0], skill_1.name)
-
-    def test_search_languages(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
-        language_1 = LanguageFactory.create()
-        LanguageFactory.create()
-        url = urlparams(reverse('groups:search_languages'), term=language_1.name)
-        with self.login(user) as client:
-            response = client.get(url, follow=True,
-                                  **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
-        eq_(response.status_code, 200)
-        eq_(response.get('content-type'), 'application/json')
-
-        data = json.loads(response.content)
-        eq_(len(data), 1, 'Non autocomplete languages are included in search')
-        eq_(data[0], language_1.name)
 
     def test_search_no_ajax(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
