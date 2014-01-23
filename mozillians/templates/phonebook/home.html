@@ -117,7 +117,9 @@
             <h4>{{ _('Groups') }}</h4>
             {% for membership in user.userprofile.groupmembership_set.all() -%}
               {%- with group=membership.group -%}
-                <a href="{{ url('groups:show_group', group.url) }}">{{ group }}
+                <a href="{{ url('groups:show_group', group.url) }}">
+                  {%- if group.curator == user.userprofile %}&#9812;{% endif -%}
+                  {{ group }}
                   {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}
                 </a>
               {%- endwith -%}
