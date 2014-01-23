@@ -24,6 +24,16 @@
 
     <article class="group-meta">
 
+      {% if show_delete_group_button %}
+        <form action="{{ url('groups:group_delete', group.url) }}"
+            id="delete-group" method="post">
+          {{ csrf() }}
+          <button class="button button-negative delete right">
+            {{ _('Delete Group') }}
+          </button>
+        </form>
+      {% endif %}
+
       {% if is_curator or request.user.is_superuser %}
         <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
       {% endif %}

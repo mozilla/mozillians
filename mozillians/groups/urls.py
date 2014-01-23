@@ -12,6 +12,7 @@ urlpatterns = patterns(
 
     url('^group_add/$', 'views.group_add_edit', name='group_add'),
     url('^group_edit/(?P<url>[-\'\w]+)/$', 'views.group_add_edit', name='group_edit'),
+    url('^group_delete/(?P<url>[-\'\w]+)/$', 'views.group_delete', name='group_delete'),
 
     url('^group/(?P<url>[-\w]+)/$', 'views.show',
         {'alias_model': GroupAlias, 'template': 'groups/group.html'},

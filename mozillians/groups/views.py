@@ -139,12 +139,16 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
+    # Curator can delete their group if there are no other members.
+    show_delete_group_button = is_curator and group.members.all().count() == 1
+
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
                 is_curator=is_curator,
                 is_pending=is_pending,
                 show_pagination=show_pagination,
+                show_delete_group_button=show_delete_group_button,
                 show_join_button=group.user_can_join(request.user.userprofile),
                 show_leave_button=group.user_can_leave(request.user.userprofile),
                 m_selected=m_selected,
@@ -274,6 +278,26 @@ def toggle_skill_subscription(request, url):
         profile.skills.add(skill)
 
     return redirect(reverse('groups:show_skill', args=[skill.url]))
+
+
+@require_POST
+def group_delete(request, url):
+    profile = request.user.userprofile
+    # Get the group to delete
+    group = get_object_or_404(Group, url=url)
+    # Only a group curator is allowed to delete a group
+    is_curator = profile == group.curator
+    if not is_curator:
+        messages.error(request, _('You must be a curator to delete a group'))
+        return redirect(reverse('groups:show_group', args=[group.url]))
+    # Cannot delete if anyone else is in it
+    if group.members.all().count() != 1:
+        messages.error(request, _('You cannot delete a group if anyone else is in it.'))
+        return redirect(reverse('groups:show_group', args=[group.url]))
+    # Go to it
+    group.delete()
+    messages.info(request, _('Group %s has been deleted') % group.name)
+    return redirect(reverse('groups:index_groups'))
 
 
 def group_add_edit(request, url=None):
