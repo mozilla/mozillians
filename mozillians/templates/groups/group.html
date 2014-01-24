@@ -139,15 +139,6 @@
       {% with items=people %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
-
-      <div class="filters right">
-        <input id="members" type="checkbox">
-        <label for="members">members</label>
-        <input id="requests" type="checkbox">
-        <label for="requests">requests</label>
-        <input class="button" type="submit" value="filter">
-      </div>
-
       <h3>
         {% if group.functional_area %}
           {{ _('Functional Area Members') }}
@@ -155,9 +146,6 @@
           {{ _('Group Members') }}
         {% endif %}
       </h3>
-
-      <br class="clear">
-
       <div class="row">
         {% for people_slice in people|slice(3) -%}
             {% for person in people_slice %}
