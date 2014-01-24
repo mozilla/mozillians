@@ -7,7 +7,7 @@
     {% if profile.pending %}
       <form action="{{ url('groups:confirm_member', group_pk=group.pk, user_pk=profile.pk) }}" method="POST">
         {{ csrf() }}
-        <button type="submit" class="status-pending">{{ _('Requested') }}</span></button>
+        <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
       </form>
     {% endif %}
   {% elif request.user.userprofile == profile and profile.pending %}
