@@ -24,86 +24,81 @@
 
     <article class="group-meta">
 
-        {% if is_curator or request.user.is_superuser %}
-          <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
-        {% endif %}
+      {% if is_curator or request.user.is_superuser %}
+        <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
+      {% endif %}
 
-        {% if group.description %}
-          <p>{{ group.description }}</p>
-        {% endif %}
+      {% if group.description %}
+        <p>{{ group.description }}</p>
+      {% endif %}
 
+      <ul class="curated-group-details">
+          {% if group.irc_channel %}
+          <li>
+              <span>
+              {% if irc_channels|length > 1 %}
+                {{ _('IRC Channels') }}:
+              {% else %}
+                {{ _('IRC Channel') }}:
+              {% endif %}
+              </span>
+              {% for irc in irc_channels %}
+                {{ irc }}
+              {% endfor %}
+            </li>
+          {% endif %}
 
-        <div class="row">
+          {% if group.website %}
+            <li><span>{{ _('Website') }}:</span> {{ group.website|urlize }}</li>
+          {% endif %}
 
-            <ul class="curated-group-details">
-                {% if group.irc_channel %}
+          {% if group.wiki %}
+            <li><span>{{ _('Wiki') }}:</span> {{ group.wiki|urlize }} </li>
+          {% endif %}
+
+          <li><span>{{ _('Members') }}:</span> {{ members }}</li>
+
+          {% if skills %}
+            <li>
+                <span>{{ _('Skills members have in common') }}:</span>
+                {% for skill in skills[:15] %}
+                  {{ skill.name }}{% if not loop.last %},{% endif %}
+                {% else %}
+                    None
+                {% endfor %}
+            </li>
+          {% endif %}
+      </ul><!-- .curated-group-details -->
+
+      {% if group.curator %}  {# curated group #}
+        <div class="curator">
+          <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
+          <div class="avatar">
+            <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
+              <img class="profile-photo"
+                   src="{{ group.curator.get_photo_url('70x70') }}"
+                   alt="{{ _('Profile Photo') }}">
+            </a>
+          </div>
+          <div class="details">
+              <ul>
                 <li>
-                    <span>
-                    {% if irc_channels|length > 1 %}
-                      {{ _('IRC Channels') }}:
-                    {% else %}
-                      {{ _('IRC Channel') }}:
-                    {% endif %}
-                    </span>
-                    {% for irc in irc_channels %}
-                      {{ irc }}
-                    {% endfor %}
-                  </li>
-                {% endif %}
-
-                {% if group.website %}
-                  <li><span>{{ _('Website') }}:</span> {{ group.website|urlize }}</li>
-                {% endif %}
-
-                {% if group.wiki %}
-                  <li><span>{{ _('Wiki') }}:</span> {{ group.wiki|urlize }} </li>
-                {% endif %}
-
-                <li><span>{{ _('Members') }}:</span> {{ members }}</li>
-
-                {% if skills %}
-                  <li>
-                      <span>{{ _('Skills members have in common') }}:</span>
-                      {% for skill in skills[:15] %}
-                        {{ skill.name }}{% if not loop.last %},{% endif %}
-                      {% else %}
-                          None
-                      {% endfor %}
-                  </li>
-                {% endif %}
-            </ul><!-- .curated-group-details -->
-
-            {% if group.curator %}  {# curated group #}
-              <div class="curator">
-                <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
-                <div class="avatar">
-                  <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
-                    <img class="profile-photo"
-                         src="{{ group.curator.get_photo_url('70x70') }}"
-                         alt="{{ _('Profile Photo') }}">
+                  <span>
+                    <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
+                      {{ group.curator.display_name }}
+                    </a>
+                  </span>
+                </li>
+                <li>
+                  <a href="mailto:{{ group.curator.user.email }}">
+                     <i class="icon-envelope"></i>
+                    {{ group.curator.user.email }}
                   </a>
-                </div>
-                <div class="details">
-                    <ul>
-                      <li>
-                        <span>
-                          <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
-                            {{ group.curator.display_name }}
-                          </a>
-                        </span>
-                      </li>
-                      <li>
-                        <a href="mailto:{{ group.curator.user.email }}">
-                           <i class="icon-envelope"></i>
-                          {{ group.curator.user.email }}
-                        </a>
-                      </li>
-                    </ul>
-                  </div><!-- details -->
-              </div><!-- .curator -->
-            {% endif %}
-
-        </div><!-- .row -->
+                </li>
+              </ul>
+            </div><!-- details -->
+        </div><!-- .curator -->
+      {% endif %}
 
     </article><!-- .group-meta -->
 
