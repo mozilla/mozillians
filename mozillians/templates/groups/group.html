@@ -19,7 +19,7 @@
     {% else %}
         {{ _('Group') }}:
     {% endif %}
-     {{ group.name }}
+        {{ group.name }}
     </h1>
 
     <article class="group-meta">
@@ -106,7 +106,7 @@
         <form action="{{ url('groups:join_group', group.pk) }}"
               id="join-group" method="post">
           {{ csrf() }}
-        <button class="button button{{ ('-negative' if in_group) }}">
+        <button class="button">
           {{ _('Join Group') }}
         </button>
       </form>
@@ -116,9 +116,9 @@
         <form action="{{ url('groups:remove_member', group.pk, user.userprofile.pk) }}"
               id="leave-group" method="post">
           {{ csrf() }}
-          <button class="button button{{ ('-negative' if in_group) }}">
-          {{ _('Leave Group') }}
-        </button>
+          <button class="button button-negative">
+            {{ _('Leave Group') }}
+          </button>
       </form>
     {% endif %}
 
