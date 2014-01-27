@@ -100,8 +100,10 @@
           </section>
         {% endif %}
         {% if profile.timezone %}
-          <section id="timezone">
-            <i class="icon-time"></i> {{ profile.timezone }}
+          <section id="timezone" data-timezone-offset="{{ profile.timezone_offset()|default('notset') }}">
+            <i class="icon-time"></i>
+            {{ now_in_timezone(profile.timezone).strftime('%H:%M') }}
+            {{ profile.timezone }}
           </section>
         {% endif %}
        </div>
@@ -246,6 +248,16 @@
     </article>
     <span class="hidden category">Mozillians</span>
   </div>
+  {# strings that need translating, used from profile_view.js, replacing %HOURS% #}
+  <span class="hidden" id="hours_ahead_text">
+    {%- trans hours="%HOURS%" %}{{ hours }} hours ahead of your timezone{% endtrans -%}
+  </span>
+  <span class="hidden" id="hours_behind_text">
+    {%- trans hours="%HOURS%" %}{{ hours }} hours behind your timezone{% endtrans -%}
+  </span>
+  <span class="hidden" id="same_timezone_text">
+    {%- trans %}same time zone as yours{% endtrans -%}
+  </span>
 {% endblock %}
 
 {% block page_js %}

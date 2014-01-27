@@ -22,6 +22,7 @@ from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
+from mozillians.common.utils import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Language, LanguageAlias,
                                       Skill, SkillAlias)
@@ -559,6 +560,15 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             group.pending = (membership.status == GroupMembership.PENDING)
             groups.append(group)
         return groups
+
+    def timezone_offset(self):
+        """
+        Return minutes the user's timezone is offset from UTC.  E.g. if user is
+        4 hours behind UTC, returns -240.
+        If user has not set a timezone, returns None (not 0).
+        """
+        if self.timezone:
+            return offset_of_timezone(self.timezone)
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
