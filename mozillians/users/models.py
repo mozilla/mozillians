@@ -22,7 +22,7 @@ from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common.helpers import gravatar
-from mozillians.common.utils import offset_of_timezone
+from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Language, LanguageAlias,
                                       Skill, SkillAlias)

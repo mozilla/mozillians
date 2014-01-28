@@ -1,3 +1,4 @@
+from datetime import datetime
 from hashlib import md5
 
 from django.conf import settings
@@ -13,6 +14,7 @@ from funfactory.urlresolvers import reverse
 from funfactory import utils
 from jingo import register
 from jinja2 import Markup, contextfunction
+from pytz import timezone, utc
 from sorl.thumbnail import get_thumbnail
 from tower import ugettext as _
 
@@ -192,3 +194,34 @@ def is_checkbox(field):
 @register.filter
 def is_radio(field):
     return field.field.widget.__class__.__name__.lower() == 'radioselect'
+
+
+def aware_utcnow():
+    """
+    Return timezone-aware now, same way Django does it, but regardless
+    of settings.USE_TZ. (This is a separate method so it can be easily
+    mocked to test the other methods.)
+    """
+    return datetime.utcnow().replace(tzinfo=utc)
+
+
+@register.function
+def now_in_timezone(timezone_name):
+    """
+    Return the current time, expressed in the named timezone
+    """
+    zone = timezone(timezone_name)
+    return zone.normalize(aware_utcnow().astimezone(zone))
+
+
+def offset_of_timezone(timezone_name):
+    """
+    Return offset from UTC of named time zone, in minutes, as of now.
+
+    This is (time in specified time zone) - (time UTC), so if the time
+    zone is 5 hours ahead of UTC, it returns 300.
+    """
+    now = now_in_timezone(timezone_name)
+    offset = now.tzinfo.utcoffset(now)  # timedelta
+    minutes = offset.seconds / 60 + offset.days * 24 * 60
+    return minutes
