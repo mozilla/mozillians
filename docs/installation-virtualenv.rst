@@ -33,7 +33,7 @@ When you want to start contributing...
 
 #. Create your python virtual environment::
 
-     $ virtualenv --no-site-packages venv
+     $ virtualenv venv
 
 #. Activate your python virtual environment::
 
