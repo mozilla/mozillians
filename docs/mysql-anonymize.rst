@@ -12,8 +12,9 @@ personal information for stage, and all personal information for dev.
     $ python anonymize.py anonymize_dev.yml > anon.sql
     $ mysql < anon.sql
 
-    .. note::
 
-       Make sure your database is named ``mozillians``. If it isn't, you can change
-       the name in the .yml file you are using, it's clearly noted on the second line
-       of each of the .yml configuration files.
+   .. note::
+
+      Make sure your database is named ``mozillians``. If it isn't, you can change
+      the name in the .yml file you are using, it's clearly noted on the second line
+      of each of the .yml configuration files.
