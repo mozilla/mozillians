@@ -24,8 +24,7 @@ When you want to start contributing, you should :doc:`follow the installation in
 
 #. Set up a branch for a particular set of changes and switch to it::
 
-    $ git branch my_branch
-    $ git checkout my_branch
+    $ git checkout -b my_branch
 
 #. Commit changes to the code!
 
