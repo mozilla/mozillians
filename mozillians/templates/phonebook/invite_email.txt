@@ -1,5 +1,7 @@
 {% trans sender=sender %}
-Hi there. {{ sender }} has invited you to join mozillians.org,
+Hi there,
+
+{{ sender }} has invited you to join mozillians.org,
 the community directory for Mozilla contributors. You
 can create a community profile for yourself and search
 for other contributors to learn more about them or get
@@ -13,4 +15,7 @@ in touch.
 {{ personal_message }}
 {% endif %}
 
-{{ _('Join Mozillians:') }} {{ link }}
+{{ _('Take two minutes to create your mozillians.org profile:') }} 
+{{ link }}
+
+{{ _('Thanks for contributing to Mozilla') }} :)
