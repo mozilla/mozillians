@@ -38,7 +38,9 @@ class ShowTests(TestCase):
         eq_(context['people'][0], self.user_2.userprofile)
 
     def test_show_pending_user(self):
-        self.group.add_member(self.user_2.userprofile, GroupMembership.PENDING)
+        # Make user 2 pending
+        GroupMembership.objects.filter(userprofile=self.user_2.userprofile,
+                                       group=self.group).update(status=GroupMembership.PENDING)
         with self.login(self.user_2) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
@@ -258,7 +260,8 @@ class ShowTests(TestCase):
         self.group.curator = self.user_1.userprofile
         self.group.save()
         # Make user 2 pending
-        self.group.add_member(self.user_2.userprofile, GroupMembership.PENDING)
+        GroupMembership.objects.filter(userprofile=self.user_2.userprofile,
+                                       group=self.group).update(status=GroupMembership.PENDING)
         ok_(self.group.has_pending_member(self.user_2.userprofile))
 
         # We must request the full path, with language, or the

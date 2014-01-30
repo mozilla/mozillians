@@ -41,7 +41,7 @@ class GroupBase(models.Model):
     def merge_groups(self, group_list):
         for group in group_list:
             map(lambda x: self.add_member(x),
-                group.members.values_list('id', flat=True))
+                group.members.all())
             group.aliases.update(alias=self)
             group.delete()
 
@@ -208,6 +208,17 @@ class Group(GroupBase):
     def get_absolute_url(self):
         return absolutify(reverse('groups:show_group', args=[self.url]))
 
+    def merge_groups(self, group_list):
+        for membership in GroupMembership.objects.filter(group__in=group_list):
+            # add_member will never demote someone, so just add them with the current membership
+            # level from the merging group and they'll end up with the highest level from
+            # either group.
+            self.add_member(membership.userprofile, membership.status)
+
+        for group in group_list:
+            group.aliases.update(alias=self)
+            group.delete()
+
     def add_member(self, userprofile, status=GroupMembership.MEMBER):
         """
         Add a user to this group. Optionally specify status other than member.
@@ -215,7 +226,7 @@ class Group(GroupBase):
         If user is already in the group with the given status, this is a no-op.
 
         If user is already in the group with a different status, their status will
-        be updated.
+        be updated if the change is a promotion. Otherwise, their status will not change.
         """
         defaults = dict(status=status,
                         date_joined=now())
@@ -230,11 +241,12 @@ class Group(GroupBase):
             # Status changed
             old_status = membership.status
             membership.status = status
-            membership.save()
-            update_basket_task.delay(userprofile.id)
             if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
                 # Request accepted
+                membership.save()
+                update_basket_task.delay(userprofile.id)
                 email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
+            # else? never demote people from full member to requested, that doesn't make sense
 
     def remove_member(self, userprofile, send_email=True):
         membership = GroupMembership.objects.get(group=self, userprofile=userprofile)

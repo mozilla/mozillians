@@ -36,6 +36,43 @@ class GroupBaseTests(TestCase):
                                             url=group.url).exists())
             ok_(not Group.objects.filter(pk=group.pk).exists())
 
+    def test_merge_group_members(self):
+        # Test merging groups that have members
+        master_group = GroupFactory.create()
+        merge_group_1 = GroupFactory.create()
+        merge_group_2 = GroupFactory.create()
+
+        user1 = UserFactory.create(userprofile={'is_vouched': True})
+        user2 = UserFactory.create(userprofile={'is_vouched': True})
+        user3 = UserFactory.create(userprofile={'is_vouched': True})
+        user4 = UserFactory.create(userprofile={'is_vouched': True})
+        user5 = UserFactory.create(userprofile={'is_vouched': True})
+
+        master_group.add_member(user1.userprofile, GroupMembership.MEMBER)
+        master_group.add_member(user2.userprofile, GroupMembership.PENDING)
+        master_group.add_member(user5.userprofile, GroupMembership.PENDING)
+
+        merge_group_1.add_member(user1.userprofile, GroupMembership.PENDING)
+        merge_group_1.add_member(user2.userprofile, GroupMembership.MEMBER)
+
+        merge_group_2.add_member(user2.userprofile, GroupMembership.PENDING)
+        merge_group_2.add_member(user3.userprofile, GroupMembership.PENDING)
+        merge_group_2.add_member(user4.userprofile, GroupMembership.MEMBER)
+        merge_group_2.add_member(user5.userprofile, GroupMembership.PENDING)
+
+        master_group.merge_groups([merge_group_1, merge_group_2])
+
+        # user1 should not have been demoted in master group
+        ok_(master_group.has_member(user1.userprofile))
+        # user2 gets promoted because they were full member of merged group
+        ok_(master_group.has_member(user2.userprofile))
+        # user3 was not in master, pending in merged group, so only get to be pending in result
+        ok_(master_group.has_pending_member(user3.userprofile))
+        # user4 was a full member of the merged group, not in master, now full member of master
+        ok_(master_group.has_member(user4.userprofile))
+        # user5 pending in both, and is still pending
+        ok_(master_group.has_pending_member(user5.userprofile))
+
     def test_search(self):
         group = GroupFactory.create(visible=True)
         GroupFactory.create(visible=False)
@@ -196,10 +233,10 @@ class GroupTests(TestCase):
                                            status=GroupMembership.MEMBER).exists())
         ok_(group.has_member(user.userprofile))
         group.add_member(user.userprofile, status=GroupMembership.PENDING)
+        # never demotes anyone
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
-                                           status=GroupMembership.PENDING).exists())
-        ok_(not group.has_member(user.userprofile))
-        ok_(group.has_pending_member(user.userprofile))
+                                           status=GroupMembership.MEMBER).exists())
+        ok_(group.has_member(user.userprofile))
 
     def test_has_member(self):
         user = UserFactory.create()
