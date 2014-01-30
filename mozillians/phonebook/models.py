@@ -39,10 +39,13 @@ class Invite(models.Model):
         available.
 
         """
+        from_reply = settings.FROM_NOREPLY
+
         if sender:
+            from_reply = sender.full_name + ' via ' + settings.FROM_NOREPLY
             sender = '%s (%s)' % (sender.full_name, sender.user.email)
 
-        subject = _('Become a Mozillian')
+        subject = _('Please join me on mozillians.org')
 
         template = get_template('phonebook/invite_email.txt')
 
@@ -55,7 +58,7 @@ class Invite(models.Model):
         # escaped by the template and this makes the message look bad.
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
-        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
+        send_mail(subject, filtered_message, from_reply,
                   [self.recipient])
 
     def send_thanks(self):
