@@ -117,9 +117,13 @@
             <h4>{{ _('Groups') }}</h4>
             {% for membership in user.userprofile.groupmembership_set.all() -%}
               {%- with group=membership.group -%}
-                <a href="{{ url('groups:show_group', group.url) }}">{{ group }}
-                  {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}
-                </a>
+              <a href="{{ url('groups:show_group', group.url) }}">
+                {%- if group.curator == user.userprofile -%}
+                  <i class="icon-certificate"></i>
+                {% endif %}
+                {{ group.name }}
+                {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}
+              </a>
               {%- endwith -%}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
