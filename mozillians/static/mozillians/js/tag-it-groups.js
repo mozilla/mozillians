@@ -4,9 +4,9 @@
             $('#id_skills').tagit({
                 allowSpaces: true,
                 caseSensitive: false,
-                onTagAdded: function(event, group) {
+                onTagAdded: function(event, skill) {
                     app.validator.resetField('#groups-container');
-                    app.validator.validateGroup(group, $('#id_skills'));
+                    app.validator.validateSkill(skill, $('#id_skills'));
                 },
                 singleField: true,
                 singleFieldDelimiter: ',',

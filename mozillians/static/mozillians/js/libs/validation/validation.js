@@ -48,12 +48,22 @@ var Validator = function() {
         },
         validateGroup: function(group, field) {
             var name = group.children('span').text();
-            if (name.match(/^[a-zA-Z0-9 .:,-]*$/g) === null) {
+            if (name.match(/^[a-zA-Z0-9 +.:,-]*$/g) === null) {
                 displayError(field, gettext('Groups can only contain ' +
-                                            'alphanumeric characters, dashes, ' +
-                                            'spaces.'));
+                                            'alphanumeric characters, dashes, spaces ' +
+                                            'and + . : ,'));
                 // HACK: Do this without dirty DOM manipulation.
                 group.children('a.tagit-close').click();
+            }
+        },
+        validateSkill: function(skill, field) {
+            var name = skill.children('span').text();
+            if (name.match(/^[a-zA-Z0-9 +.:,-]*$/g) === null) {
+                displayError(field, gettext('Skills can only contain ' +
+                                            'alphanumeric characters ' +
+                                            'and +.:-.'));
+                // HACK: Do this without dirty DOM manipulation.
+                skill.children('a.tagit-close').click();
             }
         },
         resetField: function(field) {
