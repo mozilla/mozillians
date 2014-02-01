@@ -5,8 +5,10 @@ import re
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from django.forms import ValidationError
 from mozillians.phonebook.validators import validate_twitter
 from mozillians.users.models import ExternalAccount
+
 
 class Migration(DataMigration):
 
