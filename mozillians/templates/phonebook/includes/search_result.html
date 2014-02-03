@@ -32,16 +32,16 @@
         </li>
         {% if profile.email %}
           <li>
-            <a title="{{ profile.display_name }}" href="{{ profile.email }}">
+            <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
             <i class="icon-envelope"></i> {{ profile.email|truncate(20, True) }}
             </a>
           </li>
         {% endif %}
-        {% if profile.user.username %}
+        {% if profile.ircname %}
           <li>
-            <a title="{{ profile.display_name }}" href="{{ url('phonebook:profile_view', profile.user.username) }}">
-              <i class="icon-user"></i> {{ profile.user.username|truncate(20, True) }}
-            </a>
+            <span title="{{ profile.ircname }}">
+              <i class="icon-comments-alt"></i>IRC: {{ profile.ircname|truncate(20, True) }}
+            </span>
           </li>
         {% endif %}
       </ul>
