@@ -48,7 +48,7 @@ When you want to start contributing...
 
 #. Install development and compiled requirements::
 
-     (venv)$ pip install -r requirements/compiled.txt -r requirements/dev.txt
+     (venv)$ pip install -r requirements/dev.txt
      (lots more output - be patient again...)
      (venv) $
 

@@ -1,28 +1,15 @@
-# This file pulls in everything a developer needs. If it's a basic package
-# needed to run the site, it belongs in requirements/prod.txt. If it's a
-# package for developers (testing, docs, etc.), it goes in this file.
+# This file pulls in everything a developer needs that's not already in
+# vendor or vendor-local.
 
--r prod.txt
+# Things that can't be put into vendor or vendor-local because they build
+# platform-specific libraries:
+-r compiled.txt
 
-# Documentation
-Sphinx==1.1.3
-
-# Testing
+# Things that aren't in vendor or vendor-local because they're only needed to
+# run tests, not for production:
+factory-boy==2.3.0
 flake8==2.1.0
-nose==1.0.0
 mock==0.8.0
--e git://github.com/jbalogh/django-nose.git#egg=django_nose
--e git://github.com/jbalogh/test-utils.git#egg=test-utils
-lxml==2.1
-pyquery
 
-# L10n
-translate-toolkit==1.8.0
-
-# Debug tools
-django-extensions
-Werkzeug
-
-coverage
-nosenicedots
-factory-boy
+# Just for building documentation
+Sphinx==1.1.3

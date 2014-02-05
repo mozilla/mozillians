@@ -3,13 +3,23 @@
 # codebase.
 set -e
 
+echo "Starting build on executor $EXECUTOR_NUMBER..."
+
 DB_HOST="localhost"
 DB_USER="hudson"
 
+if [ -n $WORKSPACE ] ; then WORKSPACE=. ; fi
+
 cd $WORKSPACE
+if [ ! -d "$WORKSPACE/vendor" ]; then
+    echo "No /vendor... crap."
+    exit 1
+fi
+
 VENV=$WORKSPACE/venv
 
-echo "Starting build on executor $EXECUTOR_NUMBER..."
+if [ -n $JOB_NAME ] ; then JOB_NAME=mozillians ; fi
+
 
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;
@@ -17,18 +27,14 @@ find . -name '*.pyc' -exec rm {} \;
 git submodule sync
 git submodule update --init --recursive
 
-if [ ! -d "$WORKSPACE/vendor" ]; then
-    echo "No /vendor... crap."
-    exit 1
-fi
-
 if [ ! -d "$VENV" ]; then
     echo "Making virtualenv..."
     virtualenv $VENV --no-site-packages
 fi
-source $VENV/bin/activate
+. $VENV/bin/activate
+# If setuptools is too old, recent pips fail badly later on, so make sure we're at least at 0.8
+pip install -U 'setuptools>=0.8'
 pip install -r requirements/dev.txt
-pip install -r requirements/compiled.txt
 
 cat > mozillians/settings/local.py <<SETTINGS
 # flake8: noqa

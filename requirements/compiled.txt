@@ -1,3 +1,8 @@
+# This file has only packages that must be compiled natively during installation.
+# Everything else should either be in vendor or vendor-local, if it's needed in
+# production, or in dev.txt, if it's only needed for running tests or building
+# documentation.
+
 -r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
 
 # Images
