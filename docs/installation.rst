@@ -7,6 +7,5 @@ Installation
    :maxdepth: 1
 
    installation-virtualenv
-   installation-vagrant
    translation
    mysql

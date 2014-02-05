@@ -2,29 +2,6 @@
  Testing
 =========
 
-Vagrant Box Shortcuts
----------------------
-
-If you are using the :doc:`installation-vagrant` there are a couple of shortcuts
-to make your life easier:
-
-- Alias `t`::
-
-  ~4 dj test -x --logging-clear-handlers --with-nicedots'
-
-- Alias `td` ::
-
-  ~$ FORCE_DB=True t --noinput
-
-- Alias `tf`::
-
-  ~$ dj test --logging-clear-handlers --with-nicedots --failed
-
-- Alias `tp`::
-
-  ~$ tp='t --pdb --pdb-failure'
-
-
 Test Coverage
 -------------
 
