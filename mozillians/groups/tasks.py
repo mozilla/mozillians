@@ -50,8 +50,14 @@ def send_pending_membership_emails():
             tower.activate('en-us')
 
             count = pending_memberships.count()
-            subject = _('%d outstanding requests to join Mozillians group "%s"') % (
-                count, group.name)
+            subject = tower.ungettext(
+                '%(count)d outstanding request to join Mozillians group "%(name)s"',
+                '%(count)d outstanding requests to join Mozillians group "%(name)s"',
+                count
+            ) % {
+                'count': count,
+                'name': group.name
+            }
             body = render_to_string('groups/email/memberships_pending.txt', {
                 'group': group,
                 'count': count,

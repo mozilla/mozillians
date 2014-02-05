@@ -52,7 +52,6 @@ class SendPendingMembershipEmailsTests(TestCase):
         ok_('There are 2 outstanding requests' in body)
         # Full path to group page is in the message
         ok_(group.get_absolute_url() in body)
-        print("to_list=%s, curator.email=%s" % (to_list, curator.email))
         ok_(curator.email in to_list)
 
         # Add another pending membership
@@ -61,6 +60,28 @@ class SendPendingMembershipEmailsTests(TestCase):
         with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
             tasks.send_pending_membership_emails()
         ok_(mock_send_mail.called)
+
+    def test_sending_pending_email_singular(self):
+        # If a curated group has exactly one pending membership, added since the reminder email
+        # was last sent, send the curator an email.  It should contain the count of
+        # all pending memberships, which should be one, and should use the singular text.
+        curator = UserFactory.create()
+        group = GroupFactory.create(curator=curator.userprofile)
+
+        # Add one pending membership
+        group.add_member(UserFactory.create().userprofile, GroupMembership.PENDING)
+
+        with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
+            tasks.send_pending_membership_emails()
+        ok_(mock_send_mail.called)
+
+        # The message body should mention that there is 1 pending memberships
+        subject, body, from_addr, to_list = mock_send_mail.call_args[0]
+        eq_('1 outstanding request to join Mozillians group "%s"' % group.name, subject)
+        ok_('There is 1 outstanding request' in body)
+        # Full path to group page is in the message
+        ok_(group.get_absolute_url() in body)
+        ok_(curator.email in to_list)
 
     def test_sending_pending_email_already_sent(self):
         # If a curated group has a pending membership, but it was added before the

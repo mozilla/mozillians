@@ -1,7 +1,11 @@
 {% trans name=group.curator.full_name %}Hi {{ name }}, {% endtrans %}
 
 
-{% trans name=group.name %}There are {{ count }} outstanding requests to join your group "{{ name }}".{% endtrans %}
+{% trans count=count, name=group.name -%}
+   There is {{ count }} outstanding request to join your group "{{ name }}".
+{%- pluralize count -%}
+   There are {{ count }} outstanding requests to join your group "{{ name }}".
+{%- endtrans %}
 
 {% trans %}View requests here:{% endtrans %}
 
