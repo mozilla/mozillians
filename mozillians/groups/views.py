@@ -95,6 +95,7 @@ def show(request, url, alias_model, template):
         return redirect('groups:show_group', url=group_alias.alias.url)
 
     is_curator = False
+    is_pending = False
 
     group = group_alias.alias
     profile = request.user.userprofile
@@ -110,6 +111,8 @@ def show(request, url, alias_model, template):
             # only show full members, or this user
             profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
                                                            always_include=profile)
+        # Is this user's membership pending?
+        is_pending = group.has_pending_member(profile)
     else:
         profiles = group.members.vouched()
 
@@ -129,6 +132,7 @@ def show(request, url, alias_model, template):
                 group=group,
                 in_group=in_group,
                 is_curator=is_curator,
+                is_pending=is_pending,
                 show_pagination=show_pagination,
                 show_join_button=group.user_can_join(request.user.userprofile),
                 show_leave_button=group.user_can_leave(request.user.userprofile),

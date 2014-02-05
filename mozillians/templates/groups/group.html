@@ -134,13 +134,18 @@
       {% with items=people %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
-      <h3>
+      <h3 class="members-list-header">
         {% if group.functional_area %}
           {{ _('Functional Area Members') }}
         {% else %}
           {{ _('Group Members') }}
         {% endif %}
       </h3>
+
+      {% if is_pending %}
+        <div class="group-pending-membership">{{ _('Your membership request is pending approval by the group curator.') }}</div>
+      {% endif %}
+
       <div class="row">
         {% for people_slice in people|slice(3) -%}
             {% for person in people_slice %}

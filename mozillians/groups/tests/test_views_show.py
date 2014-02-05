@@ -25,6 +25,7 @@ class ShowTests(TestCase):
         eq_(context['people'].paginator.count, 1)
         eq_(context['people'][0], self.user_2.userprofile)
         eq_(context['people'][0].pending, False)
+        ok_(not context['is_pending'])
 
     def test_show_user_in_group(self):
         """Test show() for a user within the group."""
@@ -36,6 +37,7 @@ class ShowTests(TestCase):
         eq_(context['in_group'], True)
         eq_(context['people'].paginator.count, 1)
         eq_(context['people'][0], self.user_2.userprofile)
+        ok_(not context['is_pending'])
 
     def test_show_pending_user(self):
         # Make user 2 pending
@@ -50,6 +52,7 @@ class ShowTests(TestCase):
         eq_(context['people'].paginator.count, 1)
         eq_(context['people'][0], self.user_2.userprofile)
         eq_(context['people'][0].pending, True)
+        ok_(context['is_pending'])
 
     def test_show_empty_group(self):
         group = GroupFactory.create()
@@ -59,6 +62,7 @@ class ShowTests(TestCase):
         eq_(response.status_code, 200)
         context = response.context
         eq_(context['people'].paginator.count, 0)
+        ok_(not context['is_pending'])
 
     @requires_login()
     def test_show_anonymous(self):
@@ -114,6 +118,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_leave_button'], True)
+        ok_(not response.context['is_pending'])
 
     def test_show_leave_button_value_members_cant_leave(self):
         """
@@ -129,6 +134,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_leave_button'], False)
+        ok_(not response.context['is_pending'])
 
     def test_show_leave_button_value_members_can_leave(self):
         """
@@ -144,6 +150,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_leave_button'], True)
+        ok_(not response.context['is_pending'])
 
     def test_show_leave_button_value_members_can_leave_non_member(self):
         """
@@ -158,6 +165,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_leave_button'], False)
+        ok_(not response.context['is_pending'])
 
     def test_show_join_button_accepting_members_yes(self):
         group = GroupFactory.create(accepting_new_members='yes')
@@ -168,6 +176,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_join_button'], True)
+        ok_(not response.context['is_pending'])
 
     def test_show_join_button_accepting_members_yes_member(self):
         group = GroupFactory.create(accepting_new_members='yes')
@@ -221,6 +230,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         eq_(response.context['show_leave_button'], True)
+        ok_(not response.context['is_pending'])
 
     def test_remove_button_confirms(self):
         """GET to remove_member view displays confirmation"""

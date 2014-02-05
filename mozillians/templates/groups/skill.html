@@ -16,7 +16,7 @@
   <form action="{{ url('groups:toggle_skill_subscription', group.url) }}"
         id="toggle-group" method="post">
     {{ csrf() }}
-    <button class="button button{{ ('-negative' if in_group) }}">
+    <button class="button {{ ('button-negative' if in_group) }}">
       {% if not in_group %}
         {{ _('Add Skill') }}
       {% else %}

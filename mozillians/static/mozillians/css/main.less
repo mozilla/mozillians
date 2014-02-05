@@ -208,8 +208,18 @@ body {
         }
     }
     label.required:after {
-      content: " *";
-      color: @linkRed;
+        content: " *";
+        color: @linkRed;
+    }
+
+    .group-pending-membership {
+        background-color: #F5F5DC;
+        color: #FF8F00;
+        display: block;
+        text-align: center;
+        margin: 20px 0;
+        border-radius: 3px;
+        padding: 4px;
     }
 }
 
@@ -1736,6 +1746,9 @@ body#group-show {
     }
     #toggle-group {
         margin: 15px 0;
+    }
+    .members-list-header {
+        margin-top: 1em;
     }
 }
 
