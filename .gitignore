@@ -10,8 +10,6 @@ build.py
 .noseids
 .virtualenv
 docs/_gh-pages
-/vendor-local/
-/vendor/
 vagrantconfig_local.yaml
 docs/_build
 locale*

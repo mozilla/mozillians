@@ -35,6 +35,3 @@
 [submodule "mozillians/static/mozillians/css/less-prefixer"]
 	path = mozillians/static/mozillians/css/less-prefixer
 	url = https://github.com/JoelSutherland/LESS-Prefixer.git
-[submodule "vendor-local/src/unidecode"]
-	path = vendor-local/src/unidecode
-	url = http://www.tablix.org/~avian/git/unidecode.git
