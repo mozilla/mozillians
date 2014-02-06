@@ -36,7 +36,7 @@ def send_pending_membership_emails():
 
     # Curated groups that have pending membership requests
     groups = Group.objects.exclude(curator__isnull=True)
-    groups = groups.filter(groupmembership__status=GroupMembership.PENDING)
+    groups = groups.filter(groupmembership__status=GroupMembership.PENDING).distinct()
 
     for group in groups:
         # what's the max pk of pending memberships?
