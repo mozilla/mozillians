@@ -283,3 +283,63 @@ class ShowTests(TestCase):
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
         # Now a member
         ok_(self.group.has_member(self.user_2.userprofile))
+
+    def test_filter_members_only(self):
+        """Filter `m` will filter out members that are only pending"""
+        # Make user 1 the group curator so they can see requests
+        self.group.curator = self.user_1.userprofile
+        self.group.save()
+        # Make user 2 a full member
+        self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
+        member = self.user_2.userprofile
+        # Make user 3 a pending member
+        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
+        pending = self.user_3.userprofile
+
+        url = self.url + "?m"
+        with self.login(self.user_1) as client:
+            response = client.get(url, follow=True)
+        people = response.context['people'].object_list
+        ok_(member in people)
+        ok_(pending not in people)
+
+    def test_filter_pending_only(self):
+        """Filter `r` will show only member requests (pending)"""
+        # Make user 1 the group curator so they can see requests
+        self.group.curator = self.user_1.userprofile
+        self.group.save()
+        # Make user 2 a full member
+        self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
+        member = self.user_2.userprofile
+        # Make user 3 a pending member
+        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
+        pending = self.user_3.userprofile
+
+        url = self.url + "?r"
+        with self.login(self.user_1) as client:
+            response = client.get(url, follow=True)
+        people = response.context['people'].object_list
+        ok_(member not in people)
+        ok_(pending in people)
+
+    def test_filter_both(self):
+        """If they specify both filters, they get all the members"""
+        # Make user 1 the group curator so they can see requests
+        self.group.curator = self.user_1.userprofile
+        self.group.save()
+        # Make user 2 a full member
+        self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
+        member = self.user_2.userprofile
+        # Make user 3 a pending member
+        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
+        pending = self.user_3.userprofile
+
+        url = self.url + "?r&m"
+        with self.login(self.user_1) as client:
+            response = client.get(url, follow=True)
+        people = response.context['people'].object_list
+        ok_(member in people, people)
+        ok_(pending in people)
