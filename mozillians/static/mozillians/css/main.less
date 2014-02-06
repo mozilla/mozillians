@@ -618,6 +618,13 @@ nav {
     }
 }
 
+/* fixes firefox sizing quirk */
+.button::-moz-focus-inner{
+    border:0;
+    margin:0;
+    padding:0;
+}
+
 a#back-to-top {
     z-index: 1000;
     bottom: 20px;
@@ -1670,6 +1677,11 @@ body#group-show {
         span{
             font-weight:normal;
         }
+    }
+    .button.delete{
+      .button;
+      .button-negative;
+      margin: 0 0 0 2px;
     }
     [class^="status"]{
         position: absolute;
