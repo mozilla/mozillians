@@ -45,6 +45,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
             tasks.send_pending_membership_emails()
         ok_(mock_send_mail.called)
+        # Should only have been called once
+        eq_(1, len(mock_send_mail.call_args_list))
 
         # The message body should mention that there are 2 pending memberships
         subject, body, from_addr, to_list = mock_send_mail.call_args[0]
