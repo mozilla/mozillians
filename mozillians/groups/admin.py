@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db.models import Count, Sum
+from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.contrib.admin.templatetags.admin_static import static
 
 import autocomplete_light
 
@@ -77,10 +78,24 @@ class VisibleGroupFilter(SimpleListFilter):
         return queryset.filter(visible=value)
 
 
+class FilteredNoSelectAllMultiple(FilteredSelectMultiple):
+    """
+    A FilteredSelectMultiple without the ability to select all.
+    """
+
+    @property
+    def media(self):
+        js = ['admin/js/core.js', 'admin/js/SelectBox.js', 'mozillians/js/NoSelectAllFilter.js']
+        return forms.Media(js=[static('%s' % path) for path in js])
+
+    def __init__(self, verbose_name, is_stacked, attrs=None, choices=()):
+        super(FilteredNoSelectAllMultiple, self).__init__(verbose_name, is_stacked, attrs, choices)
+
+
 class GroupBaseEditAdminForm(forms.ModelForm):
     merge_with = forms.ModelMultipleChoiceField(
         required=False, queryset=None,
-        widget=FilteredSelectMultiple('Merge', False))
+        widget=FilteredNoSelectAllMultiple('Merge', False))
 
     def __init__(self, *args, **kwargs):
         queryset = self._meta.model.objects.exclude(pk=kwargs['instance'].id)
