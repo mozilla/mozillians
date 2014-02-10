@@ -1,12 +1,13 @@
 from datetime import datetime
 
+from jinja2 import Markup
 from mock import patch
 from nose.tools import ok_
 
 from mozillians.announcements.tests import AnnouncementFactory, TestCase
 
 
-class AnnouncementManagerTests(TestCase):
+class AnnouncementTests(TestCase):
     @patch('mozillians.announcements.models.datetime')
     def test_published(self, mock_obj):
         """Test published model property."""
@@ -21,3 +22,8 @@ class AnnouncementManagerTests(TestCase):
         ok_(first.published)
         ok_(second.published)
         ok_(not third.published)
+
+    def test_get_template_text(self):
+        announcement = AnnouncementFactory.create(publish_from=datetime(2013, 2, 12))
+        text = announcement.get_template_text()
+        ok_(isinstance(text, Markup))

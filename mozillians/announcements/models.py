@@ -7,12 +7,13 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 import bleach
+from jinja2 import Markup
 from sorl.thumbnail import ImageField
 
 from mozillians.announcements.managers import AnnouncementManager
 
 
-ALLOWED_TAGS = ['em', 'strong', 'a']
+ALLOWED_TAGS = ['em', 'strong', 'a', 'u']
 
 
 def _calculate_image_filename(instance, filename):
@@ -48,6 +49,10 @@ class Announcement(models.Model):
         now = datetime.now()
         return ((self.publish_from <= now) and
                 (self.publish_until > now if self.publish_until else True))
+
+    def get_template_text(self):
+        """Mark text as template safe so html tags are not escaped."""
+        return Markup(self.text)
 
     def __unicode__(self):
         return self.title

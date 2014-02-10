@@ -180,7 +180,7 @@
             <img src="{{ thumbnail(announcement.image, '60x60').url }}">
           {% endif %}
           <h2>{{ announcement.title }}</h2>
-          <p> {{ announcement.text }} </p>
+          <p> {{ announcement.get_template_text() }} </p>
         {% else %}
           {% set fact=random_funfact() %}
           {% if fact %}
