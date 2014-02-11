@@ -38,12 +38,14 @@ class Invite(models.Model):
         Includes the name and email of the inviting person, if
         available.
 
+        sender is a user.userprofile
         """
         from_reply = settings.FROM_NOREPLY
 
         if sender:
             from_reply = sender.full_name + ' via ' + settings.FROM_NOREPLY
-            sender = '%s (%s)' % (sender.full_name, sender.user.email)
+            full_name = sender.full_name
+            email_in_brackets = "(" + sender.user.email + ")"
 
         subject = _('Please join me on mozillians.org')
 
@@ -51,7 +53,8 @@ class Invite(models.Model):
 
         message = template.render({
             'personal_message': self.message,
-            'sender': sender or _('A fellow Mozillian'),
+            'full_name': full_name or _('A fellow Mozillian'),
+            'email_in_brackets': email_in_brackets,
             'link': self.get_url()})
 
         # Manually replace quotes and double-quotes as these get

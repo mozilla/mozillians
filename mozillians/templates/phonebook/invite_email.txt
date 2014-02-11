@@ -1,7 +1,7 @@
 {{ _('Hi there,') }}
 
 {% trans sender=sender %}
-{{ sender }} has invited you to join mozillians.org,
+{{ full_name }} {{ email_in_brackets }} has invited you to join mozillians.org,
 the community directory for Mozilla contributors. You
 can create a community profile for yourself and search
 for other contributors to learn more about them or get
@@ -15,7 +15,7 @@ in touch.
 {{ personal_message|indent(indentfirst=True) }}
 {% endif %}
 
-{{ _('Take two minutes to create your mozillians.org profile:') }} 
+{{ _('Take two minutes to create your mozillians.org profile:') }}
 {{ link }}
 
-{{ _('Thanks for contributing to Mozilla') }} :)
+{{ _('Thanks for contributing to Mozilla.') }} :)
