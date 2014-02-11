@@ -555,10 +555,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         set to True, others will have it set False.
         """
         groups = []
-        for membership in GroupMembership.objects.filter(userprofile=self):
-            group = membership.group
-            group.pending = (membership.status == GroupMembership.PENDING)
-            groups.append(group)
+        if self._privacy_level and self.privacy_groups >= self._privacy_level:
+            for membership in GroupMembership.objects.filter(userprofile=self):
+                group = membership.group
+                group.pending = (membership.status == GroupMembership.PENDING)
+                groups.append(group)
         return groups
 
     def timezone_offset(self):
