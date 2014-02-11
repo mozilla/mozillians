@@ -227,14 +227,14 @@ def search(request):
     show_pagination = False
     form = forms.SearchForm(request.GET)
     groups = None
-    curated_groups = None
+    functional_areas = None
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
         include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
-        curated_groups = Group.get_curated()
+        functional_areas = Group.get_functional_areas()
         public = not (request.user.is_authenticated()
                       and request.user.userprofile.is_vouched)
 
@@ -262,7 +262,7 @@ def search(request):
              limit=limit,
              show_pagination=show_pagination,
              groups=groups,
-             curated_groups=curated_groups)
+             functional_areas=functional_areas)
 
     if request.is_ajax():
         return render(request, 'search_ajax.html', d)
