@@ -63,6 +63,15 @@
       </select>
     </fieldset>
 
+    {% if profile.is_complete %}
+      <fieldset id="edit-controls-top" class="edit-controls">
+        <button id="form-submit-top" type="submit">{{ _('Update Profile') }}</button>
+          <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
+            {{ _('Cancel') }}{# L10n: Cancel editing #}
+          </a>
+      </fieldset>
+    {% endif %}
+
     <fieldset id="photo">
       <label>{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
@@ -432,7 +441,7 @@
       </p>
     {% endif %}
 
-    <fieldset id="edit_controls">
+    <fieldset id="edit-controls" class="edit-controls">
         {% if profile.is_complete %}
           <button id="form-submit" type="submit">{{ _('Update Profile') }}</button>
           <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
