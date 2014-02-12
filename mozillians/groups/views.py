@@ -96,7 +96,6 @@ def show(request, url, alias_model, template):
 
     is_curator = False
     m_selected = r_selected = False
-    is_pending = False
 
     group = group_alias.alias
     profile = request.user.userprofile
@@ -122,7 +121,9 @@ def show(request, url, alias_model, template):
             profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
                                                            always_include=profile)
         # Is this user's membership pending?
-        is_pending = group.has_pending_member(profile)
+        if group.has_pending_member(profile):
+            messages.info(
+                request, _('Your membership request is pending approval by the group curator.'))
     else:
         # not a Group
         profiles = group.members.vouched()
@@ -146,7 +147,6 @@ def show(request, url, alias_model, template):
                 group=group,
                 in_group=in_group,
                 is_curator=is_curator,
-                is_pending=is_pending,
                 show_pagination=show_pagination,
                 show_delete_group_button=show_delete_group_button,
                 show_join_button=group.user_can_join(request.user.userprofile),
@@ -259,9 +259,8 @@ def join_group(request, group_pk):
             group.add_member(profile_to_add)
             messages.info(request, _('You have been added to this group.'))
         elif group.accepting_new_members == 'by_request':
+            # Pending request message is in show() to make it persistent.
             group.add_member(profile_to_add, status=GroupMembership.PENDING)
-            messages.info(request,
-                          _('Your membership request is pending approval by the group curator.'))
 
     return redirect(reverse('groups:show_group', args=[group.url]))
 
