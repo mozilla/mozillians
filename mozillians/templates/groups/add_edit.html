@@ -69,6 +69,7 @@
     </fieldset>
 
     {% if request.user.is_superuser %}
+      <h2>Admin Settings</h2>
 
       <fieldset>
         {{ mozillians_field(form.visible) }}
