@@ -18,7 +18,7 @@ from mozillians.groups.models import Group, Language, Skill
 from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      LanguageAliasFactory, LanguageFactory,
                                      SkillAliasFactory, SkillFactory)
-from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS
+from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
 from mozillians.users.tests import UserFactory
 
@@ -208,6 +208,18 @@ class UserProfileTests(TestCase):
         eq_(profile.websites.count(), 1)
         profile.set_instance_privacy_level(PUBLIC)
         eq_(profile.websites.count(), 0)
+
+    def test_annotated_groups_not_public(self):
+        # Group member who wants their groups kept semi-private
+        profile = UserFactory.create(userprofile={'privacy_groups': MOZILLIANS}).userprofile
+        group = GroupFactory.create(name='group')
+        group.add_member(profile)
+
+        # Being accessed by a member of the general public
+        profile.set_instance_privacy_level(PUBLIC)
+
+        # no groups seen
+        eq_(len(profile.get_annotated_groups()), 0)
 
     @patch('mozillians.users.models.UserProfile.auto_vouch')
     def test_auto_vouch_on_profile_save(self, auto_vouch_mock):

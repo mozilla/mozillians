@@ -555,7 +555,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         set to True, others will have it set False.
         """
         groups = []
-        for membership in GroupMembership.objects.filter(userprofile=self):
+        # Query this way so we only get the groups that the privacy controls allow the
+        # current user to see. We have to force evaluation of this query first, otherwise
+        # Django combines the whole thing into one query and loses the privacy control.
+        user_group_ids = list(self.groups.values_list('id', flat=True))
+        for membership in GroupMembership.objects.filter(group_id__in=user_group_ids):
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
             groups.append(group)
