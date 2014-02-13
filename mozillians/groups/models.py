@@ -262,15 +262,15 @@ class Group(GroupBase):
         """
         Return True if this user is in this group with status MEMBER.
         """
-        return GroupMembership.objects.filter(group=self, userprofile=userprofile,
-                                              status=GroupMembership.MEMBER).exists()
+        return self.groupmembership_set.filter(userprofile=userprofile,
+                                               status=GroupMembership.MEMBER).exists()
 
     def has_pending_member(self, userprofile):
         """
         Return True if this user is in this group with status PENDING.
         """
-        return GroupMembership.objects.filter(group=self, userprofile=userprofile,
-                                              status=GroupMembership.PENDING).exists()
+        return self.groupmembership_set.filter(userprofile=userprofile,
+                                               status=GroupMembership.PENDING).exists()
 
     def get_vouched_annotated_members(self, statuses=None, always_include=None):
         """
@@ -284,8 +284,7 @@ class Group(GroupBase):
         Attribute ``.pending`` indicates whether membership is only pending.
         Attribute ``.is_curator`` indicates if member is a curator of this group
         """
-        memberships = GroupMembership.objects.filter(group=self,
-                                                     userprofile__is_vouched=True)
+        memberships = self.groupmembership_set.filter(userprofile__is_vouched=True)
         if statuses is not None:
             if always_include is not None:
                 memberships = memberships.filter(Q(status__in=statuses)

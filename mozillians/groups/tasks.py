@@ -40,8 +40,7 @@ def send_pending_membership_emails():
 
     for group in groups:
         # what's the max pk of pending memberships?
-        pending_memberships = GroupMembership.objects.filter(group=group,
-                                                             status=GroupMembership.PENDING)
+        pending_memberships = group.groupmembership_set.filter(status=GroupMembership.PENDING)
         max_pk = pending_memberships.aggregate(max_pk=Max('pk'))['max_pk']
         # Only send reminder if there are newer requests than we'd previously reminded about
         if max_pk > group.max_reminder:
