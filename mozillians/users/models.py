@@ -559,7 +559,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         # current user to see. We have to force evaluation of this query first, otherwise
         # Django combines the whole thing into one query and loses the privacy control.
         user_group_ids = list(self.groups.values_list('id', flat=True))
-        for membership in GroupMembership.objects.filter(group_id__in=user_group_ids):
+        for membership in self.groupmembership_set.filter(group_id__in=user_group_ids):
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
             groups.append(group)

@@ -221,6 +221,22 @@ class UserProfileTests(TestCase):
         # no groups seen
         eq_(len(profile.get_annotated_groups()), 0)
 
+    def test_get_annotated_groups_limit_to_current_user(self):
+        """Test that get_annotated_groups() limits query to current user.
+
+        To regression test against 969920: We didn't limit
+        GroupMembership queryset to current user which resulted server
+        timeouts because we iterated over all groups.
+
+        """
+        group_1 = GroupFactory.create()
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
+        group_1.add_member(user_1.userprofile)
+        group_1.add_member(user_2.userprofile)
+        user_groups = user_1.userprofile.get_annotated_groups()
+        eq_([group_1], user_groups)
+
     @patch('mozillians.users.models.UserProfile.auto_vouch')
     def test_auto_vouch_on_profile_save(self, auto_vouch_mock):
         UserFactory.create()
