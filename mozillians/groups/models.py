@@ -174,8 +174,8 @@ class Group(GroupBase):
     )
     max_reminder = models.IntegerField(
         default=0,
-        help_text=_lazy(u'The max PK of pending membership requests the last time we sent the '
-                        u'curator a reminder')
+        help_text=(u'The max PK of pending membership requests the last time we sent the '
+                   u'curator a reminder')
     )
 
     @classmethod
