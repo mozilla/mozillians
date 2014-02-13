@@ -132,6 +132,11 @@ class GroupBaseAdmin(admin.ModelAdmin):
         return 0
     vouched_member_count.admin_order_field = 'vouched_member_count'
 
+    class Media:
+        css = {
+            'all': ('mozillians/css/admin.css',)
+        }
+
 
 class GroupAliasInline(admin.StackedInline):
     model = GroupAlias
