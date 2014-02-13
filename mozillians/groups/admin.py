@@ -12,7 +12,7 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
 
 
 class EmptyGroupFilter(SimpleListFilter):
-    title = 'empty_group'
+    title = 'utilization'
     parameter_name = 'empty_group'
 
     def lookups(self, request, model_admin):
@@ -47,7 +47,7 @@ class CuratedGroupFilter(SimpleListFilter):
 
 class FunctionalAreaFilter(SimpleListFilter):
     """Admin filter for functional areas."""
-    title = 'functional_areas'
+    title = 'functional area'
     parameter_name = 'functional_area'
 
     def lookups(self, request, model_admin):
@@ -63,7 +63,7 @@ class FunctionalAreaFilter(SimpleListFilter):
 
 class VisibleGroupFilter(SimpleListFilter):
     """Admin filter for visible groups."""
-    title = 'visible_groups'
+    title = 'visibility'
     parameter_name = 'visible'
 
     def lookups(self, request, model_admin):
@@ -75,6 +75,20 @@ class VisibleGroupFilter(SimpleListFilter):
             return queryset
         value = self.value() == '1'
         return queryset.filter(visible=value)
+
+
+class NoURLFilter(SimpleListFilter):
+    """Admin filter for groups without a url."""
+    title = 'no URL'
+    parameter_name = 'empty_url'
+
+    def lookups(self, request, model_admin):
+        return (('True', 'No URL'),)
+
+    def queryset(self, request, queryset):
+        if self.value() == 'True':
+            return queryset.filter(url='')
+        return queryset
 
 
 class GroupBaseEditAdminForm(forms.ModelForm):
@@ -98,7 +112,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
     list_display = ['name', 'member_count', 'vouched_member_count']
     list_display_links = ['name']
-    list_filter = [EmptyGroupFilter]
+    list_filter = [EmptyGroupFilter, NoURLFilter]
     readonly_fields = ['url']
 
     def get_form(self, request, obj=None, **kwargs):
@@ -177,10 +191,10 @@ class GroupAdmin(GroupBaseAdmin):
     add_form = autocomplete_light.modelform_factory(Group,
                                                     form=GroupAddAdminForm)
     inlines = [GroupAliasInline, GroupMembershipInline]
-    list_display = ['name', 'curator', 'wiki', 'website', 'irc_channel',
-                    'functional_area', 'accepting_new_members', 'members_can_leave', 'visible',
-                    'member_count', 'vouched_member_count']
-    list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter]
+    list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
+                    'members_can_leave', 'visible', 'member_count', 'vouched_member_count']
+    list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
+                   NoURLFilter]
 
 
 class GroupMembershipAdmin(admin.ModelAdmin):
