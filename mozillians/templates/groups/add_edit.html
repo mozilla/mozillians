@@ -1,11 +1,9 @@
 {% extends 'base.html' %}
 {% block page_title %}
   {% if creating %}
-    {{ _('Add a curated group') }}
+    {{ _('Add a group') }}
   {% elif group.functional_area %}
     {{ _('Edit functional area') }}
-  {% elif group.curator %}
-    {{ _('Edit curated group') }}
   {% else %}
     {{ _('Edit group') }}
   {% endif %}
@@ -21,7 +19,7 @@
 
   <header>
     {% if creating %}
-      <h1>{{ _('Add a curated group') }}</h1>
+      <h1>{{ _('Add a group') }}</h1>
       <p>
         {% trans %}
           Use this form to create a group on Mozillians.org. Before creating a group,
@@ -37,8 +35,6 @@
       </p>
     {% elif group.functional_area %}
       <h1>{{ _('Edit functional area') }}</h1>
-    {% elif group.curator %}
-      <h1>{{ _('Edit curated group') }}</h1>
     {% else %}
       <h1>{{ _('Edit group') }}</h1>
     {% endif %}
