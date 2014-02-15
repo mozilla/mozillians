@@ -29,6 +29,18 @@ class GroupForm(happyforms.ModelForm):
 
 class SuperuserGroupForm(happyforms.ModelForm):
     """Form used by superusers (admins) when editing a group"""
+    def clean(self):
+        cleaned_data = super(SuperuserGroupForm, self).clean()
+        accepting_new = cleaned_data.get('accepting_new_members')
+        criteria = cleaned_data.get('new_member_criteria')
+
+        if (accepting_new == 'by_request' and (criteria is None or len(criteria) == 0)):
+            msg = u'You must either specify the criteria or change the acceptance selection.'
+            self._errors['new_member_criteria'] = self.error_class([msg])
+            del cleaned_data['new_member_criteria']
+
+        return cleaned_data
+
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',
@@ -37,4 +49,5 @@ class SuperuserGroupForm(happyforms.ModelForm):
                   'functional_area',
                   'members_can_leave',
                   'accepting_new_members',
+                  'new_member_criteria',
                   ]
