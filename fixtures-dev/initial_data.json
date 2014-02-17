@@ -34,9 +34,6 @@
             "bio": "",
             "vouched_by": null,
             "last_updated": "2012-11-06T08:10:25",
-            "groups": [
-                1
-            ],
             "city": "",
             "skills": [],
             "photo": "",
@@ -67,5 +64,15 @@
             "email": "test@example.com",
             "date_joined": "2012-11-06T08:09:34"
         }
+    },
+  {
+    "pk": 1,
+    "model": "groups.groupmembership",
+    "fields": {
+      "userprofile": 1,
+      "group": 1,
+      "status": "member",
+      "date_joined": "2012-11-06T08:10:25"
     }
+  }
 ]
