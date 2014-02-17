@@ -685,6 +685,7 @@ class ExternalAccount(models.Model):
     TYPE_YAHOO = 'YAHOO'
     TYPE_WEBSITE = 'WEBSITE'
     TYPE_BITBUCKET = 'BITBUCKET'
+    TYPE_SLIDESHARE = 'SLIDESHARE'
 
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
@@ -702,6 +703,7 @@ class ExternalAccount(models.Model):
         TYPE_AIM: {'name': 'AIM', 'url': ''},
         TYPE_GTALK: {'name': 'Google Talk', 'url': ''},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
+        TYPE_SLIDESHARE: {'name': 'SlideShare', 'url': 'http://www.slideshare.net/{identifier}'},
         TYPE_YAHOO: {'name': 'Yahoo! Messenger', 'url': ''},
         TYPE_WEBSITE: {'name': 'Website URL',
                        'url': '{identifier}',
