@@ -66,39 +66,97 @@ class Migration(DataMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         'groups.group': {
-            'Meta': {'object_name': 'Group', 'db_table': "'group'"},
-            'always_auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
+            'Meta': {'ordering': "['name']", 'object_name': 'Group'},
+            'accepting_new_members': ('django.db.models.fields.CharField', [], {'default': "'by_request'", 'max_length': '10'}),
+            'curator': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'groups_curated'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['users.UserProfile']"}),
+            'description': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
+            'functional_area': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'irc_channel': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
+            'max_reminder': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'members_can_leave': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
+            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'}),
+            'visible': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'}),
+            'wiki': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
+        },
+        'groups.groupmembership': {
+            'Meta': {'unique_together': "(('userprofile', 'group'),)", 'object_name': 'GroupMembership'},
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'group': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['groups.Group']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
+            'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
+        },
+        'groups.language': {
+            'Meta': {'ordering': "['name']", 'object_name': 'Language'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'system': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
-            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'})
+            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
         },
-        'users.userprofile': {
-            'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},
-            'bio': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
-            'confirmation_code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'display_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['groups.Group']", 'symmetrical': 'False'}),
+        'groups.skill': {
+            'Meta': {'ordering': "['name']", 'object_name': 'Skill'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
-            'is_autovouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_confirmed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_vouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_updated': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'auto_now': 'True', 'blank': 'True'}),
-            'photo': ('sorl.thumbnail.fields.ImageField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
-            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': "orm['users.UserProfile']", 'null': 'True'}),
-            'website': ('django.db.models.fields.URLField', [], {'default': "''", 'max_length': '200', 'null': 'True', 'blank': 'True'})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
+            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
         },
         'users.externalaccount': {
-            'Meta': {'ordering': "['type']", 'object_name': 'ExternalAccount'},
+            'Meta': {'ordering': "['type']", 'unique_together': "(('identifier', 'type', 'user'),)", 'object_name': 'ExternalAccount'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'identifier': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'privacy': ('django.db.models.fields.PositiveIntegerField', [], {'default': '3'}),
             'type': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"}),
-            'identifier': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
+        'users.usernameblacklist': {
+            'Meta': {'ordering': "['value']", 'object_name': 'UsernameBlacklist'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_regex': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'value': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
+        },
+        'users.userprofile': {
+            'Meta': {'ordering': "['full_name']", 'object_name': 'UserProfile', 'db_table': "'profile'"},
+            'allows_community_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'allows_mozilla_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'basket_token': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
+            'bio': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'city': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
+            'country': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '50'}),
+            'date_mozillian': ('django.db.models.fields.DateField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
+            'date_vouched': ('django.db.models.fields.DateTimeField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
+            'full_name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255'}),
+            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'through': "orm['groups.GroupMembership']", 'to': "orm['groups.Group']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
+            'is_vouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'languages': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Language']"}),
+            'last_updated': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'auto_now': 'True', 'blank': 'True'}),
+            'photo': ('sorl.thumbnail.fields.ImageField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
+            'privacy_bio': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_city': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_country': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_date_mozillian': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_email': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_full_name': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_groups': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_ircname': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_languages': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_photo': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_region': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_skills': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_timezone': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_title': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'privacy_tshirt': ('mozillians.users.models.PrivacyField', [], {'default': '1'}),
+            'privacy_vouched_by': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
+            'region': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
+            'skills': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Skill']"}),
+            'timezone': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '70', 'blank': 'True'}),
+            'tshirt': ('django.db.models.fields.IntegerField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'}),
+            'vouched_by': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouchees'", 'on_delete': 'models.SET_NULL', 'default': 'None', 'to': "orm['users.UserProfile']", 'blank': 'True', 'null': 'True'})
+        }
     }
 
     complete_apps = ['users']
