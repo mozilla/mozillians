@@ -288,7 +288,7 @@ BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
 BROWSERID_VERIFY_CLASS = 'mozillians.phonebook.views.BrowserIDVerify'
 
 # Pagination: Items per page.
-ITEMS_PER_PAGE = 21
+ITEMS_PER_PAGE = 24
 
 COMPRESS_OFFLINE = True
 COMPRESS_ENABLED = True
