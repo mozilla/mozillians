@@ -78,6 +78,15 @@ class TestGroupRemoveMember(TestCase):
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
+    def test_as_curator_twice(self):
+        # removing a second time doesn't blow up
+        curator = UserFactory(userprofile={'is_vouched': True})
+        self.group.curator = curator.userprofile
+        self.group.save()
+        with self.login(curator) as client:
+            client.post(self.url, follow=False)
+            client.post(self.url, follow=False)
+
     def test_as_curator_from_unleavable(self):
         # curator can remove another even from an unleavable group
         self.group.members_can_leave = False
