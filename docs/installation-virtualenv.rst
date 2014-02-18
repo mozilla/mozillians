@@ -6,12 +6,12 @@ VirtualEnv Installation
 .. note::
 
    Installing Mozillians might be daunting.  Ask for help in
-   #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`, 
+   #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`,
    they will be happy to help.
 
 
-**Prerequisites:** You 'll need python 2.6, virtualenv and pip.  You'll also need
-mysql-dev (or the equivalent on your system), and MySQL server.
+**Prerequisites:** You'll need python 2.6, virtualenv and pip.  You'll also need
+mysql-dev (or the equivalent on your system), a MySQL server and `gettext`_.
 
 You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
 
@@ -123,4 +123,6 @@ When you want to start contributing...
 
 Have fun!
 
-.. _Fork the main Mozillians repository: https://github.com/mozilla/mozillians/fork_select
+.. _gettext: http://playdoh.readthedocs.org/en/latest/userguide/l10n.html#requirements
+.. _Fork the main Mozillians repository: https://github.com/mozilla/mozillians/fork
+
