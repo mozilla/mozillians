@@ -1,9 +1,11 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 import happyforms
+from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group
+from mozillians.groups.models import Group, GroupAlias
 
 
 class SortForm(forms.Form):
@@ -21,13 +23,30 @@ class SortForm(forms.Form):
 
 class GroupForm(happyforms.ModelForm):
 
+    def clean_name(self):
+        """Verify that name is unique in ALIAS_MODEL.
+
+        We have to duplicate code here and in
+        models.GroupBase.clean due to bug
+        https://code.djangoproject.com/ticket/16986. To update when we
+        upgrade to Django 1.7.
+
+        """
+        name = self.cleaned_data['name']
+        query = GroupAlias.objects.filter(name=name)
+        if self.instance.pk:
+            query = query.exclude(alias=self.instance)
+        if query.exists():
+            raise ValidationError(_('Group with this Name already exists.'))
+        return name
+
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',
                   'website', 'wiki']
 
 
-class SuperuserGroupForm(happyforms.ModelForm):
+class SuperuserGroupForm(GroupForm):
     """Form used by superusers (admins) when editing a group"""
     class Meta:
         model = Group

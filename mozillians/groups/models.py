@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.timezone import now
@@ -5,6 +6,7 @@ from django.utils.timezone import now
 from autoslug.fields import AutoSlugField
 from funfactory.urlresolvers import reverse
 from funfactory.utils import absolutify
+from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.helpers import slugify
@@ -19,6 +21,23 @@ class GroupBase(models.Model):
     class Meta:
         abstract = True
         ordering = ['name']
+
+    def clean(self):
+        """Verify that name is unique in ALIAS_MODEL.
+
+        We have to duplicate code here and in
+        forms.GroupForm.clean_name due to bug
+        https://code.djangoproject.com/ticket/16986. To update when we
+        upgrade to Django 1.7.
+
+        """
+        super(GroupBase, self).clean()
+        query = self.ALIAS_MODEL.objects.filter(name=self.name)
+        if self.pk:
+            query = query.exclude(alias=self)
+        if query.exists():
+            raise ValidationError({'name': _('This name already exists.')})
+        return self.name
 
     @classmethod
     def search(cls, query):
