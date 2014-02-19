@@ -24,9 +24,10 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from mozillians.common.helpers import gravatar
 from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
-                                      Language, LanguageAlias,
                                       Skill, SkillAlias)
+from mozillians.phonebook.helpers import langcode_to_name
 from mozillians.phonebook.validators import validate_twitter, validate_website
+from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
@@ -158,8 +159,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
-    languages = models.ManyToManyField(Language, blank=True,
-                                       related_name='members')
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
     photo = ImageField(default='', blank=True,
                        upload_to=_calculate_photo_filename)
@@ -285,11 +284,19 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         d.update(dict(bio=obj.bio))
         d.update(dict(has_photo=bool(obj.photo)))
 
-        for attribute in ['groups', 'skills', 'languages']:
+        for attribute in ['groups', 'skills']:
             groups = []
             for g in getattr(obj, attribute).all():
                 groups.extend(g.aliases.values_list('name', flat=True))
             d[attribute] = groups
+        # Add to search index language code, language name in English
+        # native lanugage name.
+        languages = []
+        for code in obj.languages.values_list('code', flat=True):
+            languages.append(code)
+            languages.append(langcode_to_name(code, 'en_US').lower())
+            languages.append(langcode_to_name(code, code).lower())
+        d['languages'] = list(set(languages))
         return d
 
     @classmethod
@@ -412,6 +419,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 return True
         return False
 
+    @property
+    def languages(self):
+        """Return user languages based on privacy settings."""
+        if self._privacy_level > self.privacy_languages:
+            return self.language_set.none()
+        return self.language_set.all()
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
@@ -431,16 +445,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             self.save()
 
     def set_membership(self, model, membership_list):
-        """Alters membership to Groups, Skills and Languages."""
+        """Alters membership to Groups and Skills."""
         if model is Group:
             m2mfield = self.groups
             alias_model = GroupAlias
         elif model is Skill:
             m2mfield = self.skills
             alias_model = SkillAlias
-        elif model is Language:
-            m2mfield = self.languages
-            alias_model = LanguageAlias
 
         # Remove any visible groups that weren't supplied in this list.
         if model is Group:
@@ -733,3 +744,20 @@ class ExternalAccount(models.Model):
             return _('You already have an account with this name and type.')
         else:
             return super(ExternalAccount, self).unique_error_message(model_class, unique_check)
+
+
+class Language(models.Model):
+    code = models.CharField(max_length=63, choices=get_languages_for_locale('en'))
+    userprofile = models.ForeignKey(UserProfile)
+
+    class Meta:
+        ordering = ['code']
+        unique_together = ('code', 'userprofile')
+
+    def __unicode__(self):
+        return self.code
+
+    def unique_error_message(self, model_class, unique_check):
+        if (model_class == type(self) and unique_check == ('code', 'userprofile')):
+            return _('This language has already been selected.')
+        return super(Language, self).unique_error_message(model_class, unique_check)

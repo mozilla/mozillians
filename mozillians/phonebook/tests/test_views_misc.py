@@ -1,29 +1,21 @@
 import os.path
 
-from mock import patch
 
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseBadRequest, HttpResponseNotAllowed
 from django.test.client import Client
+
+from mock import patch
 from nose.tools import eq_, ok_
+
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
+from mozillians.phonebook.tests import _get_privacy_fields
 from mozillians.users.managers import MOZILLIANS, PRIVILEGED
 from mozillians.users.models import UserProfilePrivacyModel
 from mozillians.users.tests import UserFactory
-
-
-def _get_privacy_fields(privacy_level):
-    """Helper which returns a dict with privacy fields set to privacy_level"""
-    data = {}
-    for field in UserProfilePrivacyModel._meta._fields():
-        data[field.name] = privacy_level
-
-    # privacy_tshirt field has only one level of privacy available
-    data['privacy_tshirt'] = PRIVILEGED
-    return data
 
 
 class SearchTests(TestCase):
@@ -177,7 +169,11 @@ class EmailChangeTests(TestCase):
                 'username': user.username,
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
@@ -195,7 +191,11 @@ class ImageTests(TestCase):
                 'photo': open(file_path, 'rb'),
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         data.update(_get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -255,7 +255,11 @@ class ImageTests(TestCase):
                 'username': user.username,
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
 
         for field in UserProfilePrivacyModel._meta._fields():
             data[field.name] = MOZILLIANS
@@ -273,7 +277,7 @@ class DateValidationTests(TestCase):
 
         Related bug 914448.
         """
-        user = UserFactory.create(email='es@example',
+        user = UserFactory.create(email='es@example.com',
                                   userprofile={'is_vouched': True})
         data = {'full_name': user.userprofile.full_name,
                 'email': user.email,
@@ -283,7 +287,11 @@ class DateValidationTests(TestCase):
                 'date_mozillian_month': '1',
                 'externalaccount_set-MAX_NUM_FORMS': '1000',
                 'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0'}
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
         data.update(_get_privacy_fields(MOZILLIANS))
 
         url = reverse('phonebook:profile_edit', prefix='/es/')

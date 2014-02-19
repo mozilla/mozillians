@@ -77,7 +77,7 @@ def index_functional_areas(request):
 def search(request, searched_object=Group):
     """Simple wildcard search for a group using a GET parameter.
 
-    Used for group/skill/language auto-completion.
+    Used for group/skill auto-completion.
 
     """
     term = request.GET.get('term', None)

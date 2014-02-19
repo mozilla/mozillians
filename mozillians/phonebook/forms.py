@@ -6,18 +6,19 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
-from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
 import happyforms
 from PIL import Image
 from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.groups.models import Language, Skill
+from mozillians.groups.models import Skill
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.models import ExternalAccount, UserProfile
+from mozillians.users import get_languages_for_locale
+from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -102,9 +103,6 @@ class ProfileForm(happyforms.ModelForm):
         label=_lazy(u'When did you get involved with Mozilla?'),
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
-    languages = forms.CharField(
-        label=_lazy(u'Start typing to add a language you speak (example: '
-                    u'English, French, German)'), required=False)
     skills = forms.CharField(
         label=_lazy(u'Start typing to add a skill (example: Python, '
                     u'javascript, Graphic Design, User Research)'),
@@ -154,18 +152,6 @@ class ProfileForm(happyforms.ModelForm):
                 photo.size = cleaned_photo.tell()
         return photo
 
-    def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
-                        self.cleaned_data['languages']):
-            raise forms.ValidationError(_(u'Languages can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
-        languages = self.cleaned_data['languages']
-
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          languages.lower().split(',')))
-
     def clean_skills(self):
         if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
             raise forms.ValidationError(_(u'Skills can only contain '
@@ -179,8 +165,28 @@ class ProfileForm(happyforms.ModelForm):
     def save(self):
         """Save the data to profile."""
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        self.instance.set_membership(Language, self.cleaned_data['languages'])
         super(ProfileForm, self).save()
+
+
+class BaseLanguageFormSet(BaseInlineFormSet):
+
+    def __init__(self, *args, **kwargs):
+        self.locale = kwargs.pop('locale', 'en')
+        super(BaseLanguageFormSet, self).__init__(*args, **kwargs)
+
+    def add_fields(self, form, index):
+        super(BaseLanguageFormSet, self).add_fields(form, index)
+        choices = [('', '---------')] + get_languages_for_locale(self.locale)
+        form.fields['code'].choices = choices
+
+    class Meta:
+        models = Language
+        fields = ['code']
+
+
+LanguagesFormset = inlineformset_factory(UserProfile, Language,
+                                         formset=BaseLanguageFormSet,
+                                         extra=1)
 
 
 class EmailForm(happyforms.Form):

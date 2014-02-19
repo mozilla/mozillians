@@ -18,8 +18,8 @@ from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
 from mozillians.users.cron import index_all_profiles
-from mozillians.users.models import (COUNTRIES, PUBLIC, UserProfile,
-                                     UsernameBlacklist)
+from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
+                                     UserProfile, UsernameBlacklist)
 
 
 admin.site.unregister(User)
@@ -273,6 +273,7 @@ class UserAdmin(UserAdmin):
     def full_name(self, obj):
         return obj.userprofile.full_name
 
+
 admin.site.register(User, UserAdmin)
 
 
@@ -283,4 +284,14 @@ class UsernameBlacklistAdmin(admin.ModelAdmin):
     list_filter = ['is_regex']
     list_display = ['value', 'is_regex']
 
+
 admin.site.register(UsernameBlacklist, UsernameBlacklistAdmin)
+
+
+class LanguageAdmin(admin.ModelAdmin):
+    search_fields = ['userprofile__full_name', 'userprofile__user__email', 'code']
+    list_display = ['code', 'userprofile']
+    list_filter = ['code']
+
+
+admin.site.register(Language, LanguageAdmin)

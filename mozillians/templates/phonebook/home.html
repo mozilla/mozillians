@@ -129,11 +129,11 @@
             {% endfor %}
           </section>
         {% endif %}
-        {% if user.userprofile.languages.count() %}
+        {% if user.userprofile.languages.exists() %}
           <section class="languages">
             <h4>{{ _('Languages') }}</h4>
-            {% for language in user.userprofile.languages.all() %}
-              {{ language|capitalize }}
+            {% for language in user.userprofile.languages %}
+              {{ langcode_to_name(language.code) }}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>

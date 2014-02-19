@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
 
 import factory
+from factory import fuzzy
 
-from mozillians.users.models import UserProfile
+from mozillians.users.models import Language, UserProfile
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -30,3 +31,8 @@ class UserFactory(factory.DjangoModelFactory):
             for key, value in extracted.items():
                 setattr(self.userprofile, key, value)
         self.userprofile.save()
+
+
+class LanguageFactory(factory.DjangoModelFactory):
+    FACTORY_FOR = Language
+    code = fuzzy.FuzzyChoice(choices=['en', 'fr', 'el', 'es'])
