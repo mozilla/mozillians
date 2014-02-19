@@ -187,8 +187,7 @@
           <div id="languages" class="p-category category">
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages -%}
-                {% set language_name = langcode_to_name(language.code, locale) %}
-                  {{ language_name }}
+                {{ langcode_to_name(language.code) }}
                 {%- if not loop.last %},{% endif %}
               {% endfor %}
           </div>

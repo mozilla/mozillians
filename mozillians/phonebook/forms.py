@@ -17,7 +17,7 @@ from mozillians.groups.models import Skill
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users import get_translated_languages
+from mozillians.users import get_languages_for_locale
 from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
@@ -176,7 +176,8 @@ class BaseLanguageFormSet(BaseInlineFormSet):
 
     def add_fields(self, form, index):
         super(BaseLanguageFormSet, self).add_fields(form, index)
-        form.fields['code'].choices = get_translated_languages(self.locale)
+        choices = [('', '---------')] + get_languages_for_locale(self.locale)
+        form.fields['code'].choices = choices
 
     class Meta:
         models = Language

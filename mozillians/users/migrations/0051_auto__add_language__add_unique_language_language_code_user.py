@@ -1,253 +1,32 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
 
-LANGUAGES = {'afrikaans': 'af',
-             u'arabic': 'ar',
-             u'assamese': 'as',
-             u'arabe': 'ar',
-             u'english': 'en',
-             u'esperanto': 'eo',
-             u'spanish': 'es',
-             u'espanol': 'es',
-             u'some spanish': 'es',
-             u'basque': 'eu',
-             u'persian': 'fa',
-             u'farsi': 'fa',
-             u'finnish': 'fi',
-             u'french': 'fr',
-             u'francais': 'fr',
-             u'some french': 'fr',
-             u'fr': 'fr',
-             u'gujarati': 'gu',
-             u'hebrew': 'he',
-             u'hindi': 'hi',
-             u'croatian': 'hr',
-             u'hungarian': 'hu',
-             u'armenian': 'hy',
-             u'indonesian': 'id',
-             u'bahasa indonesia': 'id',
-             u'bahasa': 'id',
-             u'italian': 'it',
-             u'italiano': 'it',
-             u'japanese': 'ja',
-             u'javanese': 'jv',
-             u'khmer': 'km',
-             u'kannada': 'kn',
-             u'korean': 'ko',
-             u'latin': 'la',
-             u'luganda': 'lg',
-             u'latvian': 'lv',
-             u'malayalam': 'ml',
-             u'marathi': 'mr',
-             u'malay': 'ms',
-             u'bahasa malaysia': 'ms',
-             u'norwegian': 'nb',
-             u'nepali': 'ne',
-             u'dutch': 'nl',
-             u'nederlands': 'nl',
-             u'oriya': 'or',
-             u'punjabi': 'pa',
-             u'polish': 'pl',
-             u'polski': 'pl',
-             u'portuguese': 'pt',
-             u'portugues': 'pt',
-             u'brazilian portuguese': 'pt_BR',
-             u'romanian': 'ro',
-             u'russian': 'ru',
-             u'sanskrit': 'sa',
-             u'sinhala': 'si',
-             u'slovak': 'sk',
-             u'slovenian': 'sl',
-             u'albanian': 'sq',
-             u'serbian': 'sr',
-             u'swedish': 'sv',
-             u'swahili': 'sw',
-             u'kiswahili': 'sw',
-             u'tamil': 'ta',
-             u'telugu': 'te',
-             u'thai': 'th',
-             u'tagalog': 'tl',
-             u'filipino': 'tl',
-             u'turkish': 'tr',
-             u'ukrainian': 'uk',
-             u'urdu': 'ur',
-             u'vietnamese': 'vi',
-             u'chinese': 'zh_Hans',
-             u'mandarin': 'zh_CN',
-             u'cantonese': 'zh_CN',
-             u'mandarin chinese': 'zh_CN',
-             u'traditional chinese': 'zh_Hant',
-             u'taiwanese': 'zh_TW',
-             u'chinese traditional': 'zh_TW',
-             u'Afrikaans': 'af',
-             u'Acholi': 'ach',
-             u'Akan': 'ak',
-             u'Amharic': 'am-et',
-             u'Aragonese': 'an',
-             u'Arabic': 'ar',
-             u'Assamese': 'as',
-             u'Asturian': 'ast',
-             u'Azerbaijani': 'az',
-             u'Belarusian': 'be',
-             u'Bulgarian': 'bg',
-             u'Bengali (India)': 'bn-IN',
-             u'Bengali (Bangladesh)': 'bn-BD',
-             u'Breton': 'br',
-             u'Bosnian': 'bs',
-             u'Catalan': 'ca',
-             u'Catalan (Valencian)': 'ca-valencia',
-             u'Czech': 'cs',
-             u'Kashubian': 'csb',
-             u'Welsh': 'cy',
-             u'Danish': 'da',
-             u'German': 'de',
-             u'German (Austria)': 'de-AT',
-             u'German (Switzerland)': 'de-CH',
-             u'German (Germany)': 'de-DE',
-             u'Lower sorbian': 'dsb',
-             u'Greek': 'el',
-             u'English (Australian)': 'en-AU',
-             u'English (Canadian)': 'en-CA',
-             u'English (New Zealand)': 'en-NZ',
-             u'English (US)': 'en-US',
-             u'English (British)': 'en-GB',
-             u'English (South African)': 'en-ZA',
-             u'Esperanto': 'eo',
-             u'Spanish': 'es',
-             u'Spanish (Argentina)': 'es-AR',
-             u'Spanish (Chile)': 'es-CL',
-             u'Spanish (Spain)': 'es-ES',
-             u'Spanish (Mexico)': 'es-MX',
-             u'Estonian': 'et',
-             u'Basque': 'eu',
-             u'Persian': 'fa',
-             u'Fulah': 'ff',
-             u'Finnish': 'fi',
-             u'Fijian': 'fj-FJ',
-             u'French': 'fr',
-             u'Friulian': 'fur-IT',
-             u'Frisian': 'fy-NL',
-             u'Irish': 'ga',
-             u'Irish': 'ga-IE',
-             u'Gaelic (Scotland)': 'gd',
-             u'Galician': 'gl',
-             u'Gujarati': 'gu-IN',
-             u'Hebrew': 'he',
-             u'Hindi': 'hi',
-             u'Hindi (India)': 'hi-IN',
-             u'Croatian': 'hr',
-             u'Upper Sorbian': 'hsb',
-             u'Hungarian': 'hu',
-             u'Armenian': 'hy-AM',
-             u'Indonesian': 'id',
-             u'Icelandic': 'is',
-             u'Italian': 'it',
-             u'Japanese': 'ja',
-             u'Japanese': 'ja-JP-mac',
-             u'Georgian': 'ka',
-             u'Kazakh': 'kk',
-             u'Khmer': 'km',
-             u'Kannada': 'kn',
-             u'Korean': 'ko',
-             u'Kurdish': 'ku',
-             u'Luganda': 'lg',
-             u'Ligurian': 'lij',
-             u'Lithuanian': 'lt',
-             u'Latvian': 'lv',
-             u'Maithili': 'mai',
-             u'Malagasy': 'mg',
-             u'Maori (Aotearoa)': 'mi',
-             u'Macedonian': 'mk',
-             u'Malayalam': 'ml',
-             u'Mongolian': 'mn',
-             u'Marathi': 'mr',
-             u'Malay': 'ms',
-             u'Burmese': 'my',
-             u'Norwegian (Bokmål)': 'nb-NO',
-             u'Nepali': 'ne-NP',
-             u'Norwegian (Nynorsk)': 'nn-NO',
-             u'Dutch': 'nl',
-             u'Ndebele, South': 'nr',
-             u'Northern Sotho': 'nso',
-             u'Occitan (Lengadocian)': 'oc',
-             u'Oriya': 'or',
-             u'Punjabi': 'pa-IN',
-             u'Polish': 'pl',
-             u'Portuguese (Brazilian)': 'pt-BR',
-             u'Portuguese (Portugal)': 'pt-PT',
-             u'Romanian': 'ro',
-             u'Romansh': 'rm',
-             u'Russian': 'ru',
-             u'Kinyarwanda': 'rw',
-             u'Sanskrit': 'sa',
-             u'Sakha': 'sah',
-             u'Sinhala': 'si',
-             u'Slovak': 'sk',
-             u'Slovenian': 'sl',
-             u'Songhai': 'son',
-             u'Albanian': 'sq',
-             u'Serbian': 'sr',
-             u'Serbian': 'sr-Latn',
-             u'Siswati': 'ss',
-             u'Southern Sotho': 'st',
-             u'Swedish': 'sv-SE',
-             u'Swahili': 'sw',
-             u'Tamil': 'ta',
-             u'Tamil (India)': 'ta-IN',
-             u'Tamil (Sri Lanka)': 'ta-LK',
-             u'Telugu': 'te',
-             u'Thai': 'th',
-             u'Tswana': 'tn',
-             u'Turkish': 'tr',
-             u'Tsonga': 'ts',
-             u'Tatar': 'tt-RU',
-             u'Ukrainian': 'uk',
-             u'Urdu': 'ur',
-             u'Venda': 've',
-             u'Vietnamese': 'vi',
-             u'Wolof': 'wo',
-             u'Xhosa': 'xh',
-             u'Chinese (Simplified)': 'zh-CN',
-             u'Chinese (Traditional)': 'zh-TW',
-             u'Zulu': 'zu'}
-
-
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Migrate matching languages to user's UserProfile."
-        LANGS = dict((k.lower(), v) for k, v in LANGUAGES.iteritems())
+        # Adding model 'Language'
+        db.create_table('users_language', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('code', self.gf('django.db.models.fields.CharField')(max_length=63)),
+            ('userprofile', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.UserProfile'])),
+        ))
+        db.send_create_signal('users', ['Language'])
 
-        users = orm['users.UserProfile'].objects.all()
-        for user in users:
-            common_set = user.languages.filter(name__in=LANGS)
-            for language in common_set:
-                if (not orm['users.Language']
-                        .objects.filter(
-                            user=user,
-                            code=LANGS[language.name])
-                        .exists()):
-                    orm['users.Language'].objects.create(user=user,
-                                                         code=LANGS[language.name])
-        orm['groups.Language'].objects.all().delete()
+        # Adding unique constraint on 'Language', fields ['code', 'userprofile']
+        db.create_unique('users_language', ['code', 'userprofile_id'])
+
 
     def backwards(self, orm):
-        "Delete all the languaes from the UserProfile of a user."
-        users = orm['users.UserProfile'].objects.all()
+        # Removing unique constraint on 'Language', fields ['code', 'userprofile']
+        db.delete_unique('users_language', ['code', 'userprofile_id'])
 
-        for user in users:
-            languages = list(set(lang.lower() for lang in
-                             [k for k, v in LANGUAGES.iteritems()
-                              if user.language_set.filter(code__iexact=v)]))
-            for language in languages:
-                lang, created = orm['groups.Language'].objects.get_or_create(name=language)
-                user.languages.add(lang)
-        for code in orm['users.Language'].objects.all():
-            code.delete()
+        # Deleting model 'Language'
+        db.delete_table('users_language')
+
 
     models = {
         'auth.group': {
@@ -331,7 +110,7 @@ class Migration(DataMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
         'users.language': {
-            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'user'),)", 'object_name': 'Language'},
+            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'userprofile'),)", 'object_name': 'Language'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '63'}),
             'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
@@ -387,4 +166,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['users']
-    symmetrical = True

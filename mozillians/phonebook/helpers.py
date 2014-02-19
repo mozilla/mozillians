@@ -1,10 +1,12 @@
 import re
 from datetime import date
 
+from django.utils.translation import get_language
+
 import jinja2
 from jingo import register
 
-from mozillians.users import get_translated_languages
+from mozillians.users import get_languages_for_locale
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -33,8 +35,15 @@ def get_mozillian_years(userprofile):
 
 
 @register.function
-def langcode_to_name(code, locale):
-    translated_languages = get_translated_languages(locale)
+def langcode_to_name(code, locale=None):
+    """Return the language name for the code in locale.
+
+    If locale is None return in current activated language.
+    """
+
+    if not locale:
+        locale = get_language()
+    translated_languages = get_languages_for_locale(locale)
     try:
         lang = dict(translated_languages)[code]
     except KeyError:

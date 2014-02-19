@@ -9,7 +9,7 @@ class Migration(SchemaMigration):
 
     # Explicitly declare the order of migrations
     depends_on = (
-        ('users', '0052_auto_del_languages'),
+        ('users', '0053_auto_del_languages'),
     )
 
     def forwards(self, orm):

@@ -2,52 +2,48 @@ import babel
 
 
 AVAILABLE_LANGUAGES = {}
-REMOVE_KEYS = ['mul', 'und', 'mis', 'zxx', 'en_US', 'en_GB']
+REMOVE_LANGS = ['art', 'cpe', 'cpf', 'cpp', 'de_AT', 'de_CH',
+                'mul', 'und', 'mis', 'zxx', 'en_US', 'en_GB', 'en_AU', 'en_CA',
+                'fr_CA', 'fr_CH']
 
 
-def get_localized_language(locale):
-    """Return all the available languages for a locale."""
-    try:
-        languages = babel.Locale(locale).languages
-    except babel.UnknownLocaleError:
-        languages = babel.Locale('en').languages
+def get_languages_for_locale(locale):
+    """This method returns available languages localized in locale.
 
-    for k in REMOVE_KEYS:
-        if k in languages:
-            del languages[k]
-    return languages
+    If a language cannnot be localized, return REFERENCE_LANGUAGE.
+    Translated dictionaries get cached in AVAILABLE_LANGUAGES.
 
+    We use Babel to get translated language names.
 
-LANGUAGE_REFERENCE = get_localized_language('en')
-
-
-def get_translated_languages(locale):
-    """This method returns all the available languages,
-
-    localized in user's native language. If a language is not localized,
-    return the equivalent translation into English.
-    The available translations for each locale are stored in
-    AVAILABLE_LANGUAGES for caching purposes.
-    Babel internationalization utilities are used for this purpose."""
-
-    if locale == 'en-US':
-        locale = 'en'
-    if locale:
-        locale = locale.replace('-', '_')
+    """
+    # Babel uses _ instead of - for locales. E.g. 'en_US' instead of
+    # 'en-US'
+    locale = locale.replace('-', '_')
     if locale not in AVAILABLE_LANGUAGES:
         try:
-            local_lang = get_localized_language(locale)
+            local_lang = babel.Locale(locale).languages
         except babel.UnknownLocaleError:
-            if 'en' in AVAILABLE_LANGUAGES:
-                return AVAILABLE_LANGUAGES['en']
-            local_lang = LANGUAGE_REFERENCE
-        diff = [lc for lc in LANGUAGE_REFERENCE.keys()
+            return AVAILABLE_LANGUAGES['en']
+
+        # If a translation is missing, add an untranslated entry from
+        # the REFERENCE_LANGUAGE
+        diff = [lc for lc in REFERENCE_LANGUAGE.keys()
                 if lc not in local_lang.keys()]
         for lc in diff:
-            local_lang[lc] = LANGUAGE_REFERENCE[lc]
-        AVAILABLE_LANGUAGES[locale] = sorted([(key, value.capitalize())
-                                             for key, value in local_lang.items()],
-                                             key=lambda language: language[1])
-        if AVAILABLE_LANGUAGES[locale][0][1] != '-----':
-            AVAILABLE_LANGUAGES[locale].insert(0, ('', '-----'))
+            local_lang[lc] = REFERENCE_LANGUAGE[lc]
+
+        # Remove unwanted and testing languages.
+        map(local_lang.pop, REMOVE_LANGS)
+
+        # Sort based on language name.
+        local_lang = sorted([(key, value.capitalize())
+                             for key, value in local_lang.items()],
+                            key=lambda language: language[1])
+
+        AVAILABLE_LANGUAGES[locale] = local_lang
     return AVAILABLE_LANGUAGES[locale]
+
+
+REFERENCE_LANGUAGE = babel.Locale('en').languages
+# Add 'en' to AVAILABLE_LANGUAGES
+get_languages_for_locale('en')

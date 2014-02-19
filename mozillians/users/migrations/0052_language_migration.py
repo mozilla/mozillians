@@ -1,27 +1,149 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import SchemaMigration
+from south.v2 import DataMigration
 from django.db import models
 
+import babel
 
-class Migration(SchemaMigration):
+LANGUAGES = {u'afrikaans': 'af',
+             u'arabic': 'ar',
+             u'assamese': 'as',
+             u'arabe': 'ar',
+             u'english': 'en',
+             u'esperanto': 'eo',
+             u'spanish': 'es',
+             u'espanol': 'es',
+             u'some spanish': 'es',
+             u'basque': 'eu',
+             u'persian': 'fa',
+             u'farsi': 'fa',
+             u'finnish': 'fi',
+             u'french': 'fr',
+             u'francais': 'fr',
+             u'some french': 'fr',
+             u'fr': 'fr',
+             u'gujarati': 'gu',
+             u'hebrew': 'he',
+             u'hindi': 'hi',
+             u'croatian': 'hr',
+             u'hungarian': 'hu',
+             u'armenian': 'hy',
+             u'indonesian': 'id',
+             u'bahasa indonesia': 'id',
+             u'bahasa': 'id',
+             u'italian': 'it',
+             u'italiano': 'it',
+             u'japanese': 'ja',
+             u'javanese': 'jv',
+             u'khmer': 'km',
+             u'kannada': 'kn',
+             u'korean': 'ko',
+             u'latin': 'la',
+             u'luganda': 'lg',
+             u'latvian': 'lv',
+             u'malayalam': 'ml',
+             u'marathi': 'mr',
+             u'malay': 'ms',
+             u'bahasa malaysia': 'ms',
+             u'norwegian': 'nb',
+             u'nepali': 'ne',
+             u'dutch': 'nl',
+             u'nederlands': 'nl',
+             u'oriya': 'or',
+             u'punjabi': 'pa',
+             u'polish': 'pl',
+             u'polski': 'pl',
+             u'portuguese': 'pt',
+             u'portugues': 'pt',
+             u'brazilian portuguese': 'pt_BR',
+             u'romanian': 'ro',
+             u'russian': 'ru',
+             u'sanskrit': 'sa',
+             u'sinhala': 'si',
+             u'slovak': 'sk',
+             u'slovenian': 'sl',
+             u'albanian': 'sq',
+             u'serbian': 'sr',
+             u'swedish': 'sv',
+             u'swahili': 'sw',
+             u'kiswahili': 'sw',
+             u'tamil': 'ta',
+             u'telugu': 'te',
+             u'thai': 'th',
+             u'tagalog': 'tl',
+             u'filipino': 'tl',
+             u'turkish': 'tr',
+             u'ukrainian': 'uk',
+             u'urdu': 'ur',
+             u'vietnamese': 'vi',
+             u'chinese': 'zh_Hans',
+             u'mandarin': 'zh_Hans',
+             u'cantonese': 'zh_Hans',
+             u'mandarin chinese': 'zh_Hans',
+             u'traditional chinese': 'zh_Hant',
+             u'taiwanese': 'zh_Hans',
+             u'chinese traditional': 'zh_Hant',
+             u'german': 'de',
+             u'anglais': 'en',
+             u'bangla': 'bn',
+             u'bengali': 'bn',
+             u'englisch': 'en',
+             u'en': 'en',
+             u'ingles': 'en',
+             u'indonesia': 'id',
+             u'angielski': 'en',
+             u'balinese': 'ban',
+             u'sundanese': 'su',
+             u'marwari': 'mwr',
+             u'bhojpuri': 'bho',
+             u'bosnian': 'bs',
+             u'bulgarian': 'bg',
+             u'catalan': 'ca',
+             u'czech': 'cs',
+             u'danish': 'da',
+             u'de': 'de',
+             u'deutsch': 'de',
+             u'frances': 'fr',
+             u'greek': 'el',
+             u'lithuanian': 'lt',
+             u'macedonian': 'mk',
+             u'maithili': 'mai',
+             u'mongolian': 'mn',
+             u'newari': 'new',
+             u'rajasthani': 'raj',
+             u'aragonese': 'an',
+             u'british english': 'en',
+             u'burmese': 'my'} 
+
+
+class Migration(DataMigration):
 
     def forwards(self, orm):
-        # Removing M2M table for field languages on 'UserProfile'
-        db.delete_table(db.shorten_name('profile_languages'))
+        """Migrate matching languages to user's UserProfile."""
 
+        profiles = orm['users.UserProfile'].objects.all()
+        for profile in profiles:
+            common_set = profile.languages.filter(name__in=LANGUAGES)
+            for language in common_set:
+                orm['users.Language'].objects.get_or_create(
+                    userprofile=profile, code=LANGUAGES[language.name])
+        orm['groups.Language'].objects.all().delete()
 
     def backwards(self, orm):
-        # Adding M2M table for field languages on 'UserProfile'
-        m2m_table_name = db.shorten_name('profile_languages')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('userprofile', models.ForeignKey(orm['users.userprofile'], null=False)),
-            ('language', models.ForeignKey(orm['groups.language'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['userprofile_id', 'language_id'])
+        """Delete all the languages from the UserProfile of a user."""
+        profiles = orm['users.UserProfile'].objects.all()
+        available_languages = babel.Locale('en').languages
 
+        for profile in profiles:
+            lang_codes = profile.language_set.values_list('code', flat=True)
+            user_languages = []
+            for code in lang_codes:
+                user_languages.append(available_languages[code])
+            for language in user_languages:
+                lang, created = orm['groups.Language'].objects.get_or_create(name=language.lower())
+                profile.languages.add(lang)
+        orm['users.Language'].objects.all().delete()
 
     models = {
         'auth.group': {
@@ -84,6 +206,12 @@ class Migration(SchemaMigration):
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
+        'groups.language': {
+            'Meta': {'ordering': "['name']", 'object_name': 'Language'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
+            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
+        },
         'groups.skill': {
             'Meta': {'ordering': "['name']", 'object_name': 'Skill'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -99,7 +227,7 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
         'users.language': {
-            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'user'),)", 'object_name': 'Language'},
+            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'userprofile'),)", 'object_name': 'Language'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '63'}),
             'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
@@ -125,6 +253,7 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
             'is_vouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'languages': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Language']"}),
             'last_updated': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'auto_now': 'True', 'blank': 'True'}),
             'photo': ('sorl.thumbnail.fields.ImageField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'privacy_bio': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),
@@ -154,3 +283,4 @@ class Migration(SchemaMigration):
     }
 
     complete_apps = ['users']
+    symmetrical = True

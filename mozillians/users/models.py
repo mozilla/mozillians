@@ -27,7 +27,7 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
 from mozillians.phonebook.validators import validate_twitter, validate_website
-from mozillians.users import get_translated_languages
+from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
@@ -294,8 +294,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         languages = []
         for code in obj.languages.values_list('code', flat=True):
             languages.append(code)
-            languages.append(langcode_to_name(code, 'en_US'))
-            languages.append(langcode_to_name(code, code))
+            languages.append(langcode_to_name(code, 'en_US').lower())
+            languages.append(langcode_to_name(code, code).lower())
         d['languages'] = list(set(languages))
         return d
 
@@ -747,8 +747,7 @@ class ExternalAccount(models.Model):
 
 
 class Language(models.Model):
-    code = models.CharField(max_length=63,
-                            choices=get_translated_languages('en'))
+    code = models.CharField(max_length=63, choices=get_languages_for_locale('en'))
     userprofile = models.ForeignKey(UserProfile)
 
     class Meta:
@@ -759,8 +758,6 @@ class Language(models.Model):
         return self.code
 
     def unique_error_message(self, model_class, unique_check):
-        if (model_class == type(self) and
-                unique_check == ('code', 'userprofile')):
+        if (model_class == type(self) and unique_check == ('code', 'userprofile')):
             return _('This language has already been selected.')
-        return (super(Language, self)
-                .unique_error_message(model_class, unique_check))
+        return super(Language, self).unique_error_message(model_class, unique_check)

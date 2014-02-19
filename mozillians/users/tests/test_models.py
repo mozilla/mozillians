@@ -19,7 +19,7 @@ from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
-from mozillians.users.tests import UserFactory
+from mozillians.users.tests import LanguageFactory, UserFactory
 
 
 class SignaledFunctionsTests(TestCase):
@@ -87,10 +87,6 @@ class UserProfileTests(TestCase):
         eq_(profile.full_name, 'foobar')
 
     def test_extract_document(self):
-        group_1 = GroupFactory.create()
-        group_2 = GroupFactory.create()
-        skill_1 = SkillFactory.create()
-        skill_2 = SkillFactory.create()
         user = UserFactory.create(userprofile={'city': 'athens',
                                                'region': 'attika',
                                                'allows_community_sites': False,
@@ -99,6 +95,12 @@ class UserProfileTests(TestCase):
                                                'full_name': 'Nikos Koukos',
                                                'bio': 'This is my bio'})
         profile = user.userprofile
+        group_1 = GroupFactory.create()
+        group_2 = GroupFactory.create()
+        skill_1 = SkillFactory.create()
+        skill_2 = SkillFactory.create()
+        LanguageFactory.create(code='fr', userprofile=profile)
+        LanguageFactory.create(code='en', userprofile=profile)
         group_1.add_member(profile)
         group_2.add_member(profile)
         profile.skills.add(skill_1)
@@ -119,6 +121,8 @@ class UserProfileTests(TestCase):
         eq_(result['has_photo'], False)
         eq_(result['groups'], [group_1.name, group_2.name])
         eq_(result['skills'], [skill_1.name, skill_2.name])
+        eq_(set(result['languages']),
+            set([u'en', u'fr', u'english', u'french', u'français']))
 
     def test_get_mapping(self):
         ok_(UserProfile.get_mapping())
@@ -516,14 +520,21 @@ class UserProfileTests(TestCase):
         with self.assertRaises(SomeException):
             profile.lookup_basket_token()
 
-
-class LanguageTests(TestCase):
-
-    def test_language_public_mozillians(self):
+    def test_language_privacy_public(self):
+        """Test that instance with level PUBLIC cannot access languages."""
         profile = UserFactory.create().userprofile
-        profile.set_instance_privacy_level(PUBLIC)
         profile.language_set.create(code='en')
+        profile.privacy_language = MOZILLIANS
+        profile.save()
+        profile.set_instance_privacy_level(PUBLIC)
         eq_(profile.languages.count(), 0)
+
+    def test_language_privacy_mozillians(self):
+        """Test that instance with level MOZILLIANS can access languages."""
+        profile = UserFactory.create().userprofile
+        profile.language_set.create(code='en')
+        profile.privacy_language = MOZILLIANS
+        profile.save()
         profile.set_instance_privacy_level(MOZILLIANS)
         eq_(profile.languages.count(), 1)
 

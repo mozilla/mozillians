@@ -7,7 +7,7 @@ import bleach
 
 from mozillians.groups.models import Group, Skill  # noqa
 from mozillians.mozspaces.models import MozSpace  # noqa
-from mozillians.users.models import UserProfile  # noqa
+from mozillians.users.models import Language, UserProfile  # noqa
 
 ALLOWED_TAGS = ['em', 'strong']
 

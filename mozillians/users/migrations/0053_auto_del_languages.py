@@ -8,24 +8,19 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Language'
-        db.create_table('users_language', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('code', self.gf('django.db.models.fields.CharField')(max_length=63)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['users.UserProfile'])),
-        ))
-        db.send_create_signal('users', ['Language'])
-
-        # Adding unique constraint on 'Language', fields ['code', 'user']
-        db.create_unique('users_language', ['code', 'user_id'])
+        # Removing M2M table for field languages on 'UserProfile'
+        db.delete_table(db.shorten_name('profile_languages'))
 
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Language', fields ['code', 'user']
-        db.delete_unique('users_language', ['code', 'user_id'])
-
-        # Deleting model 'Language'
-        db.delete_table('users_language')
+        # Adding M2M table for field languages on 'UserProfile'
+        m2m_table_name = db.shorten_name('profile_languages')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('userprofile', models.ForeignKey(orm['users.userprofile'], null=False)),
+            ('language', models.ForeignKey(orm['groups.language'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['userprofile_id', 'language_id'])
 
 
     models = {
@@ -89,12 +84,6 @@ class Migration(SchemaMigration):
             'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
             'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
-        'groups.language': {
-            'Meta': {'ordering': "['name']", 'object_name': 'Language'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'url': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
-        },
         'groups.skill': {
             'Meta': {'ordering': "['name']", 'object_name': 'Skill'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -110,7 +99,7 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
         },
         'users.language': {
-            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'user'),)", 'object_name': 'Language'},
+            'Meta': {'ordering': "['code']", 'unique_together': "(('code', 'userprofile'),)", 'object_name': 'Language'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'code': ('django.db.models.fields.CharField', [], {'max_length': '63'}),
             'userprofile': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['users.UserProfile']"})
@@ -136,7 +125,6 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'ircname': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '63', 'blank': 'True'}),
             'is_vouched': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'languages': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'members'", 'blank': 'True', 'to': "orm['groups.Language']"}),
             'last_updated': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'auto_now': 'True', 'blank': 'True'}),
             'photo': ('sorl.thumbnail.fields.ImageField', [], {'default': "''", 'max_length': '100', 'blank': 'True'}),
             'privacy_bio': ('mozillians.users.models.PrivacyField', [], {'default': '3'}),

@@ -17,8 +17,8 @@
 {% endblock extrahead %}
 
 {% block content %}
-  {% if profile_form.errors or user_form.errors or accounts_formset.errors
-     or language_formset.errors %}
+  {% if (profile_form.errors or user_form.errors or accounts_formset.errors
+         or language_formset.errors) %}
       <div class="alert alert-error">
         {{ _('Please correct the errors below.') }}
       </div>
