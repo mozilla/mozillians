@@ -268,7 +268,10 @@ class Group(GroupBase):
             # else? never demote people from full member to requested, that doesn't make sense
 
     def remove_member(self, userprofile, send_email=True):
-        membership = GroupMembership.objects.get(group=self, userprofile=userprofile)
+        try:
+            membership = GroupMembership.objects.get(group=self, userprofile=userprofile)
+        except GroupMembership.DoesNotExist:
+            return
         old_status = membership.status
         membership.delete()
         update_basket_task.delay(userprofile.id)
