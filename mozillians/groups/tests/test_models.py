@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias, GroupMembership
-from mozillians.groups.tests import GroupAliasFactory, GroupFactory, \
-    SkillFactory
+from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
+                                     SkillFactory)
 from mozillians.users.tests import UserFactory
 
 
@@ -186,6 +187,12 @@ class GroupBaseTests(TestCase):
         user = UserFactory.create(userprofile={'is_vouched': True})
         group.add_member(user.userprofile)
         ok_(not group.user_can_leave(user.userprofile))
+
+    def test_unique_name(self):
+        group = GroupFactory.create()
+        GroupAliasFactory.create(alias=group, name='bar')
+        group_2 = GroupFactory.build(name='bar')
+        self.assertRaises(ValidationError, group_2.clean)
 
 
 class GroupTests(TestCase):
