@@ -50,7 +50,7 @@
         "pk": 1,
         "model": "auth.user",
         "fields": {
-            "username": "testuser",
+            "username": "qa-api-testuser",
             "first_name": "",
             "last_name": "Test",
             "is_active": true,
@@ -60,7 +60,7 @@
             "groups": [],
             "user_permissions": [],
             "password": "!",
-            "email": "test@example.com",
+            "email": "qa-api-testuser@example.com",
             "date_joined": "2012-11-06T08:09:34"
         }
     },
