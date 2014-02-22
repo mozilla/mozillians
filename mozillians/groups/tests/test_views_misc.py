@@ -129,6 +129,7 @@ class CreateGroupTests(TestCase):
         data = {
             'name': u'Test Group',
             'accepting_new_members': u'by_request',
+            'new_member_criteria': u'some criteria',
             'description': u'lorem ipsum and lah-dee-dah',
             'irc_channel': u'some text, this is not validated',
             'website': u'http://mozillians.org',
