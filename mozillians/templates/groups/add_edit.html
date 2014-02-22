@@ -83,6 +83,10 @@
         {{ mozillians_field(form.accepting_new_members) }}
       </fieldset>
 
+      <fieldset id="id_new_member_criteria_fieldset">
+        {{ mozillians_field(form.new_member_criteria) }}
+      </fieldset>
+
     {% endif %}
 
     <fieldset id="edit_controls">
@@ -95,4 +99,10 @@
 
   </form>
 
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/group-edit.js') }}"></script>
+  {% endcompress %}
 {% endblock %}
