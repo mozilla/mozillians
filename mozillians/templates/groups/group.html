@@ -40,6 +40,10 @@
         <p>{{ group.description }}</p>
       {% endif %}
 
+      {% if group.new_member_criteria %}        
+        <p><span>{{ _('New Member Criteria') }}:</span><br />{{ group.new_member_criteria }}</p>
+      {% endif %}
+
       <ul class="curated-group-details">
           {% if group.irc_channel %}
           <li>
