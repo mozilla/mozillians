@@ -181,7 +181,7 @@ class Group(GroupBase):
             ('by_request', _lazy(u'By request')),
             ('no', _lazy(u'No')),
         ),
-        default='by_request',
+        default='yes',
         max_length=10
     )
     functional_area = models.BooleanField(default=False)

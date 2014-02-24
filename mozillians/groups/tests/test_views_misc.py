@@ -169,7 +169,7 @@ class CreateGroupTests(TestCase):
             response = client.post(url, data=data, follow=False)
         eq_(302, response.status_code)
         group = GroupAlias.objects.get(name=data['name']).alias
-        eq_(u'by_request', group.accepting_new_members)
+        eq_(u'yes', group.accepting_new_members)
         # All non-superuser-created groups are leavable by default
         ok_(group.members_can_leave)
         # All non-superuser-created groups are visible by default
