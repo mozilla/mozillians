@@ -10,7 +10,7 @@ to make your life easier:
 
 - Alias `t`::
 
-  ~4 dj test -x --logging-clear-handlers --with-nicedots'
+  ~$ dj test -x --logging-clear-handlers --with-nicedots'
 
 - Alias `td` ::
 
