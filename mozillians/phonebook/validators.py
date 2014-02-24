@@ -58,3 +58,16 @@ def validate_website(url):
         raise ValidationError(_lazy('Enter a valid URL.'))
 
     return url
+
+
+def validate_username_not_url(username):
+    """Validate that a username is not a URL."""
+
+    validate_url = URLValidator()
+
+    try:
+        validate_url(username)
+    except ValidationError:
+        return username
+
+    raise ValidationError(_lazy('This field requires a username, not a URL.'))
