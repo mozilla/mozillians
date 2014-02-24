@@ -26,7 +26,8 @@ from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
-from mozillians.phonebook.validators import validate_twitter, validate_website
+from mozillians.phonebook.validators import (validate_twitter, validate_website,
+                                             validate_username_not_url)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -701,26 +702,40 @@ class ExternalAccount(models.Model):
 
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
-                   'url': 'https://addons.mozilla.org/user/{identifier}/'},
+                   'url': 'https://addons.mozilla.org/user/{identifier}/',
+                   'validator': validate_username_not_url},
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
-                   'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}'},
-        TYPE_GITHUB: {'name': 'GitHub', 'url': 'https://github.com/{identifier}'},
-        TYPE_BITBUCKET: {'name': 'Bitbucket', 'url': 'https://bitbucket.org/{identifier}'},
-        TYPE_MDN: {'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{identifier}'},
+                   'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}',
+                   'validator': validate_username_not_url},
+        TYPE_GITHUB: {'name': 'GitHub',
+                      'url': 'https://github.com/{identifier}',
+                      'validator': validate_username_not_url},
+        TYPE_BITBUCKET: {'name': 'Bitbucket',
+                         'url': 'https://bitbucket.org/{identifier}',
+                         'validator': validate_username_not_url},
+        TYPE_MDN: {'name': 'MDN',
+                   'url': 'https://developer.mozilla.org/profiles/{identifier}',
+                   'validator': validate_username_not_url},
         TYPE_SUMO: {'name': 'Mozilla Support', 'url': ''},
-        TYPE_FACEBOOK: {'name': 'Facebook', 'url': 'https://www.facebook.com/{identifier}'},
+        TYPE_FACEBOOK: {'name': 'Facebook',
+                        'url': 'https://www.facebook.com/{identifier}',
+                        'validator': validate_username_not_url},
         TYPE_TWITTER: {'name': 'Twitter',
                        'url': 'https://twitter.com/{identifier}',
                        'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
         TYPE_GTALK: {'name': 'Google Talk', 'url': ''},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
-        TYPE_SLIDESHARE: {'name': 'SlideShare', 'url': 'http://www.slideshare.net/{identifier}'},
+        TYPE_SLIDESHARE: {'name': 'SlideShare',
+                          'url': 'http://www.slideshare.net/{identifier}',
+                          'validator': validate_username_not_url},
         TYPE_YAHOO: {'name': 'Yahoo! Messenger', 'url': ''},
         TYPE_WEBSITE: {'name': 'Website URL',
                        'url': '{identifier}',
                        'validator': validate_website},
-        TYPE_WEBMAKER: {'name': 'Mozilla Webmaker', 'url': 'https://{identifier}.makes.org/'}
+        TYPE_WEBMAKER: {'name': 'Mozilla Webmaker',
+                        'url': 'https://{identifier}.makes.org',
+                        'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)

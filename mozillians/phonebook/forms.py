@@ -35,9 +35,21 @@ class ExternalAccountForm(happyforms.ModelForm):
         type = cleaned_data.get('type')
 
         if type:
+            # If the Account expects an identifier and user provided a
+            # full URL, try to extract the identifier from the URL.
+            url = ExternalAccount.ACCOUNT_TYPES[type].get('url')
+            if url and identifier.startswith('http'):
+                url_pattern_re = re.sub('{identifier}', '(.+)', url)
+                identifier = identifier.rstrip('/')
+                url_pattern_re = url_pattern_re.rstrip('/')
+                match = re.match(url_pattern_re, identifier)
+                if match:
+                    cleaned_data['identifier'] = match.groups()[0]
+
             validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
             if validator:
-                cleaned_data['identifier'] = validator(identifier)
+                cleaned_data['identifier'] = validator(cleaned_data['identifier'])
+
         return cleaned_data
 
 AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
