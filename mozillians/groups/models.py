@@ -184,6 +184,13 @@ class Group(GroupBase):
         default='yes',
         max_length=10
     )
+    new_member_criteria = models.TextField(max_length=255,
+                                           default='',
+                                           blank=True,
+                                           verbose_name=_lazy(u'New Member Criteria'),
+                                           help_text=_lazy(u'Specify the criteria you will use to '
+                                                           u'decide whether or not you will accept '
+                                                           u'a membership request.'))
     functional_area = models.BooleanField(default=False)
     visible = models.BooleanField(
         default=True,
