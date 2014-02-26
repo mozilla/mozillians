@@ -2,4 +2,4 @@
 
 # Images
 PIL
-sorl-thumbnail
+
