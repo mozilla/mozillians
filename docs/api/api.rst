@@ -43,6 +43,3 @@ API Methods
    api-users
    api-groups
    api-skills
-   api-languages
-   api-cities
-   api-countries
