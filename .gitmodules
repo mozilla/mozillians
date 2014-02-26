@@ -35,3 +35,6 @@
 [submodule "mozillians/static/mozillians/css/less-prefixer"]
 	path = mozillians/static/mozillians/css/less-prefixer
 	url = https://github.com/JoelSutherland/LESS-Prefixer.git
+[submodule "vendor-local/src/sorl-thumbnail"]
+	path = vendor-local/src/sorl-thumbnail
+	url = git://github.com/mariocesar/sorl-thumbnail
