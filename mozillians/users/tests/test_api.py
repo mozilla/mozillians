@@ -7,210 +7,13 @@ from django.test.utils import override_settings
 
 from funfactory.helpers import urlparams
 from funfactory.utils import absolutify
-from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory, SkillFactory
-from mozillians.users.api import CustomQuerySet
-from mozillians.users.managers import MOZILLIANS, PUBLIC
 from mozillians.users.models import ExternalAccount
 from mozillians.users.tests import UserFactory
-
-
-class CityResourceTests(TestCase):
-    def setUp(self):
-        self.user = UserFactory.create()
-        self.resource_url = reverse(
-            'api_dispatch_list',
-            kwargs={'api_name': 'v1', 'resource_name': 'cities'})
-        self.app = APIAppFactory.create(owner=self.user,
-                                        is_mozilla_app=True)
-        self.resource_url = urlparams(self.resource_url,
-                                      app_name=self.app.name,
-                                      app_key=self.app.key)
-
-    def test_get_list(self):
-        UserFactory.create(userprofile={'country': 'gr', 'city': 'Athens'})
-        UserFactory.create(vouched=False, userprofile={'country': 'gr',
-                                                       'city': 'Athens'})
-        client = Client()
-        response = client.get(self.resource_url, follow=True)
-        eq_(response.status_code, 200)
-        data = json.loads(response.content)
-        eq_(data['meta']['total_count'], 1, 'Unvouched users get listed!')
-        eq_(data['objects'][0]['city'], 'Athens')
-        eq_(data['objects'][0]['country'], 'gr')
-        eq_(data['objects'][0]['country_name'], 'Greece')
-        eq_(data['objects'][0]['population'], 1)
-        eq_(data['objects'][0]['url'],
-            absolutify(reverse('phonebook:list_city', args=['gr', 'Athens'])))
-
-    def test_not_duplicated(self):
-        # Ensure if there are users from the same city with different
-        # privacy settings, the city API only returns that city once.
-        # Also, the population should be the total.
-        # Note that setUp() already created one User, but that User has
-        # no city and so should not show up in these results.
-        UserFactory.create(userprofile={'privacy_city': MOZILLIANS, 'city': 'Athens'})
-        UserFactory.create(userprofile={'privacy_city': PUBLIC, 'city': 'Athens'})
-        client = Client()
-        response = client.get(self.resource_url, follow=True)
-        eq_(response.status_code, 200)
-        data = json.loads(response.content)
-        eq_(data['meta']['total_count'], 1)
-        eq_(data['objects'][0]['population'], 2)
-        eq_(data['objects'][0]['city'], 'Athens')
-
-    def test_get_details(self):
-        client = Client()
-        url = reverse('api_dispatch_detail',
-                      kwargs={'api_name': 'v1',
-                              'resource_name': 'cities', 'pk': 1})
-        response = client.get(url, follow=True)
-        eq_(response.status_code, 405)
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_default_ordering(self, order_by_mock):
-        client = Client()
-        client.get(self.resource_url, follow=True)
-        order_by_mock.assert_called_with('country', 'city')
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_custom_ordering(self, order_by_mock):
-        client = Client()
-        url = urlparams(self.resource_url, order_by='-population')
-        client.get(url, follow=True)
-        order_by_mock.assert_called_with('-population')
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_custom_invalid_ordering(self, order_by_mock):
-        client = Client()
-        url = urlparams(self.resource_url, order_by='foo')
-        client.get(url, follow=True)
-        order_by_mock.assert_called_with('country', 'city')
-
-    @patch('mozillians.users.api.CustomQuerySet.filter',
-           wraps=CustomQuerySet.filter)
-    def test_filtering(self, filter_mock):
-        url = urlparams(self.resource_url, city='athens')
-        client = Client()
-        client.get(url, follow=True)
-        ok_(filter_mock.called)
-        call_arg = filter_mock.call_args[0][0]
-        eq_(call_arg.children, [('city__iexact', 'athens')])
-
-    @patch('mozillians.users.api.CustomQuerySet.filter',
-           wraps=CustomQuerySet.filter)
-    def test_invalid_filtering(self, filter_mock):
-        url = urlparams(self.resource_url, foo='bar')
-        client = Client()
-        client.get(url, follow=True)
-        ok_(not filter_mock.called)
-
-
-class CountryResourceTests(TestCase):
-    def setUp(self):
-        self.user = UserFactory.create()
-        self.resource_url = reverse(
-            'api_dispatch_list',
-            kwargs={'api_name': 'v1', 'resource_name': 'countries'})
-        self.app = APIAppFactory.create(owner=self.user,
-                                        is_mozilla_app=True)
-        self.resource_url = urlparams(self.resource_url,
-                                      app_name=self.app.name,
-                                      app_key=self.app.key)
-
-    def test_get_list(self):
-        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
-        client = Client()
-        response = client.get(self.resource_url, follow=True)
-        eq_(response.status_code, 200)
-        data = json.loads(response.content)
-        eq_(data['meta']['total_count'], 1, 'Unvouched users get listed!')
-        eq_(data['objects'][0]['country'], 'gr')
-        eq_(data['objects'][0]['country_name'], 'Greece')
-        eq_(data['objects'][0]['population'], 1)
-        eq_(data['objects'][0]['url'],
-            absolutify(reverse('phonebook:list_country', args=['gr'])))
-
-    def test_not_duplicated(self):
-        # If mozillians from the same country have different privacy_country
-        # settings, make sure we don't return the country twice in the API
-        # result.
-        # Also, the population should be the total.
-
-        # NOTE: There's already one Greek created in setUp()
-
-        # Create a couple more Greeks with each privacy setting.  We should
-        # still get back Greece only once.
-        for i in xrange(2):
-            UserFactory.create(userprofile={'country': 'gr',
-                                            'privacy_country': MOZILLIANS})
-        for i in xrange(2):
-            UserFactory.create(userprofile={'country': 'gr',
-                                            'privacy_country': PUBLIC})
-
-        # One person from another country, to make sure that country shows up too.
-        UserFactory.create(userprofile={'country': 'us',
-                                        'privacy_country': MOZILLIANS})
-
-        client = Client()
-        response = client.get(self.resource_url, follow=True)
-        eq_(response.status_code, 200)
-        data = json.loads(response.content)
-        # We should get back Gr and Us
-        eq_(data['meta']['total_count'], 2)
-        for obj in data['objects']:
-            if obj['country'] == 'gr':
-                # 5 greeks
-                eq_(obj['population'], 5)
-            else:
-                # 1 USian
-                eq_(obj['population'], 1)
-
-    def test_get_details(self):
-        client = Client()
-        url = reverse('api_dispatch_detail',
-                      kwargs={'api_name': 'v1',
-                              'resource_name': 'countries', 'pk': 1})
-        response = client.get(url, follow=True)
-        eq_(response.status_code, 405)
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_default_ordering(self, order_by_mock):
-        client = Client()
-        client.get(self.resource_url, follow=True)
-        order_by_mock.assert_called_with('country')
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_custom_ordering(self, order_by_mock):
-        client = Client()
-        url = urlparams(self.resource_url, order_by='-population')
-        client.get(url, follow=True)
-        order_by_mock.assert_called_with('-population')
-
-    @patch('mozillians.users.api.CustomQuerySet.order_by',
-           wraps=CustomQuerySet.order_by)
-    def test_custom_invalid_ordering(self, order_by_mock):
-        client = Client()
-        url = urlparams(self.resource_url, order_by='foo')
-        client.get(url, follow=True)
-        order_by_mock.assert_called_with('country')
-
-    @patch('mozillians.users.api.CustomQuerySet.filter',
-           wraps=CustomQuerySet.filter)
-    def test_filtering(self, filter_mock):
-        url = urlparams(self.resource_url, country='gr')
-        client = Client()
-        client.get(url, follow=True)
-        ok_(not filter_mock.called)
 
 
 class UserResourceTests(TestCase):
@@ -262,7 +65,7 @@ class UserResourceTests(TestCase):
         data = json.loads(response.content)
         profile = self.user.userprofile
         eq_(response.status_code, 200)
-        eq_(data['id'], unicode(profile.id))
+        eq_(data['id'], profile.id)
         eq_(data['full_name'], profile.full_name)
         eq_(data['is_vouched'], profile.is_vouched)
         eq_(data['vouched_by'], profile.vouched_by.user.id)
@@ -351,7 +154,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_accounts(self):
         client = Client()
@@ -381,7 +184,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
+        eq_(data['objects'][0]['id'], user_1.userprofile.id)
 
     def test_search_groups(self):
         client = Client()
@@ -396,7 +199,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
+        eq_(data['objects'][0]['id'], user_1.userprofile.id)
 
     def test_search_combined_skills_country(self):
         country = 'fr'
@@ -410,7 +213,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
+        eq_(data['objects'][0]['id'], user_1.userprofile.id)
 
     def test_query_with_space(self):
         user = UserFactory.create(userprofile={'city': 'Mountain View'})
@@ -419,7 +222,7 @@ class UserResourceTests(TestCase):
         request = client.get(url, follow=True)
         data = json.loads(request.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_name(self):
         user = UserFactory.create(userprofile={'full_name': u'Νίκος Κούκος'})
@@ -429,7 +232,7 @@ class UserResourceTests(TestCase):
         request = client.get(url, follow=True)
         data = json.loads(request.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_username(self):
         user = UserFactory.create()
@@ -438,7 +241,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_country(self):
         user = UserFactory.create(userprofile={'country': 'fr'})
@@ -448,7 +251,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_region(self):
         user = UserFactory.create(userprofile={'region': 'la lo'})
@@ -458,7 +261,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_city(self):
         user = UserFactory.create(userprofile={'city': u'αθήνα'})
@@ -468,7 +271,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_ircname(self):
         user = UserFactory.create(userprofile={'ircname': 'nikos'})
@@ -478,7 +281,7 @@ class UserResourceTests(TestCase):
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
-        eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
+        eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_community_app_does_not_allow_community_sites(self):
         user = UserFactory.create(userprofile={'allows_community_sites': False})

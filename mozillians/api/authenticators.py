@@ -9,15 +9,23 @@ class AppAuthentication(Authentication):
     """App Authentication."""
 
     def is_authenticated(self, request, **kwargs):
-        """Authenticate App."""
+        """Authenticate and authorize App."""
         app_key = request.GET.get('app_key', '')
         app_name = request.GET.get('app_name', '')
 
-        result = (APIApp.objects.filter(name__iexact=app_name, key=app_key,
-                                        is_active=True).exists())
-        if result:
-            statsd.incr('api.auth.success')
-        else:
+        try:
+            app = APIApp.objects.get(name__iexact=app_name, key=app_key, is_active=True)
+        except APIApp.DoesNotExist:
             statsd.incr('api.auth.failed')
+            return False
 
-        return result
+        statsd.incr('api.auth.success')
+        if not app.is_mozilla_app:
+            statsd.incr('api.requests.total_community')
+            data = request.GET.copy()
+            data['restricted'] = True
+            request.GET = data
+        else:
+            statsd.incr('api.requests.total_mozilla')
+        return True
+

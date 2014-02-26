@@ -48,3 +48,19 @@ class AppAuthenticationTests(TestCase):
         request.GET = {'app_key': 'invalid', 'app_name': 'invalid'}
         authentication = AppAuthentication()
         eq_(authentication.is_authenticated(request), False)
+
+    def test_mozilla_app(self):
+        app = APIAppFactory.create(is_mozilla_app=True)
+        request = RequestFactory()
+        request.GET = {'app_key': app.key, 'app_name': app.name}
+        authentication = AppAuthentication()
+        authentication.is_authenticated(request)
+        eq_(request.GET.get('restricted'), None)
+
+    def test_community_app(self):
+        app = APIAppFactory.create(is_mozilla_app=False)
+        request = RequestFactory()
+        request.GET = {'app_key': app.key, 'app_name': app.name}
+        authentication = AppAuthentication()
+        authentication.is_authenticated(request)
+        eq_(request.GET.get('restricted'), True)
