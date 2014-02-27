@@ -2,6 +2,6 @@
 
 BeautifulSoup<4.0
 django-selectable==0.7.0
-python-memcached==1.45
+python-memcached==1.53
 unidecode
 urllib3
