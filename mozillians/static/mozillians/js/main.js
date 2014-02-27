@@ -41,7 +41,7 @@ var app = {
             } else {
                 $('#outer-wrapper').off('click', collapseNavMenu);
             }
-        });     
+        });
 
         /* Back to top button
         ================================================== */
@@ -57,6 +57,13 @@ var app = {
           $('html, body').animate({ scrollTop: "0px"}, 1200);
         });
 
-        $('input, textarea').placeholder(); 
+        $('input, textarea').placeholder();
+
+	// Focus search when 's' key is pressed
+	$('body').keypress(function(event){
+	  if (event.which==115 && !$('input, textarea, select').is(':focus')) {
+	    $('.search-query').focus();
+	  }
+	});
     });
 })(jQuery);
