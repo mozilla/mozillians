@@ -10,7 +10,6 @@ from django.db.models import get_model
 import basket
 import requests
 import pyes
-from basket.base import request
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
@@ -79,12 +78,19 @@ def update_basket_task(instance_id):
     if not BASKET_ENABLED or not instance.is_vouched:
         return
 
-    if not instance.basket_token:
+    email = instance.user.email
+    token = instance.basket_token
+
+    if not token:
         # no token yet, they're probably not subscribed, so subscribe them.
+        # pass sync='Y' so we wait for it to complete and get back the token.
         try:
-            basket.subscribe(instance.user.email,
-                             settings.BASKET_NEWSLETTER,
-                             trigger_welcome='N')
+            retval = basket.subscribe(
+                email,
+                [settings.BASKET_NEWSLETTER],
+                sync='Y',
+                trigger_welcome='N'
+            )
         except (requests.exceptions.RequestException,
                 basket.BasketException) as exception:
             try:
@@ -93,23 +99,57 @@ def update_basket_task(instance_id):
                 _email_basket_managers('subscribe', instance.user.email,
                                        exception.message)
             return
-    # Schedule the phonebook update - if we don't have a token yet,
-    # phonebook update will look it up.  But delay running it for a few
-    # seconds to give Basket a chance to already have the token.
-    update_basket_phonebook_task.apply_async(args=[instance.user.pk], countdown=10)
+        # Remember the token
+        instance.basket_token = token = retval['token']
+        # Don't call .save() on a userprofile from here, it would invoke us again
+        # via the post-save signal, which would be pointless.
+        UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
+    else:
+        # They were already subscribed. See what email address they
+        # have in exact target. If it has changed, we'll need to
+        # unsubscribe the old address and subscribe the new one,
+        # and save the new token.
+        # This'll also return their subscriptions, so we can transfer them
+        # to the new address if we need to.
+        try:
+            result = basket.lookup_user(token=token)
+        except basket.BasketException as exception:
+            try:
+                update_basket_task.retry()
+            except (MaxRetriesExceededError, basket.BasketException):
+                msg = exception.message
+                _email_basket_managers('update_phonebook', token, msg)
+            return
+        old_email = result['email']
+        if old_email != email:
+            try:
+                # We do the new subscribe first, then the unsubscribe, so we don't
+                # risk losing their subscriptions if the subscribe fails.
+                # Subscribe to all the same newsletters.
+                # Pass sync='Y' so we get back the new token right away
+                subscribe_result = basket.subscribe(
+                    email,
+                    result['newsletters'],
+                    sync='Y',
+                    trigger_welcome='N',
+                )
+                # unsub all from the old token
+                basket.unsubscribe(token=token, email=old_email, optout='Y')
+            except (requests.exceptions.RequestException,
+                    basket.BasketException) as exception:
+                try:
+                    update_basket_task.retry()
+                except (MaxRetriesExceededError, basket.BasketException):
+                    _email_basket_managers('subscribe', email, exception.message)
+                return
+            # FIXME: We should also remove their previous phonebook record from Exact Target, but
+            # basket doesn't have a custom API to do that. (basket never deletes anything.)
 
-
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY,
-      max_retries=BASKET_TASK_MAX_RETRIES)
-def update_basket_phonebook_task(user_pk):
-    """
-    Create or update profile information in the Exact Target PHONEBOOK
-    data extension about the user.
-    """
-    instance = User.objects.get(pk=user_pk).userprofile
-    email = instance.user.email
-    if not BASKET_ENABLED or not instance.is_vouched:
-        return
+            # That was all successful. Update the token.
+            instance.basket_token = token = subscribe_result['token']
+            # Don't call .save() on a userprofile from here, it would invoke us again
+            # via the post-save signal, which would be pointless.
+            UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
 
     GroupMembership = get_model('groups', 'GroupMembership')
     Group = get_model('groups', 'Group')
@@ -127,38 +167,14 @@ def update_basket_phonebook_task(user_pk):
     if instance.city:
         data['city'] = instance.city
 
-    # We need their token to do the update
-    token = instance.basket_token
-    if not token:
-        msg = 'Cannot find user in Basket'
-        try:
-            token = instance.lookup_basket_token()
-        except (requests.exceptions.RequestException,
-                basket.BasketException) as exception:
-            msg = exception.message
-        if not token:
-            # Either user not found or an exception occurred.
-            # Retry either way - basket might still be in the process of setting up the user,
-            # or else we got an exception and it might work next time.
-            try:
-                update_basket_phonebook_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                _email_basket_managers('update_phonebook', email, msg)
-            return
-        # Remember the token
-        # Since UserProfile.save() will trigger another update_basket_task
-        # via a post-save signal, avoid calling save()
-        from models import UserProfile
-        UserProfile.objects.filter(user__email=email).update(basket_token=token)
-
     # We have a token, proceed with the update
     try:
-        request('post', 'custom_update_phonebook',
-                token=token, data=data)
+        basket.request('post', 'custom_update_phonebook',
+                       token=token, data=data)
     except (requests.exceptions.RequestException,
             basket.BasketException) as exception:
         try:
-            update_basket_phonebook_task.retry()
+            update_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
             _email_basket_managers('update_phonebook', email,
                                    exception.message)
@@ -169,45 +185,35 @@ def update_basket_phonebook_task(user_pk):
 def remove_from_basket_task(email, basket_token):
     """Remove from Basket Task.
 
-    This task unsubscribes a user to Basket. The task retries on
-    failure at most BASKET_TASK_MAX_RETRIES times and if it finally
-    doesn't complete successfully, it emails the
+    This task unsubscribes a user from the Mozillians newsletter.
+    The task retries on failure at most BASKET_TASK_MAX_RETRIES times
+    and if it finally doesn't complete successfully, it emails the
     settings.BASKET_MANAGERS with details.
 
     """
+    # IMPLEMENTATION NOTE:
+    #
+    # This task might run AFTER the User has been deleted, so it can't
+    # look anything up about the user locally. It has to make do
+    # with the email and token passed in.
+
     if not BASKET_ENABLED:
         return
 
-    if not basket_token:
-        # We don't have this user's token yet, ask basket for it
-        user = User.objects.get(email=email)
-        try:
-            basket_token = user.userprofile.lookup_basket_token()
-        except basket.BasketException as exception:
-            try:
-                remove_from_basket_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                _email_basket_managers('subscribe', email, exception.message)
-            return
-        if not basket_token:
-            logger.error('No user found with email %s' % email)
-            return
-
-        # Remember the token
-        # Since UserProfile.save() will trigger another update_basket_task
-        # via a post-save signal, avoid calling save()
-        from models import UserProfile
-        UserProfile.objects.filter(user__email=email).update(basket_token=basket_token)
-
     try:
+        if not basket_token:
+            # We don't have this user's token yet, and we need it to
+            # unsubscribe.  Ask basket for it
+            basket_token = basket.lookup_user(email=email)['token']
+
         basket.unsubscribe(basket_token, email,
                            newsletters=settings.BASKET_NEWSLETTER)
     except (requests.exceptions.RequestException,
-            basket.BasketException), exception:
+            basket.BasketException) as exception:
         try:
             remove_from_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
-            _email_basket_managers('subscribe', email, exception.message)
+            _email_basket_managers('unsubscribe', email, exception.message)
 
 
 @task
