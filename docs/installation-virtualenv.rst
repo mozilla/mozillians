@@ -5,15 +5,32 @@ VirtualEnv Installation
 
 .. note::
 
-   Installing Mozillians might be daunting.  Ask for help in
+   Installing Mozillians might be daunting.  Ask for help using IRC in
    #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`,
    they will be happy to help.
 
 
-**Prerequisites:** You'll need python 2.6, virtualenv and pip.  You'll also need
-mysql-dev (or the equivalent on your system), a MySQL server and `gettext`_.
+**Prerequisites:** You'll need python 2.6, python-dev, virtualenv, pip,
+a C compiler (for building some of the Python packages, like the DB interface),
+mysqlclient and mysql-dev (or the equivalent on your system), a MySQL server, `gettext`_,
+git, and lessc.  If you're working on translations, add subversion.
 
-You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
+There are almost certainly other requirements that
+we're so used to having installed we've forgotten we have them, so don't be shy
+about asking on IRC for help if you run into unexpected errors.
+
+You will want a \*nix box, ideally Debian or Ubuntu since that's what
+most of the core developers are using and it's most likely to work.
+
+If you're on Ubuntu or Debian, you might start with::
+
+    $ sudo apt-get install build-essential git-core subversion \
+    python2.6 python2.6-dev python-virtualenv python-pip \
+    gettext libjpeg-turbo8-dev \
+    mysql-client mysql-server libmysqlclient-dev
+
+Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/>`_.
+(You only need node for lessc.)
 
 When you want to start contributing...
 
