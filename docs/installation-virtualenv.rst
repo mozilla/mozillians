@@ -67,14 +67,9 @@ When you want to start contributing...
    accesses it locally using the user `mozillians`.  You can see
    :doc:`mysql` if you need help creating a user and database.
 
-#. Download and run elastic search::
+#. Download from http://www.elasticsearch.org/download decompress and
+   run elastic search.
 
-     (venv)$ wget http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.0.tar.gz -O /tmp/es.tar.gz
-     (venv)$ tar xvf /tmp/es.tar.gz -C $VIRTUAL_ENV
-     (venv)$ $VIRTUAL_ENV/elasticsearch-0.20.0/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
-
-   That will start elastic search in the background; be sure to see the instructions
-   later on for stopping it when you're done working on Mozillians.
 
 #. Update product details::
 
@@ -101,12 +96,9 @@ When you want to start contributing...
 
 #. When you're done:
 
-   When you are done with your coding session, do not forget to kill the `elastic
-   search` process::
-
-     (venv)$ kill `cat $VIRTUAL_ENV/es.pid`
-
-   and deactivate your virtual python environment by running::
+   When you are done with your coding session, do not forget to kill
+   the `elasticsearch` process and deactivate your virtual python
+   environment by running::
 
      (venv)$ deactivate
      $
@@ -117,12 +109,9 @@ When you want to start contributing...
 
      $ . $VIRTUAL_ENV/bin/activate
 
-   and start the `elasticsearch` server again::
-
-     $ $VIRTUAL_ENV/elasticsearch-0.19.4/bin/elasticsearch -p $VIRTUAL_ENV/es.pid
+   and start the `elasticsearch` server again.
 
 Have fun!
 
 .. _gettext: http://playdoh.readthedocs.org/en/latest/userguide/l10n.html#requirements
 .. _Fork the main Mozillians repository: https://github.com/mozilla/mozillians/fork
-
