@@ -58,5 +58,12 @@ var app = {
         });
 
         $('input, textarea').placeholder(); 
+
+	// Focus search when S key is pressed
+	$('body').keypress(function(event){
+	  if (event.which==115 && !$('input, textarea, select').is(':focus')) {
+	    $('.search-query').focus(); 
+	  } 
+	});
     });
 })(jQuery);
