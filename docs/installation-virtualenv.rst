@@ -13,6 +13,10 @@ VirtualEnv Installation
 **Prerequisites:** You'll need python 2.6, virtualenv and pip.  You'll also need
 mysql-dev (or the equivalent on your system), a MySQL server and `gettext`_.
 
+**Notes for Mac OS X:** If Django complains about lessc, use your preferred package manager to
+install npm, then do ``sudo npm install -g less``. You may also see a problem when pip installs
+PIL. To correct that, install freetype, then do ``sudo ln -s /opt/local/include/freetype2 /opt/local/include/freetype``.
+
 You will probably also want a \*nix box; Mozillians.org is tricky to install on Windows.
 
 When you want to start contributing...
