@@ -67,9 +67,14 @@ When you want to start contributing...
    accesses it locally using the user `mozillians`.  You can see
    :doc:`mysql` if you need help creating a user and database.
 
-#. Download from http://www.elasticsearch.org/download decompress and
-   run elastic search.
+#. Download ElasticSearch::
 
+     (venv)$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.10.tar.gz
+     (venv)$ tar zxf elasticsearch-0.90.10.tar.gz
+
+   and run::
+
+     (venv)$ ./elasticsearch-0.90.10/bin/elasticsearch
 
 #. Update product details::
 
@@ -109,7 +114,9 @@ When you want to start contributing...
 
      $ . $VIRTUAL_ENV/bin/activate
 
-   and start the `elasticsearch` server again.
+   and start `elasticsearch` server again::
+
+     (venv)$ ./elasticsearch-0.90.10/bin/elasticsearch
 
 Have fun!
 
