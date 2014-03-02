@@ -17,7 +17,17 @@ class ValidatorTests(TestCase):
         username = '@ValidName'
         eq_('ValidName', validate_twitter(username))
 
-    def test_username_not_url(self):
+    def test_username_not_url_with_username(self):
         username = 'someusername'
-        eq_(username, validate_username_not_url(username))
-        assert_raises(ValidationError, validate_username_not_url, 'http://www.somewebsite.com')
+        url_pattern = 'http://somesite.com/{identifier}'
+        eq_(username, validate_username_not_url(username, url_pattern))
+
+    def test_username_not_url_with_url(self):
+        username = 'http://somesite.com/validusername'
+        url_pattern = 'http://somesite.com/{identifier}'
+        eq_('validusername', validate_username_not_url(username, url_pattern))
+
+    def test_username_not_url_with_bad_url(self):
+        username = 'http://somesite.com'
+        url_pattern = 'http://somesite.com/{identifier}'
+        assert_raises(ValidationError, validate_username_not_url, username, url_pattern)

@@ -37,7 +37,11 @@ class ExternalAccountForm(happyforms.ModelForm):
         if type:
             validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
             if validator:
-                cleaned_data['identifier'] = validator(identifier)
+                if validator.__name__ == 'validate_username_not_url':
+                    url = ExternalAccount.ACCOUNT_TYPES[type].get('url')
+                    cleaned_data['identifier'] = validator(identifier, url)
+                else:
+                    cleaned_data['identifier'] = validator(identifier)
         return cleaned_data
 
 AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
