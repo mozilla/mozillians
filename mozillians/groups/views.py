@@ -262,8 +262,7 @@ def join_group(request, group_pk):
             messages.info(request, _('You have been added to this group.'))
         elif group.accepting_new_members == 'by_request':
             group.add_member(profile_to_add, status=GroupMembership.PENDING)
-            messages.info(request,
-                          _('Your membership request is pending approval by the group curator.'))
+            messages.info(request, _('Your membership request has been sent to the group curator.'))
 
     return redirect(reverse('groups:show_group', args=[group.url]))
 

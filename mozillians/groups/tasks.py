@@ -99,10 +99,10 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
             template_name = 'groups/email/rejected.txt'
         else:
             # Odd things happen in some of our tests. Don't worry about it.
-            raise ValueError("BAD ARGS TO email_membership_change")
+            raise ValueError('BAD ARGS TO email_membership_change')
     else:
         # Odd things happen in some of our tests. Don't worry about it.
-        raise ValueError("BAD ARGS TO email_membership_change")
+        raise ValueError('BAD ARGS TO email_membership_change')
 
     context = {
         'group': group,
