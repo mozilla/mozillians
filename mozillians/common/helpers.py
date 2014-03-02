@@ -50,13 +50,13 @@ def field_with_attrs(bfield, **kwargs):
 
 
 @register.function
-def mozillians_field(element):
+def mozillians_field(element, required=False):
     """Renders fields in jinja2.
 
     Takes a field and renders the appropriate elements.
     """
     template = get_template('includes/field.html')
-    context = Context({'field': element})
+    context = Context({'field': element, 'flag_required': required})
 
     return mark_safe(template.render(context))
 
