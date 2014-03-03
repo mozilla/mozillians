@@ -19,7 +19,8 @@ from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.paginator import Paginator
 from mozillians.api.resources import (AdvancedSortingResourceMixIn,
-                                      ClientCacheResourceMixIn)
+                                      ClientCacheResourceMixIn,
+                                      GraphiteMixIn)
 from mozillians.users.models import COUNTRIES, UserProfile
 
 
@@ -74,7 +75,8 @@ class FakeQuerySet(object):
 
 
 class LocationCustomResource(AdvancedSortingResourceMixIn,
-                             ClientCacheResourceMixIn, Resource):
+                             ClientCacheResourceMixIn, GraphiteMixIn,
+                             Resource):
 
     class Meta:
         authentication = AppAuthentication()
@@ -235,7 +237,7 @@ class CityResource(LocationCustomResource):
         return utils.absolutify(url)
 
 
-class UserResource(ClientCacheResourceMixIn, ModelResource):
+class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     """User Resource."""
     email = fields.CharField(attribute='user__email', null=True, readonly=True)
     username = fields.CharField(attribute='user__username', null=True, readonly=True)
