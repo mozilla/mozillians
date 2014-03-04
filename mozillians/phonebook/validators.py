@@ -60,21 +60,18 @@ def validate_website(url):
     return url
 
 
-def validate_username_not_url(username, url_pattern):
+def validate_username_not_url(username):
     """Validate that a username is not a URL."""
+    ERROR_MSG = 'This field requires a username, not a URL.'
+
+    if username.startswith('http'):
+        raise ValidationError(_lazy(ERROR_MSG))
 
     validate_url = URLValidator()
 
-    # if what was passed in is not a URL, it must be a username, return that
     try:
         validate_url(username)
     except ValidationError:
         return username
 
-    # otherwise, maybe the user specified a URL that matches the expected pattern
-    url_pattern_re = re.sub('{identifier}', '(.*)', url_pattern)
-    match = re.match(url_pattern_re, username)
-    if match:
-        return match.groups()[0]
-
-    raise ValidationError(_lazy('This field requires a username, not a URL.'))
+    raise ValidationError(_lazy(ERROR_MSG))

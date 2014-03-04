@@ -19,15 +19,8 @@ class ValidatorTests(TestCase):
 
     def test_username_not_url_with_username(self):
         username = 'someusername'
-        url_pattern = 'http://somesite.com/{identifier}'
-        eq_(username, validate_username_not_url(username, url_pattern))
+        eq_(username, validate_username_not_url(username))
 
     def test_username_not_url_with_url(self):
-        username = 'http://somesite.com/validusername'
-        url_pattern = 'http://somesite.com/{identifier}'
-        eq_('validusername', validate_username_not_url(username, url_pattern))
-
-    def test_username_not_url_with_bad_url(self):
         username = 'http://somesite.com'
-        url_pattern = 'http://somesite.com/{identifier}'
-        assert_raises(ValidationError, validate_username_not_url, username, url_pattern)
+        assert_raises(ValidationError, validate_username_not_url, username)
