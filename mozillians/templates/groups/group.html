@@ -167,13 +167,6 @@
         {% endif %}
       </h3>
 
-      {% if is_pending %}
-        <div class="group-pending-membership">{{ _('Your membership request is pending approval by the group curator.') }}</div>
-      {% endif %}
-
-
-      <br class="clear">
-
       <div class="row">
         {% for people_slice in people|slice(3) -%}
             {% for person in people_slice %}
