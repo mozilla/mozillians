@@ -9,13 +9,14 @@ from tastypie.serializers import Serializer
 from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.resources import (AdvancedSortingResourceMixIn,
-                                      ClientCacheResourceMixIn)
+                                      ClientCacheResourceMixIn,
+                                      GraphiteMixIn)
 from mozillians.api.paginator import Paginator
 from mozillians.groups.models import Group, Skill
 
 
 class GroupBaseResource(AdvancedSortingResourceMixIn, ClientCacheResourceMixIn,
-                        ModelResource):
+                        GraphiteMixIn, ModelResource):
     number_of_members = fields.IntegerField(attribute='number_of_members',
                                             readonly=True)
 
