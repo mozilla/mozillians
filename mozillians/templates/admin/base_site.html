@@ -12,4 +12,6 @@
 <h1 id="site-name">Mozillians Administration</h1>
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
+{% block userlinks %}
+  <a href="{% url phonebook:logout %}">{% trans 'Log out' %}</a>
+{% endblock %}
