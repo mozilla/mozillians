@@ -167,7 +167,7 @@ ANON_ALWAYS = True
 
 # Email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-FROM_NOREPLY = u'Mozillians <no-reply@mozillians.org>'
+FROM_NOREPLY = u'Mozillians.org <no-reply@mozillians.org>'
 
 # Auth
 CACHES = {
