@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseRedirect
@@ -23,7 +23,6 @@ from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
 
 
 admin.site.unregister(User)
-admin.site.unregister(Group)
 
 Q_PUBLIC_PROFILES = Q()
 for field in UserProfile.privacy_fields():
