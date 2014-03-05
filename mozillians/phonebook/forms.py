@@ -153,10 +153,12 @@ class ProfileForm(happyforms.ModelForm):
         return photo
 
     def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+        if not re.match(r'^[a-zA-Z0-9 +.:,-]*$', self.cleaned_data['skills']):
+            # Commas cannot be included in skill names because we use them to
+            # separate names in a list
             raise forms.ValidationError(_(u'Skills can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
+                                          u'alphanumeric characters '
+                                          u'and +.:-.'))
         skills = self.cleaned_data['skills']
         return filter(lambda x: x,
                       map(lambda x: x.strip() or False,
