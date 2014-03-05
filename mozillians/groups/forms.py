@@ -23,6 +23,20 @@ class SortForm(forms.Form):
 
 class GroupForm(happyforms.ModelForm):
 
+    def clean(self):
+        cleaned_data = super(GroupForm, self).clean()
+        accepting_new = cleaned_data.get('accepting_new_members')
+        criteria = cleaned_data.get('new_member_criteria')
+
+        if not accepting_new == 'by_request':
+            cleaned_data['new_member_criteria'] = u''
+        else:
+            if not criteria:
+                msg = _(u'You must either specify the criteria or change the acceptance selection.')
+                self._errors['new_member_criteria'] = self.error_class([msg])
+                del cleaned_data['new_member_criteria']
+        return cleaned_data
+
     def clean_name(self):
         """Verify that name is unique in ALIAS_MODEL.
 
@@ -43,29 +57,20 @@ class GroupForm(happyforms.ModelForm):
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',
-                  'website', 'wiki']
+                  'website', 'wiki', 'accepting_new_members',
+                  'new_member_criteria']
 
 
 class SuperuserGroupForm(GroupForm):
     """Form used by superusers (admins) when editing a group"""
-    def clean(self):
-        cleaned_data = super(SuperuserGroupForm, self).clean()
-        accepting_new = cleaned_data.get('accepting_new_members')
-        criteria = cleaned_data.get('new_member_criteria')
-
-        if not accepting_new == 'by_request':
-            cleaned_data['new_member_criteria'] = u''
-        else:
-            if not criteria:
-                msg = _(u'You must either specify the criteria or change the acceptance selection.')
-                self._errors['new_member_criteria'] = self.error_class([msg])
-                del cleaned_data['new_member_criteria']
-        return cleaned_data
 
     class Meta:
         model = Group
-        fields = ['name', 'description', 'irc_channel',
-                  'website', 'wiki',
+        fields = ['name',
+                  'description',
+                  'irc_channel',
+                  'website',
+                  'wiki',
                   'visible',
                   'functional_area',
                   'members_can_leave',
