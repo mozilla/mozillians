@@ -179,17 +179,12 @@ class GroupMembershipAdminForm(forms.ModelForm):
         }
 
 
-class GroupMembershipInline(admin.TabularInline):
-    model = GroupMembership
-    form = GroupMembershipAdminForm
-
-
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
     add_form = autocomplete_light.modelform_factory(Group,
                                                     form=GroupAddAdminForm)
-    inlines = [GroupAliasInline, GroupMembershipInline]
+    inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
                     'members_can_leave', 'visible', 'member_count', 'vouched_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
