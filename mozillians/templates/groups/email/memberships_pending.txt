@@ -10,3 +10,5 @@
 {% trans %}View requests here:{% endtrans %}
 
 {{ group.get_absolute_url() }}
+
+{{ _('The Mozillians.org team') }}
