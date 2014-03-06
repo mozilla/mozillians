@@ -76,6 +76,15 @@ When you want to start contributing...
       will be available only within this environment. Your system's
       python libraries will remain intact.
 
+   .. note::
+
+      Mac OS X users may see a problem when pip installs PIL. To correct that,
+      install freetype, then do::
+
+        sudo ln -s /opt/local/include/freetype2 /opt/local/include/freetype
+
+      Once complete, re-run the pip install step to finish the installation.
+
 #. Configure your local mozillians installation::
 
      (venv)$ cp mozillians/settings/local.py-devdist mozillians/settings/local.py
