@@ -62,18 +62,8 @@ def validate_website(url):
 
 def validate_username_not_url(username):
     """Validate that a username is not a URL."""
-    ERROR_MSG = 'This field requires a username, not a URL.'
 
-    # a user might specify a URL-like string that would not pass validate_url
-    # so this check tries to catch that. example: http://somesite/someuser
-    if username.startswith('http'):
-        raise ValidationError(_(ERROR_MSG))
+    if username.startswith('http://') or username.startswith('https://'):
+        raise ValidationError(_('This field requires a username, not a URL.'))
 
-    validate_url = URLValidator()
-
-    try:
-        validate_url(username)
-    except ValidationError:
-        return username
-
-    raise ValidationError(_(ERROR_MSG))
+    return username
