@@ -364,6 +364,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return accounts_query
 
     @property
+    def vouched_profiles(self):
+        vouchees_query = self.vouchees.all()
+        if self._privacy_level:
+            vouchees_query = vouchees_query.filter(privacy_vouched_by__gte=self._privacy_level)
+        return vouchees_query
+
+    @property
     def websites(self):
         websites_query = self.externalaccount_set.filter(type=ExternalAccount.TYPE_WEBSITE)
         if self._privacy_level:
