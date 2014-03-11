@@ -179,6 +179,8 @@ CACHES = {
 
 AUTH_PROFILE_MODULE = 'users.UserProfile'
 
+
+
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
 AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')

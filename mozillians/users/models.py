@@ -697,6 +697,7 @@ class ExternalAccount(models.Model):
     TYPE_WEBSITE = 'WEBSITE'
     TYPE_BITBUCKET = 'BITBUCKET'
     TYPE_SLIDESHARE = 'SLIDESHARE'
+    TYPE_WEBMAKER='WEBMAKER'
 
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
@@ -718,7 +719,9 @@ class ExternalAccount(models.Model):
         TYPE_YAHOO: {'name': 'Yahoo! Messenger', 'url': ''},
         TYPE_WEBSITE: {'name': 'Website URL',
                        'url': '{identifier}',
-                       'validator': validate_website}
+                       'validator': validate_website},
+        TYPE_WEBMAKER: {'name': 'Webmaker', 'url': 'https://{identifier}.makes.org/'}
+
     }
 
     user = models.ForeignKey(UserProfile)
