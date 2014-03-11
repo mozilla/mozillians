@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404, HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -298,7 +298,20 @@ def invite(request):
         return redirect('phonebook:home')
 
     return render(request, 'phonebook/invite.html',
-                  {'invite_form': invite_form})
+                  {'invite_form': invite_form, 'invites': profile.invites.all()})
+
+
+@require_POST
+def delete_invite(request, invite_pk):
+    profile = request.user.userprofile
+    deleted_invite = get_object_or_404(Invite, pk=invite_pk, inviter=profile, redeemed=None)
+    deleted_invite.delete()
+
+    msg = (_(u"%s's invitation to Mozillians has been revoked. "
+             u"You can invite %s again if you like.") %
+            (deleted_invite.recipient, deleted_invite.recipient))
+    messages.success(request, msg)
+    return redirect('phonebook:invite')
 
 
 @require_POST
