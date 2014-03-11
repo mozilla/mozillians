@@ -1,10 +1,11 @@
 from django.forms import model_to_dict
 
-from nose.tools import ok_
+from mock import MagicMock, patch
+from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Skill
-from mozillians.phonebook.forms import EmailForm, ProfileForm
+from mozillians.phonebook.forms import EmailForm, ExternalAccountForm, ProfileForm
 from mozillians.users.tests import UserFactory
 
 
@@ -46,3 +47,26 @@ class ProfileFormTests(TestCase):
         form = ProfileForm(data=data, instance=user.userprofile)
         ok_(not form.is_valid())
         ok_('skills' in form.errors)
+
+
+class ExternalAccountFormTests(TestCase):
+    def test_identifier_cleanup(self):
+        with patch('mozillians.phonebook.forms.ExternalAccount.ACCOUNT_TYPES',
+                   {'AMO': {'name': 'Example',
+                            'url': 'https://example.com/{identifier}'}}):
+            form = ExternalAccountForm({'type': 'AMO',
+                                        'identifier': 'https://example.com/foobar/',
+                                        'privacy': 3})
+            form.is_valid()
+        eq_(form.cleaned_data['identifier'], 'foobar')
+
+    def test_identifier_validator_get_called(self):
+        validator = MagicMock()
+        with patch('mozillians.phonebook.forms.ExternalAccount.ACCOUNT_TYPES',
+                   {'AMO': {'name': 'Example',
+                            'validator': validator}}):
+            form = ExternalAccountForm({'type': 'AMO',
+                                        'identifier': 'https://example.com/foobar/',
+                                        'privacy': 3})
+            form.is_valid()
+        ok_(validator.called)
