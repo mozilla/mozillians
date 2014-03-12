@@ -699,6 +699,7 @@ class ExternalAccount(models.Model):
     TYPE_BITBUCKET = 'BITBUCKET'
     TYPE_SLIDESHARE = 'SLIDESHARE'
     TYPE_WEBMAKER = 'WEBMAKER'
+    TYPE_MOWIKI = 'MOZILLAWIKI'
 
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
@@ -736,6 +737,8 @@ class ExternalAccount(models.Model):
         TYPE_WEBMAKER: {'name': 'Mozilla Webmaker',
                         'url': 'https://{identifier}.makes.org',
                         'validator': validate_username_not_url},
+        TYPE_MOWIKI: {'name': 'Mozilla Wiki', 'url': 'https://wiki.mozilla.org/User:{identifier}',
+                      'validator': validate_username_not_url}
     }
 
     user = models.ForeignKey(UserProfile)
