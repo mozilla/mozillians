@@ -2,6 +2,7 @@
 import re
 from south.v2 import DataMigration
 from django.db.models import Q
+from django.db.utils import IntegrityError
 
 
 class Migration(DataMigration):
@@ -48,7 +49,11 @@ class Migration(DataMigration):
                 match = re.match(url_pattern_re, res.identifier)
                 if match:
                     res.identifier = match.groups()[0]
-                    res.save()
+                    try:
+                        res.save()
+                    except IntegrityError:
+                        # User probably has a dupe here. Let him resolv it manually.
+                        pass
 
     def backwards(self, orm):
         pass
