@@ -1,5 +1,7 @@
 -r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
 
 # Images
+--allow-external PIL
+--allow-unverified PIL
 PIL
 
