@@ -149,9 +149,15 @@
     {% if not people.paginator.count %}
       <div class="well">
         <p id="not-found">
-          {% trans group_name=group.name %}
-            Sorry, we cannot find any mozillians in {{ group_name }}
-          {% endtrans %}
+          {% if r_selected %}
+            {% trans group_name=group.name %}
+              There are no open membership requests for {{ group_name }}.
+            {% endtrans %}
+          {% else %}
+            {% trans group_name=group.name %}
+              Sorry, we can not find any mozillians in {{ group_name }}.
+            {% endtrans %}
+          {% endif %}
         </p>
       </div>
     {% else %}
