@@ -922,7 +922,7 @@ body#home {
     &.loggedin {
         #main {
             #profile-info {
-                .span(3);
+                .span(4);
                 margin: 0;
                 position: relative;
                 a.profile-photo {
@@ -1190,10 +1190,10 @@ body#profile {
             }
         }
         #profile-info {
-            .span(8);
+            .span(9);
             margin: 0;
-            border-left: 1px solid lighten(@black,90%);
-            padding: 0 10px 0 25px;
+            //border-left: 1px solid lighten(@black,90%);
+            //padding: 0 10px 0 25px;
             @media (max-width: @breakDesktop) {
                 text-align: center;
                 width: 100%;
@@ -1231,7 +1231,8 @@ body#profile {
                 }
             }
             #profile-contact {
-                width: 220px;
+                width: 280px;
+                //.span(3);
                 float: left;
                 ul {
                     width:100%;
