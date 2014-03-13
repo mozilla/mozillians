@@ -685,6 +685,16 @@ class ExternalAccount(models.Model):
     TYPE_WEBMAKER = 'WEBMAKER'
     TYPE_MOWIKI = 'MOZILLAWIKI'
 
+    # Account type field documentation:
+    # name: The name of the service that this account belongs to. What
+    #       users see
+    # url: If the service features profile pages for its users, then
+    #      this field should be a link to that profile page. User's
+    #      identifier should be replaced by the special string
+    #      {identifier}.
+    # validator: Points to a function which will clean and validate
+    #            user's entry. Function should return the cleaned
+    #            data.
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
                    'url': 'https://addons.mozilla.org/user/{identifier}/',
@@ -716,7 +726,7 @@ class ExternalAccount(models.Model):
                           'validator': validate_username_not_url},
         TYPE_YAHOO: {'name': 'Yahoo! Messenger', 'url': ''},
         TYPE_WEBSITE: {'name': 'Website URL',
-                       'url': '{identifier}',
+                       'url': '',
                        'validator': validate_website},
         TYPE_WEBMAKER: {'name': 'Mozilla Webmaker',
                         'url': 'https://{identifier}.makes.org',
