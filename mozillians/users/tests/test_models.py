@@ -240,24 +240,6 @@ class UserProfileTests(TestCase):
         UserFactory.create()
         ok_(auto_vouch_mock.called)
 
-    @patch('mozillians.users.models.UserProfile.add_to_staff_group')
-    def test_add_to_staff_group_on_profile_save(self, add_to_staff_group_mock):
-        UserFactory.create()
-        ok_(add_to_staff_group_mock.called)
-
-    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
-    def test_add_to_staff_group_auto_vouch_domain(self):
-        user = UserFactory.create(email='foobar@example.com')
-        ok_(user.userprofile.groups.filter(name='staff').exists())
-
-    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
-    def test_add_to_staff_group_invalid_domain(self):
-        user = UserFactory.create(email='foobar@not_valid.com')
-        staff_group, _ = Group.objects.get_or_create(name='staff')
-        staff_group.add_member(user.userprofile)
-        user.userprofile.add_to_staff_group()
-        ok_(not user.userprofile.groups.filter(name='staff').exists())
-
     @patch('mozillians.users.models.send_mail')
     def test_email_now_vouched(self, send_mail_mock):
         user = UserFactory.create()
