@@ -518,21 +518,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
             self.vouch(None, commit=False)
 
-    def add_to_staff_group(self):
-        """Keep users in the staff group if they're autovouchable."""
-        email = self.user.email
-        staff, created = Group.objects.get_or_create(
-            name='staff',
-            defaults=dict(visible=False,
-                          members_can_leave=False,
-                          accepting_new_members='no')
-        )
-        if any(email.endswith('@' + x) for x in
-               settings.AUTO_VOUCH_DOMAINS):
-            staff.add_member(self)
-        elif self.groups.filter(pk=staff.pk).exists():
-            staff.remove_member(self)
-
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
         subject = _(u'You are now vouched on Mozillians!')
@@ -590,7 +575,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         self._privacy_level = None
         self.auto_vouch()
         super(UserProfile, self).save(*args, **kwargs)
-        self.add_to_staff_group()
 
     @classmethod
     def get_index(cls, public_index=False):

@@ -9,8 +9,7 @@ from nose.tools import eq_
 
 from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Group
-from mozillians.groups.tests import SkillFactory
+from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -29,7 +28,7 @@ class GroupResourceTests(TestCase):
     def test_list_groups(self):
         unvouched_user = UserFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
-        group = Group.objects.get(name='staff')
+        group = GroupFactory()
         group.add_member(unvouched_user.userprofile)
         group.add_member(user.userprofile)
 
