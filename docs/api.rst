@@ -28,7 +28,7 @@ If you believe an application is misusing Mozillians.org API data, please `file 
 Getting an API Key
 ------------------
 
-Community sites and Mozilla Corporation sites can request an API key by `submitting a bug <https://bugzilla.mozilla.org/enter_bug.cgi?product=Data%20Safety&cc=williamr@mozilla.com&short_desc=Phonebook%20API%20Usage%20Request>`_. The bug should include the **URL and description of the application** and **details about the expected use of API data**.
+Community sites and Mozilla Corporation sites can request an API key by `submitting a bug <https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=API%20Requests>`_. The bug should include the **URL and description of the application** and **details about the expected use of API data**.
 
 All requests are reviewed by product owners and data safety experts; not all requests are approved. 
 
