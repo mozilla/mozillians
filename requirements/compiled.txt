@@ -1,5 +1,4 @@
 -r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
 
 # Images
-PIL
-
+Pillow==2.3.0
