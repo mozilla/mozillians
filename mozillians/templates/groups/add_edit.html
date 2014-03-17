@@ -64,6 +64,14 @@
       {{ mozillians_field(form.wiki) }}
     </fieldset>
 
+    <fieldset>
+      {{ mozillians_field(form.accepting_new_members) }}
+    </fieldset>
+
+    <fieldset id="id_new_member_criteria_fieldset">
+      {{ mozillians_field(form.new_member_criteria) }}
+    </fieldset>
+
     {% if request.user.is_superuser %}
       <h2>Admin Settings</h2>
 
@@ -78,15 +86,6 @@
       <fieldset>
         {{ mozillians_field(form.members_can_leave) }}
       </fieldset>
-
-      <fieldset>
-        {{ mozillians_field(form.accepting_new_members) }}
-      </fieldset>
-
-      <fieldset id="id_new_member_criteria_fieldset">
-        {{ mozillians_field(form.new_member_criteria, required=True) }}
-      </fieldset>
-
     {% endif %}
 
     <fieldset id="edit_controls">

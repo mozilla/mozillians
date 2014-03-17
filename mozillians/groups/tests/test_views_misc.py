@@ -164,7 +164,8 @@ class CreateGroupTests(TestCase):
             #'members_can_leave': not checked
             #'visible': not checked
             'functional_area': 'checked',  # should be ignored
-            'accepting_new_members': u'barracuda',  # should be ignored
+            'accepting_new_members': 'yes',
+            'members_can_leave': False,  # should be ignored
         }
         with self.login(self.user) as client:
             response = client.post(url, data=data, follow=False)
@@ -188,6 +189,7 @@ class CreateGroupTests(TestCase):
         data = {
             'name': u'Test Group',
             'accepting_new_members': u'by_request',
+            'new_member_criteria': 'some criteria',
             'description': u'lorem ipsum and lah-dee-dah',
             'irc_channel': u'some text, this is not validated',
             'website': u'http://mozillians.org',
