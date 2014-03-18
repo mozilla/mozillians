@@ -176,6 +176,7 @@ def edit_profile(request):
 
         # Notify the user that their old profile URL won't work.
         if new_profile:
+            request.user.userprofile.full_name = profile.full_name
             update_invites(request)
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
