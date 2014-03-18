@@ -69,7 +69,7 @@
     </fieldset>
 
     <fieldset id="id_new_member_criteria_fieldset">
-      {{ mozillians_field(form.new_member_criteria) }}
+      {{ mozillians_field(form.new_member_criteria, required=True) }}
     </fieldset>
 
     {% if request.user.is_superuser %}
