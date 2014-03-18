@@ -1,26 +1,26 @@
-{% if profile.city %}
-  {% if profile.country and user.is_authenticated() %}
-    <a href="{{ url('phonebook:list_city', country=profile.country, city=profile.city) }}">
-      <span class="locality">{{ profile.city }}</span></a>
+{% if profile.geo_city %}
+  {% if profile.geo_country and user.is_authenticated() %}
+    <a href="{{ url('phonebook:list_city', country=profile.geo_country.name, city=profile.geo_city.name) }}">
+      <span class="locality">{{ profile.geo_city.name }}</span></a>
   {%- else -%}
-    <span class="locality">{{ profile.city }}</span>
+    <span class="locality">{{ profile.geo_city.name }}</span>
   {%- endif -%},
 {% endif %}
-{% if profile.region %}
+{% if profile.geo_region %}
   {% if profile.country and user.is_authenticated() %}
-    <a href="{{ url('phonebook:list_region', country=profile.country, region=profile.region) }}">
-      <span class="region">{{ profile.region }}</span></a>
+    <a href="{{ url('phonebook:list_region', country=profile.geo_country.name, region=profile.geo_region.name) }}">
+      <span class="region">{{ profile.geo_region.name }}</span></a>
   {%- else -%}
-     <span class="region">{{ profile.region }}</span>
+     <span class="region">{{ profile.geo_region.name }}</span>
   {%- endif -%},
 {% endif %}
-{% if profile.country %}
+{% if profile.geo_country %}
   {% if user.is_authenticated() %}
-    <a href="{{ url('phonebook:list_country', country=profile.country) }}">
-    <span class="country-name">{{ profile.get_country_display() }}<span></a>
+    <a href="{{ url('phonebook:list_country', country=profile.geo_country.name) }}">
+    <span class="country-name">{{ profile.geo_country.name }}<span></a>
   {%- else -%}
     <span class="country-name">
-      {{ profile.get_country_display() }}
+      {{ profile.geo_country.name }}
     </span>
   {%- endif -%}
 {% endif %}

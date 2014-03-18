@@ -57,10 +57,10 @@ class CityResourceTests(TestCase):
         # Note that setUp() already created one User, but that User has
         # no city and so should not show up in these results.
         UserFactory.create(userprofile={'is_vouched': True,
-                                        'privacy_city': MOZILLIANS,
+                                        'privacy_geo_city': MOZILLIANS,
                                         'city': 'Athens'})
         UserFactory.create(userprofile={'is_vouched': True,
-                                        'privacy_city': PUBLIC,
+                                        'privacy_geo_city': PUBLIC,
                                         'city': 'Athens'})
         client = Client()
         response = client.get(self.resource_url, follow=True)
@@ -158,16 +158,16 @@ class CountryResourceTests(TestCase):
         for i in xrange(2):
             UserFactory.create(userprofile={'is_vouched': True,
                                             'country': 'gr',
-                                            'privacy_country': MOZILLIANS})
+                                            'privacy_geo_country': MOZILLIANS})
         for i in xrange(2):
             UserFactory.create(userprofile={'is_vouched': True,
                                             'country': 'gr',
-                                            'privacy_country': PUBLIC})
+                                            'privacy_geo_country': PUBLIC})
 
         # One person from another country, to make sure that country shows up too.
         UserFactory.create(userprofile={'is_vouched': True,
                                         'country': 'us',
-                                        'privacy_country': MOZILLIANS})
+                                        'privacy_geo_country': MOZILLIANS})
 
         client = Client()
         response = client.get(self.resource_url, follow=True)
