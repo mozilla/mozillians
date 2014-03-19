@@ -24,7 +24,7 @@
 
       {% if show_delete_group_button %}
         <form action="{{ url('groups:group_delete', group.url) }}"
-            id="delete-group" method="post">
+              id="delete-group" method="post">
           {{ csrf() }}
           <button class="button button-negative delete right">
             {{ _('Delete Group') }}
@@ -33,7 +33,9 @@
       {% endif %}
 
       {% if is_curator or request.user.is_superuser %}
-        <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
+        <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
+          {{ _('Edit Group') }}
+        </a>
       {% endif %}
 
       {% if group.description %}
@@ -84,7 +86,13 @@
 
       {% if group.curator %}  {# curated group #}
         <div class="curator">
-          <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
+          <h3>
+            {% if group.functional_area %}
+              {{ _('Community Steward') }}
+            {% else %}
+              {{ _('Curator') }}
+            {% endif %}
+          </h3>
           <div class="avatar">
             <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
               <img class="profile-photo"
@@ -118,9 +126,9 @@
         <form action="{{ url('groups:join_group', group.pk) }}"
               id="join-group" method="post">
           {{ csrf() }}
-        <button class="button">
-          {{ _('Join Group') }}
-        </button>
+          <button class="button">
+            {{ _('Join Group') }}
+          </button>
       </form>
     {% endif %}
 
@@ -174,7 +182,9 @@
       </h3>
 
       {% if is_pending %}
-        <div class="group-pending-membership">{{ _('Your membership request is pending approval by the group curator.') }}</div>
+        <div class="alert alert-warning" id="group-pending-membership">
+          {{ _('Your membership request is pending approval by the group curator.') }}
+        </div>
       {% endif %}
 
 
@@ -182,9 +192,9 @@
 
       <div class="row">
         {% for people_slice in people|slice(3) -%}
-            {% for person in people_slice %}
-              {{ search_result(person) }}
-            {% endfor %}
+          {% for person in people_slice %}
+            {{ search_result(person) }}
+          {% endfor %}
         {% endfor %}
       </div>
       {% with items=people %}
