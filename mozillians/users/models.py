@@ -684,6 +684,7 @@ class ExternalAccount(models.Model):
     TYPE_SLIDESHARE = 'SLIDESHARE'
     TYPE_WEBMAKER = 'WEBMAKER'
     TYPE_MOWIKI = 'MOZILLAWIKI'
+    TYPE_REMO = 'REMO'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -732,7 +733,9 @@ class ExternalAccount(models.Model):
                         'url': 'https://{identifier}.makes.org',
                         'validator': validate_username_not_url},
         TYPE_MOWIKI: {'name': 'Mozilla Wiki', 'url': 'https://wiki.mozilla.org/User:{identifier}',
-                      'validator': validate_username_not_url}
+                      'validator': validate_username_not_url},
+        TYPE_REMO: {'name': 'Mozilla Reps', 'url': 'https://reps.mozilla.org/u/{identifier}/',
+                    'validator': validate_username_not_url}
     }
 
     user = models.ForeignKey(UserProfile)

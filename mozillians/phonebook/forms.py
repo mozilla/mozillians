@@ -32,23 +32,25 @@ class ExternalAccountForm(happyforms.ModelForm):
     def clean(self):
         cleaned_data = super(ExternalAccountForm, self).clean()
         identifier = cleaned_data.get('identifier')
-        type = cleaned_data.get('type')
+        account_type = cleaned_data.get('type')
 
-        if type:
+        if account_type and identifier:
             # If the Account expects an identifier and user provided a
             # full URL, try to extract the identifier from the URL.
-            url = ExternalAccount.ACCOUNT_TYPES[type].get('url')
+            url = ExternalAccount.ACCOUNT_TYPES[account_type].get('url')
             if url and identifier.startswith('http'):
-                url_pattern_re = re.sub('{identifier}', '(.+)', url)
+                url_pattern_re = url.replace('{identifier}', '(.+)')
                 identifier = identifier.rstrip('/')
                 url_pattern_re = url_pattern_re.rstrip('/')
                 match = re.match(url_pattern_re, identifier)
                 if match:
-                    cleaned_data['identifier'] = match.groups()[0]
+                    identifier = match.groups()[0]
 
-            validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
+            validator = ExternalAccount.ACCOUNT_TYPES[account_type].get('validator')
             if validator:
-                cleaned_data['identifier'] = validator(cleaned_data['identifier'])
+                identifier = validator(identifier)
+
+            cleaned_data['identifier'] = identifier
 
         return cleaned_data
 

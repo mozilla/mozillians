@@ -70,3 +70,13 @@ class ExternalAccountFormTests(TestCase):
                                         'privacy': 3})
             form.is_valid()
         ok_(validator.called)
+
+    def test_account_with_url_but_no_identifier(self):
+        # Related bug 984298
+        with patch('mozillians.phonebook.forms.ExternalAccount.ACCOUNT_TYPES',
+                   {'AMO': {'name': 'Example',
+                            'url': 'https://example.com/{identifier}'}}):
+            form = ExternalAccountForm({'type': 'AMO',
+                                        'privacy': 3})
+            form.is_valid()
+        ok_('identifier' in form.errors)
