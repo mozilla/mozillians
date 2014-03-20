@@ -301,6 +301,7 @@ def group_delete(request, url):
     return redirect(reverse('groups:index_groups'))
 
 
+@never_cache
 def group_add_edit(request, url=None):
     """
     Add or edit a group.  (If a url is passed in, we're editing.)
