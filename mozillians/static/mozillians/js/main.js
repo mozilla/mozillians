@@ -50,20 +50,22 @@ var app = {
         $(a).hide().removeAttr("href");
 
         $(window).scroll(function() {
-          $(this).scrollTop() >= 200 ? $(a).fadeIn("slow") : $(a).fadeOut("slow");
+            $(this).scrollTop() >= 200 ? $(a).fadeIn("slow") : $(a).fadeOut("slow");
         });
 
         $(a).click(function(){
-          $('html, body').animate({ scrollTop: "0px"}, 1200);
+            $('html, body').animate({ scrollTop: "0px"}, 1200);
         });
 
         $('input, textarea').placeholder();
 
-	// Focus search when 's' key is pressed
-	$('body').keypress(function(event){
-	  if (event.which==115 && !$('input, textarea, select').is(':focus')) {
-	    $('.search-query').focus();
-	  }
-	});
+        // Focus search when 's' key is pressed
+        $('body').keypress(function(event){
+            if (event.which==115 && !$('input, textarea, select').is(':focus')) {
+                $searchbox = $('.search-query, #search-form input[type=text]');
+                $searchbox.focus();
+                event.preventDefault();
+            }
+        });
     });
 })(jQuery);
