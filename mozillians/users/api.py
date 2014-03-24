@@ -163,7 +163,7 @@ class CountryResource(LocationCustomResource):
         queryset = (UserProfile.objects
                     .vouched()
                     .exclude(country='')
-                    .values('country', 'privacy_country')
+                    .values('country', 'privacy_geo_country')
                     .annotate(population=Count('country')))
         default_order = ('country',)
         object_class = Country
@@ -201,8 +201,8 @@ class CityResource(LocationCustomResource):
                     .vouched()
                     .exclude(city='')
                     .exclude(country='')
-                    .values('city', 'privacy_city',
-                            'country', 'privacy_country')
+                    .values('city', 'privacy_geo_city',
+                            'country', 'privacy_geo_country')
                     .annotate(population=Count('city')))
         default_order = ('country', 'city')
         object_class = City

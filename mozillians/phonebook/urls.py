@@ -20,14 +20,14 @@ urlpatterns = patterns(
     url(r'^search/$', 'views.search', name='search'),
     url(r'^vouch/$', 'views.vouch', name='vouch'),
     url(r'^invite/$', 'views.invite', name='invite'),
-    url(r'^country/(?P<country>[A-Za-z]+)/$',
+    url(r'^country/(?P<country>[A-Za-z0-9 ]+)/$',
         'views.list_mozillians_in_location', name='list_country'),
-    url(r'^country/(?P<country>[A-Za-z]+)/city/(?P<city>.+)/$',
+    url(r'^country/(?P<country>[A-Za-z0-9 ]+)/city/(?P<city>.+)/$',
         'views.list_mozillians_in_location', name='list_city'),
-    url((r'^country/(?P<country>[A-Za-z]+)/'
+    url((r'^country/(?P<country>[A-Za-z0-9 ]+)/'
          'region/(?P<region>.+)/city/(?P<city>.+)/$'),
         'views.list_mozillians_in_location', name='list_region_city'),
-    url(r'^country/(?P<country>[A-Za-z]+)/region/(?P<region>.+)/$',
+    url(r'^country/(?P<country>[A-Za-z0-9 ]+)/region/(?P<region>.+)/$',
         'views.list_mozillians_in_location', name='list_region'),
 
 

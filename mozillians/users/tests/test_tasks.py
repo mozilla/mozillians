@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from mock import MagicMock, Mock, call, patch
+from mozillians.geo.tests import CountryFactory, CityFactory
 from nose.tools import ok_
 from pyes.exceptions import ElasticSearchException
 
@@ -132,16 +133,18 @@ class BasketTests(TestCase):
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     def test_update_basket_task_with_token(self):
+        country = CountryFactory.create(name='Greece', code='gr')
+        city = CityFactory.create(name='Athens', country=country)
         user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens',
+                                               'geo_country': country,
+                                               'geo_city': city,
                                                'basket_token': 'token'})
         group = GroupFactory.create(name='Web Development',
                                     curator=user.userprofile)
         GroupFactory.create(name='Marketing', curator=user.userprofile)
         group.add_member(user.userprofile)
-        data = {'country': 'gr',
-                'city': 'athens',
+        data = {'country': country.name,
+                'city': city.name,
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 
@@ -162,15 +165,17 @@ class BasketTests(TestCase):
     def test_update_basket_task_without_token(self, basket_mock, lookup_token_mock, request_mock):
         lookup_token_mock.return_value = "basket_token"
 
+        country = CountryFactory.create(name='Greece', code='gr')
+        city = CityFactory.create(name='Athens', country=country)
         user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens'})
+                                               'geo_country': country,
+                                               'geo_city': city})
         group = GroupFactory.create(
             name='Web Development', curator=user.userprofile)
         GroupFactory.create(name='Marketing', curator=user.userprofile)
         group.add_member(user.userprofile)
-        data = {'country': 'gr',
-                'city': 'athens',
+        data = {'country': country.name,
+                'city': city.name,
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 
