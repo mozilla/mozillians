@@ -1,11 +1,10 @@
-from contextlib import nested
 from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from mock import MagicMock, Mock, call, patch
-from nose.tools import ok_
+from nose.tools import eq_, ok_
 from pyes.exceptions import ElasticSearchException
 
 from mozillians.common.tests import TestCase
@@ -14,7 +13,7 @@ from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
                                     remove_incomplete_accounts, unindex_objects,
-                                    remove_from_basket_task, update_basket_task)
+                                    remove_from_basket_task)
 from mozillians.users.tests import UserFactory
 
 
@@ -131,59 +130,85 @@ class BasketTests(TestCase):
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    def test_update_basket_task_with_token(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens',
-                                               'basket_token': 'token'})
+    @patch('mozillians.users.tasks.basket')
+    def test_update_basket_task(self, mock_basket):
+        # When a user is created or added to a group, the appropriate
+        # calls to update basket are made
+        email = 'foo@example.com'
+        token = 'footoken'
+        mock_basket.lookup_user.return_value = {
+            'email': email,
+        }
+        mock_basket.subscribe.return_value = {
+            'token': token,
+        }
+        user = UserFactory.create(
+            email=email,
+            userprofile={'is_vouched': True,
+                         'country': 'gr',
+                         'city': 'athens'})
+        mock_basket.subscribe.reset_mock()  # forget that subscribe was called
         group = GroupFactory.create(name='Web Development',
                                     curator=user.userprofile)
         GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.add_member(user.userprofile)
         data = {'country': 'gr',
                 'city': 'athens',
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 
-        with nested(patch('mozillians.users.tasks.basket.subscribe'),
-                    patch('mozillians.users.tasks.request')) \
-                as (subscribe_mock, request_mock):
-            update_basket_task(user.userprofile.id)
+        group.add_member(user.userprofile)
 
-        ok_(not subscribe_mock.called)
-        request_mock.assert_called_with(
-            'post', 'custom_update_phonebook', token='token', data=data)
+        # We just added a group, we should not need to subscribe anything
+        ok_(not mock_basket.subscribe.called)
+        # But we do need to update their phonebook record
+        mock_basket.request.assert_called_with(
+            'post', 'custom_update_phonebook', token=token, data=data)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.request')
-    @patch.object(UserProfile, 'lookup_basket_token')
     @patch('mozillians.users.tasks.basket')
-    def test_update_basket_task_without_token(self, basket_mock, lookup_token_mock, request_mock):
-        lookup_token_mock.return_value = "basket_token"
+    def test_change_email(self, mock_basket):
+        # When a user's email is changed, their old email is unsubscribed
+        # from all newsletters and their new email is subscribed to them.
 
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens'})
-        group = GroupFactory.create(
-            name='Web Development', curator=user.userprofile)
-        GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.add_member(user.userprofile)
-        data = {'country': 'gr',
-                'city': 'athens',
-                'WEB_DEVELOPMENT': 'Y',
-                'MARKETING': 'N'}
+        # Create a new user
+        email = 'foo@example.com'
+        token = 'first token'
+        mock_basket.lookup_user.return_value = {
+            'email': email,  # the old value
+            'token': token,
+            'newsletters': ['foo', 'bar']
+        }
+        mock_basket.subscribe.return_value = {
+            'token': token,
+        }
+        user = UserFactory.create(
+            email=email,
+            userprofile={'is_vouched': True,
+                         'country': 'gr',
+                         'city': 'athens'})
+        up = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(token, up.basket_token)
 
-        basket_mock.subscribe.return_value = {}
-
-        update_basket_task(user.userprofile.id)
-
-        basket_mock.subscribe.assert_called_with(
-            user.email, 'newsletter', trigger_welcome='N')
-        request_mock.assert_called_with(
-            'post', 'custom_update_phonebook', token='basket_token', data=data)
-        ok_(UserProfile.objects.filter(
-            basket_token='basket_token', id=user.userprofile.id).exists())
+        new_email = 'bar@example.com'
+        new_token = 'NEW token'
+        mock_basket.subscribe.return_value = {
+            'token': new_token,
+        }
+        user.email = new_email
+        user.save()
+        mock_basket.lookup_user.assert_called_with(token=token)
+        mock_basket.unsubscribe.assert_called_with(
+            token=token, email=email, optout='Y'
+        )
+        mock_basket.subscribe.assert_called_with(
+            new_email,
+            ['foo', 'bar'],
+            trigger_welcome='N',
+            sync='Y'
+        )
+        up = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(new_token, up.basket_token)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
@@ -196,12 +221,13 @@ class BasketTests(TestCase):
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.basket.unsubscribe')
+    @patch('mozillians.users.tasks.basket')
     @patch.object(UserProfile, 'lookup_basket_token')
-    def test_remove_from_basket_task_without_token(self, lookup_token_mock, unsubscribe_mock):
+    def test_remove_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
         lookup_token_mock.return_value = 'basket_token'
+        basket_mock.lookup_user.return_value = {'token': 'basket_token'}
         user = UserFactory.create(userprofile={'basket_token': ''})
         remove_from_basket_task(user.email, user.userprofile.basket_token)
         user = User.objects.get(pk=user.pk)  # refresh data from DB
-        unsubscribe_mock.assert_called_with(
+        basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters='newsletter')
