@@ -22,8 +22,9 @@ Contents:
    testing
    invites
    contribute
-   api
+   api/api
    mysql-anonymize
+   internationalization
 
 Indices and tables
 ------------------

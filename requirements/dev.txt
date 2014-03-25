@@ -26,3 +26,5 @@ Werkzeug
 coverage
 nosenicedots
 factory-boy
+dennis
+blessings
