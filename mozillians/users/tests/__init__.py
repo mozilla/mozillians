@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 
 import factory
 from factory import fuzzy
@@ -31,6 +31,12 @@ class UserFactory(factory.DjangoModelFactory):
             for key, value in extracted.items():
                 setattr(self.userprofile, key, value)
         self.userprofile.save()
+
+    @factory.post_generation
+    def manager(self, create, extracted, **kwargs):
+        if extracted:
+            group, created = Group.objects.get_or_create(name='Managers')
+            self.groups.add(group)
 
 
 class LanguageFactory(factory.DjangoModelFactory):

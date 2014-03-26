@@ -1,5 +1,5 @@
 <div class="result">
-  {% if group and (is_curator or request.user.is_superuser) and (request.user != profile.user) %}
+  {% if group and (is_curator or user.userprofile.is_manager) and (user != profile.user) %}
     <form action="{{ url('groups:remove_member', group_pk=group.pk, user_pk=profile.pk) }}" method="GET">
       {{ csrf() }}
       <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
@@ -10,7 +10,7 @@
         <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
       </form>
     {% endif %}
-  {% elif request.user.userprofile == profile and profile.pending %}
+  {% elif user.userprofile == profile and profile.pending %}
     <div class="status-pending">{{ _('Requested') }}</div>
   {% endif %}
   <div class="card">
