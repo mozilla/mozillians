@@ -46,6 +46,5 @@ $MYSQL $STAGEDB < $SQLPATH/$DB.$TODAY.queries_sanitize_stage.sql
 /usr/bin/mysqldump $STAGEDB -u root $P -S /var/lib/mysql/$INSTANCE.sock > $SQLPATH/$DB.$TODAY.sanitized_stage.sql
 
 # copy dbs
-/usr/bin/scp -q $SQLPATH/$DB.$TODAY.sanitized_dev.sql $SQLPATH/$DB.$TODAY.sanitized_stage.sql  dev1.db.phx1.mozilla.com:/data/backup-drop/$INSTANCE/$DB
-
+/usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_dev.sql $SQLPATH/$DB.$TODAY.sanitized_stage.sql  generic1.dev.webapp.phx1.mozilla.com:/data/www/mozillians-dev.allizom.org/mozillians/media/
 # Done!
