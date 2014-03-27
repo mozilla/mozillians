@@ -4,7 +4,7 @@ INSTANCE=generic
 DB=mozillians_org
 DEVDB=sanitize_dev_$DB
 STAGEDB=sanitize_stage_$DB
-cd /data/backups/bin/
+cd /data/backups/bin/sanitize
 rm -f anonymize.py anonymize_dev.yml anonymize_stage.yml
 /usr/bin/wget -q -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize.py
 /bin/chmod 755 anonymize.py
