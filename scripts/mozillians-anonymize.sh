@@ -6,10 +6,10 @@ DEVDB=sanitize_dev_$DB
 STAGEDB=sanitize_stage_$DB
 cd /data/backups/bin/
 rm -f anonymize.py anonymize_dev.yml anonymize_stage.yml
-/usr/bin/wget -q -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize.py
+/usr/bin/wget -q --no-check-certificate -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize.py
 /bin/chmod 755 anonymize.py
-/usr/bin/wget -q -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize_dev.yml
-/usr/bin/wget -q -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize_stage.yml
+/usr/bin/wget -q --no-check-certificate -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize_dev.yml
+/usr/bin/wget -q --no-check-certificate -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize_stage.yml
 
 TODAY=`/bin/date +"%Y.%m.%d"`
 HOSTNAME=`/bin/hostname`
