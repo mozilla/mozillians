@@ -12,7 +12,7 @@ from mozillians.users.tests import UserFactory
 class ToggleGroupSubscriptionTests(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         self.join_url = reverse('groups:join_group', prefix='/en-US/',
@@ -47,7 +47,7 @@ class ToggleGroupSubscriptionTests(TestCase):
 
     @requires_vouch()
     def test_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         join_url = reverse('groups:join_group', prefix='/en-US/',
                            kwargs={'group_pk': self.group.pk})
         with self.login(user) as client:
@@ -75,7 +75,7 @@ class ToggleSkillSubscriptionTests(TestCase):
         # LanguageMiddleware will convert the request to GET.
         self.url = reverse('groups:toggle_skill_subscription', prefix='/en-US/',
                            kwargs={'url': self.skill.url})
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
 
     def test_skill_subscription(self):
         with self.login(self.user) as client:
@@ -106,7 +106,7 @@ class ToggleSkillSubscriptionTests(TestCase):
 
     @requires_vouch()
     def test_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.post(self.url, follow=True)
 
@@ -119,7 +119,7 @@ class ToggleSkillSubscriptionTests(TestCase):
 class CreateGroupTests(TestCase):
     def test_basic_group_creation_as_manager(self):
         # Managers have access to all group parameters when creating a group
-        user = UserFactory.create(userprofile={'is_vouched': True}, manager=True)
+        user = UserFactory.create(manager=True)
         url = reverse('groups:group_add', prefix='/en-US/')
         data = {
             'name': u'Test Group',
@@ -149,7 +149,7 @@ class CreateGroupTests(TestCase):
 
     def test_basic_group_creation_as_non_manager(self):
         # non-managers cannot set some of the parameters, try though they might
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:group_add', prefix='/en-US/')
         data = {
             'name': u'Test Group',
@@ -182,7 +182,7 @@ class CreateGroupTests(TestCase):
 
     def test_group_edit(self):
         # Curator can edit a group and change (some of) its properties
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         data = {
             'name': u'Test Group',
             'accepting_new_members': u'by_request',

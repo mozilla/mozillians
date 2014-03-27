@@ -19,21 +19,19 @@ class ListTests(TestCase):
 
     @requires_vouch()
     def test_list_mozillians_in_location_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': 'gr'})
             client.get(url, follow=True)
 
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_vouched(self):
-        user_listed_1 = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it'})
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        UserFactory.create(userprofile={'is_vouched': True})
+        user_listed_1 = UserFactory.create(userprofile={'country': 'it'})
+        UserFactory.create(userprofile={'country': 'it'})
         UserFactory.create()
-        UserFactory.create(userprofile={'country': 'gr'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(vouched=False)
+        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': 'it'})
             response = client.get(url, follow=True)
@@ -50,10 +48,9 @@ class ListTests(TestCase):
 
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_second_page(self):
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        user_listed_2 = (UserFactory.create(userprofile={'is_vouched': True,
-                                                         'country': 'it'}))
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(userprofile={'country': 'it'})
+        user_listed_2 = (UserFactory.create(userprofile={'country': 'it'}))
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': 'it'})
             url = urlparams(url, page=2)
@@ -67,9 +64,9 @@ class ListTests(TestCase):
 
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_empty_page(self):
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(userprofile={'country': 'it'})
+        UserFactory.create(userprofile={'country': 'it'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': 'it'})
             url = urlparams(url, page=20000)
@@ -79,9 +76,9 @@ class ListTests(TestCase):
 
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_invalid_page(self):
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        UserFactory.create(userprofile={'is_vouched': True, 'country': 'it'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(userprofile={'country': 'it'})
+        UserFactory.create(userprofile={'country': 'it'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': 'it'})
             url = urlparams(url, page='invalid')
@@ -90,18 +87,13 @@ class ListTests(TestCase):
         eq_(response.context['people'].number, 1)
 
     def test_list_mozillians_in_location_region_vouched(self):
-        user_listed = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'region': 'florence'})
-        UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'region': 'foo'})
-        UserFactory.create(userprofile={'is_vouched': True})
+        user_listed = UserFactory.create(userprofile={'country': 'it',
+                                                      'region': 'florence'})
+        UserFactory.create(userprofile={'country': 'it', 'region': 'foo'})
         UserFactory.create()
-        UserFactory.create(userprofile={'country': 'gr'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(vouched=False)
+        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse(
                 'phonebook:list_region',
@@ -116,18 +108,13 @@ class ListTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_city_vouched(self):
-        user_listed = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'city': 'madova'})
-        UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'city': 'foo'})
-        UserFactory.create(userprofile={'is_vouched': True})
+        user_listed = UserFactory.create(userprofile={'country': 'it',
+                                                      'city': 'madova'})
+        UserFactory.create(userprofile={'country': 'it', 'city': 'foo'})
         UserFactory.create()
-        UserFactory.create(userprofile={'country': 'gr'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(vouched=False)
+        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_city',
                           kwargs={'country': 'it', 'city': 'Madova'})
@@ -141,20 +128,16 @@ class ListTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_region_n_city_vouched(self):
-        user_listed = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'region': 'Florence',
-                         'city': 'madova'})
-        UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'country': 'it',
-                         'region': 'florence',
-                         'city': 'foo'})
-        UserFactory.create(userprofile={'is_vouched': True})
+        user_listed = UserFactory.create(userprofile={'country': 'it',
+                                                      'region': 'Florence',
+                                                      'city': 'madova'})
+        UserFactory.create(userprofile={'country': 'it',
+                                        'region': 'florence',
+                                        'city': 'foo'})
         UserFactory.create()
-        UserFactory.create(userprofile={'country': 'gr'})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create(vouched=False)
+        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_region_city',
                           kwargs={'country': 'it', 'region': 'florence', 'city': 'Madova'})
@@ -168,7 +151,7 @@ class ListTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_invalid_country(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country',
                           kwargs={'country': 'invalid'})

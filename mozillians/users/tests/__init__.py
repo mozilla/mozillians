@@ -38,6 +38,14 @@ class UserFactory(factory.DjangoModelFactory):
             group, created = Group.objects.get_or_create(name='Managers')
             self.groups.add(group)
 
+    @factory.post_generation
+    def vouched(self, create, extracted, **kwargs):
+        # By default Users are vouched
+        if extracted is None:
+            extracted = True
+        self.userprofile.is_vouched = extracted
+        self.userprofile.save()
+
 
 class LanguageFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Language

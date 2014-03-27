@@ -21,7 +21,7 @@ from mozillians.users.tests import UserFactory
 
 class CityResourceTests(TestCase):
     def setUp(self):
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         self.resource_url = reverse(
             'api_dispatch_list',
             kwargs={'api_name': 'v1', 'resource_name': 'cities'})
@@ -32,12 +32,9 @@ class CityResourceTests(TestCase):
                                       app_key=self.app.key)
 
     def test_get_list(self):
-        UserFactory.create(userprofile={'is_vouched': True,
-                                        'country': 'gr',
-                                        'city': 'Athens'})
-        UserFactory.create(userprofile={'is_vouched': False,
-                                        'country': 'gr',
-                                        'city': 'Athens'})
+        UserFactory.create(userprofile={'country': 'gr', 'city': 'Athens'})
+        UserFactory.create(vouched=False, userprofile={'country': 'gr',
+                                                       'city': 'Athens'})
         client = Client()
         response = client.get(self.resource_url, follow=True)
         eq_(response.status_code, 200)
@@ -56,12 +53,8 @@ class CityResourceTests(TestCase):
         # Also, the population should be the total.
         # Note that setUp() already created one User, but that User has
         # no city and so should not show up in these results.
-        UserFactory.create(userprofile={'is_vouched': True,
-                                        'privacy_city': MOZILLIANS,
-                                        'city': 'Athens'})
-        UserFactory.create(userprofile={'is_vouched': True,
-                                        'privacy_city': PUBLIC,
-                                        'city': 'Athens'})
+        UserFactory.create(userprofile={'privacy_city': MOZILLIANS, 'city': 'Athens'})
+        UserFactory.create(userprofile={'privacy_city': PUBLIC, 'city': 'Athens'})
         client = Client()
         response = client.get(self.resource_url, follow=True)
         eq_(response.status_code, 200)
@@ -122,7 +115,7 @@ class CityResourceTests(TestCase):
 
 class CountryResourceTests(TestCase):
     def setUp(self):
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         self.resource_url = reverse(
             'api_dispatch_list',
             kwargs={'api_name': 'v1', 'resource_name': 'countries'})
@@ -133,7 +126,7 @@ class CountryResourceTests(TestCase):
                                       app_key=self.app.key)
 
     def test_get_list(self):
-        UserFactory.create(userprofile={'is_vouched': False, 'country': 'gr'})
+        UserFactory.create(vouched=False, userprofile={'country': 'gr'})
         client = Client()
         response = client.get(self.resource_url, follow=True)
         eq_(response.status_code, 200)
@@ -156,17 +149,14 @@ class CountryResourceTests(TestCase):
         # Create a couple more Greeks with each privacy setting.  We should
         # still get back Greece only once.
         for i in xrange(2):
-            UserFactory.create(userprofile={'is_vouched': True,
-                                            'country': 'gr',
+            UserFactory.create(userprofile={'country': 'gr',
                                             'privacy_country': MOZILLIANS})
         for i in xrange(2):
-            UserFactory.create(userprofile={'is_vouched': True,
-                                            'country': 'gr',
+            UserFactory.create(userprofile={'country': 'gr',
                                             'privacy_country': PUBLIC})
 
         # One person from another country, to make sure that country shows up too.
-        UserFactory.create(userprofile={'is_vouched': True,
-                                        'country': 'us',
+        UserFactory.create(userprofile={'country': 'us',
                                         'privacy_country': MOZILLIANS})
 
         client = Client()
@@ -225,7 +215,7 @@ class CountryResourceTests(TestCase):
 
 class UserResourceTests(TestCase):
     def setUp(self):
-        voucher = UserFactory.create(userprofile={'is_vouched': True})
+        voucher = UserFactory.create()
         self.user = UserFactory.create(
             userprofile={'is_vouched': True,
                          'vouched_by': voucher.userprofile})
@@ -324,8 +314,8 @@ class UserResourceTests(TestCase):
         eq_(data['meta']['limit'], 1)
 
     def test_request_with_normal_offset(self):
-        UserFactory.create(userprofile={'is_vouched': True})
-        UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create()
+        UserFactory.create()
         client = Client()
         url = urlparams(self.mozilla_resource_url, offset=1)
         response = client.get(url, follow=True)
@@ -334,8 +324,8 @@ class UserResourceTests(TestCase):
         eq_(data['meta']['offset'], 1)
 
     def test_request_with_huge_offset(self):
-        UserFactory.create(userprofile={'is_vouched': True})
-        UserFactory.create(userprofile={'is_vouched': True})
+        UserFactory.create()
+        UserFactory.create()
         client = Client()
         url = urlparams(self.mozilla_resource_url, offset=100000000)
         response = client.get(url, follow=True)
@@ -344,8 +334,8 @@ class UserResourceTests(TestCase):
         eq_(data['meta']['offset'], data['meta']['total_count'])
 
     def test_is_vouched_true(self):
-        UserFactory.create(userprofile={'is_vouched': True})
-        UserFactory.create(userprofile={'is_vouched': False})
+        UserFactory.create()
+        UserFactory.create(vouched=False)
         client = Client()
         url = urlparams(self.mozilla_resource_url, is_vouched='true')
         response = client.get(url, follow=True)
@@ -354,8 +344,8 @@ class UserResourceTests(TestCase):
             ok_(obj['is_vouched'])
 
     def test_is_vouched_false(self):
-        UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create(userprofile={'is_vouched': False})
+        UserFactory.create()
+        user = UserFactory.create(vouched=False)
         client = Client()
         url = urlparams(self.mozilla_resource_url, is_vouched='false')
         response = client.get(url, follow=True)
@@ -365,10 +355,10 @@ class UserResourceTests(TestCase):
 
     def test_search_accounts(self):
         client = Client()
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
+        user_1 = UserFactory.create()
         user_1.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
                                                       identifier='AccountTest')
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        user_2 = UserFactory.create()
         user_2.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
                                                       identifier='AccountTest')
 
@@ -382,9 +372,9 @@ class UserResourceTests(TestCase):
         client = Client()
         skill_1 = SkillFactory.create()
         skill_2 = SkillFactory.create()
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
+        user_1 = UserFactory.create()
         user_1.userprofile.skills.add(skill_1)
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        user_2 = UserFactory.create()
         user_2.userprofile.skills.add(skill_2)
 
         url = urlparams(self.mozilla_resource_url, skills=skill_1.name)
@@ -397,9 +387,9 @@ class UserResourceTests(TestCase):
         client = Client()
         group_1 = GroupFactory.create()
         group_2 = GroupFactory.create()
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
+        user_1 = UserFactory.create()
         group_1.add_member(user_1.userprofile)
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        user_2 = UserFactory.create()
         group_2.add_member(user_2.userprofile)
 
         url = urlparams(self.mozilla_resource_url, groups=group_1.name)
@@ -410,9 +400,8 @@ class UserResourceTests(TestCase):
 
     def test_search_combined_skills_country(self):
         country = 'fr'
-        user_1 = UserFactory.create(userprofile={'is_vouched': True,
-                                                 'country': country})
-        UserFactory.create(userprofile={'is_vouched': True, 'country': country})
+        user_1 = UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country})
         skill = SkillFactory.create()
         user_1.userprofile.skills.add(skill)
         client = Client()
@@ -424,8 +413,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user_1.userprofile.id))
 
     def test_query_with_space(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'city': 'Mountain View'})
+        user = UserFactory.create(userprofile={'city': 'Mountain View'})
         client = Client()
         url = urlparams(self.mozilla_resource_url, city='mountain view')
         request = client.get(url, follow=True)
@@ -434,8 +422,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_name(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'full_name': u'Νίκος Κούκος'})
+        user = UserFactory.create(userprofile={'full_name': u'Νίκος Κούκος'})
         client = Client()
         url = urlparams(self.mozilla_resource_url,
                         name=user.userprofile.full_name)
@@ -445,7 +432,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_username(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = urlparams(self.mozilla_resource_url, username=user.username)
         client = Client()
         response = client.get(url, follow=True)
@@ -454,8 +441,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_country(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'fr'})
+        user = UserFactory.create(userprofile={'country': 'fr'})
         url = urlparams(self.mozilla_resource_url,
                         country=user.userprofile.country)
         client = Client()
@@ -465,8 +451,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_region(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'region': 'la lo'})
+        user = UserFactory.create(userprofile={'region': 'la lo'})
         url = urlparams(self.mozilla_resource_url,
                         region=user.userprofile.region)
         client = Client()
@@ -476,8 +461,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_city(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'city': u'αθήνα'})
+        user = UserFactory.create(userprofile={'city': u'αθήνα'})
         url = urlparams(self.mozilla_resource_url,
                         city=user.userprofile.city)
         client = Client()
@@ -487,8 +471,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_search_ircname(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'ircname': 'nikos'})
+        user = UserFactory.create(userprofile={'ircname': 'nikos'})
         url = urlparams(self.mozilla_resource_url,
                         ircname=user.userprofile.ircname)
         client = Client()
@@ -498,8 +481,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], unicode(user.userprofile.id))
 
     def test_community_app_does_not_allow_community_sites(self):
-        user = UserFactory.create(
-            userprofile={'is_vouched': True, 'allows_community_sites': False})
+        user = UserFactory.create(userprofile={'allows_community_sites': False})
         client = Client()
         url = urlparams(self.community_resource_url, email=user.email)
         response = client.get(url, follow=True)
@@ -508,8 +490,7 @@ class UserResourceTests(TestCase):
         eq_(len(data['objects']), 0)
 
     def test_community_app_does_allows_community_sites(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'allows_community_sites': True})
+        user = UserFactory.create(userprofile={'allows_community_sites': True})
         client = Client()
         url = urlparams(self.community_resource_url, email=user.email)
         response = client.get(url, follow=True)
@@ -521,8 +502,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['is_vouched'], user.userprofile.is_vouched)
 
     def test_mozillian_app_does_not_allow_mozilla_sites(self):
-        user = UserFactory.create(
-            userprofile={'is_vouched': True, 'allows_mozilla_sites': False})
+        user = UserFactory.create(userprofile={'allows_mozilla_sites': False})
         client = Client()
         url = urlparams(self.mozilla_resource_url, email=user.email)
         response = client.get(url, follow=True)
@@ -534,8 +514,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['is_vouched'], user.userprofile.is_vouched)
 
     def test_mozilla_app_does_allows_mozilla_sites(self):
-        user = UserFactory.create(
-            userprofile={'is_vouched': True, 'allows_mozilla_sites': True})
+        user = UserFactory.create(userprofile={'allows_mozilla_sites': True})
         client = Client()
         url = urlparams(self.mozilla_resource_url, email=user.email)
         response = client.get(url, follow=True)
@@ -545,7 +524,7 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['email'], user.email)
 
     def test_only_completed_profiles(self):
-        user = UserFactory.create(userprofile={'is_vouched': True, 'full_name': ''})
+        user = UserFactory.create(userprofile={'full_name': ''})
         client = Client()
         response = client.get(self.mozilla_resource_url, follow=True)
         data = json.loads(response.content)
@@ -555,7 +534,7 @@ class UserResourceTests(TestCase):
             ok_(obj['email'] != user.email)
 
     def test_distinct_results(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group_1 = GroupFactory.create()
         group_2 = GroupFactory.create()
         group_1.add_member(user.userprofile)

@@ -43,11 +43,11 @@ class GroupBaseTests(TestCase):
         merge_group_1 = GroupFactory.create()
         merge_group_2 = GroupFactory.create()
 
-        user1 = UserFactory.create(userprofile={'is_vouched': True})
-        user2 = UserFactory.create(userprofile={'is_vouched': True})
-        user3 = UserFactory.create(userprofile={'is_vouched': True})
-        user4 = UserFactory.create(userprofile={'is_vouched': True})
-        user5 = UserFactory.create(userprofile={'is_vouched': True})
+        user1 = UserFactory.create()
+        user2 = UserFactory.create()
+        user3 = UserFactory.create()
+        user4 = UserFactory.create()
+        user5 = UserFactory.create()
 
         master_group.add_member(user1.userprofile, GroupMembership.MEMBER)
         master_group.add_member(user2.userprofile, GroupMembership.PENDING)
@@ -127,51 +127,51 @@ class GroupBaseTests(TestCase):
 
     def test_can_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(group.user_can_join(user.userprofile))
 
     def test_can_join_by_request(self):
         group = GroupFactory.create(accepting_new_members='by_request')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(group.user_can_join(user.userprofile))
 
     def test_unvouched_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': False})
+        user = UserFactory.create(vouched=False)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_member_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_pending_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_cant_join_antisocial_group(self):
         group = GroupFactory.create(accepting_new_members='no')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(not group.user_can_join(user.userprofile))
 
     def test_member_can_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(group.user_can_leave(user.userprofile))
 
     def test_pending_can_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING)
         ok_(group.user_can_leave(user.userprofile))
 
     def test_curator_cant_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.curator = user.userprofile
         group.save()
         group.add_member(user.userprofile)
@@ -179,12 +179,12 @@ class GroupBaseTests(TestCase):
 
     def test_nonmember_cant_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(not group.user_can_leave(user.userprofile))
 
     def test_cant_leave_unleavable_group(self):
         group = GroupFactory.create(members_can_leave=False)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(not group.user_can_leave(user.userprofile))
 

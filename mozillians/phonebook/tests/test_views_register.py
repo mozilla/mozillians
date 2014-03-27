@@ -18,10 +18,9 @@ class RegisterTests(TestCase):
         eq_(client.session['invite-code'], 'foo')
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-    @patch('mozillians.phonebook.views.redeem_invite',
-           wraps=redeem_invite)
+    @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_unvouched(self, redeem_invite_mock):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         invite = InviteFactory.create(inviter=user.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
         with self.login(user) as client:
@@ -31,11 +30,10 @@ class RegisterTests(TestCase):
         ok_(redeem_invite_mock.called)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-    @patch('mozillians.phonebook.views.redeem_invite',
-           wraps=redeem_invite)
+    @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_vouched(self, redeem_invite_mock):
-        voucher_1 = UserFactory.create(userprofile={'is_vouched': True})
-        voucher_2 = UserFactory.create(userprofile={'is_vouched': True})
+        voucher_1 = UserFactory.create()
+        voucher_2 = UserFactory.create()
         user = UserFactory.create(
             userprofile={'is_vouched': True,
                          'vouched_by': voucher_1.userprofile})
@@ -57,7 +55,7 @@ class RegisterTests(TestCase):
         eq_(response.status_code, 200)
 
     def test_register_without_code_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:register'), follow=True)
         ok_(not self.client.session.get('invite-code'))
@@ -65,7 +63,7 @@ class RegisterTests(TestCase):
         eq_(response.status_code, 200)
 
     def test_register_without_code_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:register'), follow=True)
         ok_(not self.client.session.get('invite-code'))

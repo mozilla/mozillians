@@ -11,8 +11,8 @@ class ShowTests(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
         self.url = reverse('groups:show_group', kwargs={'url': self.group.url})
-        self.user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        self.user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        self.user_1 = UserFactory.create()
+        self.user_2 = UserFactory.create()
         self.group.add_member(self.user_2.userprofile)
 
     def test_show_user_not_in_group(self):
@@ -71,7 +71,7 @@ class ShowTests(TestCase):
 
     @requires_vouch()
     def test_show_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.get(self.url, follow=True)
 
@@ -82,7 +82,7 @@ class ShowTests(TestCase):
         eq_(response.status_code, 404)
 
     def test_alias_redirection(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group = GroupFactory.create()
         group_alias = GroupAliasFactory.create(alias=group)
         url = reverse('groups:show_group', kwargs={'url': group_alias.url})
@@ -92,9 +92,9 @@ class ShowTests(TestCase):
         eq_(response.context['group'], group)
 
     def test_show_leave_button_value_with_curator(self):
-        curator_user = UserFactory.create(userprofile={'is_vouched': True})
+        curator_user = UserFactory.create()
         group = GroupFactory.create(curator=curator_user.userprofile)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -110,7 +110,7 @@ class ShowTests(TestCase):
 
     def test_show_leave_button_value_without_curator(self):
         group = GroupFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -126,7 +126,7 @@ class ShowTests(TestCase):
         is False, even for group member
         """
         group = GroupFactory.create(members_can_leave=False)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -142,7 +142,7 @@ class ShowTests(TestCase):
         is True, for group member
         """
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -158,7 +158,7 @@ class ShowTests(TestCase):
         is True, if not group member
         """
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
         with self.login(user) as client:
@@ -169,7 +169,7 @@ class ShowTests(TestCase):
 
     def test_show_join_button_accepting_members_yes(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
         with self.login(user) as client:
@@ -180,7 +180,7 @@ class ShowTests(TestCase):
 
     def test_show_join_button_accepting_members_yes_member(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -191,7 +191,7 @@ class ShowTests(TestCase):
 
     def test_show_join_button_accepting_members_by_request(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
         with self.login(user) as client:
@@ -201,7 +201,7 @@ class ShowTests(TestCase):
 
     def test_show_join_button_accepting_members_by_request_member(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
@@ -212,7 +212,7 @@ class ShowTests(TestCase):
 
     def test_show_join_button_accepting_members_no(self):
         group = GroupFactory.create(accepting_new_members='no')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:show_group', kwargs={'url': group.url})
 
         with self.login(user) as client:
@@ -222,7 +222,7 @@ class ShowTests(TestCase):
 
     def test_show_leave_button_value_skill(self):
         skill = SkillFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         skill.members.add(user.userprofile)
         url = reverse('groups:show_skill', kwargs={'url': skill.url})
 
@@ -293,7 +293,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
         member = self.user_2.userprofile
         # Make user 3 a pending member
-        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.user_3 = UserFactory.create()
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending = self.user_3.userprofile
 
@@ -313,7 +313,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
         member = self.user_2.userprofile
         # Make user 3 a pending member
-        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.user_3 = UserFactory.create()
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending = self.user_3.userprofile
 
@@ -333,7 +333,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
         member = self.user_2.userprofile
         # Make user 3 a pending member
-        self.user_3 = UserFactory.create(userprofile={'is_vouched': True})
+        self.user_3 = UserFactory.create()
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending = self.user_3.userprofile
 

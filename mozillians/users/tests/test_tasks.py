@@ -24,17 +24,13 @@ class IncompleteAccountsTests(TestCase):
     @patch('mozillians.users.tasks.datetime')
     def test_remove_incomplete_accounts(self, datetime_mock):
         """Test remove incomplete accounts."""
-        complete_user = UserFactory.create(
-            date_joined=datetime(2012, 01, 01))
-        complete_vouched_user = UserFactory.create(
-            date_joined=datetime(2013, 01, 01),
-            userprofile={'is_vouched': True})
-        incomplete_user_not_old = UserFactory.create(
-            date_joined=datetime(2013, 01, 01),
-            userprofile={'full_name': ''})
-        incomplete_user_old = UserFactory.create(
-            date_joined=datetime(2012, 01, 01),
-            userprofile={'full_name': ''})
+        complete_user = UserFactory.create(vouched=False,
+                                           date_joined=datetime(2012, 01, 01))
+        complete_vouched_user = UserFactory.create(date_joined=datetime(2013, 01, 01))
+        incomplete_user_not_old = UserFactory.create(date_joined=datetime(2013, 01, 01),
+                                                     userprofile={'full_name': ''})
+        incomplete_user_old = UserFactory.create(date_joined=datetime(2012, 01, 01),
+                                                 userprofile={'full_name': ''})
 
         datetime_mock.now.return_value = datetime(2013, 01, 01)
 
@@ -132,8 +128,7 @@ class BasketTests(TestCase):
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     def test_update_basket_task_with_token(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
+        user = UserFactory.create(userprofile={'country': 'gr',
                                                'city': 'athens',
                                                'basket_token': 'token'})
         group = GroupFactory.create(name='Web Development',
@@ -162,8 +157,7 @@ class BasketTests(TestCase):
     def test_update_basket_task_without_token(self, basket_mock, lookup_token_mock, request_mock):
         lookup_token_mock.return_value = "basket_token"
 
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
+        user = UserFactory.create(userprofile={'country': 'gr',
                                                'city': 'athens'})
         group = GroupFactory.create(
             name='Web Development', curator=user.userprofile)

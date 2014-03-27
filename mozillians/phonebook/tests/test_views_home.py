@@ -15,13 +15,13 @@ class HomeTests(TestCase):
         ok_('profile' not in response.context)
 
     def test_home_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:home'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
     def test_home_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:home'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
