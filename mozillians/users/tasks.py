@@ -100,7 +100,8 @@ def update_basket_task(instance_id):
                                        exception.message)
             return
         # Remember the token
-        instance.basket_token = token = retval['token']
+        instance.basket_token = retval['token']
+        token = retval['token']
         # Don't call .save() on a userprofile from here, it would invoke us again
         # via the post-save signal, which would be pointless.
         UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
@@ -129,12 +130,13 @@ def update_basket_task(instance_id):
                 # Pass sync='Y' so we get back the new token right away
                 subscribe_result = basket.subscribe(
                     email,
-                    result['newsletters'],
+                    [settings.BASKET_NEWSLETTER],
                     sync='Y',
                     trigger_welcome='N',
                 )
                 # unsub all from the old token
-                basket.unsubscribe(token=token, email=old_email, optout='Y')
+                basket.unsubscribe(token=token, email=old_email,
+                                   newsletters=[settings.BASKET_NEWSLETTER], optout='Y')
             except (requests.exceptions.RequestException,
                     basket.BasketException) as exception:
                 try:
@@ -146,7 +148,8 @@ def update_basket_task(instance_id):
             # basket doesn't have a custom API to do that. (basket never deletes anything.)
 
             # That was all successful. Update the token.
-            instance.basket_token = token = subscribe_result['token']
+            instance.basket_token = subscribe_result['token']
+            token = subscribe_result['token']
             # Don't call .save() on a userprofile from here, it would invoke us again
             # via the post-save signal, which would be pointless.
             UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
@@ -157,7 +160,7 @@ def update_basket_task(instance_id):
     # What groups is the user in?
     user_group_pks = (instance.groups.filter(groupmembership__status=GroupMembership.MEMBER)
                       .values_list('pk', flat=True))
-    for group in Group.objects.exclude(curator=None):
+    for group in Group.objects.filter(functional_area=True):
         name = group.name.upper().replace(' ', '_')
         data[name] = 'Y' if group.id in user_group_pks else 'N'
 

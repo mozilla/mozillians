@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
@@ -143,9 +144,8 @@ class BasketTests(TestCase):
             userprofile={'country': 'gr',
                          'city': 'athens'})
         mock_basket.subscribe.reset_mock()  # forget that subscribe was called
-        group = GroupFactory.create(name='Web Development',
-                                    curator=user.userprofile)
-        GroupFactory.create(name='Marketing', curator=user.userprofile)
+        group = GroupFactory.create(name='Web Development', functional_area=True)
+        GroupFactory.create(name='Marketing', functional_area=True)
         data = {'country': 'gr',
                 'city': 'athens',
                 'WEB_DEVELOPMENT': 'Y',
@@ -177,10 +177,8 @@ class BasketTests(TestCase):
         mock_basket.subscribe.return_value = {
             'token': token,
         }
-        user = UserFactory.create(
-            email=email,
-            userprofile={'country': 'gr',
-                         'city': 'athens'})
+        user = UserFactory.create(email=email, userprofile={'country': 'gr',
+                                                            'city': 'athens'})
         up = UserProfile.objects.get(pk=user.userprofile.pk)
         eq_(token, up.basket_token)
 
@@ -193,11 +191,11 @@ class BasketTests(TestCase):
         user.save()
         mock_basket.lookup_user.assert_called_with(token=token)
         mock_basket.unsubscribe.assert_called_with(
-            token=token, email=email, optout='Y'
+            token=token, email=email, optout='Y', newsletters=[settings.BASKET_NEWSLETTER]
         )
         mock_basket.subscribe.assert_called_with(
             new_email,
-            ['foo', 'bar'],
+            [settings.BASKET_NEWSLETTER],
             trigger_welcome='N',
             sync='Y'
         )
@@ -205,23 +203,23 @@ class BasketTests(TestCase):
         eq_(new_token, up.basket_token)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.basket.unsubscribe')
     def test_remove_from_basket_task(self, unsubscribe_mock):
         user = UserFactory.create(userprofile={'basket_token': 'foo'})
-        remove_from_basket_task(user.email, user.userprofile.basket_token)
+        with patch('mozillians.users.tasks.BASKET_ENABLED', True):
+            remove_from_basket_task(user.email, user.userprofile.basket_token)
         unsubscribe_mock.assert_called_with(
             user.userprofile.basket_token, user.email, newsletters='newsletter')
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.basket')
     @patch.object(UserProfile, 'lookup_basket_token')
     def test_remove_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
         lookup_token_mock.return_value = 'basket_token'
         basket_mock.lookup_user.return_value = {'token': 'basket_token'}
         user = UserFactory.create(userprofile={'basket_token': ''})
-        remove_from_basket_task(user.email, user.userprofile.basket_token)
+        with patch('mozillians.users.tasks.BASKET_ENABLED', True):
+            remove_from_basket_task(user.email, user.userprofile.basket_token)
         user = User.objects.get(pk=user.pk)  # refresh data from DB
         basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters='newsletter')
