@@ -143,7 +143,7 @@ def show(request, url, alias_model, template):
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
     # Curator can delete their group if there are no other members.
-    show_delete_group_button = is_curator and group.members.all().count() == 1
+    show_delete_group_button = (is_curator or is_manager) and group.members.all().count() == 1
 
     data = dict(people=people,
                 group=group,
