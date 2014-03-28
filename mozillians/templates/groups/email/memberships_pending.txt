@@ -1,4 +1,6 @@
-{% trans name=group.curator.full_name %}Hi {{ name }}, {% endtrans %}
+{% trans name=group.curator.full_name %}
+Hi {{ name }},
+{% endtrans %}
 
 
 {% trans count=count, name=group.name -%}
@@ -7,8 +9,10 @@
    There are {{ count }} outstanding requests to join your group "{{ name }}".
 {%- endtrans %}
 
-{% trans %}View requests here:{% endtrans %}
 
-{{ group.get_absolute_url() }}
+{% trans link=group.get_absolute_url() %}
+You can view the requests at {{ link }}.
+{% endtrans %}
+
 
 {{ _('The Mozillians.org team') }}
