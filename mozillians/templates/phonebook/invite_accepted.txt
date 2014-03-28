@@ -1,10 +1,10 @@
 {% trans %}
-Hi {{ inviter }},
+Hi {{ inviter }}, 
 
-Thanks to you, your friend {{ friend }} created a profile on mozillians.org.
+You invited {{ friend }} to create a profile on mozillians.org. Take a look
+at their shiny, new profile: {{ profile }}
 
-Take a look at their profile:
-{{ profile }}
+Thanks for inviting a contributor to join our community directory!
 {% endtrans %}
 
 {{ _('The Mozillians.org team') }}
