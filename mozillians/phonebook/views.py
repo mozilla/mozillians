@@ -218,8 +218,7 @@ def confirm_delete(request):
 @require_POST
 def delete(request):
     request.user.delete()
-    messages.info(request, _('Your account has been deleted. '
-                             'Thanks for being a Mozillian!'))
+    messages.info(request, _('Your account has been deleted. Thanks for being a Mozillian!'))
     # We don't redirect to logout view, because delete already logs
     # out user. Instead we render the logout template to BrowserID
     # logout.
@@ -293,7 +292,7 @@ def invite(request):
         invite.send(sender=profile)
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
                 u"with instructions on how to join. You can "
-                u"invite another Mozillian if you like." % invite.recipient)
+                u"invite another Mozillian if you like.") % invite.recipient
         messages.success(request, msg)
         return redirect('phonebook:home')
 

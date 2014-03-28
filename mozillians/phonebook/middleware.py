@@ -27,8 +27,7 @@ class RegisterMiddleware():
 
         if (user.is_authenticated() and not user.userprofile.is_complete
             and not filter(lambda url: re.match(url, path), allow_urls)):
-            messages.warning(request, _('Please complete registration '
-                                        'before proceeding.'))
+            messages.warning(request, _('Please complete registration before proceeding.'))
             return redirect('phonebook:profile_edit')
 
 
