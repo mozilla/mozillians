@@ -5,7 +5,7 @@ from django.test import Client
 from funfactory.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.tests import InviteFactory
-from mozillians.phonebook.utils import update_invites
+from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.tests import UserFactory
 from nose.tools import eq_, ok_
 
@@ -18,9 +18,9 @@ class RegisterTests(TestCase):
         eq_(client.session['invite-code'], 'foo')
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-    @patch('mozillians.phonebook.views.update_invites',
-           wraps=update_invites)
-    def test_register_unvouched(self, update_invites_mock):
+    @patch('mozillians.phonebook.views.redeem_invite',
+           wraps=redeem_invite)
+    def test_register_unvouched(self, redeem_invite_mock):
         user = UserFactory.create()
         invite = InviteFactory.create(inviter=user.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
@@ -28,12 +28,12 @@ class RegisterTests(TestCase):
             response = client.get(url, follow=True)
         user = User.objects.get(id=user.id)
         ok_(user.userprofile.is_vouched)
-        ok_(update_invites_mock.called)
+        ok_(redeem_invite_mock.called)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-    @patch('mozillians.phonebook.views.update_invites',
-           wraps=update_invites)
-    def test_register_vouched(self, update_invites_mock):
+    @patch('mozillians.phonebook.views.redeem_invite',
+           wraps=redeem_invite)
+    def test_register_vouched(self, redeem_invite_mock):
         voucher_1 = UserFactory.create(userprofile={'is_vouched': True})
         voucher_2 = UserFactory.create(userprofile={'is_vouched': True})
         user = UserFactory.create(
@@ -46,7 +46,7 @@ class RegisterTests(TestCase):
         user = User.objects.get(id=user.id)
         ok_(user.userprofile.is_vouched)
         ok_(user.userprofile.vouched_by, voucher_1.userprofile)
-        ok_(not update_invites_mock.called)
+        ok_(not redeem_invite_mock.called)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
     def test_register_without_code_anonymous(self):
