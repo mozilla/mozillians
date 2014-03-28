@@ -22,7 +22,7 @@ from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
-from mozillians.phonebook.utils import update_invites
+from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import COUNTRIES, UserProfile
 
@@ -176,7 +176,8 @@ def edit_profile(request):
 
         # Notify the user that their old profile URL won't work.
         if new_profile:
-            update_invites(request)
+            if request.session.get('invite-code'):
+                redeem_invite(profile, request.session.get('invite-code'))
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
             messages.info(request,
@@ -377,7 +378,7 @@ def register(request):
         request.session['invite-code'] = request.GET['code']
         if request.user.is_authenticated():
             if not request.user.userprofile.is_vouched:
-                update_invites(request)
+                redeem_invite(request.user.userprofile, request.session['invite-code'])
         else:
             messages.info(request, _("You've been invited to join Mozillians.org! "
                                      "Sign in and then you can create a profile."))
