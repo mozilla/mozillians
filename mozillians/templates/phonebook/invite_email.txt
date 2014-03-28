@@ -1,18 +1,25 @@
-{% trans sender=sender %}
-Hi there. {{ sender }} has invited you to join mozillians.org,
+{% trans %}
+Hi there,
+{% endtrans %}
+
+
+{% trans %}
+
+{{ sender }} has invited you to join mozillians.org,
 the community directory for Mozilla contributors. You
 can create a community profile for yourself and search
 for other contributors to learn more about them or get
 in touch.
+
 {% endtrans %}
 
+
 {% if personal_message %}
-
 {{ _('Personal message:') }}
-
-{{ personal_message }}
+  {{ personal_message|indent(indentfirst=True) }}
 {% endif %}
 
 {{ _('Join Mozillians:') }} {{ link }}
+
 
 {{ _('The Mozillians.org team') }}
