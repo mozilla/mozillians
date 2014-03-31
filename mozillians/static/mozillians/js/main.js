@@ -68,4 +68,12 @@ var app = {
             }
         });
     });
+
+    // april fools 2014 - 3d mode
+    $('#three-dee-toggle').click(function(event) {
+        event.preventDefault();
+        $('body').toggleClass('three-dee');
+        var q = $('body').hasClass('three-dee');
+        $(this).children('img').attr('src','/static/mozillians/img/3d-'+q+'.png');
+    });
 })(jQuery);

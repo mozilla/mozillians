@@ -70,6 +70,7 @@
                 <a class="brand" href="{{ url('phonebook:home') }}">
                     <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
                 </a>
+                <a href="#" id="three-dee-toggle"><img src="{{ static('mozillians/img/3d-false.png') }}"></a>
                 {% block search %}
                   <form class="navbar-search"
                       action="{{ url('phonebook:search') }}" method="GET">
