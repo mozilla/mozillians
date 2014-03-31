@@ -20,6 +20,7 @@ urlpatterns = patterns(
     url(r'^search/$', 'views.search', name='search'),
     url(r'^vouch/$', 'views.vouch', name='vouch'),
     url(r'^invite/$', 'views.invite', name='invite'),
+    url(r'^invite/(?P<invite_pk>\d+)/delete/$', 'views.delete_invite', name='delete_invite'),
     url(r'^country/(?P<country>[A-Za-z]+)/$',
         'views.list_mozillians_in_location', name='list_country'),
     url(r'^country/(?P<country>[A-Za-z]+)/city/(?P<city>.+)/$',

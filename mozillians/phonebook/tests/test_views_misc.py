@@ -1,4 +1,5 @@
 import os.path
+from datetime import datetime
 
 
 from django.contrib.auth.models import User
@@ -12,7 +13,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
-from mozillians.phonebook.tests import _get_privacy_fields
+from mozillians.phonebook.tests import _get_privacy_fields, InviteFactory
 from mozillians.users.managers import MOZILLIANS, PRIVILEGED
 from mozillians.users.models import UserProfilePrivacyModel
 from mozillians.users.tests import UserFactory
@@ -86,6 +87,45 @@ class InviteTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/invite.html')
         ok_('recipient' in response.context['invite_form'].errors)
         eq_(Invite.objects.all().count(), 0)
+
+    def test_invite_delete(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        invite = InviteFactory.create(inviter=user.userprofile)
+        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        with self.login(user) as client:
+            response = client.post(url, follow=True)
+
+        eq_(Invite.objects.all().count(), 0)
+        self.assertTemplateUsed(response, 'phonebook/invite.html')
+
+    def test_invite_delete_invalid_requester(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        invite = InviteFactory.create(inviter=user.userprofile)
+        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        invalid_requester = UserFactory.create(userprofile={'is_vouched': True})
+        with self.login(invalid_requester) as client:
+            response = client.post(url)
+
+        eq_(Invite.objects.all().count(), 1)
+        eq_(response.status_code, 404)
+
+    def test_invite_delete_redeemed(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        invite = InviteFactory.create(inviter=user.userprofile, redeemed=datetime.now())
+        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        with self.login(user) as client:
+            response = client.post(url)
+
+        eq_(Invite.objects.all().count(), 1)
+        eq_(response.status_code, 404)
+
+    def test_invite_delete_invalid_invite(self):
+        user = UserFactory.create(userprofile={'is_vouched': True})
+        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': '1'})
+        with self.login(user) as client:
+            response = client.post(url)
+
+        eq_(response.status_code, 404)
 
 
 class VouchTests(TestCase):

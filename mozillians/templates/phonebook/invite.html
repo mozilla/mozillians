@@ -35,4 +35,40 @@
       </p>
   </form>
 
+  {% if invites.exists() %}
+    <h1>{{ _('Your Invites') }}</h1>
+
+    {% for invite in invites %}
+      <div class="card">
+      <ul>
+        <li>
+          <a title="{{ invite.recipient }}" href="mailto:{{ invite.recipient }}">
+            <i class="icon-envelope"></i> {{ invite.recipient }}
+          </a>
+        </li>
+        <li>
+          {{ _('Sent:') }} {{ invite.created }}
+        </li>
+        {% if invite.redeemed %}
+          <li>
+            {{ _('Redeemed:') }} {{ invite.redeemed }}
+          </li>
+          <li>
+            {{ _('Redeemer:') }}
+            <a href="{{ url('phonebook:profile_view', invite.redeemer.user.username) }}">
+              {{ invite.redeemer.display_name }}
+            </a>
+          </li>
+        {% else %}
+          <form action="{{ url('phonebook:delete_invite', invite_pk=invite.pk) }}" method="POST">
+            {{ csrf() }}
+            <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
+          </form>
+        {% endif %}
+      </ul>
+    </div>
+    {% endfor %}
+
+  {% endif %}
+
 {% endblock %}
