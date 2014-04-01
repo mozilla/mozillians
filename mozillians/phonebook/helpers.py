@@ -6,6 +6,7 @@ from django.utils.translation import get_language
 import jinja2
 from jingo import register
 
+from mozillians.groups.models import GroupMembership
 from mozillians.users import get_languages_for_locale
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
@@ -18,12 +19,32 @@ def paragraphize(value):
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
-@register.inclusion_tag('phonebook/includes/search_result.html')
-@jinja2.contextfunction
-def search_result(context, profile):
+def search_result_context(context, profile_or_membership):
+    """
+    Return the template context for search_result.html.
+    Has a `profile` and optional `is_pending` and `is_curator` attributes.
+
+    Input might be a UserProfile or a GroupMembership object.
+    """
     d = dict(context.items())
+    if isinstance(profile_or_membership, GroupMembership):
+        membership = profile_or_membership
+        profile = membership.userprofile
+        profile.is_pending = membership.status == GroupMembership.PENDING
+        profile.is_curator = profile == membership.group.curator
+    else:
+        profile = profile_or_membership
+        profile.is_pending = False
+        profile.is_curator = False
     d.update(profile=profile)
     return d
+
+
+@register.inclusion_tag('phonebook/includes/search_result.html')
+@jinja2.contextfunction
+def search_result(context, profile_or_membership):
+    # Actual code broken out to make it testable
+    return search_result_context(context, profile_or_membership)
 
 
 @register.function

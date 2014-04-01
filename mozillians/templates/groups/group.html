@@ -154,7 +154,7 @@
       </div>
     {% endif %}
 
-    {% if not people.paginator.count %}
+    {% if not page.paginator.count %}
       <div class="well">
         <p id="not-found">
           {% if r_selected %}
@@ -169,7 +169,7 @@
         </p>
       </div>
     {% else %}
-      {% with items=people %}
+      {% with items=page %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
 
@@ -187,17 +187,14 @@
         </div>
       {% endif %}
 
-
       <br class="clear">
 
       <div class="row">
-        {% for people_slice in people|slice(3) -%}
-          {% for person in people_slice %}
-            {{ search_result(person) }}
-          {% endfor %}
+        {% for membership in page %}
+          {{ search_result(membership) }}
         {% endfor %}
       </div>
-      {% with items=people %}
+      {% with items=page %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
     {% endif %}

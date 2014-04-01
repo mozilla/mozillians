@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 
-from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
+from mozillians.groups.models import Group, Skill
 
 
 urlpatterns = patterns(
@@ -14,12 +14,12 @@ urlpatterns = patterns(
     url('^group_edit/(?P<url>[-\'\w]+)/$', 'views.group_add_edit', name='group_edit'),
     url('^group_delete/(?P<url>[-\'\w]+)/$', 'views.group_delete', name='group_delete'),
 
-    url('^group/(?P<url>[-\w]+)/$', 'views.show',
-        {'alias_model': GroupAlias, 'template': 'groups/group.html'},
+    url('^group/(?P<url>[-\w]+)/$', 'views.show_group',
+        {'template': 'groups/group.html'},
         name='show_group'),
 
-    url('^skill/(?P<url>[-\w]+)/$', 'views.show',
-        {'alias_model': SkillAlias, 'template': 'groups/skill.html'},
+    url('^skill/(?P<url>[-\w]+)/$', 'views.show_skill',
+        {'template': 'groups/skill.html'},
         name='show_skill'),
     url('^skill/(?P<url>[-\w]+)/toggle/$', 'views.toggle_skill_subscription',
         name='toggle_skill_subscription'),

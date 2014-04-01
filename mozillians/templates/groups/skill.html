@@ -25,7 +25,7 @@
     </button>
   </form>
 
-  {% if not people.paginator.count %}
+  {% if not page.paginator.count %}
     <div class="well">
       <p id="not-found">
         {% trans name=group.name %}
@@ -34,17 +34,15 @@
       </p>
     </div>
   {% else %}
-    {% with items=people %}
+    {% with items=page %}
       {% include 'includes/pagination.html' %}
     {% endwith %}
     <div class="row">
-      {% for people_slice in people|slice(3) -%}
-          {% for person in people_slice %}
-            {{ search_result(person) }}
-          {% endfor %}
+      {% for person in page -%}
+        {{ search_result(person) }}
       {% endfor %}
     </div>
-    {% with items=people %}
+    {% with items=page %}
       {% include 'includes/pagination.html' %}
     {% endwith %}
   {% endif %}

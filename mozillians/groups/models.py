@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.timezone import now
 
 from autoslug.fields import AutoSlugField
@@ -300,33 +299,6 @@ class Group(GroupBase):
         """
         return self.groupmembership_set.filter(userprofile=userprofile,
                                                status=GroupMembership.PENDING).exists()
-
-    def get_vouched_annotated_members(self, statuses=None, always_include=None):
-        """
-        Return list of UserProfiles of vouched users who are members or pending members.
-
-        Pass ``statuses`` a list of desired statuses to filter by status too.
-
-        Pass a userprofile in ``always_include`` to include that userprofile regardless
-        of status (so we show a user that they are in the group in pending state).
-
-        Attribute ``.pending`` indicates whether membership is only pending.
-        Attribute ``.is_curator`` indicates if member is a curator of this group
-        """
-        memberships = self.groupmembership_set.filter(userprofile__is_vouched=True)
-        if statuses is not None:
-            if always_include is not None:
-                memberships = memberships.filter(Q(status__in=statuses)
-                                                 | Q(userprofile=always_include))
-            else:
-                memberships = memberships.filter(status__in=statuses)
-        profiles = []
-        for membership in memberships:
-            profile = membership.userprofile
-            profile.pending = (membership.status == GroupMembership.PENDING)
-            profile.is_curator = (self.curator == profile)
-            profiles.append(profile)
-        return profiles
 
 
 class SkillAlias(GroupAliasBase):

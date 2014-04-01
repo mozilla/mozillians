@@ -2,10 +2,10 @@
 
 from mock import patch, MagicMock
 
-from mozillians.groups.views import show, group_delete
+from mozillians.groups.views import group_delete, show_group
 from nose.tools import ok_
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Group, GroupAlias, GroupMembership
+from mozillians.groups.models import Group, GroupMembership
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.tests import UserFactory
 
@@ -28,7 +28,7 @@ class ShowGroupDeleteTests(TestCase):
 
         with patch('mozillians.groups.views.render') as mock_render:
             with patch('django.views.decorators.cache.add_never_cache_headers'):
-                show(request, self.group.url, GroupAlias, 'groups/group.html')
+                show_group(request, self.group.url, 'groups/group.html')
 
         ok_(mock_render.called)
         args, kwargs = mock_render.call_args

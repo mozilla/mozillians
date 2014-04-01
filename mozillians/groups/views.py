@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -15,7 +15,7 @@ from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
 from mozillians.groups.forms import GroupForm, SortForm, SuperuserGroupForm
-from mozillians.groups.models import Group, Skill, GroupAlias, GroupMembership
+from mozillians.groups.models import Group, Skill, GroupAlias, GroupMembership, SkillAlias
 
 
 def _list_groups(request, template, query):
@@ -89,87 +89,100 @@ def search(request, searched_object=Group):
     return HttpResponseBadRequest()
 
 
+def add_page_to_context(request, object_list, context):
+    """
+    Add a `page` item to the context, containing the
+    current page of profiles or memberships or whatever
+    we're paginating.
+    """
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(object_list, settings.ITEMS_PER_PAGE)
+
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+
+    context.update(page=page,
+                   show_pagination=paginator.count > settings.ITEMS_PER_PAGE,
+                   members=paginator.count,
+                   )
+
+
 @never_cache
-def show(request, url, alias_model, template):
-    """List all vouched users with this group."""
-    group_alias = get_object_or_404(alias_model, url=url)
+def show_skill(request, url, template):
+    skill_alias = get_object_or_404(SkillAlias, url=url)
+    if skill_alias.alias.url != url:
+        return redirect('groups:show_skill', url=skill_alias.alias.url)
+
+    skill = skill_alias.alias
+    context = dict(group=skill,
+                   in_group=skill.has_member(request.user.userprofile))
+    add_page_to_context(request, skill.members.vouched(), context)
+
+    return render(request, template, context)
+
+
+@never_cache
+def show_group(request, url, template):
+    group_alias = get_object_or_404(GroupAlias, url=url)
     if group_alias.alias.url != url:
         return redirect('groups:show_group', url=group_alias.alias.url)
-
-    is_curator = False
-    m_selected = r_selected = False
-    is_pending = False
 
     group = group_alias.alias
     profile = request.user.userprofile
     in_group = group.has_member(profile)
+    is_curator = (group.curator == profile)
+    is_pending = group.has_pending_member(profile)
 
-    if alias_model is GroupAlias:
-        # Curator?
-        is_curator = (group.curator == request.user.userprofile)
-        if is_curator or request.user.is_superuser:
-            m_selected = 'm' in request.GET
-            r_selected = 'r' in request.GET
-            if m_selected or r_selected:
-                statuses = []
-                if m_selected:
-                    statuses.append(GroupMembership.MEMBER)
-                if r_selected:
-                    statuses.append(GroupMembership.PENDING)
-            else:
-                statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
-            profiles = group.get_vouched_annotated_members(statuses=statuses)
-        else:
-            # only show full members, or this user
-            profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
-                                                           always_include=profile)
-        # Is this user's membership pending?
-        is_pending = group.has_pending_member(profile)
+    memberships = GroupMembership.objects.filter(group=group)
+    if is_curator or request.user.is_superuser:
+        # Curator and superuser are able to see other pending members, or
+        # to filter and see only pending or only full members.
+        statuses = []
+        if 'm' in request.GET:
+            statuses.append(GroupMembership.MEMBER)
+        if 'r' in request.GET:
+            statuses.append(GroupMembership.PENDING)
+        # If no filter selected, show all
+        if statuses:
+            memberships = memberships.filter(status__in=statuses)
+    elif is_pending:
+        # Normal user, pending membership, only show full members and this user
+        memberships = memberships.filter(Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
     else:
-        # not a Group
-        profiles = group.members.vouched()
-
-    page = request.GET.get('page', 1)
-    paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
-
-    try:
-        people = paginator.page(page)
-    except PageNotAnInteger:
-        people = paginator.page(1)
-    except EmptyPage:
-        people = paginator.page(paginator.num_pages)
-
-    show_pagination = paginator.count > settings.ITEMS_PER_PAGE
+        # Normal user, not pending, only show full members
+        memberships = memberships.filter(status=GroupMembership.MEMBER)
 
     # Curator can delete their group if there are no other members.
     show_delete_group_button = is_curator and group.members.all().count() == 1
 
-    data = dict(people=people,
-                group=group,
-                in_group=in_group,
-                is_curator=is_curator,
-                is_pending=is_pending,
-                show_pagination=show_pagination,
-                show_delete_group_button=show_delete_group_button,
-                show_join_button=group.user_can_join(request.user.userprofile),
-                show_leave_button=group.user_can_leave(request.user.userprofile),
-                m_selected=m_selected,
-                r_selected=r_selected,
-                )
+    context = dict(group=group,
+                   in_group=in_group,
+                   is_curator=is_curator,
+                   is_pending=is_pending,
+                   show_delete_group_button=show_delete_group_button,
+                   show_join_button=group.user_can_join(request.user.userprofile),
+                   show_leave_button=group.user_can_leave(request.user.userprofile),
+                   m_selected='m' in request.GET,
+                   r_selected='r' in request.GET,
+                   )
+    add_page_to_context(request, memberships, context)
 
-    if isinstance(group, Group):
-        # Get the most globally popular skills that appear in the group
-        # Sort them with most members first
-        #
-        skills = (Skill.objects
-                  .filter(members__in=profiles)
-                  .annotate(no_users=Count('members'))
-                  .order_by('-no_users'))
-        data.update(skills=skills)
-        data.update(irc_channels=group.irc_channel.split(' '))
-        data.update(members=paginator.count)
+    # Get the most globally popular skills that appear in the group
+    # Sort them with most members first
+    #
+    profiles = memberships.values_list('userprofile', flat=True)
+    skills = (Skill.objects
+              .filter(members__in=profiles)
+              .annotate(num_users=Count('members'))
+              .order_by('-num_users'))
+    context.update(skills=skills)
+    context.update(irc_channels=group.irc_channel.split(' '))
 
-    return render(request, template, data)
+    return render(request, template, context)
 
 
 def remove_member(request, group_pk, user_pk):

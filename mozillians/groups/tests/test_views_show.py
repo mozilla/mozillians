@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import GroupMembership
-from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
+from mozillians.groups.tests import GroupFactory, GroupAliasFactory
 from mozillians.users.tests import UserFactory
 from nose.tools import eq_, ok_
 
@@ -22,9 +22,9 @@ class ShowTests(TestCase):
         context = response.context
         eq_(context['group'], self.group)
         eq_(context['in_group'], False)
-        eq_(context['people'].paginator.count, 1)
-        eq_(context['people'][0], self.user_2.userprofile)
-        eq_(context['people'][0].pending, False)
+        eq_(context['page'].paginator.count, 1)
+        eq_(context['page'][0].userprofile, self.user_2.userprofile)
+        ok_(context['page'][0].status != GroupMembership.PENDING)
         ok_(not context['is_pending'])
 
     def test_show_user_in_group(self):
@@ -35,8 +35,8 @@ class ShowTests(TestCase):
         context = response.context
         eq_(context['group'], self.group)
         eq_(context['in_group'], True)
-        eq_(context['people'].paginator.count, 1)
-        eq_(context['people'][0], self.user_2.userprofile)
+        eq_(context['page'].paginator.count, 1)
+        eq_(context['page'][0].userprofile, self.user_2.userprofile)
         ok_(not context['is_pending'])
 
     def test_show_pending_user(self):
@@ -49,9 +49,9 @@ class ShowTests(TestCase):
         context = response.context
         eq_(context['group'], self.group)
         eq_(context['in_group'], False)
-        eq_(context['people'].paginator.count, 1)
-        eq_(context['people'][0], self.user_2.userprofile)
-        eq_(context['people'][0].pending, True)
+        eq_(context['page'].paginator.count, 1)
+        eq_(context['page'][0].userprofile, self.user_2.userprofile)
+        eq_(context['page'][0].status, GroupMembership.PENDING)
         ok_(context['is_pending'])
 
     def test_show_empty_group(self):
@@ -61,7 +61,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         context = response.context
-        eq_(context['people'].paginator.count, 0)
+        eq_(context['page'].paginator.count, 0)
         ok_(not context['is_pending'])
 
     @requires_login()
@@ -220,18 +220,6 @@ class ShowTests(TestCase):
         eq_(response.status_code, 200)
         eq_(response.context['show_join_button'], False)
 
-    def test_show_leave_button_value_skill(self):
-        skill = SkillFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True})
-        skill.members.add(user.userprofile)
-        url = reverse('groups:show_skill', kwargs={'url': skill.url})
-
-        with self.login(user) as client:
-            response = client.get(url, follow=True)
-        eq_(response.status_code, 200)
-        eq_(response.context['show_leave_button'], True)
-        ok_(not response.context['is_pending'])
-
     def test_remove_button_confirms(self):
         """GET to remove_member view displays confirmation"""
         # Make user 1 the group curator so they can remove users
@@ -300,7 +288,8 @@ class ShowTests(TestCase):
         url = self.url + "?m"
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
-        people = response.context['people'].object_list
+        people = [membership.userprofile
+                  for membership in response.context['page'].object_list]
         ok_(member in people)
         ok_(pending not in people)
 
@@ -320,7 +309,8 @@ class ShowTests(TestCase):
         url = self.url + "?r"
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
-        people = response.context['people'].object_list
+        people = [membership.userprofile
+                  for membership in response.context['page'].object_list]
         ok_(member not in people)
         ok_(pending in people)
 
@@ -340,6 +330,7 @@ class ShowTests(TestCase):
         url = self.url + "?r&m"
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
-        people = response.context['people'].object_list
+        people = [membership.userprofile
+                  for membership in response.context['page'].object_list]
         ok_(member in people, people)
         ok_(pending in people)
