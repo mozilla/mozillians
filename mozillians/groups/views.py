@@ -173,8 +173,8 @@ def show(request, url, alias_model, template):
     return render(request, template, data)
 
 
-def remove_member(request, group_pk, user_pk):
-    group = get_object_or_404(Group, pk=group_pk)
+def remove_member(request, url, user_pk):
+    group = get_object_or_404(Group, url=url)
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
     is_curator = (group.curator == this_userprofile)
@@ -215,11 +215,11 @@ def remove_member(request, group_pk, user_pk):
 
 
 @require_POST
-def confirm_member(request, group_pk, user_pk):
+def confirm_member(request, url, user_pk):
     """
     Add a member to a group who has requested membership.
     """
-    group = get_object_or_404(Group, pk=group_pk)
+    group = get_object_or_404(Group, url=url)
     profile = get_object_or_404(UserProfile, pk=user_pk)
     is_curator = (group.curator == request.user.userprofile)
     is_manager = request.user.userprofile.is_manager
@@ -244,9 +244,9 @@ def edit(request, url, alias_model, template):
 
 
 @require_POST
-def join_group(request, group_pk):
+def join_group(request, url):
     """User request to join group."""
-    group = get_object_or_404(Group, pk=group_pk)
+    group = get_object_or_404(Group, url=url)
     profile_to_add = request.user.userprofile
 
     # TODO: this duplicates some of the logic in Group.user_can_join(), but we

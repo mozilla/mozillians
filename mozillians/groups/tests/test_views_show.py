@@ -241,7 +241,7 @@ class ShowTests(TestCase):
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:remove_member', prefix='/en-US/',
-                      kwargs=dict(group_pk=self.group.pk, user_pk=self.user_2.userprofile.pk))
+                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         self.assertTemplateUsed(response, 'groups/confirm_remove_member.html')
@@ -257,7 +257,7 @@ class ShowTests(TestCase):
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:remove_member', prefix='/en-US/',
-                      kwargs=dict(group_pk=self.group.pk, user_pk=self.user_2.userprofile.pk))
+                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.post(url, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
@@ -277,7 +277,7 @@ class ShowTests(TestCase):
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:confirm_member', prefix='/en-US/',
-                      kwargs=dict(group_pk=self.group.pk, user_pk=self.user_2.userprofile.pk))
+                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.post(url, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')

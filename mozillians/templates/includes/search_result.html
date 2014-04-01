@@ -1,11 +1,11 @@
 <div class="result">
   {% if group and (is_curator or user.userprofile.is_manager) and (user != profile.user) %}
-    <form action="{{ url('groups:remove_member', group_pk=group.pk, user_pk=profile.pk) }}" method="GET">
+    <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}" method="GET">
       {{ csrf() }}
       <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
     </form>
     {% if profile.pending %}
-      <form action="{{ url('groups:confirm_member', group_pk=group.pk, user_pk=profile.pk) }}" method="POST">
+      <form action="{{ url('groups:confirm_member', url=group.url, user_pk=profile.pk) }}" method="POST">
         {{ csrf() }}
         <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
       </form>

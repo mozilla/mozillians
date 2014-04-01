@@ -16,7 +16,7 @@ class TestGroupRemoveMember(TestCase):
         self.member = UserFactory()
         self.group.add_member(self.member.userprofile)
         self.url = reverse('groups:remove_member', prefix='/en-US/',
-                           kwargs={'group_pk': self.group.pk,
+                           kwargs={'url': self.group.url,
                                    'user_pk': self.member.userprofile.pk})
 
     def test_as_manager(self):
@@ -110,7 +110,7 @@ class TestGroupRemoveMember(TestCase):
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:confirm_member', args=[self.group.pk, user.userprofile.pk],
+        url = reverse('groups:confirm_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/')
         with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -135,7 +135,7 @@ class TestGroupRemoveMember(TestCase):
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:remove_member', args=[self.group.pk, user.userprofile.pk],
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/',)
         with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
             with self.login(curator) as client:
