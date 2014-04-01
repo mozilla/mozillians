@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.views.main import ChangeList
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db.models import Count, Sum
 
@@ -105,6 +106,35 @@ class GroupBaseEditAdminForm(forms.ModelForm):
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
+class GroupBaseChangeList(ChangeList):
+    # We can't just override queryset() on the ModelAdmin class because the
+    # changelist applies search and filtering on top of whatever that returns,
+    # and we need to apply our annotations after that.  So we
+    # need to subclass the changelist itself.
+    def get_query_set(self, request):
+        qset = super(GroupBaseChangeList, self).get_query_set(request)
+
+        # HACK: we want to annotate the result, but if a group has matched a search
+        # in more than one way, the annotations end up double-counting members. So
+        # execute the query to get the final set of groups, then generate a new,
+        # simple query that just includes those groups and annotate that.
+        qset = qset.order_by()  # (No point in wasting cycles sorting these results)
+        pks = qset.values_list('pk', flat=True)
+        qset = Group.objects.filter(pk__in=pks)
+
+        # Restore ordering.
+        qset = qset.order_by(*self.get_ordering(request, qset))
+
+        # Also note:
+        # The Sum('members__is_vouched') annotation only works for
+        # databases where the Boolean type is really an integer. It works
+        # for Sqlite3 or MySQL, but fails on Postgres. If Mozillians ever
+        # switches from MySQL to a database where this won't work, we'll
+        # need to revisit this.
+        return qset.annotate(member_count=Count('members'),
+                             vouched_member_count=Sum('members__is_vouched'))
+
+
 class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
@@ -121,16 +151,8 @@ class GroupBaseAdmin(admin.ModelAdmin):
         defaults.update(kwargs)
         return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
 
-    def queryset(self, request):
-        # The Sum('members__is_vouched') annotation only works for
-        # databases where the Boolean type is really an integer. It works
-        # for Sqlite3 or MySQL, but fails on Postgres. If Mozillians ever
-        # switches from MySQL to a database where this won't work, we'll
-        # need to revisit this.
-        return (super(GroupBaseAdmin, self)
-                .queryset(request)
-                .annotate(member_count=Count('members'),
-                          vouched_member_count=Sum('members__is_vouched')))
+    def get_changelist(self, request, **kwargs):
+        return GroupBaseChangeList
 
     def member_count(self, obj):
         """Return number of members in group."""
