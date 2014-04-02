@@ -287,9 +287,9 @@ def invite(request):
     profile = request.user.userprofile
     invite_form = forms.InviteForm(request.POST or None,
                                    instance=Invite(inviter=profile))
-    if request.method == 'POST' and invite_form.is_valid():
+    if invite_form.is_valid():
         invite = invite_form.save()
-        invite.send(sender=profile)
+        invite.send(sender=profile, personal_message=invite_form.cleaned_data['message'])
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
                 u"with instructions on how to join. You can "
                 u"invite another Mozillian if you like.") % invite.recipient

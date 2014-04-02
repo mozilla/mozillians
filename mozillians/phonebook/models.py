@@ -15,14 +15,13 @@ from mozillians.users.models import UserProfile
 
 class Invite(models.Model):
     inviter = models.ForeignKey(UserProfile, related_name='invites', null=True,
-                                verbose_name=_lazy(u"Inviter"))
-    recipient = models.EmailField(verbose_name=_lazy(u"Recipient"))
-    message = models.TextField(blank=True, verbose_name=_lazy(u"Message"))
+                                verbose_name=_lazy(u'Inviter'))
+    recipient = models.EmailField(verbose_name=_lazy(u'Recipient'))
     redeemer = models.OneToOneField(UserProfile, blank=True, null=True,
-                                    verbose_name=_lazy(u"Redeemer"))
-    code = models.CharField(max_length=32, editable=False, unique=True)
-    redeemed = models.DateTimeField(null=True, editable=False)
-    created = models.DateTimeField(auto_now_add=True, editable=False)
+                                    verbose_name=_lazy(u'Redeemer'))
+    code = models.CharField(max_length=32, unique=True)
+    redeemed = models.DateTimeField(null=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return 'Invite {0} for {1}'.format(self.id, self.recipient)
@@ -32,7 +31,7 @@ class Invite(models.Model):
         return absolutify(
             urlparams(reverse('phonebook:register'), code=self.code))
 
-    def send(self, sender=None):
+    def send(self, sender=None, personal_message=None):
         """Mail this invite to the specified user.
 
         Includes the name and email of the inviting person, if
@@ -47,7 +46,7 @@ class Invite(models.Model):
         template = get_template('phonebook/invite_email.txt')
 
         message = template.render({
-            'personal_message': self.message,
+            'personal_message': personal_message,
             'sender': sender or _('A fellow Mozillian'),
             'link': self.get_url()})
 

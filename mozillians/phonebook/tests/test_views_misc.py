@@ -73,7 +73,7 @@ class InviteTests(TestCase):
             response = client.post(url, data, follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
         ok_(Invite.objects
-            .filter(recipient='foo@example.com', message='Join us foo!')
+            .filter(recipient='foo@example.com', inviter=user.userprofile)
             .exists())
         ok_(success_mock.called)
 
