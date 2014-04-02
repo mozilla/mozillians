@@ -421,6 +421,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return False
 
     @property
+    def is_manager(self):
+        return self.user.is_superuser or self.user.groups.filter(name='Managers').exists()
+
+    @property
     def languages(self):
         """Return user languages based on privacy settings."""
         if self._privacy_level > self.privacy_languages:

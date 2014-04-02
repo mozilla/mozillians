@@ -520,6 +520,18 @@ class UserProfileTests(TestCase):
         profile.set_instance_privacy_level(MOZILLIANS)
         eq_(profile.languages.count(), 1)
 
+    def test_is_manager_when_manager(self):
+        user = UserFactory.create(manager=True)
+        ok_(user.userprofile.is_manager)
+
+    def test_is_manager_when_not_manager(self):
+        user = UserFactory.create()
+        ok_(not user.userprofile.is_manager)
+
+    def test_is_manager_when_superuser(self):
+        user = UserFactory.create(is_superuser=True)
+        ok_(user.userprofile.is_manager)
+
 
 class CalculatePhotoFilenameTests(TestCase):
     @patch('mozillians.users.models.uuid.uuid4', wraps=uuid4)

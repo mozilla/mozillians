@@ -72,7 +72,7 @@
       {{ mozillians_field(form.new_member_criteria, required=True) }}
     </fieldset>
 
-    {% if request.user.is_superuser %}
+    {% if user.userprofile.is_manager %}
       <h2>Admin Settings</h2>
 
       <fieldset>

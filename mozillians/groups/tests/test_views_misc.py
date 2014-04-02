@@ -117,14 +117,9 @@ class ToggleSkillSubscriptionTests(TestCase):
 
 
 class CreateGroupTests(TestCase):
-    def setUp(self):
-        self.user = UserFactory.create(
-            userprofile={'is_vouched': True})
-
-    def test_basic_group_creation_as_superuser(self):
-        # superuser have access to all group parameters when creating a group
-        self.user.is_superuser = True
-        self.user.save()
+    def test_basic_group_creation_as_manager(self):
+        # Managers have access to all group parameters when creating a group
+        user = UserFactory.create(userprofile={'is_vouched': True}, manager=True)
         url = reverse('groups:group_add', prefix='/en-US/')
         data = {
             'name': u'Test Group',
@@ -138,7 +133,7 @@ class CreateGroupTests(TestCase):
             'visible': 'checked',
             # 'functional_area' not checked
         }
-        with self.login(self.user) as client:
+        with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
         eq_(302, response.status_code)
         group = GroupAlias.objects.get(name=data['name']).alias
@@ -152,8 +147,9 @@ class CreateGroupTests(TestCase):
         eq_(data['website'] + '/', group.website)
         eq_(data['wiki'] + '/', group.wiki)
 
-    def test_basic_group_creation_as_non_superuser(self):
-        # non-superuser cannot set some of the parameters, try though they might
+    def test_basic_group_creation_as_non_manager(self):
+        # non-managers cannot set some of the parameters, try though they might
+        user = UserFactory.create(userprofile={'is_vouched': True})
         url = reverse('groups:group_add', prefix='/en-US/')
         data = {
             'name': u'Test Group',
@@ -167,16 +163,16 @@ class CreateGroupTests(TestCase):
             'accepting_new_members': 'yes',
             'members_can_leave': False,  # should be ignored
         }
-        with self.login(self.user) as client:
+        with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
         eq_(302, response.status_code)
         group = GroupAlias.objects.get(name=data['name']).alias
         eq_(u'yes', group.accepting_new_members)
-        # All non-superuser-created groups are leavable by default
+        # All non-manager-created groups are leavable by default
         ok_(group.members_can_leave)
-        # All non-superuser-created groups are visible by default
+        # All non-manager-created groups are visible by default
         ok_(group.visible)
-        # Ignored attempt to make this a functional_area by a non-superuser
+        # Ignored attempt to make this a functional_area by a non-manager
         ok_(not group.functional_area)
         eq_(data['description'], group.description)
         eq_(data['irc_channel'], group.irc_channel)
@@ -186,6 +182,7 @@ class CreateGroupTests(TestCase):
 
     def test_group_edit(self):
         # Curator can edit a group and change (some of) its properties
+        user = UserFactory.create(userprofile={'is_vouched': True})
         data = {
             'name': u'Test Group',
             'accepting_new_members': u'by_request',
@@ -197,11 +194,9 @@ class CreateGroupTests(TestCase):
             'members_can_leave': True,
             'visible': True,
             'functional_area': False,
+            'curator': user.userprofile,
         }
         group = GroupFactory(**data)
-        # Must be curator or superuser to edit group. Make user the curator.
-        group.curator = self.user.userprofile
-        group.save()
         url = reverse('groups:group_edit', prefix='/en-US/', kwargs={'url': group.url})
         # Change some data
         data2 = data.copy()
@@ -209,7 +204,7 @@ class CreateGroupTests(TestCase):
         data2['wiki'] = u'http://google.com/'
         # make like a form
         del data2['functional_area']
-        with self.login(self.user) as client:
+        with self.login(user) as client:
             response = client.post(url, data=data2, follow=False)
         eq_(302, response.status_code)
         group = GroupAlias.objects.get(name=data['name']).alias

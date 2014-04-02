@@ -19,25 +19,25 @@ class TestGroupRemoveMember(TestCase):
                            kwargs={'group_pk': self.group.pk,
                                    'user_pk': self.member.userprofile.pk})
 
-    def test_as_superuser(self):
-        # superuser can remove another from a group they're not curator of
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
+    def test_as_manager(self):
+        # manager can remove another from a group they're not curator of
+        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
-    def test_as_superuser_from_unleavable_group(self):
-        # superuser can remove people even from unleavable groups
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
+    def test_as_manager_from_unleavable_group(self):
+        # manager can remove people even from unleavable groups
+        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
-    def test_as_superuser_removing_curator(self):
-        # but even superuser cannot remove a curator
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
+    def test_as_manager_removing_curator(self):
+        # but even manager cannot remove a curator
+        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
         self.group.curator = self.member.userprofile
         self.group.save()
         with self.login(user) as client:

@@ -97,6 +97,7 @@ def show(request, url, alias_model, template):
         return redirect('groups:show_group', url=group_alias.alias.url)
 
     is_curator = False
+    is_manager = request.user.userprofile.is_manager
     m_selected = r_selected = False
     is_pending = False
 
@@ -107,7 +108,7 @@ def show(request, url, alias_model, template):
     if alias_model is GroupAlias:
         # Curator?
         is_curator = (group.curator == request.user.userprofile)
-        if is_curator or request.user.is_superuser:
+        if is_curator or is_manager:
             m_selected = 'm' in request.GET
             r_selected = 'r' in request.GET
             if m_selected or r_selected:
@@ -142,7 +143,7 @@ def show(request, url, alias_model, template):
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
     # Curator can delete their group if there are no other members.
-    show_delete_group_button = is_curator and group.members.all().count() == 1
+    show_delete_group_button = (is_curator or is_manager) and group.members.all().count() == 1
 
     data = dict(people=people,
                 group=group,
@@ -177,14 +178,14 @@ def remove_member(request, group_pk, user_pk):
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
     is_curator = (group.curator == this_userprofile)
-    is_superuser = request.user.is_superuser
+    is_manager = request.user.userprofile.is_manager
 
     # TODO: this duplicates some of the logic in Group.user_can_leave(), but we
     # want to give the user a message that's specific to the reason they can't leave.
     # Can we make this DRYer?
 
     # You can remove yourself, if group allows it. Curator and superuser can remove anyone.
-    if not (is_curator or is_superuser):
+    if not (is_curator or is_manager):
         if not group.members_can_leave:
             messages.error(request, _('This group does not allow members to remove themselves.'))
             return redirect('groups:show_group', url=group.url)
@@ -221,7 +222,9 @@ def confirm_member(request, group_pk, user_pk):
     group = get_object_or_404(Group, pk=group_pk)
     profile = get_object_or_404(UserProfile, pk=user_pk)
     is_curator = (group.curator == request.user.userprofile)
-    if not (is_curator or request.user.is_superuser):
+    is_manager = request.user.userprofile.is_manager
+
+    if not (is_curator or is_manager):
         raise Http404()
     try:
         membership = GroupMembership.objects.get(group=group, userprofile=profile)
@@ -308,18 +311,20 @@ def group_add_edit(request, url=None):
     """
 
     profile = request.user.userprofile
+    is_manager = request.user.userprofile.is_manager
+
     if url:
         # Get the group to edit
         group = get_object_or_404(Group, url=url)
         # Only a group curator or an admin is allowed to edit a group
         is_curator = profile == group.curator
-        if not (is_curator or request.user.is_superuser):
+        if not (is_curator or is_manager):
             messages.error(request, _('You must be a curator or an admin to edit a group'))
             return redirect(reverse('groups:show_group', args=[group.url]))
     else:
         group = Group(curator=profile)
 
-    form_class = SuperuserGroupForm if request.user.is_superuser else GroupForm
+    form_class = SuperuserGroupForm if is_manager else GroupForm
 
     form = form_class(request.POST or None, instance=group)
     if form.is_valid():

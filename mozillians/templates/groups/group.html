@@ -32,7 +32,7 @@
         </form>
       {% endif %}
 
-      {% if is_curator or request.user.is_superuser %}
+      {% if is_curator or user.userprofile.is_manager %}
         <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
           {{ _('Edit Group') }}
         </a>
