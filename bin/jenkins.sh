@@ -81,6 +81,14 @@ ES_INDEXES = dict(default='test_${JOB_NAME}', public='test_${JOB_NAME}_public')
 ES_TIMEOUT = 60
 
 COMPRESS_ENABLED = False
+SECRET_KEY = 'localdev'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
 
 SETTINGS
 

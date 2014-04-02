@@ -28,4 +28,3 @@ class AppAuthentication(Authentication):
         else:
             statsd.incr('api.requests.total_mozilla')
         return True
-

@@ -104,7 +104,7 @@
                             {{ _('Edit Your Profile') }}
                           </a>
                         </li>
-                        {% if user.get_profile().is_vouched %}
+                        {% if user.userprofile.is_vouched %}
                           <li>
                             <a id="invite" href="{{ url('phonebook:invite') }}">
                               <i class="icon-group"></i>
