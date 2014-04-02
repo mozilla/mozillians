@@ -347,7 +347,7 @@
         {{ profile_form.allows_mozilla_sites }}
       </p>
 
-      {% if user.get_profile().is_vouched %}
+      {% if user.userprofile.is_vouched %}
         <h5>{{ _('Developers') }}</h5>
         <p class="field_description">
           {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api.html',
