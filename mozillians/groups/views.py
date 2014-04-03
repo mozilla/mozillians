@@ -291,7 +291,7 @@ def group_delete(request, url):
     group = get_object_or_404(Group, url=url)
     # Only a group curator is allowed to delete a group
     is_curator = profile == group.curator
-    if not is_curator:
+    if not is_curator and not profile.is_manager:
         messages.error(request, _('You must be a curator to delete a group'))
         return redirect(reverse('groups:show_group', args=[group.url]))
     # Cannot delete if anyone else is in it
