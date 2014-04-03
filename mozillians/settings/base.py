@@ -120,7 +120,10 @@ SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
     'humans.txt'
 ]
 
-AUTHENTICATION_BACKENDS = ('django_browserid.auth.BrowserIDBackend',)
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django_browserid.auth.BrowserIDBackend',
+)
 
 # BrowserID creates a user if one doesn't exist.
 BROWSERID_CREATE_USER = True
