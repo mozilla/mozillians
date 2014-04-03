@@ -125,3 +125,19 @@ class GroupDeleteTest(TestCase):
 
         # The group was NOT deleted
         ok_(Group.objects.filter(url=self.group.url).exists())
+
+    def test_is_superuser(self):
+        # Only one member (user2) but user requesting the view (user1) is not the curator
+        # however they are a superuser.
+        user2 = UserFactory.create(userprofile={'is_vouched': True})
+        self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
+        user1 = UserFactory.create(userprofile={'is_vouched': True}, is_superuser=True)
+
+        request = MagicMock()
+        request.user = user1
+        request.method = 'POST'
+
+        group_delete(request, self.group.url)
+
+        # The group was deleted
+        ok_(not Group.objects.filter(url=self.group.url).exists())
