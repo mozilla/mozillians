@@ -127,7 +127,11 @@
               id="join-group" method="post">
           {{ csrf() }}
           <button class="button">
-            {{ _('Join Group') }}
+            {% if group.accepting_new_members == 'by_request' %}
+                {{ _('Request to Join Group') }}
+            {% else %}
+                {{ _('Join Group') }}
+            {% endif %}
           </button>
       </form>
     {% endif %}
