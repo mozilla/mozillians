@@ -23,7 +23,7 @@
     {% endif %}
 
     <form action="." method="post" id="pagination-form">
-      <label>Page</label>
+      <label>{{ _('Page') }}</label>
       <select class="page-list">
         {% for page in items.paginator.page_range %}
           <option {% if page == items.number %}selected{% endif %}
