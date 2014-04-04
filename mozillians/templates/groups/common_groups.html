@@ -41,7 +41,11 @@
               {% endif %}
               {{ group.name|truncate(20, True) }}<br>
               <i class="icon-group"></i>
-              {{ group.num_members }} {{ _('members') }}
+              {% trans num=group.num_members %}
+                {{ num }} member
+              {% pluralize num %}
+                {{ num }} members
+              {% endtrans %}
             </a>
           </li>
         {% endfor %}
