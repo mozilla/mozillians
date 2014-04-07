@@ -52,7 +52,7 @@ def index_groups(request):
     Doesn't list functional areas, invisible groups, and groups with
     no vouched members
     """
-    query = Group.get_non_functional_areas(members__is_vouched=True)
+    query = Group.get_non_functional_areas()
     template = 'groups/index_groups.html'
     return _list_groups(request, template, query)
 
@@ -91,7 +91,7 @@ def search(request, searched_object=Group):
 
 @never_cache
 def show(request, url, alias_model, template):
-    """List all vouched users with this group."""
+    """List all members in this group."""
     group_alias = get_object_or_404(alias_model, url=url)
     if group_alias.alias.url != url:
         return redirect('groups:show_group', url=group_alias.alias.url)
@@ -119,16 +119,16 @@ def show(request, url, alias_model, template):
                     statuses.append(GroupMembership.PENDING)
             else:
                 statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
-            profiles = group.get_vouched_annotated_members(statuses=statuses)
+            profiles = group.get_annotated_members(statuses=statuses)
         else:
             # only show full members, or this user
-            profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
-                                                           always_include=profile)
+            profiles = group.get_annotated_members(statuses=[GroupMembership.MEMBER],
+                                                   always_include=profile)
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
     else:
         # not a Group
-        profiles = group.members.vouched()
+        profiles = group.members.all()
 
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)

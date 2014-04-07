@@ -301,9 +301,9 @@ class Group(GroupBase):
         return self.groupmembership_set.filter(userprofile=userprofile,
                                                status=GroupMembership.PENDING).exists()
 
-    def get_vouched_annotated_members(self, statuses=None, always_include=None):
+    def get_annotated_members(self, statuses=None, always_include=None):
         """
-        Return list of UserProfiles of vouched users who are members or pending members.
+        Return list of UserProfiles of users who are members or pending members.
 
         Pass ``statuses`` a list of desired statuses to filter by status too.
 
@@ -313,7 +313,7 @@ class Group(GroupBase):
         Attribute ``.pending`` indicates whether membership is only pending.
         Attribute ``.is_curator`` indicates if member is a curator of this group
         """
-        memberships = self.groupmembership_set.filter(userprofile__is_vouched=True)
+        memberships = self.groupmembership_set.all()
         if statuses is not None:
             if always_include is not None:
                 memberships = memberships.filter(Q(status__in=statuses)
