@@ -146,7 +146,7 @@ def collapse_locations(obj_list, keyname):
     locations = locations.itervalues()
     # Now we have an iterable of dicts, but an iterable is not a queryset
     queryset = FakeQuerySet(locations)
-     # And let's make it a CustomQuerySet again
+    # And let's make it a CustomQuerySet again
     queryset = CustomQuerySet(queryset)
     return queryset
 
