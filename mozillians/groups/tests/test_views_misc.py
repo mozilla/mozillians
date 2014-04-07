@@ -157,8 +157,8 @@ class CreateGroupTests(TestCase):
             'irc_channel': u'some text, this is not validated',
             'website': u'http://mozillians.org',
             'wiki': u'http://wiki.mozillians.org',
-            #'members_can_leave': not checked
-            #'visible': not checked
+            # 'members_can_leave': not checked
+            # 'visible': not checked
             'functional_area': 'checked',  # should be ignored
             'accepting_new_members': 'yes',
             'members_can_leave': False,  # should be ignored
