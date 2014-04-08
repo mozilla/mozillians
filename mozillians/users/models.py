@@ -99,6 +99,7 @@ class UserProfilePrivacyModel(models.Model):
     privacy_tshirt = PrivacyField(choices=((PRIVILEGED, _lazy(u'Privileged')),),
                                   default=PRIVILEGED)
     privacy_title = PrivacyField()
+    privacy_story_link = PrivacyField()
 
     CACHED_PRIVACY_FIELDS = None
 
@@ -199,6 +200,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         ))
     title = models.CharField(_lazy(u'What do you do for Mozilla?'),
                              max_length=70, blank=True, default='')
+
+    story_link = models.URLField(
+        _lazy(u'Link to your contribution story'),
+        help_text=_lazy(u'If you have created something public that '
+                        u'tells the story of how you came to be a '
+                        u'Mozillian, specify that link here.'),
+        max_length=1024, blank=True, default='')
 
     class Meta:
         db_table = 'profile'
