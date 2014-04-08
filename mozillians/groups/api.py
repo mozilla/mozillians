@@ -1,5 +1,5 @@
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
+from django.db.models import Count, Sum
 
 from funfactory import utils
 from tastypie import fields
@@ -41,7 +41,7 @@ class GroupResource(GroupBaseResource):
         # This Sum hack counts the number of 1's in database, only
         # works with MySQL because it stores booleans as 0s and 1s
         queryset = (Group.objects
-                    .annotate(number_of_members=Sum('members__is_vouched'))
+                    .annotate(number_of_members=Count('members'))
                     .filter(number_of_members__gt=0))
 
     def dehydrate_url(self, bundle):

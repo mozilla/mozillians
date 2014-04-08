@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.db.models import Count, Sum
+from django.db.models import Count
 
 import autocomplete_light
 
@@ -109,7 +109,7 @@ class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
-    list_display = ['name', 'member_count', 'vouched_member_count']
+    list_display = ['name', 'member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter, NoURLFilter]
     readonly_fields = ['url']
@@ -122,28 +122,14 @@ class GroupBaseAdmin(admin.ModelAdmin):
         return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
 
     def queryset(self, request):
-        # The Sum('members__is_vouched') annotation only works for
-        # databases where the Boolean type is really an integer. It works
-        # for Sqlite3 or MySQL, but fails on Postgres. If Mozillians ever
-        # switches from MySQL to a database where this won't work, we'll
-        # need to revisit this.
         return (super(GroupBaseAdmin, self)
                 .queryset(request)
-                .annotate(member_count=Count('members'),
-                          vouched_member_count=Sum('members__is_vouched')))
+                .annotate(member_count=Count('members')))
 
     def member_count(self, obj):
         """Return number of members in group."""
         return obj.member_count
     member_count.admin_order_field = 'member_count'
-
-    def vouched_member_count(self, obj):
-        """Return number of vouched members in group"""
-        # Annotated field, could be None or a float
-        if obj.vouched_member_count:
-            return int(obj.vouched_member_count)
-        return 0
-    vouched_member_count.admin_order_field = 'vouched_member_count'
 
     class Media:
         css = {
@@ -186,7 +172,7 @@ class GroupAdmin(GroupBaseAdmin):
                                                     form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
-                    'members_can_leave', 'visible', 'member_count', 'vouched_member_count']
+                    'members_can_leave', 'visible', 'member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
 

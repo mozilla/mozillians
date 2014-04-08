@@ -26,10 +26,8 @@ class GroupResourceTests(TestCase):
                                       app_key=self.app.key)
 
     def test_list_groups(self):
-        unvouched_user = UserFactory.create()
         user = UserFactory.create(userprofile={'is_vouched': True})
-        group = GroupFactory()
-        group.add_member(unvouched_user.userprofile)
+        group = GroupFactory.create()
         group.add_member(user.userprofile)
 
         client = Client()
@@ -37,9 +35,7 @@ class GroupResourceTests(TestCase):
         data = json.loads(response.content)
         eq_(data['meta']['total_count'], 1)
         eq_(data['objects'][0]['name'], group.name)
-
-        eq_(data['objects'][0]['number_of_members'], 1,
-            'List includes unvouched users')
+        eq_(data['objects'][0]['number_of_members'], 1)
         eq_(int(data['objects'][0]['id']), group.id)
         eq_(data['objects'][0]['url'],
             absolutify(reverse('groups:show_group', args=[group.url])))
