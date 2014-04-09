@@ -16,7 +16,7 @@ class ShowGroupDeleteTests(TestCase):
     """
     def setUp(self):
         self.group = GroupFactory.create()
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
 
     def get_context(self, group):
         """
@@ -51,7 +51,7 @@ class ShowGroupDeleteTests(TestCase):
         self.group.curator = self.user.userprofile
         self.group.save()
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
-        self.group.add_member(UserFactory.create(userprofile={'is_vouched': True}).userprofile,
+        self.group.add_member(UserFactory.create().userprofile,
                               GroupMembership.PENDING)
 
         context = self.get_context(self.group)
@@ -62,7 +62,7 @@ class ShowGroupDeleteTests(TestCase):
     def test_not_curator(self):
         # Only one member (user2) but user requesting the view (user1) is not the curator
         # (actually, nobody is the curator). Don't show delete button.
-        user2 = UserFactory.create(userprofile={'is_vouched': True})
+        user2 = UserFactory.create()
         self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
 
         context = self.get_context(self.group)
@@ -77,7 +77,7 @@ class GroupDeleteTest(TestCase):
     """
     def setUp(self):
         self.group = GroupFactory.create()
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
 
     def test_curator_only_member(self):
         # If user is curator and no other members, can delete the group
@@ -99,7 +99,7 @@ class GroupDeleteTest(TestCase):
         self.group.curator = self.user.userprofile
         self.group.save()
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
-        self.group.add_member(UserFactory.create(userprofile={'is_vouched': True}).userprofile,
+        self.group.add_member(UserFactory.create().userprofile,
                               GroupMembership.PENDING)
 
         request = MagicMock()
@@ -114,7 +114,7 @@ class GroupDeleteTest(TestCase):
     def test_not_curator(self):
         # Only one member (user2) but user requesting the view (user1) is not the curator
         # (actually, nobody is the curator)
-        user2 = UserFactory.create(userprofile={'is_vouched': True})
+        user2 = UserFactory.create()
         self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
 
         request = MagicMock()
@@ -126,15 +126,14 @@ class GroupDeleteTest(TestCase):
         # The group was NOT deleted
         ok_(Group.objects.filter(url=self.group.url).exists())
 
-    def test_is_superuser(self):
-        # Only one member (user2) but user requesting the view (user1) is not the curator
-        # however they are a superuser.
-        user2 = UserFactory.create(userprofile={'is_vouched': True})
+    def test_is_manager(self):
+        # Test that manager can delete group.
+        manager = UserFactory.create(manager=True)
+        user2 = UserFactory.create()
         self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
-        user1 = UserFactory.create(userprofile={'is_vouched': True}, is_superuser=True)
 
         request = MagicMock()
-        request.user = user1
+        request.user = manager
         request.method = 'POST'
 
         group_delete(request, self.group.url)

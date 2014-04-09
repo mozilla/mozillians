@@ -28,7 +28,7 @@ class SearchTests(TestCase):
             'application/opensearchdescription+xml')
 
     def test_search_plugin_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:search_plugin'),
                                   follow=True)
@@ -37,7 +37,7 @@ class SearchTests(TestCase):
             'application/opensearchdescription+xml')
 
     def test_search_plugin_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:search_plugin'),
                                   follow=True)
@@ -54,19 +54,19 @@ class InviteTests(TestCase):
 
     @requires_vouch()
     def test_invite_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.get(reverse('phonebook:invite'), follow=True)
 
     def test_invite_get_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:invite'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/invite.html')
 
     @patch('mozillians.phonebook.views.messages.success')
     def test_invite_post_vouched(self, success_mock):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:invite', prefix='/en-US/')
         data = {'message': 'Join us foo!', 'recipient': 'foo@example.com'}
         with self.login(user) as client:
@@ -78,8 +78,8 @@ class InviteTests(TestCase):
         ok_(success_mock.called)
 
     def test_invite_already_vouched(self):
-        vouched_user = UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        vouched_user = UserFactory.create()
+        user = UserFactory.create()
         url = reverse('phonebook:invite', prefix='/en-US/')
         data = {'recipient': vouched_user.email}
         with self.login(user) as client:
@@ -130,7 +130,7 @@ class InviteTests(TestCase):
 
 class VouchTests(TestCase):
     def test_vouch_get_method(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:vouch', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url)
@@ -144,15 +144,15 @@ class VouchTests(TestCase):
 
     @requires_vouch()
     def test_vouch_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         url = reverse('phonebook:vouch', prefix='/en-US/')
         with self.login(user) as client:
             client.post(url)
 
     @patch('mozillians.phonebook.views.messages.info')
     def test_vouch_vouched(self, info_mock):
-        user = UserFactory.create(userprofile={'is_vouched': True})
-        unvouched_user = UserFactory.create()
+        user = UserFactory.create()
+        unvouched_user = UserFactory.create(vouched=False)
         url = reverse('phonebook:vouch', prefix='/en-US/')
         data = {'vouchee': unvouched_user.userprofile.id}
         with self.login(user) as client:
@@ -164,7 +164,7 @@ class VouchTests(TestCase):
         ok_(info_mock.called)
 
     def test_vouch_invalid_form_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:vouch', prefix='/en-US/')
         data = {'vouchee': 'invalid'}
         with self.login(user) as client:
@@ -180,7 +180,7 @@ class LogoutTests(TestCase):
 
     @patch('mozillians.phonebook.views.auth.views.logout', wraps=logout_view)
     def test_logout_unvouched(self, logout_mock):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
@@ -189,7 +189,7 @@ class LogoutTests(TestCase):
 
     @patch('mozillians.phonebook.views.auth.views.logout', wraps=logout_view)
     def test_logout_vouched(self, logout_mock):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
@@ -201,8 +201,7 @@ class EmailChangeTests(TestCase):
     @patch('mozillians.phonebook.views.forms.ProfileForm')
     def test_email_change_verification_redirection(self, profile_form_mock):
         profile_form_mock().is_valid.return_value = True
-        user = UserFactory.create(email='old@example.com',
-                                  userprofile={'is_vouched': True})
+        user = UserFactory.create(email='old@example.com')
         data = {'full_name': 'foobar',
                 'email': 'new@example.com',
                 'country': 'gr',
@@ -244,7 +243,7 @@ class ImageTests(TestCase):
 
     def test_exif_broken(self):
         """Test image with broken EXIF data."""
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         file_path = os.path.join(os.path.dirname(__file__), 'broken_exif.jpg')
         self._upload_photo(user, file_path)
 
@@ -253,7 +252,7 @@ class ImageTests(TestCase):
 
         Related bug 928959.
         """
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         file_path = os.path.join(os.path.dirname(__file__),
                                  'broken_colorspace.gif')
         self._upload_photo(user, file_path)
@@ -274,7 +273,7 @@ class ImageTests(TestCase):
         This test reproduces that behavior and should fail if we don't
         update the size of `photo` with the new cleaned image size.
         """
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         file_path = os.path.join(os.path.dirname(__file__), 'broken_marshal.jpg')
         self._upload_photo(user, file_path)
 
@@ -284,7 +283,7 @@ class ImageTests(TestCase):
         Related bug 925256.
         """
         # Set a user with a photo
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         file_path = os.path.join(os.path.dirname(__file__), 'normal_photo.jpg')
         self._upload_photo(user, file_path)
 
@@ -317,8 +316,7 @@ class DateValidationTests(TestCase):
 
         Related bug 914448.
         """
-        user = UserFactory.create(email='es@example.com',
-                                  userprofile={'is_vouched': True})
+        user = UserFactory.create(email='es@example.com')
         data = {'full_name': user.userprofile.full_name,
                 'email': user.email,
                 'username': user.username,

@@ -18,7 +18,7 @@ class ViewProfileTests(TestCase):
     @patch('mozillians.phonebook.views.login_required', wraps=login_required)
     def test_view_profile_no_public_anonymous(self, login_required_mock,
                                               warning_mock):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True})
+        lookup_user = UserFactory.create()
         client = Client()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
@@ -29,8 +29,8 @@ class ViewProfileTests(TestCase):
     @patch('mozillians.phonebook.views.messages.error')
     @patch('mozillians.phonebook.views.redirect', wraps=redirect)
     def test_view_profile_no_public_unvouched(self, redirect_mock, error_mock):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create()
+        lookup_user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -39,8 +39,8 @@ class ViewProfileTests(TestCase):
         ok_(error_mock.called)
 
     def test_view_profile_no_public_vouched(self):
-        lookup_user = UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        lookup_user = UserFactory.create()
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -50,9 +50,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['profile'], lookup_user.userprofile)
 
     def test_view_vouched_profile_public_anonymous(self):
-        lookup_user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
         client = Client()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
@@ -64,10 +62,8 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_unvouched(self):
-        lookup_user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'privacy_full_name': PUBLIC})
-        user = UserFactory.create()
+        lookup_user = UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -79,10 +75,8 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_vouched_profile_public_vouched(self):
-        lookup_user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'privacy_full_name': PUBLIC})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        lookup_user = UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -94,8 +88,8 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_unvouched_profile_public_anonymous(self):
-        lookup_user = UserFactory.create(
-            userprofile={'privacy_full_name': PUBLIC})
+        lookup_user = UserFactory.create(vouched=False,
+                                         userprofile={'privacy_full_name': PUBLIC})
         client = Client()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
@@ -107,9 +101,9 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_unvouched_profile_public_unvouched(self):
-        lookup_user = UserFactory.create(
-            userprofile={'privacy_full_name': PUBLIC})
-        user = UserFactory.create()
+        lookup_user = UserFactory.create(vouched=False,
+                                         userprofile={'privacy_full_name': PUBLIC})
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -121,9 +115,9 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_unvouched_profile_public_vouched(self):
-        lookup_user = UserFactory.create(
-            userprofile={'privacy_full_name': PUBLIC})
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        lookup_user = UserFactory.create(vouched=False,
+                                         userprofile={'privacy_full_name': PUBLIC})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
@@ -136,7 +130,7 @@ class ViewProfileTests(TestCase):
             lookup_user.userprofile.id)
 
     def test_view_profile_mine_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': user.username})
@@ -148,7 +142,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'myself')
 
     def test_view_profile_mine_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:profile_view',
                           kwargs={'username': user.username})
@@ -160,7 +154,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'myself')
 
     def test_view_profile_mine_as_anonymous(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
         url = urlparams(url, view_as='anonymous')
@@ -173,7 +167,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'anonymous')
 
     def test_view_profile_mine_as_mozillian(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
         url = urlparams(url, view_as='mozillian')
@@ -186,7 +180,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'mozillian')
 
     def test_view_profile_mine_as_employee(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
         url = urlparams(url, view_as='employee')
@@ -199,7 +193,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'employee')
 
     def test_view_profile_mine_as_privileged(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
         url = urlparams(url, view_as='privileged')
@@ -212,8 +206,8 @@ class ViewProfileTests(TestCase):
         eq_(response.context['privacy_mode'], 'privileged')
 
     def test_view_profile_waiting_for_vouch_unvouched(self):
-        unvouched_user = UserFactory.create()
-        user = UserFactory.create()
+        unvouched_user = UserFactory.create(vouched=False)
+        user = UserFactory.create(vouched=False)
         url = reverse('phonebook:profile_view',
                       kwargs={'username': unvouched_user.username})
         with self.login(user) as client:
@@ -221,8 +215,8 @@ class ViewProfileTests(TestCase):
         ok_('vouch_form' not in response.context)
 
     def test_view_profile_waiting_for_vouch_vouched(self):
-        unvouched_user = UserFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        unvouched_user = UserFactory.create(vouched=False)
+        user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': unvouched_user.username})
         with self.login(user) as client:

@@ -310,11 +310,11 @@ class UserProfileTests(TestCase):
         eq_(user.userprofile.privacy_level, EMPLOYEES)
 
     def test_privacy_level_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         eq_(user.userprofile.privacy_level, MOZILLIANS)
 
     def test_privacy_level_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         eq_(user.userprofile.privacy_level, PUBLIC)
 
     def test_is_complete(self):
@@ -416,8 +416,8 @@ class UserProfileTests(TestCase):
 
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_auto_vouching(self):
-        user_1 = UserFactory.create(email='foo@example.com')
-        user_2 = UserFactory.create(email='foo@bar.com')
+        user_1 = UserFactory.create(vouched=False, email='foo@example.com')
+        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
         ok_(user_1.userprofile.is_vouched)
         ok_(not user_2.userprofile.is_vouched)
 
@@ -425,8 +425,8 @@ class UserProfileTests(TestCase):
     @patch('mozillians.users.models.datetime')
     def test_vouch(self, datetime_mock, email_vouched_mock):
         datetime_mock.now.return_value = datetime(2012, 01, 01, 00, 10)
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2 = UserFactory.create()
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create(vouched=False)
         user_2.userprofile.vouch(user_1.userprofile)
         user_2 = User.objects.get(id=user_2.id)
         ok_(user_2.userprofile.is_vouched)
@@ -436,8 +436,8 @@ class UserProfileTests(TestCase):
 
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     def test_vouch_no_commit(self, email_vouched_mock):
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2 = UserFactory.create()
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create(vouched=False)
         user_2.userprofile.vouch(user_1.userprofile, commit=False)
         user_2 = User.objects.get(id=user_2.id)
         ok_(not user_2.userprofile.is_vouched)
@@ -446,10 +446,9 @@ class UserProfileTests(TestCase):
         ok_(email_vouched_mock.called)
 
     def test_voucher_public(self):
-        voucher = UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'vouched_by': voucher.userprofile})
+        voucher = UserFactory.create()
+        user = UserFactory.create(userprofile={'is_vouched': True,
+                                               'vouched_by': voucher.userprofile})
         voucher_profile = voucher.userprofile
         voucher_profile.privacy_full_name = PUBLIC
         voucher_profile.save()
@@ -460,10 +459,9 @@ class UserProfileTests(TestCase):
         eq_(user_profile.vouched_by, voucher.userprofile)
 
     def test_voucher_nonpublic(self):
-        voucher = UserFactory.create(userprofile={'is_vouched': True})
-        user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'vouched_by': voucher.userprofile})
+        voucher = UserFactory.create()
+        user = UserFactory.create(userprofile={'is_vouched': True,
+                                               'vouched_by': voucher.userprofile})
         user_profile = user.userprofile
         user_profile.set_instance_privacy_level(PUBLIC)
 

@@ -13,7 +13,7 @@ from nose.tools import ok_, eq_
 @patch('mozillians.groups.views.render')
 class ListTests(TestCase):
     def setUp(self):
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         self.group_1 = GroupFactory.create()
         self.group_2 = GroupFactory.create()
         self.group_2.add_member(self.user.userprofile)

@@ -13,7 +13,7 @@ from mozillians.users.tests import UserFactory
 class TestGroupRemoveMember(TestCase):
     def setUp(self):
         self.group = GroupFactory()
-        self.member = UserFactory(userprofile={'is_vouched': True})
+        self.member = UserFactory()
         self.group.add_member(self.member.userprofile)
         self.url = reverse('groups:remove_member', prefix='/en-US/',
                            kwargs={'group_pk': self.group.pk,
@@ -21,7 +21,7 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_manager(self):
         # manager can remove another from a group they're not curator of
-        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
+        user = UserFactory(manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -29,7 +29,7 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_manager_from_unleavable_group(self):
         # manager can remove people even from unleavable groups
-        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
+        user = UserFactory(manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -37,7 +37,7 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_manager_removing_curator(self):
         # but even manager cannot remove a curator
-        user = UserFactory(userprofile={'is_vouched': True}, manager=True)
+        user = UserFactory(manager=True)
         self.group.curator = self.member.userprofile
         self.group.save()
         with self.login(user) as client:
@@ -63,14 +63,14 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_simple_user_removing_another(self):
         # user cannot remove anyone else
-        user = UserFactory(userprofile={'is_vouched': True})
+        user = UserFactory()
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(404, response.status_code)
 
     def test_as_curator(self):
         # curator can remove another
-        curator = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
         self.group.curator = curator.userprofile
         self.group.save()
         with self.login(curator) as client:
@@ -80,7 +80,7 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_curator_twice(self):
         # removing a second time doesn't blow up
-        curator = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
         self.group.curator = curator.userprofile
         self.group.save()
         with self.login(curator) as client:
@@ -91,7 +91,7 @@ class TestGroupRemoveMember(TestCase):
         # curator can remove another even from an unleavable group
         self.group.members_can_leave = False
         self.group.save()
-        curator = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
         self.group.curator = curator.userprofile
         self.group.save()
         with self.login(curator) as client:
@@ -101,10 +101,10 @@ class TestGroupRemoveMember(TestCase):
 
     def test_accepting_sends_email(self):
         # when curator accepts someone, they are sent an email
-        curator = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
         self.group.curator = curator.userprofile
         self.group.save()
-        user = UserFactory(userprofile={'is_vouched': True})
+        user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes membership request
         eq_(0, len(mail.outbox))
@@ -126,10 +126,10 @@ class TestGroupRemoveMember(TestCase):
 
     def test_rejecting_sends_email(self):
         # when curator rejects someone, they are sent an email
-        curator = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
         self.group.curator = curator.userprofile
         self.group.save()
-        user = UserFactory(userprofile={'is_vouched': True})
+        user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes request
         eq_(0, len(mail.outbox))

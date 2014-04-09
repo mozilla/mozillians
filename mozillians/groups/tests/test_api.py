@@ -18,7 +18,7 @@ class GroupResourceTests(TestCase):
         self.resource_url = reverse(
             'api_dispatch_list',
             kwargs={'api_name': 'v1', 'resource_name': 'groups'})
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         self.app = APIAppFactory.create(owner=self.user,
                                         is_mozilla_app=True)
         self.resource_url = urlparams(self.resource_url,
@@ -26,7 +26,7 @@ class GroupResourceTests(TestCase):
                                       app_key=self.app.key)
 
     def test_list_groups(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group = GroupFactory.create()
         group.add_member(user.userprofile)
 
@@ -46,7 +46,7 @@ class SkillResourceTests(TestCase):
         self.resource_url = reverse(
             'api_dispatch_list',
             kwargs={'api_name': 'v1', 'resource_name': 'skills'})
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
         self.app = APIAppFactory.create(owner=self.user,
                                         is_mozilla_app=True)
         self.resource_url = urlparams(self.resource_url,
@@ -54,8 +54,8 @@ class SkillResourceTests(TestCase):
                                       app_key=self.app.key)
 
     def test_list_skills(self):
-        unvouched_user = UserFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        unvouched_user = UserFactory.create(vouched=False)
+        user = UserFactory.create()
         skill = SkillFactory.create()
         skill.members.add(unvouched_user.userprofile)
         skill.members.add(user.userprofile)

@@ -14,7 +14,7 @@ class ProfileEditTests(TestCase):
     def test_profile_edit_vouched_links_to_groups_page(self):
         """A vouched user editing their profile is shown a link to the groups page.
         """
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -25,7 +25,7 @@ class ProfileEditTests(TestCase):
     def test_profile_edit_unvouched_doesnt_link_to_groups_page(self):
         """An unvouched user editing their profile is not shown a link to the groups page.
         """
-        user = UserFactory.create(userprofile={'is_vouched': False})
+        user = UserFactory.create(vouched=False)
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -34,8 +34,7 @@ class ProfileEditTests(TestCase):
         ok_(groups_url not in response.content)
 
     def test_languages_get_saved(self):
-        user = UserFactory.create(email='es@example.com',
-                                  userprofile={'is_vouched': True})
+        user = UserFactory.create(email='es@example.com')
         data = {'full_name': user.userprofile.full_name,
                 'email': user.email,
                 'username': user.username,

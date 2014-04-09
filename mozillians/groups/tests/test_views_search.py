@@ -14,8 +14,8 @@ class IndexTests(TestCase):
         self.url = reverse('groups:index_groups')
 
     def test_index(self):
-        user_1 = UserFactory.create(userprofile={'is_vouched': True})
-        user_2 = UserFactory.create(userprofile={'is_vouched': True})
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
         group_1 = GroupFactory.create()
         group_2 = GroupFactory.create()
         group_1.add_member(user_1.userprofile)
@@ -39,7 +39,7 @@ class IndexTests(TestCase):
 
     @requires_vouch()
     def test_index_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.get(self.url, follow=True)
 
@@ -49,7 +49,7 @@ class IndexFunctionalAreasTests(TestCase):
         self.url = reverse('groups:index_functional_areas')
 
     def test_index_functional_areas(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group_1 = GroupFactory.create(curator=user.userprofile,
                                       functional_area=True)
         group_2 = GroupFactory.create()
@@ -71,7 +71,7 @@ class IndexFunctionalAreasTests(TestCase):
 
     @requires_vouch()
     def test_index_functional_areas_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.get(self.url, follow=True)
 
@@ -81,7 +81,7 @@ class IndexSkillsTests(TestCase):
         self.url = reverse('groups:index_skills')
 
     def test_index_skills(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         skill_1 = SkillFactory.create()
         skill_2 = SkillFactory.create()
         SkillFactory.create()
@@ -102,14 +102,14 @@ class IndexSkillsTests(TestCase):
 
     @requires_vouch()
     def test_index_skills_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             client.get(self.url, follow=True)
 
 
 class SearchTests(TestCase):
     def test_search_existing_group(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group_1 = GroupFactory.create(visible=True)
         GroupFactory.create()
         url = urlparams(reverse('groups:search_groups'), term=group_1.name)
@@ -124,7 +124,7 @@ class SearchTests(TestCase):
         eq_(data[0], group_1.name)
 
     def test_search_invalid_group(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = urlparams(reverse('groups:search_groups'), term='invalid')
         with self.login(user) as client:
             response = client.get(url, follow=True,
@@ -136,7 +136,7 @@ class SearchTests(TestCase):
         eq_(len(data), 0)
 
     def test_search_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         group = GroupFactory.create(visible=True)
         url = urlparams(reverse('groups:search_groups'), term=group.name)
         with self.login(user) as client:
@@ -152,7 +152,7 @@ class SearchTests(TestCase):
         client.get(url, follow=True)
 
     def test_search_skills(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         skill_1 = SkillFactory.create()
         SkillFactory.create()
         url = urlparams(reverse('groups:search_skills'), term=skill_1.name)
@@ -167,7 +167,7 @@ class SearchTests(TestCase):
         eq_(data[0], skill_1.name)
 
     def test_search_no_ajax(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group = GroupFactory.create()
         url = urlparams(reverse('groups:search_groups'), term=group.name)
         with self.login(user) as client:
@@ -175,7 +175,7 @@ class SearchTests(TestCase):
         ok_(isinstance(response, HttpResponseBadRequest))
 
     def test_search_no_term(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('groups:search_groups')
         with self.login(user) as client:
             response = client.get(url, follow=True)

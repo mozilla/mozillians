@@ -14,9 +14,8 @@ from mozillians.users.tests import UserFactory
 class TestGroupAdmin(TestCase):
     def test_member_counts(self):
         group = GroupFactory()
-        user = UserFactory(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
-
         admin = GroupAdmin(model=Group, admin_site=site)
         mock_request = Mock(spec=HttpRequest)
         qset = admin.queryset(mock_request)

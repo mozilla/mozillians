@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, User
 import factory
 from factory import fuzzy
 
-from mozillians.users.models import Language, UserProfile
+from mozillians.users.models import Language
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -14,14 +14,6 @@ class UserFactory(factory.DjangoModelFactory):
     email = factory.LazyAttribute(
         lambda a: '{0}.{1}@example.com'.format(
             a.first_name, a.last_name.replace(' ', '.')))
-
-    @classmethod
-    def create(cls, **kwargs):
-        """After creating User object, update ElasticSearch index."""
-        user = super(UserFactory, cls).create(**kwargs)
-        UserProfile.refresh_index(public_index=False)
-        UserProfile.refresh_index(public_index=True)
-        return user
 
     @factory.post_generation
     def userprofile(self, create, extracted, **kwargs):
@@ -37,6 +29,14 @@ class UserFactory(factory.DjangoModelFactory):
         if extracted:
             group, created = Group.objects.get_or_create(name='Managers')
             self.groups.add(group)
+
+    @factory.post_generation
+    def vouched(self, create, extracted, **kwargs):
+        # By default Users are vouched
+        if extracted is None:
+            extracted = True
+        self.userprofile.is_vouched = extracted
+        self.userprofile.save()
 
 
 class LanguageFactory(factory.DjangoModelFactory):

@@ -13,21 +13,19 @@ class LoginTests(TestCase):
         client.get(reverse('phonebook:login'), follow=True)
 
     def test_login_unvouched(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
     def test_login_vouched(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
     def test_login_incomplete_profile(self):
-        user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'full_name': ''})
+        user = UserFactory.create(userprofile={'full_name': ''})
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
