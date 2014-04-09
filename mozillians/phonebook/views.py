@@ -269,9 +269,6 @@ def search(request):
              groups=groups,
              functional_areas=functional_areas)
 
-    if request.is_ajax():
-        return render(request, 'search_ajax.html', d)
-
     return render(request, 'phonebook/search.html', d)
 
 
@@ -361,7 +358,7 @@ def list_mozillians_in_location(request, country, region=None, city=None):
             'region_name': region,
             'page': page,
             'show_pagination': show_pagination}
-    return render(request, 'phonebook/location-list.html', data)
+    return render(request, 'phonebook/location_list.html', data)
 
 
 @allow_unvouched

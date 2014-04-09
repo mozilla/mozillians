@@ -43,7 +43,7 @@ class Invite(models.Model):
 
         subject = _('Become a Mozillian')
 
-        template = get_template('phonebook/invite_email.txt')
+        template = get_template('phonebook/emails/invite_email.txt')
 
         message = template.render({
             'personal_message': personal_message,
@@ -59,7 +59,7 @@ class Invite(models.Model):
 
     def send_thanks(self):
         """Sends email to person who friend accepted invitation."""
-        template = get_template('phonebook/invite_accepted.txt')
+        template = get_template('phonebook/emails/invite_accepted.txt')
         subject = _('%s created a Mozillians profile') % self.redeemer.full_name
         profile_url = reverse('phonebook:profile_view',
                               kwargs={'username': self.redeemer.user.username})
