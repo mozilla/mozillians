@@ -18,7 +18,7 @@ def paragraphize(value):
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
-@register.inclusion_tag('phonebook/includes/search_result.html')
+@register.inclusion_tag('includes/search_result.html')
 @jinja2.contextfunction
 def search_result(context, profile):
     d = dict(context.items())
