@@ -21,7 +21,7 @@
     {% endif %}
   </p>
 
-   <form action="{{ url('groups:remove_member', group_pk=group.pk, user_pk=profile.pk) }}" method="POST">
+   <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}" method="POST">
      {{ csrf() }}
      <button class="button remove" type="submit">{{ _('Remove') }}</button>
   </form>

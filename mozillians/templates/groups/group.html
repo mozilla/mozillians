@@ -123,7 +123,7 @@
     </article><!-- .group-meta -->
 
     {% if show_join_button %}
-        <form action="{{ url('groups:join_group', group.pk) }}"
+        <form action="{{ url('groups:join_group', group.url) }}"
               id="join-group" method="post">
           {{ csrf() }}
           <button class="button">
@@ -137,7 +137,7 @@
     {% endif %}
 
     {% if show_leave_button %}
-        <form action="{{ url('groups:remove_member', group.pk, user.userprofile.pk) }}"
+        <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
               id="leave-group" method="post">
           {{ csrf() }}
           <button class="button button-negative">
