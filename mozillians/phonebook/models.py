@@ -38,24 +38,26 @@ class Invite(models.Model):
         available.
 
         """
+        sender_addr = _('A fellow Mozillian')
+        from_addr = settings.FROM_NOREPLY
         if sender:
-            sender = '%s (%s)' % (sender.full_name, sender.user.email)
+            sender_addr = '%s (%s)' % (sender.full_name, sender.user.email)
+            from_addr = settings.FROM_NOREPLY_VIA % sender.full_name
 
-        subject = _('Become a Mozillian')
+        subject = _('Please join me on mozillians.org')
 
         template = get_template('phonebook/emails/invite_email.txt')
 
         message = template.render({
             'personal_message': personal_message,
-            'sender': sender or _('A fellow Mozillian'),
+            'sender': sender_addr,
             'link': self.get_url()})
 
         # Manually replace quotes and double-quotes as these get
         # escaped by the template and this makes the message look bad.
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
-        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
-                  [self.recipient])
+        send_mail(subject, filtered_message, from_addr, [self.recipient])
 
     def send_thanks(self):
         """Sends email to person who friend accepted invitation."""
