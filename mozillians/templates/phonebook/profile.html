@@ -108,33 +108,33 @@
         {% endif %}
        </div>
        <div class="contact-details">
-          <ul>
+          
             {% if profile.email %}
-              <li class="u-email">
+              <section class="u-email">
                 <i class="icon-envelope"></i>
                 {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
                   <span class="email">{{ profile.email }}</span>
                 {% if user != shown_user %}</a>{% endif %}
-              </li>
+              </section>
             {% endif %}
             {% if profile.ircname %}
-              <li class="p-nickname">
+              <section class="p-nickname">
                 <i class="icon-comments-alt"></i> IRC :
                 <span class="nickname">{{ profile.ircname }}</span>
-              </li>
+              </section>
             {% endif %}
             {% for site in profile.websites %}
-              <li class="u-url">
+              <section class="u-url">
                 <i class="icon-link pre-break-bullet"></i>
                 <a href="{{ site.identifier }}">
                   <span class="url">{{ site.identifier }}</span>
                 </a>
-              </li>
+              </section>
             {% endfor %}
             {% if profile.tshirt %}
-              <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
+              <section>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</section>
             {% endif %}
-          </ul>
+          
         </div>
     </article>
 
