@@ -231,7 +231,7 @@ class VouchForm(happyforms.Form):
 
 
 class InviteForm(happyforms.ModelForm):
-    message = forms.CharField(label=_lazy('Message'), required=False)
+    message = forms.CharField(label=_lazy('Message'), required=False, widget=forms.Textarea())
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
@@ -244,6 +244,3 @@ class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite
         fields = ['recipient']
-        widgets = {
-            'message': forms.Textarea(),
-        }
