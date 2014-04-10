@@ -19,7 +19,15 @@ in touch.
   {{ personal_message|indent(indentfirst=True) }}
 {% endif %}
 
-{{ _('Join Mozillians:') }} {{ link }}
+{% trans %}
+Take two minutes to create your mozillians.org profile:
+{% endtrans %}
+
+{{ link }}
+
+{% trans %}
+Thanks for contributing to Mozilla :)
+{% endtrans %}
 
 
 {{ _('The Mozillians.org team') }}
