@@ -207,6 +207,18 @@ class UserProfileTests(TestCase):
         profile.set_instance_privacy_level(PUBLIC)
         eq_(profile.websites.count(), 0)
 
+    def test_vouched_profiles(self):
+        profile_1 = UserFactory.create().userprofile
+        profile_2 = UserFactory.create(userprofile={'privacy_vouched_by': MOZILLIANS}).userprofile
+        profile_2.vouch(profile_1)
+
+        profile_1.set_instance_privacy_level(MOZILLIANS)
+        eq_(profile_1.vouched_profiles.count(), 1)
+        ok_(profile_2 in profile_1.vouched_profiles.all())
+
+        profile_1.set_instance_privacy_level(PUBLIC)
+        eq_(profile_1.vouched_profiles.count(), 0)
+
     def test_annotated_groups_not_public(self):
         # Group member who wants their groups kept semi-private
         profile = UserFactory.create(userprofile={'privacy_groups': MOZILLIANS}).userprofile
