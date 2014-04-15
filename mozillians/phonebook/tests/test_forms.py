@@ -48,6 +48,19 @@ class ProfileFormTests(TestCase):
         ok_(not form.is_valid())
         ok_('skills' in form.errors)
 
+    def test_story_link(self):
+        user = UserFactory.create()
+        data = model_to_dict(user.userprofile)
+        data['story_link'] = 'http://somelink.com'
+        form = ProfileForm(data=data, instance=user.userprofile)
+        ok_(form.is_valid(), msg=dict(form.errors))
+
+        eq_(form.cleaned_data['story_link'], u'http://somelink.com/')
+
+        data['story_link'] = 'Foobar'
+        form = ProfileForm(data=data, instance=user.userprofile)
+        ok_(not form.is_valid())
+
 
 class ExternalAccountFormTests(TestCase):
     def test_identifier_cleanup(self):

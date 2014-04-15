@@ -148,6 +148,13 @@
               </p>
           </div>
         {% endif %}
+        {% if profile.story_link %}
+          <div id="story-link">
+	    <p>
+	      <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
+	    </p>
+	  </div>
+        {% endif %}
         {% if groups %}
           <div id="groups">
             <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
