@@ -192,7 +192,21 @@
               {% endfor %}
           </div>
         {% endif %}
-        {% if profile.accounts.count() %}
+        {% if profile.websites.exists() %}
+          <div id="websites" class="p-category category">
+            <h3><i class="icon-link"></i> {{ _('Websites') }}</h3>
+            <ul>
+              {% for site in profile.websites %}
+                <li class="u-url">
+                  <a href="{{ site.identifier }}">
+                    <span class="url">{{ site.identifier }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% if profile.accounts.exists() %}
           <div id="externalaccounts" class="p-category category">
             <h3><i class="icon-external-link"></i> {{ _('External Accounts') }}</h3>
             <ul>
@@ -236,14 +250,6 @@
                 <span class="nickname">{{ profile.ircname }}</span>
               </li>
             {% endif %}
-            {% for site in profile.websites %}
-              <li class="u-url">
-                <i class="icon-link pre-break-bullet"></i>
-                <a href="{{ site.identifier }}">
-                  <span class="url">{{ site.identifier }}</span>
-                </a>
-              </li>
-            {% endfor %}
             {% if profile.tshirt %}
               <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
             {% endif %}
