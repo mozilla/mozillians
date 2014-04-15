@@ -107,6 +107,35 @@
           </section>
         {% endif %}
        </div>
+       <div class="contact-details">
+          
+            {% if profile.email %}
+              <section class="u-email">
+                <i class="icon-envelope"></i>
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
+              </section>
+            {% endif %}
+            {% if profile.ircname %}
+              <section class="p-nickname">
+                <i class="icon-comments-alt"></i> IRC :
+                <span class="nickname">{{ profile.ircname }}</span>
+              </section>
+            {% endif %}
+            {% for site in profile.websites %}
+              <section class="u-url">
+                <i class="icon-link pre-break-bullet"></i>
+                <a href="{{ site.identifier }}">
+                  <span class="url">{{ site.identifier }}</span>
+                </a>
+              </section>
+            {% endfor %}
+            {% if profile.tshirt %}
+              <section>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</section>
+            {% endif %}
+          
+        </div>
     </article>
 
     <article id="profile-info">
@@ -224,38 +253,6 @@
             </a>
           </div>
         {% endif %}
-      </section>
-
-      <section id="profile-contact">
-        <div class="contact-details">
-          <ul>
-            {% if profile.email %}
-              <li class="u-email">
-                <i class="icon-envelope"></i>
-                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
-                  <span class="email">{{ profile.email }}</span>
-                {% if user != shown_user %}</a>{% endif %}
-              </li>
-            {% endif %}
-            {% if profile.ircname %}
-              <li class="p-nickname">
-                <i class="icon-comments-alt"></i> IRC :
-                <span class="nickname">{{ profile.ircname }}</span>
-              </li>
-            {% endif %}
-            {% for site in profile.websites %}
-              <li class="u-url">
-                <i class="icon-link pre-break-bullet"></i>
-                <a href="{{ site.identifier }}">
-                  <span class="url">{{ site.identifier }}</span>
-                </a>
-              </li>
-            {% endfor %}
-            {% if profile.tshirt %}
-              <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
-            {% endif %}
-          </ul>
-        </div>
       </section>
     </article>
     <span class="hidden category">Mozillians</span>
