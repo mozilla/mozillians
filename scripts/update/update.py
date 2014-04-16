@@ -45,7 +45,7 @@ def update_locales(ctx):
 @task
 def update_assets(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("LANG=en_US.UTF-8 python2.6 manage.py collectstatic --noinput")
+        ctx.local("LANG=en_US.UTF-8 python2.6 manage.py collectstatic --noinput --no-default-ignore -i .git")
         ctx.local("LANG=en_US.UTF-8 python2.6 manage.py compress_jingo")
         ctx.local("LANG=en_US.UTF-8 python2.6 manage.py update_product_details")
 
