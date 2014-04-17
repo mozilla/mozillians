@@ -118,8 +118,9 @@ class ProfileForm(happyforms.ModelForm):
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
     skills = forms.CharField(
-        label=_lazy(u'Start typing to add a skill (example: Python, '
-                    u'javascript, Graphic Design, User Research)'),
+        label='',
+        help_text=_lazy(u'Start typing to add a skill (example: Python, '
+                        u'javascript, Graphic Design, User Research)'),
         required=False)
 
     class Meta:
