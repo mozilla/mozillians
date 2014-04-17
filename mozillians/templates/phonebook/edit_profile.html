@@ -282,10 +282,7 @@
           both.
         {% endtrans %}
       </p>
-      {{ profile_form.skills }}
-      <div class="help_text">
-        {{ profile_form.skills.label_tag() }}
-      </div>
+      {{ mozillians_field(profile_form.skills) }}
       {{ privacy_field(profile_form.privacy_skills) }}
     </fieldset>
 
