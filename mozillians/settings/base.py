@@ -262,7 +262,6 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
                          '^/browserid/',
-                         '^/jsi18n',
                          '^/api/']
 
 # Set default avatar for user profiles
