@@ -20,7 +20,7 @@ class RegisterMiddleware():
                       r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
                       r'^/browserid/',
                       r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
-                      r'^/[\w-]+/jsi18n/']
+                      ]
 
         if settings.DEBUG:
             allow_urls.append(settings.MEDIA_URL)

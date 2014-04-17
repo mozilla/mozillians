@@ -71,3 +71,12 @@ BASKET_MANAGERS = None  # or list of email addresses.
 GA_ACCOUNT_CODE = None
 
 COMPRESS_ENABLED = False
+
+SECRET_KEY = 'localdev'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}

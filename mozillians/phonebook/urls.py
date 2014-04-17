@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 from mozillians.common.decorators import allow_public
 
@@ -33,6 +33,7 @@ urlpatterns = patterns(
 
 
     # Static pages need csrf for browserID post to work
-    url(r'^about/$', allow_public(direct_to_template),
-        {'template': 'phonebook/about.html'}, name='about'),
+    url(r'^about/$',
+        allow_public(TemplateView.as_view(template_name='phonebook/about.html')),
+        name='about'),
 )
