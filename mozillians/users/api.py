@@ -1,240 +1,23 @@
-from collections import namedtuple
-from operator import itemgetter
 from urllib2 import unquote
 from urlparse import urljoin
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Q
+from django.db.models import Q
 
 from funfactory import utils
-from tastypie import fields
-from tastypie import http
+from tastypie import fields, http
+from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.bundle import Bundle
 from tastypie.exceptions import ImmediateHttpResponse
-from tastypie.resources import ModelResource, Resource
+from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
 from mozillians.api.authenticators import AppAuthentication
-from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.paginator import Paginator
-from mozillians.api.resources import (AdvancedSortingResourceMixIn,
-                                      ClientCacheResourceMixIn,
+from mozillians.api.resources import (ClientCacheResourceMixIn,
                                       GraphiteMixIn)
-from mozillians.users.models import COUNTRIES, UserProfile
-
-
-Country = namedtuple('Country', ['country', 'country_name', 'population'])
-City = namedtuple('City', ['city', 'country', 'country_name', 'population'])
-
-
-class CustomQuerySet(object):
-    """A custom queryset class.
-
-    Supports database count() on len(), order_by, filter, array
-    slicing.
-
-    """
-
-    def __init__(self, queryset):
-        self._query = queryset
-
-    def __len__(self):
-        return self._query.count()
-
-    def order_by(self, *args):
-        return self._query.order_by(*args)
-
-    def filter(self, *args, **kwargs):
-        return self._query.filter(*args, **kwargs)
-
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self._query[key.start:key.stop]
-        return self._query[key]
-
-
-class FakeQuerySet(object):
-    """
-    Wrap an iterable and make it work like a pretty dumb queryset.
-    """
-
-    def __init__(self, iterable):
-        # We won't be able to get the data out of this without evaluating
-        # the iterable (to sort or index it), so we might as well evaluate
-        # it once now.
-        self.values = list(iterable)
-
-    def order_by(self, *args):
-        return sorted(self.values, key=itemgetter(*args))
-
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            return self.values[key.start:key.stop]
-        return self.values[key]
-
-
-class LocationCustomResource(AdvancedSortingResourceMixIn,
-                             ClientCacheResourceMixIn, GraphiteMixIn,
-                             Resource):
-
-    class Meta:
-        authentication = AppAuthentication()
-        authorization = MozillaOfficialAuthorization()
-        list_allowed_methods = ['get']
-        serializer = Serializer(formats=['json', 'jsonp'])
-        paginator_class = Paginator
-        include_resource_uri = False
-        detail_allowed_methods = []
-        cache_control = {'max-age': 0}
-
-    def get_object_list(self):
-        queryset = self.Meta.queryset
-        return CustomQuerySet(queryset)
-
-    def obj_get_list(self, request=None, **kwargs):
-        obj_list = self.get_object_list()
-        filters = self.build_filters(getattr(request, 'GET', None))
-        if filters:
-            obj_list = self.apply_filters(obj_list, filters)
-        return obj_list
-
-    def apply_filters(self, obj_list, applicable_filters):
-        mega_filter = Q()
-        for db_filter in applicable_filters.values():
-            mega_filter &= db_filter
-        return obj_list.filter(mega_filter)
-
-
-def collapse_locations(obj_list, keyname):
-    """
-    Given a CustomQuerySet object, filter/aggregate it down
-    so we just have one item per country or city.
-
-    keyname is 'country' or 'city'.
-
-    Also drop the 'privacy_country' or 'privacy_city' field.
-
-    On input, we might have:
-
-       country   privacy_country  population
-         Gr             1            27
-         Gr             2            16
-         Us             1            13
-         Us             2            12
-
-    and we want to end up with
-
-       country   population
-         Gr          43
-         Us          25
-
-    Returns a CustomQuerySet.
-    """
-
-    locations = {}
-    delkey = 'privacy_%s' % keyname
-    for item in obj_list:
-        location = item[keyname]
-        if location in locations:
-            locations[location]['population'] += item['population']
-        else:
-            if delkey in item:
-                del item[delkey]
-            locations[location] = item
-    # Turn the dictionary into an iterable of the dict values.
-    locations = locations.itervalues()
-    # Now we have an iterable of dicts, but an iterable is not a queryset
-    queryset = FakeQuerySet(locations)
-    # And let's make it a CustomQuerySet again
-    queryset = CustomQuerySet(queryset)
-    return queryset
-
-
-class CountryResource(LocationCustomResource):
-    country = fields.CharField(attribute='country')
-    country_name = fields.CharField(attribute='country_name')
-    population = fields.IntegerField(attribute='population')
-    url = fields.CharField()
-
-    class Meta(LocationCustomResource.Meta):
-        resource_name = 'countries'
-        ordering = ['country', 'population']
-        queryset = (UserProfile.objects
-                    .vouched()
-                    .exclude(country='')
-                    .values('country', 'privacy_country')
-                    .annotate(population=Count('country')))
-        default_order = ('country',)
-        object_class = Country
-
-    def obj_get_list(self, request=None, **kwargs):
-        obj_list = super(CountryResource, self).obj_get_list(request, **kwargs)
-        return collapse_locations(obj_list, 'country')
-
-    def build_filters(self, filters=None):
-        return None
-
-    def full_dehydrate(self, queryset):
-        queryset.obj = self.Meta.object_class(
-            country=queryset.obj['country'],
-            population=queryset.obj['population'],
-            country_name=COUNTRIES[queryset.obj['country']])
-        return super(LocationCustomResource, self).full_dehydrate(queryset)
-
-    def dehydrate_url(self, bundle):
-        url = reverse('phonebook:list_country', args=[bundle.obj.country])
-        return utils.absolutify(url)
-
-
-class CityResource(LocationCustomResource):
-    city = fields.CharField(attribute='city')
-    country = fields.CharField(attribute='country')
-    country_name = fields.CharField(attribute='country_name')
-    population = fields.IntegerField(attribute='population')
-    url = fields.CharField()
-
-    class Meta(LocationCustomResource.Meta):
-        resource_name = 'cities'
-        ordering = ['city', 'country', 'population']
-        queryset = (UserProfile.objects
-                    .vouched()
-                    .exclude(city='')
-                    .exclude(country='')
-                    .values('city', 'privacy_city',
-                            'country', 'privacy_country')
-                    .annotate(population=Count('city')))
-        default_order = ('country', 'city')
-        object_class = City
-
-    def obj_get_list(self, request=None, **kwargs):
-        obj_list = super(CityResource, self).obj_get_list(request, **kwargs)
-        return collapse_locations(obj_list, 'city')
-
-    def build_filters(self, filters=None):
-        database_filters = {}
-        valid_filters = [f for f in filters if f in ['country', 'city']]
-        getvalue = lambda x: unquote(filters[x].lower())
-
-        for valid_filter in valid_filters:
-            database_filters[valid_filter] = (
-                Q(**{'{0}__iexact'.format(valid_filter):
-                     getvalue(valid_filter)}))
-
-        return database_filters
-
-    def full_dehydrate(self, queryset):
-        queryset.obj = self.Meta.object_class(
-            country=queryset.obj['country'],
-            country_name=COUNTRIES[queryset.obj['country']],
-            population=queryset.obj['population'],
-            city=queryset.obj['city'])
-        return super(LocationCustomResource, self).full_dehydrate(queryset)
-
-    def dehydrate_url(self, bundle):
-        url = reverse('phonebook:list_city',
-                      args=[bundle.obj.country, bundle.obj.city])
-        return utils.absolutify(url)
+from mozillians.users.models import UserProfile
 
 
 class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
@@ -252,7 +35,7 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     class Meta:
         queryset = UserProfile.objects.all()
         authentication = AppAuthentication()
-        authorization = MozillaOfficialAuthorization()
+        authorization = ReadOnlyAuthorization()
         serializer = Serializer(formats=['json', 'jsonp'])
         paginator_class = Paginator
         cache_control = {'max-age': 0}

@@ -159,7 +159,7 @@
           <div id="groups">
             <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
               {% for group in groups %}
-                {% if (user.is_authenticated() and user.get_profile().is_vouched) %}
+                {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
                   <a href="{{ url('groups:show_group', group.url) }}">
                     {%- if group.curator == profile -%}
                       <i class="icon-certificate"></i>
@@ -181,7 +181,7 @@
             <h3><i class="icon-wrench"></i> {{ _('Skills') }}</h3>
               {% for skill in profile.skills.all() %}
                 {% if (user.is_authenticated() and
-                       user.get_profile().is_vouched) %}
+                       user.userprofile.is_vouched) %}
                   <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
                 {%- else -%}
                   {{ skill.name }}

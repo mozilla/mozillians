@@ -3,11 +3,11 @@ from django.db.models import Count, Sum
 
 from funfactory import utils
 from tastypie import fields
+from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
 from mozillians.api.authenticators import AppAuthentication
-from mozillians.api.authorisers import MozillaOfficialAuthorization
 from mozillians.api.resources import (AdvancedSortingResourceMixIn,
                                       ClientCacheResourceMixIn,
                                       GraphiteMixIn)
@@ -22,7 +22,7 @@ class GroupBaseResource(AdvancedSortingResourceMixIn, ClientCacheResourceMixIn,
 
     class Meta:
         authentication = AppAuthentication()
-        authorization = MozillaOfficialAuthorization()
+        authorization = ReadOnlyAuthorization()
         cache_control = {'max-age': 0}
         list_allowed_methods = ['get']
         detail_allowed_methods = ['get']
