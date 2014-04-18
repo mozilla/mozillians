@@ -191,20 +191,20 @@
 
             <div class="footer-license">
               <p>
-                {% trans %}
+                {% trans license_link='https://www.mozilla.org/en-US/foundation/licensing/website-content/' %}
                 Portions of this content are &copy;1998–{{ current_year }} by individual mozilla.org
                 contributors. Content available under
-                a <a href="http://www.mozilla.org/foundation/licensing/website-content.html">Creative
-                Commons license</a>.
+                a <a href="{{ license_link }}">Creative Commons license</a>.
                 {% endtrans %}
               </p>
             </div>
 
             <ul class="footer-nav details">
               <li><a href="{{ url('phonebook:about') }}">{{_('About Mozillians')}}</a></li>
-              <li><a href="http://mozilla.org/privacy/websites/">{{_('Privacy Policy')}}</a></li>
-              <li><a href="http://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
-              <li><a href="http://mozilla.org/legal/fraud-report/">{{_('Report Trademark Abuse')}}</a></li>
+              <li><a href="https://mozilla.org/contact/">{{_('Contact Us')}}</a></li>
+              <li><a href="https://mozilla.org/privacy/websites/">{{_('Privacy Policy')}}</a></li>
+              <li><a href="https://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
+              <li><a href="https://mozilla.org/legal/fraud-report/">{{_('Report Trademark Abuse')}}</a></li>
             </ul>
 
         </div>
