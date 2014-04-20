@@ -1,6 +1,6 @@
 import re
 
-from django.core.validators import URLValidator
+from django.core.validators import URLValidator, EmailValidator, email_re
 from django.db.models.loading import get_model
 from django.forms import ValidationError
 
@@ -65,5 +65,17 @@ def validate_username_not_url(username):
 
     if username.startswith('http://') or username.startswith('https://'):
         raise ValidationError(_('This field requires an identifier, not a URL.'))
+
+    return username
+
+def validate_email(username):
+    """ Validate that a username is email like."""
+    
+    validate_username = EmailValidator(email_re, _('Enter a valid email address.'),'invalid')
+    
+    try:
+        validate_username(username)
+    except ValidationError:
+        raise ValidationError(_('Enter a valid email address.'))
 
     return username
