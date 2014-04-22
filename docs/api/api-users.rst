@@ -8,7 +8,7 @@
 Users
 ==================
 
-The ``users`` method of the :doc:`Mozillians API </api>` returns user profile information.
+The ``users`` method of the :doc:`Mozillians API <api>` returns user profile information.
 
 **Requires Authentication**
     Yes
