@@ -6,6 +6,7 @@ from mozillians.common.tests import TestCase
 from mozillians.phonebook.validators import (validate_twitter, validate_username_not_url,
                                              validate_email)
 
+
 class ValidatorTests(TestCase):
     def test_twitter_username_restrictions(self):
         assert_raises(ValidationError, validate_twitter, "thisusernameiswaytoolong")

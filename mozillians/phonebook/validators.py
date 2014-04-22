@@ -68,10 +68,12 @@ def validate_username_not_url(username):
 
     return username
 
+
 def validate_email(username):
     """ Validate that a username is email like."""
 
     validate_username = EmailValidator(email_re, _('Enter a valid email address.'), 'invalid')
+
     try:
         validate_username(username)
     except ValidationError:
