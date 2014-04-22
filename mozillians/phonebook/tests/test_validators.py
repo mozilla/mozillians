@@ -3,7 +3,7 @@ from django.forms import ValidationError
 from nose.tools import assert_raises, eq_
 
 from mozillians.common.tests import TestCase
-from mozillians.phonebook.validators import validate_twitter, validate_username_not_url
+from mozillians.phonebook.validators import validate_twitter, validate_username_not_url, validate_email
 
 
 class ValidatorTests(TestCase):
@@ -24,3 +24,11 @@ class ValidatorTests(TestCase):
     def test_username_not_url_with_url(self):
         username = 'http://somesite.com'
         assert_raises(ValidationError, validate_username_not_url, username)
+
+    def test_jabber_usernmame_not_email_like(self):
+        username = 'testtest.com'
+        assert_raises(ValidationError, validate_email, username)
+
+    def test_jabber_usernmame_is_email_like(self):
+        username = 'test@test.com'
+        eq_(username, validate_email(username))

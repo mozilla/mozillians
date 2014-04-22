@@ -751,7 +751,7 @@ class ExternalAccount(models.Model):
                     'validator': validate_username_not_url},
         TYPE_JABBER: {'name': 'XMPP/Jabber',
                       'url': '',
-                      'validator': validate_email}
+                      'validator': validate_website}
     }
 
     user = models.ForeignKey(UserProfile)
