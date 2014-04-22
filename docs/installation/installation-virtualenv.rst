@@ -32,6 +32,13 @@ If you're on Ubuntu or Debian, you might start with::
 Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/>`_.
 (You only need node for lessc.)
 
+
+.. note::
+
+   Make sure your node version ``node -v`` is greater than v0.6.12 or there 
+   will be issues installing less.
+
+
 When you want to start contributing...
 
 #.  `Fork the main Mozillians repository`_ (https://github.com/mozilla/mozillians) on GitHub.
