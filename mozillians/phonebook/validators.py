@@ -3,6 +3,7 @@ import re
 from django.core.validators import URLValidator
 from django.db.models.loading import get_model
 from django.forms import ValidationError
+from django.forms.fields import email_re
 
 from tower import ugettext as _
 
@@ -67,3 +68,8 @@ def validate_username_not_url(username):
         raise ValidationError(_('This field requires an identifier, not a URL.'))
 
     return username
+
+def validate_email(username):
+    """ Validate that a username is email like."""
+    
+    return True if email_re.match(username) else False
