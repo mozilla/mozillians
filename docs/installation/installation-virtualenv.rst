@@ -91,7 +91,7 @@ When you want to start contributing...
 
    The provided configuration uses a MySQL database named `mozillians` and
    accesses it locally using the user `mozillians`.  You can see
-   :doc:`mysql` if you need help creating a user and database.
+   :doc:`/installation/mysql` if you need help creating a user and database.
 
 #. Download ElasticSearch::
 
