@@ -3,7 +3,8 @@ from django.forms import ValidationError
 from nose.tools import assert_raises, eq_
 
 from mozillians.common.tests import TestCase
-from mozillians.phonebook.validators import validate_twitter, validate_username_not_url, validate_email
+from mozillians.phonebook.validators import (validate_twitter, validate_username_not_url,
+                                             validate_email)
 
 
 class ValidatorTests(TestCase):
