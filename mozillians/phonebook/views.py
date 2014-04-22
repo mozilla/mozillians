@@ -317,7 +317,7 @@ def vouch(request):
 
     if form.is_valid():
         p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.userprofile)
+        p.vouch(request.user.userprofile, True, form.cleaned_data.get('description'))
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
