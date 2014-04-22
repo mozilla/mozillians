@@ -27,7 +27,7 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
 from mozillians.phonebook.validators import (validate_twitter, validate_website,
-                                             validate_username_not_url)
+                                             validate_username_not_url, validate_email)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -749,7 +749,9 @@ class ExternalAccount(models.Model):
                       'validator': validate_username_not_url},
         TYPE_REMO: {'name': 'Mozilla Reps', 'url': 'https://reps.mozilla.org/u/{identifier}/',
                     'validator': validate_username_not_url},
-        TYPE_JABBER: {'name': 'XMPP/Jabber', 'url': ''}
+        TYPE_JABBER: {'name': 'XMPP/Jabber',
+                      'url': '',
+                      'validator': validate_email}
     }
 
     user = models.ForeignKey(UserProfile)
