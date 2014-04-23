@@ -8,7 +8,7 @@
 Skills
 ==================
 
-The ``skills`` method of the :doc:`Mozillians API </api>` returns information about skills.
+The ``skills`` method of the :doc:`Mozillians API <api>` returns information about skills.
 
 **Requires Authentication**
     Yes

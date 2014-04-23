@@ -32,6 +32,13 @@ If you're on Ubuntu or Debian, you might start with::
 Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/>`_.
 (You only need node for lessc.)
 
+
+.. note::
+
+   Make sure your node version ``node -v`` is greater than v0.6.12 or there 
+   will be issues installing less.
+
+
 When you want to start contributing...
 
 #.  `Fork the main Mozillians repository`_ (https://github.com/mozilla/mozillians) on GitHub.
@@ -91,7 +98,7 @@ When you want to start contributing...
 
    The provided configuration uses a MySQL database named `mozillians` and
    accesses it locally using the user `mozillians`.  You can see
-   :doc:`mysql` if you need help creating a user and database.
+   :doc:`/installation/mysql` if you need help creating a user and database.
 
 #. Download ElasticSearch::
 

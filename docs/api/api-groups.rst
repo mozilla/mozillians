@@ -8,7 +8,7 @@
 Groups
 ==================
 
-The ``groups`` method of the :doc:`Mozillians API </api>` returns information about groups.
+The ``groups`` method of the :doc:`Mozillians API <api>` returns information about groups.
 
 **Requires Authentication**
     Yes

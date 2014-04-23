@@ -259,6 +259,8 @@ class UserProfileAdminForm(forms.ModelForm):
             self.base_fields['username'].initial = self.instance.user.username
             self.base_fields['email'].initial = self.instance.user.email
         super(UserProfileAdminForm, self).__init__(*args, **kwargs)
+    last_login = forms.DateTimeField()
+    date_joined = forms.DateTimeField()
 
     def save(self, *args, **kwargs):
         if self.instance:
@@ -274,7 +276,7 @@ class UserProfileAdminForm(forms.ModelForm):
 class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname']
-    readonly_fields = ['date_vouched', 'vouched_by', 'user']
+    readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
@@ -292,6 +294,9 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)
+        }),
+        ('Important dates', {
+            'fields': ('date_joined', 'last_login')
         }),
         ('Vouch Info', {
             'fields': ('date_vouched', 'is_vouched', 'vouched_by')
@@ -352,6 +357,12 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
         """Return the number of vouchees for obj."""
         return obj.vouchees.count()
     number_of_vouchees.admin_order_field = 'vouchees__count'
+
+    def last_login(self, obj):
+        return obj.user.last_login
+
+    def date_joined(self, obj):
+        return obj.user.date_joined
 
     def get_actions(self, request):
         """Return bulk actions for UserAdmin without bulk delete."""
