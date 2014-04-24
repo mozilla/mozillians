@@ -59,8 +59,7 @@ def index_groups(request):
 
 def index_skills(request):
     """Lists all public skills (in use) on Mozillians."""
-    query = (Skill.objects.filter(members__is_vouched=True)
-             .annotate(num_members=Count('members')))
+    query = Skill.objects.filter(members__is_vouched=True)
     template = 'groups/index_skills.html'
     return _list_groups(request, template, query)
 

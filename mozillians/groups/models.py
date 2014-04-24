@@ -9,6 +9,7 @@ from funfactory.utils import absolutify
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
+from mozillians.groups.managers import GroupBaseManager
 from mozillians.groups.helpers import slugify
 from mozillians.groups.tasks import email_membership_change
 from mozillians.users.tasks import update_basket_task
@@ -17,6 +18,8 @@ from mozillians.users.tasks import update_basket_task
 class GroupBase(models.Model):
     name = models.CharField(db_index=True, max_length=50, unique=True)
     url = models.SlugField(blank=True)
+
+    objects = GroupBaseManager()
 
     class Meta:
         abstract = True
@@ -182,13 +185,13 @@ class Group(GroupBase):
         default='yes',
         max_length=10
     )
-    new_member_criteria = models.TextField(max_length=255,
-                                           default='',
-                                           blank=True,
-                                           verbose_name=_lazy(u'New Member Criteria'),
-                                           help_text=_lazy(u'Specify the criteria you will use to '
-                                                           u'decide whether or not you will accept '
-                                                           u'a membership request.'))
+    new_member_criteria = models.TextField(
+        max_length=255,
+        default='',
+        blank=True,
+        verbose_name=_lazy(u'New Member Criteria'),
+        help_text=_lazy(u'Specify the criteria you will use to decide whether or not '
+                        u'you will accept a membership request.'))
     functional_area = models.BooleanField(default=False)
     visible = models.BooleanField(
         default=True,
@@ -205,8 +208,7 @@ class Group(GroupBase):
     @classmethod
     def get_functional_areas(cls):
         """Return all visible groups that are functional areas."""
-        return cls.objects.filter(functional_area=True, visible=True).annotate(
-            num_members=models.Count('members'))
+        return cls.objects.filter(functional_area=True, visible=True)
 
     @classmethod
     def get_non_functional_areas(cls, **kwargs):
@@ -215,8 +217,7 @@ class Group(GroupBase):
 
         Use kwargs to apply additional filtering to the groups.
         """
-        return cls.objects.filter(functional_area=False, visible=True, **kwargs).annotate(
-            num_members=models.Count('members'))
+        return cls.objects.filter(functional_area=False, visible=True, **kwargs)
 
     @classmethod
     def get_curated(cls):

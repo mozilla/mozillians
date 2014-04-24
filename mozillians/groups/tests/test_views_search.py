@@ -30,7 +30,7 @@ class IndexTests(TestCase):
 
         # Member counts
         group1 = response.context['groups'].paginator.object_list.get(pk=group_1.pk)
-        eq_(group1.num_members, 2)
+        eq_(group1.member_count, 2)
 
     @requires_login()
     def test_index_anonymous(self):

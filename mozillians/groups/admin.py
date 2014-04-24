@@ -109,10 +109,10 @@ class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
-    list_display = ['name', 'member_count']
+    list_display = ['name', 'total_member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter, NoURLFilter]
-    readonly_fields = ['url']
+    readonly_fields = ['url', 'total_member_count']
 
     def get_form(self, request, obj=None, **kwargs):
         defaults = {}
@@ -121,18 +121,13 @@ class GroupBaseAdmin(admin.ModelAdmin):
         defaults.update(kwargs)
         return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
 
-    def queryset(self, request):
-        return (super(GroupBaseAdmin, self)
-                .queryset(request)
-                .annotate(member_count=Count('members')))
-
-    def member_count(self, obj):
+    def total_member_count(self, obj):
         """Return total number of members in group.
 
         Do not use annonated value member_count directly (bug 908053).
         """
         return obj.members.count()
-    member_count.admin_order_field = 'member_count'
+    total_member_count.admin_order_field = 'member_count'
 
     class Media:
         css = {
@@ -174,9 +169,18 @@ class GroupAdmin(GroupBaseAdmin):
     add_form = autocomplete_light.modelform_factory(Group, form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
-                    'members_can_leave', 'visible', 'member_count']
+                    'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
+                    'pending_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
+
+    def full_member_count(self, obj):
+        """Return number of members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.MEMBER).count()
+
+    def pending_member_count(self, obj):
+        """Return number of members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING).count()
 
 
 class GroupMembershipAdmin(admin.ModelAdmin):
@@ -210,7 +214,6 @@ class SkillAdmin(GroupBaseAdmin):
     form = SkillEditAdminForm
     add_form = SkillAddAdminForm
     inlines = [SkillAliasInline]
-
 
 admin.site.register(Group, GroupAdmin)
 admin.site.register(GroupMembership, GroupMembershipAdmin)
