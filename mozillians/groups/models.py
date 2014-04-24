@@ -97,17 +97,15 @@ class GroupBase(models.Model):
 
     def add_member(self, userprofile):
         self.members.add(userprofile)
-        update_basket_task.delay(userprofile.id)
 
     def remove_member(self, userprofile):
         self.members.remove(userprofile)
-        update_basket_task.delay(userprofile.id)
 
     def has_member(self, userprofile):
         return self.members.filter(user=userprofile.user).exists()
 
     def has_pending_member(self, userprofile):
-        # skills and languages have no pending members, just members
+        # skills have no pending members, just members
         return False
 
 
@@ -262,17 +260,22 @@ class Group(GroupBase):
         if created:
             if status == GroupMembership.MEMBER:
                 # Joined
-                update_basket_task.delay(userprofile.id)
-        elif not created and membership.status != status:
-            # Status changed
-            old_status = membership.status
-            membership.status = status
-            if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
-                # Request accepted
-                membership.save()
-                update_basket_task.delay(userprofile.id)
-                email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-            # else? never demote people from full member to requested, that doesn't make sense
+                # Group is functional area, we want to sent this update to Basket
+                if self.functional_area:
+                    update_basket_task.delay(userprofile.id)
+        else:
+            if membership.status != status:
+                # Status changed
+                old_status = membership.status
+                membership.status = status
+                if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
+                    # Request accepted
+                    membership.save()
+                    if self.functional_area:
+                        # Group is functional area, we want to sent this update to Basket.
+                        update_basket_task.delay(userprofile.id)
+                    email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
+                # else? never demote people from full member to requested, that doesn't make sense
 
     def remove_member(self, userprofile, send_email=True):
         try:
@@ -281,7 +284,11 @@ class Group(GroupBase):
             return
         old_status = membership.status
         membership.delete()
-        update_basket_task.delay(userprofile.id)
+
+        # If group is functional area, we want to sent this update to Basket
+        if self.functional_area:
+            update_basket_task.delay(userprofile.id)
+
         if old_status == GroupMembership.PENDING and send_email:
             # Request denied
             email_membership_change.delay(self.pk, userprofile.user.pk,
