@@ -1,11 +1,13 @@
-from mock import patch
 from django.test import RequestFactory
+
+from mock import patch
+from nose.tools import ok_, eq_
+
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 from mozillians.groups.views import _list_groups
 from mozillians.users.tests import UserFactory
-from nose.tools import ok_, eq_
 
 
 @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
