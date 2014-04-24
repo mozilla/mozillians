@@ -26,8 +26,8 @@ from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
-from mozillians.phonebook.validators import (validate_twitter, validate_website,
-                                             validate_username_not_url)
+from mozillians.phonebook.validators import (validate_email, validate_twitter,
+                                             validate_website, validate_username_not_url)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -698,6 +698,7 @@ class ExternalAccount(models.Model):
     TYPE_MOWIKI = 'MOZILLAWIKI'
     TYPE_REMO = 'REMO'
     TYPE_LINKEDIN = 'LINKEDIN'
+    TYPE_JABBER = 'JABBER'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -733,7 +734,9 @@ class ExternalAccount(models.Model):
                        'url': 'https://twitter.com/{identifier}',
                        'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
-        TYPE_GTALK: {'name': 'Google Talk', 'url': ''},
+        TYPE_GTALK: {'name': 'Google Talk',
+                     'url': '',
+                     'validator': validate_email},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
         TYPE_SLIDESHARE: {'name': 'SlideShare',
                           'url': 'http://www.slideshare.net/{identifier}',
@@ -751,7 +754,10 @@ class ExternalAccount(models.Model):
                     'validator': validate_username_not_url},
         TYPE_LINKEDIN: {'name': 'LinkedIn',
                         'url': '',
-                        'validator': validate_website}
+                        'validator': validate_website},
+        TYPE_JABBER: {'name': 'XMPP/Jabber',
+                      'url': '',
+                      'validator': validate_email},
     }
 
     user = models.ForeignKey(UserProfile)
