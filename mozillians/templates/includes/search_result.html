@@ -1,17 +1,23 @@
 <div class="result">
-  {% if group and (is_curator or user.userprofile.is_manager) and (user != profile.user) %}
-    <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}" method="GET">
-      {{ csrf() }}
-      <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
-    </form>
-    {% if profile.pending %}
-      <form action="{{ url('groups:confirm_member', url=group.url, user_pk=profile.pk) }}" method="POST">
-        {{ csrf() }}
-        <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
-      </form>
+  {% if group %}
+    {% if is_curator %}
+      {% if user != profile.user %}
+        <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
+              method="GET">
+          {{ csrf() }}
+          <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
+        </form>
+      {% endif %}
+      {% if group.has_pending_member(profile) %}
+        <form action="{{ url('groups:confirm_member', url=group.url, user_pk=profile.pk) }}"
+              method="POST">
+          {{ csrf() }}
+          <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
+        </form>
+      {% endif %}
+    {% elif user == profile.user and group.has_pending_member(profile) %}
+      <div class="status-pending">{{ _('Requested') }}</div>
     {% endif %}
-  {% elif user.userprofile == profile and profile.pending %}
-    <div class="status-pending">{{ _('Requested') }}</div>
   {% endif %}
   <div class="card">
     <div class="avatar">
@@ -25,7 +31,8 @@
       <ul>
         <li>
           <h2>
-            <a title="{{ profile.display_name }}" href="{{ url('phonebook:profile_view', profile.user.username) }}">
+            <a title="{{ profile.display_name }}"
+               href="{{ url('phonebook:profile_view', profile.user.username) }}">
               {{ profile.display_name|truncate(20, True) }}
             </a>
           </h2>

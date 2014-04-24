@@ -32,7 +32,7 @@
         </form>
       {% endif %}
 
-      {% if is_curator or user.userprofile.is_manager %}
+      {% if is_curator %}
         <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
           {{ _('Edit Group') }}
         </a>
@@ -195,10 +195,8 @@
       <br class="clear">
 
       <div class="row">
-        {% for people_slice in people|slice(3) -%}
-          {% for person in people_slice %}
-            {{ search_result(person) }}
-          {% endfor %}
+        {% for membership in people %}
+          {{ search_result(membership.userprofile) }}
         {% endfor %}
       </div>
       {% with items=people %}

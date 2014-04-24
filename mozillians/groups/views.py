@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -106,8 +106,8 @@ def show(request, url, alias_model, template):
 
     if alias_model is GroupAlias:
         # Curator?
-        is_curator = (group.curator == request.user.userprofile)
-        if is_curator or is_manager:
+        is_curator = is_manager or (group.curator == request.user.userprofile)
+        if is_curator:
             m_selected = 'm' in request.GET
             r_selected = 'r' in request.GET
             if m_selected or r_selected:
@@ -118,11 +118,12 @@ def show(request, url, alias_model, template):
                     statuses.append(GroupMembership.PENDING)
             else:
                 statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
-            profiles = group.get_annotated_members(statuses=statuses)
+            profiles = group.groupmembership_set.filter(status__in=statuses)
         else:
             # only show full members, or this user
-            profiles = group.get_annotated_members(statuses=[GroupMembership.MEMBER],
-                                                   always_include=profile)
+            profiles = group.groupmembership_set.filter(
+                Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
+
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
     else:
@@ -142,7 +143,7 @@ def show(request, url, alias_model, template):
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
     # Curator can delete their group if there are no other members.
-    show_delete_group_button = (is_curator or is_manager) and group.members.all().count() == 1
+    show_delete_group_button = is_curator and group.members.all().count() == 1
 
     data = dict(people=people,
                 group=group,
