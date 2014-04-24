@@ -173,6 +173,26 @@ class GroupAdmin(GroupBaseAdmin):
                     'pending_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
+    readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
+                       'max_reminder']
+
+    fieldsets = (
+        ('Group', {
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible')
+        }),
+        ('Functional Area', {
+            'fields': ('functional_area', 'curator')
+        }),
+        ('Membership', {
+            'fields': (('accepting_new_members', 'new_member_criteria',),
+                       'members_can_leave',
+                       ('total_member_count', 'full_member_count', 'pending_member_count',), )
+        }),
+        ('Debug info', {
+            'fields': ('max_reminder',),
+            'classes': ('collapse',)
+        })
+    )
 
     def full_member_count(self, obj):
         """Return number of members in group."""
