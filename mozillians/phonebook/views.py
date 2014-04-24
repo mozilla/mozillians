@@ -31,7 +31,7 @@ class BrowserIDVerify(Verify):
     def form_valid(self, form):
         """Custom form validation to support email changing.
 
-        If user is already authenticated and reaches this points, it's
+        If user is already authenticated and reaches this point, it's
         an email changing procedure. Validate that email is good and
         save it in the database.
 
