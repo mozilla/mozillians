@@ -26,10 +26,10 @@ class ValidatorTests(TestCase):
         username = 'http://somesite.com'
         assert_raises(ValidationError, validate_username_not_url, username)
 
-    def test_jabber_usernmame_not_email_like(self):
+    def test_validate_email_without_email(self):
         username = 'testtest.com'
         assert_raises(ValidationError, validate_email, username)
 
-    def test_jabber_usernmame_is_email_like(self):
+    def test_validate_email_with_email(self):
         username = 'test@test.com'
         eq_(username, validate_email(username))
