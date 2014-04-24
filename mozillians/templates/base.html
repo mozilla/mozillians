@@ -96,33 +96,33 @@
                       </a>
                       <ul class="dropdown-menu">
                         <li>
-                          <a href="{{ url('phonebook:profile_view', user.username) }}">
+                          <a id="nav-profile" href="{{ url('phonebook:profile_view', user.username) }}">
                             <i class="icon-eye-open"></i>
                             {{ _('View Profile') }}
                           </a>
                         </li>
                         <li>
-                          <a href="{{ url('phonebook:profile_edit') }}">
+                          <a id="nav-edit-profile" href="{{ url('phonebook:profile_edit') }}">
                             <i class="icon-pencil"></i>
                             {{ _('Edit Your Profile') }}
                           </a>
                         </li>
                         {% if user.userprofile.is_vouched %}
                           <li>
-                            <a href="{{ url('groups:index_groups') }}">
+                            <a id="nav-groups" href="{{ url('groups:index_groups') }}">
                               <i class="icon-group"></i>
                               {{ _('Groups') }}
                             </a>
                           </li>
                           <li>
-                            <a href="{{ url('phonebook:invite') }}">
+                            <a id="nav-invite" href="{{ url('phonebook:invite') }}">
                               <i class="icon-plus-sign"></i>
                               {{ _('Invite') }}
                             </a>
                           </li>
                         {% endif %}
                         <li>
-                          <a class="browserid-logout" href="{{ url('phonebook:logout') }}">
+                          <a id="nav-logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
                             <i class="icon-reply"></i>
                             {{ _('Log Out') }}
                           </a>
@@ -136,7 +136,7 @@
                     </a>
                   {% endif %}
                 {% else %}
-                  <a href="#" id="create_profile" class="persona-button browserid-login"
+                  <a href="#" id="nav-login" class="persona-button browserid-login"
                      title="{{_('Sign in')}}"
                      data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}">
                     <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
