@@ -14,8 +14,8 @@ from mozillians.users.models import UserProfile
 from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.groups.forms import GroupForm, SortForm, SuperuserGroupForm
-from mozillians.groups.models import Group, Skill, GroupAlias, GroupMembership
+from mozillians.groups.forms import GroupForm, MembershipFilterForm, SortForm, SuperuserGroupForm
+from mozillians.groups.models import Group, Skill, GroupMembership
 
 
 def _list_groups(request, template, query):
@@ -97,38 +97,48 @@ def show(request, url, alias_model, template):
 
     is_curator = False
     is_manager = request.user.userprofile.is_manager
-    m_selected = r_selected = False
     is_pending = False
+    show_delete_group_button = False
+    membership_filter_form = MembershipFilterForm(request.GET)
 
     group = group_alias.alias
     profile = request.user.userprofile
     in_group = group.has_member(profile)
+    profiles = group.members.all()
+    data = {}
 
-    if alias_model is GroupAlias:
-        # Curator?
+    if isinstance(group, Group):
+        # Is this user's membership pending?
+        is_pending = group.has_pending_member(profile)
+
         is_curator = is_manager or (group.curator == request.user.userprofile)
         if is_curator:
-            m_selected = 'm' in request.GET
-            r_selected = 'r' in request.GET
-            if m_selected or r_selected:
-                statuses = []
-                if m_selected:
-                    statuses.append(GroupMembership.MEMBER)
-                if r_selected:
-                    statuses.append(GroupMembership.PENDING)
-            else:
-                statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
+            statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
+            if membership_filter_form.is_valid():
+                filtr = membership_filter_form.cleaned_data['filtr']
+                if filtr == 'members':
+                    statuses = [GroupMembership.MEMBER]
+                elif filtr == 'pending_members':
+                    statuses = [GroupMembership.PENDING]
+
             profiles = group.groupmembership_set.filter(status__in=statuses)
+
+            # Curator can delete their group if there are no other members.
+            show_delete_group_button = is_curator and group.members.all().count() == 1
+
         else:
             # only show full members, or this user
             profiles = group.groupmembership_set.filter(
                 Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
 
-        # Is this user's membership pending?
-        is_pending = group.has_pending_member(profile)
-    else:
-        # not a Group
-        profiles = group.members.all()
+        # Get the most globally popular skills that appear in the group
+        # Sort them with most members first
+        skills = (Skill.objects
+                  .filter(members__in=profiles)
+                  .annotate(no_users=Count('members'))
+                  .order_by('-no_users'))
+        data.update(skills=skills)
+        data.update(irc_channels=group.irc_channel.split(' '))
 
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
@@ -142,9 +152,6 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    # Curator can delete their group if there are no other members.
-    show_delete_group_button = is_curator and group.members.all().count() == 1
-
     data = dict(people=people,
                 group=group,
                 in_group=in_group,
@@ -154,21 +161,9 @@ def show(request, url, alias_model, template):
                 show_delete_group_button=show_delete_group_button,
                 show_join_button=group.user_can_join(request.user.userprofile),
                 show_leave_button=group.user_can_leave(request.user.userprofile),
-                m_selected=m_selected,
-                r_selected=r_selected,
+                membership_filter_form=membership_filter_form,
+                members=group.member_count,
                 )
-
-    if isinstance(group, Group):
-        # Get the most globally popular skills that appear in the group
-        # Sort them with most members first
-        #
-        skills = (Skill.objects
-                  .filter(members__in=profiles)
-                  .annotate(no_users=Count('members'))
-                  .order_by('-no_users'))
-        data.update(skills=skills)
-        data.update(irc_channels=group.irc_channel.split(' '))
-        data.update(members=paginator.count)
 
     return render(request, template, data)
 

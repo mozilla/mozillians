@@ -77,3 +77,16 @@ class SuperuserGroupForm(GroupForm):
                   'accepting_new_members',
                   'new_member_criteria',
                   ]
+
+
+class MembershipFilterForm(forms.Form):
+    filtr = forms.ChoiceField(required=False,
+                              label='',
+                              choices=(('all', _lazy(u'All')),
+                                       ('members', _lazy(u'Members')),
+                                       ('pending_members', _lazy(u'Pending Members'))))
+
+    def clean_filtr(self):
+        if self.cleaned_data['filtr'] == '':
+            return 'all'
+        return self.cleaned_data['filtr']

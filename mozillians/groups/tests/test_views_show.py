@@ -1,10 +1,13 @@
 from django.core.urlresolvers import reverse
 from django.test import Client
+
+from funfactory.helpers import urlparams
+from nose.tools import eq_, ok_
+
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import GroupMembership
 from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
 from mozillians.users.tests import UserFactory
-from nose.tools import eq_, ok_
 
 
 class ShowTests(TestCase):
@@ -296,7 +299,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending_membership = self.group.groupmembership_set.get(userprofile__user=self.user_3)
 
-        url = self.url + "?m"
+        url = urlparams(self.url, filtr='members')
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
@@ -317,7 +320,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending_membership = self.group.groupmembership_set.get(userprofile__user=self.user_3)
 
-        url = self.url + "?r"
+        url = urlparams(self.url, filtr='pending_members')
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
@@ -338,7 +341,7 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending_membership = self.group.groupmembership_set.get(userprofile__user=self.user_3)
 
-        url = self.url + "?r&m"
+        url = urlparams(self.url, filtr='all')
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
