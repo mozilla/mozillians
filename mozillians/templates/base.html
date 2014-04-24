@@ -80,7 +80,10 @@
                 {% if user.is_authenticated() %}
                   {% if user.userprofile.is_complete %}
                     <div id="nav-main">
-                      <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
+                      <span class="icon">
+                        <img src="{{ static('mozillians/img/persona-person-white.png') }}"
+                             alt="persona icon">
+                      </span>
                       <a href="#" class="dropdown-toggle">
                         <span class="username">
                           {% if user.userprofile.full_name %}
@@ -93,12 +96,12 @@
                       </a>
                       <ul class="dropdown-menu">
                         <li>
-                          <a id="profile" href="{{ url('phonebook:profile_view', user.username) }}">
+                          <a href="{{ url('phonebook:profile_view', user.username) }}">
                             <i class="icon-eye-open"></i>
                             {{ _('View Profile') }}
                           </a>
                         </li>
-                        <li class="edit_profile">
+                        <li>
                           <a href="{{ url('phonebook:profile_edit') }}">
                             <i class="icon-pencil"></i>
                             {{ _('Edit Your Profile') }}
@@ -106,14 +109,20 @@
                         </li>
                         {% if user.userprofile.is_vouched %}
                           <li>
-                            <a id="invite" href="{{ url('phonebook:invite') }}">
+                            <a href="{{ url('groups:index_groups') }}">
                               <i class="icon-group"></i>
+                              {{ _('Groups') }}
+                            </a>
+                          </li>
+                          <li>
+                            <a href="{{ url('phonebook:invite') }}">
+                              <i class="icon-plus-sign"></i>
                               {{ _('Invite') }}
                             </a>
                           </li>
                         {% endif %}
                         <li>
-                          <a id="logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
+                          <a class="browserid-logout" href="{{ url('phonebook:logout') }}">
                             <i class="icon-reply"></i>
                             {{ _('Log Out') }}
                           </a>
