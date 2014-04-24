@@ -26,8 +26,8 @@ from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
-from mozillians.phonebook.validators import (validate_twitter, validate_website,
-                                             validate_username_not_url)
+from mozillians.phonebook.validators import (validate_email, validate_twitter,
+                                             validate_website, validate_username_not_url)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -697,6 +697,7 @@ class ExternalAccount(models.Model):
     TYPE_WEBMAKER = 'WEBMAKER'
     TYPE_MOWIKI = 'MOZILLAWIKI'
     TYPE_REMO = 'REMO'
+    TYPE_JABBER = 'JABBER'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -747,7 +748,10 @@ class ExternalAccount(models.Model):
         TYPE_MOWIKI: {'name': 'Mozilla Wiki', 'url': 'https://wiki.mozilla.org/User:{identifier}',
                       'validator': validate_username_not_url},
         TYPE_REMO: {'name': 'Mozilla Reps', 'url': 'https://reps.mozilla.org/u/{identifier}/',
-                    'validator': validate_username_not_url}
+                    'validator': validate_username_not_url},
+        TYPE_JABBER: {'name': 'XMPP/Jabber',
+                      'url': '',
+                      'validator': validate_email}
     }
 
     user = models.ForeignKey(UserProfile)
