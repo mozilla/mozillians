@@ -127,8 +127,11 @@ class GroupBaseAdmin(admin.ModelAdmin):
                 .annotate(member_count=Count('members')))
 
     def member_count(self, obj):
-        """Return number of members in group."""
-        return obj.member_count
+        """Return total number of members in group.
+
+        Do not use annonated value member_count directly (bug 908053).
+        """
+        return obj.members.count()
     member_count.admin_order_field = 'member_count'
 
     class Media:
@@ -168,8 +171,7 @@ class GroupMembershipAdminForm(forms.ModelForm):
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
-    add_form = autocomplete_light.modelform_factory(Group,
-                                                    form=GroupAddAdminForm)
+    add_form = autocomplete_light.modelform_factory(Group, form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
                     'members_can_leave', 'visible', 'member_count']
