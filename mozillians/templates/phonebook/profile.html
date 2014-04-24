@@ -73,7 +73,10 @@
   <div class="vcard h-card">
     <article id="profile-stats">
       <div class="profile-photo">
-        <img src="{{ profile.get_photo_url('150x150') }}" alt="{{ shown_user.username }}" class="photo">
+        <a href="{{ profile.get_photo_url('800', upscale=False) }}">
+          <img src="{{ profile.get_photo_url('150x150') }}"
+               alt="{{ shown_user.username }}" class="photo">
+        </a>
       </div>
       <div class="stats">
         {% set mozillian_years = get_mozillian_years(profile) %}
