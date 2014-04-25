@@ -8,8 +8,10 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 from django.utils import unittest
+from django.utils.timezone import make_aware
 
 import basket
+import pytz
 from mock import Mock, call, patch
 from nose.tools import eq_, ok_
 
@@ -431,14 +433,15 @@ class UserProfileTests(TestCase):
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.datetime')
     def test_vouch(self, datetime_mock, email_vouched_mock):
-        datetime_mock.now.return_value = datetime(2012, 01, 01, 00, 10)
+        dt = make_aware(datetime(2012, 01, 01, 00, 10), pytz.UTC)
+        datetime_mock.now.return_value = dt
         user_1 = UserFactory.create()
         user_2 = UserFactory.create(vouched=False)
         user_2.userprofile.vouch(user_1.userprofile)
         user_2 = User.objects.get(id=user_2.id)
         ok_(user_2.userprofile.is_vouched)
         eq_(user_2.userprofile.vouched_by, user_1.userprofile)
-        eq_(user_2.userprofile.date_vouched, datetime(2012, 01, 01, 00, 10))
+        eq_(user_2.userprofile.date_vouched, dt)
         ok_(email_vouched_mock.called)
 
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
