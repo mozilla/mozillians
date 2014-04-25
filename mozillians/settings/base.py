@@ -272,6 +272,8 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
 
+USE_TZ = True
+
 
 def _request_args():
     from django.conf import settings
