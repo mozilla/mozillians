@@ -62,6 +62,13 @@ class SignaledFunctionsTests(TestCase):
             call(UserProfile, [user.userprofile.id], public_index=False),
             call(UserProfile, [user.userprofile.id], public_index=True)])
 
+    def test_delete_user_obj_on_profile_delete(self):
+        user = UserFactory.create()
+        profile = user.userprofile
+        profile.delete()
+
+        ok_(not User.objects.filter(pk=user.pk).exists())
+
 
 class UserProfileTests(TestCase):
     @patch('mozillians.users.models.UserProfile.privacy_fields')

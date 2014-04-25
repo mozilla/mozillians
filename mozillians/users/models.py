@@ -660,11 +660,17 @@ def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfile, [instance.id], public_index=True)
 
 
-@receiver(dbsignals.pre_delete, sender=User,
+@receiver(dbsignals.pre_delete, sender=UserProfile,
           dispatch_uid='remove_from_basket_sig')
 def remove_from_basket(sender, instance, **kwargs):
-    remove_from_basket_task.delay(instance.email,
-                                  instance.userprofile.basket_token)
+    remove_from_basket_task.delay(instance.email, instance.basket_token)
+
+
+@receiver(dbsignals.post_delete, sender=UserProfile,
+          dispatch_uid='delete_user_obj_sig')
+def delete_user_obj_sig(sender, instance, **kwargs):
+    if instance.user:
+        instance.user.delete()
 
 
 class UsernameBlacklist(models.Model):
