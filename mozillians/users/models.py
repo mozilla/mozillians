@@ -511,13 +511,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             return gravatar(self.user.email, size=geometry)
         return self.get_photo_thumbnail(geometry, **kwargs).url
 
-    def vouch(self, vouched_by, commit=True):
+    def vouch(self, vouched_by, commit=True, description=''):
         if self.is_vouched:
             return
 
         self.is_vouched = True
-        self.vouched_by = vouched_by
-        self.date_vouched = datetime.now()
+        self.vouches_received.create(voucher=vouched_by, description=description)
 
         if commit:
             self.save()
@@ -665,6 +664,18 @@ def remove_from_search_index(sender, instance, **kwargs):
 def remove_from_basket(sender, instance, **kwargs):
     remove_from_basket_task.delay(instance.email,
                                   instance.userprofile.basket_token)
+
+
+class Vouch(models.Model):
+    vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
+    voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
+                                null=True, default=None, blank=True)
+    description = models.CharField(max_length=500, verbose_name=_lazy(u'Description'),
+                                   default='', blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('vouchee', 'voucher')
 
 
 class UsernameBlacklist(models.Model):
