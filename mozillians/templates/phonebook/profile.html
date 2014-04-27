@@ -153,10 +153,10 @@
         {% endif %}
         {% if profile.story_link %}
           <div id="story-link">
-	    <p>
-	      <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
-	    </p>
-	  </div>
+            <p>
+              <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
+            </p>
+          </div>
         {% endif %}
         {% if groups %}
           <div id="groups">
@@ -226,10 +226,10 @@
                   {% if account.get_identifier_url() -%}
                     <a href="{{ account.get_identifier_url() }}">{{ account.identifier }}</a>
                   {%- else -%}
-                    {{ account.identifier }}
+                    {{ account.identifier|simple_urlize() }}
                   {%- endif -%}
-                {% endfor %}
-              </li>
+                </li>
+              {% endfor %}
             </ul>
           </div>
         {% endif %}
