@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.http import HttpResponse
 from mozillians.common.decorators import allow_public, allow_unvouched
 
