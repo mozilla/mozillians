@@ -72,6 +72,10 @@ $(function() {
         return false;
     });
 
+    $('.tshirt-info').hover(function() {
+        $(this).toggleClass('active');
+    });
+
     $('.tshirt-info').click(function() {
         $(this).toggleClass('active');
         return false;
