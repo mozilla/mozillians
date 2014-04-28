@@ -253,6 +253,8 @@ class ExternalAccountInline(admin.TabularInline):
 class UserProfileAdminForm(forms.ModelForm):
     username = forms.CharField()
     email = forms.CharField()
+    last_login = forms.DateTimeField(required=False)
+    date_joined = forms.DateTimeField(required=False)
 
     def __init__(self, *args, **kwargs):
         self.instance = kwargs.get('instance')
@@ -260,8 +262,6 @@ class UserProfileAdminForm(forms.ModelForm):
             self.base_fields['username'].initial = self.instance.user.username
             self.base_fields['email'].initial = self.instance.user.email
         super(UserProfileAdminForm, self).__init__(*args, **kwargs)
-    last_login = forms.DateTimeField()
-    date_joined = forms.DateTimeField()
 
     def clean_username(self):
         username = self.cleaned_data['username']
