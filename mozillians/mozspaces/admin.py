@@ -1,10 +1,11 @@
 from django import forms
 from django.contrib import admin
 from django.core.urlresolvers import reverse
-from product_details import product_details
-from sorl.thumbnail.admin import AdminImageMixin
 
 import autocomplete_light
+from import_export.admin import ExportMixin
+from product_details import product_details
+from sorl.thumbnail.admin import AdminImageMixin
 
 from models import Keyword, MozSpace, Photo
 
@@ -33,7 +34,7 @@ class MozSpaceAdminForm(forms.ModelForm):
         model = MozSpace
 
 
-class MozSpaceAdmin(admin.ModelAdmin):
+class MozSpaceAdmin(ExportMixin, admin.ModelAdmin):
     form = MozSpaceAdminForm
     inlines = [PhotoAdmin, KeywordAdmin]
     search_fields = ['name']

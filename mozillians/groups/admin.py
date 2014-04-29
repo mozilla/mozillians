@@ -5,6 +5,9 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.db.models import Count
 
 import autocomplete_light
+from import_export.admin import ExportMixin
+from import_export.fields import Field
+from import_export.resources import ModelResource
 
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
@@ -105,7 +108,7 @@ class GroupBaseEditAdminForm(forms.ModelForm):
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
-class GroupBaseAdmin(admin.ModelAdmin):
+class GroupBaseAdmin(ExportMixin, admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
@@ -154,17 +157,6 @@ class GroupEditAdminForm(GroupBaseEditAdminForm):
         model = Group
 
 
-class GroupMembershipAdminForm(forms.ModelForm):
-
-    class Meta:
-        model = GroupMembership
-        widgets = {
-            # Use autocomplete_light to allow any user profile.
-            'userprofile': autocomplete_light.ChoiceWidget('UserProfiles'),
-            'group': autocomplete_light.ChoiceWidget('Groups'),
-        }
-
-
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
@@ -177,7 +169,28 @@ class GroupAdmin(GroupBaseAdmin):
                    NoURLFilter]
 
 
-class GroupMembershipAdmin(admin.ModelAdmin):
+class GroupMembershipResource(ModelResource):
+    """django-import-export Groupmembership Resource."""
+    username = Field(attribute='userprofile__user__username')
+    group_name = Field(attribute='group__name')
+
+    class Meta:
+        model = GroupMembership
+
+
+class GroupMembershipAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = GroupMembership
+        widgets = {
+            # Use autocomplete_light to allow any user profile.
+            'userprofile': autocomplete_light.ChoiceWidget('UserProfiles'),
+            'group': autocomplete_light.ChoiceWidget('Groups'),
+        }
+
+
+class GroupMembershipAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = GroupMembershipResource
     list_display = ['group', 'userprofile']
     search_fields = ['group__name', 'group__url', 'group__description',
                      'group__aliases__name', 'group__aliases__url',

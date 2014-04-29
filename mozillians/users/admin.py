@@ -1,4 +1,3 @@
-import csv
 from datetime import datetime, timedelta
 
 from django import forms
@@ -6,15 +5,19 @@ from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.auth.models import User
+from django.contrib.auth.admin import GroupAdmin
+from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
 from django.forms import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 
 import autocomplete_light
 from celery.task.sets import TaskSet
 from functools import update_wrapper
+from import_export.admin import ExportMixin
+from import_export.fields import Field
+from import_export.resources import ModelResource
 from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
@@ -25,57 +28,13 @@ from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
                                      UserProfile, UsernameBlacklist)
 
 
+admin.site.unregister(Group)
+
+
 Q_PUBLIC_PROFILES = Q()
 for field in UserProfile.privacy_fields():
     key = 'privacy_%s' % field
     Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
-
-
-def export_as_csv_action(description=None, fields=None, exclude=None,
-                         header=True):
-    """
-    This function returns an export csv action
-    'fields' and 'exclude' work like in django ModelForm
-    'header' is whether or not to output the column names as the first row
-
-    Based on snippet http://djangosnippets.org/snippets/2020/
-    """
-
-    def export_as_csv(modeladmin, request, queryset):
-        """
-        Generic csv export admin action.
-        based on http://djangosnippets.org/snippets/1697/
-        """
-        opts = modeladmin.model._meta
-        if fields:
-            field_names = set(fields)
-        elif exclude:
-            excludeset = set(exclude)
-            field_names = set([field.name for field in opts.fields])
-            field_names = field_names - excludeset
-
-        response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = ('attachment; filename=%s.csv' %
-                                           unicode(opts).replace('.', '_'))
-
-        writer = csv.writer(response, delimiter=';')
-        if header:
-            writer.writerow(list(field_names))
-        for obj in queryset:
-            row = []
-            for field in field_names:
-                # Process fields that refer to attributes of
-                # foreignkeys, like 'user__email'.
-                subfields = field.split('__')
-                value = getattr(obj, subfields[0])
-                for subfield in subfields[1:]:
-                    value = getattr(value, subfield)
-                row.append(unicode(value).encode('utf-8'))
-            writer.writerow(row)
-        return response
-
-    export_as_csv.short_description = (description or 'Export to CSV file')
-    return export_as_csv
 
 
 def subscribe_to_basket_action():
@@ -202,14 +161,7 @@ class LastLoginFilter(SimpleListFilter):
         return queryset
 
 
-class UserProfileInline(AdminImageMixin, admin.StackedInline):
-    """UserProfile Inline model for UserAdmin."""
-    model = UserProfile
-    readonly_fields = ['date_vouched', 'vouched_by']
-    form = autocomplete_light.modelform_factory(UserProfile)
-
-
-class UsernameBlacklistAdmin(admin.ModelAdmin):
+class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
     search_fields = ['value']
@@ -220,7 +172,7 @@ class UsernameBlacklistAdmin(admin.ModelAdmin):
 admin.site.register(UsernameBlacklist, UsernameBlacklistAdmin)
 
 
-class LanguageAdmin(admin.ModelAdmin):
+class LanguageAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ['userprofile__full_name', 'userprofile__user__email', 'code']
     list_display = ['code', 'userprofile']
     list_filter = ['code']
@@ -288,7 +240,17 @@ class UserProfileAdminForm(forms.ModelForm):
         model = UserProfile
 
 
-class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
+class UserProfileResource(ModelResource):
+    """django-import-export UserProfile Resource."""
+    username = Field(attribute='user__username')
+    email = Field(attribute='user__email')
+
+    class Meta:
+        model = UserProfile
+
+
+class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
+    resource_class = UserProfileResource
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login']
@@ -300,8 +262,7 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
     list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
                     'vouched_by', 'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
-    actions = [export_as_csv_action(fields=('user__username', 'user__email'), header=True),
-               subscribe_to_basket_action(), unsubscribe_from_basket_action()]
+    actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action()]
 
     fieldsets = (
         ('Account', {
@@ -406,3 +367,9 @@ class UserProfileAdmin(AdminImageMixin, admin.ModelAdmin):
         return my_urls + urls
 
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+class GroupAdmin(ExportMixin, GroupAdmin):
+    pass
+
+admin.site.register(Group, GroupAdmin)

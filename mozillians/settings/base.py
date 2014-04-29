@@ -152,6 +152,7 @@ INSTALLED_APPS = get_apps(append=[
     'django.contrib.admin',
     'django_browserid',
     'jingo_offline_compressor',
+    'import_export',
 
     # DB migrations
     'south',
