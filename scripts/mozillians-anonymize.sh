@@ -49,8 +49,8 @@ $MYSQL $STAGEDB < $SQLPATH/$DB.$TODAY.queries_sanitize_stage.sql
 # copy dbs; compress for the copy only
 gzip $SQLPATH/$DB.$TODAY.sanitized_dev.sql $SQLPATH/$DB.$TODAY.sanitized_stage.sql
 /usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_dev.sql.gz genericadm.private.phx1.mozilla.com:/data/genericrhel6-dev/src/mozillians-dev.allizom.org/mozillians/media/mozillians_org.latest.sanitized_dev.sql.gz
-# don't copy stage yet
-#/usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_stage.sql.gz genericadm.private.phx1.mozilla.com:/data/genericrhel6-dev/src/mozillians-dev.allizom.org/mozillians/media/mozillians_org.latest.sanitized_stage.sql.gz
+# stage goes to dev-db, an LDAP-protected dir
+/usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_stage.sql.gz genericadm.private.phx1.mozilla.com:/data/genericrhel6-dev/src/mozillians-dev.allizom.org/mozillians/media/dev-db/mozillians_org.latest.sanitized_stage.sql.gz
 # leave this uncompressed for more efficient storage on our backup device (yes, really)
 gunzip $SQLPATH/$DB.$TODAY.sanitized_dev.sql.gz $SQLPATH/$DB.$TODAY.sanitized_stage.sql.gz            
 
