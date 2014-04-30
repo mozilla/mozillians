@@ -16,6 +16,7 @@ from tower import ugettext as _
 from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
+from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.helpers import redirect
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
@@ -212,10 +213,11 @@ def edit_profile(request):
                 accounts_formset=accounts_formset,
                 user_groups=user_groups,
                 profile=request.user.userprofile,
-                apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
                 vouch_threshold=settings.CAN_VOUCH_THRESHOLD,
-                mapbox_id=settings.MAPBOX_PROFILE_ID)
+                mapbox_id=settings.MAPBOX_PROFILE_ID,
+                apps=user.apiapp_set.filter(is_active=True),
+                appsv2=profile.apps.filter(enabled=True))
 
     # If there are form errors, don't send a 200 OK.
     status = 400 if any(f.errors for f in all_forms) else 200
@@ -452,6 +454,28 @@ def delete_invite(request, invite_pk):
             (deleted_invite.recipient, deleted_invite.recipient))
     messages.success(request, msg)
     return redirect('phonebook:invite')
+
+
+@waffle_flag('apiv2')
+def apikeys(request):
+    profile = request.user.userprofile
+    apikey_request_form = forms.APIKeyRequestForm(
+        request.POST or None,
+        instance=APIv2App(enabled=True, owner=profile)
+    )
+
+    if apikey_request_form.is_valid():
+        apikey_request_form.save()
+        msg = _(u'API Key generated successfully.')
+        messages.success(request, msg)
+        return redirect('phonebook:apikeys')
+
+    data = {
+        'apps': request.user.apiapp_set.filter(is_active=True),
+        'appsv2': profile.apps.filter(enabled=True),
+        'apikey_request_form': apikey_request_form,
+    }
+    return render(request, 'phonebook/apikeys.html', data)
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):

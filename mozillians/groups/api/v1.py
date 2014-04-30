@@ -7,11 +7,11 @@ from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
-from mozillians.api.authenticators import AppAuthentication
-from mozillians.api.resources import (AdvancedSortingResourceMixIn,
-                                      ClientCacheResourceMixIn,
-                                      GraphiteMixIn)
-from mozillians.api.paginator import Paginator
+from mozillians.api.v1.authenticators import AppAuthentication
+from mozillians.api.v1.resources import (AdvancedSortingResourceMixIn,
+                                         ClientCacheResourceMixIn,
+                                         GraphiteMixIn)
+from mozillians.api.v1.paginator import Paginator
 from mozillians.groups.models import Group, Skill
 
 

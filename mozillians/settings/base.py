@@ -81,7 +81,8 @@ TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
 JINGO_EXCLUDE_APPS = [
     'admin',
     'autocomplete_light',
-    'browserid'
+    'browserid',
+    'rest_framework',
 ]
 
 
@@ -154,6 +155,7 @@ INSTALLED_APPS = get_apps(append=[
     'django_browserid',
     'import_export',
     'waffle',
+    'rest_framework',
 
     # DB migrations
     'south',
@@ -336,3 +338,24 @@ VOUCH_COUNT_LIMIT = 6
 
 # All accounts need 1 vouches to be able to vouch.
 CAN_VOUCH_THRESHOLD = 3
+
+# This must be set to a working mapbox token for the maps to work.
+MAPBOX_MAP_ID = 'examples.map-i86nkdio'
+
+# This must be set in local for the maps to work
+MAPBOX_MAP_ID = ''
+
+REST_FRAMEWORK = {
+    'URL_FIELD_NAME': '_url',
+    'PAGINATE_BY': 30,
+    'MAX_PAGINATE_BY': 200,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'mozillians.api.v2.permissions.MozilliansPermission',
+    ),
+    'DEFAULT_MODEL_SERIALIZER_CLASS':
+        'rest_framework.serializers.HyperlinkedModelSerializer',
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+}

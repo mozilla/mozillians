@@ -1,12 +1,12 @@
 from mock import MagicMock, patch
 from nose.tools import eq_
 
-from mozillians.api.resources import GraphiteMixIn
+from mozillians.api.v1.resources import GraphiteMixIn
 from mozillians.common.tests import TestCase
 
 
 class GraphiteMixInTests(TestCase):
-    @patch('mozillians.api.resources.statsd.incr')
+    @patch('mozillians.api.v1.resources.statsd.incr')
     def test_statsd_call(self, incr_mock):
         real_wrapper = MagicMock()
         view = MagicMock()
