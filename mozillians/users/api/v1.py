@@ -13,10 +13,10 @@ from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
-from mozillians.api.authenticators import AppAuthentication
-from mozillians.api.paginator import Paginator
-from mozillians.api.resources import (ClientCacheResourceMixIn,
-                                      GraphiteMixIn)
+from mozillians.api.v1.authenticators import AppAuthentication
+from mozillians.api.v1.paginator import Paginator
+from mozillians.api.v1.resources import (ClientCacheResourceMixIn,
+                                         GraphiteMixIn)
 from mozillians.users.models import UserProfile
 
 
