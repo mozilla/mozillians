@@ -764,6 +764,9 @@ class ExternalAccount(models.Model):
         TYPE_JABBER: {'name': 'XMPP/Jabber',
                       'url': '',
                       'validator': validate_email},
+        TYPE_DISCOURSE: {'name': 'DISCOURSE',
+                   'url': 'https://discourse.mozilla-community.org/users/{identifier}',
+                   'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
