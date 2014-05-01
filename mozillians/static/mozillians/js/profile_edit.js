@@ -74,12 +74,14 @@ $(function() {
 
     // Show tooltip on hover on desktops and on click on touch
     // devices.
-    $('.tshirt-info').hover(function() {
-        $(this).toggleClass('active');
-    });
 
-    $('.tshirt-info').click(function() {
-        $(this).toggleClass('active');
-        return false;
+
+    $('.tshirt-info').on({
+        "touchstart mouseenter":function() {
+            $(this).addClass('active');
+        },
+        "touchend mouseleave":function() {
+            $(this).removeClass('active');
+        },
     });
 });
