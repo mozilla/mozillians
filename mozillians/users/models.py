@@ -705,6 +705,7 @@ class ExternalAccount(models.Model):
     TYPE_REMO = 'REMO'
     TYPE_LINKEDIN = 'LINKEDIN'
     TYPE_JABBER = 'JABBER'
+    TYPE_DISCOURSE = 'DISCOURSE'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -765,8 +766,8 @@ class ExternalAccount(models.Model):
                       'url': '',
                       'validator': validate_email},
         TYPE_DISCOURSE: {'name': 'DISCOURSE',
-                   'url': 'https://discourse.mozilla-community.org/users/{identifier}',
-                   'validator': validate_username_not_url},
+                         'url': 'https://discourse.mozilla-community.org/users/{identifier}',
+                         'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
