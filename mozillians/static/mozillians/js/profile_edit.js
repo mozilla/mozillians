@@ -77,10 +77,12 @@ $(function() {
 
 
     $('.tshirt-info').on({
-        "touchstart mouseenter":function() {
+        "touchstart mouseenter":function(event) {
+            event.preventDefault();
             $(this).addClass('active');
         },
-        "touchend mouseleave":function() {
+        "touchend mouseleave":function(event) {
+            event.preventDefault();
             $(this).removeClass('active');
         },
     });
