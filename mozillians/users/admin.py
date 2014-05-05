@@ -287,7 +287,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('privacy_photo', 'privacy_full_name', 'privacy_ircname',
                        'privacy_email', 'privacy_bio', 'privacy_city', 'privacy_region',
                        'privacy_country', 'privacy_groups', 'privacy_skills', 'privacy_languages',
-                       'privacy_vouched_by', 'privacy_date_mozillian', 'privacy_timezone',
+                       'privacy_date_mozillian', 'privacy_timezone',
                        'privacy_tshirt', 'privacy_title'),
             'classes': ('collapse',)
         }),

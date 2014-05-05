@@ -93,7 +93,6 @@ class UserProfilePrivacyModel(models.Model):
     privacy_groups = PrivacyField()
     privacy_skills = PrivacyField()
     privacy_languages = PrivacyField()
-    privacy_vouched_by = PrivacyField()
     privacy_date_mozillian = PrivacyField()
     privacy_timezone = PrivacyField()
     privacy_tshirt = PrivacyField(choices=((PRIVILEGED, _lazy(u'Privileged')),),
@@ -140,8 +139,8 @@ class UserProfilePrivacyModel(models.Model):
                     default = field.get_default()
                 privacy_fields[name] = default
             # HACK: There's not really an email field on UserProfile, but it's faked with a property
-            if 'privacy_email' in field_names:
-                privacy_fields['email'] = u''
+            privacy_fields['email'] = u''
+
             cls.CACHED_PRIVACY_FIELDS = privacy_fields
         return cls.CACHED_PRIVACY_FIELDS
 
@@ -241,7 +240,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         privacy_fields = UserProfile.privacy_fields()
         privacy_level = _getattr('_privacy_level')
 
-        if not privacy_level or attrname not in privacy_fields:
+        if not privacy_level:
             return _getattr(attrname)
 
         if attrname == 'vouched_by':
@@ -249,10 +248,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             if voucher:
                 voucher.set_instance_privacy_level(privacy_level)
                 for field in privacy_fields:
-                    if ((getattr(voucher, 'privacy_%s' % field) >=
-                         privacy_level)):
+                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
                         return voucher
             return None
+
+        if attrname not in privacy_fields:
+            return _getattr(attrname)
 
         field_privacy = _getattr('privacy_%s' % attrname)
         if field_privacy < privacy_level:
