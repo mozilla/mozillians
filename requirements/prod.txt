@@ -5,3 +5,4 @@ django-selectable==0.7.0
 python-memcached==1.53
 unidecode
 urllib3
+django-import-export==0.2.2
