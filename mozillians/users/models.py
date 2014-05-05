@@ -252,6 +252,15 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                         return voucher
             return None
 
+        if attrname == 'vouchees':
+            available_vouchees = []
+            for vouchee in _getattr('vouchees').all():
+                vouchee.set_instance_privacy_level(privacy_level)
+                for field in privacy_fields:
+                    if getattr(vouchee, 'privacy_%s' % field, 0) >= privacy_level:
+                        available_vouchees.append(vouchee.id)
+            return UserProfile.objects.filter(pk__in=available_vouchees)
+
         if attrname not in privacy_fields:
             return _getattr(attrname)
 

@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block page_title %}
   {{ profile.display_name|default(shown_user.username, true) }}
 {% endblock %}
@@ -112,6 +111,7 @@
        </div>
     </article>
 
+
     <article id="profile-info">
       <header>
         {% if user == shown_user %}
@@ -142,24 +142,26 @@
           <h2><span class="title">{{ profile.title }}</span></h2>
         {% endif %}
       </header>
+
+
       <section id="profile-details">
         {% if profile.bio %}
-          <div id="bio">
+          <div id="bio" class="profile-entry">
               <h3><i class="icon-user"></i> {{ _('Bio') }}</h3>
-              <p>
                 <span class="note">{{ profile.bio|markdown }}</span>
-              </p>
           </div>
         {% endif %}
+
         {% if profile.story_link %}
-          <div id="story-link">
-            <p>
-              <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
-            </p>
-          </div>
+          <div id="story-link" class="profile-entry">
+	    <p>
+	      <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
+	    </p>
+	  </div>
         {% endif %}
+
         {% if groups %}
-          <div id="groups">
+          <div id="groups" class="profile-entry">
             <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
               {% for group in groups %}
                 {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
@@ -179,8 +181,9 @@
               {% endfor %}
           </div>
         {% endif %}
+
         {% if profile.skills.count() %}
-          <div id="skills" class="p-category category">
+          <div id="skills" class=" profile-entry">
             <h3><i class="icon-wrench"></i> {{ _('Skills') }}</h3>
               {% for skill in profile.skills.all() %}
                 {% if (user.is_authenticated() and
@@ -193,8 +196,9 @@
               {% endfor %}
           </div>
         {% endif %}
+
         {% if profile.languages.exists() %}
-          <div id="languages" class="p-category category">
+          <div id="languages" class="profile-entry">
             <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages -%}
                 {{ langcode_to_name(language.code) }}
@@ -202,8 +206,9 @@
               {% endfor %}
           </div>
         {% endif %}
+
         {% if profile.websites.exists() %}
-          <div id="websites" class="p-category category">
+          <div id="websites" class="profile-entry">
             <h3><i class="icon-link"></i> {{ _('Websites') }}</h3>
             <ul>
               {% for site in profile.websites %}
@@ -216,8 +221,9 @@
             </ul>
           </div>
         {% endif %}
+
         {% if profile.accounts.exists() %}
-          <div id="externalaccounts" class="p-category category">
+          <div id="externalaccounts" class="profile-entry">
             <h3><i class="icon-external-link"></i> {{ _('External Accounts') }}</h3>
             <ul>
               {% for account in profile.accounts %}
@@ -233,14 +239,31 @@
             </ul>
           </div>
         {% endif %}
+
         {% if profile.vouched_by %}
-          <div id="vouched_by" class="p-category category">
+          <div id="vouched_by" class="profile-entry">
             <h3>{{ _('Vouched By') }}</h3>
             <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}">
               {{ profile.vouched_by.display_name|default(profile.vouched_by.user.username, true)}}
             </a>
           </div>
         {% endif %}
+
+        {% if profile.vouchees.exists() %}
+          <div id="vouchees" class="profile-entry">
+            <h3>{{ _('Vouchees') }}</h3>
+            <ul>
+              {% for vouchee in profile.vouchees.all() %}
+                <li>
+                  <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}">
+                    {{ vouchee.display_name|default(vouchee.user.username, true)}}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
       </section>
 
       <section id="profile-contact">
@@ -267,7 +290,10 @@
         </div>
       </section>
     </article>
+
+    {# H-card support, add group Mozillians #}
     <span class="hidden category">Mozillians</span>
+
   </div>
   {# strings that need translating, used from profile_view.js, replacing %HOURS% #}
   <span class="hidden" id="hours_ahead_text">

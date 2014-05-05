@@ -477,6 +477,22 @@ class UserProfileTests(TestCase):
 
         eq_(user_profile.vouched_by, None)
 
+    def test_vouchee_privacy(self):
+        voucher = UserFactory.create()
+        vouchee_1 = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
+                                                    'is_vouched': True,
+                                                    'privacy_full_name': PUBLIC})
+        vouchee_2 = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
+                                                    'is_vouched': True,
+                                                    'privacy_full_name': MOZILLIANS})
+
+        user_profile = voucher.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile]))
+
+        user_profile.set_instance_privacy_level(MOZILLIANS)
+        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile, vouchee_2.userprofile]))
+
     @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
     def test_lookup_token_registered(self, mock_lookup_user):
         # Lookup token for a user with registered email
