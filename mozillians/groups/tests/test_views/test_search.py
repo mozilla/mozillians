@@ -1,12 +1,15 @@
 import json
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseBadRequest
 from django.test import Client
+
 from funfactory.helpers import urlparams
+from nose.tools import eq_, ok_
+
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
-from nose.tools import eq_, ok_
 
 
 class IndexTests(TestCase):
@@ -30,7 +33,7 @@ class IndexTests(TestCase):
 
         # Member counts
         group1 = response.context['groups'].paginator.object_list.get(pk=group_1.pk)
-        eq_(group1.num_members, 2)
+        eq_(group1.member_count, 2)
 
     @requires_login()
     def test_index_anonymous(self):

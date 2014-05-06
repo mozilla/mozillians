@@ -32,7 +32,7 @@
         </form>
       {% endif %}
 
-      {% if is_curator or user.userprofile.is_manager %}
+      {% if is_curator %}
         <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
           {{ _('Edit Group') }}
         </a>
@@ -149,28 +149,23 @@
     {% if is_curator %}
       <div class="filters right">
         <form method="get">
-          <input id="members" name="m" type="checkbox" {% if m_selected %}checked{% endif %}>
-          <label for="members">members</label>
-          <input id="requests" name="r" type="checkbox" {% if r_selected %}checked{% endif %}>
-          <label for="requests">requests</label>
-          <input class="button" type="submit" value="filter">
+          {{ membership_filter_form }}
+          <input class="button" type="submit" value="{{ _('Filter') }}">
         </form>
       </div>
     {% endif %}
 
     {% if not people.paginator.count %}
-      <div class="well">
-        <p id="not-found">
-          {% if r_selected %}
-            {% trans group_name=group.name %}
-              There are no open membership requests for {{ group_name }}.
-            {% endtrans %}
-          {% else %}
-            {% trans group_name=group.name %}
-              Sorry, we can not find any mozillians in {{ group_name }}.
-            {% endtrans %}
-          {% endif %}
-        </p>
+      <div class="clear">
+        {% if membership_filter_form.filtr.value() == 'pending_members' %}
+          {% trans group_name=group.name %}
+            There are no open membership requests for {{ group_name }}.
+          {% endtrans %}
+        {% else %}
+          {% trans group_name=group.name %}
+            Sorry, we can not find any mozillians in {{ group_name }}.
+          {% endtrans %}
+        {% endif %}
       </div>
     {% else %}
       {% with items=people %}
@@ -195,10 +190,8 @@
       <br class="clear">
 
       <div class="row">
-        {% for people_slice in people|slice(3) -%}
-          {% for person in people_slice %}
-            {{ search_result(person) }}
-          {% endfor %}
+        {% for membership in people %}
+          {{ search_result(membership.userprofile) }}
         {% endfor %}
       </div>
       {% with items=people %}

@@ -144,7 +144,8 @@ class BasketTests(TestCase):
             userprofile={'country': 'gr',
                          'city': 'athens'})
         mock_basket.subscribe.reset_mock()  # forget that subscribe was called
-        group = GroupFactory.create(name='Web Development', functional_area=True)
+        group = GroupFactory.create(name='Web Development',
+                                    functional_area=True)
         GroupFactory.create(name='Marketing', functional_area=True)
         data = {'country': 'gr',
                 'city': 'athens',

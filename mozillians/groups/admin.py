@@ -109,10 +109,10 @@ class GroupBaseAdmin(admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
-    list_display = ['name', 'member_count']
+    list_display = ['name', 'total_member_count']
     list_display_links = ['name']
     list_filter = [EmptyGroupFilter, NoURLFilter]
-    readonly_fields = ['url']
+    readonly_fields = ['url', 'total_member_count']
 
     def get_form(self, request, obj=None, **kwargs):
         defaults = {}
@@ -121,15 +121,13 @@ class GroupBaseAdmin(admin.ModelAdmin):
         defaults.update(kwargs)
         return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
 
-    def queryset(self, request):
-        return (super(GroupBaseAdmin, self)
-                .queryset(request)
-                .annotate(member_count=Count('members')))
+    def total_member_count(self, obj):
+        """Return total number of members in group.
 
-    def member_count(self, obj):
-        """Return number of members in group."""
-        return obj.member_count
-    member_count.admin_order_field = 'member_count'
+        Do not use annonated value member_count directly (bug 908053).
+        """
+        return obj.members.count()
+    total_member_count.admin_order_field = 'member_count'
 
     class Media:
         css = {
@@ -168,13 +166,41 @@ class GroupMembershipAdminForm(forms.ModelForm):
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
-    add_form = autocomplete_light.modelform_factory(Group,
-                                                    form=GroupAddAdminForm)
+    add_form = autocomplete_light.modelform_factory(Group, form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
-                    'members_can_leave', 'visible', 'member_count']
+                    'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
+                    'pending_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
+    readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
+                       'max_reminder']
+
+    fieldsets = (
+        ('Group', {
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible')
+        }),
+        ('Functional Area', {
+            'fields': ('functional_area', 'curator')
+        }),
+        ('Membership', {
+            'fields': (('accepting_new_members', 'new_member_criteria',),
+                       'members_can_leave',
+                       ('total_member_count', 'full_member_count', 'pending_member_count',), )
+        }),
+        ('Debug info', {
+            'fields': ('max_reminder',),
+            'classes': ('collapse',)
+        })
+    )
+
+    def full_member_count(self, obj):
+        """Return number of members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.MEMBER).count()
+
+    def pending_member_count(self, obj):
+        """Return number of members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING).count()
 
 
 class GroupMembershipAdmin(admin.ModelAdmin):
@@ -208,7 +234,6 @@ class SkillAdmin(GroupBaseAdmin):
     form = SkillEditAdminForm
     add_form = SkillAddAdminForm
     inlines = [SkillAliasInline]
-
 
 admin.site.register(Group, GroupAdmin)
 admin.site.register(GroupMembership, GroupMembershipAdmin)

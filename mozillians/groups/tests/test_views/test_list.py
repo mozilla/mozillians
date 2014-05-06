@@ -1,12 +1,13 @@
-from mock import patch
-from django.db.models import Count
 from django.test import RequestFactory
+
+from mock import patch
+from nose.tools import ok_, eq_
+
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 from mozillians.groups.views import _list_groups
 from mozillians.users.tests import UserFactory
-from nose.tools import ok_, eq_
 
 
 @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
@@ -17,9 +18,7 @@ class ListTests(TestCase):
         self.group_1 = GroupFactory.create()
         self.group_2 = GroupFactory.create()
         self.group_2.add_member(self.user.userprofile)
-        self.query = (Group.objects
-                      .filter(pk__in=[self.group_1.pk, self.group_2.pk])
-                      .annotate(num_members=Count('members')))
+        self.query = Group.objects.filter(pk__in=[self.group_1.pk, self.group_2.pk])
         self.template = 'groups/index.html'
         self.request = RequestFactory()
         self.request.GET = {}
@@ -43,14 +42,14 @@ class ListTests(TestCase):
         eq_(data['groups'].object_list[0], self.group_1)
 
     def test_sort_by_most_members(self, render_mock):
-        self.request.GET = {'sort': '-num_members'}
+        self.request.GET = {'sort': '-member_count'}
         _list_groups(self.request, self.template, self.query)
         ok_(render_mock.called)
         request, template, data = render_mock.call_args[0]
         eq_(data['groups'].object_list[0], self.group_2)
 
     def test_sort_by_fewest_members(self, render_mock):
-        self.request.GET = {'sort': 'num_members'}
+        self.request.GET = {'sort': 'member_count'}
         _list_groups(self.request, self.template, self.query)
         ok_(render_mock.called)
         request, template, data = render_mock.call_args[0]

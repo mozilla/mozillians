@@ -1,8 +1,9 @@
-from mock import patch
-
 from django.core.urlresolvers import reverse
 from django.test.client import Client
+
+from mock import patch
 from nose.tools import eq_, ok_
+
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.models import Group, GroupAlias, Skill
 from mozillians.groups.tests import (GroupFactory, SkillFactory)

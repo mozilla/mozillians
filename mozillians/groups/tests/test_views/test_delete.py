@@ -1,12 +1,10 @@
-"""Test group deletion"""
-
 from mock import patch, MagicMock
-
-from mozillians.groups.views import show, group_delete
 from nose.tools import ok_
+
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias, GroupMembership
 from mozillians.groups.tests import GroupFactory
+from mozillians.groups.views import show, group_delete
 from mozillians.users.tests import UserFactory
 
 
