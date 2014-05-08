@@ -41,3 +41,6 @@
 [submodule "vendor-local/src/django-waffle"]
 	path = vendor-local/src/django-waffle
 	url = git://github.com/jsocol/django-waffle.git
+[submodule "vendor-local/src/django-browserid"]
+	path = vendor-local/src/django-browserid
+	url = git://github.com/mozilla/django-browserid/
