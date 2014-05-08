@@ -586,6 +586,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def save(self, *args, **kwargs):
         self._privacy_level = None
         self.auto_vouch()
+        if not self.is_vouched:
+            self.vouched_by = None
+            self.date_vouched = None
         super(UserProfile, self).save(*args, **kwargs)
 
     @classmethod
