@@ -50,7 +50,7 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns(
     '',
-    url(r'^browserid/', include('django_browserid.urls')),
+    url(r'', include('django_browserid.urls')),
     url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.groups.urls', 'groups')),
     url(r'', include('mozillians.phonebook.urls', 'phonebook')),
