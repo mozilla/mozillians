@@ -6,9 +6,9 @@ MySQL setup
 
 Setting up a MySQL user and database for development:
 
-#. Install the MySQL server. Many Linux distributions provide an installable
-   package. If your OS does not, you can find downloadable install packages
-   on the `MySQL site`_.
+Install the MySQL server. Many Linux distributions provide an installable
+package. If your OS does not, you can find downloadable install packages
+on the `MySQL site`_.
 
 .. _MySQL site: http://dev.mysql.com/downloads/mysql/
 
@@ -32,3 +32,11 @@ Setting up a MySQL user and database for development:
     mysql> EXIT
     Bye
     $
+
+Loading in data:
+
+#. Download `SQL data`_ and run the command::
+
+    mysql -u root -p -D mozillians < mozillians_org.latest.sanitized_dev.sql
+.. _SQL data: https://mozillians-dev.allizom.org/media/mozillians_org.latest.sanitized_dev.sql.gz
+
