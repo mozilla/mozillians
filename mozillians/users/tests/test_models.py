@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 from django.utils import unittest
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 
 import basket
 import pytz
@@ -539,6 +539,17 @@ class UserProfileTests(TestCase):
     def test_is_manager_when_superuser(self):
         user = UserFactory.create(is_superuser=True)
         ok_(user.userprofile.is_manager)
+
+    def test_vouch_reset(self):
+        voucher = UserFactory.create()
+        user = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
+                                               'date_vouched': now()})
+        profile = user.userprofile
+        profile.is_vouched = False
+        profile.save()
+        profile = UserProfile.objects.get(pk=profile.id)
+        eq_(profile.vouched_by, None)
+        eq_(profile.date_vouched, None)
 
 
 class CalculatePhotoFilenameTests(TestCase):
