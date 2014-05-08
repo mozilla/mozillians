@@ -226,9 +226,9 @@
                   {% if account.get_identifier_url() -%}
                     <a href="{{ account.get_identifier_url() }}">{{ account.identifier }}</a>
                   {%- else -%}
-                    {{ account.identifier }}
+                      {{ account.identifier|simple_urlize() }}
                   {%- endif -%}
-                {% endfor %}
+              {% endfor %}
               </li>
             </ul>
           </div>
