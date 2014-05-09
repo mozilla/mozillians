@@ -11,6 +11,7 @@ from mozillians.users.tests import UserFactory
 
 
 class ShowTests(TestCase):
+
     def setUp(self):
         self.group = GroupFactory.create()
         self.url = reverse('groups:show_group', kwargs={'url': self.group.url})
@@ -64,6 +65,28 @@ class ShowTests(TestCase):
         context = response.context
         eq_(context['people'].paginator.count, 0)
         ok_(not context['is_pending'])
+
+    def test_show_group_members_sorted(self):
+        """
+        Test show() where group members are sorted in alphabetical
+        ascending order.
+        """
+        group = GroupFactory.create()
+        user_1 = UserFactory.create(userprofile={'full_name': 'Carol'})
+        user_2 = UserFactory.create(userprofile={'full_name': 'Alice'})
+        user_3 = UserFactory.create(userprofile={'full_name': 'Bob'})
+        group.add_member(user_1.userprofile)
+        group.add_member(user_2.userprofile)
+        group.add_member(user_3.userprofile)
+
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+        with self.login(user_1) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        people = response.context['people']
+        eq_(people[0].userprofile, user_2.userprofile)
+        eq_(people[1].userprofile, user_3.userprofile)
+        eq_(people[2].userprofile, user_1.userprofile)
 
     @requires_login()
     def test_show_anonymous(self):
