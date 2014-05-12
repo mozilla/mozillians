@@ -86,4 +86,14 @@ $(function() {
             $(this).removeClass('active');
         },
     });
+
+    $('#id_skills').tagit({
+        allowSpaces: true,
+        caseSensitive: false,
+        singleField: true,
+        singleFieldDelimiter: ',',
+        removeConfirmation: true,
+        tagSource: $('#skills').data('autocomplete-url'),
+        triggerKeys: ['enter', 'comma', 'tab']
+    });
 });
