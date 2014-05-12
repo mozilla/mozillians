@@ -131,6 +131,8 @@ def show(request, url, alias_model, template):
             profiles = group.groupmembership_set.filter(
                 Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
 
+        profiles = profiles.order_by('userprofile')
+
         # Get the most globally popular skills that appear in the group
         # Sort them with most members first
         skills = (Skill.objects
