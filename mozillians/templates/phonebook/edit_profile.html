@@ -14,6 +14,7 @@
     <link href="{{ static('mozillians/css/profile_edit.less') }}"
           type="text/less" rel="stylesheet" media="screen" />
   {% endcompress %}
+  <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css" type="text/css" rel="stylesheet" media="screen" />
   {{ profile_form.media.css }}
 {% endblock extrahead %}
 
@@ -74,6 +75,24 @@
       </fieldset>
     {% endif %}
 
+    {% if (profile_form.non_field_errors() or user_form.non_field_errors()
+         or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
+      <ul class="unstyled">
+        {% for error in profile_form.non_field_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in user_form.non_field_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in accounts_formset.non_form_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in language_formset.non_form_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+      </ul>
+  {% endif %}
+
     <fieldset id="photo">
       <label>{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
@@ -103,19 +122,31 @@
       {{ privacy_field(profile_form.privacy_email) }}
     </fieldset>
 
+    <label>Your location</label>
+    <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+    <!--<button id="locate" onclick="locateMe()">Locate me</button>-->
+
     <fieldset>
-      {{ mozillians_field(profile_form.country) }}
-      {{ privacy_field(profile_form.privacy_country) }}
+      <label>Country</label> <span id="display_country"></span>
+      {{ privacy_field(profile_form.privacy_geo_country) }}
     </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.region) }}
-      {{ privacy_field(profile_form.privacy_region) }}
+      <label>Region</label> <span id="display_province"></span>
+      {{ privacy_field(profile_form.privacy_geo_region) }}
     </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.city) }}
-      {{ privacy_field(profile_form.privacy_city) }}
+      <label>City</label> <span id="display_city"></span>
+      {{ privacy_field(profile_form.privacy_geo_city) }}
+    </fieldset>
+
+    <fieldset>
+      {{ mozillians_field(profile_form.lat) }}
+    </fieldset>
+
+    <fieldset>
+      {{ mozillians_field(profile_form.lng) }}
     </fieldset>
 
     <fieldset>
@@ -473,9 +504,11 @@
 {% endblock %}
 
 {% block page_js %}
+  <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
   {% compress js %}
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
+    <script src="{{ static('mozillians/js/profile_edit_mapbox.js') }}"></script>
   {% endcompress %}
   {{ profile_form.media.js }}
 {% endblock %}

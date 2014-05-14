@@ -5,10 +5,12 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from mock import MagicMock, Mock, call, patch
+
 from nose.tools import eq_, ok_
 from pyes.exceptions import ElasticSearchException
 
 from mozillians.common.tests import TestCase
+from mozillians.geo.tests import CountryFactory, CityFactory
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
@@ -139,16 +141,18 @@ class BasketTests(TestCase):
         mock_basket.subscribe.return_value = {
             'token': token,
         }
+        country = CountryFactory.create(name='Greece', code='gr')
+        city = CityFactory.create(name='Athens', country=country)
         user = UserFactory.create(
             email=email,
-            userprofile={'country': 'gr',
-                         'city': 'athens'})
+            userprofile={'geo_country': country,
+                         'geo_city': city})
         mock_basket.subscribe.reset_mock()  # forget that subscribe was called
         group = GroupFactory.create(name='Web Development',
                                     functional_area=True)
         GroupFactory.create(name='Marketing', functional_area=True)
-        data = {'country': 'gr',
-                'city': 'athens',
+        data = {'country': country.name,
+                'city': city.name,
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 
@@ -178,8 +182,10 @@ class BasketTests(TestCase):
         mock_basket.subscribe.return_value = {
             'token': token,
         }
-        user = UserFactory.create(email=email, userprofile={'country': 'gr',
-                                                            'city': 'athens'})
+        country = CountryFactory.create(name='Greece', code='gr')
+        city = CityFactory.create(name='Athens', country=country)
+        user = UserFactory.create(email=email, userprofile={'geo_country': country,
+                                                            'geo_city': city})
         up = UserProfile.objects.get(pk=user.userprofile.pk)
         eq_(token, up.basket_token)
 

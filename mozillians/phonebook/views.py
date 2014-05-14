@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page, never_cache
@@ -24,7 +25,7 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import COUNTRIES, UserProfile
+from mozillians.users.models import UserProfile
 
 
 class BrowserIDVerify(Verify):
@@ -158,16 +159,19 @@ def edit_profile(request):
         form = forms.RegisterForm
 
     profile_form = form(request.POST or None, request.FILES or None,
-                        instance=profile, locale=request.locale,
+                        instance=profile,
                         initial=dict(skills=user_skills))
 
     email_form = forms.EmailForm(request.POST or None,
                                  initial={'email': request.user.email,
                                           'user_id': request.user.id})
 
-    if (user_form.is_valid() and profile_form.is_valid() and
-        accounts_formset.is_valid() and email_form.is_valid() and
-            language_formset.is_valid()):
+    all_forms = [user_form, profile_form, accounts_formset, email_form,
+                 language_formset]
+
+    # Using ``list`` to force calling is_valid on all the forms, even if earlier
+    # ones are not valid, so we detect and display all the errors.
+    if all(list(f.is_valid() for f in all_forms)):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
@@ -196,10 +200,11 @@ def edit_profile(request):
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
-                language_formset=language_formset)
+                language_formset=language_formset,
+                mapbox_id=settings.MAPBOX_MAP_ID)
 
     # If there are form errors, don't send a 200 OK.
-    status = 400 if (profile_form.errors or user_form.errors) else 200
+    status = 400 if any(f.errors for f in all_forms) else 200
     return render(request, 'phonebook/edit_profile.html', data, status=status)
 
 
@@ -329,15 +334,15 @@ def vouch(request):
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):
-    country = country.lower()
-    country_name = COUNTRIES.get(country, country)
-    queryset = UserProfile.objects.vouched().filter(country=country)
+    queryset = UserProfile.objects.vouched().filter(geo_country__name__iexact=country)
     show_pagination = False
 
     if city:
-        queryset = queryset.filter(city__iexact=city)
+        # Don't exclude people who haven't entered a city, they might be in the
+        # desired city.
+        queryset = queryset.filter(Q(geo_city__name__iexact=city) | Q(geo_city=None))
     if region:
-        queryset = queryset.filter(region__iexact=region)
+        queryset = queryset.filter(Q(geo_region__name__iexact=region) | Q(geo_region=None))
 
     paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
     page = request.GET.get('page', 1)
@@ -353,7 +358,7 @@ def list_mozillians_in_location(request, country, region=None, city=None):
         show_pagination = True
 
     data = {'people': people,
-            'country_name': country_name,
+            'country_name': country,
             'city_name': city,
             'region_name': region,
             'page': page,

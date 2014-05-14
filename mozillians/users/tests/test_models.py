@@ -13,6 +13,7 @@ from django.utils.timezone import make_aware, now
 import basket
 import pytz
 from mock import Mock, call, patch
+from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -96,11 +97,14 @@ class UserProfileTests(TestCase):
         eq_(profile.full_name, 'foobar')
 
     def test_extract_document(self):
-        user = UserFactory.create(userprofile={'city': 'athens',
-                                               'region': 'attika',
+        country = CountryFactory.create(name='Greece', code='gr')
+        region = RegionFactory.create(name='attika', country=country)
+        city = CityFactory.create(name='athens', region=region, country=country)
+        user = UserFactory.create(userprofile={'geo_city': city,
+                                               'geo_region': region,
                                                'allows_community_sites': False,
                                                'allows_mozilla_sites': False,
-                                               'country': 'gr',
+                                               'geo_country': country,
                                                'full_name': 'Nikos Koukos',
                                                'bio': 'This is my bio'})
         profile = user.userprofile
@@ -119,11 +123,11 @@ class UserProfileTests(TestCase):
         ok_(isinstance(result, dict))
         eq_(result['id'], profile.id)
         eq_(result['is_vouched'], profile.is_vouched)
-        eq_(result['region'], profile.region)
-        eq_(result['city'], profile.city)
+        eq_(result['region'], region.name)
+        eq_(result['city'], city.name)
         eq_(result['allows_community_sites'], profile.allows_community_sites)
         eq_(result['allows_mozilla_sites'], profile.allows_mozilla_sites)
-        eq_(result['country'], ['gr', 'greece'])
+        eq_(result['country'], country.name)
         eq_(result['fullname'], profile.full_name.lower())
         eq_(result['name'], profile.full_name.lower())
         eq_(result['bio'], profile.bio)
