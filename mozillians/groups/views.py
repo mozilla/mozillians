@@ -141,7 +141,6 @@ def show(request, url, alias_model, template):
                   .annotate(no_users=Count('members'))
                   .order_by('-no_users'))
         data.update(skills=skills)
-        data.update(irc_channels=group.irc_channel.split(' '))
 
     page = request.GET.get('page', 1)
     paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
@@ -155,18 +154,20 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    data = dict(people=people,
-                group=group,
-                in_group=in_group,
-                is_curator=is_curator,
-                is_pending=is_pending,
-                show_pagination=show_pagination,
-                show_delete_group_button=show_delete_group_button,
-                show_join_button=group.user_can_join(request.user.userprofile),
-                show_leave_button=group.user_can_leave(request.user.userprofile),
-                membership_filter_form=membership_filter_form,
-                members=group.member_count,
-                )
+    extra_data = dict(people=people,
+                      group=group,
+                      in_group=in_group,
+                      is_curator=is_curator,
+                      is_pending=is_pending,
+                      show_pagination=show_pagination,
+                      show_delete_group_button=show_delete_group_button,
+                      show_join_button=group.user_can_join(request.user.userprofile),
+                      show_leave_button=group.user_can_leave(request.user.userprofile),
+                      membership_filter_form=membership_filter_form,
+                      members=group.member_count,
+                      )
+
+    data.update(extra_data)
 
     return render(request, template, data)
 

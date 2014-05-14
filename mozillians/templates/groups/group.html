@@ -42,24 +42,18 @@
         <p>{{ group.description }}</p>
       {% endif %}
 
-      {% if group.new_member_criteria %}        
+      {% if group.new_member_criteria %}
         <p><span>{{ _('New Member Criteria') }}:</span><br />{{ group.new_member_criteria }}</p>
       {% endif %}
 
       <ul class="curated-group-details">
           {% if group.irc_channel %}
           <li>
-              <span>
-              {% if irc_channels|length > 1 %}
-                {{ _('IRC Channels') }}:
-              {% else %}
-                {{ _('IRC Channel') }}:
-              {% endif %}
-              </span>
-              {% for irc in irc_channels %}
-                {{ irc }}
-              {% endfor %}
-            </li>
+            <span>
+              {{ _('IRC Channel') }}:
+            </span>
+            {{ group.irc_channel }}
+          </li>
           {% endif %}
 
           {% if group.website %}
