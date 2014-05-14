@@ -13,20 +13,24 @@ from mozillians.common.middleware import safe_query_string
 
 class RegisterMiddleware():
     """Redirect authenticated users with incomplete profile to register view."""
+    def __init__(self):
+        self.allow_urls = [
+            r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
+            r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
+            r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
+            r'^/[\w-]+{0}'.format(reverse('groups:search_skills')),
+            r'^/browserid/',
+        ]
+
     def process_request(self, request):
         user = request.user
         path = request.path
-        allow_urls = [r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
-                      r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
-                      r'^/browserid/',
-                      r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
-                      ]
 
         if settings.DEBUG:
-            allow_urls.append(settings.MEDIA_URL)
+            self.allow_urls.append(settings.MEDIA_URL)
 
         if (user.is_authenticated() and not user.userprofile.is_complete
-            and not filter(lambda url: re.match(url, path), allow_urls)):
+            and not filter(lambda url: re.match(url, path), self.allow_urls)):
             messages.warning(request, _('Please complete registration before proceeding.'))
             return redirect('phonebook:profile_edit')
 
