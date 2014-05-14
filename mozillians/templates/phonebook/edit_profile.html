@@ -180,7 +180,7 @@
     </fieldset>
 
     <fieldset id="shirts">
-      <legend>{{ _('T-Shirt Size') }}</legend>
+      <h2>{{ _('T-Shirt Size') }}</h2>
       <p class="field_description">
         {% trans %}
           Like t-shirts? Add your size so we can give you a shirt at events or for other special occasions.
@@ -237,7 +237,7 @@
     </fieldset>
 
     <fieldset id="groups">
-      <legend>{{ _('Groups') }}</legend>
+      <h2>{{ _('Groups') }}</h2>
       <p class="field_description">
         {% trans %}
           Groups are a community of Mozillians with some relation to
@@ -274,7 +274,7 @@
     </fieldset>
 
     <fieldset id="skills">
-      <legend>{{ _('Skills') }}</legend>
+      <h2>{{ _('Skills') }}</h2>
       <p class="field_description">
         {% trans %}
           A skill is the learned capacity to carry out pre-determined
@@ -287,7 +287,7 @@
     </fieldset>
 
     <fieldset id="languages">
-      <legend>{{ _('Languages') }}</legend>
+      <h2>{{ _('Languages') }}</h2>
       <p class="field_description">
         {% trans %}
           The Mozilla Project spans over many countries and
@@ -325,7 +325,7 @@
     </fieldset>
 
     <fieldset id="services">
-      <legend>{{ _('Services') }}</legend>
+      <h2>{{ _('Services') }}</h2>
       <p class="field_description">
         {% trans bugzilla_url='http://bugzilla.mozilla.org',
                  reps_url='http://reps.mozilla.org' %}
@@ -377,7 +377,7 @@
 
     {% if profile.is_complete %}
       <fieldset id="invites">
-        <legend>{{ _('Vouches & Invites') }}</legend>
+        <h2>{{ _('Vouches & Invites') }}</h2>
         <h5>{{ _('Vouched By') }}</h5>
         {% if profile.vouched_by %}
           <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}" class="vouched">
@@ -453,7 +453,7 @@
 
     {% if profile.is_complete %}
       <fieldset id="delete">
-        <legend>{{ _('Delete Profile') }}</legend>
+        <h2>{{ _('Delete Profile') }}</h2>
         <input type="checkbox" class="acknowledge"></input>
         <p class="field_description">
           {% trans %}
