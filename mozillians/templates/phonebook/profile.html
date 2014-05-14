@@ -32,29 +32,11 @@
             If you are new to the Mozilla community,
             <a class="button" href="{{ contribute_url }}">get involved</a>
           </p>
-          <p>
-            The chances of being vouched increase as you finish tasks in our community.
-          </p>
-
+          <p>The chances of being vouched increase as you finish tasks in our community.</p>
         {% endtrans %}
       {% else %}
-        {% if vouch_form %}
-          <form action="{{ url('phonebook:vouch') }}" method="POST"
-                id="vouch-form">
-            {{ csrf() }}
-            {{ vouch_form }}
-            {% trans name=profile.display_name %}
-                <button type="submit">
-                  Vouch for {{ name }}
-                </button>
-            {% endtrans %}
-          </form>
-        {% endif %}
         {% trans %}
-          <p>This profile is waiting for approval.</p>
-          <p>Because our community directory is for Mozillians who
-            are 13 and older, please don't vouch for anyone under
-            13.</p>
+          <p>This profile is waiting for approval. If you would like to vouch for them, use the form at the bottom of the page.</p>
         {% endtrans %}
       {% endif %}
     </div>
@@ -109,6 +91,31 @@
           </section>
         {% endif %}
        </div>
+
+      <section id="profile-contact">
+        <div class="contact-details">
+            {% if profile.email %}
+              <section class="u-email">
+                <i class="icon-envelope"></i>
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
+              </section>
+            {% endif %}
+            {% if profile.ircname %}
+              <section class="p-nickname">
+                <i class="icon-comments-alt"></i> IRC :
+                <span class="nickname">{{ profile.ircname }}</span>
+              </section>
+            {% endif %}
+            {% if profile.tshirt %}
+              <section><i class="icon-shirt"></i>
+                {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</section>
+            {% endif %}
+        </div>
+      </section>
+
+
     </article>
 
 
@@ -248,6 +255,7 @@
             </a>
           </div>
         {% endif %}
+<<<<<<< HEAD
 
         {% if profile.vouchees.exists() %}
           <div id="vouchees" class="profile-entry">
@@ -263,32 +271,39 @@
             </ul>
           </div>
         {% endif %}
+        <!-- FIXME: if that checks number of vouchers to show vouch box at all -->
+          <div class="vouch-box">
+            <div class="margins">
+            {% if not profile.is_vouched %}
+            <h4>Is First Last a Mozillian? Let us know how he/she contributed</h4>
+            {% else %}
+            <h4>Do you know this Mozillian? Let us know how he/she contributed</h4>
+            {% endif %}
+            <p>Provide a reason for vouching with relevant links</p>
+            <textarea maxlength="800"></textarea>
+            <a href="#" class="left">Markdown Syntax</a>
 
+            <a class="button"><i class="icon-key"></i> Vouch</a>
+            <div class="character-countdown">500</div>
+
+            <div class="clear"></div>
+
+            <p style="margin:10px 0;">Only vouch for users who have made significant contributions and are at least 13 years old. Once vouched, they will be able to:</p>
+<!--
+            <ul>
+              <li>View all profiles and join groups</li>
+              <li>Access special video content on Air Mozilla</li>
+              <li>Join the Mozilla Exchange Yammer network</li>
+              <li>Use other Mozilla apps as a vouched user</li>
+            </ul>
+-->
+            <p>Vouchers cannot be edited or retracted.
+            <br><a href="#">Read more about vouching</a></p>
+          </div>
+          </div>
+        <!-- endif -->
       </section>
 
-      <section id="profile-contact">
-        <div class="contact-details">
-          <ul>
-            {% if profile.email %}
-              <li class="u-email">
-                <i class="icon-envelope-o"></i>
-                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
-                  <span class="email">{{ profile.email }}</span>
-                {% if user != shown_user %}</a>{% endif %}
-              </li>
-            {% endif %}
-            {% if profile.ircname %}
-              <li class="p-nickname">
-                <i class="icon-comments-o"></i> IRC :
-                <span class="nickname">{{ profile.ircname }}</span>
-              </li>
-            {% endif %}
-            {% if profile.tshirt %}
-              <li><i class="icon-shirt"></i> {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
-            {% endif %}
-          </ul>
-        </div>
-      </section>
     </article>
 
     {# H-card support, add group Mozillians #}
@@ -310,5 +325,6 @@
 {% block page_js %}
   {% compress js %}
     <script src="{{ static('mozillians/js/profile_view.js') }}"></script>
+    <script src="{{ static('mozillians/js/character_limit.js') }}"></script>
   {% endcompress %}
 {% endblock %}

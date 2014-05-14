@@ -1,0 +1,29 @@
+{% if vouchable %}
+  <div class="vouch-box">
+    <div class="margins">
+    {% if not profile.is_vouched %}
+      <h4>Is {{ profile.full_name }} a Mozillian? Let us know how he/she contributed.</h4>
+    {% else %}
+      <h4>Do you know this Mozillian? Let us know how he/she contributed</h4>
+    {% endif %}
+    {% if vouch_form %}
+      <form action="{{ url('phonebook:vouch') }}" method="POST"
+            id="vouch-form">
+        {{ csrf() }}
+        {{ vouch_form }}
+        {% trans name=profile.display_name %}
+            <button class="button" type="submit"><i class="icon-key"></i>
+              Vouch for {{ name }}
+            </button>
+        {% endtrans %}
+      </form>
+    {% endif %}
+    <a href="#" class="left">Markdown Syntax</a>
+    <div class="character-countdown">500</div>
+    <div class="clear"></div>
+    <p style="margin:10px 0;">Only vouch for users who have made significant contributions and are at least 13 years old. Once vouched, they will be able to:</p>
+    <p>Vouchers cannot be edited or retracted.
+    <br><br><a href="#">Read more about vouching</a></p>
+  </div>
+  </div>
+{% endif %}

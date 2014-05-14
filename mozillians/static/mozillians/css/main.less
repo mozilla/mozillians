@@ -106,6 +106,12 @@
   .box-shadow(inset 0 1px 1px rgba(0,0,0,.05));
 }
 
+.ellipsis{
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+
 /* Generic
 ==================== */
 
@@ -1184,6 +1190,39 @@ body#profile {
                     }
                 }
             }
+
+            #profile-contact {
+                width: 220px;
+                float: left;
+                margin-top:1em;
+                ul {
+                    width:100%;
+                    word-wrap: break-word;
+                    list-style: none;
+                    float: left;
+                    li {
+                        position:relative;
+                        margin: 0 15px 0 0;
+                    }
+                }
+                .pre-break-bullet{
+                    position:absolute;
+                }
+                .u-url a{
+                    display:block;
+                    text-indent:1.25em;
+                }
+                .u-email{ &:extend( .ellipsis ); }
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
+                    float: none;
+                    ul {
+                        float: none;
+                    }
+                }
+            }
+
             @media (max-width: @breakDesktop) {
                 text-align: center;
                 width: 100%;
@@ -1215,7 +1254,6 @@ body#profile {
                 h3 { font-size: 24px; }
             }
             #profile-details {
-                width: 370px;
                 word-wrap: break-word;
                 padding-right: 30px;
                 margin: 0;
@@ -1230,35 +1268,30 @@ body#profile {
                     padding: 0;
                 }
             }
-            #profile-contact {
-                width: 220px;
-                float: left;
-                ul {
-                    width:100%;
-                    word-wrap: break-word;
-                    list-style: none;
-                    float: left;
-                    li {
-                        position:relative;
-                        margin: 0 15px 0 0;
-                    }
-                }
-                .pre-break-bullet{
-                    position:absolute;
-                }
-                .u-url a{
-                    display:block;
-                    text-indent:1.25em;
-                }
-                @media (max-width: @breakDesktop) {
-                    text-align: center;
-                    width: 100%;
-                    float: none;
-                    ul {
-                        float: none;
-                    }
-                }
-            }
+        }
+    }
+    .vouch-box{
+        &:extend(.alert);
+        padding:0px;
+        text-align:left;
+        .margins{
+            margin:10px;
+        }
+        textarea{
+            margin: 0px;
+            height: 115px;
+            width:100%;
+            padding:0;
+            font-size: 11pt;
+        }
+        .character-countdown{
+            &:extend(.right all);
+            margin-right: 5px;
+            line-height: 24px;
+        }
+        .button{
+            &:extend(.right all);
+            margin:0 auto;
         }
     }
 }
