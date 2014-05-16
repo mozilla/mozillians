@@ -170,7 +170,8 @@ class GroupAdmin(GroupBaseAdmin):
 
     fieldsets = (
         ('Group', {
-            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible')
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible',
+                       'merge_with')
         }),
         ('Functional Area', {
             'fields': ('functional_area', 'curator')
