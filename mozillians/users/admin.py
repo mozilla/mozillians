@@ -57,11 +57,12 @@ def unsubscribe_from_basket_action():
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
         ts = [(mozillians.users.tasks.remove_from_basket_task
-               .subtask(userprofile.user.email, userprofile.basket_token))
+               .subtask(args=[userprofile.user.email, userprofile.basket_token]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
     unsubscribe_from_basket.short_description = 'Unsubscribe from Basket'
+
     return unsubscribe_from_basket
 
 
