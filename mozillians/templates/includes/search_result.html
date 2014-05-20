@@ -5,7 +5,7 @@
         <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
               method="GET">
           {{ csrf() }}
-          <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
+          <button type="submit" class="button remove">{{ _('Remove') }} <i class="icon-close"></i></button>
         </form>
       {% endif %}
       {% if group.has_pending_member(profile) %}
@@ -40,14 +40,14 @@
         {% if profile.email %}
           <li>
             <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
-            <i class="icon-envelope"></i> {{ profile.email|truncate(20, True) }}
+            <i class="icon-envelope-o"></i> {{ profile.email|truncate(20, True) }}
             </a>
           </li>
         {% endif %}
         {% if profile.ircname %}
           <li>
             <span title="{{ profile.ircname }}">
-              <i class="icon-comments-alt"></i>IRC: {{ profile.ircname|truncate(20, True) }}
+              <i class="icon-comments-o"></i>IRC: {{ profile.ircname|truncate(20, True) }}
             </span>
           </li>
         {% endif %}
