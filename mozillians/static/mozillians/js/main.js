@@ -10,13 +10,13 @@
         // Collapses nav menu when user has clicked outside the dropdown
         function collapseNavMenu () {
             $('.dropdown-menu').hide();
-            $('i.icon-reorder').removeClass('open');
+            $('i.icon-bars').removeClass('open');
             $('#outer-wrapper').off('click', collapseNavMenu);
         }
 
         // Main nav dropdown
         $('a.dropdown-toggle').on('click', function(e) {
-            var $icon = $('i.icon-reorder');
+            var $icon = $('i.icon-bars');
             e.stopPropagation();
 
             $('.dropdown-menu').toggle();

@@ -119,7 +119,7 @@
               {%- with group=membership.group -%}
               <a href="{{ url('groups:show_group', group.url) }}">
                 {%- if group.curator == user.userprofile -%}
-                  <i class="icon-certificate"></i>
+                  <i class="icon-crown"></i>
                 {% endif %}
                 {{ group.name }}
                 {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}

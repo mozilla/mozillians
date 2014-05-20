@@ -43,7 +43,7 @@
       <ul>
         <li>
           <a title="{{ invite.recipient }}" href="mailto:{{ invite.recipient }}">
-            <i class="icon-envelope"></i> {{ invite.recipient }}
+            <i class="icon-envelope-o"></i> {{ invite.recipient }}
           </a>
         </li>
         <li>
@@ -62,7 +62,7 @@
         {% else %}
           <form action="{{ url('phonebook:delete_invite', invite_pk=invite.pk) }}" method="POST">
             {{ csrf() }}
-            <button type="submit" class="button remove">{{ _('Remove') }} <span>✖</span></button>
+            <button type="submit" class="button remove">{{ _('Remove') }} <i class="icon-close"></i></button>
           </form>
         {% endif %}
       </ul>

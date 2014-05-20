@@ -103,7 +103,7 @@
         {% endif %}
         {% if profile.timezone %}
           <section id="timezone" data-timezone-offset="{{ profile.timezone_offset()|default('notset') }}">
-            <i class="icon-time"></i>
+            <i class="icon-clock-o"></i>
             {{ now_in_timezone(profile.timezone).strftime('%H:%M') }}
             {{ profile.timezone }}
           </section>
@@ -167,13 +167,13 @@
                 {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
                   <a href="{{ url('groups:show_group', group.url) }}">
                     {%- if group.curator == profile -%}
-                      <i class="icon-certificate"></i>
+                      <i class="icon-crown"></i>
                     {%- endif -%}
                     {{ group.name }}
                     {%- if group.pending -%} {{ _('(membership requested)') }}{%- endif -%}</a>
                 {%- else -%}
                   {%- if group.curator == profile -%}
-                    <i class="icon-certificate"></i>
+                    <i class="icon-crown"></i>
                   {%- endif -%}
                   {{ group.name }}
                 {%- endif -%}
@@ -199,7 +199,7 @@
 
         {% if profile.languages.exists() %}
           <div id="languages" class="profile-entry">
-            <h3><i class="icon-comments-alt"></i> {{ _('Languages') }}</h3>
+            <h3><i class="icon-comments-o"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages -%}
                 {{ langcode_to_name(language.code) }}
                 {%- if not loop.last %},{% endif %}
@@ -209,7 +209,7 @@
 
         {% if profile.websites.exists() %}
           <div id="websites" class="profile-entry">
-            <h3><i class="icon-link"></i> {{ _('Websites') }}</h3>
+            <h3><i class="icon-chain"></i> {{ _('Websites') }}</h3>
             <ul>
               {% for site in profile.websites %}
                 <li class="u-url">
@@ -271,7 +271,7 @@
           <ul>
             {% if profile.email %}
               <li class="u-email">
-                <i class="icon-envelope"></i>
+                <i class="icon-envelope-o"></i>
                 {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
                   <span class="email">{{ profile.email }}</span>
                 {% if user != shown_user %}</a>{% endif %}
@@ -279,12 +279,12 @@
             {% endif %}
             {% if profile.ircname %}
               <li class="p-nickname">
-                <i class="icon-comments-alt"></i> IRC :
+                <i class="icon-comments-o"></i> IRC :
                 <span class="nickname">{{ profile.ircname }}</span>
               </li>
             {% endif %}
             {% if profile.tshirt %}
-              <li>{{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
+              <li><i class="icon-shirt"></i> {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
             {% endif %}
           </ul>
         </div>

@@ -22,6 +22,7 @@
 
   {% block site_css %}
     {% compress css %}
+      <link href="{{ static('mozillians/icons/style.css') }}" type="text/css" rel="stylesheet" media="screen" />
       <link href="{{ static('mozillians/css/main.less') }}" type="text/less" rel="stylesheet" media="screen" />
       <link href="{{ static('mozillians/css/jquery-ui-1.8.16.custom.css') }}" rel="stylesheet" media="screen" />
       <link href="{{ static('mozillians/js/libs/tag-it/css/jquery.tagit.css') }}" rel="stylesheet" media="screen" />
@@ -92,12 +93,12 @@
                             {{ user.username }}
                           {% endif %}
                         </span>
-                        <i class="icon-reorder"></i>
+                        <i class="icon-bars"></i>
                       </a>
                       <ul class="dropdown-menu">
                         <li>
                           <a id="nav-profile" href="{{ url('phonebook:profile_view', user.username) }}">
-                            <i class="icon-eye-open"></i>
+                            <i class="icon-eye"></i>
                             {{ _('View Profile') }}
                           </a>
                         </li>
@@ -116,14 +117,14 @@
                           </li>
                           <li>
                             <a id="nav-invite" href="{{ url('phonebook:invite') }}">
-                              <i class="icon-plus-sign"></i>
+                              <i class="icon-plus-circle"></i>
                               {{ _('Invite') }}
                             </a>
                           </li>
                         {% endif %}
                         <li>
                           <a id="nav-logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
-                            <i class="icon-reply"></i>
+                            <i class="icon-mail-reply"></i>
                             {{ _('Log Out') }}
                           </a>
                         </li>
@@ -131,7 +132,7 @@
                     </div>
                   {% else %}
                     <a id="nav-logout" class="browserid-logout no-profile" href="{{ url('phonebook:logout') }}">
-                      <i class="icon-reply"></i>
+                      <i class="icon-mail-reply"></i>
                       {{ _('Log Out') }}
                     </a>
                   {% endif %}
