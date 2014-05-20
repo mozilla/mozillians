@@ -148,6 +148,16 @@ class SearchTests(TestCase):
         eq_(response.status_code, 200)
         eq_(response.get('content-type'), 'application/json')
 
+    def test_search_incomplete_profile(self):
+        user = UserFactory.create(vouched=False, userprofile={'full_name': ''})
+        group = GroupFactory.create(visible=True)
+        url = urlparams(reverse('groups:search_skills'), term=group.name)
+        with self.login(user) as client:
+            response = client.get(url, follow=True,
+                                  **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        eq_(response.status_code, 200)
+        eq_(response.get('content-type'), 'application/json')
+
     @requires_login()
     def test_search_anonymous(self):
         url = urlparams(reverse('groups:search_groups'), term='invalid')
