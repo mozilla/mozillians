@@ -11,7 +11,8 @@
 
 {% block extrahead %}
   {% compress css %}
-    <link href="{{ static('mozillians/css/profile_edit.less') }}" type="text/less" rel="stylesheet" media="screen" />
+    <link href="{{ static('mozillians/css/profile_edit.less') }}"
+          type="text/less" rel="stylesheet" media="screen" />
   {% endcompress %}
   {{ profile_form.media.css }}
 {% endblock extrahead %}
@@ -173,7 +174,7 @@
       {{ mozillians_field(profile_form.story_link) }}
       {{ privacy_field(profile_form.privacy_story_link) }}
     </fieldset>
-	
+
     <fieldset>
       {{ mozillians_field(profile_form.title) }}
       {{ privacy_field(profile_form.privacy_title) }}
@@ -273,7 +274,7 @@
       {{ privacy_field(profile_form.privacy_groups) }}
     </fieldset>
 
-    <fieldset id="skills">
+    <fieldset id="skills" data-autocomplete-url="{{ url('groups:search_skills') }}">
       <h2>{{ _('Skills') }}</h2>
       <p class="field_description">
         {% trans %}
@@ -475,7 +476,6 @@
   {% compress js %}
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
-    <script src="{{ static('mozillians/js/tag-it-groups.js') }}"></script>
   {% endcompress %}
   {{ profile_form.media.js }}
 {% endblock %}
