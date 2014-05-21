@@ -8,12 +8,14 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models import signals as dbsignals, ManyToManyField
 from django.dispatch import receiver
+from django.template.loader import get_template
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 
 import basket
 from elasticutils.contrib.django import S, get_es
 from elasticutils.contrib.django.models import SearchMixin
+from funfactory import utils
 from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
@@ -542,12 +544,16 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
+
+        name = self.vouched_by.full_name
+        profile_link = utils.absolutify(self.vouched_by.get_absolute_url())
+        template = get_template('phonebook/vouched_confirmation_email.txt')
         subject = _(u'You are now vouched on Mozillians!')
-        message = _(u'You\'ve now been vouched on Mozillians.org. '
-                    u'You\'ll now be able to search, vouch '
-                    u'and invite other Mozillians onto the site.')
-        send_mail(subject, message, settings.FROM_NOREPLY,
-                  [self.user.email])
+        message = template.render({
+            'voucher_name': name,
+            'voucher_profile_url': profile_link})
+        filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
+        send_mail(subject, filtered_message, settings.FROM_NOREPLY, [self.user.email])
 
     def lookup_basket_token(self):
         """
