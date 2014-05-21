@@ -719,6 +719,7 @@ class ExternalAccount(models.Model):
     TYPE_LINKEDIN = 'LINKEDIN'
     TYPE_JABBER = 'JABBER'
     TYPE_DISCOURSE = 'DISCOURSE'
+    TYPE_LANYRD = 'LANYRD'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -783,6 +784,10 @@ class ExternalAccount(models.Model):
         TYPE_DISCOURSE: {'name': 'Mozilla Discourse',
                          'url': 'https://discourse.mozilla-community.org/users/{identifier}',
                          'validator': validate_username_not_url},
+        TYPE_LANYRD: {'name': 'Lanyrd',
+                      'url': 'http://lanyrd.com/profile/{identifier}/',
+                      'validator': validate_username_not_url},
+
     }
 
     user = models.ForeignKey(UserProfile)
