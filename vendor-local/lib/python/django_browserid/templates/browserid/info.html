@@ -1,0 +1,12 @@
+{# Store useful data for the JavaScript to use. #}
+<div id="browserid-info"
+     style="display: none;"
+     data-user-email="{{ email }}"
+     data-request-args="{{ request_args }}">
+</div>
+
+{# Single form used by login buttons to submit an assertion to the backend. #}
+<form id="browserid-form" method="POST" action="{{ login_url }}" style="display: none;">
+  {% csrf_token %}
+  {{ form.as_p }}
+</form>
