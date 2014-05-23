@@ -5,12 +5,12 @@ from datetime import datetime
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
 import happyforms
 from PIL import Image
-from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.groups.models import Skill
@@ -125,26 +125,18 @@ class ProfileForm(happyforms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('full_name', 'ircname', 'bio', 'photo', 'country',
-                  'region', 'city', 'allows_community_sites', 'tshirt',
+        fields = ('full_name', 'ircname', 'bio', 'photo',
+                  'allows_community_sites', 'tshirt',
                   'title', 'allows_mozilla_sites',
                   'date_mozillian', 'story_link', 'timezone',
+                  'lat', 'lng',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_email', 'privacy_timezone', 'privacy_tshirt',
-                  'privacy_bio', 'privacy_city', 'privacy_region',
-                  'privacy_country', 'privacy_groups',
+                  'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
+                  'privacy_geo_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',
                   'privacy_date_mozillian', 'privacy_story_link', 'privacy_title')
         widgets = {'bio': forms.Textarea()}
-
-    def __init__(self, *args, **kwargs):
-        locale = kwargs.pop('locale', 'en-US')
-
-        super(ProfileForm, self).__init__(*args, **kwargs)
-        country_list = product_details.get_regions(locale).items()
-        country_list = sorted(country_list, key=lambda country: country[1])
-        country_list.insert(0, ('', '----'))
-        self.fields['country'].choices = country_list
 
     def clean_photo(self):
         """Clean possible bad Image data.
@@ -179,10 +171,20 @@ class ProfileForm(happyforms.ModelForm):
                       map(lambda x: x.strip() or False,
                           skills.lower().split(',')))
 
-    def save(self):
+    def clean(self):
+        # If long/lat were provided, make sure they point at a country somewhere...
+        if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
+            self.instance.lat = self.cleaned_data['lat']
+            self.instance.lng = self.cleaned_data['lng']
+            self.instance.reverse_geocode()
+            if not self.instance.geo_country:
+                raise ValidationError(_("Location must be inside a country."))
+        return self.cleaned_data
+
+    def save(self, *args, **kwargs):
         """Save the data to profile."""
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        super(ProfileForm, self).save()
+        super(ProfileForm, self).save(*args, **kwargs)
 
 
 class BaseLanguageFormSet(BaseInlineFormSet):

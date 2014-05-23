@@ -145,6 +145,7 @@ INSTALLED_APPS = get_apps(append=[
     'mozillians.funfacts',
     'mozillians.announcements',
     'mozillians.humans',
+    'mozillians.geo',
 
     'sorl.thumbnail',
     'autocomplete_light',
@@ -188,7 +189,8 @@ AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 SOUTH_TESTS_MIGRATE = False
 
 # Django-CSP
-CSP_DEFAULT_SRC = ("'self'",)
+CSP_DEFAULT_SRC = ("'self'",
+                   'https://*.mapbox.com')
 CSP_FONT_SRC = ("'self'",
                 'http://*.mozilla.net',
                 'https://*.mozilla.net')
@@ -200,20 +202,23 @@ CSP_IMG_SRC = ("'self'",
                'https://*.mozilla.net',
                '*.google-analytics.com',
                '*.gravatar.com',
-               '*.wp.com')
+               '*.wp.com',
+               '*.mapbox.com')
 CSP_SCRIPT_SRC = ("'self'",
                   'http://www.mozilla.org',
                   'https://www.mozilla.org',
                   'http://*.mozilla.net',
                   'https://*.mozilla.net',
                   'https://*.google-analytics.com',
-                  'https://login.persona.org',)
+                  'https://login.persona.org',
+                  'https://*.mapbox.com')
 CSP_STYLE_SRC = ("'self'",
                  "'unsafe-inline'",
                  'http://www.mozilla.org',
                  'https://www.mozilla.org',
                  'http://*.mozilla.net',
-                 'https://*.mozilla.net')
+                 'https://*.mozilla.net',
+                 'https://*.mapbox.com')
 
 # Elasticutils settings
 ES_DISABLED = True
@@ -301,3 +306,6 @@ HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contrib
 HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales'
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
+
+# This must be set in local for the maps to work
+MAPBOX_MAP_ID = ''

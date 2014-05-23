@@ -165,10 +165,10 @@ def update_basket_task(instance_id):
         data[name] = 'Y' if group.id in user_group_pks else 'N'
 
     # User location if known
-    if instance.country:
-        data['country'] = instance.country
-    if instance.city:
-        data['city'] = instance.city
+    if instance.geo_country:
+        data['country'] = instance.geo_country.name
+    if instance.geo_city:
+        data['city'] = instance.geo_city.name
 
     # We have a token, proceed with the update
     try:

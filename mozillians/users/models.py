@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from datetime import datetime
@@ -17,6 +18,7 @@ from elasticutils.contrib.django.models import SearchMixin
 from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
+from requests import HTTPError
 from sorl.thumbnail import ImageField, get_thumbnail
 from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -39,6 +41,7 @@ from mozillians.users.tasks import (index_objects, remove_from_basket_task,
 
 COUNTRIES = product_details.get_regions('en-US')
 AVATAR_SIZE = (300, 300)
+logger = logging.getLogger(__name__)
 
 
 def _calculate_photo_filename(instance, filename):
@@ -87,9 +90,9 @@ class UserProfilePrivacyModel(models.Model):
     privacy_ircname = PrivacyField()
     privacy_email = PrivacyField()
     privacy_bio = PrivacyField()
-    privacy_city = PrivacyField()
-    privacy_region = PrivacyField()
-    privacy_country = PrivacyField()
+    privacy_geo_city = PrivacyField()
+    privacy_geo_region = PrivacyField()
+    privacy_geo_country = PrivacyField()
     privacy_groups = PrivacyField()
     privacy_skills = PrivacyField()
     privacy_languages = PrivacyField()
@@ -166,6 +169,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     ircname = models.CharField(max_length=63,
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
+
+    # legacy geo data
     country = models.CharField(max_length=50, default='',
                                choices=COUNTRIES.items(),
                                verbose_name=_lazy(u'Country'))
@@ -173,6 +178,15 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                               verbose_name=_lazy(u'Province/State'))
     city = models.CharField(max_length=255, default='', blank=True,
                             verbose_name=_lazy(u'City'))
+
+    # validated geo data (validated that it's valid geo data, not that the
+    # mozillian is there :-) )
+    geo_country = models.ForeignKey('geo.Country', blank=True, null=True, on_delete=models.SET_NULL)
+    geo_region = models.ForeignKey('geo.Region', blank=True, null=True, on_delete=models.SET_NULL)
+    geo_city = models.ForeignKey('geo.City', blank=True, null=True, on_delete=models.SET_NULL)
+    lat = models.FloatField(_(u"Latitude"), blank=True, null=True)
+    lng = models.FloatField(_(u"Longitude"), blank=True, null=True)
+
     allows_community_sites = models.BooleanField(
         default=True,
         verbose_name=_lazy(u'Sites that can determine my vouched status'),
@@ -285,10 +299,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             if isinstance(data, basestring):
                 data = data.lower()
             d.update({a: data})
-
-        if obj.country:
-            d.update({'country':
-                      [obj.country, COUNTRIES[obj.country].lower()]})
+        if obj.geo_country:
+            d.update(country=obj.geo_country.name)
+        if obj.geo_region:
+            d.update(region=obj.geo_region.name)
+        if obj.geo_city:
+            d.update(city=obj.geo_city.name)
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')
@@ -637,6 +653,27 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             es = get_es()
 
         es.delete(cls.get_index(public_index), cls.get_mapping_type(), id)
+
+    def reverse_geocode(self):
+        """
+        Use the user's lat and lng to set their city, region, and country.
+        Does not save the profile.
+        """
+        if self.lat is None or self.lng is None:
+            return
+        from mozillians.geo.lookup import reverse_geocode
+        try:
+            result = reverse_geocode(self.lat, self.lng)
+        except HTTPError:
+            logger.exception("Error calling mapbox")
+        else:
+            if result:
+                country, region, city = result
+                self.geo_country = country
+                self.geo_region = region
+                self.geo_city = city
+            else:
+                logger.error("Got back NONE from reverse_geocode on %s, %s" % (self.lng, self.lat))
 
 
 @receiver(dbsignals.post_save, sender=User,

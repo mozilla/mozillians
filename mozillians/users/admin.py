@@ -253,14 +253,15 @@ class UserProfileResource(ModelResource):
 class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     resource_class = UserProfileResource
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
-    search_fields = ['full_name', 'user__email', 'user__username', 'ircname']
+    search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
+                     'geo_country__name', 'geo_region__name', 'geo_city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
                    PublicProfileFilter]
     save_on_top = True
-    list_display = ['full_name', 'email', 'username', 'country', 'is_vouched',
+    list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched',
                     'vouched_by', 'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action()]
@@ -279,15 +280,16 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_vouched', 'is_vouched', 'vouched_by')
         }),
         ('Location', {
-            'fields': ('country', 'region', 'city', 'timezone')
+            'fields': ('country', 'region', 'city', 'lng', 'lat', 'timezone')
         }),
         ('Services', {
             'fields': ('allows_community_sites', 'allows_mozilla_sites')
         }),
         ('Privacy Settings', {
             'fields': ('privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                       'privacy_email', 'privacy_bio', 'privacy_city', 'privacy_region',
-                       'privacy_country', 'privacy_groups', 'privacy_skills', 'privacy_languages',
+                       'privacy_email', 'privacy_bio',
+                       'privacy_geo_city', 'privacy_geo_region', 'privacy_geo_country',
+                       'privacy_groups', 'privacy_skills', 'privacy_languages',
                        'privacy_date_mozillian', 'privacy_timezone',
                        'privacy_tshirt', 'privacy_title'),
             'classes': ('collapse',)

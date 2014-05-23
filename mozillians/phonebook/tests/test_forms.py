@@ -1,6 +1,7 @@
 from django.forms import model_to_dict
 
 from mock import MagicMock, patch
+from mozillians.geo.tests import CountryFactory
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -60,6 +61,32 @@ class ProfileFormTests(TestCase):
         data['story_link'] = 'Foobar'
         form = ProfileForm(data=data, instance=user.userprofile)
         ok_(not form.is_valid())
+
+    def test_lat_lng_does_not_point_to_country(self):
+        # If form includes lat/lng, must point to some country; fails if not
+        user = UserFactory.create(email='foo@bar.com')
+        data = model_to_dict(user.userprofile)
+        # invalid data
+        data['lat'] = data['lng'] = 0.0
+        form = ProfileForm(data=data, instance=user.userprofile)
+        with patch('mozillians.users.models.UserProfile.reverse_geocode'):
+            # Pretend that geocoding doesn't come up with a country
+            user.userprofile.geo_country = None
+            ok_(not form.is_valid())
+
+    def test_lat_lng_does_point_to_country(self):
+        # If form includes lat/lng, must point to some country; succeeds if so
+        user = UserFactory.create(email='foo@bar.com')
+        data = model_to_dict(user.userprofile)
+        # Try again, with valid data
+        data['lng'] = 35.918596
+        data['lat'] = -79.083799
+        country = CountryFactory.create()
+        form = ProfileForm(data=data, instance=user.userprofile)
+        with patch('mozillians.users.models.UserProfile.reverse_geocode'):
+            # Pretend that geocoding does come up with a country
+            user.userprofile.geo_country = country
+            ok_(form.is_valid())
 
 
 class ExternalAccountFormTests(TestCase):
