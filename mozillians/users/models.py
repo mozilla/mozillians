@@ -11,6 +11,8 @@ from django.db.models import signals as dbsignals, ManyToManyField
 from django.dispatch import receiver
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
+from django.template.loader import get_template
+
 
 import basket
 from elasticutils.contrib.django import S, get_es
@@ -22,6 +24,7 @@ from requests import HTTPError
 from sorl.thumbnail import ImageField, get_thumbnail
 from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
+from funfactory import utils
 
 from mozillians.common.helpers import gravatar
 from mozillians.common.helpers import offset_of_timezone
@@ -555,11 +558,22 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
-        subject = _(u'You are now vouched on Mozillians!')
-        message = _(u'You\'ve now been vouched on Mozillians.org. '
-                    u'You\'ll now be able to search, vouch '
-                    u'and invite other Mozillians onto the site.')
-        send_mail(subject, message, settings.FROM_NOREPLY,
+        name = None
+        profile_link = None
+        if self.vouched_by:
+            name = self.vouched_by.full_name
+            profile_link = utils.absolutify(self.vouched_by.get_absolute_url())
+
+        template = get_template('phonebook/vouched_confirmation_email.txt')
+        message = template.render({
+            'voucher_name': name,
+            'voucher_profile_url': profile_link,
+            'functional_areas_url': utils.absolutify(reverse('groups:index_functional_areas')),
+            'groups_url': utils.absolutify(reverse('groups:index_groups')),
+        })
+        subject = _(u'You are now vouched on Mozillians.org')
+        filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
+        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.user.email])
 
     def lookup_basket_token(self):
