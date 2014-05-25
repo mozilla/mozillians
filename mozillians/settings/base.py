@@ -105,7 +105,10 @@ MIDDLEWARE_CLASSES = get_middleware(append=[
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
-    'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
+    'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
+
+    'waffle.middleware.WaffleMiddleware',
+])
 
 # StrictTransport
 STS_SUBDOMAINS = True
@@ -154,6 +157,8 @@ INSTALLED_APPS = get_apps(append=[
     'django_browserid',
     'jingo_offline_compressor',
     'import_export',
+    'rest_framework',
+    'waffle',
 
     # DB migrations
     'south',
