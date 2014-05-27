@@ -1,7 +1,7 @@
 {
 	"metadata": {
 		"name": "Mozillians",
-		"lastOpened": 1400604478597,
+		"lastOpened": 1401207142790,
 		"created": 1400163534764
 	},
 	"iconSets": [
@@ -807,7 +807,7 @@
 				},
 				{
 					"id": 81,
-					"order": 0,
+					"order": 24,
 					"prevSize": 28,
 					"code": 61526,
 					"name": "",

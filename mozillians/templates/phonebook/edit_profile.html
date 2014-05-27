@@ -147,7 +147,7 @@
             {% if not field.name == 'privacy' %}
               {{ field }}
               {% if field.name == 'DELETE' %}
-                <i class="icon-minus-sign"></i> {{ _('Delete') }}
+                <i class="icon-minus-circle"></i> {{ _('Delete') }}
               {% endif %}
             {% else %}
               {{ privacy_field(field) }}
@@ -312,7 +312,7 @@
           {% for field in language_form %}
             {{ field }}
             {% if field.name == 'DELETE' %}
-              <i class="icon-minus-sign"></i> {{ _('Delete') }}
+              <i class="icon-minus-circle"></i> {{ _('Delete') }}
             {% endif %}
           {% endfor %}
           <div class="error">
