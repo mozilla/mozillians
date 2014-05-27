@@ -98,7 +98,7 @@
                       <ul class="dropdown-menu">
                         <li>
                           <a id="nav-profile" href="{{ url('phonebook:profile_view', user.username) }}">
-                            <i class="icon-eye-open"></i>
+                            <i class="icon-eye"></i>
                             {{ _('View Profile') }}
                           </a>
                         </li>
@@ -117,14 +117,14 @@
                           </li>
                           <li>
                             <a id="nav-invite" href="{{ url('phonebook:invite') }}">
-                              <i class="icon-plus-sign"></i>
+                              <i class="icon-plus-circle"></i>
                               {{ _('Invite') }}
                             </a>
                           </li>
                         {% endif %}
                         <li>
                           <a id="nav-logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
-                            <i class="icon-reply"></i>
+                            <i class="icon-mail-reply"></i>
                             {{ _('Log Out') }}
                           </a>
                         </li>
@@ -132,7 +132,7 @@
                     </div>
                   {% else %}
                     <a id="nav-logout" class="browserid-logout no-profile" href="{{ url('phonebook:logout') }}">
-                      <i class="icon-reply"></i>
+                      <i class="icon-mail-reply"></i>
                       {{ _('Log Out') }}
                     </a>
                   {% endif %}

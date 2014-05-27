@@ -8,7 +8,7 @@
 		{
 			"selection": [
 				{
-					"order": 19,
+					"order": 18,
 					"id": 2,
 					"prevSize": 28,
 					"code": 58880,
@@ -17,7 +17,7 @@
 					"ligatures": ""
 				},
 				{
-					"order": 18,
+					"order": 17,
 					"id": 1,
 					"prevSize": 28,
 					"code": 58881,
@@ -26,7 +26,7 @@
 					"ligatures": ""
 				},
 				{
-					"order": 20,
+					"order": 19,
 					"id": 0,
 					"prevSize": 28,
 					"code": 58882,
@@ -40,7 +40,7 @@
 				"name": "Untitled Set"
 			},
 			"height": 1024,
-			"prevSize": 14,
+			"prevSize": 56,
 			"icons": [
 				{
 					"id": 2,
@@ -110,7 +110,7 @@
 				},
 				{
 					"id": 3,
-					"order": 22,
+					"order": 20,
 					"prevSize": 28,
 					"code": 61443,
 					"name": "envelope-o",
@@ -843,11 +843,11 @@
 				},
 				{
 					"id": 85,
-					"order": 0,
+					"order": 22,
 					"prevSize": 28,
 					"code": 61530,
-					"name": "",
-					"tempChar": "",
+					"name": "info-circle",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -888,11 +888,11 @@
 				},
 				{
 					"id": 90,
-					"order": 0,
+					"order": 23,
 					"prevSize": 28,
 					"code": 61536,
-					"name": "",
-					"tempChar": "",
+					"name": "arrow-left",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -901,7 +901,7 @@
 					"prevSize": 28,
 					"code": 61537,
 					"name": "arrow-right",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1018,7 +1018,7 @@
 					"prevSize": 28,
 					"code": 61550,
 					"name": "eye",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1054,7 +1054,7 @@
 					"prevSize": 28,
 					"code": 61555,
 					"name": "calendar",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1099,7 +1099,7 @@
 					"prevSize": 28,
 					"code": 61560,
 					"name": "chevron-down",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1198,7 +1198,7 @@
 					"prevSize": 28,
 					"code": 61572,
 					"name": "key",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1288,7 +1288,7 @@
 					"prevSize": 28,
 					"code": 61582,
 					"name": "external-link",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1540,7 +1540,7 @@
 					"prevSize": 28,
 					"code": 61612,
 					"name": "globe",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1549,7 +1549,7 @@
 					"prevSize": 28,
 					"code": 61613,
 					"name": "wrench",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1594,7 +1594,7 @@
 					"prevSize": 28,
 					"code": 61632,
 					"name": "group",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1671,11 +1671,11 @@
 				},
 				{
 					"id": 177,
-					"order": 23,
+					"order": 21,
 					"prevSize": 28,
 					"code": 61641,
 					"name": "bars",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -1918,7 +1918,7 @@
 					"prevSize": 28,
 					"code": 61670,
 					"name": "comments-o",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
@@ -2287,7 +2287,7 @@
 					"prevSize": 28,
 					"code": 61714,
 					"name": "mail-reply",
-					"tempChar": "",
+					"tempChar": "",
 					"ligatures": ""
 				},
 				{
