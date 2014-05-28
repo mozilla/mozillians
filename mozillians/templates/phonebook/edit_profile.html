@@ -122,22 +122,22 @@
       {{ privacy_field(profile_form.privacy_email) }}
     </fieldset>
 
-    <label>Your location</label>
+    <label>{{ _('Your location') }}</label>
     <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
     <!--<button id="locate" onclick="locateMe()">Locate me</button>-->
 
     <fieldset>
-      <label>Country</label> <span id="display_country"></span>
+      <label>{{ _('Country') }}</label> <span id="display_country"></span>
       {{ privacy_field(profile_form.privacy_geo_country) }}
     </fieldset>
 
     <fieldset>
-      <label>Region</label> <span id="display_province"></span>
+      <label>{{ _('Region') }}</label> <span id="display_province"></span>
       {{ privacy_field(profile_form.privacy_geo_region) }}
     </fieldset>
 
     <fieldset>
-      <label>City</label> <span id="display_city"></span>
+      <label>{{ _('City') }}</label> <span id="display_city"></span>
       {{ privacy_field(profile_form.privacy_geo_city) }}
     </fieldset>
 
