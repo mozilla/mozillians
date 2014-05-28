@@ -6,6 +6,7 @@ _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
 _gaq.push(['_setAccount', _gaAccountCode]);
 _gaq.push(['_setAllowLinker', true]);
 _gaq.push(['_setAllowAnchor', true]);
+_gaq.push(['_gat._anonymizeIp']);
 _gaq.push(['_trackPageview']);
 
 if (_gaAccountCode) {
