@@ -293,7 +293,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         attrs = ('id', 'is_vouched', 'ircname',
                  'region', 'city', 'allows_mozilla_sites',
-                 'allows_community_sites')
+                 'allows_community_sites', 'timezone')
         for a in attrs:
             data = getattr(obj, a)
             if isinstance(data, basestring):
@@ -352,6 +352,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 'groups': {'type': 'string', 'analyzer': 'whitespace'},
                 'languages': {'type': 'string', 'index': 'not_analyzed'},
                 'bio': {'type': 'string', 'analyzer': 'snowball'},
+                'timezone': {'type': 'string', 'analyzer': 'simple'},
                 'is_vouched': {'type': 'boolean'},
                 'allows_mozilla_sites': {'type': 'boolean'},
                 'allows_community_sites': {'type': 'boolean'},
@@ -369,7 +370,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                   'city__text', 'city__text_phrase',
                   'fullname__text', 'fullname__text_phrase',
                   'fullname__prefix', 'fullname__fuzzy'
-                  'groups__text')
+                  'groups__text', 'timezone__text')
         s = PrivacyAwareS(cls)
         if public:
             s = s.privacy_level(PUBLIC)
