@@ -151,8 +151,8 @@ class BasketTests(TestCase):
         group = GroupFactory.create(name='Web Development',
                                     functional_area=True)
         GroupFactory.create(name='Marketing', functional_area=True)
-        data = {'country': country.name,
-                'city': city.name,
+        data = {'country': 'gr',
+                'city': 'Athens',
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 

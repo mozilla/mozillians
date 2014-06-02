@@ -1,7 +1,8 @@
 import random
+
 import factory
 
-from mozillians.geo.models import Country, Region, City
+from mozillians.geo.models import City, Country, Region
 
 
 class CountryFactory(factory.DjangoModelFactory):
@@ -13,7 +14,7 @@ class CountryFactory(factory.DjangoModelFactory):
 
 class RegionFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Region
-    name = factory.Sequence(lambda n: 'RegionName{0}'.format(n))
+    name = factory.Sequence(lambda n: 'Region Name {0}'.format(n))
     mapbox_id = factory.Sequence(lambda n: 'province.{0}'.format(n))
     country = factory.SubFactory(CountryFactory)
 

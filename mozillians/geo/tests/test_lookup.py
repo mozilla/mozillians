@@ -1,14 +1,15 @@
 from django.test.utils import override_settings
 
 from mock import patch
-from mozillians.geo.models import Country, Region, City
-from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_, ok_
 from requests import HTTPError
 
 from mozillians.common.tests import TestCase
-from mozillians.geo.lookup import reverse_geocode, get_first_mapbox_geocode_result, \
-    result_to_country_region_city, result_to_country, result_to_region, result_to_city
+from mozillians.geo.models import Country, Region, City
+from mozillians.geo.lookup import (reverse_geocode, get_first_mapbox_geocode_result,
+                                   result_to_country_region_city, result_to_country,
+                                   result_to_region, result_to_city)
+from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 
 
 @patch('mozillians.geo.lookup.requests')
@@ -117,7 +118,7 @@ class TestResultToRegion(TestCase):
         # If region name has changed, we update our database
         country = CountryFactory.create()
         region = RegionFactory.create(country=country)
-        new_name = "New %s" % region.name
+        new_name = 'New %s' % region.name
         result = {
             'province': {
                 'name': new_name,

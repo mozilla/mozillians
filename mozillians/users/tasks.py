@@ -166,7 +166,7 @@ def update_basket_task(instance_id):
 
     # User location if known
     if instance.geo_country:
-        data['country'] = instance.geo_country.name
+        data['country'] = instance.geo_country.code
     if instance.geo_city:
         data['city'] = instance.geo_city.name
 

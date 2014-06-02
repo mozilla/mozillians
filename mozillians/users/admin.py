@@ -280,7 +280,9 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_vouched', 'is_vouched', 'vouched_by')
         }),
         ('Location', {
-            'fields': ('country', 'region', 'city', 'lng', 'lat', 'timezone')
+            'fields': ('country', 'region', 'city',
+                       'geo_country', 'geo_region', 'geo_city',
+                       'lng', 'lat', 'timezone')
         }),
         ('Services', {
             'fields': ('allows_community_sites', 'allows_mozilla_sites')
