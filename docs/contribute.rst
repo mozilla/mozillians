@@ -29,9 +29,23 @@ When you want to start contributing, you should :doc:`follow the installation in
 
 #. Commit changes to the code!
 
+#. Code!
+
+#. Lint the code::
+
+    $ flake8 mozillians
+
+   and fix any errors.
+
 #. Run the tests::
 
     $ ./manage.py test
+
+   and make sure that all tests pass.
+
+   Learn more about :doc:`testing </testing>`.
+
+#. Commit changes to the code!
 
 #. When you're done, figure out how many commits you've made::
 
