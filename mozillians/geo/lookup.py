@@ -140,20 +140,32 @@ def result_to_city(result, country, region):
     # City has more data, but is similar to region and country
     if 'city' in result:
         mapbox_city = result['city']
-        defaults = dict(
-                name=mapbox_city['name'],
-                country=country,
-                region=region,
-                lat=mapbox_city['lat'],
-                lng=mapbox_city['lon'],
-            )
-        city, created = City.objects.get_or_create(
-            mapbox_id=mapbox_city['id'],
-            defaults=defaults
+        created = False
+        lookup_args = dict(
+            name=mapbox_city['name'],
+            country=country,
+            region=region,
         )
+        defaults = dict(
+            mapbox_id=mapbox_city['id'],
+            lat=mapbox_city['lat'],
+            lng=mapbox_city['lon'],
+        )
+
+        try:
+            city = City.objects.get(mapbox_id=mapbox_city['id'])
+        except City.DoesNotExist:
+            # Mapbox sometimes returns multiple cities with the same
+            # name but different ids. So we need to check for existing
+            # (name, region, country) groups to avoid filling the
+            # database with multiple rows for a particular city.
+
+            city, created = City.objects.get_or_create(defaults=defaults, **lookup_args)
+
         if not created:
             # Update if anything has changed
             do_save = False
+            defaults.update(lookup_args)
             for key, val in defaults.iteritems():
                 if getattr(city, key) != val:
                     setattr(city, key, val)

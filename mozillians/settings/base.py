@@ -190,6 +190,7 @@ SOUTH_TESTS_MIGRATE = False
 
 # Django-CSP
 CSP_DEFAULT_SRC = ("'self'",
+                   'http://*.mapbox.com',
                    'https://*.mapbox.com')
 CSP_FONT_SRC = ("'self'",
                 'http://*.mozilla.net',
@@ -203,7 +204,8 @@ CSP_IMG_SRC = ("'self'",
                '*.google-analytics.com',
                '*.gravatar.com',
                '*.wp.com',
-               '*.mapbox.com')
+               'http://*.mapbox.com',
+               'https://*.mapbox.com')
 CSP_SCRIPT_SRC = ("'self'",
                   'http://www.mozilla.org',
                   'https://www.mozilla.org',
@@ -211,6 +213,7 @@ CSP_SCRIPT_SRC = ("'self'",
                   'https://*.mozilla.net',
                   'https://*.google-analytics.com',
                   'https://login.persona.org',
+                  'http://*.mapbox.com',
                   'https://*.mapbox.com')
 CSP_STYLE_SRC = ("'self'",
                  "'unsafe-inline'",
@@ -218,6 +221,7 @@ CSP_STYLE_SRC = ("'self'",
                  'https://www.mozilla.org',
                  'http://*.mozilla.net',
                  'https://*.mozilla.net',
+                 'http://*.mapbox.com',
                  'https://*.mapbox.com')
 
 # Elasticutils settings
@@ -307,5 +311,5 @@ HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozill
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
-# This must be set in local for the maps to work
-MAPBOX_MAP_ID = ''
+# This must be set to a working mapbox token for the maps to work.
+MAPBOX_MAP_ID = 'examples.map-i86nkdio'
