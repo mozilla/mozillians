@@ -78,7 +78,7 @@ def massage_results(country_code, results):
         result = dict([(item['type'], item) for item in result])
 
         if 'country' not in result:
-            print("SKIPPING result - no country")
+            print('SKIPPING result - no country')
             continue
 
         # Ignore any result that isn't in this user's country
@@ -86,7 +86,7 @@ def massage_results(country_code, results):
         # don't all match.
         result_name = result['country']['name']
         if result_name != country_name:
-            print("SKIPPING result - wrong country - %s != %s" % (result['country']['name'],
+            print('SKIPPING result - wrong country - %s != %s' % (result['country']['name'],
                                                                   country_name))
             continue
 
@@ -138,7 +138,7 @@ def massage_results(country_code, results):
         name = list(sets['city'])[0]
         item = cities[name]
         if 'lat' in item and 'lon' in item:
-            print("Get or create city: %r" % item)
+            print('Get or create city: %r' % item)
             city, created = City.objects.get_or_create(
                 mapbox_id=item['id'],
                 defaults=dict(
@@ -151,7 +151,7 @@ def massage_results(country_code, results):
             )
             retval['city'] = city
         else:
-            print("NO LAT, LONG for city %s" % item['name'])
+            print('NO LAT, LONG for city %s' % item['name'])
 
     return retval
 
@@ -161,16 +161,19 @@ class Command(BaseCommand):
     help = 'Geocode users'
 
     def handle(self, *args, **options):
-        print("Here we go!")
+        print('Here we go!')
 
         map_id = MAPBOX_MAP_ID
+
+        if not map_id:
+            raise Exception('MAPBOX_MAP_ID is not defined')
 
         # Reset mozillians from some country
         def reset_country(code):
             UserProfile.objects.filter(country=code, geo_coded=True).update(geo_coded=False)
             Geocoding.objects.filter(country=code).delete()
 
-            print("COUNTRIES['%s'] = %r" % (code, COUNTRIES[code]))
+            print('COUNTRIES["%s"] = %r' % (code, COUNTRIES[code]))
             print(repr(country_code_to_mapbox_name(code)))
 
         # Apply known data from geocoding model
@@ -185,7 +188,7 @@ class Command(BaseCommand):
         qset = UserProfile.objects.filter(geo_country=None).exclude(country='', region='', city='')
         # Skip the stupid ones that are just in there to test for injection attacks
         qset = qset.exclude(city__contains='<')
-        print("%d profiles left to geocode..." % qset.count())
+        print('%d profiles left to geocode...' % qset.count())
         for profile in qset.order_by('country', 'region', 'city'):
             # Profile might have been updated already while we were geocoding a previous user
             profile = UserProfile.objects.get(pk=profile.pk)
@@ -194,7 +197,7 @@ class Command(BaseCommand):
 
             city, region, country = profile.city, profile.region, profile.country
 
-            print("%d: %s, %s, %s" % (profile.pk, city, region, country))
+            print('%d: %s, %s, %s' % (profile.pk, city, region, country))
 
             # Mapbox does better if we use the full name for the country
             if country:
@@ -218,9 +221,9 @@ class Command(BaseCommand):
             results = data['results']
             results = massage_results(profile.country, results)
             if not results:
-                print("NO results for %s" % (name,))
+                print('NO results for %s' % (name,))
                 continue
-            print("Results: %s" % results.values())
+            print('Results: %s' % results.values())
             if 'city' in results:
                 profile.geo_city = results['city']
             if 'region' in results:
@@ -229,10 +232,10 @@ class Command(BaseCommand):
                 profile.geo_country = results['country']
             profile.save()
             count = Geocoding.remember(profile).apply()
-            print("Applied geocoding of %s to %d records" % (name, count))
+            print('Applied geocoding of %s to %d records' % (name, count))
 
             num_geocoded += 1
             if num_geocoded >= 500:
                 break
 
-        print("%d profiles left to geocode." % qset.count())
+        print('%d profiles left to geocode.' % (qset.count() - num_geocoded))

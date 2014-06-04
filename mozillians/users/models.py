@@ -184,8 +184,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     geo_country = models.ForeignKey('geo.Country', blank=True, null=True, on_delete=models.SET_NULL)
     geo_region = models.ForeignKey('geo.Region', blank=True, null=True, on_delete=models.SET_NULL)
     geo_city = models.ForeignKey('geo.City', blank=True, null=True, on_delete=models.SET_NULL)
-    lat = models.FloatField(_(u"Latitude"), blank=True, null=True)
-    lng = models.FloatField(_(u"Longitude"), blank=True, null=True)
+    lat = models.FloatField(_lazy(u'Latitude'), blank=True, null=True)
+    lng = models.FloatField(_lazy(u'Longitude'), blank=True, null=True)
 
     allows_community_sites = models.BooleanField(
         default=True,
@@ -292,19 +292,16 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         d = {}
 
         attrs = ('id', 'is_vouched', 'ircname',
-                 'region', 'city', 'allows_mozilla_sites',
-                 'allows_community_sites')
+                 'allows_mozilla_sites', 'allows_community_sites')
         for a in attrs:
             data = getattr(obj, a)
             if isinstance(data, basestring):
                 data = data.lower()
             d.update({a: data})
-        if obj.geo_country:
-            d.update(country=obj.geo_country.name)
-        if obj.geo_region:
-            d.update(region=obj.geo_region.name)
-        if obj.geo_city:
-            d.update(city=obj.geo_city.name)
+
+        d['country'] = [obj.geo_country.name, obj.geo_country.code] if obj.geo_country else None
+        d['region'] = obj.geo_region.name if obj.geo_region else None
+        d['city'] = obj.geo_city.name if obj.geo_city else None
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')
@@ -661,11 +658,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """
         if self.lat is None or self.lng is None:
             return
+
         from mozillians.geo.lookup import reverse_geocode
+
         try:
             result = reverse_geocode(self.lat, self.lng)
         except HTTPError:
-            logger.exception("Error calling mapbox")
+            logger.exception('Error calling mapbox')
         else:
             if result:
                 country, region, city = result
@@ -673,7 +672,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 self.geo_region = region
                 self.geo_city = city
             else:
-                logger.error("Got back NONE from reverse_geocode on %s, %s" % (self.lng, self.lat))
+                logger.error('Got back NONE from reverse_geocode on %s, %s' % (self.lng, self.lat))
 
 
 @receiver(dbsignals.post_save, sender=User,

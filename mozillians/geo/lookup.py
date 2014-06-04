@@ -42,7 +42,7 @@ def reverse_geocode(lat, lng):
 
     Raises exception if there's any error calling mapbox.
     """
-    result = get_first_mapbox_geocode_result("%s,%s" % (lng, lat))
+    result = get_first_mapbox_geocode_result('%s,%s' % (lng, lat))
     if result:
         return result_to_country_region_city(result)
     else:

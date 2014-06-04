@@ -127,7 +127,7 @@ class UserProfileTests(TestCase):
         eq_(result['city'], city.name)
         eq_(result['allows_community_sites'], profile.allows_community_sites)
         eq_(result['allows_mozilla_sites'], profile.allows_mozilla_sites)
-        eq_(result['country'], country.name)
+        eq_(set(result['country']), set(['gr', 'Greece']))
         eq_(result['fullname'], profile.full_name.lower())
         eq_(result['name'], profile.full_name.lower())
         eq_(result['bio'], profile.bio)

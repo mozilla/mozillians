@@ -14,7 +14,8 @@
     <link href="{{ static('mozillians/css/profile_edit.less') }}"
           type="text/less" rel="stylesheet" media="screen" />
   {% endcompress %}
-  <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css" type="text/css" rel="stylesheet" media="screen" />
+  <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css"
+        type="text/css" rel="stylesheet" media="screen" />
   {{ profile_form.media.css }}
 {% endblock extrahead %}
 
@@ -76,7 +77,7 @@
     {% endif %}
 
     {% if (profile_form.non_field_errors() or user_form.non_field_errors()
-         or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
+           or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
       <ul class="unstyled">
         {% for error in profile_form.non_field_errors() %}
           <li class="alert alert-error">{{ error }}</li>
@@ -91,7 +92,7 @@
           <li class="alert alert-error">{{ error }}</li>
         {% endfor %}
       </ul>
-  {% endif %}
+    {% endif %}
 
     <fieldset id="photo">
       <label>{{ _('Profile Photo') }}</label>
@@ -124,7 +125,6 @@
 
     <label>{{ _('Your location') }}</label>
     <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
-    <!--<button id="locate" onclick="locateMe()">Locate me</button>-->
 
     <fieldset>
       <label>{{ _('Country') }}</label> <span id="display_country"></span>
