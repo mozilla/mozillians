@@ -23,7 +23,7 @@ from sorl.thumbnail import ImageField, get_thumbnail
 from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.common.helpers import gravatar
+from mozillians.common.helpers import absolutify, gravatar
 from mozillians.common.helpers import offset_of_timezone
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
@@ -123,6 +123,10 @@ class UserProfilePrivacyModel(models.Model):
         model that are privacy-controlled, and whose values are the default
         values to use for those fields when the user is not privileged to
         view their actual value.
+
+        Note: should be only used through UserProfile class. We should
+        fix this.
+
         """
         # Cache on the class object
         if cls.CACHED_PRIVACY_FIELDS is None:
@@ -532,7 +536,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
         if (not self.photo and self.privacy_photo >= privacy_level):
             return gravatar(self.user.email, size=geometry)
-        return self.get_photo_thumbnail(geometry, **kwargs).url
+        return absolutify(self.get_photo_thumbnail(geometry, **kwargs).url)
 
     def vouch(self, vouched_by, commit=True):
         if self.is_vouched:
@@ -850,6 +854,9 @@ class ExternalAccount(models.Model):
         else:
             return super(ExternalAccount, self).unique_error_message(model_class, unique_check)
 
+    def __unicode__(self):
+        return self.type
+
 
 class Language(models.Model):
     code = models.CharField(max_length=63, choices=get_languages_for_locale('en'))
@@ -861,6 +868,18 @@ class Language(models.Model):
 
     def __unicode__(self):
         return self.code
+
+    def get_english(self):
+        return self.get_code_display()
+
+    def get_native(self):
+        if not getattr(self, '_native', None):
+            languages = get_languages_for_locale(self.code)
+            for code, language in languages:
+                if code == self.code:
+                    self._native = language
+                    break
+        return self._native
 
     def unique_error_message(self, model_class, unique_check):
         if (model_class == type(self) and unique_check == ('code', 'userprofile')):

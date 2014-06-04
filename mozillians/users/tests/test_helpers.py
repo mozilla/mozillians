@@ -39,9 +39,3 @@ class GetTranslatedLanguagesTests(TestCase):
     def test_valid_locale(self):
         get_languages_for_locale('en')
         self.assertIn('en', AVAILABLE_LANGUAGES.keys())
-
-    def test_valid_locale_not_cached(self):
-        # check that key does not exist
-        self.assertNotIn('el', AVAILABLE_LANGUAGES.keys())
-        get_languages_for_locale('el')
-        self.assertIn('el', AVAILABLE_LANGUAGES.keys())

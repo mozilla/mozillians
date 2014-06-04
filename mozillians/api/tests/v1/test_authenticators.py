@@ -3,7 +3,7 @@ from django.test.client import RequestFactory
 from nose.tools import eq_, ok_
 from test_utils import TestCase
 
-from mozillians.api.authenticators import AppAuthentication
+from mozillians.api.v1.authenticators import AppAuthentication
 from mozillians.api.tests import APIAppFactory
 
 

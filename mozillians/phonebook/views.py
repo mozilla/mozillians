@@ -17,6 +17,7 @@ from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 
 import mozillians.phonebook.forms as forms
+from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.helpers import redirect
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
@@ -199,7 +200,6 @@ def edit_profile(request):
                 user_groups=user_groups,
                 my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
-                apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
                 mapbox_id=settings.MAPBOX_MAP_ID)
 
@@ -313,6 +313,26 @@ def delete_invite(request, invite_pk):
             (deleted_invite.recipient, deleted_invite.recipient))
     messages.success(request, msg)
     return redirect('phonebook:invite')
+
+
+def developers(request):
+    profile = request.user.userprofile
+    apikey_request_form = forms.APIKeyRequestForm(
+        request.POST or None,
+        instance=APIv2App(enabled=True, owner=profile)
+    )
+
+    if apikey_request_form.is_valid():
+        apikey_request_form.save()
+        msg = _(u'API Key generated successfully.')
+        messages.success(request, msg)
+
+    data = {
+        'apps': request.user.apiapp_set.filter(is_active=True),
+        'appsv2': profile.apps.filter(enabled=True),
+        'apikey_request_form': apikey_request_form,
+    }
+    return render(request, 'phonebook/developers.html', data)
 
 
 @require_POST

@@ -38,3 +38,6 @@
 [submodule "vendor-local/src/sorl-thumbnail"]
 	path = vendor-local/src/sorl-thumbnail
 	url = git://github.com/mariocesar/sorl-thumbnail
+[submodule "vendor-local/src/django-waffle"]
+	path = vendor-local/src/django-waffle
+	url = git://github.com/jsocol/django-waffle.git

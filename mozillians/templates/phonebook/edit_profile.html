@@ -366,7 +366,7 @@
           and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
           <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
         {% endtrans %}
-      <h5>{{ _('Other Sites') }}</h5>
+      <h4>{{ _('API Version 1') }}</h4>
       <p>
         {{ profile_form.allows_community_sites.label_tag() }}
         {{ profile_form.allows_community_sites }}
@@ -375,36 +375,15 @@
         {{ profile_form.allows_mozilla_sites.label_tag() }}
         {{ profile_form.allows_mozilla_sites }}
       </p>
+      <p>
+        API Version 2, currently under testing, respects the defined
+        per field privacy levels. These fields will become obsolete
+        and eventually dropped along with the API Version 1.
+      </p>
+      <p>
+        Manage your API keys from the <a href="{{ url('phonebook:developers') }}">Developers</a> page.
+      </p>
 
-      {% if user.userprofile.is_vouched %}
-        <h5>{{ _('Developers') }}</h5>
-        <p class="field_description">
-          {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api.html',
-                   bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                         'product=Data%20Safety&cc=williamr@mozilla.com'
-                                         '&short_desc=Phonebook%20API%20Usage%20Request'),
-                   dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
-            Take a look at the list of
-            the <a href="{{ api_schema_url }}">API methods we've
-            made available</a>. To use this API, you'll need to
-            get approval from the Privacy team. To get started,
-            <a href="{{ bugzilla_request_url }}">file
-            a bug</a>. If you have any questions, talk to us in
-            our <a href="{{ dev_form_url }}">
-            development forum</a>.
-          {% endtrans %}
-        </p>
-        <ul>
-          <strong>{{ _('Your approved apps:') }}</strong>
-          {% for app in apps %}
-            <li>{{ app.name }} {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}<br>
-              <small><strong>{{ _('Key') }}:</strong> {{ app.key }}</small>
-            </li>
-          {% else %}
-            {{ _('You have no registered, active apps.') }}
-          {% endfor %}
-        </ul>
-      {% endif %}
     </fieldset>
 
     {% if profile.is_complete %}

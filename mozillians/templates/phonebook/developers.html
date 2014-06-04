@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ _('API') }}
+{% endblock %}
+
+{% block body_id %}edit-profile{% endblock %}
+
+{% block content %}
+<header>
+  <h1>{{ _('Mozillians API') }}</h1>
+</header>
+<h2>{{ _('API Version 1') }}</h4>
+<p class="field_description">
+  {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api.html',
+           bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                 'product=Data%20Safety&cc=williamr@mozilla.com'
+                                 '&short_desc=Phonebook%20API%20Usage%20Request'),
+           dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
+            Take a look at the list of
+            the <a href="{{ api_schema_url }}">API methods we've
+            made available</a>. To use this API, you'll need to
+            get approval from the Privacy team. To get started,
+            <a href="{{ bugzilla_request_url }}">file
+            a bug</a>. If you have any questions, talk to us in
+            our <a href="{{ dev_form_url }}">
+            development forum</a>.
+          {% endtrans %}
+        </p>
+        <strong>{{ _('Your approved apps:') }}</strong>
+          <ul>
+            {% for app in apps %}
+              <li><strong>{{ app.name }}</strong>
+                {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}
+                <ul>
+                  <li>
+                    {{ _('Key') }}: {{ app.key }}
+                  </li>
+                </ul>
+              </li>
+            {% else %}
+              {{ _('You have no active apps.') }}
+            {% endfor %}
+          </ul>
+        <ul>
+
+{% if waffle.flag('apiv2') %}
+  <h2>{{ _('API Version 2') }}</h4>
+  
+  <p class="field_description">
+    {% trans api_schema_url=url('apiroot') + 'v2/',
+             bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                   'product=Data%20Safety&cc=williamr@mozilla.com'
+                                   '&short_desc=Phonebook%20API%20Version%202%20Usage%20Request'),
+             dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
+      Take a look at the list of
+      the <a href="{{ api_schema_url }}">API methods we've
+      made available</a>. 
+    
+      You can instantly get a new API key by submitting a
+      request bellow. If you need a key with elevated
+      permissions you'll have to
+      <a href="{{ bugzilla_request_url }}">file a bug</a>. If you have
+      any questions, talk to us in our <a href="{{ dev_form_url }}">
+      development forum</a>. 
+  
+    {% endtrans %}
+  </p>
+  <strong>{{ _('Your apps:') }}</strong>
+  <ul>
+    {% for app in appsv2 %}
+    <li><strong>{{ app.name }}</strong>
+      {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}
+      <ul>
+        <li>
+          {{ _('Key') }}: {{ app.key }}
+        </li>
+        <li>
+          {{ _('Level') }}: {{ app.get_privacy_level_display() }}
+        </li>
+      </ul>
+    </li>
+    {% else %}
+    {{ _('You have no active apps.') }}
+    {% endfor %}
+  </ul>
+  
+  Register a new app
+  <form method="POST">
+    {{ csrf() }}
+    {{ apikey_request_form.as_p() }}
+    <button type="submit">{{ _('Create Profile') }}</button>
+  </form>
+{% endif %}
+
+{% endblock %}

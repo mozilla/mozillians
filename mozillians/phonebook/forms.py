@@ -13,6 +13,7 @@ import happyforms
 from PIL import Image
 from tower import ugettext as _, ugettext_lazy as _lazy
 
+from mozillians.api.models import APIv2App
 from mozillians.groups.models import Skill
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
@@ -247,3 +248,10 @@ class InviteForm(happyforms.ModelForm):
     class Meta:
         model = Invite
         fields = ['recipient']
+
+
+class APIKeyRequestForm(happyforms.ModelForm):
+
+    class Meta:
+        model = APIv2App
+        fields = ('name', 'description', 'url')

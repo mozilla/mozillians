@@ -11,6 +11,7 @@ urlpatterns = patterns(
     url(r'^logout/$', 'views.logout', name='logout'),
     url(r'^register/$', 'views.register', name='register'),
     url(r'^user/edit/$', 'views.edit_profile', name='profile_edit'),
+    url(r'^developers/$', 'views.developers', name='developers'),
     url(r'^u/(?P<username>[\w.@+-]+)/$', 'views.view_profile',
         name='profile_view'),
     url(r'^confirm-delete/$', 'views.confirm_delete',

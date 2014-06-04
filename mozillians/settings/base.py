@@ -84,7 +84,8 @@ TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
 JINGO_EXCLUDE_APPS = [
     'admin',
     'autocomplete_light',
-    'browserid'
+    'browserid',
+    'rest_framework',
 ]
 
 
@@ -105,7 +106,10 @@ MIDDLEWARE_CLASSES = get_middleware(append=[
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
-    'mozillians.groups.middleware.OldGroupRedirectionMiddleware'])
+    'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
+
+    'waffle.middleware.WaffleMiddleware',
+])
 
 # StrictTransport
 STS_SUBDOMAINS = True
@@ -154,6 +158,8 @@ INSTALLED_APPS = get_apps(append=[
     'django_browserid',
     'jingo_offline_compressor',
     'import_export',
+    'rest_framework',
+    'waffle',
 
     # DB migrations
     'south',
@@ -313,3 +319,16 @@ HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
 # This must be set to a working mapbox token for the maps to work.
 MAPBOX_MAP_ID = 'examples.map-i86nkdio'
+
+REST_FRAMEWORK = {
+    'URL_FIELD_NAME': '_url',
+    'PAGINATE_BY': 30,
+    'MAX_PAGINATE_BY': 200,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'mozillians.api.v2.permissions.MozilliansPermission',
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+}
