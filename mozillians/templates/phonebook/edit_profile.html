@@ -123,32 +123,53 @@
       {{ privacy_field(profile_form.privacy_email) }}
     </fieldset>
 
-    <label>{{ _('Your location') }}</label>
-    <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+    <fieldset>
+      <h5>{{ _('Your location') }}</h5>
+      <div id="location">
+        <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+        <input id="location_search" type="search"/>
+        <input id="location_search_button" class="button" type="button" value="Search location"/>
+        <img class="loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+        <ol id="location_search_results" class="scroll-shadows"></ol>
+      </div>
+    </fieldset>
 
     <fieldset>
-      <label>{{ _('Country') }}</label> <span id="display_country"></span>
+      <label>{{ _('Country') }}</label>
+      <span id="display_country" class="geodisplay"
+            data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
+      </span>
+      <div class="geocheckbox">
+        {{ profile_form.savecountry }}
+        {{ profile_form.savecountry.label_tag() }}
+      </div>
       {{ privacy_field(profile_form.privacy_geo_country) }}
     </fieldset>
 
     <fieldset>
-      <label>{{ _('Region') }}</label> <span id="display_province"></span>
+      <label>{{ _('Region') }}</label>
+      <span id="display_province" class="geodisplay"
+            data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
+      </span>
+      <div class="geocheckbox">
+        {{ profile_form.saveregion }}
+        {{ profile_form.saveregion.label_tag() }}
+      </div>
       {{ privacy_field(profile_form.privacy_geo_region) }}
     </fieldset>
 
     <fieldset>
-      <label>{{ _('City') }}</label> <span id="display_city"></span>
+      <label>{{ _('City') }}</label>
+      <span id="display_city" class="geodisplay"
+            data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
+      <div class="geocheckbox">
+        {{ profile_form.savecity }}
+        {{ profile_form.savecity.label_tag() }}
+      </div>
       {{ privacy_field(profile_form.privacy_geo_city) }}
     </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.lat) }}
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.lng) }}
-    </fieldset>
-
+      {{ profile_form.lat }}
+      {{ profile_form.lng }}
     <fieldset>
       {{ mozillians_field(profile_form.timezone) }}
       {{ privacy_field(profile_form.privacy_timezone) }}

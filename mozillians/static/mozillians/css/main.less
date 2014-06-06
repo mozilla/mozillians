@@ -20,6 +20,7 @@
 // Search Results
 // Groups
 // Invite/Invited
+// Special
 
 
 /* Imports
@@ -1508,11 +1509,6 @@ body#edit-profile {
     section {
         margin-bottom: 25px;
     }
-    #map{
-        width:100%;
-        height:280px;
-        margin-bottom:15px;
-    }
 }
 
 /* Generic Groups, Functional Areas and Search Results
@@ -1765,6 +1761,7 @@ body#group-show {
     }
 }
 
+
 /* Invite/Invited
 ================== */
 body#invite {
@@ -1793,4 +1790,19 @@ body#invite {
     .card button {
         margin-top: 30px;
     }
+}
+
+
+/* Special
+================== */
+.scroll-shadows{
+    background:
+        linear-gradient(white 30%, rgba(255,255,255,0)),
+        linear-gradient(rgba(255,255,255,0), white 70%) 0 100%,
+        radial-gradient(farthest-side at 50% 0, rgba(0,0,0,0.2), rgba(0,0,0,0)),
+        radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,0.2), rgba(0,0,0,0)) 0 100%;
+
+    background-repeat: no-repeat;
+    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+    background-attachment: local, local, scroll, scroll;
 }
