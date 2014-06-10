@@ -160,7 +160,11 @@ def edit_profile(request):
 
     profile_form = form(request.POST or None, request.FILES or None,
                         instance=profile,
-                        initial=dict(skills=user_skills))
+                        initial={'skills': user_skills,
+                                 'saveregion': True if profile.geo_region else False,
+                                 'savecity': True if profile.geo_city else False,
+                                 'lat': profile.lat,
+                                 'lng': profile.lng})
 
     email_form = forms.EmailForm(request.POST or None,
                                  initial={'email': request.user.email,
@@ -201,7 +205,7 @@ def edit_profile(request):
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
-                mapbox_id=settings.MAPBOX_MAP_ID)
+                mapbox_id=settings.MAPBOX_PROFILE_ID)
 
     # If there are form errors, don't send a 200 OK.
     status = 400 if any(f.errors for f in all_forms) else 200

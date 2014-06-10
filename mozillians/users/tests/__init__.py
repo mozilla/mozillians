@@ -19,6 +19,8 @@ class UserFactory(factory.DjangoModelFactory):
     def userprofile(self, create, extracted, **kwargs):
         self.userprofile.full_name = ' '.join([self.first_name, self.last_name])
         self.userprofile.country = 'gr'
+        self.userprofile.lat = 39.727924
+        self.userprofile.lng = 21.592328
         if extracted:
             for key, value in extracted.items():
                 setattr(self.userprofile, key, value)

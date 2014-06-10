@@ -311,5 +311,7 @@ HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozill
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
-# This must be set to a working mapbox token for the maps to work.
+# These must both be set to a working mapbox token for the maps to work.
 MAPBOX_MAP_ID = 'examples.map-i86nkdio'
+# This is the token for the edit profile page alone.
+MAPBOX_PROFILE_ID = MAPBOX_MAP_ID

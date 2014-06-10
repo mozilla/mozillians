@@ -122,6 +122,15 @@ class ProfileForm(happyforms.ModelForm):
         help_text=_lazy(u'Start typing to add a skill (example: Python, '
                         u'javascript, Graphic Design, User Research)'),
         required=False)
+    lat = forms.FloatField(widget=forms.HiddenInput)
+    lng = forms.FloatField(widget=forms.HiddenInput)
+    savecountry = forms.BooleanField(
+        label=_lazy('Required'),
+        initial=True, required=False,
+        widget=forms.CheckboxInput(attrs={'disabled': 'disabled'})
+    )
+    saveregion = forms.BooleanField(label=_lazy('Save'), required=False)
+    savecity = forms.BooleanField(label=_lazy('Save'), required=False)
 
     class Meta:
         model = UserProfile
@@ -129,7 +138,6 @@ class ProfileForm(happyforms.ModelForm):
                   'allows_community_sites', 'tshirt',
                   'title', 'allows_mozilla_sites',
                   'date_mozillian', 'story_link', 'timezone',
-                  'lat', 'lng',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_email', 'privacy_timezone', 'privacy_tshirt',
                   'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
@@ -179,6 +187,14 @@ class ProfileForm(happyforms.ModelForm):
             self.instance.reverse_geocode()
             if not self.instance.geo_country:
                 raise ValidationError(_("Location must be inside a country."))
+            # If the user doesn't want their region/city saved, respect it.
+            if not self.cleaned_data.get('saveregion'):
+                self.instance.geo_region = None
+            if not self.cleaned_data.get('savecity'):
+                self.instance.geo_city = None
+        else:
+            raise ValidationError(_('Location data cannot be empty.'))
+
         return self.cleaned_data
 
     def save(self, *args, **kwargs):
