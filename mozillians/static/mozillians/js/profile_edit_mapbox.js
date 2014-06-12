@@ -1,9 +1,12 @@
-'use strict';
 (function(){
+    'use strict';
+
+
     // DOM ELEMENTS
     var display_country = $('#display_country');
     var display_region = $('#display_province');
     var display_city = $('#display_city');
+
     var save_region = $('#id_saveregion');
     var save_city = $('#id_savecity');
 
@@ -12,7 +15,8 @@
 
     var search_el = $('#location_search');
     var results_el = $('#location_search_results');
-    var loading_el = $('#location .loading');
+    var search_loading_el = $('#location_search_loading');
+    var gps_loading_el = $('#location_gps_loading');
 
 
     // MAPBOX
@@ -49,70 +53,60 @@
 
 
     // GEOCODERS
-    function forwardGeocode(query){
-        loading_el.show();
-        $.ajax({
-            url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+query+'.json',
-            success:function(data){
-                results_el.children().remove();
-                loading_el.hide();
-                for (var i = 0; i < data.results.length; i++) {
-                    var result = data.results[i];
-                    var text = '';
-                    for (var j = 0; j < result.length; j++) {
-                        text += result[j].name;
-                        if(j < result.length-1) text += ', ';
+    var xhr = $.ajax();
+
+    function forwardGeocode(query,takeFirstResult){
+        if(query){
+            if(takeFirstResult){ results_el.hide(); }
+            search_loading_el.show();
+            xhr.abort();
+            xhr = $.ajax({
+                url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+query+'.json',
+                success:function(data){
+                    results_el.children().remove();
+                    search_loading_el.hide();
+                    if(data.results.length > 0){
+                        if(takeFirstResult){
+                            selectSearchResult(data.results[0]);
+                        }else{
+                            for (var i = 0; i < data.results.length; i++) {
+                                var result = data.results[i];
+                                var text = '';
+                                for (var j = 0; j < result.length; j++) {
+                                    text += result[j].name;
+                                    if(j < result.length-1) text += ', ';
+                                }
+                                var item = $('<li>').text(text).appendTo(results_el);
+                                item[0].datum = result;
+                            }
+                            results_el.show();
+                        }
+                    }else{
+                        results_el.hide();
                     }
-                    var item = $('<li>').text(text).appendTo(results_el);
-                    item[0].datum = result;
                 }
-                if(data.results.length > 0){
-                    results_el.show();
-                }else{
-                    results_el.hide();
-                }
-            }
-        });
+            });
+        }
     }
 
-    function reverseGeocode(coordinates, init){
-        $.ajax({
+    function reverseGeocode(coordinates, modifyForm){
+        xhr.abort();
+        xhr = $.ajax({
             url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+coordinates.lng+','+coordinates.lat+'.json',
             success: function(data){
                 you.setLatLng(data.results[0][0]);
                 displayResults(data.results[0]);
                 var youLatLng = you.getLatLng();
-                set_latitude.val(youLatLng.lat);
-                set_longitude.val(youLatLng.lng);
-                if (init) {
-                    var region_name = display_region.data('mapbox');
-                    var city_name = display_city.data('mapbox');
-                    if (!region_name) {
-                        display_region.text('');
-                        save_region.prop('checked', false);
-                    }
-                    if (!city_name) {
-                        display_city.text('');
-                        save_city.prop('checked', false);
-                    }
+                if(modifyForm){
+                    set_latitude.val(youLatLng.lat);
+                    set_longitude.val(youLatLng.lng);
                 }
             }
         });
     }
 
-    function jumptoGeocode(query){
-        $.ajax({
-            url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+query+'.json',
-            success: function(data){
-                you.setLatLng(data.results[0][0]);
-                displayResults(data.results[0]);
-                var youLatLng = you.getLatLng();
-                set_latitude.val(youLatLng.lat);
-                set_longitude.val(youLatLng.lng);
-            }
-        });
-    }
 
+    // DISPLAY
     function displayResults(results){
         display_country.text('');
         display_region.text('');
@@ -125,8 +119,9 @@
 
         if(results !== undefined){
             var zoomed = false;
+            var centered = false;
             for(var i=0; i<results.length; i++){
-                var bounds_converted = undefined;
+                var bounds_converted;
                 if(results[i].bounds !== undefined){
                     bounds_converted = [
                         [results[i].bounds[1],results[i].bounds[0]],
@@ -140,6 +135,10 @@
                         if(!zoomed){
                             map.fitBounds(bounds_converted);
                             zoomed = true;
+                        }
+                        if(!centered){
+                            you.setLatLng([results[i].lat,results[i].lon]);
+                            centered = true;
                         }
                         if(display_bounds){
                             bounds_city.setBounds(bounds_converted);
@@ -155,6 +154,10 @@
                             map.fitBounds(bounds_converted);
                             zoomed = true;
                         }
+                        if(!centered){
+                            you.setLatLng([results[i].lat,results[i].lon]);
+                            centered = true;
+                        }
                         if(display_bounds){
                             bounds_region.setBounds(bounds_converted);
                             bounds_region.setStyle(style_region);
@@ -168,6 +171,10 @@
                             map.fitBounds(bounds_converted);
                             zoomed = true;
                         }
+                        if(!centered){
+                            you.setLatLng([results[i].lat,results[i].lon]);
+                            centered = true;
+                        }
                         if(display_bounds){
                             bounds_country.setBounds(bounds_converted);
                             bounds_country.setStyle(style_country);
@@ -175,22 +182,37 @@
                     }
                 }
             }
+            map.panTo(you.getLatLng());
+            results_el.hide();
         }
     }
 
 
     // SEARCH
-    function selectSearchResult(listItem){
-        displayResults(listItem.datum);
-        map.setView(listItem.datum[0]);
+    function selectSearchResult(searchResult){
+        displayResults(searchResult);
 
-        you.setLatLng([listItem.datum[0].lat,listItem.datum[0].lon]);
+        you.setLatLng([searchResult[0].lat,searchResult[0].lon]);
 
-        set_latitude.val(listItem.datum[0].lat);
-        set_longitude.val(listItem.datum[0].lon);
-
-        results_el.hide();
+        set_latitude.val(searchResult[0].lat);
+        set_longitude.val(searchResult[0].lon);
     }
+
+
+    // LOCATE ME VIA GPS
+    function locateMe(){
+        navigator.geolocation.getCurrentPosition(handleLocating, handleError, { enableHighAccuracy:true });
+    }
+
+    function handleLocating(geoposition){
+        reverseGeocode({
+            lat: geoposition.coords.latitude,
+            lng: geoposition.coords.longitude
+        },true);
+        gps_loading_el.hide();
+    }
+
+    function handleError(err){}
 
 
     // MAP
@@ -200,6 +222,7 @@
             detectRetina: true,
             minZoom: 1,
         }));
+
     map.scrollWheelZoom.disable();
 
     map.attributionControl.addAttribution('© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
@@ -209,7 +232,7 @@
     }).addTo(map);
 
     you.on('dragend',function(event){
-        reverseGeocode(event.target.getLatLng());
+        reverseGeocode(event.target.getLatLng(),true);
     });
 
     bounds_country = L.rectangle([[0,0],[0,0]], style_hidden).addTo(map);
@@ -218,66 +241,76 @@
 
 
     // INIT FOR EXISTING FORM DATA
-    var country_name = display_country.data('mapbox');
-    var region_name = display_region.data('mapbox');
+    var mapbox_country = display_country.data('mapbox');
+    var mapbox_region = display_region.data('mapbox');
+    var mapbox_city = display_city.data('mapbox');
+    var latlng = {
+        lat: set_latitude.val(),
+        lng: set_longitude.val()
+    };
 
-    var latlng = [
-        set_latitude.val(),
-        set_longitude.val()
-    ];
-    if(!isNaN(parseFloat(latlng[0])) && !isNaN(parseFloat(latlng[1]))){
-        reverseGeocode({
-            lat: latlng[0],
-            lng: latlng[1]
-        }, true);
-
-    }
-    else {
-        // No lat/lng, try to center the map based on country & region names if available.
-        if (region_name) {
-            display_region.text(region_name);
-            jumptoGeocode(region_name);
+    if(!isNaN(parseFloat(latlng.lat)) && !isNaN(parseFloat(latlng.lng))){
+        // use coordinates if present
+        you.setLatLng(latlng);
+        reverseGeocode(latlng,false);
+        if (!mapbox_region) {
+            display_region.text('');
+            save_region.prop('checked', false);
         }
-        else if (country_name) {
-            display_region.text(country_name);
-            jumptoGeocode(country_name);
+        if (!mapbox_city) {
+            display_city.text('');
+            save_city.prop('checked', false);
+        }
+    }else{
+        // no coordinates. run a search with the text that's available
+        // assume profiles with city always comes with lat/lng
+        if(mapbox_region){
+            display_region.text(mapbox_region);
+            forwardGeocode(mapbox_region,true);
+        }else if(mapbox_country){
+            display_country.text(mapbox_country);
+            forwardGeocode(mapbox_country,true);
         }
     }
-
 
 
     // INIT PAGE ELEMENTS
     results_el.hide();
-    loading_el.hide();
+    search_loading_el.hide();
+    gps_loading_el.hide();
 
 
     // EVENTS
-    var keystrokeTimer = undefined;
+    var keystrokeTimer;
 
     $('#location_search_button').click(function(){
         forwardGeocode(search_el.val());
-        results_el.show();
+    });
+
+    $('#location_gps_button').click(function(){
+        results_el.hide();
+        gps_loading_el.show();
+        locateMe();
     });
 
     results_el.on('click', 'li', function(){
-        selectSearchResult(this);
+        selectSearchResult(this.datum);
     });
 
     search_el.on('keydown changed', function(event){
+        clearTimeout(keystrokeTimer);
         if(event.keyCode === 13){ // enter
             event.preventDefault();
-            selectSearchResult(results_el.children('li')[0]);
-            results_el.hide();
+            forwardGeocode(search_el.val(),true);
         }else{ // all other keys
-            clearTimeout(keystrokeTimer);
             keystrokeTimer = setTimeout(function(){
                 if(search_el.val() !== ''){
-                    forwardGeocode(search_el.val());
+                    forwardGeocode(search_el.val(),false);
                 }else{
-                    loading_el.hide();
+                    search_loading_el.hide();
                     results_el.hide();
                 }
-            },200);
+            },250);
         }
     });
 }());

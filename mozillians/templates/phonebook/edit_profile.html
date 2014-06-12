@@ -127,9 +127,11 @@
       <h5>{{ _('Your location') }}</h5>
       <div id="location">
         <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+        <div id="location_gps_button"><i class="icon-target"></i></div>
+        <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
         <input id="location_search" type="search"/>
         <input id="location_search_button" class="button" type="button" value="Search location"/>
-        <img class="loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+        <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
         <ol id="location_search_results" class="scroll-shadows"></ol>
       </div>
     </fieldset>

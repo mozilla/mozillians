@@ -93,13 +93,15 @@ span.geodisplay {
     -webkit-overflow-scrolling: touch;
     li {
       cursor: pointer;
+      padding-left: 0.5em;
+      border-radius: 1em;
     }
     li:hover {
       background-color: #eee;
     }
   }
 
-  .loading {
+  #location_search_loading {
     bottom: 4.4em;
     right: 0.8em;
     height: 4px;
@@ -113,5 +115,29 @@ span.geodisplay {
     width: 100%;
     height: 100%;
     margin-bottom: 15px;
+  }
+
+  #location_gps_button{
+    width: 26px;
+    height: 26px;
+    top: 71px;
+    left: 10px;
+    line-height: 29px;
+    font-size: 18px;
+    text-align: center;
+    border: solid 1px #9a9a9a;
+    border-radius: 3px;
+    background-color: white;
+    cursor:pointer;
+  }
+  #location_gps_button:hover{
+    background-color:#fafafa;
+  }
+
+  #location_gps_loading{
+    width:28px;
+    height:4px;
+    top:100px;
+    left:10px;
   }
 }
