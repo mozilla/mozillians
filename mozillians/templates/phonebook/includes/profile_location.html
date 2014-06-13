@@ -7,7 +7,7 @@
   {%- endif -%},
 {% endif %}
 {% if profile.geo_region %}
-  {% if profile.country and user.is_authenticated() %}
+  {% if profile.geo_country and user.is_authenticated() %}
     <a href="{{ url('phonebook:list_region', country=profile.geo_country.name, region=profile.geo_region.name) }}">
       <span class="region">{{ profile.geo_region.name }}</span></a>
   {%- else -%}
