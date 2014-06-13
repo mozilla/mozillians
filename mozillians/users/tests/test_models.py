@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 from django.utils import unittest
-from django.utils.timezone import make_aware, now
+from django.utils.timezone import make_aware
 
 import basket
 import pytz
@@ -437,76 +437,6 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         ok_(user.userprofile.get_absolute_url())
 
-    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
-    def test_auto_vouching(self):
-        user_1 = UserFactory.create(vouched=False, email='foo@example.com')
-        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
-        ok_(user_1.userprofile.is_vouched)
-        ok_(not user_2.userprofile.is_vouched)
-
-    @patch('mozillians.users.models.UserProfile._email_now_vouched')
-    @patch('mozillians.users.models.datetime')
-    def test_vouch(self, datetime_mock, email_vouched_mock):
-        dt = make_aware(datetime(2012, 01, 01, 00, 10), pytz.UTC)
-        datetime_mock.now.return_value = dt
-        user_1 = UserFactory.create()
-        user_2 = UserFactory.create(vouched=False)
-        user_2.userprofile.vouch(user_1.userprofile)
-        user_2 = User.objects.get(id=user_2.id)
-        ok_(user_2.userprofile.is_vouched)
-        eq_(user_2.userprofile.vouched_by, user_1.userprofile)
-        eq_(user_2.userprofile.date_vouched, dt)
-        ok_(email_vouched_mock.called)
-
-    @patch('mozillians.users.models.UserProfile._email_now_vouched')
-    def test_vouch_no_commit(self, email_vouched_mock):
-        user_1 = UserFactory.create()
-        user_2 = UserFactory.create(vouched=False)
-        user_2.userprofile.vouch(user_1.userprofile, commit=False)
-        user_2 = User.objects.get(id=user_2.id)
-        ok_(not user_2.userprofile.is_vouched)
-        ok_(not user_2.userprofile.vouched_by)
-        ok_(not user_2.userprofile.date_vouched)
-        ok_(email_vouched_mock.called)
-
-    def test_voucher_public(self):
-        voucher = UserFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'vouched_by': voucher.userprofile})
-        voucher_profile = voucher.userprofile
-        voucher_profile.privacy_full_name = PUBLIC
-        voucher_profile.save()
-
-        user_profile = user.userprofile
-        user_profile.set_instance_privacy_level(PUBLIC)
-
-        eq_(user_profile.vouched_by, voucher.userprofile)
-
-    def test_voucher_nonpublic(self):
-        voucher = UserFactory.create()
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'vouched_by': voucher.userprofile})
-        user_profile = user.userprofile
-        user_profile.set_instance_privacy_level(PUBLIC)
-
-        eq_(user_profile.vouched_by, None)
-
-    def test_vouchee_privacy(self):
-        voucher = UserFactory.create()
-        vouchee_1 = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
-                                                    'is_vouched': True,
-                                                    'privacy_full_name': PUBLIC})
-        vouchee_2 = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
-                                                    'is_vouched': True,
-                                                    'privacy_full_name': MOZILLIANS})
-
-        user_profile = voucher.userprofile
-        user_profile.set_instance_privacy_level(PUBLIC)
-        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile]))
-
-        user_profile.set_instance_privacy_level(MOZILLIANS)
-        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile, vouchee_2.userprofile]))
-
     @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
     def test_lookup_token_registered(self, mock_lookup_user):
         # Lookup token for a user with registered email
@@ -570,16 +500,92 @@ class UserProfileTests(TestCase):
         user = UserFactory.create(is_superuser=True)
         ok_(user.userprofile.is_manager)
 
+
+class VouchTests(TestCase):
+    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
+    def test_auto_vouching(self):
+        user_1 = UserFactory.create(vouched=False, email='foo@example.com')
+        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
+        ok_(user_1.userprofile.is_vouched)
+        ok_(not user_2.userprofile.is_vouched)
+
+    @patch('mozillians.users.models.UserProfile._email_now_vouched')
+    @patch('mozillians.users.models.datetime')
+    def test_vouch(self, datetime_mock, email_vouched_mock):
+        dt = make_aware(datetime(2012, 01, 01, 00, 10), pytz.UTC)
+        datetime_mock.now.return_value = dt
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create(vouched=False)
+        user_2.userprofile.vouch(user_1.userprofile)
+        user_2 = User.objects.get(id=user_2.id)
+        ok_(user_2.userprofile.is_vouched)
+        eq_(user_2.userprofile.vouched_by, user_1.userprofile)
+        eq_(user_2.userprofile.vouches_received.all()[0].date, dt)
+        ok_(email_vouched_mock.called)
+
+    @patch('mozillians.users.models.UserProfile._email_now_vouched')
+    def test_vouch_no_commit(self, email_vouched_mock):
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create(vouched=False)
+        user_2.userprofile.vouch(user_1.userprofile, commit=False)
+        user_2 = User.objects.get(id=user_2.id)
+        ok_(not user_2.userprofile.is_vouched)
+        ok_(not user_2.userprofile.vouched_by)
+        ok_(not user_2.userprofile.vouches_received.all())
+        ok_(email_vouched_mock.called)
+
+    def test_voucher_public(self):
+        voucher = UserFactory.create()
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(voucher.userprofile)
+        voucher_profile = voucher.userprofile
+        voucher_profile.privacy_full_name = PUBLIC
+        voucher_profile.save()
+        user_profile = user.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+
+        eq_(user_profile.vouched_by, voucher.userprofile)
+
+    def test_voucher_nonpublic(self):
+        voucher = UserFactory.create()
+        user = UserFactory.create()
+        user.userprofile.vouch(voucher.userprofile)
+        user_profile = user.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+
+        eq_(user_profile.vouched_by, None)
+
+    def test_vouchee_privacy(self):
+        voucher = UserFactory.create()
+        vouchee_1 = UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
+        vouchee_2 = UserFactory.create(userprofile={'privacy_full_name': MOZILLIANS})
+
+        vouchee_1.userprofile.vouch(voucher.userprofile)
+        vouchee_2.userprofile.vouch(voucher.userprofile)
+        user_profile = voucher.userprofile
+        user_profile.set_instance_privacy_level(PUBLIC)
+        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile]))
+
+        user_profile.set_instance_privacy_level(MOZILLIANS)
+        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile, vouchee_2.userprofile]))
+
     def test_vouch_reset(self):
         voucher = UserFactory.create()
-        user = UserFactory.create(userprofile={'vouched_by': voucher.userprofile,
-                                               'date_vouched': now()})
+        user = UserFactory.create()
+        user.userprofile.vouch(voucher.userprofile)
         profile = user.userprofile
+        profile.vouches_received.all().delete()
         profile.is_vouched = False
         profile.save()
         profile = UserProfile.objects.get(pk=profile.id)
-        eq_(profile.vouched_by, None)
-        eq_(profile.date_vouched, None)
+        ok_(not profile.vouches_received.all())
+
+    def test_vouch_once_per_voucher(self):
+        voucher = UserFactory.create()
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(voucher.userprofile)
+        user.userprofile.vouch(voucher.userprofile)
+        eq_(user.userprofile.vouches_received.all().count(), 1)
 
 
 class CalculatePhotoFilenameTests(TestCase):

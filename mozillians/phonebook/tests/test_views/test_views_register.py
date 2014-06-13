@@ -34,9 +34,8 @@ class RegisterTests(TestCase):
     def test_register_vouched(self, redeem_invite_mock):
         voucher_1 = UserFactory.create()
         voucher_2 = UserFactory.create()
-        user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'vouched_by': voucher_1.userprofile})
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(voucher_1.userprofile)
         invite = InviteFactory.create(inviter=voucher_2.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
         with self.login(user) as client:

@@ -26,6 +26,8 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     username = fields.CharField(attribute='user__username', null=True, readonly=True)
     vouched_by = fields.IntegerField(attribute='vouched_by__id',
                                      null=True, readonly=True)
+    date_vouched = fields.DateTimeField(attribute='date_vouched', null=True, readonly=True)
+
     groups = fields.CharField()
     skills = fields.CharField()
     languages = fields.CharField()
@@ -129,6 +131,11 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
         url = reverse('phonebook:profile_view',
                       args=[bundle.obj.user.username])
         return utils.absolutify(url)
+
+    def dehydrate_vouches(self, bundle):
+        vouches = [{'voucher': a.identifier, 'type': a.type}
+                   for a in bundle.obj.vouches_received.all()]
+        return vouches
 
     def get_detail(self, request, **kwargs):
         if request.GET.get('restricted', False):

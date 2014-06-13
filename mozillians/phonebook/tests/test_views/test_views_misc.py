@@ -151,10 +151,12 @@ class VouchTests(TestCase):
 
     @patch('mozillians.phonebook.views.messages.info')
     def test_vouch_vouched(self, info_mock):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None)
         unvouched_user = UserFactory.create(vouched=False)
         url = reverse('phonebook:vouch', prefix='/en-US/')
-        data = {'vouchee': unvouched_user.userprofile.id}
+        data = {'vouchee': unvouched_user.userprofile.id,
+                'description': 'a reason'}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
         unvouched_user = User.objects.get(id=unvouched_user.id)

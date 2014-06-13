@@ -158,10 +158,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                  verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(default=False)
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
-    vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
-                                   on_delete=models.SET_NULL, blank=True,
-                                   related_name='vouchees')
-    date_vouched = models.DateTimeField(null=True, blank=True, default=None)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
@@ -270,7 +266,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         if attrname == 'vouchees':
             available_vouchees = []
-            for vouchee in _getattr('vouchees').all():
+            for vouchee in _getattr('vouchees'):
                 vouchee.set_instance_privacy_level(privacy_level)
                 for field in privacy_fields:
                     if getattr(vouchee, 'privacy_%s' % field, 0) >= privacy_level:
@@ -464,6 +460,30 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             return self.language_set.none()
         return self.language_set.all()
 
+    @property
+    def vouched_by(self):
+        """Return the first userprofile who vouched for this userprofile."""
+
+        vouches = self.vouches_received.all().order_by('date')[:1]
+        if vouches:
+            return vouches[0].voucher
+        return None
+
+    @property
+    def vouchees(self):
+        vouches = self.vouches_made.all()
+        vouchee_ids = [vouch.vouchee.id for vouch in vouches]
+        vouchees = UserProfile.objects.filter(pk__in=vouchee_ids)
+        return vouchees
+
+    @property
+    def date_vouched(self):
+        """ Return the date of the first vouch, if available."""
+        vouches = self.vouches_received.all().order_by('date')[:1]
+        if vouches:
+            return vouches[0].date
+        return None
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
@@ -536,15 +556,25 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             return gravatar(self.user.email, size=geometry)
         return self.get_photo_thumbnail(geometry, **kwargs).url
 
-    def vouch(self, vouched_by, commit=True):
-        if self.is_vouched:
-            return
+    def is_vouchable(self, voucher):
+        # Maximum 5 vouches per account, no matter what.
+        if self.vouches_received.all().count() >= 5:
+            return False
+        # If you've already vouched, you can't vouch this person again.
+        if voucher:
+            if self.vouches_received.filter(voucher=voucher).count() > 0:
+                return False
+        return True
+
+    def vouch(self, vouched_by, commit=True, description=''):
+        if not self.is_vouchable(vouched_by):
+            return True
 
         self.is_vouched = True
-        self.vouched_by = vouched_by
-        self.date_vouched = datetime.now()
-
         if commit:
+            self.vouches_received.create(
+                voucher=vouched_by, date=datetime.now(), description=description
+            )
             self.save()
 
         self._email_now_vouched()
@@ -553,7 +583,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """Auto vouch mozilla.com users."""
         email = self.user.email
         if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            self.vouch(None, commit=False)
+            self.vouch(None, commit=True)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
@@ -621,11 +651,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
-        self.auto_vouch()
-        if not self.is_vouched:
-            self.vouched_by = None
-            self.date_vouched = None
         super(UserProfile, self).save(*args, **kwargs)
+        # Auto_vouch follows the first save, because you can't
+        # create foreign keys without a database id.
+        self.auto_vouch()
 
     @classmethod
     def get_index(cls, public_index=False):
@@ -740,6 +769,19 @@ def remove_from_basket(sender, instance, **kwargs):
 def delete_user_obj_sig(sender, instance, **kwargs):
     if instance.user:
         instance.user.delete()
+
+
+class Vouch(models.Model):
+    vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
+    voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
+                                null=True, default=None, blank=True)
+    description = models.CharField(max_length=500, verbose_name=_lazy(u'Description'),
+                                   default='')
+    # The back-end can set date null, for migration purposes, but forms cannot.
+    date = models.DateTimeField(null=True, default=None)
+
+    class Meta:
+        unique_together = ('vouchee', 'voucher')
 
 
 class UsernameBlacklist(models.Model):

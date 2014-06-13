@@ -117,6 +117,9 @@ def edit_profile(request):
     language_formset = forms.LanguagesFormset(request.POST or None,
                                               instance=profile,
                                               locale=request.locale)
+    my_vouches = []
+    for vouch in profile.vouches_made.all():
+        my_vouches.append(vouch.voucher)
 
     if not profile.is_complete:
         new_profile = True
@@ -165,7 +168,7 @@ def edit_profile(request):
                 accounts_formset=accounts_formset,
                 email_form=email_form,
                 user_groups=user_groups,
-                my_vouches=UserProfile.objects.filter(vouched_by=profile),
+                my_vouches=my_vouches,
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
@@ -340,7 +343,7 @@ def vouch(request):
 
     if form.is_valid():
         p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.userprofile)
+        p.vouch(request.user.userprofile, True, form.cleaned_data.get('description'))
 
         # Notify the current user that they vouched successfully.
         msg = _(u'Thanks for vouching for a fellow Mozillian! '
