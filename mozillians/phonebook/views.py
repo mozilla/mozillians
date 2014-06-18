@@ -80,9 +80,9 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
-        if (not profile.is_vouched
-            and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
+        if (request.user.is_authenticated()
+            # TODO vouching, will need change for 3 user minimum.
+            and profile.is_vouchable(request.user.userprofile)):
                 data['vouch_form'] = (
                     forms.VouchForm(initial={'vouchee': profile.pk}))
 

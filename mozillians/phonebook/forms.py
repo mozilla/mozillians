@@ -257,7 +257,11 @@ class RegisterForm(ProfileForm):
 class VouchForm(happyforms.Form):
     """Vouching is captured via a user's id and a description of the reason for vouching."""
     vouchee = forms.IntegerField(widget=forms.HiddenInput)
-    description = forms.CharField(max_length=500)
+    description = forms.CharField(
+        label=_lazy(u'Provide a reason for vouching with relevant links'),
+        widget=forms.Textarea(attrs={'rows': 10, 'cols': 20, 'maxlength': 500}),
+        max_length=500
+    )
 
     def clean_description(self):
         description = self.cleaned_data['description']
@@ -267,7 +271,7 @@ class VouchForm(happyforms.Form):
 
 
 class InviteForm(happyforms.ModelForm):
-    message = forms.CharField(label=_lazy('Message'), required=False, widget=forms.Textarea())
+    message = forms.CharField(label=_lazy(u'Message'), required=False, widget=forms.Textarea())
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']

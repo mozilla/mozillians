@@ -232,21 +232,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         Otherwise it returns a default privacy respecting value for
         the attribute, as defined in the privacy_fields dictionary.
-
-        Special case is the vouched_by attribute:
-
-        Since vouched_by refers to another UserProfile object with
-        different privacy settings per attribute, we need to load that
-        object and check if any of its privacy enabled attributes are
-        available in the current privacy level.
-
-        If yes, we return the real UserProfile object, making sure
-        that we set the privacy_level of the returned instance to the
-        same privacy level as this instance.
-
-        If the object is not available in the current privacy level,
-        we return None.
-
         """
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         privacy_fields = UserProfile.privacy_fields()
@@ -254,24 +239,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         if not privacy_level:
             return _getattr(attrname)
-
-        if attrname == 'vouched_by':
-            voucher = _getattr('vouched_by')
-            if voucher:
-                voucher.set_instance_privacy_level(privacy_level)
-                for field in privacy_fields:
-                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
-                        return voucher
-            return None
-
-        if attrname == 'vouchees':
-            available_vouchees = []
-            for vouchee in _getattr('vouchees'):
-                vouchee.set_instance_privacy_level(privacy_level)
-                for field in privacy_fields:
-                    if getattr(vouchee, 'privacy_%s' % field, 0) >= privacy_level:
-                        available_vouchees.append(vouchee.id)
-            return UserProfile.objects.filter(pk__in=available_vouchees)
 
         if attrname not in privacy_fields:
             return _getattr(attrname)
@@ -463,18 +430,38 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def vouched_by(self):
         """Return the first userprofile who vouched for this userprofile."""
+        privacy_level = self._privacy_level
+        voucher = (UserProfile.objects.filter(vouches_made__vouchee=self)
+                                      .order_by('vouches_made__date'))
 
-        vouches = self.vouches_received.all().order_by('date')[:1]
-        if vouches:
-            return vouches[0].voucher
+        if voucher:
+            voucher = voucher[0]
+            if privacy_level:
+                voucher.set_instance_privacy_level(privacy_level)
+                for field in UserProfile.privacy_fields():
+                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
+                        return voucher
+                return None
+            return voucher
+
         return None
 
     @property
     def vouchees(self):
-        vouches = self.vouches_made.all()
-        vouchee_ids = [vouch.vouchee.id for vouch in vouches]
-        vouchees = UserProfile.objects.filter(pk__in=vouchee_ids)
-        return vouchees
+        """Return list of vouchees while respecting privacy level if set."""
+        privacy_level = self._privacy_level
+        vouchees = UserProfile.objects.filter(vouches_received__voucher=self)
+        available_vouchees = []
+        if self._privacy_level:
+            for vouchee in vouchees:
+                vouchee.set_instance_privacy_level(privacy_level)
+                for field in UserProfile.privacy_fields():
+                    if getattr(vouchee, 'privacy_%s' % field, 0) >= privacy_level:
+                        available_vouchees.append(vouchee.id)
+            available_vouchees = UserProfile.objects.filter(pk__in=available_vouchees)
+        else:
+            available_vouchees = vouchees
+        return available_vouchees
 
     @property
     def date_vouched(self):
@@ -557,13 +544,20 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return self.get_photo_thumbnail(geometry, **kwargs).url
 
     def is_vouchable(self, voucher):
+        """Check whether self can receive a vouch from voucher."""
+        # If there's a voucher, they must be vouched.
+        if voucher and not voucher.is_vouched:
+            return False
+
         # Maximum 5 vouches per account, no matter what.
         if self.vouches_received.all().count() >= 5:
             return False
+
         # If you've already vouched, you can't vouch this person again.
         if voucher:
             if self.vouches_received.filter(voucher=voucher).count() > 0:
                 return False
+
         return True
 
     def vouch(self, vouched_by, commit=True, description=''):
@@ -582,8 +576,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
         email = self.user.email
-        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            self.vouch(None, commit=True)
+        if not self.is_vouched:
+            if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+                self.vouch(None, commit=True)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""

@@ -21,7 +21,8 @@ class RegisterTests(TestCase):
     @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_unvouched(self, redeem_invite_mock):
         user = UserFactory.create(vouched=False)
-        invite = InviteFactory.create(inviter=user.userprofile)
+        inviter = UserFactory.create()
+        invite = InviteFactory.create(inviter=inviter.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
         with self.login(user) as client:
             response = client.get(url, follow=True)

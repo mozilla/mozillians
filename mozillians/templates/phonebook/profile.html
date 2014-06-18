@@ -247,16 +247,25 @@
           </div>
         {% endif %}
 
-        {% if profile.vouched_by %}
+        {% if profile.vouches_received.exists() %}
           <div id="vouched_by" class="profile-entry">
             <h3>{{ _('Vouched By') }}</h3>
-            <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}">
-              {{ profile.vouched_by.display_name|default(profile.vouched_by.user.username, true)}}
-            </a>
+            <ul>
+              {% for vouch in profile.vouches_received.all() %}
+                <li>
+                  {% if vouch.voucher %}
+                    <a href="{{ url('phonebook:profile_view', vouch.voucher.user.username) }}">
+                      {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
+                    </a>
+                  {% else %}
+                    <a href="#">Unknown</a>
+                  {% endif %}
+                  <p>Reason: {{ vouch.description }}</p>
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         {% endif %}
-<<<<<<< HEAD
-
         {% if profile.vouchees.exists() %}
           <div id="vouchees" class="profile-entry">
             <h3>{{ _('Vouchees') }}</h3>
@@ -271,37 +280,7 @@
             </ul>
           </div>
         {% endif %}
-        <!-- FIXME: if that checks number of vouchers to show vouch box at all -->
-          <div class="vouch-box">
-            <div class="margins">
-            {% if not profile.is_vouched %}
-            <h4>Is First Last a Mozillian? Let us know how he/she contributed</h4>
-            {% else %}
-            <h4>Do you know this Mozillian? Let us know how he/she contributed</h4>
-            {% endif %}
-            <p>Provide a reason for vouching with relevant links</p>
-            <textarea maxlength="800"></textarea>
-            <a href="#" class="left">Markdown Syntax</a>
-
-            <a class="button"><i class="icon-key"></i> Vouch</a>
-            <div class="character-countdown">500</div>
-
-            <div class="clear"></div>
-
-            <p style="margin:10px 0;">Only vouch for users who have made significant contributions and are at least 13 years old. Once vouched, they will be able to:</p>
-<!--
-            <ul>
-              <li>View all profiles and join groups</li>
-              <li>Access special video content on Air Mozilla</li>
-              <li>Join the Mozilla Exchange Yammer network</li>
-              <li>Use other Mozilla apps as a vouched user</li>
-            </ul>
--->
-            <p>Vouchers cannot be edited or retracted.
-            <br><a href="#">Read more about vouching</a></p>
-          </div>
-          </div>
-        <!-- endif -->
+        {% include 'phonebook/includes/profile_vouch.html' %}
       </section>
 
     </article>

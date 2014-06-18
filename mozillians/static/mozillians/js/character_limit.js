@@ -1,11 +1,13 @@
-$('textarea[maxlength]').each(function(){
+var textarea = $('textarea[maxlength]');
+
+textarea.each(function(){
 	this.maxlength = $(this).attr('maxlength');
-	this.countdownElement = $(this).parent().find('.character-countdown');
-	$(this.countdownElement).text(this.maxlength - this.value.length);
+	this.countdownElement = $('.character-countdown');
+	this.countdownElement.text(this.maxlength - this.value.length);
 });
 
-$('textarea[maxlength]').on({
+textarea.on({
     'keydown keyup propertychange input paste':function(){
-        $(this.countdownElement).text(this.maxlength - this.value.length);
+        this.countdownElement.text(this.maxlength - this.value.length);
     }
 });

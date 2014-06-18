@@ -263,8 +263,8 @@ class UserProfileTests(TestCase):
     @patch('mozillians.users.models.send_mail')
     def test_email_now_vouched_with_voucher(self, send_mail_mock):
         voucher = UserFactory.create()
-        user = UserFactory.create()
-        user.userprofile.vouched_by = voucher.userprofile
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(voucher.userprofile)
         user.userprofile._email_now_vouched()
         ok_(send_mail_mock.called)
         eq_(send_mail_mock.call_args[0][3], [user.email])
@@ -586,6 +586,13 @@ class VouchTests(TestCase):
         user.userprofile.vouch(voucher.userprofile)
         user.userprofile.vouch(voucher.userprofile)
         eq_(user.userprofile.vouches_received.all().count(), 1)
+
+    def test_multiple_vouches(self):
+        user = UserFactory.create(vouched=False)
+        # 9 vouches, only 5 should stick.
+        for i in range(1, 10):
+            user.userprofile.vouch(UserFactory.create().userprofile)
+        eq_(user.userprofile.vouches_received.all().count(), 5)
 
 
 class CalculatePhotoFilenameTests(TestCase):
