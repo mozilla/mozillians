@@ -223,8 +223,6 @@
             minZoom: 1,
         }));
 
-    map.scrollWheelZoom.disable();
-
     map.attributionControl.addAttribution('© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
 
     you = L.marker([0,0],{
