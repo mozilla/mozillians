@@ -85,53 +85,49 @@ class ProfileEditTests(TestCase):
         ok_(form.errors.get('lat'))
         ok_(form.errors.get('lng'))
 
+
+class LocationEditTests(TestCase):
+    def setUp(self):
+        self.user = UserFactory.create(email='latlng@example.com')
+        self.data = {
+            'full_name': self.user.userprofile.full_name,
+            'email': self.user.email,
+            'username': self.user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '0',
+            }
+        self.country = CountryFactory.create(mapbox_id='country1', name='Petoria')
+        self.region = RegionFactory.create(country=self.country, mapbox_id='region1', name='Ontario')
+        self.city = CityFactory.create(region=self.region, mapbox_id='city1', name='Toronto')
+
     @patch('mozillians.geo.lookup.reverse_geocode')
     def test_location_city_region_optout(self, mock_reverse_geocode):
-        country = CountryFactory.create(mapbox_id='country1', name='Petoria')
-        region = RegionFactory.create(country=country, mapbox_id='region1', name='Ontario')
-        city = CityFactory.create(region=region, mapbox_id='city1', name='Toronto')
-        mock_reverse_geocode.return_value = (country, region, city)
-        user = UserFactory.create(email='latlng@example.com')
-        data = {'full_name': user.userprofile.full_name,
-                'email': user.email,
-                'username': user.username,
-                'lat': 40.005814,
-                'lng': -3.42071,
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
-        data.update(_get_privacy_fields(MOZILLIANS))
+        mock_reverse_geocode.return_value = (self.country, self.region, self.city)
+        self.data.update(_get_privacy_fields(MOZILLIANS))
 
-        form = ProfileForm(data=data)
+        form = ProfileForm(data=self.data)
         eq_(form.is_valid(), True)
-        eq_(form.instance.geo_country, country)
+        eq_(form.instance.geo_country, self.country)
         eq_(form.instance.geo_region, None)
         eq_(form.instance.geo_city, None)
 
     @patch('mozillians.geo.lookup.reverse_geocode')
     def test_location_call_api_when_latlng_changed(self, mock_reverse_geocode):
-        user = UserFactory.create(email='latlng@example.com')
-        data = {'full_name': user.userprofile.full_name,
-                'email': user.email,
-                'username': user.username,
-                'lng': user.userprofile.lng,
-                'lat': user.userprofile.lat,
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
-        data.update(_get_privacy_fields(MOZILLIANS))
-        initial = {'lat': user.userprofile.lat,
-                   'lng': user.userprofile.lng
+        mock_reverse_geocode.return_value = (self.country, self.region, self.city)
+        self.data['lng'] = self.user.userprofile.lng
+        self.data['lat'] = self.user.userprofile.lat
+        self.data.update(_get_privacy_fields(MOZILLIANS))
+
+        initial = {'lat': self.user.userprofile.lat,
+                   'lng': self.user.userprofile.lng
             }
 
-        form = ProfileForm(data=data, initial=initial)
+        form = ProfileForm(data=self.data, initial=initial)
         ok_(form.is_valid())
         ok_(not mock_reverse_geocode.called)
