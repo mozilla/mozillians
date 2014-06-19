@@ -131,3 +131,15 @@ class LocationEditTests(TestCase):
         form = ProfileForm(data=self.data, initial=initial)
         ok_(form.is_valid())
         ok_(not mock_reverse_geocode.called)
+
+    @patch('mozillians.geo.lookup.reverse_geocode')
+    def test_location_region_required_if_city(self, mock_reverse_geocode):
+        mock_reverse_geocode.return_value = (self.country, self.region, self.city)
+        self.data.update({'savecity': True})
+        self.data.update(_get_privacy_fields(MOZILLIANS))
+
+        form = ProfileForm(data=self.data)
+        eq_(form.is_valid(), True)
+        eq_(form.instance.geo_country, self.country)
+        eq_(form.instance.geo_region, self.region)
+        eq_(form.instance.geo_city, self.city)
