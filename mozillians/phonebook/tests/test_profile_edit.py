@@ -111,3 +111,27 @@ class ProfileEditTests(TestCase):
         eq_(form.instance.geo_country, country)
         eq_(form.instance.geo_region, None)
         eq_(form.instance.geo_city, None)
+
+    @patch('mozillians.geo.lookup.reverse_geocode')
+    def test_location_call_api_when_latlng_changed(self, mock_reverse_geocode):
+        user = UserFactory.create(email='latlng@example.com')
+        data = {'full_name': user.userprofile.full_name,
+                'email': user.email,
+                'username': user.username,
+                'lng': user.userprofile.lng,
+                'lat': user.userprofile.lat,
+                'externalaccount_set-MAX_NUM_FORMS': '1000',
+                'externalaccount_set-INITIAL_FORMS': '0',
+                'externalaccount_set-TOTAL_FORMS': '0',
+                'language_set-MAX_NUM_FORMS': '1000',
+                'language_set-INITIAL_FORMS': '0',
+                'language_set-TOTAL_FORMS': '0',
+            }
+        data.update(_get_privacy_fields(MOZILLIANS))
+        initial = {'lat': user.userprofile.lat,
+                   'lng': user.userprofile.lng
+            }
+
+        form = ProfileForm(data=data, initial=initial)
+        ok_(form.is_valid())
+        ok_(not mock_reverse_geocode.called)
