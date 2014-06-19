@@ -103,7 +103,7 @@ class LocationEditTests(TestCase):
             'language_set-TOTAL_FORMS': '0',
             }
         self.country = CountryFactory.create(mapbox_id='country1', name='Petoria')
-        self.region = RegionFactory.create(country=self.country, mapbox_id='region1', name='Ontario')
+        self.region = RegionFactory.create(country=self.country, mapbox_id='reg1', name='Ontario')
         self.city = CityFactory.create(region=self.region, mapbox_id='city1', name='Toronto')
 
     @patch('mozillians.geo.lookup.reverse_geocode')
@@ -123,7 +123,6 @@ class LocationEditTests(TestCase):
         self.data['lng'] = self.user.userprofile.lng
         self.data['lat'] = self.user.userprofile.lat
         self.data.update(_get_privacy_fields(MOZILLIANS))
-
         initial = {'lat': self.user.userprofile.lat,
                    'lng': self.user.userprofile.lng
             }

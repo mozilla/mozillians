@@ -11,7 +11,7 @@ admin.site.register(Geocoding, GeocodingAdmin)
 
 class CountryAdmin(admin.ModelAdmin):
     list_display = ('name', 'code')
-    readonly_fields = ('name', 'code', 'mapbox_id')
+    readonly_fields = ('name', 'mapbox_id')
     seach_fields = ('name', 'code')
 
 admin.site.register(Country, CountryAdmin)

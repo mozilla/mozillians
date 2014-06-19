@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from product_details import product_details
 import requests
 
 from mozillians.geo.models import Country, Region, City
@@ -95,11 +96,15 @@ def result_to_country(result):
     return a Country object or None
     """
     if 'country' in result:
+
         mapbox_country = result['country']
+        codes = dict((v, k) for k, v in product_details.get_regions('en-US').iteritems())
+        code = codes.get(mapbox_country['name'], '')
         country, created = Country.objects.get_or_create(
             mapbox_id=mapbox_country['id'],
             defaults=dict(
                 name=mapbox_country['name'],
+                code=code,
             )
         )
         if not created:
