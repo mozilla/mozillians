@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page, never_cache
@@ -342,11 +341,9 @@ def list_mozillians_in_location(request, country, region=None, city=None):
     show_pagination = False
 
     if city:
-        # Don't exclude people who haven't entered a city, they might be in the
-        # desired city.
-        queryset = queryset.filter(Q(geo_city__name__iexact=city) | Q(geo_city=None))
+        queryset = queryset.filter(geo_city__name__iexact=city)
     if region:
-        queryset = queryset.filter(Q(geo_region__name__iexact=region) | Q(geo_region=None))
+        queryset = queryset.filter(geo_region__name__iexact=region)
 
     paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
     page = request.GET.get('page', 1)

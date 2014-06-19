@@ -148,6 +148,10 @@ class ListTests(TestCase):
         eq_(response.context['people'].object_list[0], user_listed.userprofile)
 
     def test_list_mozillians_in_location_region_n_city_vouched(self):
+        """
+        Test that only vouched users with the correct country, city
+        and region show up in the list view.
+        """
         country = CountryFactory.create()
         country2 = CountryFactory.create()
         region = RegionFactory.create(country=country)
@@ -164,6 +168,8 @@ class ListTests(TestCase):
         UserFactory.create()
         UserFactory.create(vouched=False)
         UserFactory.create(vouched=False, userprofile={'geo_country': country2})
+        UserFactory.create(userprofile={'geo_country': country})
+        UserFactory.create(userprofile={'geo_country': country, 'geo_region': region})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_region_city',
