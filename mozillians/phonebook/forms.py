@@ -191,9 +191,11 @@ class ProfileForm(happyforms.ModelForm):
                 if not self.instance.geo_country:
                     raise ValidationError(_('Location must be inside a country.'))
                 # If the user doesn't want their region/city saved, respect it.
-                if (not self.cleaned_data.get('saveregion') and
-                    not self.cleaned_data.get('savecity')):
-                    self.instance.geo_region = None
+                if not self.cleaned_data.get('saveregion'):
+                    if not self.cleaned_data.get('savecity'):
+                        self.instance.geo_region = None
+                    else:
+                        raise ValidationError(_('Region must also be saved if city is saved.'))
                 if not self.cleaned_data.get('savecity'):
                     self.instance.geo_city = None
         else:
