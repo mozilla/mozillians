@@ -95,7 +95,7 @@
             url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+coordinates.lng+','+coordinates.lat+'.json',
             success: function(data){
                 you.setLatLng(data.results[0][0]);
-                displayResults(data.results[0]);
+                displayResults(data.results[0], modifyForm);
                 var youLatLng = you.getLatLng();
                 if(modifyForm){
                     set_latitude.val(youLatLng.lat);
@@ -107,15 +107,17 @@
 
 
     // DISPLAY
-    function displayResults(results){
+    function displayResults(results, modifyForm){
         display_country.text('');
         display_region.text('');
         display_city.text('');
         bounds_country.setStyle(style_hidden);
         bounds_region.setStyle(style_hidden);
         bounds_city.setStyle(style_hidden);
-        save_region.prop('checked', false);
-        save_city.prop('checked', false);
+        if (modifyForm) {
+            save_region.prop('checked', false);
+            save_city.prop('checked', false);
+        }
 
         if(results !== undefined){
             var zoomed = false;
@@ -130,7 +132,9 @@
                 }
                 if(results[i].type === 'city'){
                     display_city.text(results[i].name);
-                    save_city.prop('checked', true);
+                    if (modifyForm) {
+                        save_city.prop('checked', true);
+                    }
                     if(bounds_converted !== undefined){
                         if(!zoomed){
                             map.fitBounds(bounds_converted);
@@ -148,7 +152,9 @@
                 }
                 if(results[i].type === 'province'){
                     display_region.text(results[i].name);
-                    save_region.prop('checked', true);
+                    if (modifyForm) {
+                        save_region.prop('checked', true);
+                    }
                     if(bounds_converted !== undefined){
                         if(!zoomed){
                             map.fitBounds(bounds_converted);
@@ -190,7 +196,7 @@
 
     // SEARCH
     function selectSearchResult(searchResult){
-        displayResults(searchResult);
+        displayResults(searchResult, true);
 
         you.setLatLng([searchResult[0].lat,searchResult[0].lon]);
 

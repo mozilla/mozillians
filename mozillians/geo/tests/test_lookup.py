@@ -95,6 +95,12 @@ class TestResultToCountry(TestCase):
         country = Country.objects.get(pk=country.pk)
         eq_(new_name, country.name)
 
+    def test_country_code_set(self):
+        greece = {'country': {'id': 'mapbox_id', 'name': 'Greece'}}
+        country = result_to_country(greece)
+        ok_(isinstance(country, Country))
+        eq_(country.code, u'gr')
+
 
 class TestResultToRegion(TestCase):
     def test_no_region(self):

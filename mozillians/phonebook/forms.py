@@ -129,8 +129,8 @@ class ProfileForm(happyforms.ModelForm):
         initial=True, required=False,
         widget=forms.CheckboxInput(attrs={'disabled': 'disabled'})
     )
-    saveregion = forms.BooleanField(label=_lazy('Save'), required=False)
-    savecity = forms.BooleanField(label=_lazy('Save'), required=False)
+    saveregion = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
+    savecity = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
 
     class Meta:
         model = UserProfile
@@ -180,18 +180,24 @@ class ProfileForm(happyforms.ModelForm):
                           skills.lower().split(',')))
 
     def clean(self):
-        # If long/lat were provided, make sure they point at a country somewhere...
+        # If lng/lat were provided, make sure they point at a country somewhere...
         if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
-            self.instance.lat = self.cleaned_data['lat']
-            self.instance.lng = self.cleaned_data['lng']
-            self.instance.reverse_geocode()
-            if not self.instance.geo_country:
-                raise ValidationError(_("Location must be inside a country."))
-            # If the user doesn't want their region/city saved, respect it.
-            if not self.cleaned_data.get('saveregion'):
-                self.instance.geo_region = None
-            if not self.cleaned_data.get('savecity'):
-                self.instance.geo_city = None
+            # We only want to call reverse_geocode if some location data changed.
+            if ('lat' in self.changed_data or 'lng' in self.changed_data or
+                'saveregion' in self.changed_data or 'savecity' in self.changed_data):
+                self.instance.lat = self.cleaned_data['lat']
+                self.instance.lng = self.cleaned_data['lng']
+                self.instance.reverse_geocode()
+                if not self.instance.geo_country:
+                    raise ValidationError(_('Location must be inside a country.'))
+                # If the user doesn't want their region/city saved, respect it.
+                if not self.cleaned_data.get('saveregion'):
+                    if not self.cleaned_data.get('savecity'):
+                        self.instance.geo_region = None
+                    else:
+                        raise ValidationError(_('Region must also be saved if city is saved.'))
+                if not self.cleaned_data.get('savecity'):
+                    self.instance.geo_city = None
         else:
             raise ValidationError(_('Location data cannot be empty.'))
 
