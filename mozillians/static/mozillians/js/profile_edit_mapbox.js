@@ -201,7 +201,11 @@
 
     // LOCATE ME VIA GPS
     function locateMe(){
-        navigator.geolocation.getCurrentPosition(handleLocating, handleError, { enableHighAccuracy:true });
+        navigator.geolocation.getCurrentPosition(handleLocating, handleError,
+        {
+            enableHighAccuracy:false, //location will get re-approximated anyway
+            maximumAge: 900000 //15 minutes
+        });
     }
 
     function handleLocating(geoposition){
@@ -212,7 +216,9 @@
         gps_loading_el.hide();
     }
 
-    function handleError(err){}
+    function handleError(error){
+        gps_loading_el.hide();
+    }
 
 
     // MAP
