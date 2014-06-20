@@ -927,21 +927,15 @@ body#home {
                 position: relative;
                 a.profile-photo {
                     .rounded-image;
+                    display:block;
+                    position:relative;
+                    left:auto;
+
                     @media (max-width: @breakDesktop) {
-                        left: 40%;
-                    }
-                    @media (max-width: @breakTablet) {
-                         left: 35%;
-                    }
-                    @media (max-width: @breakMobileLandscape) {
-                         left: 32%;
-                    }
-                    @media (max-width: @breakMobile) {
-                         left: 62px;
+                        margin:0 auto;
                     }
                 }
                 .profile-details {
-                    margin-top: 170px;
                     word-wrap: break-word;
                     h2 { margin: 0 0 8px 0; }
                     h4 { margin: 20px 0 0;  }
@@ -1101,21 +1095,14 @@ body#profile {
             position: relative;
             .profile-photo {
                 .rounded-image;
+                display:block;
+                position:relative;
+                left:auto;
                 @media (max-width: @breakDesktop) {
-                    left: 40%;
-                }
-                @media (max-width: @breakTablet) {
-                     left: 35%;
-                }
-                @media (max-width: @breakMobileLandscape) {
-                     left: 32%;
-                }
-                @media (max-width: @breakMobile) {
-                     left: 62px;
+                    margin: 0 auto;
                 }
             }
             .stats {
-                margin-top: 170px;
                 h2 { margin: 0; }
                 h4 { margin: 20px 0 0; }
                 @media (max-width: @breakDesktop) {
