@@ -137,13 +137,16 @@
     </fieldset>
 
     <fieldset>
-      <label>{{ _('Country') }}</label>
+      <label class="required">{{ _('Country') }}</label>
       <span id="display_country" class="geodisplay"
             data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
       </span>
-      <div class="geocheckbox">
+      <div class="geocheckbox {% if profile_form.savecountry.errors %} error {% endif %}">
         {{ profile_form.savecountry }}
         {{ profile_form.savecountry.label_tag() }}
+        {% for error in profile_form.savecountry.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
       </div>
       {{ privacy_field(profile_form.privacy_geo_country) }}
     </fieldset>
@@ -153,9 +156,12 @@
       <span id="display_province" class="geodisplay"
             data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
       </span>
-      <div class="geocheckbox">
+      <div class="geocheckbox {% if profile_form.saveregion.errors %} error {% endif %}">
         {{ profile_form.saveregion }}
         {{ profile_form.saveregion.label_tag() }}
+        {% for error in profile_form.saveregion.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
       </div>
       {{ privacy_field(profile_form.privacy_geo_region) }}
     </fieldset>
@@ -164,9 +170,12 @@
       <label>{{ _('City') }}</label>
       <span id="display_city" class="geodisplay"
             data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
-      <div class="geocheckbox">
+      <div class="geocheckbox {% if profile_form.savecity.errors %} error {% endif %}">
         {{ profile_form.savecity }}
         {{ profile_form.savecity.label_tag() }}
+        {% for error in profile_form.savecity.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
       </div>
       {{ privacy_field(profile_form.privacy_geo_city) }}
     </fieldset>
