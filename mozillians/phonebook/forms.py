@@ -5,7 +5,6 @@ from datetime import datetime
 from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
@@ -189,17 +188,22 @@ class ProfileForm(happyforms.ModelForm):
                 self.instance.lng = self.cleaned_data['lng']
                 self.instance.reverse_geocode()
                 if not self.instance.geo_country:
-                    raise ValidationError(_('Location must be inside a country.'))
+                    error_msg = _('Location must be inside a country.')
+                    self.errors['savecountry'] = self.error_class([error_msg])
+                    del self.cleaned_data['savecountry']
                 # If the user doesn't want their region/city saved, respect it.
                 if not self.cleaned_data.get('saveregion'):
                     if not self.cleaned_data.get('savecity'):
                         self.instance.geo_region = None
                     else:
-                        raise ValidationError(_('Region must also be saved if city is saved.'))
+                        error_msg = _('Region must also be saved if city is saved.')
+                        self.errors['saveregion'] = self.error_class([error_msg])
+
                 if not self.cleaned_data.get('savecity'):
                     self.instance.geo_city = None
         else:
-            raise ValidationError(_('Location data cannot be empty.'))
+            self.errors['savecountry'] = self.error_class([_('Country cannot be empty.')])
+            del self.cleaned_data['savecountry']
 
         return self.cleaned_data
 
