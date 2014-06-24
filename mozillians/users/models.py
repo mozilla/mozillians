@@ -784,7 +784,7 @@ class ExternalAccount(models.Model):
                    'url': 'https://developer.mozilla.org/profiles/{identifier}',
                    'validator': validate_username_not_url},
         TYPE_SUMO: {'name': 'Mozilla Support',
-                    'url': '',
+                    'url': 'https://support.mozilla.org/user/{identifier}',
                     'validator': validate_website},
         TYPE_FACEBOOK: {'name': 'Facebook',
                         'url': 'https://www.facebook.com/{identifier}',
