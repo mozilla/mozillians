@@ -130,7 +130,7 @@ def massage_results(country_code, results):
                 name=item['name'], country=country,
                 defaults=dict(mapbox_id=item['id']),
             )
-            retval['region'] = region
+        retval['region'] = region
 
     # Can't do anything with a city without a country
     # (Region is optional, though)
@@ -150,7 +150,7 @@ def massage_results(country_code, results):
                         lng=item['lon'],
                     )
                 )
-                retval['city'] = city
+            retval['city'] = city
         else:
             print('NO LAT, LONG for city %s' % item['name'])
 

@@ -18,7 +18,6 @@ from elasticutils.contrib.django.models import SearchMixin
 from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
-from requests import HTTPError
 from sorl.thumbnail import ImageField, get_thumbnail
 from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -659,12 +658,19 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if self.lat is None or self.lng is None:
             return
 
-        from mozillians.geo.lookup import reverse_geocode
-
+        from mozillians.geo.models import Country
+        from mozillians.geo.lookup import reverse_geocode, GeoLookupException
         try:
             result = reverse_geocode(self.lat, self.lng)
-        except HTTPError:
-            logger.exception('Error calling mapbox')
+        except GeoLookupException:
+            if self.geo_country:
+                # If self.geo_country is already set, just give up.
+                pass
+            else:
+                # No country set, we need to at least set the placeholder one.
+                self.geo_country = Country.objects.get(mapbox_id='geo_error')
+                self.geo_region = None
+                self.geo_city = None
         else:
             if result:
                 country, region, city = result

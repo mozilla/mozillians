@@ -1,9 +1,15 @@
+import logging
+import requests
+from requests import ConnectionError, HTTPError
+
 from django.conf import settings
 
 from product_details import product_details
-import requests
 
 from mozillians.geo.models import Country, Region, City
+
+
+logger = logging.getLogger(__name__)
 
 # Example data from mapbox:
 # {
@@ -36,6 +42,10 @@ from mozillians.geo.models import Country, Region, City
 # }
 
 
+class GeoLookupException(Exception):
+    pass
+
+
 def reverse_geocode(lat, lng):
     """
     Given a lat and lng (floats), return a 3-tuple of
@@ -43,7 +53,15 @@ def reverse_geocode(lat, lng):
 
     Raises exception if there's any error calling mapbox.
     """
-    result = get_first_mapbox_geocode_result('%s,%s' % (lng, lat))
+    try:
+        result = get_first_mapbox_geocode_result('%s,%s' % (lng, lat))
+    except HTTPError:
+        logger.exception('HTTP status error when calling Mapbox.')
+        raise GeoLookupException
+    except ConnectionError:
+        logger.exception('Cannot open connection to Mapbox.')
+        raise GeoLookupException
+
     if result:
         return result_to_country_region_city(result)
     else:

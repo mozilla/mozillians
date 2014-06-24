@@ -2,8 +2,10 @@ from django.core.urlresolvers import reverse
 
 from mock import patch
 from nose.tools import eq_, ok_
+from requests import ConnectionError
 
 from mozillians.common.tests import TestCase
+from mozillians.geo.models import Country
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from mozillians.phonebook.forms import ProfileForm
 from mozillians.phonebook.tests import _get_privacy_fields
@@ -158,3 +160,16 @@ class LocationEditTests(TestCase):
         form = ProfileForm(data=self.data)
         ok_(not form.is_valid())
         ok_('saveregion' in form.errors)
+
+    @patch('mozillians.geo.lookup.requests')
+    def test_location_profile_save_connectionerror(self, mock_requests):
+        mock_requests.get.return_value.raise_for_status.side_effect = ConnectionError
+        error_country = Country.objects.create(name='Error', mapbox_id='geo_error')
+        self.data.update(_get_privacy_fields(MOZILLIANS))
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+
+        with self.login(self.user) as client:
+            response = client.post(url, data=self.data, follow=True)
+        userprofile = UserProfile.objects.get(user=self.user)
+        eq_(response.status_code, 200)
+        eq_(userprofile.geo_country, error_country)
