@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Search Results') }}{% endblock %}
+
+{% block body_id %}search{% endblock %}
+
+{% block body_class %}
+  {{ super() }}
+  search-page
+{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block content %}
+  {% if not user.is_authenticated() or not user.userprofile.is_vouched %}
+    <p class="alert">
+      {{ _('You are currently searching public profiles.') }}
+      {% if not user.is_authenticated() %}
+        {% trans next=request.get_full_path(), title=_('Sign In') %}
+          View more results by
+          <a href="#" class="browserid-login" title="{{ title }}" data-next="{{ next }}">
+            logging in</a>.
+        {% endtrans %}
+      {% else %}
+        {{ _('View more results when vouched.') }}
+      {% endif %}
+    </p>
+  {% endif %}
+  <h1>{{ _('Beta Search') }}</h1>
+  <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
+    {{ field_with_attrs(search_form.q,
+                        placeholder=_('Search for people, groups and more')) }}
+
+    {{ search_form.limit }}
+    <button type="submit">
+      <span class="icon-search"></span>
+      {{ _('Search') }}
+    </button>
+    <button type="button" id="advanced">
+      <span class="icon-chevron-down"></span>
+      {{ _('Advanced Options') }}
+    </button>
+    <div class="search-options">
+      <div class="field">
+        {{ search_form.include_non_vouched }}
+        {{ search_form.include_non_vouched.label_tag() }}
+      </div>
+    </div>
+  </form>
+  {% if not search_form.cleaned_data %}
+    <div class="well">
+      {% trans %}
+        <h2>Search For a Mozillian</h2>
+
+        <p>
+          You can search for another Mozillian using their name, email, or
+          nickname.
+        </p>
+      {% endtrans %}
+    </div>
+  {% else %}
+    {% if groups %}
+      <div id="search_group">
+        <h2>{{ _('Groups') }}</h2>
+        <p>
+          {% trans count=groups.count() %}
+            {{ count }} group matching
+            {% pluralize %}
+            {{ count }} groups matching
+          {% endtrans %}
+          {% if search_form.cleaned_data.q %}
+            "{{ search_form.cleaned_data.q }}"
+          {% endif %}
+        </p>
+        <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
+          {% for group in groups %}
+            <li class="tagit-choice ui-widget-content ui-state-default
+                       ui-corner-all">
+                <a href="{{ url('groups:show_group', group.url) }}">
+                  {{ group.name }}
+                </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% if people %}
+      <h2>{{ _('Mozillians') }}</h2>
+      <p>
+        {% trans count=people.paginator.count %}
+          {{ count }} Mozillian matching
+          {% pluralize %}
+          {{ count }} Mozillians matching
+        {% endtrans %}
+        {% if search_form.cleaned_data.q %}
+            "{{ search_form.cleaned_data.q }}"
+        {% endif %}
+      </p>
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
+      <div class="row">
+      {% for person in people %}
+        {{ search_result(person) }}
+      {% endfor %}
+      </div>
+      {% with items=people %}
+        {% include 'includes/pagination.html' %}
+      {% endwith %}
+    {% endif %}
+
+    {% if not people and not groups %}
+      <div class="well">
+        <p id="not-found">
+          {% trans query=search_form.cleaned_data.q %}
+            Sorry, we cannot find a group or person related to "{{ query }}".
+          {% endtrans %}
+        </p>
+        {% if user.is_authenticated() %}
+          <p>
+            {% trans invite=url('phonebook:invite') %}
+              Maybe they're not a Mozillian yet?
+              <a href="{{ invite }}">Invite this person</a> to create a profile.
+            {% endtrans %}
+          </p>
+          <hr/>
+          <h3>{{ _('Need help? Contact a steward in a functional area!') }}</h3>
+          <div class="popular-groups">
+            <ul id="groups" class="tagit ui-widget ui-corner-all">
+              {% for group in functional_areas %}
+                <li class="tagit-choice ui-widget-content ui-state-default
+                           ui-corner-all p-category category">
+                  <a href="{{ url('groups:show_group', group.url) }}">
+                    {{ group.name }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endif %}
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/search.js') }}"></script>
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
+{% endblock %}
