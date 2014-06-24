@@ -157,7 +157,6 @@ INSTALLED_APPS = get_apps(append=[
     'django_browserid',
     'jingo_offline_compressor',
     'import_export',
-    'rest_framework',
     'waffle',
 
     # DB migrations
