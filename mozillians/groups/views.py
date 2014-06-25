@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -104,7 +104,7 @@ def show(request, url, alias_model, template):
     group = group_alias.alias
     profile = request.user.userprofile
     in_group = group.has_member(profile)
-    profiles = group.members.all()
+    memberships = group.members.all()
     data = {}
 
     if isinstance(group, Group):
@@ -121,29 +121,28 @@ def show(request, url, alias_model, template):
                 elif filtr == 'pending_members':
                     statuses = [GroupMembership.PENDING]
 
-            profiles = group.groupmembership_set.filter(status__in=statuses)
+            memberships = group.groupmembership_set.filter(status__in=statuses)
 
             # Curator can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
 
         else:
             # only show full members, or this user
-            profiles = group.groupmembership_set.filter(
+            memberships = group.groupmembership_set.filter(
                 Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
 
         # Order by UserProfile.Meta.ordering
-        profiles = profiles.order_by('userprofile')
+        memberships = memberships.order_by('userprofile')
 
         # Get the most globally popular skills that appear in the group
-        # Sort them with most members first
+        # Sort them with most members first.
         skills = (Skill.objects
-                  .filter(members__in=profiles)
-                  .annotate(no_users=Count('members'))
-                  .order_by('-no_users'))
+                  .filter(members__in=memberships.values_list('userprofile', flat=True))
+                  .order_by('-member_count'))
         data.update(skills=skills)
 
     page = request.GET.get('page', 1)
-    paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
+    paginator = Paginator(memberships, settings.ITEMS_PER_PAGE)
 
     try:
         people = paginator.page(page)
