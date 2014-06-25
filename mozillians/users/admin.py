@@ -259,7 +259,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     form = UserProfileAdminForm
     list_filter = ['is_vouched', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
-                   PublicProfileFilter]
+                   PublicProfileFilter, 'externalaccount__type']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched',
                     'vouched_by', 'number_of_vouchees']
