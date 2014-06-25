@@ -1,0 +1,12 @@
+{% extends "admin/import_export/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{% url 'admin:users_index_profiles' %}">
+      Update Elastic Search Index
+    </a>
+  </li>
+  <li><a href="export/{{ cl.get_query_string }}" class="export_link">{% trans "Export" %}</a></li>
+  {{ block.super }}
+{% endblock %}
