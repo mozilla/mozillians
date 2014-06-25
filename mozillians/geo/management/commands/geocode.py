@@ -123,12 +123,12 @@ def massage_results(country_code, results):
     if country and len(sets['region']) == 1:
         name = list(sets['region'])[0]
         item = regions[name]
-        region, unused = Region.objects.get_or_create(
-            mapbox_id=item['id'],
-            defaults=dict(
-                name=item['name'],
-                country=country,
-                ),
+        try:
+            region = Region.objects.get(mapbox_id=item['id'])
+        except Region.DoesNotExist:
+            region, unused = Region.objects.get_or_create(
+                name=item['name'], country=country,
+                defaults=dict(mapbox_id=item['id']),
             )
         retval['region'] = region
 
@@ -139,16 +139,17 @@ def massage_results(country_code, results):
         item = cities[name]
         if 'lat' in item and 'lon' in item:
             print('Get or create city: %r' % item)
-            city, created = City.objects.get_or_create(
-                mapbox_id=item['id'],
-                defaults=dict(
-                    name=item['name'],
-                    region=region,
-                    country=country,
-                    lat=item['lat'],
-                    lng=item['lon'],
+            try:
+                city = City.objects.get(mapbox_id=item['id'])
+            except City.DoesNotExist:
+                city, created = City.objects.get_or_create(
+                    name=item['name'], region=region, country=country,
+                    defaults=dict(
+                        mapbox_id=item['id'],
+                        lat=item['lat'],
+                        lng=item['lon'],
+                    )
                 )
-            )
             retval['city'] = city
         else:
             print('NO LAT, LONG for city %s' % item['name'])

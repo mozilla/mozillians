@@ -2,13 +2,13 @@ from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import eq_, ok_
-from requests import HTTPError
+from requests import ConnectionError, HTTPError
 
 from mozillians.common.tests import TestCase
 from mozillians.geo.models import Country, Region, City
-from mozillians.geo.lookup import (reverse_geocode, get_first_mapbox_geocode_result,
-                                   result_to_country_region_city, result_to_country,
-                                   result_to_region, result_to_city)
+from mozillians.geo.lookup import (GeoLookupException, get_first_mapbox_geocode_result,
+                                   result_to_city, result_to_country_region_city,
+                                   result_to_country, result_to_region, reverse_geocode)
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 
 
@@ -16,8 +16,11 @@ from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 class TestCallingGeocode(TestCase):
     def test_raise_on_error(self, mock_requests):
         mock_requests.get.return_value.raise_for_status.side_effect = HTTPError
-        with self.assertRaises(HTTPError):
-            get_first_mapbox_geocode_result('')
+        with self.assertRaises(GeoLookupException):
+            reverse_geocode(40, 20)
+        mock_requests.get.return_value.raise_for_status.side_effect = ConnectionError
+        with self.assertRaises(GeoLookupException):
+            reverse_geocode(40, 20)
 
     def test_url(self, mock_requests):
         lng = lat = 1.0
