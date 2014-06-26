@@ -178,7 +178,7 @@ class LogoutTests(TestCase):
         client = Client()
         client.get(reverse('phonebook:logout'), follow=True)
 
-    @patch('mozillians.phonebook.views.auth.views.logout', wraps=logout_view)
+    @patch('mozillians.phonebook.views.auth_logout', wraps=logout_view)
     def test_logout_unvouched(self, logout_mock):
         user = UserFactory.create(vouched=False)
         with self.login(user) as client:
@@ -187,7 +187,7 @@ class LogoutTests(TestCase):
         self.assertTemplateUsed(response, 'phonebook/logout.html')
         ok_(logout_mock.called)
 
-    @patch('mozillians.phonebook.views.auth.views.logout', wraps=logout_view)
+    @patch('mozillians.phonebook.views.auth_logout', wraps=logout_view)
     def test_logout_vouched(self, logout_mock):
         user = UserFactory.create()
         with self.login(user) as client:
