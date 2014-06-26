@@ -10,10 +10,6 @@
 {% block body_id %}edit-profile{% endblock %}
 
 {% block extrahead %}
-  {% compress css %}
-    <link href="{{ static('mozillians/css/profile_edit.less') }}"
-          type="text/less" rel="stylesheet" media="screen" />
-  {% endcompress %}
   <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css"
         type="text/css" rel="stylesheet" media="screen" />
   {{ profile_form.media.css }}
