@@ -41,6 +41,8 @@ databases:
                     - basket_token
                 nullify:
                     - tshirt
+                    - geo_region_id
+                    - geo_city_id
                 random_username:
                     - ircname
 
