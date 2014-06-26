@@ -17,7 +17,7 @@
 {% if profile.geo_country %}
   {% if user.is_authenticated() %}
     <a href="{{ url('phonebook:list_country', country=profile.geo_country.name) }}">
-    <span class="country-name">{{ profile.geo_country.name }}<span></a>
+    <span class="country-name">{{ profile.geo_country.name }}</span></a>
   {%- else -%}
     <span class="country-name">
       {{ profile.geo_country.name }}
