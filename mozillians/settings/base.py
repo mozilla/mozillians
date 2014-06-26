@@ -301,7 +301,7 @@ MAPBOX_MAP_ID = 'examples.map-i86nkdio'
 MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
 
 
-def _request_args():
+def _browserid_request_args():
     from django.conf import settings
     from tower import ugettext_lazy as _lazy
 
@@ -314,7 +314,13 @@ def _request_args():
 
     return args
 
+
+def _browserid_audiences():
+    from django.conf import settings
+    return [settings.SITE_URL]
+
 # BrowserID creates a user if one doesn't exist.
 BROWSERID_CREATE_USER = True
 BROWSERID_VERIFY_CLASS = 'mozillians.common.authbackend.BrowserIDVerify'
-BROWSERID_REQUEST_ARGS = lazy(_request_args, dict)()
+BROWSERID_REQUEST_ARGS = lazy(_browserid_request_args, dict)()
+BROWSERID_AUDIENCES = lazy(_browserid_audiences, list)()
