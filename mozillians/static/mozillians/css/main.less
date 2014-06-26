@@ -1316,7 +1316,7 @@ form {
         .acknowledge {
             float:left;
         }
-        &#photo {
+        &> div#photo {
             position: relative;
             height: 150px;
             @media (max-width: @breakMobileLandscape) {
@@ -1388,8 +1388,8 @@ form {
             margin-top: 50px;
             border: none;
         }
-        #id_photo_delete {
-            margin: 10px 0 0 130px;
+        div#id_photo_delete {
+            margin: 10px 0 0 100px;
             @media (max-width: @breakMobileLandscape) {
                 margin: 10px 0 0 0;
             }
@@ -1397,6 +1397,11 @@ form {
             label {
                 float: none;
             }
+        }
+        &> div#mozillian-contributions {
+            .privacy-controls {
+                margin-top: 50px;
+          }
         }
         &#accounts {
             .externalaccount-fieldrow {

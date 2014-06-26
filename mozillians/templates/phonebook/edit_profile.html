@@ -94,19 +94,23 @@
       </ul>
     {% endif %}
 
-    <fieldset id="photo">
-      <label>{{ _('Profile Photo') }}</label>
-      <div class="profile-photo">
-        <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
-      </div>
-      <input class="input-file" id="id_photo" type="file" name="photo">
-      {% if profile.photo %}
-        <div id="id_photo_delete">
-          <input type="checkbox" name="photo-clear">
-          <label>{{ _('Remove Profile Photo') }}</label>
+    <!-- Basic Information section -->
+    <fieldset>
+      <h2>{{ _('Basic Information') }}</h2>
+      <div id="photo">
+        <label>{{ _('Profile Photo') }}</label>
+        <div class="profile-photo">
+          <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
         </div>
-      {% endif %}
-      {{ privacy_field(profile_form.privacy_photo) }}
+        <input class="input-file" id="id_photo" type="file" name="photo">
+        {% if profile.photo %}
+          <div id="id_photo_delete">
+            <input type="checkbox" name="photo-clear">
+            <label>{{ _('Remove Profile Photo') }}</label>
+          </div>
+        {% endif %}
+        {{ privacy_field(profile_form.privacy_photo) }}
+      </div>
     </fieldset>
 
     <fieldset>
@@ -124,7 +128,19 @@
     </fieldset>
 
     <fieldset>
-      <h5>{{ _('Your location') }}</h5>
+      {{ mozillians_field(profile_form.bio) }}
+      <span class="under-input-field">
+        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+        {% endtrans %}
+      </span>
+      {{ privacy_field(profile_form.privacy_bio) }}
+    </fieldset>
+    <!-- End of Basic Information section -->
+
+    <!-- Location section -->
+    <fieldset>
+      <h2>{{ _('Your location') }}</h2>
       <div id="location">
         <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
         <div id="location_gps_button"><i class="icon-target"></i></div>
@@ -185,47 +201,15 @@
       {{ mozillians_field(profile_form.timezone) }}
       {{ privacy_field(profile_form.privacy_timezone) }}
     </fieldset>
+    <!-- End of location section -->
 
+    <!-- Mozilla contributions section -->
     <fieldset>
-      {{ mozillians_field(profile_form.bio) }}
-      <span class="under-input-field">
-        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
-          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
-        {% endtrans %}
-      </span>
-      {{ privacy_field(profile_form.privacy_bio) }}
-    </fieldset>
-
-    <fieldset id="accounts">
-      <label>{{ _('Accounts') }}</label>
-      {{ accounts_formset.management_form }}
-      {% for account_form in accounts_formset %}
-        <div class="externalaccount-fieldrow
-                    {% if account_form.errors %} error{% endif %}">
-          {{ account_form.non_field_errors() }}
-          {% for field in account_form %}
-            {{ field.errors }}
-          {% endfor %}
-          {% for field in account_form %}
-            {% if not field.name == 'privacy' %}
-              {{ field }}
-              {% if field.name == 'DELETE' %}
-                <i class="icon-minus-circle"></i> {{ _('Delete') }}
-              {% endif %}
-            {% else %}
-              {{ privacy_field(field) }}
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endfor %}
-      <span class="under-input-field">
-        <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add account') }}</a>
-      </span>
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.ircname) }}
-      {{ privacy_field(profile_form.privacy_ircname) }}
+      <h2>Your Mozilla Contributions</h2>
+      <div id="mozillian-contributions">
+        {{ mozillians_field(profile_form.title) }}
+        {{ privacy_field(profile_form.privacy_title) }}
+      </div>
     </fieldset>
 
     <fieldset>
@@ -237,10 +221,42 @@
       {{ mozillians_field(profile_form.story_link) }}
       {{ privacy_field(profile_form.privacy_story_link) }}
     </fieldset>
+    <!-- End of Mozilla contributions section -->
+
+    <!-- Accounts -->
+    <fieldset id="accounts">
+      <h2>Account Information</h2>
+      <div>
+        <label>{{ _('External Accounts') }}</label>
+        {{ accounts_formset.management_form }}
+        {% for account_form in accounts_formset %}
+          <div class="externalaccount-fieldrow
+                      {% if account_form.errors %} error{% endif %}">
+            {{ account_form.non_field_errors() }}
+            {% for field in account_form %}
+              {{ field.errors }}
+            {% endfor %}
+            {% for field in account_form %}
+              {% if not field.name == 'privacy' %}
+                {{ field }}
+                {% if field.name == 'DELETE' %}
+                  <i class="icon-minus-circle"></i> {{ _('Delete') }}
+                {% endif %}
+              {% else %}
+                {{ privacy_field(field) }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <span class="under-input-field">
+          <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add account') }}</a>
+        </span>
+      </div>
+    </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.title) }}
-      {{ privacy_field(profile_form.privacy_title) }}
+      {{ mozillians_field(profile_form.ircname) }}
+      {{ privacy_field(profile_form.privacy_ircname) }}
     </fieldset>
 
     <fieldset id="shirts">
