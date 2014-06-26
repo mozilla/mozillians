@@ -1,0 +1,33 @@
+{# This is a text tempate with trans blocks. Empty lines are important to keep formating #}
+{% trans %}
+  Hi there,
+{% endtrans %}
+
+
+{% trans %}
+  You have been vouched on Mozillians.org!
+  You are now able to search through all Mozillians profiles
+  and you can also join groups.
+{% endtrans %}
+
+{% if voucher_name  %}
+
+{% trans %}
+  You were vouched by {{ voucher_name }} {{ voucher_profile_url }}
+{% endtrans %}
+
+{% endif %}
+
+{% trans %}
+  Take a moment to join a functional area or group right now:
+{% endtrans %}
+
+ - {{ functional_areas_url }}
+ - {{ groups_url }}
+
+{% trans %}
+  Keep rocking the open Web!
+{% endtrans %}
+
+
+{{ _('The Mozillians.org Team') }}

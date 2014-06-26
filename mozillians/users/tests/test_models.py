@@ -260,6 +260,16 @@ class UserProfileTests(TestCase):
         ok_(send_mail_mock.called)
         eq_(send_mail_mock.call_args[0][3], [user.email])
 
+    @patch('mozillians.users.models.send_mail')
+    def test_email_now_vouched_with_voucher(self, send_mail_mock):
+        voucher = UserFactory.create()
+        user = UserFactory.create()
+        user.userprofile.vouched_by = voucher.userprofile
+        user.userprofile._email_now_vouched()
+        ok_(send_mail_mock.called)
+        eq_(send_mail_mock.call_args[0][3], [user.email])
+        ok_(voucher.userprofile.full_name in send_mail_mock.call_args[0][1])
+
     @override_settings(ES_INDEXES={'public': 'foo'})
     def test_get_index_public(self):
         ok_(UserProfile.get_index(public_index=True), 'foo')
