@@ -576,9 +576,15 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
         email = self.user.email
+        try:
+            dino = User.objects.get(email='webprod@mozilla.com')
+        except User.DoesNotExist:
+            dino = None
+            logger.exception('Could not find the Dino Mcvouch User.')
+
         if not self.is_vouched:
             if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-                self.vouch(None, commit=True)
+                self.vouch(dino, commit=True)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
