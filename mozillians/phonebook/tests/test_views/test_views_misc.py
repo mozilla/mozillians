@@ -184,7 +184,7 @@ class LogoutTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/logout.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
         ok_(logout_mock.called)
 
     @patch('mozillians.phonebook.views.auth_logout', wraps=logout_view)
@@ -193,7 +193,7 @@ class LogoutTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/logout.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
         ok_(logout_mock.called)
 
 
