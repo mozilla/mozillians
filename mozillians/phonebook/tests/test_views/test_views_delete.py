@@ -56,7 +56,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/logout.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
 
         remove_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
@@ -76,7 +76,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/logout.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
 
         remove_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)

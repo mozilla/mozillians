@@ -192,10 +192,7 @@ def confirm_delete(request):
 def delete(request):
     request.user.delete()
     messages.info(request, _('Your account has been deleted. Thanks for being a Mozillian!'))
-    # We don't redirect to logout view, because delete already logs
-    # out user. Instead we render the logout template to BrowserID
-    # logout.
-    return render(request, 'phonebook/logout.html')
+    return logout(request)
 
 
 @allow_public
@@ -387,14 +384,9 @@ def list_mozillians_in_location(request, country, region=None, city=None):
 
 @allow_unvouched
 def logout(request):
-    """Logout view that wraps Django's logout but always redirects.
-
-    Django's contrib.auth.views logout method renders a template if
-    the `next_page` argument is `None`, which we don't want. This view
-    always returns an HTTP redirect instead.
-
-    """
-    return auth_logout(request, template_name='phonebook/logout.html')
+    """View that logs out the user and redirects to home page."""
+    auth_logout(request)
+    return redirect('phonebook:home')
 
 
 @allow_public
