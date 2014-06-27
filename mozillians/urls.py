@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.shortcuts import render
 
 import autocomplete_light
-
+import tower
 from funfactory.monkeypatches import patch
 
 
@@ -31,6 +31,11 @@ except KeyError:
     # happens if the urlconf is loaded twice
     pass
 jingo.env.add_extension(CompressorExtension)
+
+# Activate a locale so that jinja2 doesn't choke when running a shell
+# or individual tests that need translation and don't involve a web
+# request, like when testing emails.
+tower.activate('en-US')
 
 
 def error_page(request, template, status=None):
