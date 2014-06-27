@@ -228,16 +228,13 @@
 
 
     // MAP
-    map = L.map('map')
-        .setView([0, 0], 3)
-        .addLayer(L.mapbox.tileLayer(mapboxString, {
-            detectRetina: true,
-            minZoom: 1,
-        }));
+    map = L.mapbox.map('map', mapboxString, {
+        detectRetina: true,
+        minZoom: 1
+    });
 
+    map.setView([0, 0], 3);
     map.scrollWheelZoom.disable();
-
-    map.attributionControl.addAttribution('© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
 
     you = L.marker([0,0],{
         draggable:true
