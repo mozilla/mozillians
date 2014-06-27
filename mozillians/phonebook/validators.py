@@ -74,3 +74,16 @@ def validate_email(value):
     if not email_re.match(value):
         raise ValidationError(_('Enter a valid address.'))
     return value
+
+
+def validate_phone_number(value):
+    """Validate that a phone number is in international format. (5-15 characters)."""
+    value = value.replace(' ', '')
+    value = re.sub(r'^00', '+', value)
+
+    # Ensure that there are 5 to 15 digits
+    pattern = re.compile(r'^\+\d{5,15}$')
+    if not pattern.match(value):
+        raise ValidationError(_('Please enter a valid phone number, in international format.'))
+
+    return value
