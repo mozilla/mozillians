@@ -41,10 +41,16 @@
       {{ _('Advanced Options') }}
     </button>
     <div class="search-options">
-      <div class="field">
-        {{ search_form.include_non_vouched }}
-        {{ search_form.include_non_vouched.label_tag() }}
-      </div>
+      {% for field in filter.form %}
+        <div class="field">
+          {% if field|is_checkbox %}
+            {# for checkbox only, include the control inside the label element and before the label text #}
+            <label class="checkbox">{{ field }} <span>{{ field.label }}</span></label>
+          {% else %}
+            {{ field.label_tag() }} {{ field }}
+          {% endif %}
+        </div>
+      {% endfor %}
     </div>
   </form>
   {% if not search_form.cleaned_data %}
