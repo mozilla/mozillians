@@ -27,7 +27,7 @@
     </p>
   {% endif %}
   <h1>{{ _('Beta Search') }}</h1>
-  <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
+  <form method="GET" id="search-form" action="{{ url('phonebook:betasearch') }}">
     {{ field_with_attrs(search_form.q,
                         placeholder=_('Search for people, groups and more')) }}
 
