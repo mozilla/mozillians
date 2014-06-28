@@ -304,20 +304,22 @@ def betasearch(request):
     people = []
     show_pagination = False
     form = forms.SearchForm(request.GET)
+    filtr = forms.SearchFilter(request.GET)
     groups = None
     functional_areas = None
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
-        include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
         functional_areas = Group.get_functional_areas()
         public = not (request.user.is_authenticated()
                       and request.user.userprofile.is_vouched)
 
-        profiles = UserProfile.search(query, public=public,
-                                      include_non_vouched=include_non_vouched)
+        profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
+        profiles = UserProfile.search(query, include_non_vouched=True, public=public)
+        profiles = profiles.filter(id__in=profiles_matching_filter)
+
         if not public:
             groups = Group.search(query)
 
@@ -337,6 +339,7 @@ def betasearch(request):
 
     d = dict(people=people,
              search_form=form,
+             filtr=filtr,
              limit=limit,
              show_pagination=show_pagination,
              groups=groups,

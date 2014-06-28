@@ -41,10 +41,11 @@
       {{ _('Advanced Options') }}
     </button>
     <div class="search-options">
-      <div class="field">
-        {{ search_form.include_non_vouched }}
-        {{ search_form.include_non_vouched.label_tag() }}
-      </div>
+      {% for field in filtr.form %}
+        <div class="field">
+          {{ mozillians_field(field) }}
+        </div>
+      {% endfor %}
     </div>
   </form>
   {% if not search_form.cleaned_data %}
