@@ -67,7 +67,8 @@ class InviteTests(TestCase):
     def test_invite_post_vouched(self, success_mock):
         user = UserFactory.create()
         url = reverse('phonebook:invite', prefix='/en-US/')
-        data = {'message': 'Join us foo!', 'recipient': 'foo@example.com'}
+        data = {'message': 'Join us foo!', 'recipient': 'foo@example.com',
+                'reason': 'A test reason'}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')

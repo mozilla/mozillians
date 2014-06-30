@@ -278,4 +278,4 @@ class InviteForm(happyforms.ModelForm):
 
     class Meta:
         model = Invite
-        fields = ['recipient']
+        fields = ['recipient', 'reason']
