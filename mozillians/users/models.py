@@ -31,7 +31,8 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.helpers import langcode_to_name
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
-                                             validate_website, validate_username_not_url)
+                                             validate_website, validate_username_not_url,
+                                             validate_phone_number)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
@@ -776,6 +777,8 @@ class ExternalAccount(models.Model):
     TYPE_JABBER = 'JABBER'
     TYPE_DISCOURSE = 'DISCOURSE'
     TYPE_LANYRD = 'LANYRD'
+    TYPE_LANDLINE = 'Phone (Landline)'
+    TYPE_MOBILE = 'Phone (Mobile)'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -843,6 +846,12 @@ class ExternalAccount(models.Model):
         TYPE_LANYRD: {'name': 'Lanyrd',
                       'url': 'http://lanyrd.com/profile/{identifier}/',
                       'validator': validate_username_not_url},
+        TYPE_LANDLINE: {'name': 'Phone (Landline)',
+                        'url': '',
+                        'validator': validate_phone_number},
+        TYPE_LANYRD: {'name': 'Phone (Mobile)',
+                      'url': '',
+                      'validator': validate_phone_number},
 
     }
 
