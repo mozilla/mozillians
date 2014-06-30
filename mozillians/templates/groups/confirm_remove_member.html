@@ -23,6 +23,7 @@
 
    <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}" method="POST">
      {{ csrf() }}
+     {{ membership_filter_form.filtr.as_hidden() }}
      <button class="button remove" type="submit">{{ _('Remove') }}</button>
   </form>
 

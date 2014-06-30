@@ -46,6 +46,16 @@ def _list_groups(request, template, query):
     return render(request, template, data)
 
 
+def _get_callback_url(request, group):
+    """Include filtr into query string to keep the active filtering."""
+    callback_url = reverse('groups:show_group', args=[group.url])
+    membership_filter_form = MembershipFilterForm(request.POST)
+    if membership_filter_form.is_valid():
+        filtr = membership_filter_form.cleaned_data['filtr']
+        callback_url += '?filtr=%s' % filtr
+    return callback_url
+
+
 def index_groups(request):
     """Lists all public groups (in use) on Mozillians.
 
@@ -200,14 +210,17 @@ def remove_member(request, url, user_pk):
                             send_email=(profile_to_remove != this_userprofile))
         if this_userprofile == profile_to_remove:
             messages.info(request, _('You have been removed from this group.'))
+            redirect_to = reverse('groups:show_group', args=[group.url])
         else:
             messages.info(request, _('The group member has been removed.'))
-        return redirect('groups:show_group', url=group.url)
+            redirect_to = _get_callback_url(request, group)
+        return redirect(redirect_to)
 
     # Display confirmation page
     context = {
         'group': group,
-        'profile': profile_to_remove
+        'profile': profile_to_remove,
+        'membership_filter_form': MembershipFilterForm(request.GET)
     }
     return render(request, 'groups/confirm_remove_member.html', context)
 
@@ -234,7 +247,7 @@ def confirm_member(request, url, user_pk):
         else:
             group.add_member(profile)
             messages.info(request, _('This user has been added as a member of this group.'))
-    return redirect('groups:show_group', url=group.url)
+    return redirect(_get_callback_url(request, group))
 
 
 def edit(request, url, alias_model, template):

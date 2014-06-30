@@ -5,6 +5,7 @@
         <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
               method="GET">
           {{ csrf() }}
+          {{ membership_filter_form.filtr.as_hidden() }}
           <button type="submit" class="button remove">{{ _('Remove') }} <i class="icon-close"></i></button>
         </form>
       {% endif %}
@@ -12,6 +13,7 @@
         <form action="{{ url('groups:confirm_member', url=group.url, user_pk=profile.pk) }}"
               method="POST">
           {{ csrf() }}
+          {{ membership_filter_form.filtr.as_hidden() }}
           <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
         </form>
       {% endif %}
