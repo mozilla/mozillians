@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -80,9 +80,21 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
-        if (request.user.is_authenticated()
-            # TODO vouching, will need change for 3 user minimum.
-            and profile.is_vouchable(request.user.userprofile)):
+        if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
+            if request.POST:
+                vouch_form = forms.VouchForm(request.POST)
+                if vouch_form.is_valid():
+                    p = UserProfile.objects.get(pk=vouch_form.cleaned_data.get('vouchee'))
+                    p.vouch(request.user.userprofile,
+                            vouch_form.cleaned_data.get('description'))
+                    # Notify the current user that they vouched successfully.
+                    msg = _(u'Thanks for vouching for a fellow Mozillian! '
+                            u'This user is now vouched!')
+                    messages.info(request, msg)
+                    return redirect('phonebook:profile_view', p.user.username)
+                else:
+                    data['vouch_form'] = forms.VouchForm(request.POST)
+            else:
                 data['vouch_form'] = (
                     forms.VouchForm(initial={'vouchee': profile.pk}))
 
@@ -117,9 +129,6 @@ def edit_profile(request):
     language_formset = forms.LanguagesFormset(request.POST or None,
                                               instance=profile,
                                               locale=request.locale)
-    my_vouches = []
-    for vouch in profile.vouches_made.all():
-        my_vouches.append(vouch.voucher)
 
     if not profile.is_complete:
         new_profile = True
@@ -168,7 +177,6 @@ def edit_profile(request):
                 accounts_formset=accounts_formset,
                 email_form=email_form,
                 user_groups=user_groups,
-                my_vouches=my_vouches,
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
@@ -334,24 +342,6 @@ def delete_invite(request, invite_pk):
             (deleted_invite.recipient, deleted_invite.recipient))
     messages.success(request, msg)
     return redirect('phonebook:invite')
-
-
-@require_POST
-def vouch(request):
-    """Vouch a user."""
-    form = forms.VouchForm(request.POST)
-
-    if form.is_valid():
-        p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.userprofile, True, form.cleaned_data.get('description'))
-
-        # Notify the current user that they vouched successfully.
-        msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                u'This user is now vouched!')
-        messages.info(request, msg)
-        return redirect('phonebook:profile_view', p.user.username)
-
-    return HttpResponseBadRequest()
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):

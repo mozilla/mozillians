@@ -13,16 +13,17 @@ from mozillians.geo.models import Country
 class Migration(DataMigration):
 
     def forwards(self, orm):
-
-        user = orm['auth.User'].objects.create(email='webprod@example.com',
-                                       username='dinomcvouch',
-                                       is_staff=True)
+        user = orm['auth.User'].objects.create(
+            email='no-reply@mozillians.org',
+            username='dinomcvouch',
+            is_staff=True
+        )
         orm.UserProfile.objects.create(user=user)
         user.userprofile.full_name = 'Dino McVouch'
         user.userprofile.geo_country, created = orm['geo.Country'].objects.get_or_create(
-                name='United States', code='us',
-                mapbox_id='country.4150104525'
-            )
+            name='United States', code='us',
+            mapbox_id='country.4150104525'
+        )
 
         user.userprofile.is_vouched = True
         user.userprofile.save()
@@ -32,31 +33,29 @@ class Migration(DataMigration):
                 vouchee=user.userprofile, description='Dinos are always vouched.',
                 date=timezone.now()
             )
-        # Set email properly after account creation to avoid auto_vouch.
-        user.email = 'webprod@mozilla.com'
         user.save()
 
         # Confirm that the account was created before we go nuts.
         try:
-            dino = orm['auth.User'].objects.get(email='webprod@mozilla.com')
+            dino = orm['auth.User'].objects.get(email='no-reply@mozillians.org')
         except orm['auth.User'].DoesNotExist:
             raise orm['auth.User'].DoesNotExist("Can't find the Dino McVouch user.")
 
+        # Filter users by whether their email is one of the auto vouch domains.
+        av_query = reduce(
+            or_, [Q(email__endswith='@{0}'.format(e)) for e in settings.AUTO_VOUCH_DOMAINS]
+        )
 
-        av_query = reduce(or_, [Q(email__endswith=e) for e in settings.AUTO_VOUCH_DOMAINS])
         for auto_user in orm['auth.User'].objects.filter(av_query):
             try:
                 vouch = auto_user.userprofile.vouches_received.all().order_by('date')
                 if vouch and not vouch[0].voucher:
                     vouch[0].voucher = dino.userprofile
-                    vouch[0].description = 'A legacy autovouch from being a Mozilla employee.'
+                    vouch[0].description = 'An automatic vouch for being a Mozilla employee.'
                     vouch[0].save()
             except orm.UserProfile.DoesNotExist:
                 # Some users may not have a profile, so just skip them.
-                print auto_user.email + "has no userprofile, somehow!"
-
-
-
+                print auto_user.email + " has no userprofile, somehow!"
 
     def backwards(self, orm):
         orm['auth.User'].objects.get(username='dinomcvouch').delete()

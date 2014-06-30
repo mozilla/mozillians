@@ -260,14 +260,9 @@ class VouchForm(happyforms.Form):
     description = forms.CharField(
         label=_lazy(u'Provide a reason for vouching with relevant links'),
         widget=forms.Textarea(attrs={'rows': 10, 'cols': 20, 'maxlength': 500}),
-        max_length=500
+        max_length=500,
+        error_messages={'required': _(u'You must enter a reason for vouching for this person.')}
     )
-
-    def clean_description(self):
-        description = self.cleaned_data['description']
-        if not description:
-            raise forms.ValidationError(u'You must enter a reason for vouching for this person.')
-        return description
 
 
 class InviteForm(happyforms.ModelForm):

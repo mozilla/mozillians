@@ -21,7 +21,7 @@ from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
-from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename
+from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
 from mozillians.users.tests import LanguageFactory, UserFactory
 
 
@@ -504,6 +504,7 @@ class UserProfileTests(TestCase):
 class VouchTests(TestCase):
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_auto_vouching(self):
+        UserFactory.create(email='no-reply@mozillians.org')
         user_1 = UserFactory.create(vouched=False, email='foo@example.com')
         user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
         ok_(user_1.userprofile.is_vouched)
@@ -521,17 +522,6 @@ class VouchTests(TestCase):
         ok_(user_2.userprofile.is_vouched)
         eq_(user_2.userprofile.vouched_by, user_1.userprofile)
         eq_(user_2.userprofile.vouches_received.all()[0].date, dt)
-        ok_(email_vouched_mock.called)
-
-    @patch('mozillians.users.models.UserProfile._email_now_vouched')
-    def test_vouch_no_commit(self, email_vouched_mock):
-        user_1 = UserFactory.create()
-        user_2 = UserFactory.create(vouched=False)
-        user_2.userprofile.vouch(user_1.userprofile, commit=False)
-        user_2 = User.objects.get(id=user_2.id)
-        ok_(not user_2.userprofile.is_vouched)
-        ok_(not user_2.userprofile.vouched_by)
-        ok_(not user_2.userprofile.vouches_received.all())
         ok_(email_vouched_mock.called)
 
     def test_voucher_public(self):
@@ -564,10 +554,11 @@ class VouchTests(TestCase):
         vouchee_2.userprofile.vouch(voucher.userprofile)
         user_profile = voucher.userprofile
         user_profile.set_instance_privacy_level(PUBLIC)
-        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile]))
+        eq_(set(user_profile.vouches_made.all()),
+            set(vouchee_1.userprofile.vouches_received.filter(voucher=user_profile)))
 
         user_profile.set_instance_privacy_level(MOZILLIANS)
-        eq_(set(user_profile.vouchees.all()), set([vouchee_1.userprofile, vouchee_2.userprofile]))
+        eq_(set(user_profile.vouches_made.all()), set(Vouch.objects.filter(voucher=user_profile)))
 
     def test_vouch_reset(self):
         voucher = UserFactory.create()

@@ -258,22 +258,26 @@
                       {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
                     </a>
                   {% else %}
-                    <a href="#">Unknown</a>
+                    {{ _('Unknown') }}
                   {% endif %}
-                  <p>Reason: {{ vouch.description }}</p>
+                  {% if not vouch.description %}
+                    <p>{{ _('Reason: Legacy auto-vouch.') }}</p>
+                  {% else %}
+                    <p>{{ _('Reason:') }} {{ vouch.description }}</p>
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>
           </div>
         {% endif %}
-        {% if profile.vouchees.exists() %}
+        {% if profile.vouches_made.exists() %}
           <div id="vouchees" class="profile-entry">
             <h3>{{ _('Vouchees') }}</h3>
             <ul>
-              {% for vouchee in profile.vouchees.all() %}
+              {% for vouch in profile.vouches_made.all() %}
                 <li>
-                  <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}">
-                    {{ vouchee.display_name|default(vouchee.user.username, true)}}
+                  <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}">
+                    {{ vouch.vouchee.display_name|default(vouch.vouchee.user.username, true)}}
                   </a>
                 </li>
               {% endfor %}

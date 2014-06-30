@@ -156,7 +156,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
                                  verbose_name=_lazy(u'Full Name'))
-    is_vouched = models.BooleanField(default=False)
+    is_vouched = models.BooleanField(
+        default=False,
+        help_text=u'WARNING! Unchecking this will delete ALL user vouches PERMANENTLY!'
+    )
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
@@ -232,10 +235,19 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         Otherwise it returns a default privacy respecting value for
         the attribute, as defined in the privacy_fields dictionary.
+
+        special_functions provides methods that privacy safe their
+        respective properties, where the privacy modifications are
+        more complex.
         """
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         privacy_fields = UserProfile.privacy_fields()
         privacy_level = _getattr('_privacy_level')
+        special_functions = {'vouches_made': '_vouches_made',
+                             'vouches_received': '_vouches_received'}
+
+        if attrname in special_functions and privacy_level:
+            return _getattr(special_functions[attrname])
 
         if not privacy_level:
             return _getattr(attrname)
@@ -248,6 +260,28 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             return privacy_fields.get(attrname)
 
         return _getattr(attrname)
+
+    def _vouches(self, type):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        privacy_level = _getattr('_privacy_level')
+
+        vouch_ids = []
+        for vouch in _getattr(type).all():
+            vouch.vouchee.set_instance_privacy_level(privacy_level)
+            for field in UserProfile.privacy_fields():
+                if getattr(vouch.vouchee, 'privacy_%s' % field, 0) >= privacy_level:
+                    vouch_ids.append(vouch.id)
+        vouches_made = _getattr(type).filter(pk__in=vouch_ids)
+
+        return vouches_made
+
+    @property
+    def _vouches_made(self):
+        return self._vouches('vouches_made')
+
+    @property
+    def _vouches_received(self):
+        return self._vouches('vouches_received')
 
     @classmethod
     def extract_document(cls, obj_id, obj=None):
@@ -447,23 +481,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         return None
 
     @property
-    def vouchees(self):
-        """Return list of vouchees while respecting privacy level if set."""
-        privacy_level = self._privacy_level
-        vouchees = UserProfile.objects.filter(vouches_received__voucher=self)
-        available_vouchees = []
-        if self._privacy_level:
-            for vouchee in vouchees:
-                vouchee.set_instance_privacy_level(privacy_level)
-                for field in UserProfile.privacy_fields():
-                    if getattr(vouchee, 'privacy_%s' % field, 0) >= privacy_level:
-                        available_vouchees.append(vouchee.id)
-            available_vouchees = UserProfile.objects.filter(pk__in=available_vouchees)
-        else:
-            available_vouchees = vouchees
-        return available_vouchees
-
-    @property
     def date_vouched(self):
         """ Return the date of the first vouch, if available."""
         vouches = self.vouches_received.all().order_by('date')[:1]
@@ -560,31 +577,26 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         return True
 
-    def vouch(self, vouched_by, commit=True, description=''):
+    def vouch(self, vouched_by, description=''):
         if not self.is_vouchable(vouched_by):
             return True
 
         self.is_vouched = True
-        if commit:
-            self.vouches_received.create(
-                voucher=vouched_by, date=datetime.now(), description=description
-            )
-            self.save()
+        self.vouches_received.create(
+            voucher=vouched_by, date=datetime.now(), description=description
+        )
+        self.save()
 
         self._email_now_vouched()
 
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
         email = self.user.email
-        try:
-            dino = User.objects.get(email='webprod@mozilla.com')
-        except User.DoesNotExist:
-            dino = None
-            logger.exception('Could not find the Dino Mcvouch User.')
 
         if not self.is_vouched:
             if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-                self.vouch(dino, commit=True)
+                dino = UserProfile.objects.get(user__email='no-reply@mozillians.org')
+                self.vouch(dino, 'An automatic vouch for being a Mozilla employee.')
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
@@ -656,6 +668,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
         self.auto_vouch()
+        if not self.is_vouched:
+            self.vouches_received.all().delete()
 
     @classmethod
     def get_index(cls, public_index=False):
@@ -776,7 +790,7 @@ class Vouch(models.Model):
     vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
     voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
                                 null=True, default=None, blank=True)
-    description = models.CharField(max_length=500, verbose_name=_lazy(u'Description'),
+    description = models.CharField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
                                    default='')
     # The back-end can set date null, for migration purposes, but forms cannot.
     date = models.DateTimeField(null=True, default=None)

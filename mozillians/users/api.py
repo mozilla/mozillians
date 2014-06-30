@@ -132,11 +132,6 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
                       args=[bundle.obj.user.username])
         return utils.absolutify(url)
 
-    def dehydrate_vouches(self, bundle):
-        vouches = [{'voucher': a.identifier, 'type': a.type}
-                   for a in bundle.obj.vouches_received.all()]
-        return vouches
-
     def get_detail(self, request, **kwargs):
         if request.GET.get('restricted', False):
             raise ImmediateHttpResponse(response=http.HttpForbidden())
