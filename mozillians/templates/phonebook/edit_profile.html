@@ -136,7 +136,10 @@
 
     <!-- Location section -->
     <fieldset>
-      <h2>{{ _('Your location') }}</h2>
+      <h2 class="required">{{ _('Your location') }}</h2>
+      {% for error in profile_form.errors['location'] %}
+        <span class="error-message">{{ error }}</span>
+      {% endfor %}
       <div id="location">
         <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
         <div id="location_gps_button"><i class="icon-target"></i></div>

@@ -202,12 +202,17 @@ body {
                 border: 1px solid #CD0000;
                 color: #CD0000;
             }
-            label, .error-message {
+            label {
                 color: #CD0000;
             }
         }
     }
-    label.required:after {
+
+    .error-message {
+        color: #CD0000;
+    }
+
+    .required:after {
         content: " *";
         color: @linkRed;
     }

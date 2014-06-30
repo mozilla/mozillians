@@ -202,6 +202,7 @@ class ProfileForm(happyforms.ModelForm):
                 if not self.cleaned_data.get('savecity'):
                     self.instance.geo_city = None
         else:
+            self.errors['location'] = self.error_class([_('Search for your country on the map.')])
             self.errors['savecountry'] = self.error_class([_('Country cannot be empty.')])
             del self.cleaned_data['savecountry']
 
