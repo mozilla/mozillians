@@ -261,14 +261,18 @@ class ShowTests(TestCase):
         # Make user 1 the group curator so they can remove users
         self.group.curator = self.user_1.userprofile
         self.group.save()
+        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        next_url = "%s?filtr=members" % group_url
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:remove_member', prefix='/en-US/',
                       kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
-            response = client.get(url, follow=True)
+            response = client.get(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateUsed(response, 'groups/confirm_remove_member.html')
+        # make sure context variable next_url was populated properly
+        eq_(response.context['next_url'], next_url)
         # Still a member
         ok_(self.group.has_member(self.user_2.userprofile))
 
@@ -278,13 +282,19 @@ class ShowTests(TestCase):
         self.group.curator = self.user_1.userprofile
         self.group.save()
 
+        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        next_url = "%s?filtr=members" % group_url
+
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:remove_member', prefix='/en-US/',
                       kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
-            response = client.post(url, follow=True)
+            response = client.post(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
+        # make sure filter members is active
+        membership_filter_form = response.context['membership_filter_form']
+        eq_(membership_filter_form.cleaned_data['filtr'], 'members')
         # Not a member anymore
         ok_(not self.group.has_member(self.user_2.userprofile))
 
@@ -293,6 +303,10 @@ class ShowTests(TestCase):
         # Make user 1 the group curator so they can remove users
         self.group.curator = self.user_1.userprofile
         self.group.save()
+
+        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        next_url = "%s?filtr=pending_members" % group_url
+
         # Make user 2 pending
         GroupMembership.objects.filter(userprofile=self.user_2.userprofile,
                                        group=self.group).update(status=GroupMembership.PENDING)
@@ -303,8 +317,11 @@ class ShowTests(TestCase):
         url = reverse('groups:confirm_member', prefix='/en-US/',
                       kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
-            response = client.post(url, follow=True)
+            response = client.post(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
+        # make sure filter pending_members is active
+        membership_filter_form = response.context['membership_filter_form']
+        eq_(membership_filter_form.cleaned_data['filtr'], 'pending_members')
         # Now a member
         ok_(self.group.has_member(self.user_2.userprofile))
 
