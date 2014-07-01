@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from datetime import datetime
 from uuid import uuid4
 
@@ -578,12 +577,13 @@ class VouchTests(TestCase):
         user.userprofile.vouch(voucher.userprofile)
         eq_(user.userprofile.vouches_received.all().count(), 1)
 
+    @override_settings(VOUCH_COUNT_LIMIT=2)
     def test_multiple_vouches(self):
         user = UserFactory.create(vouched=False)
-        # 9 vouches, only 5 should stick.
+        # 9 vouches, only 2 should stick.
         for i in range(1, 10):
             user.userprofile.vouch(UserFactory.create().userprofile)
-        eq_(user.userprofile.vouches_received.all().count(), 5)
+        eq_(user.userprofile.vouches_received.all().count(), 2)
 
 
 class CalculatePhotoFilenameTests(TestCase):

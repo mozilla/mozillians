@@ -567,7 +567,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             return False
 
         # Maximum 5 vouches per account, no matter what.
-        if self.vouches_received.all().count() >= 5:
+        if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
         # If you've already vouched, you can't vouch this person again.
