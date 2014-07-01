@@ -307,7 +307,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     def queryset(self, request):
         qs = super(UserProfileAdmin, self).queryset(request)
-        qs = qs.annotate(Count('vouchees'))
+        qs = qs.annotate(Count('vouches_made'))
         return qs
 
     def email(self, obj):
@@ -329,15 +329,16 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     def vouched_by(self, obj):
         voucher = obj.vouched_by
-        voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
-        return '<a href="%s">%s</a>' % (voucher_url, voucher)
+        if voucher:
+            voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
+            return '<a href="%s">%s</a>' % (voucher_url, voucher)
     vouched_by.admin_order_field = 'vouched_by'
     vouched_by.allow_tags = True
 
     def number_of_vouchees(self, obj):
         """Return the number of vouchees for obj."""
-        return obj.vouchees.count()
-    number_of_vouchees.admin_order_field = 'vouchees__count'
+        return obj.vouches_made.count()
+    number_of_vouchees.admin_order_field = 'vouches_made__count'
 
     def last_login(self, obj):
         return obj.user.last_login
