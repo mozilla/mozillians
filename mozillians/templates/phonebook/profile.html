@@ -258,10 +258,10 @@
                       {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
                     </a>
                   {% else %}
-                    {{ _('Unknown') }}
+                    {{ _('Unknown Voucher') }}
                   {% endif %}
                   {% if not vouch.description %}
-                    <p>{{ _('Reason: Legacy auto-vouch.') }}</p>
+                    <p>{{ _('Reason: Legacy vouch.') }}</p>
                   {% else %}
                     <p>{{ _('Reason:') }} {{ vouch.description }}</p>
                   {% endif %}

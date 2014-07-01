@@ -7,7 +7,6 @@ from django.db.models import Q
 from django.conf import settings
 from django.utils import timezone
 from operator import or_
-from mozillians.geo.models import Country
 
 
 class Migration(DataMigration):
@@ -27,13 +26,12 @@ class Migration(DataMigration):
 
         user.userprofile.is_vouched = True
         user.userprofile.save()
-        for i in range(1,4):
+        for i in range(1, 4):
             orm.Vouch.objects.create(
                 voucher=None,
                 vouchee=user.userprofile, description='Dinos are always vouched.',
                 date=timezone.now()
             )
-        user.save()
 
         # Confirm that the account was created before we go nuts.
         try:
@@ -49,13 +47,26 @@ class Migration(DataMigration):
         for auto_user in orm['auth.User'].objects.filter(av_query):
             try:
                 vouch = auto_user.userprofile.vouches_received.all().order_by('date')
-                if vouch and not vouch[0].voucher:
-                    vouch[0].voucher = dino.userprofile
-                    vouch[0].description = 'An automatic vouch for being a Mozilla employee.'
-                    vouch[0].save()
             except orm.UserProfile.DoesNotExist:
                 # Some users may not have a profile, so just skip them.
                 print auto_user.email + " has no userprofile, somehow!"
+                continue
+
+            if vouch and not vouch[0].voucher:
+                # If no voucher, this is a employee autovouch. Assign it to Dino
+                vouch[0].voucher = dino.userprofile
+                vouch[0].description = 'An automatic vouch for being a Mozilla employee.'
+                vouch[0].save()
+            else:
+                # Mozillian got vouched before becoming an employee
+                # and this is now a legacy vouch. Assign a proper
+                # employee vouch from Dino as well.
+                orm.Vouch.objects.create(
+                    voucher=dino.userprofile,
+                    vouchee=auto_user.userprofile,
+                    description='An automatic vouch for being a Mozilla employee.',
+                    date=timezone.now()
+                )
 
     def backwards(self, orm):
         orm['auth.User'].objects.get(username='dinomcvouch').delete()

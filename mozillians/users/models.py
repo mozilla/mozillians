@@ -570,7 +570,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
-        # If you've already vouched, you can't vouch this person again.
+        # If you've already vouched this account, you cannot do it again.
         if voucher:
             if self.vouches_received.filter(voucher=voucher).count() > 0:
                 return False
