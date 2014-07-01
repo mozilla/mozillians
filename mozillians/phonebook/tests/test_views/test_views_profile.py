@@ -85,7 +85,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, MOZILLIANS)
-        ok_('vouch_form' not in response.context)
+        ok_('vouch_form' in response.context)
 
     def test_view_unvouched_profile_public_anonymous(self):
         lookup_user = UserFactory.create(vouched=False,
@@ -126,8 +126,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, MOZILLIANS)
-        eq_(response.context['vouch_form'].initial['vouchee'],
-            lookup_user.userprofile.id)
+        ok_('vouch_form' in response.context)
 
     def test_view_profile_mine_unvouched(self):
         user = UserFactory.create(vouched=False)
@@ -222,5 +221,3 @@ class ViewProfileTests(TestCase):
         with self.login(user) as client:
             response = client.get(url, follow=True)
         ok_('vouch_form' in response.context)
-        eq_(response.context['vouch_form'].initial['vouchee'],
-            unvouched_user.userprofile.id)

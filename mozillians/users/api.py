@@ -26,6 +26,8 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     username = fields.CharField(attribute='user__username', null=True, readonly=True)
     vouched_by = fields.IntegerField(attribute='vouched_by__id',
                                      null=True, readonly=True)
+    date_vouched = fields.DateTimeField(attribute='date_vouched', null=True, readonly=True)
+
     groups = fields.CharField()
     skills = fields.CharField()
     languages = fields.CharField()

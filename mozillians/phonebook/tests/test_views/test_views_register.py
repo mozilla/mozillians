@@ -21,7 +21,8 @@ class RegisterTests(TestCase):
     @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_unvouched(self, redeem_invite_mock):
         user = UserFactory.create(vouched=False)
-        invite = InviteFactory.create(inviter=user.userprofile)
+        inviter = UserFactory.create()
+        invite = InviteFactory.create(inviter=inviter.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -34,9 +35,8 @@ class RegisterTests(TestCase):
     def test_register_vouched(self, redeem_invite_mock):
         voucher_1 = UserFactory.create()
         voucher_2 = UserFactory.create()
-        user = UserFactory.create(
-            userprofile={'is_vouched': True,
-                         'vouched_by': voucher_1.userprofile})
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(voucher_1.userprofile)
         invite = InviteFactory.create(inviter=voucher_2.userprofile)
         url = urlparams(reverse('phonebook:register'), code=invite.code)
         with self.login(user) as client:

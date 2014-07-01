@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group, User
+from django.utils import timezone
 
 import factory
 from factory import fuzzy
@@ -35,9 +36,10 @@ class UserFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def vouched(self, create, extracted, **kwargs):
         # By default Users are vouched
-        if extracted is None:
-            extracted = True
-        self.userprofile.is_vouched = extracted
+        if extracted is None or extracted:
+            self.userprofile.is_vouched = True
+            self.userprofile.vouches_received.create(
+                voucher=None, date=timezone.now(), description='a test autovouch')
         self.userprofile.save()
 
 

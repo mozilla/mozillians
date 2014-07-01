@@ -19,7 +19,6 @@ urlpatterns = patterns(
     url(r'^opensearch.xml$', 'views.search_plugin', name='search_plugin'),
     url(r'^search/$', 'views.search', name='search'),
     url(r'^betasearch/$', 'views.betasearch', name='betasearch'),
-    url(r'^vouch/$', 'views.vouch', name='vouch'),
     url(r'^invite/$', 'views.invite', name='invite'),
     url(r'^invite/(?P<invite_pk>\d+)/delete/$', 'views.delete_invite', name='delete_invite'),
     url(r'^country/(?P<country>[A-Za-z0-9 ]+)/$',
