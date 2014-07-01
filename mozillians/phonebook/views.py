@@ -81,22 +81,16 @@ def view_profile(request, username):
                 request.user.userprofile.privacy_level)
 
         if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
-            if request.POST:
-                vouch_form = forms.VouchForm(request.POST)
-                if vouch_form.is_valid():
-                    p = UserProfile.objects.get(pk=vouch_form.cleaned_data.get('vouchee'))
-                    p.vouch(request.user.userprofile,
-                            vouch_form.cleaned_data.get('description'))
-                    # Notify the current user that they vouched successfully.
-                    msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                            u'This user is now vouched!')
-                    messages.info(request, msg)
-                    return redirect('phonebook:profile_view', p.user.username)
-                else:
-                    data['vouch_form'] = forms.VouchForm(request.POST)
-            else:
-                data['vouch_form'] = (
-                    forms.VouchForm(initial={'vouchee': profile.pk}))
+            vouch_form = forms.VouchForm(request.POST or None)
+            data['vouch_form'] = vouch_form
+            if vouch_form.is_valid():
+                # We need to re-fetch profile from database.
+                profile = UserProfile.objects.get(user__username=username)
+                profile.vouch(request.user.userprofile, vouch_form.cleaned_data['description'])
+                # Notify the current user that they vouched successfully.
+                msg = _(u'Thanks for vouching for a fellow Mozillian! This user is now vouched!')
+                messages.info(request, msg)
+                return redirect('phonebook:profile_view', profile.user.username)
 
     data['shown_user'] = profile.user
     data['profile'] = profile

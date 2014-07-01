@@ -579,12 +579,12 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def vouch(self, vouched_by, description=''):
         if not self.is_vouchable(vouched_by):
-            return True
+            return
 
-        self.is_vouched = True
         self.vouches_received.create(
             voucher=vouched_by, date=datetime.now(), description=description
         )
+        self.is_vouched = True
         self.save()
 
         self._email_now_vouched()

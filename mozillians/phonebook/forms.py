@@ -256,7 +256,6 @@ class RegisterForm(ProfileForm):
 
 class VouchForm(happyforms.Form):
     """Vouching is captured via a user's id and a description of the reason for vouching."""
-    vouchee = forms.IntegerField(widget=forms.HiddenInput)
     description = forms.CharField(
         label=_lazy(u'Provide a reason for vouching with relevant links'),
         widget=forms.Textarea(attrs={'rows': 10, 'cols': 20, 'maxlength': 500}),
