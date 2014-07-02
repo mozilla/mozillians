@@ -65,12 +65,10 @@
                 success:function(data){
                     results_el.children().remove();
                     search_loading_el.hide();
-                    if(data.results.length > 0){
-                        if(takeFirstResult){
-                            selectSearchResult(data.results[0]);
-                        }else{
-                            for (var i = 0; i < data.results.length; i++) {
-                                var result = data.results[i];
+                        for (var i = 0; i < data.results.length; i++) {
+                            var result = data.results[i];
+                            var type = data.results[i][0].type;
+                            if(type === 'country' || type === 'province' || type === 'city'){
                                 var text = '';
                                 for (var j = 0; j < result.length; j++) {
                                     text += result[j].name;
@@ -79,12 +77,17 @@
                                 var item = $('<li>').text(text).appendTo(results_el);
                                 item[0].datum = result;
                             }
+                        }
+                        if(results_el.children().length !== 0){
+                        if(takeFirstResult){
+                            selectSearchResult(results_el.children().first()[0].datum);
+                        }else{
                             results_el.show();
                         }
-                    }else{
-                        results_el.hide();
+                        }else{
+                            results_el.hide();
+                        }
                     }
-                }
             });
         }
     }
