@@ -161,10 +161,10 @@
 
         {% if profile.story_link %}
           <div id="story-link" class="profile-entry">
-	    <p>
-	      <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
-	    </p>
-	  </div>
+            <p>
+              <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
+            </p>
+          </div>
         {% endif %}
 
         {% if groups %}
@@ -263,7 +263,7 @@
                   {% if not vouch.description %}
                     <p>{{ _('Reason: Legacy vouch.') }}</p>
                   {% else %}
-                    <p>{{ _('Reason:') }} {{ vouch.description }}</p>
+                    {{ vouch.description|markdown }}
                   {% endif %}
                 </li>
               {% endfor %}
