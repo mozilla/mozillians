@@ -790,13 +790,17 @@ class Vouch(models.Model):
     vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
     voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
                                 null=True, default=None, blank=True)
-    description = models.CharField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
+    description = models.TextField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
                                    default='')
     # The back-end can set date null, for migration purposes, but forms cannot.
     date = models.DateTimeField(null=True, default=None)
 
     class Meta:
+        verbose_name_plural = 'vouches'
         unique_together = ('vouchee', 'voucher')
+
+    def __unicode__(self):
+        return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
 
 
 @receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')

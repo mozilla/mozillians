@@ -24,7 +24,7 @@ import mozillians.users.tasks
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
-                                     ExternalAccount,
+                                     ExternalAccount, Vouch,
                                      UserProfile, UsernameBlacklist)
 
 
@@ -380,3 +380,24 @@ class GroupAdmin(ExportMixin, GroupAdmin):
     pass
 
 admin.site.register(Group, GroupAdmin)
+
+
+class VouchAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Vouch
+        widgets = {
+            'voucher': autocomplete_light.ChoiceWidget('UserProfiles'),
+            'vouchee': autocomplete_light.ChoiceWidget('UserProfiles'),
+        }
+
+
+class VouchAdmin(admin.ModelAdmin):
+    save_on_top = True
+    search_fields = ['voucher__user__username', 'voucher__full_name',
+                     'vouchee__user__username', 'vouchee__full_name']
+    readonly_fields = ['date']
+    list_display = ['vouchee', 'voucher', 'date']
+    form = VouchAdminForm
+
+admin.site.register(Vouch, VouchAdmin)
