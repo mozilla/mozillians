@@ -24,7 +24,7 @@ import mozillians.users.tasks
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
-                                     ExternalAccount,
+                                     ExternalAccount, Vouch,
                                      UserProfile, UsernameBlacklist)
 
 
@@ -255,7 +255,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
-    readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login']
+    readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
+                       'is_vouched', 'can_vouch']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
@@ -277,7 +278,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_joined', 'last_login')
         }),
         ('Vouch Info', {
-            'fields': ('date_vouched', 'is_vouched', 'vouched_by')
+            'fields': ('date_vouched', 'is_vouched', 'vouched_by', 'can_vouch')
         }),
         ('Location', {
             'fields': ('country', 'region', 'city',
@@ -379,3 +380,24 @@ class GroupAdmin(ExportMixin, GroupAdmin):
     pass
 
 admin.site.register(Group, GroupAdmin)
+
+
+class VouchAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Vouch
+        widgets = {
+            'voucher': autocomplete_light.ChoiceWidget('UserProfiles'),
+            'vouchee': autocomplete_light.ChoiceWidget('UserProfiles'),
+        }
+
+
+class VouchAdmin(admin.ModelAdmin):
+    save_on_top = True
+    search_fields = ['voucher__user__username', 'voucher__full_name',
+                     'vouchee__user__username', 'vouchee__full_name']
+    readonly_fields = ['date']
+    list_display = ['vouchee', 'voucher', 'date']
+    form = VouchAdminForm
+
+admin.site.register(Vouch, VouchAdmin)

@@ -159,8 +159,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                  verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(
         default=False,
-        help_text=u'WARNING! Unchecking this will delete ALL user vouches PERMANENTLY!'
-    )
+        help_text='You can edit vouched status by editing invidual vouches')
+    can_vouch = models.BooleanField(
+        default=False,
+        help_text='You can edit can_vouch status by editing invidual vouches')
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
@@ -563,11 +565,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def is_vouchable(self, voucher):
         """Check whether self can receive a vouch from voucher."""
-        # If there's a voucher, they must be vouched.
-        if voucher and not voucher.is_vouched:
+        # If there's a voucher, they must be able to vouch.
+        if voucher and not voucher.can_vouch:
             return False
 
-        # Maximum 5 vouches per account, no matter what.
+        # Maximum VOUCH_COUNT_LIMIT vouches per account, no matter what.
         if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
@@ -669,8 +671,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
         self.auto_vouch()
-        if not self.is_vouched:
-            self.vouches_received.all().delete()
 
     @classmethod
     def get_index(cls, public_index=False):
@@ -791,13 +791,34 @@ class Vouch(models.Model):
     vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
     voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
                                 null=True, default=None, blank=True)
-    description = models.CharField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
+    description = models.TextField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
                                    default='')
     # The back-end can set date null, for migration purposes, but forms cannot.
     date = models.DateTimeField(null=True, default=None)
 
     class Meta:
+        verbose_name_plural = 'vouches'
         unique_together = ('vouchee', 'voucher')
+
+    def __unicode__(self):
+        return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
+
+
+@receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
+@receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
+def update_vouch_flags(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+    try:
+        profile = instance.vouchee
+    except UserProfile.DoesNotExist:
+        # In this case we delete not only the vouches but the
+        # UserProfile as well. Do nothing.
+        return
+    vouches = Vouch.objects.filter(vouchee=profile).count()
+    profile.is_vouched = vouches > 0
+    profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
+    profile.save()
 
 
 class UsernameBlacklist(models.Model):
