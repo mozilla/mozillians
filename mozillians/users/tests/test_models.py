@@ -92,6 +92,24 @@ class SignaledFunctionsTests(TestCase):
         vouched = User.objects.get(pk=vouched.id)
         eq_(vouched.userprofile.is_vouched, False)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=5)
+    def test_vouch_can_vouch_gets_updated(self):
+        unvouched = UserFactory.create(vouched=False)
+
+        # Give four vouches, should not allow to vouch.
+        for i in range(4):
+            unvouched.userprofile.vouch(None)
+            # Reload from database
+            unvouched = User.objects.get(pk=unvouched.id)
+            eq_(unvouched.userprofile.can_vouch, False)
+
+        # Give the fifth vouch
+        unvouched.userprofile.vouch(None)
+
+        # Reload from database
+        unvouched = User.objects.get(pk=unvouched.id)
+        eq_(unvouched.userprofile.can_vouch, True)
+
 
 class UserProfileTests(TestCase):
     @patch('mozillians.users.models.UserProfile.privacy_fields')

@@ -159,6 +159,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     is_vouched = models.BooleanField(
         default=False,
         help_text='You can edit vouched status by editing invidual vouches')
+    can_vouch = models.BooleanField(
+        default=False,
+        help_text='You can edit can_vouch status by editing invidual vouches')
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
@@ -561,11 +564,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def is_vouchable(self, voucher):
         """Check whether self can receive a vouch from voucher."""
-        # If there's a voucher, they must be vouched.
-        if voucher and not voucher.is_vouched:
+        # If there's a voucher, they must be able to vouch.
+        if voucher and not voucher.can_vouch:
             return False
 
-        # Maximum 5 vouches per account, no matter what.
+        # Maximum VOUCH_COUNT_LIMIT vouches per account, no matter what.
         if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
@@ -807,8 +810,10 @@ def update_vouch_flags(sender, instance, **kwargs):
         # In this case we delete not only the vouches but the
         # UserProfile as well. Do nothing.
         return
-    is_vouched = Vouch.objects.filter(vouchee=profile).exists()
-    UserProfile.objects.filter(id=profile.id).update(is_vouched=is_vouched)
+    vouches = Vouch.objects.filter(vouchee=profile).count()
+    profile.is_vouched = vouches > 0
+    profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
+    profile.save()
 
 
 class UsernameBlacklist(models.Model):
