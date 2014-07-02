@@ -265,7 +265,11 @@ class VouchForm(happyforms.Form):
 
 
 class InviteForm(happyforms.ModelForm):
-    message = forms.CharField(label=_lazy(u'Message'), required=False, widget=forms.Textarea())
+    message = forms.CharField(
+        label=_lazy(u'Personal message to be included in the invite email'),
+        required=False, widget=forms.Textarea(),
+    )
+    recipient = forms.EmailField(label=_lazy("Recipient's email"))
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
@@ -277,4 +281,4 @@ class InviteForm(happyforms.ModelForm):
 
     class Meta:
         model = Invite
-        fields = ['recipient', 'reason']
+        fields = ['recipient']
