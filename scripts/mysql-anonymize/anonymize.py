@@ -68,6 +68,16 @@ def get_updates(config):
                     # Must be a separate statement due to WHERE clause.
                     sql.append('UPDATE %s SET %s = CONCAT(id, "@mozilla.com")'
                                ' WHERE is_staff=0' % (table,field))
+            elif operation == 'random_email_noadmin_examplecom':
+                # Randomize all @mozilla.com email address to XXXX@mozilla.com
+                # where XXXX is number and all other address to XXXX@example.com
+                # Staff addresses stay intact
+                for field in listify(details):
+                    # Must be a separate statement due to WHERE clause.
+                    sql.append('UPDATE %s SET %s = CONCAT(id, "@mozilla.com")'
+                               ' WHERE is_staff=0 AND %s LIKE "%@mozilla.com" % (table,field, field))
+                    sql.append('UPDATE %s SET %s = CONCAT(id, "@example.com")'
+                               ' WHERE is_staff=0 AND %s NOT LIKE "%@mozilla.com" % (table,field, field))
             elif operation == 'random_email':
                 for field in listify(details):
                     updates.append('%s = CONCAT(id, "@mozilla.com")'

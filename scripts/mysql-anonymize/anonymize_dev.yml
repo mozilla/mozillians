@@ -23,7 +23,7 @@ databases:
                 nullify:
                     - first_name
                     - last_name
-                random_email_noadmin:
+                random_email_noadmin_examplecom:
                     - email
                 random_username:
                     - username
