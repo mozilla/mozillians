@@ -84,7 +84,7 @@ def validate_phone_number(value):
     # Ensure that there are 5 to 15 digits
     pattern = re.compile(r'^\+\d{5,15}$')
     if not pattern.match(value):
-        raise ValidationError(_('Please enter a valid phone number, in international format '
+        raise ValidationError(_('Please enter a valid phone number in international format '
                                 '(e.g. +1 555 555 5555)'))
 
     return value
