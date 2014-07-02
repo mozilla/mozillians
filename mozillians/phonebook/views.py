@@ -156,11 +156,11 @@ def edit_profile(request):
         accounts_formset.save()
         language_formset.save()
 
-        # Notify the user that their old profile URL won't work.
         if new_profile:
             redeem_invite(profile, request.session.get('invite-code'))
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
+        # Notify the user that their old profile URL won't work.
             messages.info(request,
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))
@@ -314,19 +314,30 @@ def search_plugin(request):
 
 def invite(request):
     profile = request.user.userprofile
-    invite_form = forms.InviteForm(request.POST or None,
-                                   instance=Invite(inviter=profile))
-    if invite_form.is_valid():
+    invite_form = None
+    vouch_form = None
+    if profile.can_vouch:
+        invite_form = forms.InviteForm(request.POST or None,
+                                       instance=Invite(inviter=profile))
+        vouch_form = forms.VouchForm(request.POST or None)
+
+    if invite_form and vouch_form and invite_form.is_valid() and vouch_form.is_valid():
+        invite_form.instance.reason = vouch_form.cleaned_data['description']
         invite = invite_form.save()
         invite.send(sender=profile, personal_message=invite_form.cleaned_data['message'])
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
                 u"with instructions on how to join. You can "
                 u"invite another Mozillian if you like.") % invite.recipient
         messages.success(request, msg)
-        return redirect('phonebook:home')
+        return redirect('phonebook:invite')
 
     return render(request, 'phonebook/invite.html',
-                  {'invite_form': invite_form, 'invites': profile.invites.all()})
+                  {
+                      'invite_form': invite_form,
+                      'vouch_form': vouch_form,
+                      'invites': profile.invites.all(),
+                      'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
+                  })
 
 
 @require_POST

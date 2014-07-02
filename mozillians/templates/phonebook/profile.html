@@ -288,7 +288,10 @@
             </ul>
           </div>
         {% endif %}
-        {% include 'phonebook/includes/profile_vouch.html' %}
+          <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
+                id="vouch-form">
+            {% include 'phonebook/includes/profile_vouch.html' %}
+          </form>
       </section>
 
     </article>

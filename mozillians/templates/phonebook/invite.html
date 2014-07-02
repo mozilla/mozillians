@@ -8,33 +8,37 @@
   <h1>{{ _('Invite a Mozillian') }}</h1>
 
   <p>
-    {% trans %}
-      If you'd like to invite a Mozillian to create a profile, please enter
-      their email address here:
-    {% endtrans %}
+    {% if invite_form %}
+      {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
+        If you want to invite a new Mozillian please fill out the
+        following form. <strong>Note</strong>: Inviting a new user is like
+        vouching. <a href="{{ vouching_url }}">Read more about vouching.</a>
+      {% endtrans %}
+    {% else %}
+      {% trans %}
+        You cannot currently send invites. You need at least {{ vouch_threshold }} vouches.
+      {% endtrans %}
+    {% endif %}
   </p>
 
-  {% if invite_form.errors %}
-    <div class="alert alert-error">
-      {{ _('Please correct the errors below.') }}
+  {% if invite_form %}
+    {% if invite_form.errors or vouch_form.errors %}
+      <div class="alert alert-error">
+        {{ _('Please correct the errors below.') }}
+      </div>
+    {% endif %}
+
+    <div class="invite-box">
+      <div class="margins">
+        <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
+          {{ csrf() }}
+          {{ mozillians_field(invite_form.recipient) }}
+          {{ mozillians_field(invite_form.message) }}
+          {% include "phonebook/includes/profile_vouch.html" %}
+        </form>
+      </div>
     </div>
   {% endif %}
-
-  <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
-    {{ csrf() }}
-    {{ mozillians_field(invite_form.recipient) }}
-    {{ mozillians_field(invite_form.message) }}
-    {{ mozillians_field(invite_form.reason) }}
-    <button type="submit">
-      {{ _('Send invite') }}
-    </button>
-    <p>
-      {% trans %}
-        <strong>Note:</strong>
-        Your name and email will be sent to whomever you invite.
-      {% endtrans %}
-      </p>
-  </form>
 
   {% if invites.exists() %}
     <h1>{{ _('Your Invites') }}</h1>
@@ -72,4 +76,10 @@
 
   {% endif %}
 
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/character_limit.js') }}"></script>
+  {% endcompress %}
 {% endblock %}

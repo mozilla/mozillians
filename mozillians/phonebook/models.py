@@ -20,8 +20,7 @@ class Invite(models.Model):
     redeemer = models.OneToOneField(UserProfile, blank=True, null=True,
                                     verbose_name=_lazy(u'Redeemer'))
     code = models.CharField(max_length=32, unique=True)
-    reason = models.CharField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
-                              default='')
+    reason = models.TextField(max_length=500, default='')
     redeemed = models.DateTimeField(null=True)
     created = models.DateTimeField(auto_now_add=True)
 
