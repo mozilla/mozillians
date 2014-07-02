@@ -71,6 +71,27 @@ class SignaledFunctionsTests(TestCase):
 
         ok_(not User.objects.filter(pk=user.pk).exists())
 
+    def test_vouch_is_vouch_gets_updated(self):
+        voucher = UserFactory.create()
+        unvouched = UserFactory.create(vouched=False)
+
+        eq_(unvouched.userprofile.is_vouched, False)
+        unvouched.userprofile.vouch(voucher.userprofile)
+
+        # Reload from database
+        unvouched = User.objects.get(pk=unvouched.id)
+        eq_(unvouched.userprofile.is_vouched, True)
+
+    def test_unvouch_is_vouch_gets_updated(self):
+        vouched = UserFactory.create()
+
+        eq_(vouched.userprofile.is_vouched, True)
+        vouched.userprofile.vouches_received.all().delete()
+
+        # Reload from database
+        vouched = User.objects.get(pk=vouched.id)
+        eq_(vouched.userprofile.is_vouched, False)
+
 
 class UserProfileTests(TestCase):
     @patch('mozillians.users.models.UserProfile.privacy_fields')

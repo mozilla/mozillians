@@ -158,8 +158,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                  verbose_name=_lazy(u'Full Name'))
     is_vouched = models.BooleanField(
         default=False,
-        help_text=u'WARNING! Unchecking this will delete ALL user vouches PERMANENTLY!'
-    )
+        help_text='You can edit vouched status by editing invidual vouches')
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
@@ -668,8 +667,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
         self.auto_vouch()
-        if not self.is_vouched:
-            self.vouches_received.all().delete()
 
     @classmethod
     def get_index(cls, public_index=False):
@@ -797,6 +794,21 @@ class Vouch(models.Model):
 
     class Meta:
         unique_together = ('vouchee', 'voucher')
+
+
+@receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
+@receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
+def update_vouch_flags(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+    try:
+        profile = instance.vouchee
+    except UserProfile.DoesNotExist:
+        # In this case we delete not only the vouches but the
+        # UserProfile as well. Do nothing.
+        return
+    is_vouched = Vouch.objects.filter(vouchee=profile).exists()
+    UserProfile.objects.filter(id=profile.id).update(is_vouched=is_vouched)
 
 
 class UsernameBlacklist(models.Model):

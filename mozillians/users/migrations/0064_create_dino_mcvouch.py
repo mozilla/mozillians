@@ -68,6 +68,11 @@ class Migration(DataMigration):
                     date=timezone.now()
                 )
 
+            # Make sure that the is_vouched flag is set.
+            profile = auto_user.userprofile
+            profile.is_vouched = True
+            profile.save()
+
     def backwards(self, orm):
         orm['auth.User'].objects.get(username='dinomcvouch').delete()
 
