@@ -573,10 +573,13 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
-        # If you've already vouched this account, you cannot do it again.
-        if voucher:
-            if self.vouches_received.filter(voucher=voucher).count() > 0:
-                return False
+        # If you've already vouched this account, you cannot do it again, unless
+        # this account has a legacy vouch from you.
+        vouch_query = self.vouches_received.filter(voucher=voucher)
+        if voucher and vouch_query.exists():
+            if vouch_query.filter(description='').exists():
+                return True
+            return False
 
         return True
 
@@ -584,9 +587,20 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         if not self.is_vouchable(vouched_by):
             return
 
-        self.vouches_received.create(
-            voucher=vouched_by, date=datetime.now(), description=description
-        )
+        now = datetime.now()
+        # Update a legacy vouch, if exists, by re-vouching
+        # https://bugzilla.mozilla.org/show_bug.cgi?id=1033306
+        query = self.vouches_received.filter(voucher=vouched_by)
+        if query.filter(description='').exists():
+            # If there isn't a date, provide one
+            if not query[0].date:
+                query.update(description=description, date=now)
+            else:
+                query.update(description=description)
+        else:
+            self.vouches_received.create(
+                voucher=vouched_by, date=now, description=description
+            )
         self.is_vouched = True
         self.save()
 
@@ -799,6 +813,7 @@ class Vouch(models.Model):
     class Meta:
         verbose_name_plural = 'vouches'
         unique_together = ('vouchee', 'voucher')
+        ordering = ['-date']
 
     def __unicode__(self):
         return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
