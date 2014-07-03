@@ -807,6 +807,8 @@ class Vouch(models.Model):
                                 null=True, default=None, blank=True)
     description = models.TextField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
                                    default='')
+    autovouch = models.BooleanField(default=False)
+
     # The back-end can set date null, for migration purposes, but forms cannot.
     date = models.DateTimeField(null=True, default=None)
 
