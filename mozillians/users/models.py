@@ -804,7 +804,8 @@ def delete_user_obj_sig(sender, instance, **kwargs):
 class Vouch(models.Model):
     vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
     voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
-                                null=True, default=None, blank=True)
+                                null=True, default=None, blank=True,
+                                on_delete=models.SET_NULL)
     description = models.TextField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
                                    default='')
     autovouch = models.BooleanField(default=False)
