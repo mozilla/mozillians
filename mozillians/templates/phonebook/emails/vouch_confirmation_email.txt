@@ -6,10 +6,21 @@
 
 {% trans %}
   You have been vouched on Mozillians.org!
+{% endtrans %}
+
+{% if first_vouch %}
+{% trans %}
   You are now able to search through all Mozillians profiles
   and you can also join groups.
 {% endtrans %}
 
+{% endif %}
+{% if can_vouch_threshold %}
+{% trans vouching_url = 'https://wiki.mozilla.org/Mozillians/Vouching' %}
+  You are now able to vouch others! Read more about vouching {{ vouching_url }}
+{% endtrans %}
+
+{% endif %}
 {% if voucher_name  %}
 
 {% trans %}
@@ -18,12 +29,14 @@
 
 {% endif %}
 
+{% if first_vouch %}
 {% trans %}
   Take a moment to join a functional area or group right now:
 {% endtrans %}
 
- - {{ functional_areas_url }}
- - {{ groups_url }}
+   - {{ functional_areas_url }}
+   - {{ groups_url }}
+{% endif %}
 
 {% trans %}
   Keep rocking the open Web!
