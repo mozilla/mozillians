@@ -1,80 +1,23 @@
 # -*- coding: utf-8 -*-
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
-from django.db.models import Q
-from django.conf import settings
-from django.utils import timezone
-from operator import or_
 
 
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        user = orm['auth.User'].objects.create(
-            email='no-reply@mozillians.org',
-            username='dinomcvouch',
-            is_staff=True
-        )
-        orm.UserProfile.objects.create(user=user)
-        user.userprofile.full_name = 'Dino McVouch'
-        user.userprofile.geo_country, created = orm['geo.Country'].objects.get_or_create(
-            name='United States', code='us',
-            mapbox_id='country.4150104525'
-        )
+        # Adding field 'Vouch.autovouch'
+        db.add_column(u'users_vouch', 'autovouch',
+                      self.gf('django.db.models.fields.BooleanField')(default=False),
+                      keep_default=False)
 
-        user.userprofile.is_vouched = True
-        user.userprofile.save()
-        for i in range(1, 4):
-            orm.Vouch.objects.create(
-                voucher=None,
-                vouchee=user.userprofile, description='Dinos are always vouched.',
-                date=timezone.now()
-            )
-
-        # Confirm that the account was created before we go nuts.
-        try:
-            dino = orm['auth.User'].objects.get(email='no-reply@mozillians.org')
-        except orm['auth.User'].DoesNotExist:
-            raise orm['auth.User'].DoesNotExist("Can't find the Dino McVouch user.")
-
-        # Filter users by whether their email is one of the auto vouch domains.
-        av_query = reduce(
-            or_, [Q(email__endswith='@{0}'.format(e)) for e in settings.AUTO_VOUCH_DOMAINS]
-        )
-
-        for auto_user in orm['auth.User'].objects.filter(av_query):
-            try:
-                vouch = auto_user.userprofile.vouches_received.all().order_by('date')
-            except orm.UserProfile.DoesNotExist:
-                # Some users may not have a profile, so just skip them.
-                print auto_user.email + " has no userprofile, somehow!"
-                continue
-
-            if vouch and not vouch[0].voucher:
-                # If no voucher, this is a employee autovouch. Assign it to Dino
-                vouch[0].voucher = dino.userprofile
-                vouch[0].description = 'An automatic vouch for being a Mozilla employee.'
-                vouch[0].save()
-            else:
-                # Mozillian got vouched before becoming an employee
-                # and this is now a legacy vouch. Assign a proper
-                # employee vouch from Dino as well.
-                orm.Vouch.objects.create(
-                    voucher=dino.userprofile,
-                    vouchee=auto_user.userprofile,
-                    description='An automatic vouch for being a Mozilla employee.',
-                    date=timezone.now()
-                )
-
-            # Make sure that the is_vouched flag is set.
-            profile = auto_user.userprofile
-            profile.is_vouched = True
-            profile.save()
 
     def backwards(self, orm):
-        orm['auth.User'].objects.get(username='dinomcvouch').delete()
+        # Deleting field 'Vouch.autovouch'
+        db.delete_column(u'users_vouch', 'autovouch')
+
 
     models = {
         u'auth.group': {
@@ -194,6 +137,7 @@ class Migration(DataMigration):
             'allows_mozilla_sites': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'basket_token': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1024', 'blank': 'True'}),
             'bio': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'can_vouch': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'city': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '255', 'blank': 'True'}),
             'country': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '50'}),
             'date_mozillian': ('django.db.models.fields.DateField', [], {'default': 'None', 'null': 'True', 'blank': 'True'}),
@@ -235,8 +179,9 @@ class Migration(DataMigration):
         },
         u'users.vouch': {
             'Meta': {'unique_together': "(('vouchee', 'voucher'),)", 'object_name': 'Vouch'},
+            'autovouch': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'date': ('django.db.models.fields.DateTimeField', [], {'default': 'None', 'null': 'True'}),
-            'description': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '500'}),
+            'description': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '500'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'vouchee': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'vouches_received'", 'to': u"orm['users.UserProfile']"}),
             'voucher': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'related_name': "'vouches_made'", 'null': 'True', 'blank': 'True', 'to': u"orm['users.UserProfile']"})
@@ -244,4 +189,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['users']
-    symmetrical = True
