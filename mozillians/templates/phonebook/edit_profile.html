@@ -149,6 +149,9 @@
         <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
         <ol id="location_search_results" class="scroll-shadows"></ol>
       </div>
+      <div id="gps_error" class="error-message" style="display:none;">
+        <i class="icon-target"></i> {{ _('You have denied Location services.') }}
+      </div>
     </fieldset>
 
     <fieldset>
