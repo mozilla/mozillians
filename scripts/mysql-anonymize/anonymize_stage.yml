@@ -20,5 +20,8 @@ databases:
 
         tables:
             auth_user:
-              random_email_noadmin_examplecom:
-                    - email
+              random_email_noadmin_noemployees:
+                - email
+              random_email_noadmin_employees:
+                - email
+
