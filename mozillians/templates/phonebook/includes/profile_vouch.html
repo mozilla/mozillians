@@ -1,7 +1,7 @@
 {% if vouch_form %}
   <div class="vouch-box">
     <div class="margins">
-      {% if not profile.is_vouched %}
+      {% if profile_is_vouchable %}
         <h4>
           {% trans full_name=profile.full_name %}
             Is {{ full_name }} a Mozillian? Let us know how he/she contributed.
