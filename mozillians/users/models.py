@@ -849,7 +849,7 @@ class ExternalAccount(models.Model):
         TYPE_LANDLINE: {'name': 'Phone (Landline)',
                         'url': '',
                         'validator': validate_phone_number},
-        TYPE_LANYRD: {'name': 'Phone (Mobile)',
+        TYPE_MOBILE: {'name': 'Phone (Mobile)',
                       'url': '',
                       'validator': validate_phone_number},
 
