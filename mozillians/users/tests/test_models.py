@@ -71,6 +71,14 @@ class SignaledFunctionsTests(TestCase):
 
         ok_(not User.objects.filter(pk=user.pk).exists())
 
+    def test_voucher_set_null_on_user_delete(self):
+        voucher = UserFactory.create()
+        vouchee = UserFactory.create(vouched=False)
+        vouchee.userprofile.vouch(voucher.userprofile)
+        voucher.delete()
+        vouch = Vouch.objects.get(vouchee=vouchee)
+        eq_(vouch.voucher, None)
+
     def test_vouch_is_vouch_gets_updated(self):
         voucher = UserFactory.create()
         unvouched = UserFactory.create(vouched=False)
