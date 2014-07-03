@@ -36,4 +36,7 @@ urlpatterns = patterns(
     url(r'^about/$',
         allow_public(TemplateView.as_view(template_name='phonebook/about.html')),
         name='about'),
+    url(r'^about/dinomcvouch$',
+        allow_public(TemplateView.as_view(template_name='phonebook/about-dinomcvouch.html')),
+        name='about-dinomcvouch'),
 )

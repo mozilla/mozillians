@@ -257,11 +257,15 @@
                     <a href="{{ url('phonebook:profile_view', vouch.voucher.user.username) }}">
                       {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
                     </a>
+                  {% elif vouch.autovouch %}
+                    <a href="{{ url('phonebook:about-dinomcvouch') }}">
+                      Dino McVouch
+                    </a>
                   {% else %}
                     {{ _('Unknown Voucher') }}
                   {% endif %}
                   {% if not vouch.description %}
-                    <p>{{ _('Reason: Legacy vouch.') }}</p>
+                    <p>{{ _('Legacy vouch.') }}</p>
                   {% else %}
                     {{ vouch.description|markdown }}
                   {% endif %}
