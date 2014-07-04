@@ -162,6 +162,31 @@ class LastLoginFilter(SimpleListFilter):
         return queryset
 
 
+class AutoVouchFilter(SimpleListFilter):
+    """Admin filter for type of autovouches."""
+    title = 'autovouch type'
+    parameter_name = 'autovouch_type'
+
+    def lookups(self, request, model_admin):
+        return (('employee', 'Autovouch as employee'),
+                ('summit', 'Autovouch as summit attendee'),
+                ('legacy', 'Autovouch with legacy vouches'))
+
+    def queryset(self, request, queryset):
+        autovouched = queryset.filter(vouches_received__autovouch=True)
+        if self.value() == 'employee':
+            description = 'An automatic vouch for being a Mozilla employee.'
+            qs = autovouched.filter(vouches_received__description=description)
+            return qs
+        elif self.value() == 'summit':
+            description = 'Attended Summit 2013 Day'
+            qs = autovouched.filter(vouches_received__description__startswith=description)
+            return qs
+        elif self.value() == 'legacy':
+            return autovouched.filter(vouches_received__description='')
+        return queryset
+
+
 class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
@@ -258,7 +283,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch']
     form = UserProfileAdminForm
-    list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
+    list_filter = ['is_vouched', 'can_vouch', AutoVouchFilter, DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
                    PublicProfileFilter, 'externalaccount__type']
     save_on_top = True
