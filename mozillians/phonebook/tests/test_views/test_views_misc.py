@@ -336,3 +336,21 @@ class DateValidationTests(TestCase):
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
+
+
+class AboutTests(TestCase):
+    def test_base(self):
+        url = reverse('phonebook:about')
+        client = Client()
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed('phonebook/about.html')
+
+
+class AboutDinoMcVouchTests(TestCase):
+    def test_base(self):
+        url = reverse('phonebook:about-dinomcvouch')
+        client = Client()
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed('phonebook/about-dinomcvouch.html')
