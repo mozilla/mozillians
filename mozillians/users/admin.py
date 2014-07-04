@@ -258,12 +258,12 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch']
     form = UserProfileAdminForm
-    list_filter = ['is_vouched', DateJoinedFilter,
+    list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
                    PublicProfileFilter, 'externalaccount__type']
     save_on_top = True
-    list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched',
-                    'vouched_by', 'number_of_vouchees']
+    list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
+                    'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action()]
 
@@ -278,7 +278,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_joined', 'last_login')
         }),
         ('Vouch Info', {
-            'fields': ('date_vouched', 'is_vouched', 'vouched_by', 'can_vouch')
+            'fields': ('date_vouched', 'is_vouched', 'can_vouch')
         }),
         ('Location', {
             'fields': ('country', 'region', 'city',
