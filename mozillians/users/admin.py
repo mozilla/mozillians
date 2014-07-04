@@ -397,7 +397,8 @@ class VouchAdmin(admin.ModelAdmin):
     search_fields = ['voucher__user__username', 'voucher__full_name',
                      'vouchee__user__username', 'vouchee__full_name']
     readonly_fields = ['date']
-    list_display = ['vouchee', 'voucher', 'date']
+    list_display = ['vouchee', 'voucher', 'date', 'autovouch']
+    list_filter = ['autovouch']
     form = VouchAdminForm
 
 admin.site.register(Vouch, VouchAdmin)
