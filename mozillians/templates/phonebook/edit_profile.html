@@ -473,13 +473,13 @@
             </em>
           {% endtrans %}
         {% endif %}
-        {% if my_vouches %}
+        {% if profile.vouches_made.exists() %}
           <h5>{{ _('Vouchees') }}</h5>
           <ul class="vouchees">
-            {% for vouchee in my_vouches %}
+            {% for vouch in profile.vouches_made.all() %}
               <li>
-                <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
-                  {{ vouchee.display_name }}
+                <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}" class="vouched">
+                  {{ vouch.vouchee.display_name }}
                 </a>
               </li>
             {% endfor %}

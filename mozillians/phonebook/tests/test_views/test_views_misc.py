@@ -5,7 +5,6 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseBadRequest, HttpResponseNotAllowed
 from django.test.client import Client
 
 from mock import patch
@@ -14,7 +13,7 @@ from nose.tools import eq_, ok_
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.tests import InviteFactory, _get_privacy_fields
-from mozillians.users.managers import MOZILLIANS, PRIVILEGED
+from mozillians.users.managers import MOZILLIANS, PRIVILEGED, PUBLIC
 from mozillians.users.models import UserProfilePrivacyModel
 from mozillians.users.tests import UserFactory
 
@@ -68,7 +67,8 @@ class InviteTests(TestCase):
     def test_invite_post_vouched(self, success_mock):
         user = UserFactory.create()
         url = reverse('phonebook:invite', prefix='/en-US/')
-        data = {'message': 'Join us foo!', 'recipient': 'foo@example.com'}
+        data = {'message': 'Join us foo!', 'recipient': 'foo@example.com',
+                'reason': 'A test reason'}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
         self.assertTemplateUsed(response, 'phonebook/home.html')
@@ -129,32 +129,37 @@ class InviteTests(TestCase):
 
 
 class VouchTests(TestCase):
-    def test_vouch_get_method(self):
-        user = UserFactory.create()
-        url = reverse('phonebook:vouch', prefix='/en-US/')
-        with self.login(user) as client:
-            response = client.get(url)
-        ok_(isinstance(response, HttpResponseNotAllowed))
 
-    @requires_login()
-    def test_vouch_anonymous(self):
-        client = Client()
-        url = reverse('phonebook:vouch', prefix='/en-US/')
-        client.post(url)
+    def test_vouch_not_vouched(self):
+        user = UserFactory.create(vouched=False, userprofile={'privacy_full_name': PUBLIC})
+        voucher = UserFactory.create(vouched=False)
+        url = reverse('phonebook:profile_view', args=[user.username], prefix='/en-US/')
+        data = {'vouchee': user.userprofile.id,
+                'description': 'a reason'}
+        with self.login(voucher) as client:
+            client.post(url, data)
+        unvouched_user = User.objects.get(id=user.id)
+        ok_(not unvouched_user.userprofile.is_vouched)
 
-    @requires_vouch()
-    def test_vouch_unvouched(self):
+    def test_vouch_no_description(self):
         user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:vouch', prefix='/en-US/')
-        with self.login(user) as client:
-            client.post(url)
+        voucher = UserFactory.create()
+        url = reverse('phonebook:profile_view', args=[user.username], prefix='/en-US/')
+        data = {'vouchee': user.userprofile.id,
+                'description': ''}
+        with self.login(voucher) as client:
+            client.post(url, data)
+        unvouched_user = User.objects.get(id=user.id)
+        ok_(not unvouched_user.userprofile.is_vouched)
 
     @patch('mozillians.phonebook.views.messages.info')
     def test_vouch_vouched(self, info_mock):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None)
         unvouched_user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:vouch', prefix='/en-US/')
-        data = {'vouchee': unvouched_user.userprofile.id}
+        url = reverse('phonebook:profile_view', args=[unvouched_user.username], prefix='/en-US/')
+        data = {'vouchee': unvouched_user.userprofile.id,
+                'description': 'a reason'}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
         unvouched_user = User.objects.get(id=unvouched_user.id)
@@ -162,14 +167,7 @@ class VouchTests(TestCase):
         eq_(response.context['profile'], unvouched_user.userprofile)
         ok_(unvouched_user.userprofile.is_vouched)
         ok_(info_mock.called)
-
-    def test_vouch_invalid_form_vouched(self):
-        user = UserFactory.create()
-        url = reverse('phonebook:vouch', prefix='/en-US/')
-        data = {'vouchee': 'invalid'}
-        with self.login(user) as client:
-            response = client.post(url, data, follow=True)
-        ok_(isinstance(response, HttpResponseBadRequest))
+        self.assertRedirects(response, url)
 
 
 class LogoutTests(TestCase):
@@ -338,3 +336,21 @@ class DateValidationTests(TestCase):
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
+
+
+class AboutTests(TestCase):
+    def test_base(self):
+        url = reverse('phonebook:about')
+        client = Client()
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed('phonebook/about.html')
+
+
+class AboutDinoMcVouchTests(TestCase):
+    def test_base(self):
+        url = reverse('phonebook:about-dinomcvouch')
+        client = Client()
+        response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed('phonebook/about-dinomcvouch.html')

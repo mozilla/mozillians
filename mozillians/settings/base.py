@@ -324,3 +324,9 @@ BROWSERID_CREATE_USER = True
 BROWSERID_VERIFY_CLASS = 'mozillians.common.authbackend.BrowserIDVerify'
 BROWSERID_REQUEST_ARGS = lazy(_browserid_request_args, dict)()
 BROWSERID_AUDIENCES = lazy(_browserid_audiences, list)()
+
+# All accounts limited in 6 vouches total. Bug 997400.
+VOUCH_COUNT_LIMIT = 6
+
+# All accounts need 1 vouches to be able to vouch.
+CAN_VOUCH_THRESHOLD = 1

@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
@@ -46,6 +46,7 @@ def view_profile(request, username):
     privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
                         'privileged': PRIVILEGED, 'myself': None}
     privacy_level = None
+    profile_is_vouchable = False
 
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
@@ -80,12 +81,21 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
-        if (not profile.is_vouched
-            and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
-                data['vouch_form'] = (
-                    forms.VouchForm(initial={'vouchee': profile.pk}))
+        if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
+            profile_is_vouchable = True
 
+            vouch_form = forms.VouchForm(request.POST or None)
+            data['vouch_form'] = vouch_form
+            if vouch_form.is_valid():
+                # We need to re-fetch profile from database.
+                profile = UserProfile.objects.get(user__username=username)
+                profile.vouch(request.user.userprofile, vouch_form.cleaned_data['description'])
+                # Notify the current user that they vouched successfully.
+                msg = _(u'Thanks for vouching for a fellow Mozillian! This user is now vouched!')
+                messages.info(request, msg)
+                return redirect('phonebook:profile_view', profile.user.username)
+
+    data['profile_is_vouchable'] = profile_is_vouchable
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
@@ -165,7 +175,6 @@ def edit_profile(request):
                 accounts_formset=accounts_formset,
                 email_form=email_form,
                 user_groups=user_groups,
-                my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
@@ -331,24 +340,6 @@ def delete_invite(request, invite_pk):
             (deleted_invite.recipient, deleted_invite.recipient))
     messages.success(request, msg)
     return redirect('phonebook:invite')
-
-
-@require_POST
-def vouch(request):
-    """Vouch a user."""
-    form = forms.VouchForm(request.POST)
-
-    if form.is_valid():
-        p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.userprofile)
-
-        # Notify the current user that they vouched successfully.
-        msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                u'This user is now vouched!')
-        messages.info(request, msg)
-        return redirect('phonebook:profile_view', p.user.username)
-
-    return HttpResponseBadRequest()
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):

@@ -1,0 +1,50 @@
+{% if vouch_form %}
+  <div class="vouch-box">
+    <div class="margins">
+      {% if profile_is_vouchable %}
+        <h4>
+          {% trans full_name=profile.full_name %}
+            Is {{ full_name }} a Mozillian? Let us know how he/she contributed.
+          {% endtrans %}
+        </h4>
+      {% else %}
+        <h4>{{ _('Do you know this Mozillian? Let us know how he/she contributed.') }}</h4>
+      {% endif %}
+      <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
+            id="vouch-form">
+        {{ csrf() }}
+        {{ vouch_form }}
+        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+        {% endtrans %}
+        {{ _('Characters remaining:') }}
+        <span class="character-countdown">500</span>
+        <div id="vouch-submit">
+          <button class="button" type="submit"><i class="icon-key"></i>
+            {% trans name=profile.display_name %}
+              Vouch for {{ name }}
+            {% endtrans %}
+          </button>
+        </div>
+      </form>
+      <div class="clear"></div>
+      <p>{{ _('Only vouch for users who have made significant contributions and are at least 13 years old.') }}</p>
+      {% if not profile.is_vouched %}
+        <p>{{ _('Once vouched, they will be able to:') }}</p>
+        <ul>
+          <li>{{ _('View all profiles and join groups.') }}</li>
+          <li>{{ _('Access special video content on Air Mozilla.') }}</li>
+          <li>{{ _('Join the Mozilla Exchange Yammer network.') }}</li>
+          <li>{{ _('Use other Mozilla apps as a vouched user.') }}</li>
+        </ul>
+      {% endif %}
+      <p>{{ _('Vouchers cannot be edited or retracted.') }}
+        <br><br>
+        {% trans vouching_faq='https://wiki.mozilla.org/Mozillians/Vouching' %}
+          <a href="{{ vouching_faq }}">Read more about vouching.</a>
+        {% endtrans %}
+      </p>
+    </div>
+  </div>
+{% endif %}
+

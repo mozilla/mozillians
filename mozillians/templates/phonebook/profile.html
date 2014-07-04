@@ -32,29 +32,11 @@
             If you are new to the Mozilla community,
             <a class="button" href="{{ contribute_url }}">get involved</a>
           </p>
-          <p>
-            The chances of being vouched increase as you finish tasks in our community.
-          </p>
-
+          <p>The chances of being vouched increase as you finish tasks in our community.</p>
         {% endtrans %}
       {% else %}
-        {% if vouch_form %}
-          <form action="{{ url('phonebook:vouch') }}" method="POST"
-                id="vouch-form">
-            {{ csrf() }}
-            {{ vouch_form }}
-            {% trans name=profile.display_name %}
-                <button type="submit">
-                  Vouch for {{ name }}
-                </button>
-            {% endtrans %}
-          </form>
-        {% endif %}
         {% trans %}
-          <p>This profile is waiting for approval.</p>
-          <p>Because our community directory is for Mozillians who
-            are 13 and older, please don't vouch for anyone under
-            13.</p>
+          <p>This profile is waiting for approval. If you would like to vouch for them, use the form at the bottom of the page.</p>
         {% endtrans %}
       {% endif %}
     </div>
@@ -109,6 +91,31 @@
           </section>
         {% endif %}
        </div>
+
+      <section id="profile-contact">
+        <div class="contact-details">
+            {% if profile.email %}
+              <section class="u-email">
+                <i class="icon-envelope"></i>
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
+              </section>
+            {% endif %}
+            {% if profile.ircname %}
+              <section class="p-nickname">
+                <i class="icon-comments-alt"></i> IRC :
+                <span class="nickname">{{ profile.ircname }}</span>
+              </section>
+            {% endif %}
+            {% if profile.tshirt %}
+              <section><i class="icon-shirt"></i>
+                {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</section>
+            {% endif %}
+        </div>
+      </section>
+
+
     </article>
 
 
@@ -154,10 +161,10 @@
 
         {% if profile.story_link %}
           <div id="story-link" class="profile-entry">
-	    <p>
-	      <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
-	    </p>
-	  </div>
+            <p>
+              <a href="{{ profile.story_link }}">{{ _('My contribution story') }}</a>
+            </p>
+          </div>
         {% endif %}
 
         {% if groups %}
@@ -240,55 +247,50 @@
           </div>
         {% endif %}
 
-        {% if profile.vouched_by %}
+        {% if profile.vouches_received.exists() %}
           <div id="vouched_by" class="profile-entry">
             <h3>{{ _('Vouched By') }}</h3>
-            <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}">
-              {{ profile.vouched_by.display_name|default(profile.vouched_by.user.username, true)}}
-            </a>
+            <ul>
+              {% for vouch in profile.vouches_received.all() %}
+                <li>
+                  {% if vouch.voucher %}
+                    <a href="{{ url('phonebook:profile_view', vouch.voucher.user.username) }}">
+                      {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
+                    </a>
+                  {% elif vouch.autovouch %}
+                    <a href="{{ url('phonebook:about-dinomcvouch') }}">
+                      Dino McVouch
+                    </a>
+                  {% else %}
+                    {{ _('Unknown Voucher') }}
+                  {% endif %}
+                  {% if not vouch.description %}
+                    <p>{{ _('Legacy vouch.') }}</p>
+                  {% else %}
+                    {{ vouch.description|markdown }}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
           </div>
         {% endif %}
-
-        {% if profile.vouchees.exists() %}
+        {% if profile.vouches_made.exists() %}
           <div id="vouchees" class="profile-entry">
             <h3>{{ _('Vouchees') }}</h3>
             <ul>
-              {% for vouchee in profile.vouchees.all() %}
+              {% for vouch in profile.vouches_made.all() %}
                 <li>
-                  <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}">
-                    {{ vouchee.display_name|default(vouchee.user.username, true)}}
+                  <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}">
+                    {{ vouch.vouchee.display_name|default(vouch.vouchee.user.username, true)}}
                   </a>
                 </li>
               {% endfor %}
             </ul>
           </div>
         {% endif %}
-
+        {% include 'phonebook/includes/profile_vouch.html' %}
       </section>
 
-      <section id="profile-contact">
-        <div class="contact-details">
-          <ul>
-            {% if profile.email %}
-              <li class="u-email">
-                <i class="icon-envelope-o"></i>
-                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
-                  <span class="email">{{ profile.email }}</span>
-                {% if user != shown_user %}</a>{% endif %}
-              </li>
-            {% endif %}
-            {% if profile.ircname %}
-              <li class="p-nickname">
-                <i class="icon-comments-o"></i> IRC :
-                <span class="nickname">{{ profile.ircname }}</span>
-              </li>
-            {% endif %}
-            {% if profile.tshirt %}
-              <li><i class="icon-shirt"></i> {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</li>
-            {% endif %}
-          </ul>
-        </div>
-      </section>
     </article>
 
     {# H-card support, add group Mozillians #}
@@ -310,5 +312,6 @@
 {% block page_js %}
   {% compress js %}
     <script src="{{ static('mozillians/js/profile_view.js') }}"></script>
+    <script src="{{ static('mozillians/js/character_limit.js') }}"></script>
   {% endcompress %}
 {% endblock %}

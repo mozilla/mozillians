@@ -24,7 +24,7 @@ import mozillians.users.tasks
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
-                                     ExternalAccount,
+                                     ExternalAccount, Vouch,
                                      UserProfile, UsernameBlacklist)
 
 
@@ -255,7 +255,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
-    readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login']
+    readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
+                       'is_vouched', 'can_vouch']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', DateJoinedFilter,
                    LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
@@ -277,7 +278,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_joined', 'last_login')
         }),
         ('Vouch Info', {
-            'fields': ('date_vouched', 'is_vouched', 'vouched_by')
+            'fields': ('date_vouched', 'is_vouched', 'vouched_by', 'can_vouch')
         }),
         ('Location', {
             'fields': ('country', 'region', 'city',
@@ -307,7 +308,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     def queryset(self, request):
         qs = super(UserProfileAdmin, self).queryset(request)
-        qs = qs.annotate(Count('vouchees'))
+        qs = qs.annotate(Count('vouches_made'))
         return qs
 
     def email(self, obj):
@@ -329,15 +330,16 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     def vouched_by(self, obj):
         voucher = obj.vouched_by
-        voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
-        return '<a href="%s">%s</a>' % (voucher_url, voucher)
+        if voucher:
+            voucher_url = reverse('admin:auth_user_change', args=[voucher.id])
+            return '<a href="%s">%s</a>' % (voucher_url, voucher)
     vouched_by.admin_order_field = 'vouched_by'
     vouched_by.allow_tags = True
 
     def number_of_vouchees(self, obj):
         """Return the number of vouchees for obj."""
-        return obj.vouchees.count()
-    number_of_vouchees.admin_order_field = 'vouchees__count'
+        return obj.vouches_made.count()
+    number_of_vouchees.admin_order_field = 'vouches_made__count'
 
     def last_login(self, obj):
         return obj.user.last_login
@@ -378,3 +380,24 @@ class GroupAdmin(ExportMixin, GroupAdmin):
     pass
 
 admin.site.register(Group, GroupAdmin)
+
+
+class VouchAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Vouch
+        widgets = {
+            'voucher': autocomplete_light.ChoiceWidget('UserProfiles'),
+            'vouchee': autocomplete_light.ChoiceWidget('UserProfiles'),
+        }
+
+
+class VouchAdmin(admin.ModelAdmin):
+    save_on_top = True
+    search_fields = ['voucher__user__username', 'voucher__full_name',
+                     'vouchee__user__username', 'vouchee__full_name']
+    readonly_fields = ['date']
+    list_display = ['vouchee', 'voucher', 'date']
+    form = VouchAdminForm
+
+admin.site.register(Vouch, VouchAdmin)

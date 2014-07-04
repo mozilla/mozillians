@@ -24,6 +24,7 @@
     {{ csrf() }}
     {{ mozillians_field(invite_form.recipient) }}
     {{ mozillians_field(invite_form.message) }}
+    {{ mozillians_field(invite_form.reason) }}
     <button type="submit">
       {{ _('Send invite') }}
     </button>
