@@ -1257,31 +1257,32 @@ body#profile {
             }
         }
     }
-    .vouch-box{
-        &:extend(.alert);
-        padding:0px;
-        text-align:left;
-        .margins{
-            margin:10px;
-        }
-        textarea{
-            margin: 0px;
-            height: 115px;
-            width:100%;
-            padding:0;
-            font-size: 11pt;
-        }
-        .character-countdown{
-            margin-right: 5px;
-            line-height: 24px;
-        }
-        .button{
-            margin:0 auto;
-        }
-        #vouch-submit{
-            text-align: right;
-            padding-bottom: 10px;
-        }
+}
+
+.vouch-box{
+    &:extend(.alert);
+    padding:0px;
+    text-align:left;
+    .margins{
+        margin:10px;
+    }
+    textarea{
+        margin: 0px;
+        height: 115px;
+        width:100%;
+        padding:0;
+        font-size: 11pt;
+    }
+    .character-countdown{
+        margin-right: 5px;
+        line-height: 24px;
+    }
+    .button{
+        margin:0 auto;
+    }
+    #vouch-submit{
+        text-align: right;
+        padding-bottom: 10px;
     }
 }
 
@@ -1943,11 +1944,14 @@ body#invite {
         .button;
     }
     textarea {
+	margin-bottom: 25px;
         @media (max-width: @breakMobileLandscape) {
             width: 80%;
         }
     }
-    input { margin-bottom: 25px; }
+    input {
+	margin-bottom: 25px;
+    }
 
     .card {
         float: left;
