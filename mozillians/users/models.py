@@ -583,7 +583,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         return True
 
-    def vouch(self, vouched_by, description=''):
+    def vouch(self, vouched_by, description='', autovouch=False):
         if not self.is_vouchable(vouched_by):
             return
 
@@ -599,9 +599,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 query.update(description=description)
         else:
             self.vouches_received.create(
-                voucher=vouched_by, date=now, description=description
+                voucher=vouched_by,
+                date=now,
+                description=description,
+                autovouch=autovouch
             )
-        self.is_vouched = True
         self.save()
 
         self._email_now_vouched()

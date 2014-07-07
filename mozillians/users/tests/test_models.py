@@ -570,6 +570,21 @@ class VouchTests(TestCase):
         eq_(user_2.userprofile.vouches_received.all()[0].date, dt)
         ok_(email_vouched_mock.called)
 
+    def test_vouch_autovouchset(self):
+        # autovouch=False
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None, autovouch=False)
+        user = User.objects.get(id=user.id)
+        ok_(user.userprofile.is_vouched)
+        eq_(user.userprofile.vouches_received.all()[0].autovouch, False)
+
+        # autovouch=True
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None, autovouch=True)
+        user = User.objects.get(id=user.id)
+        ok_(user.userprofile.is_vouched)
+        eq_(user.userprofile.vouches_received.all()[0].autovouch, True)
+
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.datetime')
     def test_revouch_legacy_vouch(self, datetime_mock, email_vouched_mock):

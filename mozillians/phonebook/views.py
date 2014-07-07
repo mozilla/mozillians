@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -36,6 +37,38 @@ def login(request):
 @allow_public
 def home(request):
     return render(request, 'phonebook/home.html')
+
+
+@waffle_flag('testing-autovouch-views')
+@allow_unvouched
+@never_cache
+def vouch(request, username):
+    """Automatically vouch username.
+
+    This is must be behind a waffle flag and activated only for
+    testing purposes.
+    """
+    profile = get_object_or_404(UserProfile, user__username=username)
+    now = timezone.now()
+    description = 'Automatically vouched for testing purposes on {0}'.format(now)
+    profile.vouch(None, description=description, autovouch=True)
+    messages.success(request, _('Successfully vouched user.'))
+    return redirect('phonebook:profile_view', profile.user.username)
+
+
+@waffle_flag('testing-autovouch-views')
+@allow_unvouched
+@never_cache
+def unvouch(request, username):
+    """Automatically remove all vouches from username.
+
+    This is must be behind a waffle flag and activated only for
+    testing purposes.
+    """
+    profile = get_object_or_404(UserProfile, user__username=username)
+    profile.vouches_received.all().delete()
+    messages.success(request, _('Successfully unvouched user.'))
+    return redirect('phonebook:profile_view', profile.user.username)
 
 
 @allow_public
