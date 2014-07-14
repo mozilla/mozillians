@@ -1,13 +1,16 @@
-from mock import patch
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import Client
+from django.test.utils import override_settings
+
 from funfactory.helpers import urlparams
+from mock import patch
+from nose.tools import eq_, ok_
+
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.tests import InviteFactory
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.tests import UserFactory
-from nose.tools import eq_, ok_
 
 
 class RegisterTests(TestCase):
@@ -18,6 +21,7 @@ class RegisterTests(TestCase):
         eq_(client.session['invite-code'], 'foo')
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_unvouched(self, redeem_invite_mock):
         user = UserFactory.create(vouched=False)
@@ -31,6 +35,7 @@ class RegisterTests(TestCase):
         ok_(redeem_invite_mock.called)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.phonebook.views.redeem_invite', wraps=redeem_invite)
     def test_register_vouched(self, redeem_invite_mock):
         voucher_1 = UserFactory.create()

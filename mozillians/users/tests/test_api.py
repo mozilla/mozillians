@@ -17,6 +17,7 @@ from mozillians.users.models import ExternalAccount
 from mozillians.users.tests import UserFactory
 
 
+@override_settings(CAN_VOUCH_THRESHOLD=1)
 class UserResourceTests(TestCase):
     def setUp(self):
         voucher = UserFactory.create()

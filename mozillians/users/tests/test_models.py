@@ -71,6 +71,7 @@ class SignaledFunctionsTests(TestCase):
 
         ok_(not User.objects.filter(pk=user.pk).exists())
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_voucher_set_null_on_user_delete(self):
         voucher = UserFactory.create()
         vouchee = UserFactory.create(vouched=False)
@@ -79,6 +80,7 @@ class SignaledFunctionsTests(TestCase):
         vouch = Vouch.objects.get(vouchee=vouchee)
         eq_(vouch.voucher, None)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_vouch_is_vouch_gets_updated(self):
         voucher = UserFactory.create()
         unvouched = UserFactory.create(vouched=False)
@@ -306,6 +308,7 @@ class UserProfileTests(TestCase):
         ok_(send_mail_mock.called)
         eq_(send_mail_mock.call_args[0][3], [user.email])
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.users.models.send_mail')
     def test_email_now_vouched_with_voucher(self, send_mail_mock):
         voucher = UserFactory.create()
@@ -565,6 +568,7 @@ class UserProfileTests(TestCase):
 
 
 class VouchTests(TestCase):
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_auto_vouching(self):
         UserFactory.create(email='no-reply@mozillians.org')
@@ -576,6 +580,7 @@ class VouchTests(TestCase):
         user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
         ok_(not user_2.userprofile.is_vouched)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.datetime')
     def test_vouch(self, datetime_mock, email_vouched_mock):
@@ -590,6 +595,7 @@ class VouchTests(TestCase):
         eq_(user_2.userprofile.vouches_received.all()[0].date, dt)
         ok_(email_vouched_mock.called)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_vouch_autovouchset(self):
         # autovouch=False
         user = UserFactory.create(vouched=False)
@@ -605,6 +611,7 @@ class VouchTests(TestCase):
         ok_(user.userprofile.is_vouched)
         eq_(user.userprofile.vouches_received.all()[0].autovouch, True)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.datetime')
     def test_revouch_legacy_vouch(self, datetime_mock, email_vouched_mock):
@@ -625,6 +632,7 @@ class VouchTests(TestCase):
         eq_(user_2.userprofile.vouches_received.all()[0].description, 'Re-Vouching')
         ok_(email_vouched_mock.called)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_voucher_public(self):
         voucher = UserFactory.create()
         user = UserFactory.create(vouched=False)
@@ -672,6 +680,7 @@ class VouchTests(TestCase):
         profile = UserProfile.objects.get(pk=profile.id)
         ok_(not profile.vouches_received.all())
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_vouch_once_per_voucher(self):
         voucher = UserFactory.create()
         user = UserFactory.create(vouched=False)
@@ -679,6 +688,7 @@ class VouchTests(TestCase):
         user.userprofile.vouch(voucher.userprofile)
         eq_(user.userprofile.vouches_received.all().count(), 1)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @override_settings(VOUCH_COUNT_LIMIT=2)
     def test_multiple_vouches(self):
         user = UserFactory.create(vouched=False)

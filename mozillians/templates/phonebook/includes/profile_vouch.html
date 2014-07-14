@@ -9,7 +9,11 @@
             {% endtrans %}
           </h4>
         {% else %}
-          <h4>{{ _('Do you know this Mozillian? Let us know how he/she contributed.') }}</h4>
+          <h4>
+            {% trans full_name=profile.full_name %}
+              Do you know {{ full_name }}? Let us know how he/she contributed.
+            {% endtrans %}
+          </h4>
         {% endif %}
       {% endif %}
         {{ csrf() }}
@@ -41,7 +45,7 @@
           <li>{{ _('Use other Mozilla apps as a vouched user.') }}</li>
         </ul>
       {% endif %}
-      <p>{{ _('Vouchers cannot be edited or retracted.') }}
+      <p>{{ _('Vouches cannot be edited or retracted.') }}
         <br><br>
         {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
           <a href="{{ vouching_url }}">Read more about vouching.</a>
