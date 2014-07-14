@@ -302,7 +302,7 @@ class UserProfileTests(TestCase):
     @patch('mozillians.users.models.send_mail')
     def test_email_now_vouched(self, send_mail_mock):
         user = UserFactory.create()
-        user.userprofile._email_now_vouched()
+        user.userprofile._email_now_vouched(None)
         ok_(send_mail_mock.called)
         eq_(send_mail_mock.call_args[0][3], [user.email])
 
@@ -310,11 +310,28 @@ class UserProfileTests(TestCase):
     def test_email_now_vouched_with_voucher(self, send_mail_mock):
         voucher = UserFactory.create()
         user = UserFactory.create(vouched=False)
-        user.userprofile.vouch(voucher.userprofile)
-        user.userprofile._email_now_vouched()
+        user.userprofile._email_now_vouched(voucher.userprofile)
         ok_(send_mail_mock.called)
         eq_(send_mail_mock.call_args[0][3], [user.email])
         ok_(voucher.userprofile.full_name in send_mail_mock.call_args[0][1])
+
+    @patch('mozillians.users.models.send_mail')
+    @patch('mozillians.users.models.get_template')
+    def test_email_now_vouched_first_vouch(self, get_template_mock, send_mail_mock):
+        user = UserFactory.create()
+        user.userprofile._email_now_vouched(None)
+        eq_(get_template_mock().render.call_args[0][0]['first_vouch'], True)
+
+    @patch('mozillians.users.models.send_mail')
+    @patch('mozillians.users.models.get_template')
+    @override_settings(CAN_VOUCH_THRESHOLD=2)
+    def test_email_now_vouched_can_vouch(self, get_template_mock, send_mail_mock):
+        user = UserFactory.create()
+        user.userprofile._email_now_vouched(None)
+        eq_(get_template_mock().render.call_args_list[0][0][0]['can_vouch_threshold'], False)
+        Vouch.objects.create(voucher=None, vouchee=user.userprofile, date=datetime.now())
+        user.userprofile._email_now_vouched(None)
+        eq_(get_template_mock().render.call_args_list[1][0][0]['can_vouch_threshold'], True)
 
     @override_settings(ES_INDEXES={'public': 'foo'})
     def test_get_index_public(self):
