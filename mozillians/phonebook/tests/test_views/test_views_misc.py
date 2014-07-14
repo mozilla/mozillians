@@ -1,7 +1,6 @@
 import os.path
 from datetime import datetime
 
-
 from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
@@ -397,4 +396,4 @@ class VouchTests(TestCase):
         with self.login(user) as client:
             client.get(url, follow=True)
         user = User.objects.get(id=user.id)
-        ok_(not user.userprofile.vouches_received.all().count())
+        ok_(not user.userprofile.vouches_received.all().exists())

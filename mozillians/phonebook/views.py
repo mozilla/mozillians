@@ -45,8 +45,9 @@ def home(request):
 def vouch(request, username):
     """Automatically vouch username.
 
-    This is must be behind a waffle flag and activated only for
-    testing purposes.
+    This must be behind a waffle flag and activated only for testing
+    purposes.
+
     """
     profile = get_object_or_404(UserProfile, user__username=username)
     now = timezone.now()
@@ -62,8 +63,9 @@ def vouch(request, username):
 def unvouch(request, username):
     """Automatically remove all vouches from username.
 
-    This is must be behind a waffle flag and activated only for
-    testing purposes.
+    This must be behind a waffle flag and activated only for testing
+    purposes.
+
     """
     profile = get_object_or_404(UserProfile, user__username=username)
     profile.vouches_received.all().delete()

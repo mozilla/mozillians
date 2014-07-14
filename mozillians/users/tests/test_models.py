@@ -552,8 +552,11 @@ class VouchTests(TestCase):
     def test_auto_vouching(self):
         UserFactory.create(email='no-reply@mozillians.org')
         user_1 = UserFactory.create(vouched=False, email='foo@example.com')
-        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
+        user_1 = User.objects.get(pk=user_1.pk)
         ok_(user_1.userprofile.is_vouched)
+        eq_(user_1.userprofile.vouches_received.all()[0].autovouch, True)
+
+        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
         ok_(not user_2.userprofile.is_vouched)
 
     @patch('mozillians.users.models.UserProfile._email_now_vouched')

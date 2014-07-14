@@ -612,10 +612,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """Auto vouch mozilla.com users."""
         email = self.user.email
 
-        if not self.is_vouched:
-            if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-                dino = UserProfile.objects.get(user__email='no-reply@mozillians.org')
-                self.vouch(dino, 'An automatic vouch for being a Mozilla employee.')
+        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+            if not self.vouches_received.filter(
+                    description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
+                self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
     def _email_now_vouched(self):
         """Email this user, letting them know they are now vouched."""
