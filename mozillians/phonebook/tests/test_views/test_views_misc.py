@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
 from django.test.client import Client
+from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import eq_, ok_
@@ -63,6 +64,7 @@ class InviteTests(TestCase):
             response = client.get(reverse('phonebook:invite'), follow=True)
         self.assertTemplateUsed(response, 'phonebook/invite.html')
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.phonebook.views.messages.success')
     def test_invite_post_vouched(self, success_mock):
         user = UserFactory.create()
@@ -80,6 +82,7 @@ class InviteTests(TestCase):
             .exists())
         ok_(success_mock.called)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_invite_already_vouched(self):
         vouched_user = UserFactory.create()
         user = UserFactory.create()
@@ -155,8 +158,9 @@ class VouchFormTests(TestCase):
         unvouched_user = User.objects.get(id=user.id)
         ok_(not unvouched_user.userprofile.is_vouched)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.phonebook.views.messages.info')
-    def test_vouch_vouched(self, info_mock):
+    def test_vouch_unvouched(self, info_mock):
         user = UserFactory.create(vouched=False)
         user.userprofile.vouch(None)
         unvouched_user = UserFactory.create(vouched=False)

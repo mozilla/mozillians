@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.test import Client
+from django.test.utils import override_settings
 
 from funfactory.helpers import urlparams
 
@@ -74,6 +75,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['profile']._privacy_level, PUBLIC)
         ok_('vouch_form' not in response.context)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_view_vouched_profile_public_vouched(self):
         lookup_user = UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
         user = UserFactory.create()
@@ -114,6 +116,7 @@ class ViewProfileTests(TestCase):
         eq_(response.context['profile']._privacy_level, PUBLIC)
         ok_('vouch_form' not in response.context)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_view_unvouched_profile_public_vouched(self):
         lookup_user = UserFactory.create(vouched=False,
                                          userprofile={'privacy_full_name': PUBLIC})
@@ -213,6 +216,7 @@ class ViewProfileTests(TestCase):
             response = client.get(url, follow=True)
         ok_('vouch_form' not in response.context)
 
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_view_profile_waiting_for_vouch_vouched(self):
         unvouched_user = UserFactory.create(vouched=False)
         user = UserFactory.create()

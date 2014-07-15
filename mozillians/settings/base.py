@@ -331,4 +331,4 @@ BROWSERID_AUDIENCES = lazy(_browserid_audiences, list)()
 VOUCH_COUNT_LIMIT = 6
 
 # All accounts need 1 vouches to be able to vouch.
-CAN_VOUCH_THRESHOLD = 1
+CAN_VOUCH_THRESHOLD = 3

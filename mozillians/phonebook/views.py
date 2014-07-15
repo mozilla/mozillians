@@ -134,7 +134,6 @@ def view_profile(request, username):
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
-    data['locale'] = request.locale
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
@@ -434,7 +433,6 @@ def register(request):
     if so. Single-purpose view.
     """
     # TODO already vouched users can be re-vouched?
-
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
         if request.user.is_authenticated():
