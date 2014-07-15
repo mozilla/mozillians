@@ -160,7 +160,7 @@ def edit_profile(request):
             redeem_invite(profile, request.session.get('invite-code'))
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
-        # Notify the user that their old profile URL won't work.
+            # Notify the user that their old profile URL won't work.
             messages.info(request,
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))

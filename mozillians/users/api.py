@@ -33,6 +33,9 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     languages = fields.CharField()
     url = fields.CharField()
     accounts = fields.CharField()
+    city = fields.CharField(attribute='geo_city__name', null=True, readonly=True, default='')
+    region = fields.CharField(attribute='geo_region__name', null=True, readonly=True, default='')
+    country = fields.CharField(attribute='geo_country__code', null=True, readonly=True, default='')
 
     class Meta:
         queryset = UserProfile.objects.all()
@@ -82,11 +85,19 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
             elif value == 'false':
                 database_filters['is_vouched'] = Q(is_vouched=False)
 
-        for possible_filter in ['country', 'region', 'city', 'ircname']:
-            if possible_filter in valid_filters:
-                database_filters[possible_filter] = Q(
-                    **{'{0}__iexact'.format(possible_filter):
-                       getvalue(possible_filter)})
+        if 'country' in valid_filters:
+            database_filters['country'] = Q(geo_country__code=getvalue('country'))
+
+        if 'region' in valid_filters:
+            database_filters['region'] = Q(geo_region__name=getvalue('region'))
+
+        if 'city' in valid_filters:
+            database_filters['city'] = Q(geo_city__name=getvalue('city'))
+
+        if 'ircname' in valid_filters:
+            database_filters['ircname'] = Q(
+                **{'{0}__iexact'.format('ircname'):
+                    getvalue('ircname')})
 
         for group_filter in ['groups', 'skills']:
             if group_filter in valid_filters:
