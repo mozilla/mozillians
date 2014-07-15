@@ -583,7 +583,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         return True
 
-    def vouch(self, vouched_by, description=''):
+    def vouch(self, vouched_by, description='', autovouch=False):
         if not self.is_vouchable(vouched_by):
             return
 
@@ -599,9 +599,11 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 query.update(description=description)
         else:
             self.vouches_received.create(
-                voucher=vouched_by, date=now, description=description
+                voucher=vouched_by,
+                date=now,
+                description=description,
+                autovouch=autovouch
             )
-        self.is_vouched = True
         self.save()
 
         self._email_now_vouched(vouched_by)
@@ -610,10 +612,10 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         """Auto vouch mozilla.com users."""
         email = self.user.email
 
-        if not self.is_vouched:
-            if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-                dino = UserProfile.objects.get(user__email='no-reply@mozillians.org')
-                self.vouch(dino, 'An automatic vouch for being a Mozilla employee.')
+        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
+            if not self.vouches_received.filter(
+                    description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
+                self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
     def _email_now_vouched(self, vouched_by):
         """Email this user, letting them know they are now vouched."""

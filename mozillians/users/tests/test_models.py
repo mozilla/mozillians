@@ -569,8 +569,11 @@ class VouchTests(TestCase):
     def test_auto_vouching(self):
         UserFactory.create(email='no-reply@mozillians.org')
         user_1 = UserFactory.create(vouched=False, email='foo@example.com')
-        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
+        user_1 = User.objects.get(pk=user_1.pk)
         ok_(user_1.userprofile.is_vouched)
+        eq_(user_1.userprofile.vouches_received.all()[0].autovouch, True)
+
+        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
         ok_(not user_2.userprofile.is_vouched)
 
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
@@ -586,6 +589,21 @@ class VouchTests(TestCase):
         eq_(user_2.userprofile.vouched_by, user_1.userprofile)
         eq_(user_2.userprofile.vouches_received.all()[0].date, dt)
         ok_(email_vouched_mock.called)
+
+    def test_vouch_autovouchset(self):
+        # autovouch=False
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None, autovouch=False)
+        user = User.objects.get(id=user.id)
+        ok_(user.userprofile.is_vouched)
+        eq_(user.userprofile.vouches_received.all()[0].autovouch, False)
+
+        # autovouch=True
+        user = UserFactory.create(vouched=False)
+        user.userprofile.vouch(None, autovouch=True)
+        user = User.objects.get(id=user.id)
+        ok_(user.userprofile.is_vouched)
+        eq_(user.userprofile.vouches_received.all()[0].autovouch, True)
 
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.datetime')
