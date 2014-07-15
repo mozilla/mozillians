@@ -29,14 +29,14 @@
     {% endif %}
 
     <div class="invite-box">
-      <div class="margins">
-        <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
+      <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
+        <div class="margins">
           {{ csrf() }}
           {{ mozillians_field(invite_form.recipient) }}
           {{ mozillians_field(invite_form.message) }}
-          {% include "phonebook/includes/profile_vouch.html" %}
-        </form>
-      </div>
+        </div>
+      </form>
+      {% include "phonebook/includes/profile_vouch.html" %}
     </div>
   {% endif %}
 

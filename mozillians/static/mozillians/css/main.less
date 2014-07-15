@@ -1264,13 +1264,14 @@ body#profile {
     }
 }
 
+.margins{
+    margin:10px;
+}
+
 .vouch-box{
     &:extend(.alert);
     padding:0px;
     text-align:left;
-    .margins{
-        margin:10px;
-    }
     textarea{
         margin: 0px;
         height: 115px;
@@ -1948,10 +1949,9 @@ body#invite {
         margin: 20px 0;
         .button;
     }
-    textarea {
-        @media (max-width: @breakMobileLandscape) {
-            width: 80%;
-        }
+    .invite-box textarea {
+        width:100%;
+        padding:0;
     }
     input { margin-bottom: 25px; }
 
