@@ -5,7 +5,7 @@ from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
-from django.contrib.auth.admin import GroupAdmin
+from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
@@ -396,6 +396,29 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
         return my_urls + urls
 
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+class NullProfileFilter(SimpleListFilter):
+    """Admin filter for null profiles."""
+    title = 'has user profile'
+    parameter_name = 'has_user_profile'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        if not self.value():
+            return queryset
+        value = self.value() != 'True'
+        return queryset.filter(userprofile__isnull=value)
+
+
+class UserAdmin(UserAdmin):
+    list_filter = [NullProfileFilter]
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 class GroupAdmin(ExportMixin, GroupAdmin):
