@@ -162,6 +162,28 @@ class LastLoginFilter(SimpleListFilter):
         return queryset
 
 
+class LegacyVouchFilter(SimpleListFilter):
+    """Admin filter for profiles with new or legacy vouch type."""
+    title = 'vouch type'
+    parameter_name = 'vouch_type'
+
+    def lookups(self, request, model_admin):
+        return (('legacy', 'Legacy'),
+                ('new', 'New'))
+
+    def queryset(self, request, queryset):
+        legacy_vouchees = (Vouch.objects.filter(description='')
+                           .values_list('vouchee', flat=True))
+        nonlegacy_vouchees = (Vouch.objects.exclude(description='')
+                              .values_list('vouchee', flat=True))
+        if self.value() == 'legacy':
+            return (queryset.filter(id__in=legacy_vouchees)
+                    .exclude(id__in=nonlegacy_vouchees))
+        elif self.value() == 'new':
+            return queryset.filter(id__in=nonlegacy_vouchees)
+        return queryset
+
+
 class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
@@ -259,8 +281,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
                        'is_vouched', 'can_vouch']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
-                   LastLoginFilter, SuperUserFilter, CompleteProfileFilter,
-                   PublicProfileFilter, 'externalaccount__type']
+                   LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
+                   CompleteProfileFilter, PublicProfileFilter, 'externalaccount__type']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
