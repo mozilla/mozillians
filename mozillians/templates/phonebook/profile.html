@@ -18,9 +18,9 @@
       {{ _('Pending Profile') }}
     {% endif %}
   </div>
-  {% if not profile.is_vouched %}
-    <div id="pending-approval">
-      {% if user == shown_user %}
+  {% if user.is_authenticated() and not profile.is_vouched %}
+    {% if user == shown_user %}
+      <div id="pending-approval">
         {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)),
                  contribute_url='http://www.mozilla.org/contribute' %}
           <p>
@@ -34,12 +34,17 @@
           </p>
           <p>The chances of being vouched increase as you finish tasks in our community.</p>
         {% endtrans %}
-      {% else %}
-        {% trans %}
-          <p>This profile is waiting for approval. If you would like to vouch for them, use the form at the bottom of the page.</p>
-        {% endtrans %}
-      {% endif %}
-    </div>
+      </div>
+    {% elif profile.is_vouchable(user.userprofile) %}
+      <div id="pending-approval">
+        <p>
+          {% trans %}
+            This profile is waiting for approval. If you would like to
+            vouch for them, use the form at the bottom of the page.
+          {% endtrans %}
+        </p>
+      </div>
+    {% endif %}
   {% endif %}
 
   {% if privacy_mode == 'anonymous' and not profile.is_public %}
