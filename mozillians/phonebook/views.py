@@ -52,8 +52,14 @@ def vouch(request, username):
     profile = get_object_or_404(UserProfile, user__username=username)
     now = timezone.now()
     description = 'Automatically vouched for testing purposes on {0}'.format(now)
-    profile.vouch(None, description=description, autovouch=True)
-    messages.success(request, _('Successfully vouched user.'))
+    vouch = profile.vouch(None, description=description, autovouch=True)
+    if vouch:
+        messages.success(request, _('Successfully vouched user.'))
+    else:
+        msg = _('User not vouched. Maybe there are {0} vouches already?')
+        msg = msg.format(settings.VOUCH_COUNT_LIMIT)
+        messages.error(request, msg)
+
     return redirect('phonebook:profile_view', profile.user.username)
 
 
