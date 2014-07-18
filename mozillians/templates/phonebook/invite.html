@@ -35,8 +35,8 @@
           {{ mozillians_field(invite_form.recipient) }}
           {{ mozillians_field(invite_form.message) }}
         </div>
+        {% include "phonebook/includes/profile_vouch.html" %}
       </form>
-      {% include "phonebook/includes/profile_vouch.html" %}
     </div>
   {% endif %}
 
