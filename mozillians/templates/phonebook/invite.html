@@ -15,8 +15,15 @@
         vouching. <a href="{{ vouching_url }}">Read more about vouching.</a>
       {% endtrans %}
     {% else %}
-      {% trans %}
-        You cannot currently send invites. You need at least {{ vouch_threshold }} vouches.
+      {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
+        We recently changed the criteria for being able to invite and
+        vouch other Mozillians. If you want to use this page, you need
+        to receive {{ vouch_threshold }} vouches. Ask someone to visit
+        your profile and vouch for you. Then come back here once you
+        have {{ vouch_threshold }} vouches and you will be able to
+        invite people to the directory.
+
+        <a href="{{ vouching_url }}">Learn more about vouching.</a>
       {% endtrans %}
     {% endif %}
   </p>
