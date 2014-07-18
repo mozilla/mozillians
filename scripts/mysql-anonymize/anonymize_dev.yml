@@ -1,5 +1,7 @@
 databases:
     sanitize_dev_mozillians_org:
+        rename:
+          sanitized_dev_mozillians_org
 
         drop:
             - api_apiapp

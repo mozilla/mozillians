@@ -1,6 +1,7 @@
 databases:
     sanitize_stage_mozillians_org:
-
+        rename:
+          sanitized_stage_mozillians_org
         drop:
             - api_apiapp
             - celery_taskmeta

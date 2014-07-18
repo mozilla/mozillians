@@ -6,12 +6,13 @@ This assumes an id field in each table.
 Forked from: https://github.com/davedash/mysql-anonymous
 """
 import logging
-import hashlib
 import random
-
+import os
+from tempfile import mkstemp
 
 log = logging.getLogger('anonymize')
 common_hash_secret = '%016x' % (random.getrandbits(128))
+
 
 def get_drops(config):
     database = config.get('database', {})
@@ -20,6 +21,7 @@ def get_drops(config):
     for drop in drops:
         sql.append('DROP TABLE IF EXISTS %s' % drop)
     return sql
+
 
 def get_truncates(config):
     database = config.get('database', {})
@@ -44,6 +46,7 @@ def get_deletes(config):
     return sql
 
 listify = lambda x: x if isinstance(x, list) else [x]
+
 
 def get_updates(config):
     global common_hash_secret
@@ -100,12 +103,16 @@ def get_updates(config):
     return sql
 
 
-def anonymize(config):
+def anonymize(config, db_name=None):
+    tempfile = mkstemp()[1]
     database = config.get('database', {})
 
     if 'name' in database:
-         print 'USE %s;' % database['name']
+        db_name = database['name']
 
+    print 'USE %s;' % db_name
+
+    print 'START TRANSACTION;'
     print 'SET FOREIGN_KEY_CHECKS=0;'
 
     sql = []
@@ -116,8 +123,18 @@ def anonymize(config):
     for stmt in sql:
         print stmt + ';'
 
+    print ("SELECT concat('RENAME TABLE {current_db}.',table_name, ' TO {new_db}.',table_name, ';') "
+           "INTO OUTFILE '{tempfile}' "
+           "FROM information_schema.TABLES "
+           "WHERE table_schema='{current_db}';".format(current_db=db_name,
+                                                       new_db=database['rename'],
+                                                       tempfile=tempfile))
+    print 'SOURCE {tempfile};'.format(tempfile=tempfile)
     print 'SET FOREIGN_KEY_CHECKS=1;'
+    print 'COMMIT;'
     print
+
+    os.unlink(tempfile)
 
 if __name__ == '__main__':
 
@@ -127,11 +144,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         files = sys.argv[1:]
     else:
-        files = [ 'anonymize.yml' ]
+        files = ['anonymize.yml']
 
     for f in files:
         print '--'
-        print '-- %s' %f
+        print '-- %s' % f
         print '--'
         print 'SET @common_hash_secret=rand();'
         print ''
@@ -141,5 +158,4 @@ if __name__ == '__main__':
         else:
             databases = cfg.get('databases')
             for name, sub_cfg in databases.items():
-                print 'USE %s;' % name
-                anonymize({'database': sub_cfg})
+                anonymize({'database': sub_cfg}, db_name=name)
