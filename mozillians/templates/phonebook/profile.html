@@ -21,11 +21,20 @@
   {% if user.is_authenticated() and not profile.is_vouched %}
     {% if user == shown_user %}
       <div id="pending-approval">
-        {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)),
+        {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching',
+                 profile_url=absolutify(url('phonebook:profile_view', user.username)),
                  contribute_url='http://www.mozilla.org/contribute' %}
           <p>
-            Your profile is waiting to be vouched. Send the link below to someone who
-            is familiar with your contributions and ask them to vouch for you:
+            Your profile is waiting to be vouched. Once you are vouched,
+            you will be able to view the profiles of all Mozillians,
+            join groups and access additional content on other sites as
+            a Mozillian. <a href="{{ vouching_url }}">Learn more about
+            vouching</a>.
+          </p>
+          <p>
+            Send the link below to someone who is familiar with your
+            contributions and ask them to vouch for you:
+            <br/>
             <em class="underline" title="Your profile URL">{{ profile_url }}</em>
           </p>
           <p>
