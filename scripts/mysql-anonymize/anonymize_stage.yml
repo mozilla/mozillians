@@ -1,6 +1,7 @@
 databases:
     sanitize_stage_mozillians_org:
-
+        rename:
+          sanitized_stage_mozillians_org
         drop:
             - api_apiapp
             - celery_taskmeta
@@ -17,6 +18,11 @@ databases:
             - tastypie_apiaccess
             - tastypie_apikey
             - thumbnail_kvstore
+            - waffle_flag
+            - waffle_flag_groups
+            - waffle_flag_users
+            - waffle_sample
+            - waffle_switch
 
         tables:
             auth_user:
