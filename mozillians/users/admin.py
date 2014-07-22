@@ -172,15 +172,18 @@ class LegacyVouchFilter(SimpleListFilter):
                 ('new', 'New'))
 
     def queryset(self, request, queryset):
-        legacy_vouchees = (Vouch.objects.filter(description='')
-                           .values_list('vouchee', flat=True))
-        nonlegacy_vouchees = (Vouch.objects.exclude(description='')
-                              .values_list('vouchee', flat=True))
+        vouched = queryset.filter(is_vouched=True)
+        newvouches = (Vouch.objects
+                      .exclude(description='')
+                      .values_list('vouchee', flat=True)
+                      .distinct())
+        # Load into memory
+        newvouches = list(newvouches)
+
         if self.value() == 'legacy':
-            return (queryset.filter(id__in=legacy_vouchees)
-                    .exclude(id__in=nonlegacy_vouchees))
+            return vouched.exclude(pk__in=newvouches)
         elif self.value() == 'new':
-            return queryset.filter(id__in=nonlegacy_vouchees)
+            return vouched.filter(pk__in=newvouches)
         return queryset
 
 
