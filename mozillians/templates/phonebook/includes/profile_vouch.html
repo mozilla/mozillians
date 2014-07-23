@@ -5,13 +5,15 @@
         {% if not profile.is_vouched %}
           <h4>
             {% trans full_name=profile.full_name %}
-              Is {{ full_name }} a Mozillian? Let us know how he/she contributed.
+              Does this profile belong to a Mozillian? Let us know
+              how {{ full_name }} has contributed to the project.
             {% endtrans %}
           </h4>
         {% else %}
           <h4>
             {% trans full_name=profile.full_name %}
-              Do you know {{ full_name }}? Let us know how he/she contributed.
+              Do you know this Mozillian? Let us know how
+              {{ full_name }} has contributed to the project.
             {% endtrans %}
           </h4>
         {% endif %}
