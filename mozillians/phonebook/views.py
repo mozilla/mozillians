@@ -218,6 +218,7 @@ def edit_profile(request):
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
                 language_formset=language_formset,
+                vouch_threshold=settings.CAN_VOUCH_THRESHOLD,
                 mapbox_id=settings.MAPBOX_PROFILE_ID)
 
     # If there are form errors, don't send a 200 OK.
