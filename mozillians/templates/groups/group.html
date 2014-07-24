@@ -149,6 +149,9 @@
       </div>
     {% endif %}
 
+    <h3>Map</h3>
+    <div id="map"></div>
+
     {% if not people.paginator.count %}
       <div class="clear">
         {% if membership_filter_form.filtr.value() == 'pending_members' %}
@@ -180,7 +183,6 @@
         </div>
       {% endif %}
 
-
       <br class="clear">
 
       <div class="row">
@@ -196,7 +198,18 @@
 {% endblock content %}
 
 {% block page_js %}
+    <script type="application/json" id="geodata">
+      {{ geodata|safe }}
+    </script>
+    <script type="text/javascript" src="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css">
+
+    <script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
+    <link href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
   {% compress js %}
     <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+    <script src="{{ static('mozillians/js/map.js') }}"></script>
+
   {% endcompress %}
 {% endblock %}

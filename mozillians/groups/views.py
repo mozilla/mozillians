@@ -141,6 +141,14 @@ def show(request, url, alias_model, template):
                   .order_by('-member_count'))
         data.update(skills=skills)
 
+    # Output geodata for map.
+    geodata = []
+    for profile in profiles:
+        if profile.lat and profile.lng:
+            labelText = "%s &mdash; %s" % (profile.full_name, profile.geo_city)
+            geodata.append(dict([("lat", profile.lat), ("lng", profile.lng), ("labelText", labelText), ("photo", profile.get_photo_url('32x32')), ("photo2x", profile.get_photo_url('64x64')) ]))
+
+
     page = request.GET.get('page', 1)
     paginator = Paginator(memberships, settings.ITEMS_PER_PAGE)
 
@@ -154,6 +162,7 @@ def show(request, url, alias_model, template):
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
     extra_data = dict(people=people,
+                      geodata=json.dumps(geodata),
                       group=group,
                       in_group=in_group,
                       is_curator=is_curator,
