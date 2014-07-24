@@ -487,6 +487,32 @@
         {% endif %}
 
       </fieldset>
+
+      <fieldset id="account-status">
+        <h2>{{ _('Account status') }}</h2>
+        <h5>
+        Vouched:
+        {% if profile.is_vouched %}
+          ✔  {{ _('Yes, you can view all profiles and access other Mozilla sites as a vouched Mozillian.') }}
+        {% else %}
+          ✘  {{ _('No, you can only access public Mozillian profiles.') }}
+        {% endif %}
+        </h5>
+        <h5>
+        Can vouch others:
+        {% if profile.can_vouch %}
+          ✔  {{ _('Yes, you can vouch for others.') }}
+        {% else %}
+          ✘
+          {% trans %}
+            No, you need at least {{ vouch_threshold }} vouches to vouch for others.
+          {% endtrans %}
+        {% endif %}
+        </h5>
+        {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
+          <a href="{{ vouching_url }}">Read more about vouching.</a>
+        {% endtrans %}
+      </fieldset>
     {% endif %}
 
     {% if not profile.is_complete %}
