@@ -140,7 +140,7 @@
       </form>
     {% endif %}
 
-    {% if is_curator %}
+    {% if membership_filter_form %}
       <div class="filters right">
         <form method="get">
           {{ membership_filter_form }}
@@ -151,7 +151,7 @@
 
     {% if not people.paginator.count %}
       <div class="clear">
-        {% if membership_filter_form.filtr.value() == 'pending_members' %}
+        {% if membership_filter_form and membership_filter_form.filtr.value() == 'pending_members' %}
           {% trans group_name=group.name %}
             There are no open membership requests for {{ group_name }}.
           {% endtrans %}

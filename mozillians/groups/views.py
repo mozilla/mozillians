@@ -112,9 +112,16 @@ def show(request, url, alias_model, template):
         is_pending = group.has_pending_member(profile)
 
         is_curator = is_manager or (group.curator == request.user.userprofile)
+
+        # initialize the form only when the group is moderated and user is curator of the group
+        if is_curator and group.accepting_new_members == 'by_request':
+            membership_filter_form = MembershipFilterForm(request.GET)
+        else:
+            membership_filter_form = None
+
         if is_curator:
             statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
-            if membership_filter_form.is_valid():
+            if membership_filter_form and membership_filter_form.is_valid():
                 filtr = membership_filter_form.cleaned_data['filtr']
                 if filtr == 'members':
                     statuses = [GroupMembership.MEMBER]
@@ -139,7 +146,7 @@ def show(request, url, alias_model, template):
         skills = (Skill.objects
                   .filter(members__in=memberships.values_list('userprofile', flat=True))
                   .order_by('-member_count'))
-        data.update(skills=skills)
+        data.update(skills=skills, membership_filter_form=membership_filter_form)
 
     page = request.GET.get('page', 1)
     paginator = Paginator(memberships, settings.ITEMS_PER_PAGE)
@@ -162,7 +169,6 @@ def show(request, url, alias_model, template):
                       show_delete_group_button=show_delete_group_button,
                       show_join_button=group.user_can_join(request.user.userprofile),
                       show_leave_button=group.user_can_leave(request.user.userprofile),
-                      membership_filter_form=membership_filter_form,
                       members=group.member_count,
                       )
 
