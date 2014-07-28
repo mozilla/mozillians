@@ -292,7 +292,7 @@
           <div id="vouchees" class="profile-entry">
             <h3>{{ _('Vouchees') }}</h3>
             <ul>
-              {% for vouch in profile.vouches_made.all() %}
+              {% for vouch in profile.vouches_made.all().order_by('vouchee__full_name') %}
                 <li>
                   <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}">
                     {{ vouch.vouchee.display_name|default(vouch.vouchee.user.username, true)}}
