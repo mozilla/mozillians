@@ -193,6 +193,10 @@
         {% endfor %}
       </div>
       {{ privacy_field(profile_form.privacy_geo_city) }}
+      <div id="location-wrong" >
+        Is the location wrong?
+        <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank">Help fix it</a>
+      </div>
     </fieldset>
       {{ profile_form.lat }}
       {{ profile_form.lng }}
