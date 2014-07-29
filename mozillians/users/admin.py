@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django import forms
+from django.conf import settings
 from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.contrib import messages
@@ -64,6 +65,18 @@ def unsubscribe_from_basket_action():
     unsubscribe_from_basket.short_description = 'Unsubscribe from Basket'
 
     return unsubscribe_from_basket
+
+
+def update_can_vouch_action():
+    """Update can_vouch flag action."""
+
+    def update_can_vouch(modeladmin, request, queryset):
+        for profile in queryset:
+            profile.can_vouch = (
+                profile.vouches_received.count() >= settings.CAN_VOUCH_THRESHOLD)
+            profile.save()
+    update_can_vouch.short_description = 'Update can_vouch flag.'
+    return update_can_vouch
 
 
 class SuperUserFilter(SimpleListFilter):
@@ -290,7 +303,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
-    actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action()]
+    actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action(),
+               update_can_vouch_action()]
 
     fieldsets = (
         ('Account', {
