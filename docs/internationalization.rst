@@ -21,6 +21,12 @@ Mozillians, you'll need to do a little more installation work.
       The directory in subversion is named ``locales`` but it has to be checked
       out to a local directory named ``locale``.
 
+   .. note::
+
+      If you plan to commit string merges make sure that you use the https URL::
+
+        svn co https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales locale
+
 Working on internationalization
 -------------------------------
 
@@ -39,7 +45,9 @@ Managing Strings
    to mozillians.org.
 
 
-Updating Verbatim
+.. _update-verbatim:
+
+Update Verbatim
 ^^^^^^^^^^^^^^^^^
 
 When we commit new strings or we alter already existing strings in our
@@ -49,14 +57,14 @@ Verbatim. `Verbatim
 tool localizers use to translate mozillians.org strings.
 
 Steps to follow to perform a string merge:
-  
+
   #. Inform `mathjazz <https://mozillians.org/en-US/u/mathjazz/>`_ on
      IRC in channel `#l10n` that you're about to do a string merge. If
      mathjazz is not available try to find `pascalc
      <https://mozillians.org/en-US/u/pascalc/>`_.
 
      .. warning::
-     
+
         Before updating SVN with new strings we need to make sure that
         the changes made in Verbatim are committed to SVN. The #l10n
         team will take care of that. It's important that we ping them
@@ -71,9 +79,9 @@ Steps to follow to perform a string merge:
 
   #. String extract and merge::
 
-       ./manage.py extract -c 
-       ./manage.py merge -c 
-  
+       ./manage.py extract -c
+       ./manage.py merge -c
+
   #. Check the diff to make sure things look normal::
 
        cd locale
@@ -96,8 +104,8 @@ Steps to follow to perform a string merge:
 
   #. Optionally update production. See :ref:`updating-production-translations`.
 
-     
-.. _linting-translations:   
+
+.. _linting-translations:
 
 Linting translations
 ^^^^^^^^^^^^^^^^^^^^
@@ -126,7 +134,7 @@ all the errors.
           Here is the original, English string::
 
             msgid "Sorry, we cannot find any mozillians with skill %(name)s"
-       
+
           and a incomplete Spanish translation::
 
             msgstr "Discúlpanos, pero no encontramos ningún mozillero en %(name)"
@@ -166,7 +174,7 @@ Updating Production Translations
 Production server https://mozillians.org checks out translations from
 the *production* tag instead of trunk.
 
-   #. Make sure that the translations have no errors. See :ref:`linting-translations`
+   #. Make sure that the translations in *trunk* have no errors. See :ref:`linting-translations`
 
       .. warning::
 
@@ -175,8 +183,22 @@ the *production* tag instead of trunk.
          a 500 error will be returned to users. It is really important
          that translations copied to production are correct.
 
-   #. Copy current *trunk* to *production*::
+   #. Checkout production repository if you don't have it already::
 
-        svn copy https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales https://svn.mozilla.org/projects/l10n-misc/tags/production/mozillians/locales
+        svn co https://svn.mozilla.org/projects/l10n-misc/tags/production/mozillians/locales
 
+   #. Merge current *trunk* into *production*::
 
+        svn merge https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales
+
+   #. Verify that everything looks good::
+
+        svn diff
+        svn status
+        svn info
+
+   #. Commit merge to production tag::
+
+        svn ci -m "Update mozillians production strings."
+
+   #. Production will get the new translations on next push.
