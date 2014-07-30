@@ -23,9 +23,10 @@
 
    <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}" method="POST">
      {{ csrf() }}
+     <input type="hidden" name="next_url" value="{{ next_url }}" />
      <button class="button remove" type="submit">{{ _('Remove') }}</button>
   </form>
 
-  <a href="{{ url('groups:show_group', group.url) }}">{{ _('Return to group') }}</a>
+  <a href="{{ next_url }}">{{ _('Return to group') }}</a>
 
 {% endblock content %}

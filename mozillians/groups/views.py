@@ -177,6 +177,8 @@ def remove_member(request, url, user_pk):
     this_userprofile = request.user.userprofile
     is_curator = (group.curator == this_userprofile)
     is_manager = request.user.userprofile.is_manager
+    group_url = reverse('groups:show_group', args=[group.url])
+    next_url = request.REQUEST.get('next_url', group_url)
 
     # TODO: this duplicates some of the logic in Group.user_can_leave(), but we
     # want to give the user a message that's specific to the reason they can't leave.
@@ -186,14 +188,14 @@ def remove_member(request, url, user_pk):
     if not (is_curator or is_manager):
         if not group.members_can_leave:
             messages.error(request, _('This group does not allow members to remove themselves.'))
-            return redirect('groups:show_group', url=group.url)
+            return redirect(next_url)
         if profile_to_remove != this_userprofile:
             raise Http404()
 
     # Curators cannot be removed, by anyone at all.
     if group.curator == profile_to_remove:
         messages.error(request, _('A curator cannot be removed from a group.'))
-        return redirect('groups:show_group', url=group.url)
+        return redirect(next_url)
 
     if request.method == 'POST':
         group.remove_member(profile_to_remove,
@@ -202,12 +204,13 @@ def remove_member(request, url, user_pk):
             messages.info(request, _('You have been removed from this group.'))
         else:
             messages.info(request, _('The group member has been removed.'))
-        return redirect('groups:show_group', url=group.url)
+        return redirect(next_url)
 
     # Display confirmation page
     context = {
         'group': group,
-        'profile': profile_to_remove
+        'profile': profile_to_remove,
+        'next_url': next_url
     }
     return render(request, 'groups/confirm_remove_member.html', context)
 
@@ -221,6 +224,8 @@ def confirm_member(request, url, user_pk):
     profile = get_object_or_404(UserProfile, pk=user_pk)
     is_curator = (group.curator == request.user.userprofile)
     is_manager = request.user.userprofile.is_manager
+    group_url = reverse('groups:show_group', args=[group.url])
+    next_url = request.REQUEST.get('next_url', group_url)
 
     if not (is_curator or is_manager):
         raise Http404()
@@ -234,7 +239,7 @@ def confirm_member(request, url, user_pk):
         else:
             group.add_member(profile)
             messages.info(request, _('This user has been added as a member of this group.'))
-    return redirect('groups:show_group', url=group.url)
+    return redirect(next_url)
 
 
 def edit(request, url, alias_model, template):
