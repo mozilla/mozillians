@@ -12,7 +12,6 @@ from django.utils.timezone import make_aware
 import basket
 import pytz
 from mock import Mock, call, patch
-from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -145,14 +144,8 @@ class UserProfileTests(TestCase):
         eq_(profile.full_name, 'foobar')
 
     def test_extract_document(self):
-        country = CountryFactory.create(name='Greece', code='gr')
-        region = RegionFactory.create(name='attika', country=country)
-        city = CityFactory.create(name='athens', region=region, country=country)
-        user = UserFactory.create(userprofile={'geo_city': city,
-                                               'geo_region': region,
-                                               'allows_community_sites': False,
+        user = UserFactory.create(userprofile={'allows_community_sites': False,
                                                'allows_mozilla_sites': False,
-                                               'geo_country': country,
                                                'full_name': 'Nikos Koukos',
                                                'bio': 'This is my bio'})
         profile = user.userprofile
@@ -167,12 +160,12 @@ class UserProfileTests(TestCase):
         profile.skills.add(skill_1)
         profile.skills.add(skill_2)
 
-        result = UserProfile.extract_document(user.userprofile.id)
+        result = UserProfile.extract_document(profile.id)
         ok_(isinstance(result, dict))
         eq_(result['id'], profile.id)
         eq_(result['is_vouched'], profile.is_vouched)
-        eq_(result['region'], region.name)
-        eq_(result['city'], city.name)
+        eq_(result['region'], 'Attika')
+        eq_(result['city'], 'Athens')
         eq_(result['allows_community_sites'], profile.allows_community_sites)
         eq_(result['allows_mozilla_sites'], profile.allows_mozilla_sites)
         eq_(set(result['country']), set(['gr', 'Greece']))

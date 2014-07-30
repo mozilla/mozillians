@@ -22,9 +22,13 @@ class UserResourceTests(TestCase):
     def setUp(self):
         voucher = UserFactory.create()
         country = CountryFactory()
+        region = RegionFactory()
+        city = CityFactory()
         self.user = UserFactory.create(
             userprofile={'vouched': False,
-                         'geo_country': country})
+                         'geo_country': country,
+                         'geo_region': region,
+                         'geo_city': city})
         self.user.userprofile.vouch(voucher.userprofile)
         group = GroupFactory.create()
         group.add_member(self.user.userprofile)
@@ -83,8 +87,8 @@ class UserResourceTests(TestCase):
         eq_(data['photo'], profile.photo)
         eq_(data['ircname'], profile.ircname)
         eq_(data['country'], profile.geo_country.code)
-        eq_(data['region'], profile.region)
-        eq_(data['city'], profile.city)
+        eq_(data['region'], profile.geo_region.name)
+        eq_(data['city'], profile.geo_city.name)
         eq_(data['date_mozillian'], profile.date_mozillian)
         eq_(data['timezone'], profile.timezone)
         eq_(data['email'], profile.email)

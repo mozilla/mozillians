@@ -24,8 +24,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 import mozillians.users.tasks
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
-from mozillians.users.models import (COUNTRIES, PUBLIC, Language,
-                                     ExternalAccount, Vouch,
+from mozillians.users.models import (PUBLIC, Language, ExternalAccount, Vouch,
                                      UserProfile, UsernameBlacklist)
 
 
@@ -320,8 +319,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('date_vouched', 'is_vouched', 'can_vouch')
         }),
         ('Location', {
-            'fields': ('country', 'region', 'city',
-                       'geo_country', 'geo_region', 'geo_city',
+            'fields': ('geo_country', 'geo_region', 'geo_city',
                        'lng', 'lat', 'timezone')
         }),
         ('Services', {
@@ -357,10 +355,6 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     def username(self, obj):
         return obj.user.username
     username.admin_order_field = 'user__username'
-
-    def country(self, obj):
-        return COUNTRIES.get(obj.userprofile.country, '')
-    country.admin_order_field = 'userprofile__country'
 
     def is_vouched(self, obj):
         return obj.userprofile.is_vouched

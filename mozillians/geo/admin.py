@@ -1,12 +1,6 @@
 from django.contrib import admin
 
-from mozillians.geo.models import City, Country, Geocoding, Region
-
-
-class GeocodingAdmin(admin.ModelAdmin):
-    list_display = ('country', 'region', 'city', 'geo_country', 'geo_region', 'geo_city')
-
-admin.site.register(Geocoding, GeocodingAdmin)
+from mozillians.geo.models import City, Country, Region
 
 
 class CountryAdmin(admin.ModelAdmin):

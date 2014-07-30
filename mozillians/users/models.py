@@ -174,15 +174,6 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                                verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
 
-    # legacy geo data
-    country = models.CharField(max_length=50, default='',
-                               choices=COUNTRIES.items(),
-                               verbose_name=_lazy(u'Country'))
-    region = models.CharField(max_length=255, default='', blank=True,
-                              verbose_name=_lazy(u'Province/State'))
-    city = models.CharField(max_length=255, default='', blank=True,
-                            verbose_name=_lazy(u'City'))
-
     # validated geo data (validated that it's valid geo data, not that the
     # mozillian is there :-) )
     geo_country = models.ForeignKey('geo.Country', blank=True, null=True, on_delete=models.SET_NULL)
