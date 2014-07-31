@@ -661,7 +661,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def get_annotated_groups(self):
         """
-        Return a list of all the groups the user is a member of or pending
+        Return a list of all visible groups the user is a member of or pending
         membership. The groups pending membership will have a .pending attribute
         set to True, others will have it set False.
         """
@@ -673,7 +673,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         for membership in self.groupmembership_set.filter(group_id__in=user_group_ids):
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
-            groups.append(group)
+            if group.visible is True:
+                groups.append(group)
         return groups
 
     def timezone_offset(self):
