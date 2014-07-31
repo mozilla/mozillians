@@ -417,7 +417,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def privacy_level(self):
         """Return user privacy clearance."""
-        if (self.groups.filter(name='privileged').exists() or self.user.is_superuser):
+        if (self.user.groups.filter(name='Managers').exists() or self.user.is_superuser):
             return PRIVILEGED
         if self.groups.filter(name='staff').exists():
             return EMPLOYEES
