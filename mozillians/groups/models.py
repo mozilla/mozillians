@@ -8,7 +8,7 @@ from funfactory.utils import absolutify
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
-from mozillians.groups.managers import GroupBaseManager
+from mozillians.groups.managers import GroupBaseManager, GroupManager
 from mozillians.groups.helpers import slugify
 from mozillians.groups.tasks import email_membership_change
 from mozillians.users.tasks import update_basket_task
@@ -204,10 +204,12 @@ class Group(GroupBase):
                    u'curator a reminder')
     )
 
+    objects = GroupManager()
+
     @classmethod
     def get_functional_areas(cls):
         """Return all visible groups that are functional areas."""
-        return cls.objects.filter(functional_area=True, visible=True)
+        return cls.objects.visible().filter(functional_area=True)
 
     @classmethod
     def get_non_functional_areas(cls, **kwargs):
@@ -216,7 +218,7 @@ class Group(GroupBase):
 
         Use kwargs to apply additional filtering to the groups.
         """
-        return cls.objects.filter(functional_area=False, visible=True, **kwargs)
+        return cls.objects.visible().filter(functional_area=False, **kwargs)
 
     @classmethod
     def get_curated(cls):
@@ -225,9 +227,7 @@ class Group(GroupBase):
 
     @classmethod
     def search(cls, query):
-        results = super(Group, cls).search(query)
-        results = results.filter(visible=True)
-        return results
+        return super(Group, cls).search(query).visible()
 
     def get_absolute_url(self):
         return absolutify(reverse('groups:show_group', args=[self.url]))

@@ -289,6 +289,19 @@ class UserProfileTests(TestCase):
         user_groups = user_1.userprofile.get_annotated_groups()
         eq_([group_1], user_groups)
 
+    def test_get_annotated_groups_only_visible(self):
+        """ Test that get_annotated_groups() only returns visible groups
+
+        """
+        group_1 = GroupFactory.create(visible=True)
+        group_2 = GroupFactory.create(visible=False)
+        profile = UserFactory.create().userprofile
+        group_1.add_member(profile)
+        group_2.add_member(profile)
+
+        user_groups = profile.get_annotated_groups()
+        eq_([group_1], user_groups)
+
     @patch('mozillians.users.models.UserProfile.auto_vouch')
     def test_auto_vouch_on_profile_save(self, auto_vouch_mock):
         UserFactory.create()
