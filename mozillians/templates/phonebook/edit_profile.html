@@ -55,7 +55,9 @@
     {{ csrf() }}
 
     <fieldset class="privacy-all">
-      <label>{{ _('Make all of my profile fields visible to:') }}</label>
+      <label for="privacy-global-settings">
+        {{ _('Make all of my profile fields visible to:') }}
+      </label>
       <select id="privacy-global-settings">
         <option value="-1" selected>{{ _('-- No Change --') }}</option>
         <option value="3">{{ _('Mozillians') }}</option>
@@ -94,15 +96,17 @@
     <fieldset>
       <h2>{{ _('Basic Information') }}</h2>
       <div id="photo">
-        <label>{{ _('Profile Photo') }}</label>
+        <label for="id_photo"> {{ _('Profile Photo') }} </label>
         <div class="profile-photo">
           <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
         </div>
         <input class="input-file" id="id_photo" type="file" name="photo">
         {% if profile.photo %}
           <div id="id_photo_delete">
-            <input type="checkbox" name="photo-clear">
-            <label>{{ _('Remove Profile Photo') }}</label>
+            <label>
+              <input type="checkbox" name="photo-clear">
+              {{ _('Remove Profile Photo') }}
+            </label>
           </div>
         {% endif %}
         {{ privacy_field(profile_form.privacy_photo) }}
@@ -304,9 +308,11 @@
             </h4>
             {% for t_select in t_choices[7:14] %}
               <div class="tshirt-option">
-                <input{% if profile.tshirt == t_select.0  %} checked{% endif %}
-                type="radio" name="tshirt" value="{{ t_select.0 }}">
-                <label>{{ t_select.1 }}</label>
+                <label>
+                  <input {% if profile.tshirt == t_select.0  %} checked {% endif %}
+                    type="radio" name="tshirt" value="{{ t_select.0 }}">
+                  {{ t_select.1 }}
+                </label>
               </div>
             {% endfor %}
           </div>
