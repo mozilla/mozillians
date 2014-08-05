@@ -293,33 +293,34 @@ def search(request):
 
 
 @waffle_flag('betasearch')
-@allow_public
 def betasearch(request):
     """This view is for researching new search and data filtering
     options. It will eventually replace the 'search' view.
 
+    Filtering using SearchFilter does not respect privacy levels
+    because it directly hits the db. This should be further
+    investigated before the feature is released to the
+    public. Meanwhile we limit searches only to vouched users.
+
     This view is behind the 'betasearch' waffle flag.
+
     """
     limit = None
     people = []
     show_pagination = False
     form = forms.SearchForm(request.GET)
-    groups = None
-    functional_areas = None
+    filtr = forms.SearchFilter(request.GET)
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
-        include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
-        functional_areas = Group.get_functional_areas()
         public = not (request.user.is_authenticated()
                       and request.user.userprofile.is_vouched)
 
-        profiles = UserProfile.search(query, public=public,
-                                      include_non_vouched=include_non_vouched)
-        if not public:
-            groups = Group.search(query)
+        profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
+        profiles = UserProfile.search(query, include_non_vouched=True, public=public)
+        profiles = profiles.filter(id__in=profiles_matching_filter)
 
         paginator = Paginator(profiles, limit)
 
@@ -330,19 +331,15 @@ def betasearch(request):
         except EmptyPage:
             people = paginator.page(paginator.num_pages)
 
-        if profiles.count() == 1 and not groups:
-            return redirect('phonebook:profile_view', people[0].user.username)
-
         show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    d = dict(people=people,
-             search_form=form,
-             limit=limit,
-             show_pagination=show_pagination,
-             groups=groups,
-             functional_areas=functional_areas)
+    data = dict(people=people,
+                search_form=form,
+                filtr=filtr,
+                limit=limit,
+                show_pagination=show_pagination)
 
-    return render(request, 'phonebook/betasearch.html', d)
+    return render(request, 'phonebook/betasearch.html', data)
 
 
 @allow_public

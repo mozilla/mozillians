@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
+import django_filters
 import happyforms
 from PIL import Image
 from tower import ugettext as _, ugettext_lazy as _lazy
@@ -68,6 +69,38 @@ class SearchForm(happyforms.Form):
     def clean_limit(self):
         limit = self.cleaned_data['limit'] or settings.ITEMS_PER_PAGE
         return limit
+
+
+def filter_vouched(qs, choice):
+    if choice == SearchFilter.CHOICE_ONLY_VOUCHED:
+        return qs.filter(is_vouched=True)
+    elif choice == SearchFilter.CHOICE_ONLY_UNVOUCHED:
+        return qs.filter(is_vouched=False)
+    return qs
+
+
+class SearchFilter(django_filters.FilterSet):
+    CHOICE_ONLY_VOUCHED = 'yes'
+    CHOICE_ONLY_UNVOUCHED = 'no'
+    CHOICE_ALL = 'all'
+
+    CHOICES = (
+        (CHOICE_ONLY_VOUCHED, _lazy('Vouched')),
+        (CHOICE_ONLY_UNVOUCHED, _lazy('Unvouched')),
+        (CHOICE_ALL, _lazy('All')),
+    )
+
+    vouched = django_filters.ChoiceFilter(
+        name='vouched', label=_lazy('Display only'), required=False,
+        choices=CHOICES, action=filter_vouched)
+
+    class Meta:
+        model = UserProfile
+        fields = ['vouched', 'skills', 'groups', 'timezone']
+
+    def __init__(self, *args, **kwargs):
+        super(SearchFilter, self).__init__(*args, **kwargs)
+        self.filters['timezone'].field.choices.insert(0, ('', _lazy(u'All timezones')))
 
 
 class UserForm(happyforms.ModelForm):
