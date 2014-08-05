@@ -21,7 +21,7 @@
 // Groups
 // Invite/Invited
 // Special
-
+// Betasearch
 
 /* Imports
 ==================== */
@@ -1983,4 +1983,42 @@ body#invite {
     background-repeat: no-repeat;
     background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
     background-attachment: local, local, scroll, scroll;
+}
+
+
+/* Betasearch
+================== */
+body#betasearch {
+    #search-form {
+        margin-bottom: 20px;
+        input[type=text] {
+            border: 1px solid lighten(@black,90%);
+            margin-right: 8px;
+            @media (max-width: @breakMobileLandscape) {
+                width: 50%;
+                margin-bottom: 15px;
+            }
+        }
+        button {
+            .button;
+            margin: 0 8px 15px 0;
+        }
+        .search-options {
+            display: none;
+            input, span {
+                display: block;
+                float: left;
+            }
+            input {
+                margin-right: 10px;
+            }
+        }
+    }
+    .ui-widget-content.ui-corner-all {
+        border: 1px solid #D8DCDF !important;
+    }
+}
+
+#betasearch #id_groups, #id_skills {
+    min-height: 90px;
 }

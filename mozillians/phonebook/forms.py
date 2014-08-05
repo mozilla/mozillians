@@ -96,7 +96,11 @@ class SearchFilter(django_filters.FilterSet):
 
     class Meta:
         model = UserProfile
-        fields = []
+        fields = ['vouched', 'skills', 'groups', 'timezone']
+
+    def __init__(self, *args, **kwargs):
+        super(SearchFilter, self).__init__(*args, **kwargs)
+        self.filters['timezone'].field.choices.insert(0, ('', _lazy(u'All timezones')))
 
 
 class UserForm(happyforms.ModelForm):
