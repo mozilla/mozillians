@@ -110,7 +110,7 @@
         <div class="contact-details">
             {% if profile.email %}
               <section class="u-email">
-                <i class="icon-envelope"></i>
+                <i class="icon-envelope-o"></i>
                 {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
                   <span class="email">{{ profile.email }}</span>
                 {% if user != shown_user %}</a>{% endif %}
@@ -118,7 +118,7 @@
             {% endif %}
             {% if profile.ircname %}
               <section class="p-nickname">
-                <i class="icon-comments-alt"></i> IRC :
+                <i class="icon-comments-o"></i> IRC :
                 <span class="nickname">{{ profile.ircname }}</span>
               </section>
             {% endif %}
