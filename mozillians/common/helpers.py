@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import md5
 
 from django.conf import settings
@@ -225,3 +225,11 @@ def offset_of_timezone(timezone_name):
     offset = now.tzinfo.utcoffset(now)  # timedelta
     minutes = offset.seconds / 60 + offset.days * 24 * 60
     return minutes
+
+
+def get_datetime(days=0, weeks=0):
+    """Return a datetime object, given an offset in days and/or weeks.
+
+    The offset can be either positive or negative.
+    """
+    return (datetime.today() + timedelta(days=days, weeks=weeks))
