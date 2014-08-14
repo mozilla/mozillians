@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from django import forms
 from django.conf import settings
 from django.conf.urls import patterns, url
@@ -22,6 +20,7 @@ from import_export.resources import ModelResource
 from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
+from mozillians.common.helpers import get_datetime
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (PUBLIC, Language, ExternalAccount, Vouch,
@@ -156,21 +155,29 @@ class LastLoginFilter(SimpleListFilter):
     parameter_name = 'last_login'
 
     def lookups(self, request, model_admin):
-        return (('<6', 'Less than 6 months'),
-                ('>6', 'Between 6 and 12 months'),
-                ('>12', 'More than a year'))
+        # Number is in days
+        return (('<7', 'Less than a week'),
+                ('<30', 'Less than a month'),
+                ('<90', 'Less than 3 months'),
+                ('<180', 'Less than 6 months'),
+                ('>180', 'Between 6 and 12 months'),
+                ('>360', 'More than a year'))
 
     def queryset(self, request, queryset):
-        half_year = datetime.today() - timedelta(days=180)
-        full_year = datetime.today() - timedelta(days=360)
 
-        if self.value() == '<6':
-            return queryset.filter(user__last_login__gte=half_year)
-        elif self.value() == '>6':
-            return queryset.filter(user__last_login__lt=half_year,
-                                   user__last_login__gt=full_year)
-        elif self.value() == '>12':
-            return queryset.filter(user__last_login__lt=full_year)
+        if self.value() == '<7':
+            return queryset.filter(user__last_login__gte=get_datetime(-7))
+        elif self.value() == '<30':
+            return queryset.filter(user__last_login__gte=get_datetime(-30))
+        elif self.value() == '<90':
+            return queryset.filter(user__last_login__gte=get_datetime(-90))
+        elif self.value() == '<180':
+            return queryset.filter(user__last_login__gte=get_datetime(-180))
+        elif self.value() == '>180':
+            return queryset.filter(user__last_login__lt=get_datetime(-180),
+                                   user__last_login__gt=get_datetime(-360))
+        elif self.value() == '>360':
+            return queryset.filter(user__last_login__lt=get_datetime(-360))
         return queryset
 
 
@@ -256,14 +263,14 @@ class UserProfileAdminForm(forms.ModelForm):
     def clean_username(self):
         username = self.cleaned_data['username']
         if (User.objects.exclude(pk=self.instance.user.pk)
-            .filter(username=username).exists()):
+                .filter(username=username).exists()):
             raise ValidationError('Username already exists')
         return username
 
     def clean_email(self):
         email = self.cleaned_data['email']
         if (User.objects.exclude(pk=self.instance.user.pk)
-            .filter(email=email).exists()):
+                .filter(email=email).exists()):
             raise ValidationError('Email already exists')
         return email
 
