@@ -4,6 +4,7 @@ from django.utils import timezone
 import factory
 from factory import fuzzy
 
+from mozillians.geo.models import City, Country, Region
 from mozillians.users.models import Language
 
 
@@ -19,7 +20,20 @@ class UserFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def userprofile(self, create, extracted, **kwargs):
         self.userprofile.full_name = ' '.join([self.first_name, self.last_name])
-        self.userprofile.country = 'gr'
+        self.userprofile.geo_country = Country.objects.get_or_create(
+            name='Greece', code='gr',
+            mapbox_id='country.1188277719'
+        )[0]
+        self.userprofile.geo_region = Region.objects.get_or_create(
+            name='Attika', country=self.userprofile.geo_country,
+            mapbox_id='province.539510334'
+        )[0]
+        self.userprofile.geo_city = City.objects.get_or_create(
+            name='Athens', region=self.userprofile.geo_region,
+            country=self.userprofile.geo_country,
+            lat=39.727924, lng=21.592328,
+            mapbox_id='mapbox-places.10946738'
+        )[0]
         self.userprofile.lat = 39.727924
         self.userprofile.lng = 21.592328
         if extracted:

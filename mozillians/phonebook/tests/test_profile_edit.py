@@ -92,7 +92,10 @@ class ProfileEditTests(TestCase):
 
 class LocationEditTests(TestCase):
     def setUp(self):
-        self.user = UserFactory.create(email='latlng@example.com')
+        self.user = UserFactory.create(email='latlng@example.com',
+                                       userprofile={'geo_country': None,
+                                                    'geo_region': None,
+                                                    'geo_city': None})
         self.data = {
             'full_name': self.user.userprofile.full_name,
             'email': self.user.email,

@@ -9,7 +9,9 @@ class CountryFactory(factory.DjangoModelFactory):
     FACTORY_FOR = Country
     name = factory.Sequence(lambda n: 'Country Name {0}'.format(n))
     mapbox_id = factory.Sequence(lambda n: 'country.{0}'.format(n))
-    code = factory.Sequence(lambda n: '%02x' % n)
+    # Not really unique, but we need to convert sequences to a max
+    # of two characters somehow.
+    code = factory.Sequence(lambda n: '{0}'.format(str(n)[-2:]))
 
 
 class RegionFactory(factory.DjangoModelFactory):

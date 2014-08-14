@@ -222,8 +222,9 @@ class GroupMembershipAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ['group__name', 'group__url', 'group__description',
                      'group__aliases__name', 'group__aliases__url',
                      'userprofile__full_name', 'userprofile__ircname',
-                     'userprofile__region', 'userprofile__city', 'userprofile__country',
-                     'userprofile__user__username', 'userprofile__user__email'
+                     'userprofile__geo_region__name', 'userprofile__geo_city__name',
+                     'userprofile__geo_country__name', 'userprofile__user__username',
+                     'userprofile__user__email'
                      ]
     form = GroupMembershipAdminForm
 
