@@ -597,7 +597,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                 autovouch=autovouch
             )
 
-        self._email_now_vouched(vouched_by)
+        self._email_now_vouched(vouched_by, description)
         return vouch
 
     def auto_vouch(self):
@@ -609,7 +609,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                     description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
                 self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
-    def _email_now_vouched(self, vouched_by):
+    def _email_now_vouched(self, vouched_by, description=''):
         """Email this user, letting them know they are now vouched."""
         name = None
         profile_link = None
@@ -622,6 +622,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         message = template.render({
             'voucher_name': name,
             'voucher_profile_url': profile_link,
+            'vouch_description': description,
             'functional_areas_url': utils.absolutify(reverse('groups:index_functional_areas')),
             'groups_url': utils.absolutify(reverse('groups:index_groups')),
             'first_vouch': number_of_vouches == 1,

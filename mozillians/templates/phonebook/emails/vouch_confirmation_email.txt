@@ -29,6 +29,14 @@
 
 {% endif %}
 
+{% if vouch_description %}
+{% trans %}
+  Vouch Description:
+  {{ vouch_description }}
+{% endtrans %}
+
+{% endif %}
+
 {% if first_vouch %}
 {% trans %}
   Take a moment to join a functional area or group right now:
