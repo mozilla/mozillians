@@ -416,8 +416,8 @@
                  reps_url='http://reps.mozilla.org' %}
           The Phonebook offers an API to help authorize
           contributors and share profile data to other tools
-          and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
-          <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
+          and sites like <a id="services-bugzilla-url" href="{{ bugzilla_url }}">Bugzilla</a> and the
+          <a id="services-mozilla-reps" href="{{ reps_url }}">Mozilla Reps Portal</a>.
         {% endtrans %}
       <h5>{{ _('Other Sites') }}</h5>
       <p>
@@ -438,12 +438,12 @@
                                          '&short_desc=Phonebook%20API%20Usage%20Request'),
                    dev_form_url='http://groups.google.com/group/mozilla.dev.community-tools/' %}
             Take a look at the list of
-            the <a href="{{ api_schema_url }}">API methods we've
+            the <a id="services-api-methods" href="{{ api_schema_url }}">API methods we've
             made available</a>. To use this API, you'll need to
             get approval from the Privacy team. To get started,
-            <a href="{{ bugzilla_request_url }}">file
+            <a id="services-bugzilla-request-url" href="{{ bugzilla_request_url }}">file
             a bug</a>. If you have any questions, talk to us in
-            our <a href="{{ dev_form_url }}">
+            our <a id="services-development-forum" href="{{ dev_form_url }}">
             development forum</a>.
           {% endtrans %}
         </p>
