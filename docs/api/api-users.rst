@@ -60,6 +60,9 @@ Parameters
     ``languages``
         *Optional* **string (comma-separated list)** - Return users with matching languages
 
+    ``accounts``
+        *Optional* **string** - Return users with matching external account identifier
+
     ``groups``
         *Optional* **string (comma-separated list)** - Return users with matching groups
 
