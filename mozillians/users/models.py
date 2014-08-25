@@ -627,7 +627,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             'first_vouch': number_of_vouches == 1,
             'can_vouch_threshold': number_of_vouches == settings.CAN_VOUCH_THRESHOLD,
         })
-        subject = _(u'You are now vouched on Mozillians.org')
+        subject = _(u'You have been vouched on Mozillians.org')
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.user.email])
