@@ -872,6 +872,9 @@ class ExternalAccount(models.Model):
     TYPE_LANYRD = 'LANYRD'
     TYPE_LANDLINE = 'Phone (Landline)'
     TYPE_MOBILE = 'Phone (Mobile)'
+    TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
+    TYPE_MOLOCOMOTION = 'MOZILLALOCOMOTION'
+    TYPE_TRANSIFEX = 'TRANSIFEX'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -945,7 +948,15 @@ class ExternalAccount(models.Model):
         TYPE_MOBILE: {'name': 'Phone (Mobile)',
                       'url': '',
                       'validator': validate_phone_number},
-
+        TYPE_MOVERBATIM: {'name': 'Mozilla Verbatim',
+                          'url': 'https://localize.mozilla.org/accounts/{identifier}/',
+                          'validator': validate_username_not_url},
+        TYPE_MOLOCOMOTION: {'name': 'Mozilla Locomotion',
+                            'url': 'http://mozilla.locamotion.org/accounts/{identifier}/',
+                            'validator': validate_username_not_url},
+        TYPE_TRANSIFEX: {'name': 'Transifex',
+                         'url': 'https://www.transifex.com/accounts/profile/{identifier}/',
+                         'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
