@@ -912,7 +912,7 @@ class ExternalAccount(models.Model):
                        'url': 'https://twitter.com/{identifier}',
                        'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
-        TYPE_GTALK: {'name': 'Google Talk',
+        TYPE_GTALK: {'name': 'Google+ Hangouts',
                      'url': '',
                      'validator': validate_email},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
