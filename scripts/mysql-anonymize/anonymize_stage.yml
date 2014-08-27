@@ -31,3 +31,7 @@ databases:
               random_email_noadmin_employees:
                 - email
 
+            profile:
+                empty_string:
+                    - basket_token
+
