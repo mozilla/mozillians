@@ -819,7 +819,6 @@ class Vouch(models.Model):
         return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
 
 
-@receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
 @receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
 def update_vouch_flags(sender, instance, **kwargs):
     if kwargs.get('raw'):
@@ -834,6 +833,16 @@ def update_vouch_flags(sender, instance, **kwargs):
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
     profile.save()
+
+
+@receiver(dbsignals.pre_delete, sender=UserProfile,
+          dispatch_uid='delete_vouch_flags_delete_signal')
+def delete_vouch_flags(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+
+    if instance and Vouch.objects.filter(vouchee=instance).exists():
+        Vouch.objects.filter(vouchee=instance).delete()
 
 
 class UsernameBlacklist(models.Model):
