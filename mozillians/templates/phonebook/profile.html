@@ -263,6 +263,7 @@
 
         {% if profile.vouches_received.exists() %}
           <div id="vouched_by" class="profile-entry">
+            <a name="vouched_by">
             <h3>{{ _('Vouched By') }}</h3>
             <ul>
               {% for vouch in profile.vouches_received.all() %}
@@ -286,6 +287,7 @@
                 </li>
               {% endfor %}
             </ul>
+            </a>
           </div>
         {% endif %}
         {% if profile.vouches_made.exists() %}

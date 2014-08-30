@@ -13,20 +13,20 @@
   You are now able to search through all Mozillians profiles
   and you can also join groups.
 {% endtrans %}
-
 {% endif %}
+
 {% if can_vouch_threshold %}
 {% trans vouching_url = 'https://wiki.mozilla.org/Mozillians/Vouching' %}
   You are now able to vouch others! Read more about vouching {{ vouching_url }}
 {% endtrans %}
-
 {% endif %}
-{% if voucher_name  %}
 
+{% if voucher_name  %}
 {% trans %}
   You were vouched by {{ voucher_name }} {{ voucher_profile_url }}
-{% endtrans %}
 
+  Check it out! {{ vouched_url }}
+{% endtrans %}
 {% endif %}
 
 {% if first_vouch %}

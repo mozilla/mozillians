@@ -620,6 +620,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         number_of_vouches = self.vouches_received.all().count()
         template = get_template('phonebook/emails/vouch_confirmation_email.txt')
         message = template.render({
+            'vouched_url': utils.absolutify(self.get_absolute_url())+=str('#vouched_by'),
             'voucher_name': name,
             'voucher_profile_url': profile_link,
             'functional_areas_url': utils.absolutify(reverse('groups:index_functional_areas')),
