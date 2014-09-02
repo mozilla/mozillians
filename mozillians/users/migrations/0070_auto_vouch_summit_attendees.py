@@ -16,6 +16,10 @@ SUMMIT_GROUPS_QUERY = reduce(
 
 class Migration(DataMigration):
 
+    depends_on = (
+        ('groups', '0017_rename_field_groupmembership_user__groupmembership_userprofile.py'),
+    )
+
     def forwards(self, orm):
         now = timezone.now()
         groups = orm['groups.Group'].objects.filter(SUMMIT_GROUPS_QUERY)
