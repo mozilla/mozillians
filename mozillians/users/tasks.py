@@ -3,7 +3,6 @@ import logging
 import os
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import get_model
 
@@ -260,7 +259,9 @@ def unindex_objects(model, ids, public_index, **kwargs):
 @task
 def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     """Remove incomplete accounts older than INCOMPLETE_ACC_MAX_DAYS old."""
+    # Avoid circular dependencies
+    from mozillians.users.models import UserProfile
 
     now = datetime.now() - timedelta(days=days)
-    (User.objects.filter(date_joined__lt=now)
-     .filter(userprofile__full_name='').delete())
+    (UserProfile.objects.filter(full_name='')
+     .filter(user__date_joined__lt=now).delete())
