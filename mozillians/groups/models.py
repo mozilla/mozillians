@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 from django.db import models
 from django.utils.timezone import now
 
@@ -203,6 +204,28 @@ class Group(GroupBase):
         help_text=(u'The max PK of pending membership requests the last time we sent the '
                    u'curator a reminder')
     )
+
+    def geodata(self, rebuild=False, timeout=300):
+        """Return list of dicts containing lat,lng,name and photo for each member of a group."""
+        if not rebuild:
+            cached = cache.get('geodata_group{0}'.format(self.id))
+            if cached:
+                return cached
+
+        memberships = self.groupmembership_set.filter(status=GroupMembership.MEMBER)
+        geodata = []
+        for membership in memberships:
+            profile = membership.userprofile or membership
+            if profile.lat and profile.lng and profile.geo_city:
+                labelText = "%s &mdash; %s" % (profile.full_name, profile.geo_city)
+                geodata.append(dict([("lat", profile.lat), ("lng", profile.lng),
+                                     ("labelText", labelText),
+                                     ("photo", profile.get_photo_url('32x32')),
+                                     ("photo2x", profile.get_photo_url('64x64'))]))
+        if geodata:
+            cache.set('geodata_group{0}'.format(self.id), geodata, timeout)
+
+        return geodata
 
     @classmethod
     def get_functional_areas(cls):

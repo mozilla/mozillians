@@ -32,4 +32,6 @@ urlpatterns = patterns(
         name='toggle_skill_subscription'),
     url('^skills/search/$', 'views.search',
         dict(searched_object=Skill), name='search_skills'),
+    url('^group/(?P<url>[-\w]+)/geodata.json$', 'views.geodata',
+        {'alias_model': GroupAlias}, name='show_geodata'),
 )

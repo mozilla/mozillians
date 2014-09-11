@@ -12,6 +12,14 @@ from tower import ugettext as _
 
 
 @task(ignore_result=True)
+def cache_map_data():
+    """Force caching of the lat/lng lists for groups >100 Members."""
+    Group = get_model('groups', 'Group')
+    for group in Group.objects.annotate(cnt=Count('members')).filter(cnt__gte=100):
+        Group.geodata(True, settings.GEODATA_TIMEOUT)
+
+
+@task(ignore_result=True)
 def remove_empty_groups():
     """Remove empty groups."""
     Group = get_model('groups', 'Group')

@@ -88,6 +88,14 @@ def search(request, searched_object=Group):
     return HttpResponseBadRequest()
 
 
+def geodata(request, url, alias_model):
+    group_alias = get_object_or_404(alias_model, url=url)
+    if group_alias.alias.url != url:
+        return redirect('groups:show_geodata', url=group_alias.alias.url)
+    group = group_alias.alias
+    return HttpResponse(json.dumps(group.geodata()), mimetype='application/json')
+
+
 @never_cache
 def show(request, url, alias_model, template):
     """List all members in this group."""
@@ -170,6 +178,7 @@ def show(request, url, alias_model, template):
                       show_join_button=group.user_can_join(request.user.userprofile),
                       show_leave_button=group.user_can_leave(request.user.userprofile),
                       members=group.member_count,
+                      mapbox_id=settings.MAPBOX_MAP_ID
                       )
 
     data.update(extra_data)

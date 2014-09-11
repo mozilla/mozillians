@@ -301,6 +301,8 @@ HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 MAPBOX_MAP_ID = 'examples.map-i86nkdio'
 # This is the token for the edit profile page alone.
 MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
+# Time to cache lat/lng data for group pages larger than 100. Smaller is 5 mins.
+GEODATA_TIMEOUT = 86400
 
 
 def _browserid_request_args():
