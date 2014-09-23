@@ -196,6 +196,11 @@ class GroupBaseTests(TestCase):
 
 
 class GroupTests(TestCase):
+    def test_visible(self):
+        group_1 = GroupFactory.create(visible=True)
+        GroupFactory.create(visible=False)
+        eq_(set(Group.objects.visible()), set([group_1]))
+
     def test_get_non_functional_areas(self):
         UserFactory.create()
         UserFactory.create()

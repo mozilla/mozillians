@@ -115,16 +115,14 @@
         {% if user.userprofile.groups.count() %}
           <section class="groups">
             <h4>{{ _('Groups') }}</h4>
-            {% for membership in user.userprofile.groupmembership_set.all() -%}
-              {%- with group=membership.group -%}
+            {% for group in user.userprofile.get_annotated_groups() -%}
               <a href="{{ url('groups:show_group', group.url) }}">
                 {%- if group.curator == user.userprofile -%}
                   <i class="icon-crown"></i>
                 {% endif %}
                 {{ group.name }}
-                {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}
+                {%- if group.pending %} {{ _('(membership requested)') }}{% endif -%}
               </a>
-              {%- endwith -%}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
