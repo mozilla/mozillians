@@ -88,6 +88,35 @@ class ShowTests(TestCase):
         eq_(people[1].userprofile, user_3.userprofile)
         eq_(people[2].userprofile, user_1.userprofile)
 
+    def test_show_common_skills(self):
+        """Show most common skills first."""
+        group = GroupFactory.create()
+        user_1 = UserFactory.create(userprofile={'full_name': 'Carol'})
+        user_2 = UserFactory.create(userprofile={'full_name': 'Alice'})
+        user_3 = UserFactory.create(userprofile={'full_name': 'Bob'})
+        group.add_member(user_1.userprofile)
+        group.add_member(user_2.userprofile)
+        group.add_member(user_3.userprofile)
+
+        skill_1 = SkillFactory.create()
+        skill_2 = SkillFactory.create()
+        skill_3 = SkillFactory.create()
+        skill_3.members.add(user_1.userprofile)
+        skill_3.members.add(user_2.userprofile)
+        skill_3.members.add(user_3.userprofile)
+        skill_2.members.add(user_2.userprofile)
+        skill_2.members.add(user_3.userprofile)
+        skill_1.members.add(user_1.userprofile)
+
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+        with self.login(user_1) as client:
+            response = client.get(url, follow=True)
+        eq_(response.status_code, 200)
+        skills = response.context['skills']
+        eq_(skills[0].name, skill_3.name)
+        eq_(skills[1].name, skill_2.name)
+        eq_(skills[2].name, skill_1.name)
+
     @requires_login()
     def test_show_anonymous(self):
         client = Client()
