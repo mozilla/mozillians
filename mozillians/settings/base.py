@@ -55,7 +55,7 @@ DOMAIN_METHODS = {
 # Accepted locales
 LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es', 'hu', 'fr', 'it', 'ko',
-                  'nl', 'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'sv', 'zh-TW',
+                  'nl', 'pl', 'pt-BR', 'ru', 'sk', 'sl', 'sq', 'sv-SE', 'zh-TW',
                   'zh-CN', 'lt', 'ja')
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
