@@ -85,6 +85,7 @@ class UserResourceTests(TestCase):
              for a in profile.externalaccount_set.all()])
         eq_(data['bio'], profile.bio)
         eq_(data['photo'], profile.photo)
+        eq_(data['photo_thumbnail'], profile.get_photo_url())
         eq_(data['ircname'], profile.ircname)
         eq_(data['country'], profile.geo_country.code)
         eq_(data['region'], profile.geo_region.name)
