@@ -54,6 +54,7 @@ class UserProfileQuerySet(QuerySet):
     """Custom QuerySet to support privacy."""
 
     def __init__(self, *args, **kwargs):
+        # TODO update public_q with external accounts
         self.public_q = Q()
         UserProfile = get_model('users', 'UserProfile')
         for field in UserProfile.privacy_fields():
