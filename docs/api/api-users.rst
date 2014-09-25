@@ -143,6 +143,7 @@ Examples
                     "is_vouched": true,
                     "languages": "[(u'hindi',), (u'english',)]",
                     "photo": "https://mozillians.org/media/uploads/userprofile/3c5fcc399-bf2f-6caf-96fb-b40d9a03037269.jpg",
+                    "photo_thumbnail": "https://mozillians.org/media/uploads/sorl-cache/b2/e0/b2e004e13927d41497c7f6ab39bcafad.jpg",
                     "region": "Kansas",
                     "resource_uri": "/api/v1/users/42/",
                     "skills": "[(u'card tricks',), (u'css3',), (u'skydiving instructor',)]",

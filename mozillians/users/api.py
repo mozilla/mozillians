@@ -36,6 +36,7 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     city = fields.CharField(attribute='geo_city__name', null=True, readonly=True, default='')
     region = fields.CharField(attribute='geo_region__name', null=True, readonly=True, default='')
     country = fields.CharField(attribute='geo_country__code', null=True, readonly=True, default='')
+    photo_thumbnail = fields.CharField()
 
     class Meta:
         queryset = UserProfile.objects.all()
@@ -137,6 +138,9 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
         if bundle.obj.photo:
             return urljoin(settings.SITE_URL, bundle.obj.photo.url)
         return ''
+
+    def dehydrate_photo_thumbnail(self, bundle):
+        return urljoin(settings.SITE_URL, bundle.obj.get_photo_url())
 
     def dehydrate_url(self, bundle):
         url = reverse('phonebook:profile_view',
