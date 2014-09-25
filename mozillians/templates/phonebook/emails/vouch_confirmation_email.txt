@@ -21,12 +21,18 @@
 {% endtrans %}
 
 {% endif %}
-{% if voucher_name  %}
 
+{% if voucher_name  %}
 {% trans %}
   You were vouched by {{ voucher_name }} {{ voucher_profile_url }}
 {% endtrans %}
+{% endif %}
 
+{% if vouch_description %}
+{% trans %}
+  Vouch Description:
+  {{ vouch_description }}
+{% endtrans %}
 {% endif %}
 
 {% if first_vouch %}
