@@ -223,10 +223,12 @@
             lng: geoposition.coords.longitude
         },true);
         gps_loading_el.hide();
+        $('#gps_error').hide();
     }
 
     function handleError(error){
         gps_loading_el.hide();
+        $('#gps_error').show();
     }
 
 
