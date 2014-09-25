@@ -844,18 +844,18 @@ body .ui-tooltip {
 	font-size: 1em;
 }
 .ui-widget-content {
-	border: 1px solid #dddddd;
-	background: #eeeeee url("images/ui-bg_highlight-soft_100_eeeeee_1x100.png") 50% top repeat-x;
-	color: #333333;
+    border: 1px solid #eeeeee;
+    background: #ffffff url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_flat_75_ffffff_40x100.png") 50% 50% repeat-x;
+    color: #333333;
 }
 .ui-widget-content a {
 	color: #333333;
 }
 .ui-widget-header {
-	border: 1px solid #e78f08;
-	background: #f6a828 url("images/ui-bg_gloss-wave_35_f6a828_500x100.png") 50% 50% repeat-x;
-	color: #ffffff;
-	font-weight: bold;
+    border: 1px solid #e3a1a1;
+    background: #cc0000 url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_highlight-soft_15_cc0000_1x100.png") 50% 50% repeat-x;
+    color: #ffffff; 
+    font-weight: bold;
 }
 .ui-widget-header a {
 	color: #ffffff;
@@ -866,10 +866,10 @@ body .ui-tooltip {
 .ui-state-default,
 .ui-widget-content .ui-state-default,
 .ui-widget-header .ui-state-default {
-	border: 1px solid #cccccc;
-	background: #f6f6f6 url("images/ui-bg_glass_100_f6f6f6_1x400.png") 50% 50% repeat-x;
-	font-weight: bold;
-	color: #1c94c4;
+    border: 1px solid #d8dcdf;
+    background: #eeeeee url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_highlight-hard_100_eeeeee_1x100.png") 50% 50% repeat-x; 
+    font-weight: bold;
+    color: #004276;
 }
 .ui-state-default a,
 .ui-state-default a:link,
@@ -883,10 +883,10 @@ body .ui-tooltip {
 .ui-state-focus,
 .ui-widget-content .ui-state-focus,
 .ui-widget-header .ui-state-focus {
-	border: 1px solid #fbcb09;
-	background: #fdf5ce url("images/ui-bg_glass_100_fdf5ce_1x400.png") 50% 50% repeat-x;
-	font-weight: bold;
-	color: #c77405;
+    border: 1px solid #cdd5da;
+    background: #f6f6f6 url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_highlight-hard_100_f6f6f6_1x100.png") 50% 50% repeat-x;
+    font-weight: bold;
+    color: #111111;
 }
 .ui-state-hover a,
 .ui-state-hover a:hover,
@@ -902,10 +902,10 @@ body .ui-tooltip {
 .ui-state-active,
 .ui-widget-content .ui-state-active,
 .ui-widget-header .ui-state-active {
-	border: 1px solid #fbd850;
-	background: #ffffff url("images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x;
-	font-weight: bold;
-	color: #eb8f00;
+    border: 1px solid #eeeeee;
+    background: #ffffff url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_flat_65_ffffff_40x100.png") 50% 50% repeat-x;
+    font-weight: bold;
+    color: #cc0000;
 }
 .ui-state-active a,
 .ui-state-active a:link,
@@ -919,9 +919,9 @@ body .ui-tooltip {
 .ui-state-highlight,
 .ui-widget-content .ui-state-highlight,
 .ui-widget-header .ui-state-highlight {
-	border: 1px solid #fed22f;
-	background: #ffe45c url("images/ui-bg_highlight-soft_75_ffe45c_1x100.png") 50% top repeat-x;
-	color: #363636;
+    border: 1px solid #fcd3a1;
+    background: #fbf8ee url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_glass_55_fbf8ee_1x400.png") 50% 50% repeat-x;
+    color: #444444;
 }
 .ui-state-highlight a,
 .ui-widget-content .ui-state-highlight a,
@@ -931,9 +931,9 @@ body .ui-tooltip {
 .ui-state-error,
 .ui-widget-content .ui-state-error,
 .ui-widget-header .ui-state-error {
-	border: 1px solid #cd0a0a;
-	background: #b81900 url("images/ui-bg_diagonals-thick_18_b81900_40x40.png") 50% 50% repeat;
-	color: #ffffff;
+    border: 1px solid #cc0000;
+    background: #f3d8d8 url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_diagonals-thick_75_f3d8d8_40x40.png") 50% 50% repeat;
+    color: #2e2e2e;
 }
 .ui-state-error a,
 .ui-widget-content .ui-state-error a,
@@ -975,30 +975,31 @@ body .ui-tooltip {
 .ui-icon {
 	width: 16px;
 	height: 16px;
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 .ui-icon,
 .ui-widget-content .ui-icon {
-	background-image: url("images/ui-icons_222222_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 .ui-widget-header .ui-icon {
-	background-image: url("images/ui-icons_ffffff_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_ffffff_256x240.png");
 }
 .ui-state-default .ui-icon {
-	background-image: url("images/ui-icons_ef8c08_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 .ui-state-hover .ui-icon,
 .ui-state-focus .ui-icon {
-	background-image: url("images/ui-icons_ef8c08_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 .ui-state-active .ui-icon {
-	background-image: url("images/ui-icons_ef8c08_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 .ui-state-highlight .ui-icon {
-	background-image: url("images/ui-icons_228ef1_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_004276_256x240.png");
 }
 .ui-state-error .ui-icon,
 .ui-state-error-text .ui-icon {
-	background-image: url("images/ui-icons_ffd27a_256x240.png");
+    background-image: url("/static/mozillians/img/jquery-ui-blitzer/ui-icons_cc0000_256x240.png");
 }
 
 /* positioning */
@@ -1211,15 +1212,18 @@ body .ui-tooltip {
 
 /* Overlays */
 .ui-widget-overlay {
-	background: #666666 url("images/ui-bg_diagonals-thick_20_666666_40x40.png") 50% 50% repeat;
-	opacity: .5;
-	filter: Alpha(Opacity=50); /* support: IE8 */
+    background: #a6a6a6 url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_dots-small_65_a6a6a6_2x2.png") 50% 50% repeat;
+    opacity: .40;
+    filter:Alpha(Opacity=40);
 }
 .ui-widget-shadow {
-	margin: -5px 0 0 -5px;
-	padding: 5px;
-	background: #000000 url("images/ui-bg_flat_10_000000_40x100.png") 50% 50% repeat-x;
-	opacity: .2;
-	filter: Alpha(Opacity=20); /* support: IE8 */
-	border-radius: 5px;
+    margin: -8px 0 0 -8px;
+    padding: 8px;
+    background: #333333 url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_flat_0_333333_40x100.png") 50% 50% repeat-x;
+    opacity: .10;
+    filter:Alpha(Opacity=10);
+    -moz-border-radius: 8px;
+    -khtml-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px; }/*
 }
