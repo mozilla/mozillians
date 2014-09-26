@@ -1,9 +1,11 @@
 import json
 
+from collections import Counter
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -143,14 +145,13 @@ def show(request, url, alias_model, template):
 
         # Find the most common skills of the group members.
         # Order by popularity in the group.
-        shared_skill_ids = (UserProfile.objects
-                            .filter(groups=group)
-                            .filter(groupmembership__status=GroupMembership.MEMBER)
-                            .values_list('skills', flat=True)
-                            .annotate(skill_count=Count('skills'))
-                            .order_by('-skill_count', 'skills__name'))
+        shared_skill_ids = (group.members.filter(groupmembership__status=GroupMembership.MEMBER)
+                            .values_list('skills', flat=True))
+
+        shared_skill_count = Counter(shared_skill_ids)
+
         # Translate ids to Skills preserving order.
-        skills = [Skill.objects.get(id=skill_id) for skill_id in shared_skill_ids if skill_id]
+        skills = [Skill.objects.get(id=pk) for (pk, count) in shared_skill_count.most_common()]
 
         data.update(skills=skills, membership_filter_form=membership_filter_form)
 
