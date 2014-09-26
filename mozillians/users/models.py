@@ -612,16 +612,18 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     def _email_now_vouched(self, vouched_by, description=''):
         """Email this user, letting them know they are now vouched."""
         name = None
-        profile_link = None
+        voucher_profile_link = None
+        vouchee_profile_link = utils.absolutify(self.get_absolute_url())
         if vouched_by:
             name = vouched_by.full_name
-            profile_link = utils.absolutify(vouched_by.get_absolute_url())
+            voucher_profile_link = utils.absolutify(vouched_by.get_absolute_url())
 
         number_of_vouches = self.vouches_received.all().count()
         template = get_template('phonebook/emails/vouch_confirmation_email.txt')
         message = template.render({
             'voucher_name': name,
-            'voucher_profile_url': profile_link,
+            'voucher_profile_url': voucher_profile_link,
+            'vouchee_profile_url': vouchee_profile_link,
             'vouch_description': description,
             'functional_areas_url': utils.absolutify(reverse('groups:index_functional_areas')),
             'groups_url': utils.absolutify(reverse('groups:index_groups')),

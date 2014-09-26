@@ -31,11 +31,13 @@
 
 {% if vouch_description %}
 {% trans %}
-  Vouch Description:
-  {{ vouch_description }}
+  Vouch description: {{ vouch_description }}
 {% endtrans %}
-
 {% endif %}
+
+{% trans %}
+  View your vouches on your profile {{ vouchee_profile_url }}
+{% endtrans %}
 
 {% if first_vouch %}
 {% trans %}
