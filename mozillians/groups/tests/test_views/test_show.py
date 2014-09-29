@@ -90,32 +90,44 @@ class ShowTests(TestCase):
 
     def test_show_common_skills(self):
         """Show most common skills first."""
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
+        user_3 = UserFactory.create()
+        user_4 = UserFactory.create()
+
         group = GroupFactory.create()
-        user_1 = UserFactory.create(userprofile={'full_name': 'Carol'})
-        user_2 = UserFactory.create(userprofile={'full_name': 'Alice'})
-        user_3 = UserFactory.create(userprofile={'full_name': 'Bob'})
         group.add_member(user_1.userprofile)
         group.add_member(user_2.userprofile)
         group.add_member(user_3.userprofile)
+        group.add_member(user_4.userprofile)
 
         skill_1 = SkillFactory.create()
         skill_2 = SkillFactory.create()
         skill_3 = SkillFactory.create()
+        skill_4 = SkillFactory.create()
         skill_3.members.add(user_1.userprofile)
         skill_3.members.add(user_2.userprofile)
         skill_3.members.add(user_3.userprofile)
+        skill_3.members.add(user_4.userprofile)
         skill_2.members.add(user_2.userprofile)
         skill_2.members.add(user_3.userprofile)
+        skill_2.members.add(user_4.userprofile)
+        skill_4.members.add(user_3.userprofile)
+        skill_4.members.add(user_4.userprofile)
         skill_1.members.add(user_1.userprofile)
+        users = UserFactory.create_batch(5)
+        for user in users:
+            skill_4.members.add(user.userprofile)
 
         url = reverse('groups:show_group', kwargs={'url': group.url})
         with self.login(user_1) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         skills = response.context['skills']
-        eq_(skills[0].name, skill_3.name)
-        eq_(skills[1].name, skill_2.name)
-        eq_(skills[2].name, skill_1.name)
+        eq_(skills[0], skill_3)
+        eq_(skills[1], skill_2)
+        eq_(skills[2], skill_4)
+        ok_(skill_1 not in skills)
 
     @requires_login()
     def test_show_anonymous(self):
