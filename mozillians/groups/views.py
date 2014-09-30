@@ -1,9 +1,11 @@
 import json
 
+from collections import defaultdict
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -143,14 +145,19 @@ def show(request, url, alias_model, template):
 
         # Find the most common skills of the group members.
         # Order by popularity in the group.
-        shared_skill_ids = (UserProfile.objects
-                            .filter(groups=group)
-                            .filter(groupmembership__status=GroupMembership.MEMBER)
-                            .values_list('skills', flat=True)
-                            .annotate(skill_count=Count('skills'))
-                            .order_by('-skill_count', 'skills__name'))
+        shared_skill_ids = (group.members.filter(groupmembership__status=GroupMembership.MEMBER)
+                            .values_list('skills', flat=True))
+
+        count_skills = defaultdict(int)
+        for skill_id in shared_skill_ids:
+            count_skills[skill_id] += 1
+        common_skills_ids = [k for k, v in sorted(count_skills.items(),
+                                                  key=lambda x: x[1],
+                                                  reverse=True)
+                             if count_skills[k] > 1]
+
         # Translate ids to Skills preserving order.
-        skills = [Skill.objects.get(id=skill_id) for skill_id in shared_skill_ids if skill_id]
+        skills = [Skill.objects.get(id=skill_id) for skill_id in common_skills_ids if skill_id]
 
         data.update(skills=skills, membership_filter_form=membership_filter_form)
 
