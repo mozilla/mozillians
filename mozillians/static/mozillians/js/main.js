@@ -54,5 +54,22 @@
                 event.preventDefault();
             }
         });
+
+        // Get parameters from URL query string
+        var get_params = function(param) {
+            var url = window.location.search.substring(1);
+            var args = url.split('&');
+            for (var i = 0; i < args.length; i++) {
+                var params = args[i].split('=');
+                if (params[0] == param) {
+                    return params[1];
+                }
+            }
+        };
+
+        if ( get_params('source') === 'contribute' ) {
+            alert('pretend this is the persona login popup');
+        }
+
     });
 })(jQuery);
