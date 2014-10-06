@@ -36,7 +36,11 @@ def login(request):
 @never_cache
 @allow_public
 def home(request):
-    return render(request, 'phonebook/home.html')
+    show_start = False
+    if request.GET.get('source', ''):
+        show_start = True
+    return render(request, 'phonebook/home.html',
+                  {'show_start': show_start})
 
 
 @waffle_flag('testing-autovouch-views')

@@ -152,6 +152,11 @@ class UserProfilePrivacyModel(models.Model):
 
 
 class UserProfile(UserProfilePrivacyModel, SearchMixin):
+    REFERRAL_SOURCE_CHOICES = (
+        ('direct', 'Mozillians'),
+        ('contribute', 'Get Involved'),
+    )
+
     objects = UserProfileManager()
 
     user = models.OneToOneField(User)
@@ -215,6 +220,9 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
                         u'tells the story of how you came to be a '
                         u'Mozillian, specify that link here.'),
         max_length=1024, blank=True, default='')
+    referral_source = models.CharField(max_length=32,
+                                       choices=REFERRAL_SOURCE_CHOICES,
+                                       default='direct')
 
     class Meta:
         db_table = 'profile'

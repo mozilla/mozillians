@@ -18,17 +18,16 @@
     <div id="main-feature">
       <h1><img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians"></h1>
 
-    {# Show this box only when request has the parameter 'source=contribute'
-      <div id="start">
-        <p>{{ _('Create your account now to connect with fellow Mozillians.') }}</p>
-        <p class="cta">
-          <a href="#" class="button browserid-login" data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}" role="button">{{ _('Get started') }}</a>
-        </p>
-      </div>
-    #}
+      {% if show_start %}
+        <div id="start">
+          <p>{{ _('Create your account now to connect with fellow Mozillians.') }}</p>
+          <p class="cta">
+            <a href="#" class="button browserid-login" role="button">{{ _('Get started') }}</a>
+          </p>
+        </div>
+      {% endif %}
 
       <hr>
-
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input type="text" name="q" class="search-query"
                  placeholder="{{ _('Search for people, groups and more') }}">
