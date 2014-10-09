@@ -9,33 +9,49 @@ VirtualEnv Installation
    #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`,
    they will be happy to help.
 
+.. note::
 
-**Prerequisites:** You'll need python 2.6, python-dev, virtualenv, pip,
+   You might ask why ``python2.6`` and not ``python2.7``. The reason is that we use
+   version 2.6 on our servers. Using ``python2.7`` during development will
+   probably have the same effects as 2.6. Ubuntu dropped ``python2.6`` support
+   since version 12.04, so you might want to try with 2.7. Debian 6 and 7 on the
+   other hand still ships with version 2.6. In the rest of the guide we will
+   assume you are using ``python2.6``.
+
+**Prerequisites:** You'll need python2.6, python2.6-dev, virtualenv, pip,
 a C compiler (for building some of the Python packages, like the DB interface),
 mysqlclient and mysql-dev (or the equivalent on your system), a MySQL server, `gettext`_,
-git, and lessc.  If you're working on translations, add subversion.
+git, and lessc.  If you're working on translations, add subversion. Also,
+since we use elasticsearch, you will need a JAVA runtime environment.
 
 There are almost certainly other requirements that
 we're so used to having installed we've forgotten we have them, so don't be shy
 about asking on IRC for help if you run into unexpected errors.
 
-You will want a \*nix box, ideally Debian or Ubuntu since that's what
-most of the core developers are using and it's most likely to work.
+You will want a \*nix box, ideally the latest versions of Debian or Ubuntu
+since that's what most of the core developers are using and it's most likely
+to work.
 
 If you're on Ubuntu or Debian, you might start with::
 
     $ sudo apt-get install build-essential git-core subversion \
     python2.6 python2.6-dev python-virtualenv python-pip \
     gettext libjpeg-turbo8-dev \
-    mysql-client mysql-server libmysqlclient-dev
+    mysql-client mysql-server libmysqlclient-dev default-jre \
+    libxslt1.1 libxslt1-dev
 
-Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/>`_.
-(You only need node for lessc.)
+Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/#using-less-installation>`_ (you only need node for ``lessc``).
+
+``nodejs`` is not packaged for every distribution so we will not get into details
+as that would require different instructions for every distribution.
+You might want to take a look at `nodejs github wiki <https://github.com/joyent/node/wiki/installing-node.js-via-package-manager>`_.
+Just bare in mind that ``lessc`` must be installed after ``nodejs``, since you have
+to use ``npm``, the package manager of ``nodejs``.
 
 
 .. note::
 
-   Make sure your node version ``node -v`` is greater than v0.6.12 or there 
+   Make sure your node version ``node -v`` is greater than v0.6.12 or there
    will be issues installing less.
 
 
@@ -124,6 +140,7 @@ When you want to start contributing...
         ./manage.py runserver 127.0.0.1:8000
 
      #. Load http://127.0.0.1:8000 and sign in with Persona, then create your profile.
+     #. Stop the server with ``Ctrl^C``.
      #. Vouch your account and convert it to superuser::
 
         ./scripts/su.sh
