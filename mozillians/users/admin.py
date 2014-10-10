@@ -300,11 +300,12 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
-                       'is_vouched', 'can_vouch']
+                       'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
-                   CompleteProfileFilter, PublicProfileFilter, 'externalaccount__type']
+                   CompleteProfileFilter, PublicProfileFilter,
+                   'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
@@ -347,6 +348,9 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
         }),
         ('Skills', {
             'fields': ('skills',)
+        }),
+        ('Referral Source', {
+            'fields': ('referral_source',)
         }),
     )
 

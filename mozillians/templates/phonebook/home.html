@@ -15,14 +15,24 @@
 
 {% block content %}
   {% if not user.is_authenticated() %}
-    <hgroup id="main-feature">
-      <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
+    <div id="main-feature">
+      <h1><img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians"></h1>
+
+      {% if show_start %}
+        <div id="start">
+          <p>{{ _('Create your account now to connect with fellow Mozillians.') }}</p>
+          <p class="cta">
+            <a href="#" class="button browserid-login" role="button">{{ _('Get started') }}</a>
+          </p>
+        </div>
+      {% endif %}
+
       <hr>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input type="text" name="q" class="search-query"
                  placeholder="{{ _('Search for people, groups and more') }}">
        </form>
-    </hgroup>
+    </div>
 
     <article id="information">
       <div class="container">

@@ -806,6 +806,63 @@ body#home {
             }
         }
 
+        #start {
+            .open-sans-light;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 22px;
+            text-align: center;
+            margin: 30px auto;
+            padding: 20px 100px;
+            width: 360px;
+            .box-shadow(0 1px 1px rgba(0, 0, 0, .1));
+
+            .cta {
+                margin: 0;
+            }
+
+            .button {
+                background: #0096dd;
+                border-radius: 10px;
+                border: 0;
+                box-shadow: none;
+                color: #fff;
+                display: inline-block;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 20px 40px;
+                text-shadow: none;
+                text-transform: uppercase;
+                min-width: 220px;
+                .transition(all .15s ease-in-out);
+
+                &:hover,
+                &:focus,
+                &:active {
+                    color: #fff;
+                    background: lighten(#0096dd, 5%);
+                    text-decoration: none;
+                }
+
+                @media (max-width: @breakMobileLandscape) {
+                    min-width: 0;
+                    padding: 20px 30px;
+                    font-size: 16px;
+                }
+            }
+
+            @media (max-width: @breakTablet) {
+                padding: 20px 40px;
+            }
+
+            @media (max-width: @breakMobileLandscape) {
+                padding: 20px;
+                width: 245px;
+                font-size: 16px;
+            }
+        }
+
         #information {
             padding-bottom: 50px;
             .clearfix;
