@@ -382,7 +382,8 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     @property
     def accounts(self):
-        accounts_query = self.externalaccount_set.exclude(type=ExternalAccount.TYPE_WEBSITE)
+        excluded_types = [ExternalAccount.TYPE_WEBSITE, ExternalAccount.TYPE_EMAIL]
+        accounts_query = self.externalaccount_set.exclude(type__in=excluded_types)
         if self._privacy_level:
             accounts_query = accounts_query.filter(privacy__gte=self._privacy_level)
         return accounts_query
@@ -860,6 +861,7 @@ class ExternalAccount(models.Model):
     # Constants for type field values.
     TYPE_AMO = 'AMO'
     TYPE_BMO = 'BMO'
+    TYPE_EMAIL = 'Alternate email address'
     TYPE_GITHUB = 'GITHUB'
     TYPE_MDN = 'MDN'
     TYPE_SUMO = 'SUMO'
@@ -902,6 +904,9 @@ class ExternalAccount(models.Model):
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
                    'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}',
                    'validator': validate_username_not_url},
+        TYPE_EMAIL: {'name': 'Alternate email address',
+                     'url': '',
+                     'validator': validate_email},
         TYPE_GITHUB: {'name': 'GitHub',
                       'url': 'https://github.com/{identifier}',
                       'validator': validate_username_not_url},

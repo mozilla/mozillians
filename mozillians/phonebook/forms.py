@@ -29,6 +29,15 @@ class ExternalAccountForm(happyforms.ModelForm):
         model = ExternalAccount
         fields = ['type', 'identifier', 'privacy']
 
+    def __init__(self, *args, **kwargs):
+        super(ExternalAccountForm, self).__init__(*args, **kwargs)
+
+        # Remove alternate email address from external account choices
+        email_choice = ('Alternate email address', 'Alternate email address')
+        choices = self.fields['type'].choices
+        choices.remove(email_choice)
+        self.fields['type'].choices = choices
+
     def clean(self):
         cleaned_data = super(ExternalAccountForm, self).clean()
         identifier = cleaned_data.get('identifier')
