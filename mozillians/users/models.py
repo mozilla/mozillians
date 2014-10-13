@@ -707,6 +707,7 @@ class ExternalAccount(models.Model):
     # Constants for type field values.
     TYPE_AMO = 'AMO'
     TYPE_BMO = 'BMO'
+    TYPE_EMAIL = 'EMAIL'
     TYPE_GITHUB = 'GITHUB'
     TYPE_MDN = 'MDN'
     TYPE_SUMO = 'SUMO'
@@ -822,8 +823,7 @@ class ExternalAccount(models.Model):
         choices=sorted([(k, v['name'])
                         for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
         verbose_name=_lazy(u'Account Type'))
-    privacy = models.PositiveIntegerField(default=MOZILLIANS,
-                                          choices=PRIVACY_CHOICES)
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:
         ordering = ['type']
