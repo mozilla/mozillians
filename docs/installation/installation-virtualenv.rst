@@ -6,7 +6,7 @@ VirtualEnv Installation
 .. note::
 
    Installing Mozillians might be daunting.  Ask for help using IRC in
-   #commtools on irc.mozilla.org. Ping `giorgos`, `sancus` or `hoosteeno`,
+   #commtools on irc.mozilla.org. Ping `giorgos`, `nemo-yiannis` or `tasos`,
    they will be happy to help.
 
 
