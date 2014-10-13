@@ -1,8 +1,10 @@
 from json import loads
 
+from django.conf import settings
+
 from mock import patch, Mock
 from mozillians.common.tests import TestCase
-from mozillians.common.authbackend import BrowserIDVerify
+from mozillians.common.authbackend import BrowserIDVerify, MozilliansAuthBackend
 from mozillians.users.tests import UserFactory
 from nose.tools import eq_, ok_
 
@@ -97,3 +99,24 @@ class BrowserIDVerifyTests(TestCase):
         response = loads(Verify.login_success().content)
         eq_(response['redirect'], '/u/{0}/'.format(user.username))
         eq_(response['email'], 'la@example.com')
+
+
+class ReferralSourceTests(TestCase):
+
+    @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
+    def test_get_involved_source(self, authenticate_mock):
+        Authenticate = MozilliansAuthBackend()
+        request_mock = Mock()
+        request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=contribute'}
+        Authenticate.request = request_mock
+        Authenticate.authenticate(request=request_mock)
+        eq_(Authenticate.referral_source, 'contribute')
+
+    @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
+    def test_random_source(self, authenticate_mock):
+        Authenticate = MozilliansAuthBackend()
+        request_mock = Mock()
+        request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=foobar'}
+        Authenticate.request = request_mock
+        Authenticate.authenticate(request=request_mock)
+        eq_(Authenticate.referral_source, None)
