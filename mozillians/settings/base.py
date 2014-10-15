@@ -228,7 +228,7 @@ CSP_STYLE_SRC = ("'self'",
 
 # Elasticutils settings
 ES_DISABLED = True
-ES_HOSTS = ['127.0.0.1:9200']
+ES_URLS = ['http://127.0.0.1:9200']
 ES_INDEXES = {'default': 'mozillians',
               'public': 'mozillians-public'}
 ES_INDEXING_TIMEOUT = 10

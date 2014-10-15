@@ -3,7 +3,6 @@ src/mimeparse
 src/basket-client-submodule
 src/django-autocomplete-light
 src/elasticutils
-src/pyes
 src/django-tastypie
 src/pystatsd
 src/happyforms

@@ -102,12 +102,14 @@ When you want to start contributing...
 
 #. Download ElasticSearch::
 
-     (venv)$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.10.tar.gz
-     (venv)$ tar zxf elasticsearch-0.90.10.tar.gz
+     (venv)$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.tar.gz
+     (venv)$ tar zxf elasticsearch-1.2.4.tar.gz
 
    and run::
 
-     (venv)$ ./elasticsearch-0.90.10/bin/elasticsearch
+     (venv)$ ./elasticsearch-1.2.4/bin/elasticsearch -d
+
+  This will run the elasticsearch instance in the background.
 
 #. Update product details::
 

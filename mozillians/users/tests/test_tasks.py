@@ -4,10 +4,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
+from elasticsearch.exceptions import NotFoundError
 from mock import MagicMock, Mock, call, patch
-
 from nose.tools import eq_, ok_
-from pyes.exceptions import ElasticSearchException
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory
@@ -48,59 +47,57 @@ class ElasticSearchIndexTests(TestCase):
     def test_index_objects(self, get_es_mock):
         user_1 = UserFactory.create()
         user_2 = UserFactory.create()
+        mapping_type = MagicMock()
         model = MagicMock()
-        model.objects.filter.return_value = [
-            user_1.userprofile, user_2.userprofile]
-        index_objects(
-            model, [user_1.userprofile.id, user_2.userprofile.id], False)
-        model.objects.assert_has_calls([
-            call.filter(id__in=[user_1.userprofile.id, user_2.userprofile.id])])
-        model.index.assert_has_calls([
-            call(model.extract_document(), bulk=True, id_=user_1.userprofile.id,
-                 es=get_es_mock(), public_index=False),
-            call(model.extract_document(), bulk=True, id_=user_2.userprofile.id,
-                 es=get_es_mock(), public_index=False)])
-        model.refresh_index.assert_has_calls([
-            call(es=get_es_mock()),
-            call(es=get_es_mock())])
+        mapping_type.get_model.return_value = model
+        model.objects.filter.return_value = [user_1.userprofile,
+                                             user_2.userprofile]
+        mapping_type.extract_document.return_value = 'foo'
+        index_objects(mapping_type,
+                      [user_1.userprofile.id, user_2.userprofile.id],
+                      public_index=False)
+        mapping_type.bulk_index.assert_has_calls([
+            call(['foo', 'foo'], id_field='id', es=get_es_mock(),
+                 index=mapping_type.get_index(False))])
 
     @patch('mozillians.users.tasks.get_es')
     def test_index_objects_public(self, get_es_mock):
         user_1 = UserFactory.create()
         user_2 = UserFactory.create()
+        mapping_type = MagicMock()
         model = MagicMock()
-        model.objects.privacy_level().filter.return_value = [
-            user_1.userprofile, user_2.userprofile]
-        index_objects(
-            model, [user_1.userprofile.id, user_2.userprofile.id], True)
+        mapping_type.get_model.return_value = model
+        qs = model.objects.filter().public_indexable().privacy_level
+        qs.return_value = [user_1.userprofile, user_2.userprofile]
+        mapping_type.extract_document.return_value = 'foo'
+        index_objects(mapping_type,
+                      [user_1.userprofile.id, user_2.userprofile.id],
+                      public_index=True)
+
         model.objects.assert_has_calls([
-            call.filter(id__in=[user_1.userprofile.id, user_2.userprofile.id]),
-            call.privacy_level(PUBLIC)])
-        model.index.assert_has_calls([
-            call(model.extract_document(), bulk=True, id_=user_1.userprofile.id,
-                 es=get_es_mock(), public_index=True),
-            call(model.extract_document(), bulk=True, id_=user_2.userprofile.id,
-                 es=get_es_mock(), public_index=True)])
-        model.refresh_index.assert_has_calls([
-            call(es=get_es_mock()),
-            call(es=get_es_mock())])
+            call.filter(id__in=(user_1.userprofile.id, user_2.userprofile.id)),
+            call.filter().public_indexable(),
+            call.filter().public_indexable().privacy_level(PUBLIC),
+        ])
+        mapping_type.bulk_index.assert_has_calls([
+            call(['foo', 'foo'], id_field='id', es=get_es_mock(),
+                 index=mapping_type.get_index(True))])
 
     @patch('mozillians.users.tasks.get_es')
     def test_unindex_objects(self, get_es_mock):
-        model = MagicMock()
-        unindex_objects(model, [1, 2, 3], 'foo')
-        ok_(model.unindex.called)
-        model.assert_has_calls([
-            call.unindex(es=get_es_mock(), public_index='foo', id=1),
-            call.unindex(es=get_es_mock(), public_index='foo', id=2),
-            call.unindex(es=get_es_mock(), public_index='foo', id=3)])
+        mapping_type = MagicMock()
+        unindex_objects(mapping_type, [1, 2, 3], 'foo')
+        ok_(mapping_type.unindex.called)
+        mapping_type.assert_has_calls([
+            call.unindex(1, es=get_es_mock(), public_index='foo'),
+            call.unindex(2, es=get_es_mock(), public_index='foo'),
+            call.unindex(3, es=get_es_mock(), public_index='foo')])
 
     def test_unindex_raises_not_found_exception(self):
-        exception = ElasticSearchException(
-            error=404, status=404, result={'not found': 'not found'})
-        model = Mock()
-        model.unindex = Mock(side_effect=exception)
-        unindex_objects(model, [1, 2, 3], 'foo')
+        exception = NotFoundError(404, {'not found': 'not found '}, {'foo': 'foo'})
+        mapping_type = Mock()
+        mapping_type.unindex(side_effect=exception)
+        unindex_objects(mapping_type, [1, 2, 3], 'foo')
 
 
 class BasketTests(TestCase):

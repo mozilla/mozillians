@@ -8,10 +8,10 @@ from django.db.models import get_model
 
 import basket
 import requests
-import pyes
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
+from elasticutils.utils import chunked
 
 from mozillians.users.managers import PUBLIC
 
@@ -219,41 +219,35 @@ def remove_from_basket_task(email, basket_token):
 
 
 @task
-def index_objects(model, ids, public_index, **kwargs):
+def index_objects(mapping_type, ids, chunk_size=100, public_index=False, **kwargs):
     if getattr(settings, 'ES_DISABLED', False):
         return
 
     es = get_es()
-    qs = model.objects.filter(id__in=ids)
-    if public_index:
-        qs = model.objects.privacy_level(PUBLIC).filter(id__in=ids)
+    model = mapping_type.get_model()
 
-    for item in qs:
-        model.index(model.extract_document(item.id, item),
-                    bulk=True, id_=item.id, es=es, public_index=public_index)
+    for id_list in chunked(ids, chunk_size):
+        documents = []
+        qs = model.objects.filter(id__in=id_list)
+        index = mapping_type.get_index(public_index)
+        if public_index:
+            qs = qs.public_indexable().privacy_level(PUBLIC)
 
-        es.flush_bulk(forced=True)
-        model.refresh_index(es=es)
+        for item in qs:
+            documents.append(mapping_type.extract_document(item.id, item))
+
+        mapping_type.bulk_index(documents, id_field='id', es=es, index=index)
+        mapping_type.refresh_index(es)
 
 
 @task
-def unindex_objects(model, ids, public_index, **kwargs):
+def unindex_objects(mapping_type, ids, public_index, **kwargs):
     if getattr(settings, 'ES_DISABLED', False):
         return
 
     es = get_es()
     for id_ in ids:
-        try:
-            model.unindex(id=id_, es=es, public_index=public_index)
-        except pyes.exceptions.ElasticSearchException, e:
-            # Patch pyes
-            if (e.status == 404 and
-                    isinstance(e.result, dict) and 'error' not in e.result):
-                # Item was not found, but command did not return an error.
-                # Do not worry.
-                return
-            else:
-                raise e
+        mapping_type.unindex(id_, es=es, public_index=public_index)
 
 
 @task
