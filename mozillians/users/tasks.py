@@ -184,7 +184,7 @@ def update_basket_task(instance_id):
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY,
       max_retries=BASKET_TASK_MAX_RETRIES)
-def remove_from_basket_task(email, basket_token):
+def unsubscribe_from_basket_task(email, basket_token):
     """Remove from Basket Task.
 
     This task unsubscribes a user from the Mozillians newsletter.
@@ -213,7 +213,7 @@ def remove_from_basket_task(email, basket_token):
     except (requests.exceptions.RequestException,
             basket.BasketException) as exception:
         try:
-            remove_from_basket_task.retry()
+            unsubscribe_from_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
             _email_basket_managers('unsubscribe', email, exception.message)
 

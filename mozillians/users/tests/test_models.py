@@ -80,7 +80,7 @@ class SignaledFunctionsTests(TestCase):
         eq_(vouch.voucher, None)
 
     @override_settings(CAN_VOUCH_THRESHOLD=1)
-    def test_vouch_is_vouch_gets_updated(self):
+    def test_vouch_is_vouched_gets_updated(self):
         voucher = UserFactory.create()
         unvouched = UserFactory.create(vouched=False)
 
@@ -91,7 +91,7 @@ class SignaledFunctionsTests(TestCase):
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.is_vouched, True)
 
-    def test_unvouch_is_vouch_gets_updated(self):
+    def test_unvouch_is_vouched_gets_updated(self):
         vouched = UserFactory.create()
 
         eq_(vouched.userprofile.is_vouched, True)

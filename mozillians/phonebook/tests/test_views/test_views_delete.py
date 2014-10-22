@@ -46,10 +46,10 @@ class DeleteTests(TestCase):
         client = Client()
         client.post(reverse('phonebook:profile_delete'), follow=True)
 
-    @patch('mozillians.users.models.remove_from_basket_task.delay')
+    @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
     def test_delete_unvouched(self, unindex_objects_mock,
-                              remove_from_basket_task_mock):
+                              unsubscribe_from_basket_task_mock):
         user = UserFactory.create(vouched=False, userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -58,7 +58,7 @@ class DeleteTests(TestCase):
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-        remove_from_basket_task_mock.assert_called_with(
+        unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
         unindex_objects_mock.assert_has_calls([
             call(UserProfile, [user.userprofile.id], public_index=False),
@@ -66,10 +66,10 @@ class DeleteTests(TestCase):
             ])
         ok_(not User.objects.filter(username=user.username).exists())
 
-    @patch('mozillians.users.models.remove_from_basket_task.delay')
+    @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
     def test_delete_vouched(self, unindex_objects_mock,
-                            remove_from_basket_task_mock):
+                            unsubscribe_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -78,7 +78,7 @@ class DeleteTests(TestCase):
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
-        remove_from_basket_task_mock.assert_called_with(
+        unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
         unindex_objects_mock.assert_has_calls([
             call(UserProfile, [user.userprofile.id], public_index=False),
