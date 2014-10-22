@@ -13,3 +13,5 @@ src/django-jingo-offline-compressor
 src/unidecode
 src/sorl-thumbnail
 src/django-waffle
+src/elasticsearch-py
+src/urllib3
