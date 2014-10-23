@@ -72,7 +72,7 @@ def validate_username_not_url(username):
 def validate_email(value):
     """Validate that a username is email like."""
     if not email_re.match(value):
-        raise ValidationError(_('Enter a valid address.'))
+        raise ValidationError(_('Enter a valid email address.'))
     return value
 
 
