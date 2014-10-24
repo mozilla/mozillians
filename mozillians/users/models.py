@@ -781,7 +781,10 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
 @receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_basket_sig')
 def update_basket(sender, instance, **kwargs):
-    update_basket_task.delay(instance.id)
+    if instance.is_vouched:
+        update_basket_task.delay(instance.id)
+    elif instance.basket_token:
+        unsubscribe_from_basket_task.delay(instance.email, instance.basket_token)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
