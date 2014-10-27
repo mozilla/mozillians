@@ -14,7 +14,7 @@ The below instructions are for software developers who want to work on Mozillian
 
 Git workflow
 ------------
-When you want to start contributing, you should :doc:`follow the installation instructions </installation-virtualenv>`, then...
+When you want to start contributing, you should :doc:`follow the installation instructions </installation/installation-virtualenv>`, then...
 
 #.  (Optional) Set your cloned fork to track upstream changes (changes to the main repository), then fetch and merge changes from the upstream branch::
 
