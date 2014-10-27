@@ -79,8 +79,9 @@ class SignaledFunctionsTests(TestCase):
         vouch = Vouch.objects.get(vouchee=vouchee)
         eq_(vouch.voucher, None)
 
+    @patch('mozillians.users.models.update_basket_task.delay')
     @override_settings(CAN_VOUCH_THRESHOLD=1)
-    def test_vouch_is_vouch_gets_updated(self):
+    def test_vouch_is_vouched_gets_updated(self, update_basket_mock):
         voucher = UserFactory.create()
         unvouched = UserFactory.create(vouched=False)
 
@@ -90,8 +91,10 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.is_vouched, True)
+        ok_(update_basket_mock.called_with(unvouched.userprofile.id))
 
-    def test_unvouch_is_vouch_gets_updated(self):
+    @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
+    def test_unvouch_is_vouched_gets_updated(self, unsubscribe_from_basket_mock):
         vouched = UserFactory.create()
 
         eq_(vouched.userprofile.is_vouched, True)
@@ -100,6 +103,8 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         vouched = User.objects.get(pk=vouched.id)
         eq_(vouched.userprofile.is_vouched, False)
+        ok_(unsubscribe_from_basket_mock.called_with(vouched.userprofile.email,
+                                                     vouched.userprofile.basket_token))
 
     @override_settings(CAN_VOUCH_THRESHOLD=5)
     def test_vouch_can_vouch_gets_updated(self):

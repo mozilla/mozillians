@@ -38,7 +38,7 @@ from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager)
-from mozillians.users.tasks import (index_objects, remove_from_basket_task,
+from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
                                     update_basket_task, unindex_objects)
 
 
@@ -781,7 +781,10 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
 @receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_basket_sig')
 def update_basket(sender, instance, **kwargs):
-    update_basket_task.delay(instance.id)
+    if instance.is_vouched:
+        update_basket_task.delay(instance.id)
+    elif instance.basket_token:
+        unsubscribe_from_basket_task.delay(instance.email, instance.basket_token)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
@@ -803,9 +806,9 @@ def remove_from_search_index(sender, instance, **kwargs):
 
 
 @receiver(dbsignals.pre_delete, sender=UserProfile,
-          dispatch_uid='remove_from_basket_sig')
-def remove_from_basket(sender, instance, **kwargs):
-    remove_from_basket_task.delay(instance.email, instance.basket_token)
+          dispatch_uid='unsubscribe_from_basket_sig')
+def unsubscribe_from_basket(sender, instance, **kwargs):
+    unsubscribe_from_basket_task.delay(instance.email, instance.basket_token)
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile,

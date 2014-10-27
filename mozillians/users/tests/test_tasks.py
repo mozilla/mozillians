@@ -15,7 +15,7 @@ from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
                                     remove_incomplete_accounts, unindex_objects,
-                                    remove_from_basket_task)
+                                    unsubscribe_from_basket_task)
 from mozillians.users.tests import UserFactory
 
 
@@ -202,22 +202,22 @@ class BasketTests(TestCase):
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.basket.unsubscribe')
-    def test_remove_from_basket_task(self, unsubscribe_mock):
+    def test_unsubscribe_from_basket_task(self, unsubscribe_mock):
         user = UserFactory.create(userprofile={'basket_token': 'foo'})
         with patch('mozillians.users.tasks.BASKET_ENABLED', True):
-            remove_from_basket_task(user.email, user.userprofile.basket_token)
+            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token)
         unsubscribe_mock.assert_called_with(
             user.userprofile.basket_token, user.email, newsletters='newsletter')
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.basket')
     @patch.object(UserProfile, 'lookup_basket_token')
-    def test_remove_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
+    def test_unsubscribe_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
         lookup_token_mock.return_value = 'basket_token'
         basket_mock.lookup_user.return_value = {'token': 'basket_token'}
         user = UserFactory.create(userprofile={'basket_token': ''})
         with patch('mozillians.users.tasks.BASKET_ENABLED', True):
-            remove_from_basket_task(user.email, user.userprofile.basket_token)
+            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token)
         user = User.objects.get(pk=user.pk)  # refresh data from DB
         basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters='newsletter')
