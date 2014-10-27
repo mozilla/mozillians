@@ -1,5 +1,6 @@
 ﻿[mozillians.org](https://mozillians.org)
 ========
+![build status](https://travis-ci.org/mozilla/mozillians.svg?branch=master)
 
 A community directory for Mozillians to connect with each other.
 
