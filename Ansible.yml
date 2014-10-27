@@ -1,0 +1,125 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: Install needed packages
+      apt: name={{ item }} state=present update_cache=yes cache_valid_time=300
+      with_items:
+        - python-virtualenv
+        - build-essential 
+        - python-dev 
+        - gettext 
+        - libjpeg-turbo8-dev
+        - mysql-client 
+        - mysql-server 
+        - libmysqlclient-dev
+        - subversion
+        - node
+        - npm
+        - libxslt1.1
+        - libxml2
+        - libxml2-dev
+        - libxslt1-dev
+        - openjdk-7-jre
+        - python-mysqldb
+
+      tags:
+        - setup
+        - packages
+
+    - name: Install compiled python packages
+      pip: 
+        requirements={{ path }}/requirements/compiled.txt 
+        virtualenv={{ virtualenv_path }}
+      tags:
+        - setup
+        - packages
+
+    - name: Install development python packages
+      pip: 
+        requirements={{ path }}/requirements/dev.txt 
+        virtualenv={{ virtualenv_path }}
+      tags:
+        - setup
+        - packages
+      
+    - name: Check if ElasticSearch exists
+      stat: path={{ elasticsearch_path }}
+      register: elasticsearch_stat
+      tags:
+        - setup
+        - elasticsearch
+
+    - name: Install ElasticSearch
+      get_url:
+        url={{ elasticsearch_url }}
+        dest={{ elasticsearch_tmp }}
+      when: not elasticsearch_stat.stat.exists
+      tags:
+        - setup
+        - elasticsearch
+
+    - name: Extract ElasticSearch
+      unarchive: src={{ elasticsearch_tmp }} dest={{ path }} copy=no
+      when: not elasticsearch_stat.stat.exists
+      tags:
+        - setup
+        - elasticsearch
+
+    - name: Delete temp files
+      command: rm {{ elasticsearch_tmp }}
+      when: not elasticsearch_stat.stat.exists
+      tags:
+        - setup
+        - elasticsearch
+
+    - name: Install npm packages
+      npm: name=less global=yes
+      tags: 
+        - setup
+        - packages
+
+    - name: Create mysql database
+      mysql_db: name=mozillians state=present
+      tags:
+        - setup
+        - config
+        - database
+
+    - name: Syncdb
+      django_manage: 
+        command=syncdb
+        app_path={{ django_path }}
+        virtualenv={{ virtualenv_path }}
+      tags:
+        - setup
+        - syncdb
+        - database
+
+    - name: Run ElasticSearch
+      command: "{{ elasticsearch_path }}/bin/elasticsearch"
+      register: run_elasticsearch 
+      tags:
+        - run 
+
+    - name: Wait for ElasticSearch to come up
+      wait_for: port=9200 delay=5
+      when: run_elasticsearch
+        
+    - name: Test Django
+      django_manage: 
+        command=test
+        app_path={{ django_path }}
+        virtualenv={{ virtualenv_path }}
+      tags:
+        - test
+
+  vars:
+    - path: "{{ lookup('env', 'PWD') }}"
+    - django_path: "{{ path }}"
+    - virtualenv_path: "{{ path }}/.venv"
+    - elasticsearch_path: "{{ path }}/elasticsearch"
+    - elasticsearch_tmp: /tmp/elasticsearch.tar.gz
+    - elasticsearch_url:
+        https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.10.tar.gz
