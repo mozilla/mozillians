@@ -76,7 +76,7 @@ DEBUG = TEMPLATE_DEBUG = True
 
 # ElasticSearch
 ES_DISABLED = False
-ES_HOSTS = ['jenkins-es:9200']
+ES_URLS = ['http://jenkins-es:9200']
 ES_INDEXES = dict(default='test_${JOB_NAME}', public='test_${JOB_NAME}_public')
 ES_TIMEOUT = 60
 
