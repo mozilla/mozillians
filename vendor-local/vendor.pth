@@ -3,7 +3,6 @@ src/mimeparse
 src/basket-client-submodule
 src/django-autocomplete-light
 src/elasticutils
-src/pyes
 src/django-tastypie
 src/pystatsd
 src/happyforms
@@ -13,3 +12,5 @@ src/django-jingo-offline-compressor
 src/unidecode
 src/sorl-thumbnail
 src/django-waffle
+src/elasticsearch-py
+src/urllib3

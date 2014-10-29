@@ -7,7 +7,7 @@ from mock import patch, call
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login
-from mozillians.users.models import UserProfile
+from mozillians.users.es import UserProfileMappingType
 from mozillians.users.tests import UserFactory
 
 
@@ -61,9 +61,8 @@ class DeleteTests(TestCase):
         unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
         unindex_objects_mock.assert_has_calls([
-            call(UserProfile, [user.userprofile.id], public_index=False),
-            call(UserProfile, [user.userprofile.id], public_index=True)
-            ])
+            call(UserProfileMappingType, [user.userprofile.id], public_index=False),
+            call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
         ok_(not User.objects.filter(username=user.username).exists())
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
@@ -81,7 +80,6 @@ class DeleteTests(TestCase):
         unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
         unindex_objects_mock.assert_has_calls([
-            call(UserProfile, [user.userprofile.id], public_index=False),
-            call(UserProfile, [user.userprofile.id], public_index=True)
-            ])
+            call(UserProfileMappingType, [user.userprofile.id], public_index=False),
+            call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
         ok_(not User.objects.filter(username=user.username).exists())

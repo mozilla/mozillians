@@ -20,6 +20,7 @@ from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
+from mozillians.users.es import UserProfileMappingType
 from mozillians.users.tests import LanguageFactory, UserFactory
 
 
@@ -39,9 +40,9 @@ class SignaledFunctionsTests(TestCase):
                                     index_objects_mock):
         user = UserFactory.create()
         index_objects_mock.assert_called_with(
-            UserProfile, [user.userprofile.id], public_index=False)
+            UserProfileMappingType, [user.userprofile.id], public_index=False)
         unindex_objects_mock.assert_called_with(
-            UserProfile, [user.userprofile.id], public_index=True)
+            UserProfileMappingType, [user.userprofile.id], public_index=True)
 
     @patch('mozillians.users.models.index_objects.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
@@ -60,8 +61,8 @@ class SignaledFunctionsTests(TestCase):
             user.delete()
 
         unindex_objects_mock.assert_has_calls([
-            call(UserProfile, [user.userprofile.id], public_index=False),
-            call(UserProfile, [user.userprofile.id], public_index=True)])
+            call(UserProfileMappingType, [user.userprofile.id], public_index=False),
+            call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
 
     def test_delete_user_obj_on_profile_delete(self):
         user = UserFactory.create()
@@ -165,7 +166,7 @@ class UserProfileTests(TestCase):
         profile.skills.add(skill_1)
         profile.skills.add(skill_2)
 
-        result = UserProfile.extract_document(profile.id)
+        result = UserProfileMappingType.extract_document(profile.id)
         ok_(isinstance(result, dict))
         eq_(result['id'], profile.id)
         eq_(result['is_vouched'], profile.is_vouched)
@@ -184,25 +185,25 @@ class UserProfileTests(TestCase):
             set([u'en', u'fr', u'english', u'french', u'français']))
 
     def test_get_mapping(self):
-        ok_(UserProfile.get_mapping())
+        ok_(UserProfileMappingType.get_mapping())
 
     @override_settings(ES_INDEXES={'default': 'index'})
-    @patch('mozillians.users.models.PrivacyAwareS')
+    @patch('mozillians.users.es.PrivacyAwareS')
     def test_search_no_public_only_vouched(self, PrivacyAwareSMock):
-        result = UserProfile.search('foo')
+        result = UserProfileMappingType.search('foo')
         ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfile)
+        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
         PrivacyAwareSMock().indexes.assert_any_call('index')
         (PrivacyAwareSMock().indexes().boost()
          .query().order_by().filter.assert_any_call(is_vouched=True))
         ok_(call().privacy_level(PUBLIC) not in PrivacyAwareSMock.mock_calls)
 
     @override_settings(ES_INDEXES={'default': 'index'})
-    @patch('mozillians.users.models.PrivacyAwareS')
+    @patch('mozillians.users.es.PrivacyAwareS')
     def test_search_no_public_with_unvouched(self, PrivacyAwareSMock):
-        result = UserProfile.search('foo', include_non_vouched=True)
+        result = UserProfileMappingType.search('foo', include_non_vouched=True)
         ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfile)
+        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
         PrivacyAwareSMock().indexes.assert_any_call('index')
         ok_(call().indexes().boost()
             .query().order_by().filter(is_vouched=True)
@@ -210,11 +211,11 @@ class UserProfileTests(TestCase):
         ok_(call().privacy_level(PUBLIC) not in PrivacyAwareSMock.mock_calls)
 
     @override_settings(ES_INDEXES={'public': 'public_index'})
-    @patch('mozillians.users.models.PrivacyAwareS')
+    @patch('mozillians.users.es.PrivacyAwareS')
     def test_search_public_only_vouched(self, PrivacyAwareSMock):
-        result = UserProfile.search('foo', public=True)
+        result = UserProfileMappingType.search('foo', public=True)
         ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfile)
+        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
         PrivacyAwareSMock().privacy_level.assert_any_call(PUBLIC)
         (PrivacyAwareSMock().privacy_level()
          .indexes.assert_any_call('public_index'))
@@ -222,12 +223,12 @@ class UserProfileTests(TestCase):
          .query().order_by().filter.assert_any_call(is_vouched=True))
 
     @override_settings(ES_INDEXES={'public': 'public_index'})
-    @patch('mozillians.users.models.PrivacyAwareS')
+    @patch('mozillians.users.es.PrivacyAwareS')
     def test_search_public_with_unvouched(self, PrivacyAwareSMock):
-        result = UserProfile.search(
+        result = UserProfileMappingType.search(
             'foo', public=True, include_non_vouched=True)
         ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfile)
+        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
         PrivacyAwareSMock().privacy_level.assert_any_call(PUBLIC)
         (PrivacyAwareSMock().privacy_level()
          .indexes.assert_any_call('public_index'))
@@ -349,11 +350,11 @@ class UserProfileTests(TestCase):
 
     @override_settings(ES_INDEXES={'public': 'foo'})
     def test_get_index_public(self):
-        ok_(UserProfile.get_index(public_index=True), 'foo')
+        ok_(UserProfileMappingType.get_index(public_index=True), 'foo')
 
     @override_settings(ES_INDEXES={'default': 'bar'})
     def test_get_index(self):
-        ok_(UserProfile.get_index(public_index=False), 'bar')
+        ok_(UserProfileMappingType.get_index(public_index=False), 'bar')
 
     def test_set_privacy_level_with_save(self):
         user = UserFactory.create()

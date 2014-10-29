@@ -23,7 +23,7 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import UserProfile
+from mozillians.users.models import UserProfile, UserProfileMappingType
 
 
 @allow_unvouched
@@ -267,8 +267,8 @@ def search(request):
         public = not (request.user.is_authenticated()
                       and request.user.userprofile.is_vouched)
 
-        profiles = UserProfile.search(query, public=public,
-                                      include_non_vouched=include_non_vouched)
+        profiles = UserProfileMappingType.search(
+            query, public=public, include_non_vouched=include_non_vouched)
         if not public:
             groups = Group.search(query)
 
@@ -323,7 +323,9 @@ def betasearch(request):
                       and request.user.userprofile.is_vouched)
 
         profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
-        profiles = UserProfile.search(query, include_non_vouched=True, public=public)
+        profiles = UserProfileMappingType.search(query,
+                                                 include_non_vouched=True,
+                                                 public=public)
         profiles = profiles.filter(id__in=profiles_matching_filter)
 
         paginator = Paginator(profiles, limit)
