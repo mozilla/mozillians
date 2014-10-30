@@ -6,7 +6,7 @@ from celery.task.sets import TaskSet
 from elasticutils.contrib.django import get_es
 
 from mozillians.users.tasks import index_objects
-from mozillians.users.models import PUBLIC, UserProfile, UserProfileMappingType
+from mozillians.users.models import UserProfile, UserProfileMappingType
 
 
 @cronjobs.register
@@ -32,8 +32,6 @@ def index_all_profiles():
                                         'public_index': False})]
 
     # public index
-    ids = (UserProfile.objects.complete().public_indexable()
-           .privacy_level(PUBLIC).values_list('id', flat=True))
     ts += [index_objects.subtask(kwargs={'mapping_type': UserProfileMappingType,
                                          'ids': ids,
                                          'chunk_size': 150,
