@@ -173,12 +173,12 @@ def deploy(ctx):
     checkin_changes()
     deploy_app()
     prime_app()
+    update_celery()
     # Things run below here should not break the deployment if they fail.
-    if 'mozillians-dev' not in settings.REMOTE_HOSTNAME or not OLDREV.startswith(NEWREV):
+    if OLDREV != NEWREV:
         # On dev, this script runs every 15 minutes. If we're pushing the same
         # revision we don't need to churn the index, ping new relic, or any of this.
         ping_newrelic()
-        update_celery()
         update_es_indexes()
         validate_fun_facts()
         generate_humanstxt()
