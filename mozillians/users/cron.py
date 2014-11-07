@@ -3,6 +3,7 @@ from django.conf import settings
 import cronjobs
 
 from celery.task.sets import TaskSet
+from celeryutils import chunked
 from elasticutils.contrib.django import get_es
 
 from mozillians.users.tasks import index_objects
@@ -26,15 +27,11 @@ def index_all_profiles():
 
     # mozillians index
     ids = UserProfile.objects.complete().values_list('id', flat=True)
-    ts = [index_objects.subtask(kwargs={'mapping_type': UserProfileMappingType,
-                                        'ids': ids,
-                                        'chunk_size': 150,
-                                        'public_index': False})]
+    ts = [index_objects.subtask(args=[UserProfileMappingType, chunk, 150, False])
+          for chunk in chunked(sorted(list(ids)), 150)]
 
     # public index
-    ts += [index_objects.subtask(kwargs={'mapping_type': UserProfileMappingType,
-                                         'ids': ids,
-                                         'chunk_size': 150,
-                                         'public_index': True})]
+    ts += [index_objects.subtask(args=[UserProfileMappingType, chunk, 150, True])
+           for chunk in chunked(sorted(list(ids)), 150)]
 
     TaskSet(ts).apply_async()
