@@ -15,6 +15,10 @@ from test_utils import TestCase as BaseTestCase
 AUTHENTICATION_BACKENDS = (
     'mozillians.common.tests.authentication.DummyAuthenticationBackend',
     )
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    )
 ES_INDEXES = {
     'default': 'mozillians-test',
     'public': 'mozillians-public-test'
@@ -22,6 +26,7 @@ ES_INDEXES = {
 
 
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
+                   PASSWORD_HASHERS=PASSWORD_HASHERS,
                    ES_INDEXES=ES_INDEXES)
 class TestCase(BaseTestCase):
     def __init__(self, *args, **kwargs):
