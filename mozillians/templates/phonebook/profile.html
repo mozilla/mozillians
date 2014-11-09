@@ -261,6 +261,19 @@
           </div>
         {% endif %}
 
+        {% if profile.alternate_emails.exists() %}
+          <div id="alternate_email" class="profile-entry">
+            <h3><i class="icon-envelope-o"></i> {{ _('Alternate email addresses') }}</h3>
+            <ul>
+              {% for email in profile.alternate_emails %}
+                <li>
+                  {{ email.identifier|urlize }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
         {% if profile.vouches_received.exists() %}
           <div id="vouched_by" class="profile-entry">
             <h3>{{ _('Vouched By') }}</h3>
