@@ -123,6 +123,20 @@
     </fieldset>
 
     <fieldset>
+      <label for="primary_email">{{ _('Primary e-mail') }}</label>
+      <span id="primary-email">{{ user.userprofile.email }}</span>
+      {% if profile.is_complete %}
+        <a class="button right" href="{{ url('phonebook:edit_emails') }}">
+          <i class="icon-user"></i> {{ _('Edit E-mail Addresses') }}
+        </a>
+      {% else %}
+        <div class="right small">
+          You can add additional e-mails after creating your profile.
+        </div>
+      {% endif %}
+    </fieldset>
+
+    <fieldset>
       {{ mozillians_field(profile_form.bio) }}
       <span class="under-input-field">
         {% trans url='http://daringfireball.net/projects/markdown/syntax' %}

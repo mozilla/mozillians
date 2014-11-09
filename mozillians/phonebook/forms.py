@@ -58,6 +58,21 @@ AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                         form=ExternalAccountForm, extra=1)
 
 
+class AlternateEmailForm(happyforms.ModelForm):
+    class Meta:
+        model = ExternalAccount
+        fields = ['privacy']
+
+AlternateEmailFormset = inlineformset_factory(UserProfile, ExternalAccount,
+                                              form=AlternateEmailForm, extra=0)
+
+
+class EmailPrivacyForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['privacy_email']
+
+
 class SearchForm(happyforms.Form):
     q = forms.CharField(required=False)
     limit = forms.IntegerField(

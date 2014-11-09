@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -219,6 +220,71 @@ def edit_profile(request):
     # If there are form errors, don't send a 200 OK.
     status = 400 if any(f.errors for f in all_forms) else 200
     return render(request, 'phonebook/edit_profile.html', data, status=status)
+
+
+@allow_unvouched
+@never_cache
+def edit_emails(request):
+    """Edit alternate email addresses."""
+    user = User.objects.get(pk=request.user.id)
+    profile = user.userprofile
+    emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
+    email_privacy_form = forms.EmailPrivacyForm(request.POST or None, instance=profile)
+    alternate_email_formset = forms.AlternateEmailFormset(request.POST or None,
+                                                          instance=profile,
+                                                          queryset=emails)
+
+    if alternate_email_formset.is_valid() and email_privacy_form.is_valid():
+        alternate_email_formset.save()
+        email_privacy_form.save()
+        return redirect('phonebook:edit_emails')
+
+    return render(request, 'phonebook/edit_emails.html',
+                  {'alternate_email_formset': alternate_email_formset,
+                   'email_privacy_form': email_privacy_form})
+
+
+@allow_unvouched
+@never_cache
+def delete_email(request, email_pk):
+    """Delete alternate email address."""
+    user = User.objects.get(pk=request.user.id)
+    profile = user.userprofile
+
+    # Only email owner can delete emails
+    if not ExternalAccount.objects.filter(user=profile, pk=email_pk).exists():
+        raise Http404()
+
+    ExternalAccount.objects.get(pk=email_pk).delete()
+    return redirect('phonebook:edit_emails')
+
+
+@allow_unvouched
+@never_cache
+def change_primary_email(request, email_pk):
+    """Change primary email address."""
+    user = User.objects.get(pk=request.user.id)
+    profile = user.userprofile
+    alternate_emails = ExternalAccount.objects.filter(user=profile, type=ExternalAccount.TYPE_EMAIL)
+
+    # Only email owner can change primary email
+    if not alternate_emails.filter(pk=email_pk).exists():
+        raise Http404()
+
+    alternate_email = alternate_emails.get(pk=email_pk)
+    primary_email = user.email
+
+    # Change primary email
+    user.email = alternate_email.identifier
+
+    # Turn primary email to alternate
+    alternate_email.identifier = primary_email
+
+    with transaction.atomic():
+        user.save()
+        alternate_email.save()
+
+    return redirect('phonebook:edit_emails')
 
 
 @allow_unvouched
