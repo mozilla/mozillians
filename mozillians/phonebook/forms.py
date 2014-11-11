@@ -171,7 +171,7 @@ class ProfileForm(happyforms.ModelForm):
                   'title', 'allows_mozilla_sites',
                   'date_mozillian', 'story_link', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                  'privacy_email', 'privacy_timezone', 'privacy_tshirt',
+                  'privacy_timezone', 'privacy_tshirt',
                   'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
                   'privacy_geo_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',

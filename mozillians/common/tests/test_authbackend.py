@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from mock import patch, Mock
 from mozillians.common.tests import TestCase
 from mozillians.common.authbackend import BrowserIDVerify, MozilliansAuthBackend
+from mozillians.users.models import ExternalAccount
 from mozillians.users.tests import UserFactory
 from nose.tools import eq_, ok_
 
@@ -35,7 +36,10 @@ class BrowserIDVerifyTests(TestCase):
         Verify.post()
         verify_mock.assert_called_with('assertion', 'audience')
         get_audience_mock.assert_called_with(request_mock)
-        eq_(user.email, 'foo@example.com')
+        emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
+                                                identifier='foo@example.com',
+                                                user=user.userprofile)
+        ok_(emails.exists())
 
     @patch('mozillians.common.authbackend.BrowserIDVerify.login_failure')
     @patch('mozillians.common.authbackend.get_audience')
@@ -56,13 +60,13 @@ class BrowserIDVerifyTests(TestCase):
         verify_mock.assert_called_with('assertion', 'audience')
         get_audience_mock.assert_called_with(request_mock)
         login_failure_mock.assert_called_with()
-        ok_(Verify.change_email)
+        ok_(Verify.add_email)
 
     @patch('mozillians.common.authbackend.BrowserIDVerify.login_success')
     @patch('mozillians.common.authbackend.get_audience')
     @patch('mozillians.common.authbackend.RemoteVerifier.verify')
-    def test_post_change_email(self, verify_mock, get_audience_mock,
-                               login_success_mock):
+    def test_post_add_email(self, verify_mock, get_audience_mock,
+                            login_success_mock):
         user = UserFactory.create(email='la@example.com')
         Verify = BrowserIDVerify()
         request_mock = Mock()
@@ -76,30 +80,33 @@ class BrowserIDVerifyTests(TestCase):
         verify_mock.assert_called_with('assertion', 'audience')
         get_audience_mock.assert_called_with(request_mock)
         login_success_mock.assert_called_with()
-        eq_(user.email, 'foo@example.com')
-        ok_(Verify.change_email)
 
-    def test_failure_url_email_change(self):
+        emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
+                                                identifier='foo@example.com',
+                                                user=user.userprofile)
+        ok_(emails.exists())
+        ok_(Verify.add_email)
+
+    def test_failure_url_add_email(self):
         Verify = BrowserIDVerify()
-        Verify.change_email = True
+        Verify.add_email = True
         user = UserFactory.create(email='la@example.com')
         request_mock = Mock()
         request_mock.user.is_authenticated.return_value = True
         request_mock.user = user
         url = Verify.failure_url
-        eq_(url, '/user/edit/')
+        eq_(url, '/user/edit/emails/')
 
-    def test_login_success_email_change(self):
+    def test_login_success_add_email(self):
         Verify = BrowserIDVerify()
-        Verify.change_email = True
+        Verify.add_email = True
         user = UserFactory.create(email='la@example.com')
         request_mock = Mock()
         request_mock.user.is_authenticated.return_value = True
         request_mock.user = user
         Verify.user = user
         response = loads(Verify.login_success().content)
-        eq_(response['redirect'], '/u/{0}/'.format(user.username))
-        eq_(response['email'], 'la@example.com')
+        eq_(response['redirect'], '/user/edit/emails/')
 
 
 class MozilliansAuthBackendTests(TestCase):

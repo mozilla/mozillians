@@ -15,7 +15,7 @@ from django_browserid.http import JSONResponse
 from django_browserid.views import Verify
 from tower import ugettext as _
 
-from mozillians.users.models import UserProfile
+from mozillians.users.models import ExternalAccount, UserProfile
 
 
 def calculate_username(email):
@@ -43,37 +43,37 @@ def calculate_username(email):
 class BrowserIDVerify(Verify):
     @property
     def failure_url(self):
-        if self.change_email:
-            return reverse('phonebook:profile_edit')
+        if self.add_email:
+            return reverse('phonebook:edit_emails')
         return super(BrowserIDVerify, self).failure_url
 
     @property
     def success_url(self):
-        if self.change_email:
-            return reverse('phonebook:profile_view', args=[self.user.username])
+        if self.add_email:
+            return reverse('phonebook:edit_emails')
         return super(BrowserIDVerify, self).success_url
 
     def login_success(self):
-        if self.change_email:
+        if self.add_email:
             return JSONResponse({
-                'email': self.user.email,
                 'redirect': self.success_url
             })
         return super(BrowserIDVerify, self).login_success()
 
     def login_failure(self, error=None):
-        if self.change_email:
+        if self.add_email:
             return JSONResponse({
                 'redirect': self.failure_url
             })
         return super(BrowserIDVerify, self).login_failure(error)
 
     def post(self, *args, **kwargs):
-        self.change_email = False
+        self.add_email = False
         if not self.request.user.is_authenticated():
             return super(BrowserIDVerify, self).post(*args, **kwargs)
 
-        self.change_email = True
+        self.add_email = True
+
         assertion = self.request.POST.get('assertion')
         if not assertion:
             return self.login_failure()
@@ -88,14 +88,21 @@ class BrowserIDVerify(Verify):
 
         email = result.email
 
-        if User.objects.filter(email=email).exists():
+        kwargs = {
+            'type': ExternalAccount.TYPE_EMAIL,
+            'user': self.request.user.userprofile,
+            'identifier': email
+        }
+
+        email_exists = User.objects.filter(email=email).exists()
+        alternate_email_exists = ExternalAccount.objects.filter(**kwargs).exists()
+
+        if email_exists or alternate_email_exists:
             error_msg = "Email '{0}' already exists in the database.".format(email)
             messages.error(self.request, _(error_msg))
             return self.login_failure()
 
-        self.user = self.request.user
-        self.user.email = email
-        self.user.save()
+        ExternalAccount.objects.create(**kwargs)
         return self.login_success()
 
 

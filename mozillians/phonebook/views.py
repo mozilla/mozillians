@@ -184,12 +184,7 @@ def edit_profile(request):
                                  'lat': profile.lat,
                                  'lng': profile.lng})
 
-    email_form = forms.EmailForm(request.POST or None,
-                                 initial={'email': request.user.email,
-                                          'user_id': request.user.id})
-
-    all_forms = [user_form, profile_form, accounts_formset, email_form,
-                 language_formset]
+    all_forms = [user_form, profile_form, accounts_formset, language_formset]
 
     # Using ``list`` to force calling is_valid on all the forms, even if earlier
     # ones are not valid, so we detect and display all the errors.
@@ -209,15 +204,11 @@ def edit_profile(request):
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))
 
-        if email_form.email_changed():
-            return render(request, 'phonebook/verify_email.html',
-                          {'email': email_form.cleaned_data['email']})
         return redirect('phonebook:profile_view', user.username)
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
                 accounts_formset=accounts_formset,
-                email_form=email_form,
                 user_groups=user_groups,
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
