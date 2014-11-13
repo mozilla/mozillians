@@ -1,0 +1,13 @@
+{% trans %}
+Hi {{ user_name }},
+{% endtrans %}
+
+{% trans name=group.name -%}
+You have been removed from the Mozillians group "{{ name }}".
+{%- endtrans %}
+
+{% trans link=group.get_absolute_url() %}
+If you have a question or if there has been a mistake, you can contact the group curator and see more about the group at {{ link }}.
+{% endtrans %}
+
+{{ _('The Mozillians.org team') }}
