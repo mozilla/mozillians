@@ -11,4 +11,10 @@ before_install:
 install:
   - pip install -r requirements/compiled.txt
   - pip install -r requirements/dev.txt
-script: python manage.py test
+  - pip install coverage
+script:
+  - coverage run --source=mozillians manage.py test
+after_success:
+  - pip install coveralls
+  - coveralls
+
