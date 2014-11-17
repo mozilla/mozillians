@@ -10,7 +10,7 @@ from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.managers import GroupBaseManager, GroupManager
 from mozillians.groups.helpers import slugify
-from mozillians.groups.tasks import email_membership_change
+from mozillians.groups.tasks import email_membership_change, member_removed_email
 from mozillians.users.tasks import update_basket_task
 
 
@@ -284,7 +284,6 @@ class Group(GroupBase):
             return
         old_status = membership.status
         membership.delete()
-
         # If group is functional area, we want to sent this update to Basket
         if self.functional_area:
             update_basket_task.delay(userprofile.id)
@@ -293,6 +292,9 @@ class Group(GroupBase):
             # Request denied
             email_membership_change.delay(self.pk, userprofile.user.pk,
                                           old_status, None)
+        elif old_status == GroupMembership.MEMBER and send_email:
+            # Member removed
+            member_removed_email.delay(self.pk, userprofile.user.pk)
 
     def has_member(self, userprofile):
         """

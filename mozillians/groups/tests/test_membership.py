@@ -148,3 +148,22 @@ class TestGroupRemoveMember(TestCase):
         eq_(user.pk, user_pk)
         eq_(GroupMembership.PENDING, old_status)
         ok_(new_status is None)
+
+    def test_remove_member_send_mail(self):
+        # when curator remove someone, sent mail to member
+        curator = UserFactory()
+        self.group.curator = curator.userprofile
+        self.group.save()
+        user = UserFactory()
+        self.group.add_member(user.userprofile)
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
+                      prefix='/fr/',)
+        with patch('mozillians.groups.models.member_removed_email', autospec=True) as mock_email:
+            with self.login(curator) as client:
+                response = client.post(url, follow=False)
+        eq_(302, response.status_code)
+        # email sent for curated group
+        ok_(mock_email.delay.called)
+        group_pk, user_pk = mock_email.delay.call_args[0]
+        eq_(self.group.pk, group_pk)
+        eq_(user.pk, user_pk)
