@@ -228,16 +228,22 @@ class UserProfile(UserProfilePrivacyModel):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         privacy_fields = UserProfile.privacy_fields()
         privacy_level = _getattr('_privacy_level')
-        special_functions = {'vouches_made': '_vouches_made',
-                             'vouches_received': '_vouches_received'}
+        special_functions = {
+            'accounts': '_accounts',
+            'alternate_emails': '_alternate_emails',
+            'email': '_primary_email',
+            'is_public_indexable': '_is_public_indexable',
+            'languages': '_languages',
+            'vouches_made': '_vouches_made',
+            'vouches_received': '_vouches_received',
+            'vouched_by': '_vouched_by',
+            'websites': '_websites'
+        }
 
-        if attrname in special_functions and privacy_level:
+        if attrname in special_functions:
             return _getattr(special_functions[attrname])
 
-        if not privacy_level:
-            return _getattr(attrname)
-
-        if attrname not in privacy_fields:
+        if not privacy_level or attrname not in privacy_fields:
             return _getattr(attrname)
 
         field_privacy = _getattr('privacy_%s' % attrname)
@@ -246,48 +252,97 @@ class UserProfile(UserProfilePrivacyModel):
 
         return _getattr(attrname)
 
+    def _filter_accounts_privacy(self, accounts):
+        if self._privacy_level:
+            return accounts.filter(privacy__gte=self._privacy_level)
+        return accounts
+
+    @property
+    def _accounts(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        excluded_types = [ExternalAccount.TYPE_WEBSITE, ExternalAccount.TYPE_EMAIL]
+        accounts = _getattr('externalaccount_set').exclude(type__in=excluded_types)
+        return self._filter_accounts_privacy(accounts)
+
+    @property
+    def _alternate_emails(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_EMAIL)
+        return self._filter_accounts_privacy(accounts)
+
+    @property
+    def _is_public_indexable(self):
+        for field in PUBLIC_INDEXABLE_FIELDS:
+            if getattr(self, field, None) and getattr(self, 'privacy_%s' % field, None) == PUBLIC:
+                return True
+        return False
+
+    @property
+    def _languages(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        if self._privacy_level > _getattr('privacy_languages'):
+            return _getattr('language_set').none()
+        return _getattr('language_set').all()
+
+    @property
+    def _primary_email(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        privacy_fields = UserProfile.privacy_fields()
+        if self._privacy_level and _getattr('privacy_email') < self._privacy_level:
+            email = privacy_fields['email']
+            return email
+        return _getattr('user').email
+
+    @property
+    def _vouched_by(self):
+        privacy_level = self._privacy_level
+        voucher = (UserProfile.objects.filter(vouches_made__vouchee=self)
+                   .order_by('vouches_made__date'))
+
+        if voucher.exists():
+            voucher = voucher[0]
+            if privacy_level:
+                voucher.set_instance_privacy_level(privacy_level)
+                for field in UserProfile.privacy_fields():
+                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
+                        return voucher
+                return None
+            return voucher
+
+        return None
+
     def _vouches(self, type):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
-        privacy_level = _getattr('_privacy_level')
 
         vouch_ids = []
         for vouch in _getattr(type).all():
-            vouch.vouchee.set_instance_privacy_level(privacy_level)
+            vouch.vouchee.set_instance_privacy_level(self._privacy_level)
             for field in UserProfile.privacy_fields():
-                if getattr(vouch.vouchee, 'privacy_%s' % field, 0) >= privacy_level:
+                if getattr(vouch.vouchee, 'privacy_%s' % field, 0) >= self._privacy_level:
                     vouch_ids.append(vouch.id)
-        vouches_made = _getattr(type).filter(pk__in=vouch_ids)
+        vouches = _getattr(type).filter(pk__in=vouch_ids)
 
-        return vouches_made
+        return vouches
 
     @property
     def _vouches_made(self):
-        return self._vouches('vouches_made')
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        if self._privacy_level:
+            return self._vouches('vouches_made')
+        return _getattr('vouches_made')
 
     @property
     def _vouches_received(self):
-        return self._vouches('vouches_received')
-
-    @property
-    def accounts(self):
-        accounts_query = self.externalaccount_set.exclude(type=ExternalAccount.TYPE_WEBSITE)
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         if self._privacy_level:
-            accounts_query = accounts_query.filter(privacy__gte=self._privacy_level)
-        return accounts_query
+            return self._vouches('vouches_received')
+        return _getattr('vouches_received')
 
     @property
-    def websites(self):
-        websites_query = self.externalaccount_set.filter(type=ExternalAccount.TYPE_WEBSITE)
-        if self._privacy_level:
-            websites_query = websites_query.filter(privacy__gte=self._privacy_level)
-        return websites_query
-
-    @property
-    def email(self):
-        """Privacy aware email property."""
-        if self._privacy_level and self.privacy_email < self._privacy_level:
-            return type(self).privacy_fields()['email']
-        return self.user.email
+    def _websites(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_WEBSITE)
+        return self._filter_accounts_privacy(accounts)
 
     @property
     def display_name(self):
@@ -321,46 +376,8 @@ class UserProfile(UserProfilePrivacyModel):
         return False
 
     @property
-    def is_public_indexable(self):
-        """For profile to be public indexable should have at least
-        full_name OR ircname OR email set to PUBLIC.
-
-        """
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            if (getattr(self, 'privacy_%s' % field, None) == PUBLIC and
-                    getattr(self, field, None)):
-                return True
-        return False
-
-    @property
     def is_manager(self):
         return self.user.is_superuser or self.user.groups.filter(name='Managers').exists()
-
-    @property
-    def languages(self):
-        """Return user languages based on privacy settings."""
-        if self._privacy_level > self.privacy_languages:
-            return self.language_set.none()
-        return self.language_set.all()
-
-    @property
-    def vouched_by(self):
-        """Return the first userprofile who vouched for this userprofile."""
-        privacy_level = self._privacy_level
-        voucher = (UserProfile.objects.filter(vouches_made__vouchee=self)
-                                      .order_by('vouches_made__date'))
-
-        if voucher:
-            voucher = voucher[0]
-            if privacy_level:
-                voucher.set_instance_privacy_level(privacy_level)
-                for field in UserProfile.privacy_fields():
-                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
-                        return voucher
-                return None
-            return voucher
-
-        return None
 
     @property
     def date_vouched(self):
@@ -707,6 +724,7 @@ class ExternalAccount(models.Model):
     # Constants for type field values.
     TYPE_AMO = 'AMO'
     TYPE_BMO = 'BMO'
+    TYPE_EMAIL = 'EMAIL'
     TYPE_GITHUB = 'GITHUB'
     TYPE_MDN = 'MDN'
     TYPE_SUMO = 'SUMO'
@@ -749,6 +767,9 @@ class ExternalAccount(models.Model):
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
                    'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}',
                    'validator': validate_username_not_url},
+        TYPE_EMAIL: {'name': 'Alternate email address',
+                     'url': '',
+                     'validator': validate_email},
         TYPE_GITHUB: {'name': 'GitHub',
                       'url': 'https://github.com/{identifier}',
                       'validator': validate_username_not_url},
@@ -819,11 +840,10 @@ class ExternalAccount(models.Model):
     identifier = models.CharField(max_length=255, verbose_name=_lazy(u'Account Username'))
     type = models.CharField(
         max_length=30,
-        choices=sorted([(k, v['name'])
-                        for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
+        choices=sorted([(k, v['name']) for (k, v) in ACCOUNT_TYPES.iteritems() if k != TYPE_EMAIL],
+                       key=lambda x: x[1]),
         verbose_name=_lazy(u'Account Type'))
-    privacy = models.PositiveIntegerField(default=MOZILLIANS,
-                                          choices=PRIVACY_CHOICES)
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:
         ordering = ['type']

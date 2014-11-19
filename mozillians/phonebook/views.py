@@ -23,7 +23,7 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import UserProfile, UserProfileMappingType
+from mozillians.users.models import ExternalAccount, UserProfile, UserProfileMappingType
 
 
 @allow_unvouched
@@ -165,7 +165,10 @@ def edit_profile(request):
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
-    accounts_formset = forms.AccountsFormset(request.POST or None, instance=profile)
+    queryset = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
+    accounts_formset = forms.AccountsFormset(request.POST or None,
+                                             instance=profile,
+                                             queryset=queryset)
     new_profile = False
     form = forms.ProfileForm
     language_formset = forms.LanguagesFormset(request.POST or None,
