@@ -196,13 +196,17 @@ CSP_DEFAULT_SRC = ("'self'",
                    'https://*.mapbox.com')
 CSP_FONT_SRC = ("'self'",
                 'http://*.mozilla.net',
-                'https://*.mozilla.net')
+                'https://*.mozilla.net',
+                'http://*.mozilla.org',
+                'https://*.mozilla.org')
 CSP_FRAME_SRC = ("'self'",
                  'https://login.persona.org',)
 CSP_IMG_SRC = ("'self'",
                'data:',
                'http://*.mozilla.net',
                'https://*.mozilla.net',
+               'http://*.mozilla.org',
+               'https://*.mozilla.org',
                '*.google-analytics.com',
                '*.gravatar.com',
                '*.wp.com',
