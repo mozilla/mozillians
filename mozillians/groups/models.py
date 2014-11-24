@@ -15,7 +15,8 @@ from mozillians.users.tasks import update_basket_task
 
 
 class GroupBase(models.Model):
-    name = models.CharField(db_index=True, max_length=50, unique=True)
+    name = models.CharField(db_index=True, max_length=50,
+                            unique=True, verbose_name=_lazy(u'Name'))
     url = models.SlugField(blank=True)
 
     objects = GroupBaseManager()
@@ -176,6 +177,7 @@ class Group(GroupBase):
         default='', blank=True)
     members_can_leave = models.BooleanField(default=True)
     accepting_new_members = models.CharField(
+        verbose_name=_lazy(u'Accepting new members'),
         choices=(
             ('yes', _lazy(u'Yes')),
             ('by_request', _lazy(u'By request')),
