@@ -208,8 +208,12 @@
             functional area. Find out who works on what and how you
             can help out.
           </p>
-          <a href="{{ areas_url }}">Browse functional areas <i class="icon-arrow-right"></i></a>
         {% endtrans %}
+        {% if user.userprofile.is_vouched %}
+          <a href="{{ areas_url }}">Browse functional areas<i class="icon-arrow-right"></i></a>
+        {% else %}
+        <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse functional areas!</p>
+        {% endif %}
       </section>
       <section class="groups">
         <span class="icon">
@@ -221,8 +225,12 @@
             Find and join groups centered around interests,
             technologies, geographies and more.
           </p>
-          <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
         {% endtrans %}
+        {% if user.userprofile.is_vouched %}
+          <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
+        {% else %}
+          <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse groups!</p>
+        {% endif %}
       </section>
     </article>
 
