@@ -1,0 +1,86 @@
+# This is an example settings_local.py file.
+# flake8: noqa
+
+# Copy it and add your local settings here.
+
+# For absolute urls
+DOMAIN = "127.0.0.1"
+PROTOCOL = "http://"
+PORT = 8000
+
+SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
+ROOT_URLCONF = 'mozillians.urls'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mozillians',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'db_1',
+        'PORT': '',
+        'OPTIONS': {
+            'init_command': 'SET storage_engine=InnoDB',
+            'charset': 'utf8',
+            'use_unicode': True,
+        },
+        'TEST_CHARSET': 'utf8',
+        'TEST_COLLATION': 'utf8_general_ci',
+    },
+}
+
+#Serve Profile Photos from django
+UPLOAD_URL = '/media/uploads'
+
+# Statsd Defaults -- adjust as needed
+STATSD_HOST = 'localhost'
+STATSD_PORT = 8125
+STATSD_PREFIX = 'mozillians'
+
+## Email
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+DEBUG = TEMPLATE_DEBUG = True
+# ElasticSearch
+ES_DISABLED = False
+ES_HOSTS = ['es_1:9200']
+ES_INDEXES = {'default': 'mozillians-dev',
+              'public': 'mozillians-dev-public'}
+ES_TIMEOUT = 60
+
+CELERY_ALWAYS_EAGER = True
+
+JAVA_BIN = '/usr/bin/java'
+
+SESSION_COOKIE_SECURE = False
+
+CACHES = {}
+
+STATSD_CLIENT = 'django_statsd.clients.log'
+
+# Basket
+BASKET_URL = None
+BASKET_NEWSLETTER = 'mozilla-phone'
+BASKET_MANAGERS = None # or list of email addresses.
+
+GA_ACCOUNT_CODE = None
+
+COMPRESS_ENABLED = False
+
+SECRET_KEY = 'localdev'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+
+BROWSERID_AUDIENCES = None

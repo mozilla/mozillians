@@ -1,0 +1,16 @@
+db:
+  image: orchardup/mysql
+  environment:
+    - MYSQL_DATABASE=mozillians
+es:
+  image: barnybug/elasticsearch:0.90.13
+web:
+  build: .
+  ports:
+    - "8000:8000"
+  volumes:
+    - .:/code
+  links:
+    - db
+    - es
+  command: python manage.py runserver 0.0.0.0:8000

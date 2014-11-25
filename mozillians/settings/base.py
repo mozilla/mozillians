@@ -5,12 +5,15 @@ import logging
 import os.path
 import sys
 
+from django.utils.functional import lazy
+
+import dj_database_url
+from decouple import config
 from funfactory.manage import path
 from funfactory.settings_base import *  # noqa
 from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
 
-from django.utils.functional import lazy
 
 # Log settings
 SYSLOG_TAG = "http_app_mozillians"
@@ -242,7 +245,7 @@ THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
 
 # Statsd Graphite
-STATSD_CLIENT = 'django_statsd.clients.normal'
+STATSD_CLIENT = config('STATSD_CLIENT', 'django_statsd.clients.normal')
 
 # Basket
 # If we're running tests, don't hit the real basket server.
@@ -258,7 +261,7 @@ MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
 ANNOUNCEMENTS_PHOTO_DIR = 'uploads/announcements'
 
 # Google Analytics
-GA_ACCOUNT_CODE = 'UA-35433268-19'
+GA_ACCOUNT_CODE = config('GA_ACCOUNT_CODE', default='UA-35433268-19')
 
 # Set ALLOWED_HOSTS based on SITE_URL.
 
@@ -293,8 +296,8 @@ USE_TZ = True
 # Pagination: Items per page.
 ITEMS_PER_PAGE = 24
 
-COMPRESS_OFFLINE = True
-COMPRESS_ENABLED = True
+COMPRESS_OFFLINE = config('COMPRESS_OFFLINE', default=True, cast=bool)
+COMPRESS_ENABLED = config('COMPRESS_ENABLED', default=True, cast=bool)
 
 HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
 HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales'
@@ -302,9 +305,9 @@ HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
 # These must both be set to a working mapbox token for the maps to work.
-MAPBOX_MAP_ID = 'examples.map-i86nkdio'
+MAPBOX_MAP_ID = config('MAPBOX_MAP_ID', default='examples.map-i86nkdio')
 # This is the token for the edit profile page alone.
-MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
+MAPBOX_PROFILE_ID = config('MAPBOX_MAP_ID', default=MAPBOX_MAP_ID)
 
 
 def _browserid_request_args():
@@ -336,3 +339,18 @@ VOUCH_COUNT_LIMIT = 6
 
 # All accounts need 1 vouches to be able to vouch.
 CAN_VOUCH_THRESHOLD = 3
+
+DEBUG = config('DEBUG', default=False, cast=bool)
+TEMPLATE_DEBUG = config('TEMPLATE_DEBUG', default=DEBUG, cast=bool)
+SECRET_KEY = config('SECRET_KEY')
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
+JAVA_BIN = config('JAVA_BIN', '/usr/bin/java')
+CELERY_ALWAYS_EAGER = config('CELERY_ALWAYS_EAGER', default=False, cast=bool)
+DATABASES = {
+    'default': config(
+        'DATABASE_URL',
+        default='sqlite:///' + 'db.sqlite3',
+        cast=dj_database_url.parse
+    )
+}
+SITE_URL = config('SITE_URL')

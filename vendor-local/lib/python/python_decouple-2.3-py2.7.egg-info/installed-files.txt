@@ -1,0 +1,8 @@
+../decouple.py
+../decouple.pyc
+./
+SOURCES.txt
+dependency_links.txt
+top_level.txt
+not-zip-safe
+PKG-INFO
