@@ -73,7 +73,7 @@
     </fieldset>
 
     {% if user.userprofile.is_manager %}
-      <h2>Admin Settings</h2>
+      <h2>{{ _('Admin Settings') }}</h2>
 
       <fieldset>
         {{ mozillians_field(form.visible) }}
