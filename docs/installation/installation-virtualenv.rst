@@ -18,6 +18,11 @@ VirtualEnv Installation
    other hand still ships with version 2.6. In the rest of the guide we will
    assume you are using ``python2.6``.
 
+
+************
+Dependencies
+************
+
 **Prerequisites:** You'll need python2.6, python2.6-dev, virtualenv, pip,
 a C compiler (for building some of the Python packages, like the DB interface),
 mysqlclient and mysql-dev (or the equivalent on your system), a MySQL server, `gettext`_,
@@ -113,8 +118,7 @@ When you want to start contributing...
      (venv)$ cp mozillians/settings/local.py-devdist mozillians/settings/local.py
 
    The provided configuration uses a MySQL database named `mozillians` and
-   accesses it locally using the user `mozillians`.  You can see
-   :doc:`/installation/mysql` if you need help creating a user and database.
+   accesses it locally using the user `mozillians`.
 
 #. Download ElasticSearch::
 
@@ -126,6 +130,45 @@ When you want to start contributing...
      (venv)$ ./elasticsearch-1.2.4/bin/elasticsearch -d
 
   This will run the elasticsearch instance in the background.
+
+
+***********
+MySQL setup
+***********
+
+Setting up a MySQL user and database for development:
+
+#. Install the MySQL server. Many Linux distributions provide an installable
+   package. If your OS does not, you can find downloadable install packages
+   on the `MySQL site`_.
+
+#. Start the mysql client program as the mysql root user::
+
+    $ mysql -u root -p
+    Enter password: ........
+    mysql>
+
+#. Create a ``mozillians`` user::
+
+    mysql> create user 'mozillians'@'localhost';
+
+#. Create a ``mozillians`` database::
+
+    mysql> create database mozillians;
+
+#. Give the mozillians user access to the mozillians database::
+
+    mysql> GRANT ALL PRIVILEGES ON mozillians.* TO "mozillians"@"localhost";
+    mysql> EXIT
+    Bye
+    $
+
+.. _MySQL site: http://dev.mysql.com/downloads/mysql/
+
+
+******************
+Running Mozillians
+******************
 
 #. Update product details::
 

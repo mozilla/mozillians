@@ -1,0 +1,88 @@
+====================
+Docker Installation
+====================
+
+Mozillians development environment can be installed using **docker**. This way we run Mozillians and all it's dependencies as docker containers. `Here <https://www.docker.com/whatisdocker/>`_ you can find more info about what docker is.
+
+************
+Dependencies
+************
+
+#. You need to install docker in your system. The `installation guide <https://docs.docker.com/installation/#installation>`_ covers many operating systems but for now we only support Linux and Mac OS X. *Version required*: 1.3.1 or newer.
+
+#. We are using an orchestration tool for docker called `fig <http://www.fig.sh/>`_ that helps us automate the procedure of initiating our docker containers required for development. Installation instructions can be found `in fig's documentation <http://www.fig.sh/install.html>`_. *Version required*: 1.0.1 or newer.
+
+Running Docker on Mac
+#####################
+
+Here are some notes regarding running Docker on Mac.
+
+* Docker cannot run natively on Mac because it is based in a Linux kernel specific featured called LXC.
+* When running docker in Mac via **boot2docker** you are running a lightweight Linux VM in Virtualbox that hosts the docker daemon and the LXC containers.
+* We are running docker client in our host system that connects to the docker daemon inside boot2docker VM.
+* We are using docker *volume sharing* feature in order to share the source code with the Mozillians container. This is not directly supported in Mac. As a workaround boot2docker implements this feature by sharing the folder with Virtualbox first.
+* The extra layer that we are adding using Virtualbox might cause some performance issues. This is a trade-off for having an easily reproducible stack without installing everything manually.
+
+More information regarding boot2docker can be found `in the documentation <https://docs.docker.com/installation/mac/>`_.
+
+Here are some extra steps in order to run Mozillians on Mac:
+
+#. Make sure *boot2docker* is initialized::
+
+     $ boot2docker init
+
+#. Make sure *boot2docker* VM is up and running::
+
+     $ boot2docker up
+
+#. Export *DOCKER_HOST* variables using the following command::
+
+     $ $(boot2docker shellinit)
+
+.. note::
+   You need to make sure to run shellinit in each new shell you are using, or export it globally in order not to repeat that step every time you are working on mozillians.
+
+*******************
+Building mozillians
+*******************
+#. `Fork the main Mozillians repository <https://github.com/mozilla/mozillians>`_.
+#. Clone your fork to your local machine::
+
+     $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
+     (lots of output - be patient...)
+     $ cd mozillians
+
+#. Start Mozillians service and its dependencies::
+
+     $ fig start
+
+#. Update the product details::
+
+     $ fig run web python manage.py update_product_details -f
+
+#. Create the database tables and run the migrations::
+
+     $ fig run web python manage.py syncdb
+     $ fig run web python manage.py migrate
+
+#. Create user
+   #. Run mozillians::
+
+        fig up
+
+   #. Load http://127.0.0.1:8000 and sign in with persona, then create your profile. If you are on Mac run ``boot2docker ip`` and use this ``IP`` instead of ``localhost``.
+   #. Stop the server with ``Ctrl^C``.
+   #. Vouch your account and convert it to superuser::
+
+        fig run web ./scripts/su.sh
+
+******************
+Running mozillians
+******************
+
+#. Run Mozillians::
+
+     $ fig up
+     (lots of output - be patient...)
+
+#. Develop!
