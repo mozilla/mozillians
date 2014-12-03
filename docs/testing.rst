@@ -2,27 +2,26 @@
  Testing
 =========
 
-Vagrant Box Shortcuts
----------------------
+Testing Mozillians Code
+-----------------------
 
-If you are using the :doc:`installation-vagrant` there are a couple of shortcuts
-to make your life easier:
+* To run mozillians.org tests::
 
-- Alias `t`::
+  $ ./manage.py test
 
-  ~4 dj test -x --logging-clear-handlers --with-nicedots'
+* If you need a fresh test database::
 
-- Alias `td` ::
+  $ FORCE_DB=1 ./manage.py test
 
-  ~$ FORCE_DB=True t --noinput
+* To run all tests in a class::
 
-- Alias `tf`::
+  $ ./manage.py test mozillians.users.tests.test_models:UserProfileTests
 
-  ~$ dj test --logging-clear-handlers --with-nicedots --failed
+* If you want to run a single test::
 
-- Alias `tp`::
+  $ ./manage.py test mozillians.users.tests.test_models:UserProfileTests.test_get_attribute_with_public_level
 
-  ~$ tp='t --pdb --pdb-failure'
+  to run only `test_get_attribute_with_public_level` test from the `UserProfileTests` class in the `mozillians/users/tests/test_models.py` test file.
 
 
 Test Coverage
@@ -32,10 +31,7 @@ You can combine `nose` testing with the `coverage` module to get the
 code coverage of the tests. To get a coverage report for the 'users'
 package run::
 
-  dj test -x --logging-clear-handlers --with-coverage --cover-package=users
+  $ coverage run --omit='*migrations*' manage.py test --noinput
+  $ coverage xml --omit='*migrations*' $(find mozillians -name '*.py')
 
-You can request to cover multiple packages in one run::
-
-  dj test -x --logging-clear-handlers --with-coverage --cover-package=users,phonebook
-
-
+Then visit `htmlcov/index.html` to get the coverage results.

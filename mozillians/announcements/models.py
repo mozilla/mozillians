@@ -1,10 +1,10 @@
 import os
 import uuid
-from datetime import datetime
 
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 import bleach
 from jinja2 import Markup
@@ -46,7 +46,7 @@ class Announcement(models.Model):
 
     @property
     def published(self):
-        now = datetime.now()
+        now = timezone.now()
         return ((self.publish_from <= now) and
                 (self.publish_until > now if self.publish_until else True))
 

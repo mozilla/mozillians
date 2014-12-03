@@ -1,10 +1,10 @@
 import re
 
-from django.core.validators import URLValidator
+from django.core.validators import URLValidator, email_re
 from django.db.models.loading import get_model
 from django.forms import ValidationError
 
-from tower import ugettext_lazy as _lazy
+from tower import ugettext as _
 
 
 def validate_twitter(username):
@@ -16,11 +16,11 @@ def validate_twitter(username):
         # Twitter accounts must be alphanumeric ASCII including underscore, and <= 15 chars.
         # https://support.twitter.com/articles/101299-why-can-t-i-register-certain-usernames
         if len(username) > 15:
-            raise ValidationError(_lazy('Twitter usernames cannot be longer than 15 characters.'))
+            raise ValidationError(_('Twitter usernames cannot be longer than 15 characters.'))
 
         if not re.match('^\w+$', username):
-            raise ValidationError(_lazy('Twitter usernames must contain only alphanumeric'
-                                        ' characters and the underscore.'))
+            raise ValidationError(_('Twitter usernames must contain only alphanumeric'
+                                    ' characters and the underscore.'))
     return username
 
 
@@ -55,6 +55,36 @@ def validate_website(url):
     try:
         validate_url(url)
     except ValidationError:
-        raise ValidationError(_lazy('Enter a valid URL.'))
+        raise ValidationError(_('Enter a valid URL.'))
 
     return url
+
+
+def validate_username_not_url(username):
+    """Validate that a username is not a URL."""
+
+    if username.startswith('http://') or username.startswith('https://'):
+        raise ValidationError(_('This field requires an identifier, not a URL.'))
+
+    return username
+
+
+def validate_email(value):
+    """Validate that a username is email like."""
+    if not email_re.match(value):
+        raise ValidationError(_('Enter a valid email address.'))
+    return value
+
+
+def validate_phone_number(value):
+    """Validate that a phone number is in international format. (5-15 characters)."""
+    value = value.replace(' ', '')
+    value = re.sub(r'^00', '+', value)
+
+    # Ensure that there are 5 to 15 digits
+    pattern = re.compile(r'^\+\d{5,15}$')
+    if not pattern.match(value):
+        raise ValidationError(_('Please enter a valid phone number in international format '
+                                '(e.g. +1 555 555 5555)'))
+
+    return value

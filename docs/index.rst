@@ -18,12 +18,13 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
-   installation
+   installation/installation
    testing
    invites
    contribute
-   api
+   api/api
    mysql-anonymize
+   internationalization
 
 Indices and tables
 ------------------

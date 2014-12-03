@@ -15,14 +15,24 @@
 
 {% block content %}
   {% if not user.is_authenticated() %}
-    <hgroup id="main-feature">
-      <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
+    <div id="main-feature">
+      <h1><img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians"></h1>
+
+      {% if show_start %}
+        <div id="start">
+          <p>{{ _('Create your account now to connect with fellow Mozillians.') }}</p>
+          <p class="cta">
+            <a href="#" class="button browserid-login" role="button">{{ _('Get started') }}</a>
+          </p>
+        </div>
+      {% endif %}
+
       <hr>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input type="text" name="q" class="search-query"
                  placeholder="{{ _('Search for people, groups and more') }}">
        </form>
-    </hgroup>
+    </div>
 
     <article id="information">
       <div class="container">
@@ -106,7 +116,7 @@
         <h2>{{ user.username }}</h2>
         {{ user.email }}
         {% with profile = user.userprofile %}
-        {% if profile.country or profile.region or profile.city %}
+        {% if profile.geo_country or profile.geo_region or profile.geo_city %}
           <section class="location">
             {% include 'phonebook/includes/profile_location.html' %}
           </section>
@@ -115,16 +125,14 @@
         {% if user.userprofile.groups.count() %}
           <section class="groups">
             <h4>{{ _('Groups') }}</h4>
-            {% for membership in user.userprofile.groupmembership_set.all() -%}
-              {%- with group=membership.group -%}
+            {% for group in user.userprofile.get_annotated_groups() -%}
               <a href="{{ url('groups:show_group', group.url) }}">
                 {%- if group.curator == user.userprofile -%}
-                  <i class="icon-certificate"></i>
+                  <i class="icon-crown"></i>
                 {% endif %}
                 {{ group.name }}
-                {%- if membership.status == 'pending' %} {{ _('(membership requested)') }}{% endif -%}
+                {%- if group.pending %} {{ _('(membership requested)') }}{% endif -%}
               </a>
-              {%- endwith -%}
               {%- if not loop.last -%},{% endif %}
             {% endfor %}
           </section>
@@ -142,7 +150,7 @@
         {% if user.userprofile.skills.count() %}
           <section class="skills">
             <h4>{{ _('Skills') }}</h4>
-          	{% for skill in user.userprofile.skills.all() %}
+            {% for skill in user.userprofile.skills.all() %}
               <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
               {%- if not loop.last %},{% endif %}
             {% endfor %}
@@ -194,27 +202,39 @@
           <img src="{{ static('mozillians/img/homepage-funcareas.jpg') }}" alt="Functional areas">
         </span>
         <h2>{{ _('Functional areas') }}</h2>
-        {% trans areas_url=url('groups:index_functional_areas') %}
+        {% trans %}
           <p>
             View Mozillians, Stewards and information for any
             functional area. Find out who works on what and how you
             can help out.
           </p>
-          <a href="{{ areas_url }}">Browse functional areas <i class="icon-arrow-right"></i></a>
         {% endtrans %}
+        {% if user.userprofile.is_vouched %}
+          <a href="{{ url('groups:index_functional_areas') }}">{{ _('Browse functional areas') }} <i class="icon-arrow-right"></i></a>
+        {% else %}
+          {% trans %}
+            <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse functional areas!</p>
+          {% endtrans %}
+        {% endif %}
       </section>
       <section class="groups">
         <span class="icon">
           <img src="{{ static('mozillians/img/homepage-groups.jpg') }}" alt="Groups">
         </span>
         <h2>{{ _('Groups') }}</h2>
-        {% trans group_url=url('groups:index_groups') %}
+        {% trans %}
           <p>
             Find and join groups centered around interests,
             technologies, geographies and more.
           </p>
-          <a href="{{ group_url }}">Browse groups <i class="icon-arrow-right"></i></a>
         {% endtrans %}
+        {% if user.userprofile.is_vouched %}
+          <a href="{{ url('groups:index_groups') }}">{{ _('Browse groups') }} <i class="icon-arrow-right"></i></a>
+        {% else %}
+          {% trans %}
+            <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse groups!</p>
+          {% endtrans %}
+        {% endif %}
       </section>
     </article>
 

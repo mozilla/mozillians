@@ -5,12 +5,10 @@
 pip-log.txt
 build.py
 .coverage
-.vagrant
 .DS_Store
 .noseids
 .virtualenv
 docs/_gh-pages
-vagrantconfig_local.yaml
 docs/_build
 locale*
 /venv/

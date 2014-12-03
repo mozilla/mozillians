@@ -20,14 +20,14 @@
 // Search Results
 // Groups
 // Invite/Invited
-
+// Special
+// Betasearch
 
 /* Imports
 ==================== */
 @import "sandstone/sandstone.less";
 @import "sandstone/sandstone-resp.less";
 @import "mosaic.less";
-@import "font-awesome.less";
 @import "less-prefixer/prefixer.less";
 
 /* Fonts
@@ -106,6 +106,12 @@
   .box-shadow(inset 0 1px 1px rgba(0,0,0,.05));
 }
 
+.ellipsis{
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow:hidden;
+}
+
 /* Generic
 ==================== */
 
@@ -179,13 +185,13 @@ body {
                     margin-left: 0;
                 }
                 @media (min-width: @breakMobileLandscape) and (max-width: @breakTablet) {
-                    #create_profile {
+                    #nav-login {
                         position: absolute;
                         top: 12px;
                     }
                 }
                 @media (min-width: @breakMobileLandscape) and (max-width: @breakTablet) {
-                    #create_profile {
+                    #nav-login {
                         position: normal;
                     }
                 }
@@ -202,24 +208,19 @@ body {
                 border: 1px solid #CD0000;
                 color: #CD0000;
             }
-            label, .error-message {
+            label {
                 color: #CD0000;
             }
         }
     }
-    label.required:after {
-        content: " *";
-        color: @linkRed;
+
+    .error-message {
+        color: #CD0000;
     }
 
-    .group-pending-membership {
-        background-color: #F5F5DC;
-        color: #FF8F00;
-        display: block;
-        text-align: center;
-        margin: 20px 0;
-        border-radius: 3px;
-        padding: 4px;
+    .required:after {
+        content: " *";
+        color: @linkRed;
     }
 }
 
@@ -386,7 +387,7 @@ nav {
     text-transform: none !important;
     float: none !important;
     height: 35px;
-    #create_profile {
+    #nav-login {
         float: right;
         padding-right: 5px;
         @media (max-width: @breakTablet) {
@@ -470,7 +471,7 @@ nav {
             &:hover {
                 text-decoration: none;
             }
-            .icon-reorder {
+            .icon-bars {
                 &.open {
                     color: @linkBlue;
                 }
@@ -479,7 +480,7 @@ nav {
                 width: 500px;
             }
         }
-        i.icon-reorder {
+        i.icon-bars {
             margin-left: 5px;
         }
         ul.dropdown-menu {
@@ -545,7 +546,7 @@ nav {
             }
         }
     }
-    a#logout.no-profile {
+    a#nav-logout.no-profile {
         .button;
         float: right;
     }
@@ -712,7 +713,7 @@ body#home {
         #content-wrapper {
             background: inherit;
         }
-        nav #create_profile {
+        nav #nav-login {
             @media (max-width: @breakTablet) {
                 float: none;
             }
@@ -802,6 +803,63 @@ body#home {
                         font-size: 16px;
                     }
                 }
+            }
+        }
+
+        #start {
+            .open-sans-light;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 22px;
+            text-align: center;
+            margin: 30px auto;
+            padding: 20px 100px;
+            width: 360px;
+            .box-shadow(0 1px 1px rgba(0, 0, 0, .1));
+
+            .cta {
+                margin: 0;
+            }
+
+            .button {
+                background: #0096dd;
+                border-radius: 10px;
+                border: 0;
+                box-shadow: none;
+                color: #fff;
+                display: inline-block;
+                font-size: 18px;
+                font-weight: bold;
+                padding: 20px 40px;
+                text-shadow: none;
+                text-transform: uppercase;
+                min-width: 220px;
+                .transition(all .15s ease-in-out);
+
+                &:hover,
+                &:focus,
+                &:active {
+                    color: #fff;
+                    background: lighten(#0096dd, 5%);
+                    text-decoration: none;
+                }
+
+                @media (max-width: @breakMobileLandscape) {
+                    min-width: 0;
+                    padding: 20px 30px;
+                    font-size: 16px;
+                }
+            }
+
+            @media (max-width: @breakTablet) {
+                padding: 20px 40px;
+            }
+
+            @media (max-width: @breakMobileLandscape) {
+                padding: 20px;
+                width: 245px;
+                font-size: 16px;
             }
         }
 
@@ -937,21 +995,15 @@ body#home {
                 position: relative;
                 a.profile-photo {
                     .rounded-image;
+                    display:block;
+                    position:relative;
+                    left:auto;
+
                     @media (max-width: @breakDesktop) {
-                        left: 40%;
-                    }
-                    @media (max-width: @breakTablet) {
-                         left: 35%;
-                    }
-                    @media (max-width: @breakMobileLandscape) {
-                         left: 32%;
-                    }
-                    @media (max-width: @breakMobile) {
-                         left: 62px;
+                        margin:0 auto;
                     }
                 }
                 .profile-details {
-                    margin-top: 170px;
                     word-wrap: break-word;
                     h2 { margin: 0 0 8px 0; }
                     h4 { margin: 20px 0 0;  }
@@ -1111,21 +1163,14 @@ body#profile {
             position: relative;
             .profile-photo {
                 .rounded-image;
+                display:block;
+                position:relative;
+                left:auto;
                 @media (max-width: @breakDesktop) {
-                    left: 40%;
-                }
-                @media (max-width: @breakTablet) {
-                     left: 35%;
-                }
-                @media (max-width: @breakMobileLandscape) {
-                     left: 32%;
-                }
-                @media (max-width: @breakMobile) {
-                     left: 62px;
+                    margin: 0 auto;
                 }
             }
             .stats {
-                margin-top: 170px;
                 h2 { margin: 0; }
                 h4 { margin: 20px 0 0; }
                 @media (max-width: @breakDesktop) {
@@ -1194,6 +1239,39 @@ body#profile {
                     }
                 }
             }
+
+            #profile-contact {
+                width: 220px;
+                float: left;
+                margin-top:1em;
+                ul {
+                    width:100%;
+                    word-wrap: break-word;
+                    list-style: none;
+                    float: left;
+                    li {
+                        position:relative;
+                        margin: 0 15px 0 0;
+                    }
+                }
+                .pre-break-bullet{
+                    position:absolute;
+                }
+                .u-url a{
+                    display:block;
+                    text-indent:1.25em;
+                }
+                .u-email{ &:extend( .ellipsis ); }
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
+                    float: none;
+                    ul {
+                        float: none;
+                    }
+                }
+            }
+
             @media (max-width: @breakDesktop) {
                 text-align: center;
                 width: 100%;
@@ -1225,12 +1303,11 @@ body#profile {
                 h3 { font-size: 24px; }
             }
             #profile-details {
-                width: 370px;
                 word-wrap: break-word;
                 padding-right: 30px;
                 margin: 0;
                 float: left;
-                #groups, #skills, #languages {
+                .profile-entry {
                     margin-bottom: 25px;
                 }
                 @media (max-width: @breakDesktop) {
@@ -1240,36 +1317,35 @@ body#profile {
                     padding: 0;
                 }
             }
-            #profile-contact {
-                width: 220px;
-                float: left;
-                ul {
-                    width:100%;
-                    word-wrap: break-word;
-                    list-style: none;
-                    float: left;
-                    li {
-                        position:relative;
-                        margin: 0 15px 0 0;
-                    }
-                }
-                .pre-break-bullet{
-                    position:absolute;
-                }
-                .u-url a{
-                    display:block;
-                    text-indent:1.25em;
-                }
-                @media (max-width: @breakDesktop) {
-                    text-align: center;
-                    width: 100%;
-                    float: none;
-                    ul {
-                        float: none;
-                    }
-                }
-            }
         }
+    }
+}
+
+.margins{
+    margin:10px;
+}
+
+.vouch-box{
+    &:extend(.alert);
+    padding:0px;
+    text-align:left;
+    textarea{
+        margin: 0px;
+        height: 115px;
+        width:100%;
+        padding:0;
+        font-size: 11pt;
+    }
+    .character-countdown{
+        margin-right: 5px;
+        line-height: 24px;
+    }
+    .button{
+        margin:0 auto;
+    }
+    #vouch-submit{
+        text-align: right;
+        padding-bottom: 10px;
     }
 }
 
@@ -1326,7 +1402,7 @@ form {
         .acknowledge {
             float:left;
         }
-        &#photo {
+        &> div#photo {
             position: relative;
             height: 150px;
             @media (max-width: @breakMobileLandscape) {
@@ -1398,8 +1474,8 @@ form {
             margin-top: 50px;
             border: none;
         }
-        #id_photo_delete {
-            margin: 10px 0 0 130px;
+        div#id_photo_delete {
+            margin: 10px 0 0 100px;
             @media (max-width: @breakMobileLandscape) {
                 margin: 10px 0 0 0;
             }
@@ -1407,6 +1483,11 @@ form {
             label {
                 float: none;
             }
+        }
+        &> div#mozillian-contributions {
+            .privacy-controls {
+                margin-top: 50px;
+          }
         }
         &#accounts {
             .externalaccount-fieldrow {
@@ -1463,11 +1544,11 @@ form {
                 position: relative;
                 display: inline;
                 span {
-                    padding: 5px 15px;
+                    padding: 5px 10px;
                     opacity: 0;
                     visibility: hidden;
-                    width: 200px;
-                    z-index: 10;
+                    width: 150px;
+                    z-index:10;
                     position: absolute;
                     top: -5px;
                     left: 0px;
@@ -1477,17 +1558,17 @@ form {
                     .box-shadow(2px 2px 2px @gray);
                     border: 1px solid lighten(@black,90%);
                     text-align: center;
-                    -webkit-transition-property:opacity, margin-left, visibility, margin-left;
-                    -webkit-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -webkit-transition-property:opacity, margin-left, margin-left;
+                    -webkit-transition-duration:0.1s;
                     -webkit-transition-timing-function: ease-in-out;
-                    -moz-transition-property:opacity, margin-left, visibility, margin-left;
-                    -moz-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -moz-transition-property:opacity, margin-left, margin-left;
+                    -moz-transition-duration:0.1s;
                     -moz-transition-timing-function: ease-in-out;
-                    -o-transition-property:opacity, margin-left, visibility, margin-left;
-                    -o-transition-duration:0.4s, 0.3s, 0.4s, 0.3s;
+                    -o-transition-property:opacity, margin-left, margin-left;
+                    -o-transition-duration:0.1s;
                     -o-transition-timing-function: ease-in-out;
-                    transition-property:opacity, margin-left, visibility, margin-left;
-                    transition-duration:0.4s 0.3s;
+                    transition-property:opacity, margin-left, margin-left;
+                    transition-duration:0.1s;
                     transition-timing-function: ease-in-out;
 
                 }
@@ -1495,7 +1576,7 @@ form {
                     opacity: 1;
                     visibility: visible;
                     overflow: visible;
-                    margin-left: 30px;
+                    margin-left: 40px;
                 }
             }
         }
@@ -1503,6 +1584,11 @@ form {
             padding-left: 130px;
             @media (max-width: @breakMobileLandscape) {
                 padding-left: 0px;
+            }
+        }
+        &#id_new_member_criteria_fieldset {
+            .error-message {
+                display: inline-block;
             }
         }
     }
@@ -1514,7 +1600,151 @@ body#edit-profile {
     section {
         margin-bottom: 25px;
     }
-    
+
+    /* Make django-selectable's fields look like tag-it's fields */
+    ul.selectable-deck {
+      display: inline;
+
+      li.selectable-deck-item {
+        background: url("/static/mozillians/img/jquery-ui-blitzer/ui-bg_highlight-hard_100_eeeeee_1x100.png") repeat-x scroll 50% 50% #EEEEEE;
+        border: 1px solid #D8DCDF;
+        color: #004276;
+        font-weight: bold;
+        padding: 0.2em 0.2em 0.2em 0.5em;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 6px;
+        border-top-left-radius: 6px;
+        margin: 2px 5px 2px 0;
+        display: block;
+        float: left;
+
+        a.selectable-deck-remove {
+          cursor: pointer;
+          line-height: 17px;
+          margin-top: -8px;
+          right: 0.1em;
+          top: 50%;
+          color: #004276;
+          text-decoration: none;
+          border: none;
+        }
+
+        .ui-button-text,
+        .ui-icon {
+          display: inline
+        }
+      }
+    }
+
+    .geocheckbox {
+      margin-left: 5%;
+      display: inline;
+
+      label {
+        float: none;
+      }
+    }
+    span.geodisplay {
+      display: inline-block;
+      min-width: 100px;
+    }
+
+    // map things
+    #location {
+      position: relative;
+      height: 280px;
+
+      input {
+        box-sizing: border-box;
+      }
+
+      > *{
+        position: absolute;
+      }
+
+      #location_search {
+        right: 10em;
+        bottom: 1.8em;
+        width: 13em;
+        @media (max-width: @breakMobileLandscape) {
+            width: 8em;
+        }
+        height: 2em;
+      }
+
+      #location_search_button {
+        right: 10px;
+        bottom: 2em;
+        height: 2em;
+      }
+
+      #location_search_results {
+        background-color: white;
+        max-height: 14em;
+        right: 0.8em;
+        bottom: 3.5em;
+        border-radius: 4px;
+        width: 23em;
+        padding: 0.5em;
+        @media (max-width: @breakMobileLandscape) {
+            width: 17em;
+        }
+        overflow-y:auto;
+        -webkit-overflow-scrolling: touch;
+        li {
+          cursor: pointer;
+          padding-left: 0.5em;
+          border-radius: 1em;
+        }
+        li:hover {
+          background-color: #eee;
+        }
+      }
+
+      #location_search_loading {
+        bottom: 4.4em;
+        right: 0.8em;
+        height: 4px;
+        width: 24em;
+        @media (max-width: @breakMobileLandscape) {
+            width: 18em;
+        }
+      }
+
+      #map {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 15px;
+      }
+
+      #location_gps_button{
+        width: 26px;
+        height: 26px;
+        top: 71px;
+        left: 10px;
+        line-height: 29px;
+        font-size: 18px;
+        text-align: center;
+        border: solid 1px #9a9a9a;
+        border-radius: 3px;
+        background-color: white;
+        cursor:pointer;
+      }
+      #location_gps_button:hover{
+        background-color:#fafafa;
+      }
+
+      #location_gps_loading{
+        width:28px;
+        height:4px;
+        top:100px;
+        left:10px;
+      }
+    }
+
+
+
 }
 
 /* Generic Groups, Functional Areas and Search Results
@@ -1767,6 +1997,7 @@ body#group-show {
     }
 }
 
+
 /* Invite/Invited
 ================== */
 body#invite {
@@ -1775,11 +2006,76 @@ body#invite {
         margin: 20px 0;
         .button;
     }
-    textarea {
-        @media (max-width: @breakMobileLandscape) {
-            width: 80%;
-        }
+    .invite-box textarea {
+        width:100%;
+        padding:0;
     }
     input { margin-bottom: 25px; }
 
+    .card {
+        float: left;
+        margin-right: 30px;
+    }
+
+    .card li {
+        list-style-type: none;
+        margin-left: 0;
+    }
+
+    .card button {
+        margin-top: 30px;
+    }
+}
+
+
+/* Special
+================== */
+.scroll-shadows{
+    background:
+        linear-gradient(white 30%, rgba(255,255,255,0)),
+        linear-gradient(rgba(255,255,255,0), white 70%) 0 100%,
+        radial-gradient(farthest-side at 50% 0, rgba(0,0,0,0.2), rgba(0,0,0,0)),
+        radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,0.2), rgba(0,0,0,0)) 0 100%;
+
+    background-repeat: no-repeat;
+    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+    background-attachment: local, local, scroll, scroll;
+}
+
+
+/* Betasearch
+================== */
+body#betasearch {
+    #search-form {
+        margin-bottom: 20px;
+        input[type=text] {
+            border: 1px solid lighten(@black,90%);
+            margin-right: 8px;
+            @media (max-width: @breakMobileLandscape) {
+                width: 50%;
+                margin-bottom: 15px;
+            }
+        }
+        button {
+            .button;
+            margin: 0 8px 15px 0;
+        }
+        .search-options {
+            display: none;
+            input, span {
+                display: block;
+                float: left;
+            }
+            input {
+                margin-right: 10px;
+            }
+        }
+    }
+    .ui-widget-content.ui-corner-all {
+        border: 1px solid #D8DCDF !important;
+    }
+}
+
+#betasearch #id_groups, #id_skills {
+    min-height: 90px;
 }

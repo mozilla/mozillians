@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
+import django_filters
 import happyforms
 from PIL import Image
-from product_details import product_details
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.groups.models import Skill
@@ -32,12 +32,26 @@ class ExternalAccountForm(happyforms.ModelForm):
     def clean(self):
         cleaned_data = super(ExternalAccountForm, self).clean()
         identifier = cleaned_data.get('identifier')
-        type = cleaned_data.get('type')
+        account_type = cleaned_data.get('type')
 
-        if type:
-            validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
+        if account_type and identifier:
+            # If the Account expects an identifier and user provided a
+            # full URL, try to extract the identifier from the URL.
+            url = ExternalAccount.ACCOUNT_TYPES[account_type].get('url')
+            if url and identifier.startswith('http'):
+                url_pattern_re = url.replace('{identifier}', '(.+)')
+                identifier = identifier.rstrip('/')
+                url_pattern_re = url_pattern_re.rstrip('/')
+                match = re.match(url_pattern_re, identifier)
+                if match:
+                    identifier = match.groups()[0]
+
+            validator = ExternalAccount.ACCOUNT_TYPES[account_type].get('validator')
             if validator:
-                cleaned_data['identifier'] = validator(identifier)
+                identifier = validator(identifier)
+
+            cleaned_data['identifier'] = identifier
+
         return cleaned_data
 
 AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
@@ -55,6 +69,38 @@ class SearchForm(happyforms.Form):
     def clean_limit(self):
         limit = self.cleaned_data['limit'] or settings.ITEMS_PER_PAGE
         return limit
+
+
+def filter_vouched(qs, choice):
+    if choice == SearchFilter.CHOICE_ONLY_VOUCHED:
+        return qs.filter(is_vouched=True)
+    elif choice == SearchFilter.CHOICE_ONLY_UNVOUCHED:
+        return qs.filter(is_vouched=False)
+    return qs
+
+
+class SearchFilter(django_filters.FilterSet):
+    CHOICE_ONLY_VOUCHED = 'yes'
+    CHOICE_ONLY_UNVOUCHED = 'no'
+    CHOICE_ALL = 'all'
+
+    CHOICES = (
+        (CHOICE_ONLY_VOUCHED, _lazy('Vouched')),
+        (CHOICE_ONLY_UNVOUCHED, _lazy('Unvouched')),
+        (CHOICE_ALL, _lazy('All')),
+    )
+
+    vouched = django_filters.ChoiceFilter(
+        name='vouched', label=_lazy('Display only'), required=False,
+        choices=CHOICES, action=filter_vouched)
+
+    class Meta:
+        model = UserProfile
+        fields = ['vouched', 'skills', 'groups', 'timezone']
+
+    def __init__(self, *args, **kwargs):
+        super(SearchFilter, self).__init__(*args, **kwargs)
+        self.filters['timezone'].field.choices.insert(0, ('', _lazy(u'All timezones')))
 
 
 class UserForm(happyforms.ModelForm):
@@ -104,32 +150,33 @@ class ProfileForm(happyforms.ModelForm):
         widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
                                required=False))
     skills = forms.CharField(
-        label=_lazy(u'Start typing to add a skill (example: Python, '
-                    u'javascript, Graphic Design, User Research)'),
+        label='',
+        help_text=_lazy(u'Start typing to add a skill (example: Python, '
+                        u'javascript, Graphic Design, User Research)'),
         required=False)
+    lat = forms.FloatField(widget=forms.HiddenInput)
+    lng = forms.FloatField(widget=forms.HiddenInput)
+    savecountry = forms.BooleanField(
+        label=_lazy('Required'),
+        initial=True, required=False,
+        widget=forms.CheckboxInput(attrs={'disabled': 'disabled'})
+    )
+    saveregion = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
+    savecity = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
 
     class Meta:
         model = UserProfile
-        fields = ('full_name', 'ircname', 'bio', 'photo', 'country',
-                  'region', 'city', 'allows_community_sites', 'tshirt',
+        fields = ('full_name', 'ircname', 'bio', 'photo',
+                  'allows_community_sites', 'tshirt',
                   'title', 'allows_mozilla_sites',
-                  'date_mozillian', 'timezone',
+                  'date_mozillian', 'story_link', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_email', 'privacy_timezone', 'privacy_tshirt',
-                  'privacy_bio', 'privacy_city', 'privacy_region',
-                  'privacy_country', 'privacy_groups',
+                  'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
+                  'privacy_geo_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',
-                  'privacy_date_mozillian', 'privacy_title')
+                  'privacy_date_mozillian', 'privacy_story_link', 'privacy_title')
         widgets = {'bio': forms.Textarea()}
-
-    def __init__(self, *args, **kwargs):
-        locale = kwargs.pop('locale', 'en-US')
-
-        super(ProfileForm, self).__init__(*args, **kwargs)
-        country_list = product_details.get_regions(locale).items()
-        country_list = sorted(country_list, key=lambda country: country[1])
-        country_list.insert(0, ('', '----'))
-        self.fields['country'].choices = country_list
 
     def clean_photo(self):
         """Clean possible bad Image data.
@@ -153,19 +200,51 @@ class ProfileForm(happyforms.ModelForm):
         return photo
 
     def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
+        if not re.match(r'^[a-zA-Z0-9 +.:,-]*$', self.cleaned_data['skills']):
+            # Commas cannot be included in skill names because we use them to
+            # separate names in a list
             raise forms.ValidationError(_(u'Skills can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
+                                          u'alphanumeric characters '
+                                          u'and +.:-.'))
         skills = self.cleaned_data['skills']
         return filter(lambda x: x,
                       map(lambda x: x.strip() or False,
                           skills.lower().split(',')))
 
-    def save(self):
+    def clean(self):
+        # If lng/lat were provided, make sure they point at a country somewhere...
+        if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
+            # We only want to call reverse_geocode if some location data changed.
+            if ('lat' in self.changed_data or 'lng' in self.changed_data or
+                'saveregion' in self.changed_data or 'savecity' in self.changed_data):
+                self.instance.lat = self.cleaned_data['lat']
+                self.instance.lng = self.cleaned_data['lng']
+                self.instance.reverse_geocode()
+                if not self.instance.geo_country:
+                    error_msg = _('Location must be inside a country.')
+                    self.errors['savecountry'] = self.error_class([error_msg])
+                    del self.cleaned_data['savecountry']
+                # If the user doesn't want their region/city saved, respect it.
+                if not self.cleaned_data.get('saveregion'):
+                    if not self.cleaned_data.get('savecity'):
+                        self.instance.geo_region = None
+                    else:
+                        error_msg = _('Region must also be saved if city is saved.')
+                        self.errors['saveregion'] = self.error_class([error_msg])
+
+                if not self.cleaned_data.get('savecity'):
+                    self.instance.geo_city = None
+        else:
+            self.errors['location'] = self.error_class([_('Search for your country on the map.')])
+            self.errors['savecountry'] = self.error_class([_('Country cannot be empty.')])
+            del self.cleaned_data['savecountry']
+
+        return self.cleaned_data
+
+    def save(self, *args, **kwargs):
         """Save the data to profile."""
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        super(ProfileForm, self).save()
+        super(ProfileForm, self).save(*args, **kwargs)
 
 
 class BaseLanguageFormSet(BaseInlineFormSet):
@@ -210,11 +289,21 @@ class RegisterForm(ProfileForm):
 
 
 class VouchForm(happyforms.Form):
-    """Vouching is captured via a user's id."""
-    vouchee = forms.IntegerField(widget=forms.HiddenInput)
+    """Vouching is captured via a user's id and a description of the reason for vouching."""
+    description = forms.CharField(
+        label=_lazy(u'Provide a reason for vouching with relevant links'),
+        widget=forms.Textarea(attrs={'rows': 10, 'cols': 20, 'maxlength': 500}),
+        max_length=500,
+        error_messages={'required': _(u'You must enter a reason for vouching for this person.')}
+    )
 
 
 class InviteForm(happyforms.ModelForm):
+    message = forms.CharField(
+        label=_lazy(u'Personal message to be included in the invite email'),
+        required=False, widget=forms.Textarea(),
+    )
+    recipient = forms.EmailField(label=_lazy("Recipient's email"))
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
@@ -226,4 +315,4 @@ class InviteForm(happyforms.ModelForm):
 
     class Meta:
         model = Invite
-        fields = ['recipient', 'message']
+        fields = ['recipient']

@@ -1,15 +1,11 @@
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-from django.views.decorators.cache import cache_page
-from django.views.i18n import javascript_catalog
 
 import autocomplete_light
-
+import tower
 from funfactory.monkeypatches import patch
-
-from mozillians.common.decorators import allow_public
 
 
 # Funfactory monkeypatches
@@ -36,6 +32,11 @@ except KeyError:
     pass
 jingo.env.add_extension(CompressorExtension)
 
+# Activate a locale so that jinja2 doesn't choke when running a shell
+# or individual tests that need translation and don't involve a web
+# request, like when testing emails.
+tower.activate('en-US')
+
 
 def error_page(request, template, status=None):
     """Render error templates, found in the root /templates directory.
@@ -54,7 +55,7 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns(
     '',
-    url(r'^browserid/', include('django_browserid.urls')),
+    url(r'', include('django_browserid.urls')),
     url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.groups.urls', 'groups')),
     url(r'', include('mozillians.phonebook.urls', 'phonebook')),
@@ -62,10 +63,6 @@ urlpatterns = patterns(
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
     url(r'^_autocomplete/', include('autocomplete_light.urls')),
-
-    url(r'^jsi18n/$',
-        allow_public(cache_page(60 * 60 * 24 * 365)(javascript_catalog)),
-        {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
 
     url(r'', include('mozillians.humans.urls', 'humans')),
 )

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import md5
 
 from django.conf import settings
@@ -50,13 +50,13 @@ def field_with_attrs(bfield, **kwargs):
 
 
 @register.function
-def mozillians_field(element):
+def mozillians_field(element, required=False):
     """Renders fields in jinja2.
 
     Takes a field and renders the appropriate elements.
     """
     template = get_template('includes/field.html')
-    context = Context({'field': element})
+    context = Context({'field': element, 'flag_required': required})
 
     return mark_safe(template.render(context))
 
@@ -225,3 +225,22 @@ def offset_of_timezone(timezone_name):
     offset = now.tzinfo.utcoffset(now)  # timedelta
     minutes = offset.seconds / 60 + offset.days * 24 * 60
     return minutes
+
+
+def get_datetime(days=0, weeks=0):
+    """Return a datetime object, given an offset in days and/or weeks.
+
+    The offset can be either positive or negative.
+    """
+    return (datetime.today() + timedelta(days=days, weeks=weeks))
+
+
+def get_object_or_none(model_class, **kwargs):
+    """Identical to get_object_or_404, except instead of returning Http404,
+    this returns None.
+
+    """
+    try:
+        return model_class.objects.get(**kwargs)
+    except model_class.DoesNotExist:
+        return None

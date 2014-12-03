@@ -1,19 +1,18 @@
 from django.conf import settings
-from django.contrib import auth
+from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404, HttpResponseBadRequest
-from django.shortcuts import render
+from django.http import Http404
+from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
-from django_browserid.base import get_audience, verify
-from django_browserid.views import Verify
-from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
+from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
 from mozillians.common.decorators import allow_public, allow_unvouched
@@ -22,42 +21,9 @@ from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
-from mozillians.phonebook.utils import update_invites
+from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import COUNTRIES, UserProfile
-
-
-class BrowserIDVerify(Verify):
-    def form_valid(self, form):
-        """Custom form validation to support email changing.
-
-        If user is already authenticated and reaches this points, it's
-        an email changing procedure. Validate that email is good and
-        save it in the database.
-
-        Otherwise continue with the default django-browserid verification.
-        """
-        if not self.request.user.is_authenticated():
-            return super(BrowserIDVerify, self).form_valid(form)
-
-        failure_url = urlparams(reverse('phonebook:profile_edit'), bid_login_failed=1)
-        self.assertion = form.cleaned_data['assertion']
-        self.audience = get_audience(self.request)
-        result = verify(self.assertion, self.audience)
-        if not result:
-            messages.error(self.request, _('Authentication failed.'))
-            return redirect(failure_url)
-
-        email = result['email']
-
-        if User.objects.filter(email=email).exists():
-            messages.error(self.request, _('Email already exists in the database.'))
-            return redirect('phonebook:logout')
-
-        user = self.request.user
-        user.email = email
-        user.save()
-        return redirect('phonebook:profile_view', user.username)
+from mozillians.users.models import ExternalAccount, UserProfile, UserProfileMappingType
 
 
 @allow_unvouched
@@ -70,7 +36,51 @@ def login(request):
 @never_cache
 @allow_public
 def home(request):
-    return render(request, 'phonebook/home.html')
+    show_start = False
+    if request.GET.get('source', ''):
+        show_start = True
+    return render(request, 'phonebook/home.html',
+                  {'show_start': show_start})
+
+
+@waffle_flag('testing-autovouch-views')
+@allow_unvouched
+@never_cache
+def vouch(request, username):
+    """Automatically vouch username.
+
+    This must be behind a waffle flag and activated only for testing
+    purposes.
+
+    """
+    profile = get_object_or_404(UserProfile, user__username=username)
+    now = timezone.now()
+    description = 'Automatically vouched for testing purposes on {0}'.format(now)
+    vouch = profile.vouch(None, description=description, autovouch=True)
+    if vouch:
+        messages.success(request, _('Successfully vouched user.'))
+    else:
+        msg = _('User not vouched. Maybe there are {0} vouches already?')
+        msg = msg.format(settings.VOUCH_COUNT_LIMIT)
+        messages.error(request, msg)
+
+    return redirect('phonebook:profile_view', profile.user.username)
+
+
+@waffle_flag('testing-autovouch-views')
+@allow_unvouched
+@never_cache
+def unvouch(request, username):
+    """Automatically remove all vouches from username.
+
+    This must be behind a waffle flag and activated only for testing
+    purposes.
+
+    """
+    profile = get_object_or_404(UserProfile, user__username=username)
+    profile.vouches_received.all().delete()
+    messages.success(request, _('Successfully unvouched user.'))
+    return redirect('phonebook:profile_view', profile.user.username)
 
 
 @allow_public
@@ -81,6 +91,7 @@ def view_profile(request, username):
     privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
                         'privileged': PRIVILEGED, 'myself': None}
     privacy_level = None
+    profile_is_vouchable = False
 
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
@@ -115,16 +126,24 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
-        if (not profile.is_vouched
-            and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
-                data['vouch_form'] = (
-                    forms.VouchForm(initial={'vouchee': profile.pk}))
+        if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
+            profile_is_vouchable = True
 
+            vouch_form = forms.VouchForm(request.POST or None)
+            data['vouch_form'] = vouch_form
+            if vouch_form.is_valid():
+                # We need to re-fetch profile from database.
+                profile = UserProfile.objects.get(user__username=username)
+                profile.vouch(request.user.userprofile, vouch_form.cleaned_data['description'])
+                # Notify the current user that they vouched successfully.
+                msg = _(u'Thanks for vouching for a fellow Mozillian! This user is now vouched!')
+                messages.info(request, msg)
+                return redirect('phonebook:profile_view', profile.user.username)
+
+    data['profile_is_vouchable'] = profile_is_vouchable
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
-    data['locale'] = request.locale
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
@@ -146,7 +165,10 @@ def edit_profile(request):
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
 
     user_form = forms.UserForm(request.POST or None, instance=user)
-    accounts_formset = forms.AccountsFormset(request.POST or None, instance=profile)
+    queryset = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
+    accounts_formset = forms.AccountsFormset(request.POST or None,
+                                             instance=profile,
+                                             queryset=queryset)
     new_profile = False
     form = forms.ProfileForm
     language_formset = forms.LanguagesFormset(request.POST or None,
@@ -158,27 +180,34 @@ def edit_profile(request):
         form = forms.RegisterForm
 
     profile_form = form(request.POST or None, request.FILES or None,
-                        instance=profile, locale=request.locale,
-                        initial=dict(skills=user_skills))
+                        instance=profile,
+                        initial={'skills': user_skills,
+                                 'saveregion': True if profile.geo_region else False,
+                                 'savecity': True if profile.geo_city else False,
+                                 'lat': profile.lat,
+                                 'lng': profile.lng})
 
     email_form = forms.EmailForm(request.POST or None,
                                  initial={'email': request.user.email,
                                           'user_id': request.user.id})
 
-    if (user_form.is_valid() and profile_form.is_valid() and
-        accounts_formset.is_valid() and email_form.is_valid() and
-            language_formset.is_valid()):
+    all_forms = [user_form, profile_form, accounts_formset, email_form,
+                 language_formset]
+
+    # Using ``list`` to force calling is_valid on all the forms, even if earlier
+    # ones are not valid, so we detect and display all the errors.
+    if all(list(f.is_valid() for f in all_forms)):
         old_username = request.user.username
         user_form.save()
         profile_form.save()
         accounts_formset.save()
         language_formset.save()
 
-        # Notify the user that their old profile URL won't work.
         if new_profile:
-            update_invites(request)
+            redeem_invite(profile, request.session.get('invite-code'))
             messages.info(request, _(u'Your account has been created.'))
         elif user.username != old_username:
+            # Notify the user that their old profile URL won't work.
             messages.info(request,
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))
@@ -193,13 +222,14 @@ def edit_profile(request):
                 accounts_formset=accounts_formset,
                 email_form=email_form,
                 user_groups=user_groups,
-                my_vouches=UserProfile.objects.filter(vouched_by=profile),
                 profile=request.user.userprofile,
                 apps=user.apiapp_set.filter(is_active=True),
-                language_formset=language_formset)
+                language_formset=language_formset,
+                vouch_threshold=settings.CAN_VOUCH_THRESHOLD,
+                mapbox_id=settings.MAPBOX_PROFILE_ID)
 
     # If there are form errors, don't send a 200 OK.
-    status = 400 if (profile_form.errors or user_form.errors) else 200
+    status = 400 if any(f.errors for f in all_forms) else 200
     return render(request, 'phonebook/edit_profile.html', data, status=status)
 
 
@@ -218,12 +248,8 @@ def confirm_delete(request):
 @require_POST
 def delete(request):
     request.user.delete()
-    messages.info(request, _('Your account has been deleted. '
-                             'Thanks for being a Mozillian!'))
-    # We don't redirect to logout view, because delete already logs
-    # out user. Instead we render the logout template to BrowserID
-    # logout.
-    return render(request, 'phonebook/logout.html')
+    messages.info(request, _('Your account has been deleted. Thanks for being a Mozillian!'))
+    return logout(request)
 
 
 @allow_public
@@ -244,8 +270,8 @@ def search(request):
         public = not (request.user.is_authenticated()
                       and request.user.userprofile.is_vouched)
 
-        profiles = UserProfile.search(query, public=public,
-                                      include_non_vouched=include_non_vouched)
+        profiles = UserProfileMappingType.search(
+            query, public=public, include_non_vouched=include_non_vouched)
         if not public:
             groups = Group.search(query)
 
@@ -270,10 +296,59 @@ def search(request):
              groups=groups,
              functional_areas=functional_areas)
 
-    if request.is_ajax():
-        return render(request, 'search_ajax.html', d)
-
     return render(request, 'phonebook/search.html', d)
+
+
+@waffle_flag('betasearch')
+def betasearch(request):
+    """This view is for researching new search and data filtering
+    options. It will eventually replace the 'search' view.
+
+    Filtering using SearchFilter does not respect privacy levels
+    because it directly hits the db. This should be further
+    investigated before the feature is released to the
+    public. Meanwhile we limit searches only to vouched users.
+
+    This view is behind the 'betasearch' waffle flag.
+
+    """
+    limit = None
+    people = []
+    show_pagination = False
+    form = forms.SearchForm(request.GET)
+    filtr = forms.SearchFilter(request.GET)
+
+    if form.is_valid():
+        query = form.cleaned_data.get('q', u'')
+        limit = form.cleaned_data['limit']
+        page = request.GET.get('page', 1)
+        public = not (request.user.is_authenticated()
+                      and request.user.userprofile.is_vouched)
+
+        profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
+        profiles = UserProfileMappingType.search(query,
+                                                 include_non_vouched=True,
+                                                 public=public)
+        profiles = profiles.filter(id__in=profiles_matching_filter)
+
+        paginator = Paginator(profiles, limit)
+
+        try:
+            people = paginator.page(page)
+        except PageNotAnInteger:
+            people = paginator.page(1)
+        except EmptyPage:
+            people = paginator.page(paginator.num_pages)
+
+        show_pagination = paginator.count > settings.ITEMS_PER_PAGE
+
+    data = dict(people=people,
+                search_form=form,
+                filtr=filtr,
+                limit=limit,
+                show_pagination=show_pagination)
+
+    return render(request, 'phonebook/betasearch.html', data)
 
 
 @allow_public
@@ -286,49 +361,53 @@ def search_plugin(request):
 
 def invite(request):
     profile = request.user.userprofile
-    invite_form = forms.InviteForm(request.POST or None,
-                                   instance=Invite(inviter=profile))
-    if request.method == 'POST' and invite_form.is_valid():
+    invite_form = None
+    vouch_form = None
+    if profile.can_vouch:
+        invite_form = forms.InviteForm(request.POST or None,
+                                       instance=Invite(inviter=profile))
+        vouch_form = forms.VouchForm(request.POST or None)
+
+    if invite_form and vouch_form and invite_form.is_valid() and vouch_form.is_valid():
+        invite_form.instance.reason = vouch_form.cleaned_data['description']
         invite = invite_form.save()
-        invite.send(sender=profile)
+        invite.send(sender=profile, personal_message=invite_form.cleaned_data['message'])
         msg = _(u"%s has been invited to Mozillians. They'll receive an email "
                 u"with instructions on how to join. You can "
-                u"invite another Mozillian if you like." % invite.recipient)
+                u"invite another Mozillian if you like.") % invite.recipient
         messages.success(request, msg)
-        return redirect('phonebook:home')
+        return redirect('phonebook:invite')
 
     return render(request, 'phonebook/invite.html',
-                  {'invite_form': invite_form})
+                  {
+                      'invite_form': invite_form,
+                      'vouch_form': vouch_form,
+                      'invites': profile.invites.all(),
+                      'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
+                  })
 
 
 @require_POST
-def vouch(request):
-    """Vouch a user."""
-    form = forms.VouchForm(request.POST)
+def delete_invite(request, invite_pk):
+    profile = request.user.userprofile
+    deleted_invite = get_object_or_404(Invite, pk=invite_pk, inviter=profile, redeemed=None)
+    deleted_invite.delete()
 
-    if form.is_valid():
-        p = UserProfile.objects.get(pk=form.cleaned_data.get('vouchee'))
-        p.vouch(request.user.userprofile)
-
-        # Notify the current user that they vouched successfully.
-        msg = _(u'Thanks for vouching for a fellow Mozillian! '
-                u'This user is now vouched!')
-        messages.info(request, msg)
-        return redirect('phonebook:profile_view', p.user.username)
-
-    return HttpResponseBadRequest()
+    msg = (_(u"%s's invitation to Mozillians has been revoked. "
+             u"You can invite %s again if you like.") %
+            (deleted_invite.recipient, deleted_invite.recipient))
+    messages.success(request, msg)
+    return redirect('phonebook:invite')
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):
-    country = country.lower()
-    country_name = COUNTRIES.get(country, country)
-    queryset = UserProfile.objects.vouched().filter(country=country)
+    queryset = UserProfile.objects.vouched().filter(geo_country__name__iexact=country)
     show_pagination = False
 
     if city:
-        queryset = queryset.filter(city__iexact=city)
+        queryset = queryset.filter(geo_city__name__iexact=city)
     if region:
-        queryset = queryset.filter(region__iexact=region)
+        queryset = queryset.filter(geo_region__name__iexact=region)
 
     paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
     page = request.GET.get('page', 1)
@@ -344,24 +423,19 @@ def list_mozillians_in_location(request, country, region=None, city=None):
         show_pagination = True
 
     data = {'people': people,
-            'country_name': country_name,
+            'country_name': country,
             'city_name': city,
             'region_name': region,
             'page': page,
             'show_pagination': show_pagination}
-    return render(request, 'phonebook/location-list.html', data)
+    return render(request, 'phonebook/location_list.html', data)
 
 
 @allow_unvouched
 def logout(request):
-    """Logout view that wraps Django's logout but always redirects.
-
-    Django's contrib.auth.views logout method renders a template if
-    the `next_page` argument is `None`, which we don't want. This view
-    always returns an HTTP redirect instead.
-
-    """
-    return auth.views.logout(request, template_name='phonebook/logout.html')
+    """View that logs out the user and redirects to home page."""
+    auth_logout(request)
+    return redirect('phonebook:home')
 
 
 @allow_public
@@ -372,12 +446,11 @@ def register(request):
     if so. Single-purpose view.
     """
     # TODO already vouched users can be re-vouched?
-
     if 'code' in request.GET:
         request.session['invite-code'] = request.GET['code']
         if request.user.is_authenticated():
             if not request.user.userprofile.is_vouched:
-                update_invites(request)
+                redeem_invite(request.user.userprofile, request.session['invite-code'])
         else:
             messages.info(request, _("You've been invited to join Mozillians.org! "
                                      "Sign in and then you can create a profile."))

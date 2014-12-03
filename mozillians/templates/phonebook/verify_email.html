@@ -16,11 +16,11 @@
   to login with your <em>{{ email }}</em> email address.
   {% endtrans %}
 </p>
-<a href="#" id="create_profile" class="persona-button browserid-login"
+<a href="#" id="nav-login" class="persona-button browserid-login"
    title="{{_('Verify Email' )}}">
   <span class="icon">
     <img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon">
   </span>
-  <span class="signin">{{ _('Verify Email') }}</span>
+  <span id="verify_email" class="signin">{{ _('Verify Email') }}</span>
 </a>
 {% endblock %}

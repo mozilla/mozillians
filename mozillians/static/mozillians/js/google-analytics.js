@@ -6,6 +6,7 @@ _gaq.push(['_require', 'inpage_linkid', pluginUrl]);
 _gaq.push(['_setAccount', _gaAccountCode]);
 _gaq.push(['_setAllowLinker', true]);
 _gaq.push(['_setAllowAnchor', true]);
+_gaq.push(['_gat._anonymizeIp']);
 _gaq.push(['_trackPageview']);
 
 if (_gaAccountCode) {
@@ -13,10 +14,7 @@ if (_gaAccountCode) {
         var ga = document.createElement('script');
         ga.type = 'text/javascript';
         ga.async = true;
-
-        var prefix = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www');
-        ga.src = prefix + '.google-analytics.com/ga.js';
-
+        ga.src = 'https://ssl.google-analytics.com/ga.js';
 
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(ga, s);

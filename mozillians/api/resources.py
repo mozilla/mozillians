@@ -1,6 +1,6 @@
-# Implement HTTP Caching
-# code from http://django-tastypie.readthedocs.org/en/latest/caching.html
 from django.utils.cache import patch_cache_control
+
+from django_statsd.clients import statsd
 
 
 class ClientCacheResourceMixIn(object):
@@ -11,6 +11,7 @@ class ClientCacheResourceMixIn(object):
 
     TODO: To be removed when we upgrade to django-tastypie >= 0.9.12.
 
+    Code from http://django-tastypie.readthedocs.org/en/latest/caching.html
     """
 
     def create_response(self, request, data, **response_kwargs):
@@ -39,3 +40,21 @@ class AdvancedSortingResourceMixIn(object):
             sort_list = self.Meta.default_order
 
         return obj_list.order_by(*sort_list)
+
+
+class GraphiteMixIn(object):
+    """
+    MixIn to post to graphite server every hit of API resource.
+    """
+
+    def wrap_view(self, view):
+        real_wrapper = super(GraphiteMixIn, self).wrap_view(view)
+
+        def wrapper(request, *args, **kwargs):
+            callback = getattr(self, view)
+            counter_name = 'api.resources.{klass}.{func}'.format(
+                klass=callback.im_class.__name__,
+                func=callback.im_func.__name__)
+            statsd.incr(counter_name)
+            return real_wrapper(request, *args, **kwargs)
+        return wrapper

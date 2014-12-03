@@ -1,6 +1,6 @@
-============
+=======================
 MySQL DB Anonymization
-============
+=======================
 
 Mozillians uses the production database for testing on stage and dev.
 We provide a script to anonymize a  database to remove some

@@ -11,9 +11,6 @@
 [submodule "vendor-local/src/elasticutils"]
 	path = vendor-local/src/elasticutils
 	url = git://github.com/mozilla/elasticutils
-[submodule "vendor-local/src/pyes"]
-	path = vendor-local/src/pyes
-	url = git://github.com/aparo/pyes
 [submodule "vendor-local/src/django-tastypie"]
 	path = vendor-local/src/django-tastypie
 	url = git://github.com/toastdriven/django-tastypie
@@ -35,3 +32,18 @@
 [submodule "mozillians/static/mozillians/css/less-prefixer"]
 	path = mozillians/static/mozillians/css/less-prefixer
 	url = https://github.com/JoelSutherland/LESS-Prefixer.git
+[submodule "vendor-local/src/sorl-thumbnail"]
+	path = vendor-local/src/sorl-thumbnail
+	url = git://github.com/mariocesar/sorl-thumbnail
+[submodule "vendor-local/src/django-waffle"]
+	path = vendor-local/src/django-waffle
+	url = git://github.com/jsocol/django-waffle.git
+[submodule "vendor-local/src/django-browserid"]
+	path = vendor-local/src/django-browserid
+	url = git://github.com/mozilla/django-browserid/
+[submodule "vendor-local/src/elasticsearch-py"]
+	path = vendor-local/src/elasticsearch-py
+	url = git://github.com/elasticsearch/elasticsearch-py.git
+[submodule "vendor-local/src/urllib3"]
+	path = vendor-local/src/urllib3
+	url = git://github.com/shazow/urllib3.git

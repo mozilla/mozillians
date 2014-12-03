@@ -1,12 +1,15 @@
 import re
 from datetime import date
 
+from django.core.validators import URLValidator
+from django.forms import ValidationError
 from django.utils.translation import get_language
 
 import jinja2
 from jingo import register
 
 from mozillians.users import get_languages_for_locale
+
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
@@ -18,7 +21,7 @@ def paragraphize(value):
                          for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
-@register.inclusion_tag('phonebook/includes/search_result.html')
+@register.inclusion_tag('includes/search_result.html')
 @jinja2.contextfunction
 def search_result(context, profile):
     d = dict(context.items())
@@ -49,3 +52,21 @@ def langcode_to_name(code, locale=None):
     except KeyError:
         return code
     return lang
+
+
+@register.filter
+def simple_urlize(value):
+    """Converts a string to a clickable link. If the string is legitimate
+    URL address it returns a clickable link otherwise returns the
+    string itself.
+
+    """
+
+    validate_url = URLValidator()
+
+    try:
+        validate_url(value)
+    except ValidationError:
+        return value
+
+    return jinja2.Markup('<a href="%s">%s</a>' % (value, value))

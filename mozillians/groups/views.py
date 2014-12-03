@@ -1,9 +1,11 @@
 import json
 
+from collections import defaultdict
+
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
-from django.db.models import Count
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
@@ -14,8 +16,8 @@ from mozillians.users.models import UserProfile
 from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.groups.forms import GroupForm, SortForm, SuperuserGroupForm
-from mozillians.groups.models import Group, Skill, GroupAlias, GroupMembership
+from mozillians.groups.forms import GroupForm, MembershipFilterForm, SortForm, SuperuserGroupForm
+from mozillians.groups.models import Group, Skill, GroupMembership
 
 
 def _list_groups(request, template, query):
@@ -52,15 +54,14 @@ def index_groups(request):
     Doesn't list functional areas, invisible groups, and groups with
     no vouched members
     """
-    query = Group.get_non_functional_areas(members__is_vouched=True)
+    query = Group.get_non_functional_areas()
     template = 'groups/index_groups.html'
     return _list_groups(request, template, query)
 
 
 def index_skills(request):
     """Lists all public skills (in use) on Mozillians."""
-    query = (Skill.objects.filter(members__is_vouched=True)
-             .annotate(num_members=Count('members')))
+    query = Skill.objects.filter(members__is_vouched=True)
     template = 'groups/index_skills.html'
     return _list_groups(request, template, query)
 
@@ -91,46 +92,77 @@ def search(request, searched_object=Group):
 
 @never_cache
 def show(request, url, alias_model, template):
-    """List all vouched users with this group."""
+    """List all members in this group."""
     group_alias = get_object_or_404(alias_model, url=url)
     if group_alias.alias.url != url:
         return redirect('groups:show_group', url=group_alias.alias.url)
 
     is_curator = False
-    m_selected = r_selected = False
+    is_manager = request.user.userprofile.is_manager
     is_pending = False
+    show_delete_group_button = False
+    membership_filter_form = MembershipFilterForm(request.GET)
 
     group = group_alias.alias
     profile = request.user.userprofile
     in_group = group.has_member(profile)
+    memberships = group.members.all()
+    data = {}
 
-    if alias_model is GroupAlias:
-        # Curator?
-        is_curator = (group.curator == request.user.userprofile)
-        if is_curator or request.user.is_superuser:
-            m_selected = 'm' in request.GET
-            r_selected = 'r' in request.GET
-            if m_selected or r_selected:
-                statuses = []
-                if m_selected:
-                    statuses.append(GroupMembership.MEMBER)
-                if r_selected:
-                    statuses.append(GroupMembership.PENDING)
-            else:
-                statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
-            profiles = group.get_vouched_annotated_members(statuses=statuses)
-        else:
-            # only show full members, or this user
-            profiles = group.get_vouched_annotated_members(statuses=[GroupMembership.MEMBER],
-                                                           always_include=profile)
+    if isinstance(group, Group):
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
-    else:
-        # not a Group
-        profiles = group.members.vouched()
+
+        is_curator = is_manager or (group.curator == request.user.userprofile)
+
+        # initialize the form only when the group is moderated and user is curator of the group
+        if is_curator and group.accepting_new_members == 'by_request':
+            membership_filter_form = MembershipFilterForm(request.GET)
+        else:
+            membership_filter_form = None
+
+        if is_curator:
+            statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
+            if membership_filter_form and membership_filter_form.is_valid():
+                filtr = membership_filter_form.cleaned_data['filtr']
+                if filtr == 'members':
+                    statuses = [GroupMembership.MEMBER]
+                elif filtr == 'pending_members':
+                    statuses = [GroupMembership.PENDING]
+
+            memberships = group.groupmembership_set.filter(status__in=statuses)
+
+            # Curator can delete their group if there are no other members.
+            show_delete_group_button = is_curator and group.members.all().count() == 1
+
+        else:
+            # only show full members, or this user
+            memberships = group.groupmembership_set.filter(
+                Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
+
+        # Order by UserProfile.Meta.ordering
+        memberships = memberships.order_by('userprofile')
+
+        # Find the most common skills of the group members.
+        # Order by popularity in the group.
+        shared_skill_ids = (group.members.filter(groupmembership__status=GroupMembership.MEMBER)
+                            .values_list('skills', flat=True))
+
+        count_skills = defaultdict(int)
+        for skill_id in shared_skill_ids:
+            count_skills[skill_id] += 1
+        common_skills_ids = [k for k, v in sorted(count_skills.items(),
+                                                  key=lambda x: x[1],
+                                                  reverse=True)
+                             if count_skills[k] > 1]
+
+        # Translate ids to Skills preserving order.
+        skills = [Skill.objects.get(id=skill_id) for skill_id in common_skills_ids if skill_id]
+
+        data.update(skills=skills, membership_filter_form=membership_filter_form)
 
     page = request.GET.get('page', 1)
-    paginator = Paginator(profiles, settings.ITEMS_PER_PAGE)
+    paginator = Paginator(memberships, settings.ITEMS_PER_PAGE)
 
     try:
         people = paginator.page(page)
@@ -141,60 +173,48 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    # Curator can delete their group if there are no other members.
-    show_delete_group_button = is_curator and group.members.all().count() == 1
+    extra_data = dict(people=people,
+                      group=group,
+                      in_group=in_group,
+                      is_curator=is_curator,
+                      is_pending=is_pending,
+                      show_pagination=show_pagination,
+                      show_delete_group_button=show_delete_group_button,
+                      show_join_button=group.user_can_join(request.user.userprofile),
+                      show_leave_button=group.user_can_leave(request.user.userprofile),
+                      members=group.member_count,
+                      )
 
-    data = dict(people=people,
-                group=group,
-                in_group=in_group,
-                is_curator=is_curator,
-                is_pending=is_pending,
-                show_pagination=show_pagination,
-                show_delete_group_button=show_delete_group_button,
-                show_join_button=group.user_can_join(request.user.userprofile),
-                show_leave_button=group.user_can_leave(request.user.userprofile),
-                m_selected=m_selected,
-                r_selected=r_selected,
-                )
-
-    if isinstance(group, Group):
-        # Get the most globally popular skills that appear in the group
-        # Sort them with most members first
-        #
-        skills = (Skill.objects
-                  .filter(members__in=profiles)
-                  .annotate(no_users=Count('members'))
-                  .order_by('-no_users'))
-        data.update(skills=skills)
-        data.update(irc_channels=group.irc_channel.split(' '))
-        data.update(members=paginator.count)
+    data.update(extra_data)
 
     return render(request, template, data)
 
 
-def remove_member(request, group_pk, user_pk):
-    group = get_object_or_404(Group, pk=group_pk)
+def remove_member(request, url, user_pk):
+    group = get_object_or_404(Group, url=url)
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
     is_curator = (group.curator == this_userprofile)
-    is_superuser = request.user.is_superuser
+    is_manager = request.user.userprofile.is_manager
+    group_url = reverse('groups:show_group', args=[group.url])
+    next_url = request.REQUEST.get('next_url', group_url)
 
     # TODO: this duplicates some of the logic in Group.user_can_leave(), but we
     # want to give the user a message that's specific to the reason they can't leave.
     # Can we make this DRYer?
 
     # You can remove yourself, if group allows it. Curator and superuser can remove anyone.
-    if not (is_curator or is_superuser):
+    if not (is_curator or is_manager):
         if not group.members_can_leave:
             messages.error(request, _('This group does not allow members to remove themselves.'))
-            return redirect('groups:show_group', url=group.url)
+            return redirect(next_url)
         if profile_to_remove != this_userprofile:
             raise Http404()
 
     # Curators cannot be removed, by anyone at all.
     if group.curator == profile_to_remove:
         messages.error(request, _('A curator cannot be removed from a group.'))
-        return redirect('groups:show_group', url=group.url)
+        return redirect(next_url)
 
     if request.method == 'POST':
         group.remove_member(profile_to_remove,
@@ -203,25 +223,30 @@ def remove_member(request, group_pk, user_pk):
             messages.info(request, _('You have been removed from this group.'))
         else:
             messages.info(request, _('The group member has been removed.'))
-        return redirect('groups:show_group', url=group.url)
+        return redirect(next_url)
 
     # Display confirmation page
     context = {
         'group': group,
-        'profile': profile_to_remove
+        'profile': profile_to_remove,
+        'next_url': next_url
     }
     return render(request, 'groups/confirm_remove_member.html', context)
 
 
 @require_POST
-def confirm_member(request, group_pk, user_pk):
+def confirm_member(request, url, user_pk):
     """
     Add a member to a group who has requested membership.
     """
-    group = get_object_or_404(Group, pk=group_pk)
+    group = get_object_or_404(Group, url=url)
     profile = get_object_or_404(UserProfile, pk=user_pk)
     is_curator = (group.curator == request.user.userprofile)
-    if not (is_curator or request.user.is_superuser):
+    is_manager = request.user.userprofile.is_manager
+    group_url = reverse('groups:show_group', args=[group.url])
+    next_url = request.REQUEST.get('next_url', group_url)
+
+    if not (is_curator or is_manager):
         raise Http404()
     try:
         membership = GroupMembership.objects.get(group=group, userprofile=profile)
@@ -233,7 +258,7 @@ def confirm_member(request, group_pk, user_pk):
         else:
             group.add_member(profile)
             messages.info(request, _('This user has been added as a member of this group.'))
-    return redirect('groups:show_group', url=group.url)
+    return redirect(next_url)
 
 
 def edit(request, url, alias_model, template):
@@ -241,9 +266,9 @@ def edit(request, url, alias_model, template):
 
 
 @require_POST
-def join_group(request, group_pk):
+def join_group(request, url):
     """User request to join group."""
-    group = get_object_or_404(Group, pk=group_pk)
+    group = get_object_or_404(Group, url=url)
     profile_to_add = request.user.userprofile
 
     # TODO: this duplicates some of the logic in Group.user_can_join(), but we
@@ -262,8 +287,7 @@ def join_group(request, group_pk):
             messages.info(request, _('You have been added to this group.'))
         elif group.accepting_new_members == 'by_request':
             group.add_member(profile_to_add, status=GroupMembership.PENDING)
-            messages.info(request,
-                          _('Your membership request is pending approval by the group curator.'))
+            messages.info(request, _('Your membership request has been sent to the group curator.'))
 
     return redirect(reverse('groups:show_group', args=[group.url]))
 
@@ -289,7 +313,7 @@ def group_delete(request, url):
     group = get_object_or_404(Group, url=url)
     # Only a group curator is allowed to delete a group
     is_curator = profile == group.curator
-    if not is_curator:
+    if not is_curator and not profile.is_manager:
         messages.error(request, _('You must be a curator to delete a group'))
         return redirect(reverse('groups:show_group', args=[group.url]))
     # Cannot delete if anyone else is in it
@@ -302,24 +326,27 @@ def group_delete(request, url):
     return redirect(reverse('groups:index_groups'))
 
 
+@never_cache
 def group_add_edit(request, url=None):
     """
     Add or edit a group.  (If a url is passed in, we're editing.)
     """
 
     profile = request.user.userprofile
+    is_manager = request.user.userprofile.is_manager
+
     if url:
         # Get the group to edit
         group = get_object_or_404(Group, url=url)
         # Only a group curator or an admin is allowed to edit a group
         is_curator = profile == group.curator
-        if not (is_curator or request.user.is_superuser):
+        if not (is_curator or is_manager):
             messages.error(request, _('You must be a curator or an admin to edit a group'))
             return redirect(reverse('groups:show_group', args=[group.url]))
     else:
         group = Group(curator=profile)
 
-    form_class = SuperuserGroupForm if request.user.is_superuser else GroupForm
+    form_class = SuperuserGroupForm if is_manager else GroupForm
 
     form = form_class(request.POST or None, instance=group)
     if form.is_valid():

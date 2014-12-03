@@ -1,0 +1,11 @@
+../diff_match_patch/diff_match_patch_test.py
+../diff_match_patch/__init__.py
+../diff_match_patch/diff_match_patch.py
+../diff_match_patch/diff_match_patch_test.pyc
+../diff_match_patch/__init__.pyc
+../diff_match_patch/diff_match_patch.pyc
+./
+SOURCES.txt
+dependency_links.txt
+top_level.txt
+PKG-INFO

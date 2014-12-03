@@ -1,9 +1,11 @@
 from django.contrib import admin
 
+from import_export.admin import ExportMixin
+
 from models import FunFact
 
 
-class FunFactAdmin(admin.ModelAdmin):
+class FunFactAdmin(ExportMixin, admin.ModelAdmin):
     readonly_fields = ['result', 'created', 'updated']
     list_display = ['name', 'created', 'updated', 'result', 'is_published']
 

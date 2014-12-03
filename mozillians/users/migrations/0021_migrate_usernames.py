@@ -7,7 +7,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 
-from mozillians.users.helpers import USERNAME_MAX_LENGTH
+from mozillians.settings.base import USERNAME_MAX_LENGTH
 
 class Migration(SchemaMigration):
 

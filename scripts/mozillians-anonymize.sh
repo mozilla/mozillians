@@ -3,8 +3,10 @@
 INSTANCE=generic
 DB=mozillians_org
 DEVDB=sanitize_dev_$DB
+DEVDB_SANITIZED=sanitized_dev_$DB
 STAGEDB=sanitize_stage_$DB
-cd /data/backups/bin/
+STAGEDB_SANITIZED=sanitized_stage_$DB
+cd /data/backups/bin/sanitize
 rm -f anonymize.py anonymize_dev.yml anonymize_stage.yml
 /usr/bin/wget -q -nH https://raw.github.com/mozilla/mozillians/master/scripts/mysql-anonymize/anonymize.py
 /bin/chmod 755 anonymize.py
@@ -25,6 +27,13 @@ fi
 
 MYSQL="/usr/bin/mysql --defaults-file=/data/$INSTANCE/$INSTANCE.cnf -S /var/lib/mysql/$INSTANCE.sock"
 
+# Delete and recreate sanitized dbs
+$MYSQL -e "drop database if exists $DEVDB_SANITIZED"
+$MYSQL -e "create database if not exists $DEVDB_SANITIZED"
+$MYSQL -e "drop database if exists $STAGEDB_SANITIZED"
+$MYSQL -e "create database if not exists $STAGEDB_SANITIZED"
+
+
 # import db
 $MYSQL -e "drop database if exists $DEVDB"
 $MYSQL -e "create database if not exists $DEVDB"
@@ -42,10 +51,16 @@ $MYSQL $DEVDB < $SQLPATH/$DB.$TODAY.queries_sanitize_dev.sql
 $MYSQL $STAGEDB < $SQLPATH/$DB.$TODAY.queries_sanitize_stage.sql
 
 # export dbs
-/usr/bin/mysqldump $DEVDB -u root $P -S /var/lib/mysql/$INSTANCE.sock > $SQLPATH/$DB.$TODAY.sanitized_dev.sql
-/usr/bin/mysqldump $STAGEDB -u root $P -S /var/lib/mysql/$INSTANCE.sock > $SQLPATH/$DB.$TODAY.sanitized_stage.sql
+/usr/bin/mysqldump $DEVDB_SANITIZED -u root $P -S /var/lib/mysql/$INSTANCE.sock > $SQLPATH/$DB.$TODAY.sanitized_dev.sql
+/usr/bin/mysqldump $STAGEDB_SANITIZED -u root $P -S /var/lib/mysql/$INSTANCE.sock > $SQLPATH/$DB.$TODAY.sanitized_stage.sql
 
 # copy dbs
-/usr/bin/scp -q $SQLPATH/$DB.$TODAY.sanitized_dev.sql $SQLPATH/$DB.$TODAY.sanitized_stage.sql  dev1.db.phx1.mozilla.com:/data/backup-drop/$INSTANCE/$DB
+# copy dbs; compress for the copy only
+gzip $SQLPATH/$DB.$TODAY.sanitized_dev.sql $SQLPATH/$DB.$TODAY.sanitized_stage.sql
+/usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_dev.sql.gz genericadm.private.phx1.mozilla.com:/data/genericrhel6-dev/src/mozillians-dev.allizom.org/mozillians/media/mozillians_org.latest.sanitized_dev.sql.gz
+# stage goes to dev-db, an LDAP-protected dir
+/usr/bin/scp $SQLPATH/$DB.$TODAY.sanitized_stage.sql.gz genericadm.private.phx1.mozilla.com:/data/genericrhel6-dev/src/mozillians-dev.allizom.org/mozillians/media/dev-db/mozillians_org.latest.sanitized_stage.sql.gz
+# leave this uncompressed for more efficient storage on our backup device (yes, really)
+gunzip $SQLPATH/$DB.$TODAY.sanitized_dev.sql.gz $SQLPATH/$DB.$TODAY.sanitized_stage.sql.gz            
 
 # Done!

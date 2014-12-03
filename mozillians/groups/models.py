@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
 from django.utils.timezone import now
 
 from autoslug.fields import AutoSlugField
@@ -9,14 +8,18 @@ from funfactory.utils import absolutify
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
+from mozillians.groups.managers import GroupBaseManager, GroupManager
 from mozillians.groups.helpers import slugify
-from mozillians.groups.tasks import email_membership_change
+from mozillians.groups.tasks import email_membership_change, member_removed_email
 from mozillians.users.tasks import update_basket_task
 
 
 class GroupBase(models.Model):
-    name = models.CharField(db_index=True, max_length=50, unique=True)
+    name = models.CharField(db_index=True, max_length=50,
+                            unique=True, verbose_name=_lazy(u'Name'))
     url = models.SlugField(blank=True)
+
+    objects = GroupBaseManager()
 
     class Meta:
         abstract = True
@@ -97,17 +100,15 @@ class GroupBase(models.Model):
 
     def add_member(self, userprofile):
         self.members.add(userprofile)
-        update_basket_task.delay(userprofile.id)
 
     def remove_member(self, userprofile):
         self.members.remove(userprofile)
-        update_basket_task.delay(userprofile.id)
 
     def has_member(self, userprofile):
         return self.members.filter(user=userprofile.user).exists()
 
     def has_pending_member(self, userprofile):
-        # skills and languages have no pending members, just members
+        # skills have no pending members, just members
         return False
 
 
@@ -176,14 +177,22 @@ class Group(GroupBase):
         default='', blank=True)
     members_can_leave = models.BooleanField(default=True)
     accepting_new_members = models.CharField(
+        verbose_name=_lazy(u'Accepting new members'),
         choices=(
             ('yes', _lazy(u'Yes')),
             ('by_request', _lazy(u'By request')),
             ('no', _lazy(u'No')),
         ),
-        default='by_request',
+        default='yes',
         max_length=10
     )
+    new_member_criteria = models.TextField(
+        max_length=255,
+        default='',
+        blank=True,
+        verbose_name=_lazy(u'New Member Criteria'),
+        help_text=_lazy(u'Specify the criteria you will use to decide whether or not '
+                        u'you will accept a membership request.'))
     functional_area = models.BooleanField(default=False)
     visible = models.BooleanField(
         default=True,
@@ -197,11 +206,12 @@ class Group(GroupBase):
                    u'curator a reminder')
     )
 
+    objects = GroupManager()
+
     @classmethod
     def get_functional_areas(cls):
         """Return all visible groups that are functional areas."""
-        return cls.objects.filter(functional_area=True, visible=True).annotate(
-            num_members=models.Count('members'))
+        return cls.objects.visible().filter(functional_area=True)
 
     @classmethod
     def get_non_functional_areas(cls, **kwargs):
@@ -210,8 +220,7 @@ class Group(GroupBase):
 
         Use kwargs to apply additional filtering to the groups.
         """
-        return cls.objects.filter(functional_area=False, visible=True, **kwargs).annotate(
-            num_members=models.Count('members'))
+        return cls.objects.visible().filter(functional_area=False, **kwargs)
 
     @classmethod
     def get_curated(cls):
@@ -220,9 +229,7 @@ class Group(GroupBase):
 
     @classmethod
     def search(cls, query):
-        results = super(Group, cls).search(query)
-        results = results.filter(visible=True)
-        return results
+        return super(Group, cls).search(query).visible()
 
     def get_absolute_url(self):
         return absolutify(reverse('groups:show_group', args=[self.url]))
@@ -255,17 +262,22 @@ class Group(GroupBase):
         if created:
             if status == GroupMembership.MEMBER:
                 # Joined
-                update_basket_task.delay(userprofile.id)
-        elif not created and membership.status != status:
-            # Status changed
-            old_status = membership.status
-            membership.status = status
-            if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
-                # Request accepted
-                membership.save()
-                update_basket_task.delay(userprofile.id)
-                email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-            # else? never demote people from full member to requested, that doesn't make sense
+                # Group is functional area, we want to sent this update to Basket
+                if self.functional_area:
+                    update_basket_task.delay(userprofile.id)
+        else:
+            if membership.status != status:
+                # Status changed
+                old_status = membership.status
+                membership.status = status
+                if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
+                    # Request accepted
+                    membership.save()
+                    if self.functional_area:
+                        # Group is functional area, we want to sent this update to Basket.
+                        update_basket_task.delay(userprofile.id)
+                    email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
+                # else? never demote people from full member to requested, that doesn't make sense
 
     def remove_member(self, userprofile, send_email=True):
         try:
@@ -274,11 +286,17 @@ class Group(GroupBase):
             return
         old_status = membership.status
         membership.delete()
-        update_basket_task.delay(userprofile.id)
+        # If group is functional area, we want to sent this update to Basket
+        if self.functional_area:
+            update_basket_task.delay(userprofile.id)
+
         if old_status == GroupMembership.PENDING and send_email:
             # Request denied
             email_membership_change.delay(self.pk, userprofile.user.pk,
                                           old_status, None)
+        elif old_status == GroupMembership.MEMBER and send_email:
+            # Member removed
+            member_removed_email.delay(self.pk, userprofile.user.pk)
 
     def has_member(self, userprofile):
         """
@@ -293,33 +311,6 @@ class Group(GroupBase):
         """
         return self.groupmembership_set.filter(userprofile=userprofile,
                                                status=GroupMembership.PENDING).exists()
-
-    def get_vouched_annotated_members(self, statuses=None, always_include=None):
-        """
-        Return list of UserProfiles of vouched users who are members or pending members.
-
-        Pass ``statuses`` a list of desired statuses to filter by status too.
-
-        Pass a userprofile in ``always_include`` to include that userprofile regardless
-        of status (so we show a user that they are in the group in pending state).
-
-        Attribute ``.pending`` indicates whether membership is only pending.
-        Attribute ``.is_curator`` indicates if member is a curator of this group
-        """
-        memberships = self.groupmembership_set.filter(userprofile__is_vouched=True)
-        if statuses is not None:
-            if always_include is not None:
-                memberships = memberships.filter(Q(status__in=statuses)
-                                                 | Q(userprofile=always_include))
-            else:
-                memberships = memberships.filter(status__in=statuses)
-        profiles = []
-        for membership in memberships:
-            profile = membership.userprofile
-            profile.pending = (membership.status == GroupMembership.PENDING)
-            profile.is_curator = (self.curator == profile)
-            profiles.append(profile)
-        return profiles
 
 
 class SkillAlias(GroupAliasBase):

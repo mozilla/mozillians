@@ -62,7 +62,7 @@ $(function() {
     }
 
     $('#accounts .addField').click(function() {
-        cloneFormsetField('fieldset#accounts > div:last', 'externalaccount_set');
+        cloneFormsetField('fieldset#accounts > div > div:last', 'externalaccount_set');
         return false;
     });
 
@@ -72,8 +72,28 @@ $(function() {
         return false;
     });
 
-    $('.tshirt-info').click(function() {
-        $(this).toggleClass('active');
-        return false;
+    // Show tooltip on hover on desktops and on click on touch
+    // devices.
+
+
+    $('.tshirt-info').on({
+        "touchstart mouseenter":function(event) {
+            event.preventDefault();
+            $(this).addClass('active');
+        },
+        "touchend mouseleave":function(event) {
+            event.preventDefault();
+            $(this).removeClass('active');
+        },
+    });
+
+    $('#id_skills').tagit({
+        allowSpaces: true,
+        caseSensitive: false,
+        singleField: true,
+        singleFieldDelimiter: ',',
+        removeConfirmation: true,
+        tagSource: $('#skills').data('autocomplete-url'),
+        triggerKeys: ['enter', 'comma', 'tab']
     });
 });

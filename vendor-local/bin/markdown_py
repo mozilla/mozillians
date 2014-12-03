@@ -1,4 +1,4 @@
-#!/home/seadog/.virtualenvs/mozillians/bin/python
+#!/usr/bin/env python
 """
 Python Markdown, the Command Line Script
 ========================================

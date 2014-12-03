@@ -62,6 +62,16 @@
     {% if groups %}
       <div id="search_group">
         <h2>{{ _('Groups') }}</h2>
+        <p>
+          {% trans count=groups.count() %}
+            {{ count }} group matching
+            {% pluralize %}
+            {{ count }} groups matching
+          {% endtrans %}
+          {% if search_form.cleaned_data.q %}
+            "{{ search_form.cleaned_data.q }}"
+          {% endif %}
+        </p>
         <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
           {% for group in groups %}
             <li class="tagit-choice ui-widget-content ui-state-default
@@ -76,6 +86,16 @@
     {% endif %}
     {% if people %}
       <h2>{{ _('Mozillians') }}</h2>
+      <p>
+        {% trans count=people.paginator.count %}
+          {{ count }} Mozillian matching
+          {% pluralize %}
+          {{ count }} Mozillians matching
+        {% endtrans %}
+        {% if search_form.cleaned_data.q %}
+            "{{ search_form.cleaned_data.q }}"
+        {% endif %}
+      </p>
       {% with items=people %}
         {% include 'includes/pagination.html' %}
       {% endwith %}

@@ -24,7 +24,7 @@
 
       {% if show_delete_group_button %}
         <form action="{{ url('groups:group_delete', group.url) }}"
-            id="delete-group" method="post">
+              id="delete-group" method="post">
           {{ csrf() }}
           <button class="button button-negative delete right">
             {{ _('Delete Group') }}
@@ -32,28 +32,28 @@
         </form>
       {% endif %}
 
-      {% if is_curator or request.user.is_superuser %}
-        <a class="button right" href="{{ url('groups:group_edit', group.url) }}">{{ _('Edit Group') }}</a>
+      {% if is_curator %}
+        <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
+          {{ _('Edit Group') }}
+        </a>
       {% endif %}
 
       {% if group.description %}
         <p>{{ group.description }}</p>
       {% endif %}
 
+      {% if group.new_member_criteria %}
+        <p><span>{{ _('New Member Criteria') }}:</span><br />{{ group.new_member_criteria }}</p>
+      {% endif %}
+
       <ul class="curated-group-details">
           {% if group.irc_channel %}
           <li>
-              <span>
-              {% if irc_channels|length > 1 %}
-                {{ _('IRC Channels') }}:
-              {% else %}
-                {{ _('IRC Channel') }}:
-              {% endif %}
-              </span>
-              {% for irc in irc_channels %}
-                {{ irc }}
-              {% endfor %}
-            </li>
+            <span>
+              {{ _('IRC Channel') }}:
+            </span>
+            {{ group.irc_channel }}
+          </li>
           {% endif %}
 
           {% if group.website %}
@@ -80,7 +80,13 @@
 
       {% if group.curator %}  {# curated group #}
         <div class="curator">
-          <h3>{% if group.functional_area %}{{ _('Community Steward') }}{% else %}{{ _('Curator') }}{% endif %}</h3>
+          <h3>
+            {% if group.functional_area %}
+              {{ _('Community Steward') }}
+            {% else %}
+              {{ _('Curator') }}
+            {% endif %}
+          </h3>
           <div class="avatar">
             <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
               <img class="profile-photo"
@@ -99,7 +105,7 @@
                 </li>
                 <li>
                   <a href="mailto:{{ group.curator.user.email }}">
-                     <i class="icon-envelope"></i>
+                     <i class="icon-envelope-o"></i>
                     {{ group.curator.user.email }}
                   </a>
                 </li>
@@ -111,17 +117,21 @@
     </article><!-- .group-meta -->
 
     {% if show_join_button %}
-        <form action="{{ url('groups:join_group', group.pk) }}"
+        <form action="{{ url('groups:join_group', group.url) }}"
               id="join-group" method="post">
           {{ csrf() }}
-        <button class="button">
-          {{ _('Join Group') }}
-        </button>
+          <button class="button">
+            {% if group.accepting_new_members == 'by_request' %}
+                {{ _('Request to Join Group') }}
+            {% else %}
+                {{ _('Join Group') }}
+            {% endif %}
+          </button>
       </form>
     {% endif %}
 
     {% if show_leave_button %}
-        <form action="{{ url('groups:remove_member', group.pk, user.userprofile.pk) }}"
+        <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
               id="leave-group" method="post">
           {{ csrf() }}
           <button class="button button-negative">
@@ -130,25 +140,26 @@
       </form>
     {% endif %}
 
-    {% if is_curator %}
+    {% if membership_filter_form %}
       <div class="filters right">
         <form method="get">
-          <input id="members" name="m" type="checkbox" {% if m_selected %}checked{% endif %}>
-          <label for="members">members</label>
-          <input id="requests" name="r" type="checkbox" {% if r_selected %}checked{% endif %}>
-          <label for="requests">requests</label>
-          <input class="button" type="submit" value="filter">
+          {{ membership_filter_form }}
+          <input class="button" type="submit" value="{{ _('Filter') }}">
         </form>
       </div>
     {% endif %}
 
     {% if not people.paginator.count %}
-      <div class="well">
-        <p id="not-found">
+      <div class="clear">
+        {% if membership_filter_form and membership_filter_form.filtr.value() == 'pending_members' %}
           {% trans group_name=group.name %}
-            Sorry, we cannot find any mozillians in {{ group_name }}
+            There are no open membership requests for {{ group_name }}.
           {% endtrans %}
-        </p>
+        {% else %}
+          {% trans group_name=group.name %}
+            Sorry, we can not find any mozillians in {{ group_name }}.
+          {% endtrans %}
+        {% endif %}
       </div>
     {% else %}
       {% with items=people %}
@@ -164,17 +175,17 @@
       </h3>
 
       {% if is_pending %}
-        <div class="group-pending-membership">{{ _('Your membership request is pending approval by the group curator.') }}</div>
+        <div class="alert alert-warning" id="group-pending-membership">
+          {{ _('Your membership request is pending approval by the group curator.') }}
+        </div>
       {% endif %}
 
 
       <br class="clear">
 
       <div class="row">
-        {% for people_slice in people|slice(3) -%}
-            {% for person in people_slice %}
-              {{ search_result(person) }}
-            {% endfor %}
+        {% for membership in people %}
+          {{ search_result(membership.userprofile) }}
         {% endfor %}
       </div>
       {% with items=people %}

@@ -10,9 +10,8 @@
 {% block body_id %}edit-profile{% endblock %}
 
 {% block extrahead %}
-  {% compress css %}
-    <link href="{{ static('mozillians/css/profile_edit.less') }}" type="text/less" rel="stylesheet" media="screen" />
-  {% endcompress %}
+  <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css"
+        type="text/css" rel="stylesheet" media="screen" />
   {{ profile_form.media.css }}
 {% endblock extrahead %}
 
@@ -56,7 +55,9 @@
     {{ csrf() }}
 
     <fieldset class="privacy-all">
-      <label>{{ _('Make all of my profile fields visible to:') }}</label>
+      <label for="privacy-global-settings">
+        {{ _('Make all of my profile fields visible to:') }}
+      </label>
       <select id="privacy-global-settings">
         <option value="-1" selected>{{ _('-- No Change --') }}</option>
         <option value="3">{{ _('Mozillians') }}</option>
@@ -73,19 +74,43 @@
       </fieldset>
     {% endif %}
 
-    <fieldset id="photo">
-      <label>{{ _('Profile Photo') }}</label>
-      <div class="profile-photo">
-        <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
-      </div>
-      <input class="input-file" id="id_photo" type="file" name="photo">
-      {% if profile.photo %}
-        <div id="id_photo_delete">
-          <input type="checkbox" name="photo-clear">
-          <label>{{ _('Remove Profile Photo') }}</label>
+    {% if (profile_form.non_field_errors() or user_form.non_field_errors()
+           or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
+      <ul class="unstyled">
+        {% for error in profile_form.non_field_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in user_form.non_field_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in accounts_formset.non_form_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+        {% for error in language_formset.non_form_errors() %}
+          <li class="alert alert-error">{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <!-- Basic Information section -->
+    <fieldset>
+      <h2>{{ _('Basic Information') }}</h2>
+      <div id="photo">
+        <label for="id_photo"> {{ _('Profile Photo') }} </label>
+        <div class="profile-photo">
+          <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
         </div>
-      {% endif %}
-      {{ privacy_field(profile_form.privacy_photo) }}
+        <input class="input-file" id="id_photo" type="file" name="photo">
+        {% if profile.photo %}
+          <div id="id_photo_delete">
+            <label>
+              <input type="checkbox" name="photo-clear">
+              {{ _('Remove Profile Photo') }}
+            </label>
+          </div>
+        {% endif %}
+        {{ privacy_field(profile_form.privacy_photo) }}
+      </div>
     </fieldset>
 
     <fieldset>
@@ -103,26 +128,6 @@
     </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.country) }}
-      {{ privacy_field(profile_form.privacy_country) }}
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.region) }}
-      {{ privacy_field(profile_form.privacy_region) }}
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.city) }}
-      {{ privacy_field(profile_form.privacy_city) }}
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.timezone) }}
-      {{ privacy_field(profile_form.privacy_timezone) }}
-    </fieldset>
-
-    <fieldset>
       {{ mozillians_field(profile_form.bio) }}
       <span class="under-input-field">
         {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
@@ -131,37 +136,86 @@
       </span>
       {{ privacy_field(profile_form.privacy_bio) }}
     </fieldset>
+    <!-- End of Basic Information section -->
 
-    <fieldset id="accounts">
-      <label>{{ _('Accounts') }}</label>
-      {{ accounts_formset.management_form }}
-      {% for account_form in accounts_formset %}
-        <div class="externalaccount-fieldrow
-                    {% if account_form.errors %} error{% endif %}">
-          {{ account_form.non_field_errors() }}
-          {% for field in account_form %}
-            {{ field.errors }}
-          {% endfor %}
-          {% for field in account_form %}
-            {% if not field.name == 'privacy' %}
-              {{ field }}
-              {% if field.name == 'DELETE' %}
-                <i class="icon-minus-sign"></i> {{ _('Delete') }}
-              {% endif %}
-            {% else %}
-              {{ privacy_field(field) }}
-            {% endif %}
-          {% endfor %}
-        </div>
+    <!-- Location section -->
+    <fieldset>
+      <h2 class="required">{{ _('Your location') }}</h2>
+      {% for error in profile_form.errors['location'] %}
+        <span class="error-message">{{ error }}</span>
       {% endfor %}
-      <span class="under-input-field">
-        <a href="#" class="addField"><i class="icon-plus-sign"></i> {{ _('Add account') }}</a>
-      </span>
+      <div id="location">
+        <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+        <div id="location_gps_button"><i class="icon-target"></i></div>
+        <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+        <input id="location_search" type="search"/>
+        <input id="location_search_button" class="button" type="button" value="Search location"/>
+        <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+        <ol id="location_search_results" class="scroll-shadows"></ol>
+      </div>
+      <div id="gps_error" class="error-message" style="display:none;">
+        <i class="icon-target"></i> {{ _('You have denied Location services.') }}
+      </div>
     </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.ircname) }}
-      {{ privacy_field(profile_form.privacy_ircname) }}
+      <label class="required">{{ _('Country') }}</label>
+      <span id="display_country" class="geodisplay"
+            data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
+      </span>
+      <div class="geocheckbox {% if profile_form.savecountry.errors %} error {% endif %}">
+        {{ profile_form.savecountry }}
+        {{ profile_form.savecountry.label_tag() }}
+        {% for error in profile_form.savecountry.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
+      </div>
+      {{ privacy_field(profile_form.privacy_geo_country) }}
+    </fieldset>
+
+    <fieldset>
+      <label>{{ _('Region') }}</label>
+      <span id="display_province" class="geodisplay"
+            data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
+      </span>
+      <div class="geocheckbox {% if profile_form.saveregion.errors %} error {% endif %}">
+        {{ profile_form.saveregion }}
+        {{ profile_form.saveregion.label_tag() }}
+        {% for error in profile_form.saveregion.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
+      </div>
+      {{ privacy_field(profile_form.privacy_geo_region) }}
+    </fieldset>
+
+    <fieldset>
+      <label>{{ _('City') }}</label>
+      <span id="display_city" class="geodisplay"
+            data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
+      <div class="geocheckbox {% if profile_form.savecity.errors %} error {% endif %}">
+        {{ profile_form.savecity }}
+        {{ profile_form.savecity.label_tag() }}
+        {% for error in profile_form.savecity.errors %}
+          <span class="error-message">{{ error }}</span>
+        {% endfor %}
+      </div>
+      {{ privacy_field(profile_form.privacy_geo_city) }}
+    </fieldset>
+      {{ profile_form.lat }}
+      {{ profile_form.lng }}
+    <fieldset>
+      {{ mozillians_field(profile_form.timezone) }}
+      {{ privacy_field(profile_form.privacy_timezone) }}
+    </fieldset>
+    <!-- End of location section -->
+
+    <!-- Mozilla contributions section -->
+    <fieldset>
+      <h2>Your Mozilla Contributions</h2>
+      <div id="mozillian-contributions">
+        {{ mozillians_field(profile_form.title) }}
+        {{ privacy_field(profile_form.privacy_title) }}
+      </div>
     </fieldset>
 
     <fieldset>
@@ -170,12 +224,49 @@
     </fieldset>
 
     <fieldset>
-      {{ mozillians_field(profile_form.title) }}
-      {{ privacy_field(profile_form.privacy_title) }}
+      {{ mozillians_field(profile_form.story_link) }}
+      {{ privacy_field(profile_form.privacy_story_link) }}
+    </fieldset>
+    <!-- End of Mozilla contributions section -->
+
+    <!-- Accounts -->
+    <fieldset id="accounts">
+      <h2>Account Information</h2>
+      <div>
+        <label>{{ _('External Accounts') }}</label>
+        {{ accounts_formset.management_form }}
+        {% for account_form in accounts_formset %}
+          <div class="externalaccount-fieldrow
+                      {% if account_form.errors %} error{% endif %}">
+            {{ account_form.non_field_errors() }}
+            {% for field in account_form %}
+              {{ field.errors }}
+            {% endfor %}
+            {% for field in account_form %}
+              {% if not field.name == 'privacy' %}
+                {{ field }}
+                {% if field.name == 'DELETE' %}
+                  <i class="icon-minus-circle"></i> {{ _('Delete') }}
+                {% endif %}
+              {% else %}
+                {{ privacy_field(field) }}
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <span class="under-input-field">
+          <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add account') }}</a>
+        </span>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      {{ mozillians_field(profile_form.ircname) }}
+      {{ privacy_field(profile_form.privacy_ircname) }}
     </fieldset>
 
     <fieldset id="shirts">
-      <legend>{{ _('T-Shirt Size') }}</legend>
+      <h2>{{ _('T-Shirt Size') }}</h2>
       <p class="field_description">
         {% trans %}
           Like t-shirts? Add your size so we can give you a shirt at events or for other special occasions.
@@ -187,7 +278,7 @@
             <h4>
               {{ _('Fitted') }}
               <div class="tshirt-info">
-                <i class="icon-info-sign"></i>
+                <i class="icon-info-circle"></i>
                 <span>
                   {% trans %}
                     A fitted-cut tshirt has a curved side hem which
@@ -209,7 +300,7 @@
             <h4>
               {{ _('Straight-cut') }}
               <div class="tshirt-info">
-                <i class="icon-info-sign"></i>
+                <i class="icon-info-circle"></i>
                 <span>
                   {% trans %}
                     A straight-cut shirt has wide shoulders and a body
@@ -220,9 +311,11 @@
             </h4>
             {% for t_select in t_choices[7:14] %}
               <div class="tshirt-option">
-                <input{% if profile.tshirt == t_select.0  %} checked{% endif %}
-                type="radio" name="tshirt" value="{{ t_select.0 }}">
-                <label>{{ t_select.1 }}</label>
+                <label>
+                  <input {% if profile.tshirt == t_select.0  %} checked {% endif %}
+                    type="radio" name="tshirt" value="{{ t_select.0 }}">
+                  {{ t_select.1 }}
+                </label>
               </div>
             {% endfor %}
           </div>
@@ -232,7 +325,7 @@
     </fieldset>
 
     <fieldset id="groups">
-      <legend>{{ _('Groups') }}</legend>
+      <h2>{{ _('Groups') }}</h2>
       <p class="field_description">
         {% trans %}
           Groups are a community of Mozillians with some relation to
@@ -268,8 +361,8 @@
       {{ privacy_field(profile_form.privacy_groups) }}
     </fieldset>
 
-    <fieldset id="skills">
-      <legend>{{ _('Skills') }}</legend>
+    <fieldset id="skills" data-autocomplete-url="{{ url('groups:search_skills') }}">
+      <h2>{{ _('Skills') }}</h2>
       <p class="field_description">
         {% trans %}
           A skill is the learned capacity to carry out pre-determined
@@ -277,15 +370,12 @@
           both.
         {% endtrans %}
       </p>
-      {{ profile_form.skills }}
-      <div class="help_text">
-        {{ profile_form.skills.label_tag() }}
-      </div>
+      {{ mozillians_field(profile_form.skills) }}
       {{ privacy_field(profile_form.privacy_skills) }}
     </fieldset>
 
     <fieldset id="languages">
-      <legend>{{ _('Languages') }}</legend>
+      <h2>{{ _('Languages') }}</h2>
       <p class="field_description">
         {% trans %}
           The Mozilla Project spans over many countries and
@@ -309,7 +399,7 @@
           {% for field in language_form %}
             {{ field }}
             {% if field.name == 'DELETE' %}
-              <i class="icon-minus-sign"></i> {{ _('Delete') }}
+              <i class="icon-minus-circle"></i> {{ _('Delete') }}
             {% endif %}
           {% endfor %}
           <div class="error">
@@ -319,18 +409,18 @@
           </div>
         </div>
       {% endfor %}
-      <a href="#" class="addField"><i class="icon-plus-sign"></i> {{ _('Add language') }}</a>
+      <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
     </fieldset>
 
     <fieldset id="services">
-      <legend>{{ _('Services') }}</legend>
+      <h2>{{ _('Services') }}</h2>
       <p class="field_description">
         {% trans bugzilla_url='http://bugzilla.mozilla.org',
                  reps_url='http://reps.mozilla.org' %}
           The Phonebook offers an API to help authorize
           contributors and share profile data to other tools
-          and sites like <a href="{{ bugzilla_url }}">Bugzilla</a> and the
-          <a href="{{ reps_url }}">Mozilla Reps Portal</a>.
+          and sites like <a id="services-bugzilla-url" href="{{ bugzilla_url }}">Bugzilla</a> and the
+          <a id="services-mozilla-reps" href="{{ reps_url }}">Mozilla Reps Portal</a>.
         {% endtrans %}
       <h5>{{ _('Other Sites') }}</h5>
       <p>
@@ -342,21 +432,21 @@
         {{ profile_form.allows_mozilla_sites }}
       </p>
 
-      {% if user.get_profile().is_vouched %}
+      {% if user.userprofile.is_vouched %}
         <h5>{{ _('Developers') }}</h5>
         <p class="field_description">
-          {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api.html',
+          {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api/api.html',
                    bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
                                          'product=Data%20Safety&cc=williamr@mozilla.com'
                                          '&short_desc=Phonebook%20API%20Usage%20Request'),
-                   dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
+                   dev_form_url='http://groups.google.com/group/mozilla.dev.community-tools/' %}
             Take a look at the list of
-            the <a href="{{ api_schema_url }}">API methods we've
+            the <a id="services-api-methods" href="{{ api_schema_url }}">API methods we've
             made available</a>. To use this API, you'll need to
             get approval from the Privacy team. To get started,
-            <a href="{{ bugzilla_request_url }}">file
+            <a id="services-bugzilla-request-url" href="{{ bugzilla_request_url }}">file
             a bug</a>. If you have any questions, talk to us in
-            our <a href="{{ dev_form_url }}">
+            our <a id="services-development-forum" href="{{ dev_form_url }}">
             development forum</a>.
           {% endtrans %}
         </p>
@@ -374,37 +464,30 @@
     </fieldset>
 
     {% if profile.is_complete %}
-      <fieldset id="invites">
-        <legend>{{ _('Vouches & Invites') }}</legend>
-        <h5>{{ _('Vouched By') }}</h5>
-        {% if profile.vouched_by %}
-          <a href="{{ url('phonebook:profile_view', profile.vouched_by.user.username) }}" class="vouched">
-            {{ profile.vouched_by.display_name }}
-          </a>
-        {% elif profile.is_vouched %}
-          {{ _('You are automatically vouched!') }}
+      <fieldset id="account-status">
+        <h2>{{ _('Account status') }}</h2>
+        <h5>
+        Vouched:
+        {% if profile.is_vouched %}
+          ✔  {{ _('Yes, you can view all profiles and access other Mozilla sites as a vouched Mozillian.') }}
         {% else %}
-          {% trans profile_url=absolutify(url('phonebook:profile_view', user.username)) %}
-            You aren't vouched! Send this link to a mozillian
-            who can vouch for your contributions:
-            <em class="underline" title="Your profile URL">
-              {{ profile_url }}
-            </em>
+          ✘  {{ _('No, you can only access public Mozillian profiles.') }}
+        {% endif %}
+        </h5>
+        <h5>
+        Can vouch others:
+        {% if profile.can_vouch %}
+          ✔  {{ _('Yes, you can vouch for others.') }}
+        {% else %}
+          ✘
+          {% trans %}
+            No, you need at least {{ vouch_threshold }} vouches to vouch for others.
           {% endtrans %}
         {% endif %}
-        {% if my_vouches %}
-          <h5>{{ _('Vouchees') }}</h5>
-          <ul class="vouchees">
-            {% for vouchee in my_vouches %}
-              <li>
-                <a href="{{ url('phonebook:profile_view', vouchee.user.username) }}" class="vouched">
-                  {{ vouchee.display_name }}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-
+        </h5>
+        {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
+          <a href="{{ vouching_url }}">Read more about vouching.</a>
+        {% endtrans %}
       </fieldset>
     {% endif %}
 
@@ -421,7 +504,7 @@
           </label>
         </div>
         <label for="{{ profile_form.optin.id_for_label }}" {% if profile_form.optin.errors %}class="error"{% endif %}>
-          {% trans privacy_url='http://mozilla.org/privacy-policy.html' %}
+          {% trans privacy_url='http://mozilla.org/privacy/websites/' %}
             I'm okay with you handling this info as you explain
             in <a href="{{ privacy_url }}">Mozilla's privacy
             policy</a>.
@@ -451,7 +534,7 @@
 
     {% if profile.is_complete %}
       <fieldset id="delete">
-        <legend>{{ _('Delete Profile') }}</legend>
+        <h2>{{ _('Delete Profile') }}</h2>
         <input type="checkbox" class="acknowledge"></input>
         <p class="field_description">
           {% trans %}
@@ -470,10 +553,11 @@
 {% endblock %}
 
 {% block page_js %}
+  <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
   {% compress js %}
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
-    <script src="{{ static('mozillians/js/tag-it-groups.js') }}"></script>
+    <script src="{{ static('mozillians/js/profile_edit_mapbox.js') }}"></script>
   {% endcompress %}
   {{ profile_form.media.js }}
 {% endblock %}

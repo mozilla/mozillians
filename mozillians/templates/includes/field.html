@@ -7,7 +7,7 @@
     <label class="checkbox{% if field.field.required %} required{% endif %}">
       {{ field }} <span>{{ field.label }}</span>
     </label>
-  {% elif field.field.required %}
+  {% elif field.field.required or flag_required %}
     {# put a required class on the label, in case we want to style it #}
     {{ field.label_tag(attrs={'class': 'required'}) }}
   {% else %}

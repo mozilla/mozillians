@@ -1,6 +1,9 @@
 databases:
     sanitize_dev_mozillians_org:
 
+        rename:
+          sanitized_dev_mozillians_org
+
         drop:
             - api_apiapp
             - celery_taskmeta
@@ -14,17 +17,23 @@ databases:
             - djcelery_taskstate
             - djcelery_workerstate
             - schema_migration
-            - south_migrationhistory
             - tastypie_apiaccess
             - tastypie_apikey
             - thumbnail_kvstore
+            - waffle_flag
+            - waffle_flag_groups
+            - waffle_flag_users
+            - waffle_sample
+            - waffle_switch
 
         tables:
             auth_user:
                 nullify:
                     - first_name
                     - last_name
-                random_email_noadmin:
+                random_email_noadmin_noemployees:
+                    - email
+                random_email_noadmin_employees:
                     - email
                 random_username:
                     - username
@@ -41,6 +50,8 @@ databases:
                     - basket_token
                 nullify:
                     - tshirt
+                    - geo_region_id
+                    - geo_city_id
                 random_username:
                     - ircname
 

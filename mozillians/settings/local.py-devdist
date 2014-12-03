@@ -48,7 +48,7 @@ DEBUG = TEMPLATE_DEBUG = True
 
 # ElasticSearch
 ES_DISABLED = False
-ES_HOSTS = ['127.0.0.1:9200']
+ES_URLS = ['http://127.0.0.1:9200']
 ES_INDEXES = {'default': 'mozillians-dev',
               'public': 'mozillians-dev-public'}
 ES_TIMEOUT = 60
@@ -71,3 +71,12 @@ BASKET_MANAGERS = None  # or list of email addresses.
 GA_ACCOUNT_CODE = None
 
 COMPRESS_ENABLED = False
+
+SECRET_KEY = 'localdev'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}

@@ -15,14 +15,14 @@ from mozillians.users.models import UserProfile
 
 class Invite(models.Model):
     inviter = models.ForeignKey(UserProfile, related_name='invites', null=True,
-                                verbose_name=_lazy(u"Inviter"))
-    recipient = models.EmailField(verbose_name=_lazy(u"Recipient"))
-    message = models.TextField(blank=True, verbose_name=_lazy(u"Message"))
+                                verbose_name=_lazy(u'Inviter'))
+    recipient = models.EmailField(verbose_name=_lazy(u'Recipient'))
     redeemer = models.OneToOneField(UserProfile, blank=True, null=True,
-                                    verbose_name=_lazy(u"Redeemer"))
-    code = models.CharField(max_length=32, editable=False, unique=True)
-    redeemed = models.DateTimeField(null=True, editable=False)
-    created = models.DateTimeField(auto_now_add=True, editable=False)
+                                    verbose_name=_lazy(u'Redeemer'))
+    code = models.CharField(max_length=32, unique=True)
+    reason = models.TextField(max_length=500, default='')
+    redeemed = models.DateTimeField(null=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return 'Invite {0} for {1}'.format(self.id, self.recipient)
@@ -32,36 +32,38 @@ class Invite(models.Model):
         return absolutify(
             urlparams(reverse('phonebook:register'), code=self.code))
 
-    def send(self, sender=None):
+    def send(self, sender=None, personal_message=None):
         """Mail this invite to the specified user.
 
         Includes the name and email of the inviting person, if
         available.
 
         """
+        sender_addr = _('A fellow Mozillian')
+        from_addr = settings.FROM_NOREPLY
         if sender:
-            sender = '%s (%s)' % (sender.full_name, sender.user.email)
+            sender_addr = '%s (%s)' % (sender.full_name, sender.user.email)
+            from_addr = settings.FROM_NOREPLY_VIA % sender.full_name
 
-        subject = _('Become a Mozillian')
+        subject = _('Please join me on mozillians.org')
 
-        template = get_template('phonebook/invite_email.txt')
+        template = get_template('phonebook/emails/invite_email.txt')
 
         message = template.render({
-            'personal_message': self.message,
-            'sender': sender or _('A fellow Mozillian'),
+            'personal_message': personal_message,
+            'sender': sender_addr,
             'link': self.get_url()})
 
         # Manually replace quotes and double-quotes as these get
         # escaped by the template and this makes the message look bad.
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
 
-        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
-                  [self.recipient])
+        send_mail(subject, filtered_message, from_addr, [self.recipient])
 
     def send_thanks(self):
         """Sends email to person who friend accepted invitation."""
-        template = get_template('phonebook/invite_accepted.txt')
-        subject = _('%s created a Mozillians profile' % self.redeemer.full_name)
+        template = get_template('phonebook/emails/invite_accepted.txt')
+        subject = _('%s created a Mozillians profile') % self.redeemer.full_name
         profile_url = reverse('phonebook:profile_view',
                               kwargs={'username': self.redeemer.user.username})
         message = template.render({
