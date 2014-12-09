@@ -748,6 +748,7 @@ class ExternalAccount(models.Model):
     TYPE_MOBILE = 'Phone (Mobile)'
     TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
     TYPE_MOLOCOMOTION = 'MOZILLALOCOMOTION'
+    TYPE_MOLOCATION = 'MOZILLALOCATION'
     TYPE_TRANSIFEX = 'TRANSIFEX'
 
     # Account type field documentation:
@@ -779,6 +780,9 @@ class ExternalAccount(models.Model):
         TYPE_MDN: {'name': 'MDN',
                    'url': 'https://developer.mozilla.org/profiles/{identifier}',
                    'validator': validate_username_not_url},
+        TYPE_MOLOCATION: {'name': 'Mozilla Location Service',
+                          'url': 'https://location.services.mozilla.com/leaders#{identifier}',
+                          'validator': validate_username_not_url},
         TYPE_SUMO: {'name': 'Mozilla Support',
                     'url': 'https://support.mozilla.org/user/{identifier}',
                     'validator': validate_username_not_url},
