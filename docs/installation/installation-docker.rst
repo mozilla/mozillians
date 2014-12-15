@@ -20,7 +20,7 @@ Here are some notes regarding running Docker on Mac.
 * Docker cannot run natively on Mac because it is based in a Linux kernel specific featured called LXC.
 * When running docker in Mac via **boot2docker** you are running a lightweight Linux VM in Virtualbox that hosts the docker daemon and the LXC containers.
 * We are running docker client in our host system that connects to the docker daemon inside boot2docker VM.
-* We are using docker *volume sharing* feature in order to share the source code with the Mozillians container. This is not directly supported in Mac. As a workaround boot2docker implements this feature by sharing the folder with Virtualbox first.
+* We are using docker's *volume sharing* feature in order to share the source code with the Mozillians container. This is not directly supported in Mac. As a workaround boot2docker implements this feature by sharing the folder with Virtualbox first.
 * The extra layer that we are adding using Virtualbox might cause some performance issues. This is a trade-off for having an easily reproducible stack without installing everything manually.
 
 More information regarding boot2docker can be found `in the documentation <https://docs.docker.com/installation/mac/>`_.
@@ -40,7 +40,7 @@ Here are some extra steps in order to run Mozillians on Mac:
      $ $(boot2docker shellinit)
 
 .. note::
-   You need to make sure to run shellinit in each new shell you are using, or export it globally in order not to repeat that step every time you are working on mozillians.
+   You need to make sure to run ``$(boot2docker shellinit)`` in each new shell you are using, or export it globally in order not to repeat this step every time you are working on mozillians.
 
 *******************
 Building mozillians
@@ -52,9 +52,13 @@ Building mozillians
      (lots of output - be patient...)
      $ cd mozillians
 
-#. Start Mozillians service and its dependencies::
+#. Configure your local Mozillians installation::
 
-     $ fig start
+     $ cp mozillians/settings/local.py-docker-dist mozillians/settings/local.py
+
+#. Start ``MySQL`` and ``ElasticSearch`` containers::
+
+     $ fig up -d db es
 
 #. Update the product details::
 
@@ -62,19 +66,24 @@ Building mozillians
 
 #. Create the database tables and run the migrations::
 
-     $ fig run web python manage.py syncdb
-     $ fig run web python manage.py migrate
+     $ fig run web python manage.py syncdb --noinput --migrate
 
 #. Create user
+
    #. Run mozillians::
 
         fig up
 
-   #. Load http://127.0.0.1:8000 and sign in with persona, then create your profile. If you are on Mac run ``boot2docker ip`` and use this ``IP`` instead of ``localhost``.
+   #. Load http://127.0.0.1:8000 or (for Mac users only) ``<IP>:8000`` where ``<IP>`` is the one returned by ``boot2docker ip`` command.
+   #. Sign in with persona to create your profile.
    #. Stop the server with ``Ctrl^C``.
    #. Vouch your account and convert it to superuser::
 
         fig run web ./scripts/su.sh
+
+      .. note::
+
+         In case this command doesn't work, you can run ``./scripts/su.sh`` inside the container. In order to get shell access please run ``fig run web /bin/bash``.
 
 ******************
 Running mozillians

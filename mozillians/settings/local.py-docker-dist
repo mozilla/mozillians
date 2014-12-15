@@ -80,3 +80,5 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+
+BROWSERID_AUDIENCES = None
