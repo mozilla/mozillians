@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 
 from django_browserid.auth import BrowserIDBackend
 from django_browserid.base import RemoteVerifier, get_audience
@@ -101,7 +102,14 @@ class BrowserIDVerify(Verify):
 class MozilliansAuthBackend(BrowserIDBackend):
     def create_user(self, email):
         username = calculate_username(email)
-        user = self.User.objects.create_user(username, email)
+        try:
+            user = self.User.objects.create_user(username, email)
+        except IntegrityError as err:
+            try:
+                return self.User.objects.get(email=email)
+            except self.User.DoesNotExist:
+                raise err
+
         if self.referral_source:
             user.userprofile.referral_source = self.referral_source
             user.userprofile.save()

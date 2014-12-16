@@ -1,6 +1,7 @@
 from json import loads
 
 from django.conf import settings
+from django.db import IntegrityError
 
 from mock import patch, Mock
 from mozillians.common.tests import TestCase
@@ -101,7 +102,23 @@ class BrowserIDVerifyTests(TestCase):
         eq_(response['email'], 'la@example.com')
 
 
-class ReferralSourceTests(TestCase):
+class MozilliansAuthBackendTests(TestCase):
+    def test_create_user_integrity_error(self):
+        backend = MozilliansAuthBackend()
+        backend.User = Mock()
+        error = IntegrityError()
+        user = UserFactory.create()
+        backend.User.objects.create_user.side_effect = error
+        backend.User.objects.get.return_value = user
+
+        eq_(backend.create_user('foo@example.com'), user)
+
+        backend.User.DoesNotExist = Exception
+        backend.User.objects.get.side_effect = backend.User.DoesNotExist
+        with self.assertRaises(IntegrityError) as e:
+            backend.create_user('foo@example.com')
+
+        eq_(e.exception, error)
 
     @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
     def test_get_involved_source(self, authenticate_mock):
