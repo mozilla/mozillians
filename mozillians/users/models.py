@@ -734,6 +734,7 @@ class ExternalAccount(models.Model):
     TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
     TYPE_MOLOCOMOTION = 'MOZILLALOCOMOTION'
     TYPE_MOLOCATION = 'MOZILLALOCATION'
+    TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
 
     # Account type field documentation:
@@ -820,6 +821,9 @@ class ExternalAccount(models.Model):
         TYPE_MOLOCOMOTION: {'name': 'Mozilla Locomotion',
                             'url': 'http://mozilla.locamotion.org/accounts/{identifier}/',
                             'validator': validate_username_not_url},
+        TYPE_MOPONTOON: {'name': 'Mozilla Pontoon',
+                         'url': 'https://pontoon.mozilla.org/contributor/{identifier}/',
+                         'validator': validate_email},
         TYPE_TRANSIFEX: {'name': 'Transifex',
                          'url': 'https://www.transifex.com/accounts/profile/{identifier}/',
                          'validator': validate_username_not_url},
