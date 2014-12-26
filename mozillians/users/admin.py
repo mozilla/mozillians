@@ -65,16 +65,17 @@ def unsubscribe_from_basket_action():
     return unsubscribe_from_basket
 
 
-def update_can_vouch_action():
-    """Update can_vouch flag action."""
+def update_vouch_flags_action():
+    """Update can_vouch, is_vouched flag action."""
 
-    def update_can_vouch(modeladmin, request, queryset):
+    def update_vouch_flags(modeladmin, request, queryset):
         for profile in queryset:
-            profile.can_vouch = (
-                profile.vouches_received.count() >= settings.CAN_VOUCH_THRESHOLD)
+            vouches_received = profile.vouches_received.count()
+            profile.can_vouch = vouches_received >= settings.CAN_VOUCH_THRESHOLD
+            profile.is_vouched = vouches_received > 0
             profile.save()
-    update_can_vouch.short_description = 'Update can_vouch flag.'
-    return update_can_vouch
+    update_vouch_flags.short_description = 'Update vouch flags'
+    return update_vouch_flags
 
 
 class SuperUserFilter(SimpleListFilter):
@@ -311,7 +312,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
                     'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action(),
-               update_can_vouch_action()]
+               update_vouch_flags_action()]
 
     fieldsets = (
         ('Account', {
