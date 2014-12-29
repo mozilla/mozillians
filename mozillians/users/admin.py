@@ -246,6 +246,34 @@ class ExternalAccountInline(admin.TabularInline):
     model = ExternalAccount
     extra = 1
 
+    def queryset(self, request):
+        """Exclude alternate emails from external accounts"""
+        qs = super(ExternalAccountInline, self).queryset(request)
+        return qs.exclude(type=ExternalAccount.TYPE_EMAIL)
+
+
+class AlternateEmailForm(forms.ModelForm):
+    def save(self, *args, **kwargs):
+        self.instance.type = ExternalAccount.TYPE_EMAIL
+        return super(AlternateEmailForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = ExternalAccount
+        exclude = ['type']
+
+
+class AlternateEmailInline(admin.TabularInline):
+    form = AlternateEmailForm
+    model = ExternalAccount
+    extra = 1
+    verbose_name = 'Alternate Email'
+    verbose_name_plural = 'Alternate Emails'
+
+    def queryset(self, request):
+        """Limit queryset to alternate emails."""
+        qs = super(AlternateEmailInline, self).queryset(request)
+        return qs.filter(type=ExternalAccount.TYPE_EMAIL)
+
 
 class UserProfileAdminForm(forms.ModelForm):
     username = forms.CharField()
@@ -296,7 +324,8 @@ class UserProfileResource(ModelResource):
 
 class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     resource_class = UserProfileResource
-    inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline]
+    inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline,
+               AlternateEmailInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
