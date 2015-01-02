@@ -129,18 +129,35 @@ class MozilliansAuthBackendTests(TestCase):
 
     @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
     def test_get_involved_source(self, authenticate_mock):
-        Authenticate = MozilliansAuthBackend()
+        backend = MozilliansAuthBackend()
         request_mock = Mock()
         request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=contribute'}
-        Authenticate.request = request_mock
-        Authenticate.authenticate(request=request_mock)
-        eq_(Authenticate.referral_source, 'contribute')
+        backend.request = request_mock
+        backend.authenticate(request=request_mock)
+        eq_(backend.referral_source, 'contribute')
 
     @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
     def test_random_source(self, authenticate_mock):
-        Authenticate = MozilliansAuthBackend()
+        backend = MozilliansAuthBackend()
         request_mock = Mock()
         request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=foobar'}
-        Authenticate.request = request_mock
-        Authenticate.authenticate(request=request_mock)
-        eq_(Authenticate.referral_source, None)
+        backend.request = request_mock
+        backend.authenticate(request=request_mock)
+        eq_(backend.referral_source, None)
+
+    def test_filter_users_by_primary_email(self):
+        backend = MozilliansAuthBackend()
+        user = UserFactory.create(email='foo@example.com')
+        kwargs = {'type': ExternalAccount.TYPE_EMAIL, 'identifier': 'bar@example.com'}
+        user.userprofile.externalaccount_set.create(**kwargs)
+        result = backend.filter_users_by_email('foo@example.com')
+        eq_(result.count(), 1)
+        eq_(result[0], user)
+
+    def test_filter_users_by_secondary_email(self):
+        backend = MozilliansAuthBackend()
+        user = UserFactory.create(email='foo@example.com')
+        kwargs = {'type': ExternalAccount.TYPE_EMAIL, 'identifier': 'bar@example.com'}
+        user.userprofile.externalaccount_set.create(**kwargs)
+        result = backend.filter_users_by_email('bar@example.com')
+        eq_(result[0], user)

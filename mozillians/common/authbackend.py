@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from django.db.models import Q
 
 from django_browserid.auth import BrowserIDBackend
 from django_browserid.base import RemoteVerifier, get_audience
@@ -134,3 +135,10 @@ class MozilliansAuthBackend(BrowserIDBackend):
                     self.referral_source = source
                     break
         return super(MozilliansAuthBackend, self).authenticate(*args, **kwargs)
+
+    def filter_users_by_email(self, email):
+        account_type = ExternalAccount.TYPE_EMAIL
+        alternate_emails = ExternalAccount.objects.filter(type=account_type, identifier=email)
+        primary_email_qs = Q(email=email)
+        alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
+        return self.User.objects.filter(primary_email_qs | alternate_email_qs).distinct()
