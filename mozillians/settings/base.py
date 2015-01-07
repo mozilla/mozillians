@@ -116,6 +116,7 @@ SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
     'csp',
     'api',
     'browserid',
+    'contribute.json',
     'admin',
     'autocomplete',
     'humans.txt'

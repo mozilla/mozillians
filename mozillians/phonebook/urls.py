@@ -6,6 +6,7 @@ from mozillians.common.decorators import allow_public
 
 urlpatterns = patterns(
     'mozillians.phonebook',
+    url(r'^contribute.json/$', 'views.contribute_view', name='contribute-view'),
     url(r'^$', 'views.home', name='home'),
     url(r'^login/$', 'views.login', name='login'),
     url(r'^logout/$', 'views.logout', name='logout'),

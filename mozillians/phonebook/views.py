@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page, never_cache
@@ -453,3 +453,9 @@ def register(request):
                                      "Sign in and then you can create a profile."))
 
     return redirect('phonebook:home')
+
+
+def contribute_view(request):
+    """Generate a contribute.json"""
+    template = render(request, 'contribute.json')
+    return HttpResponse(template, mimetype='application/json')
