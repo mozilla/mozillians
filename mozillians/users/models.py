@@ -462,12 +462,9 @@ class UserProfile(UserProfilePrivacyModel):
         if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
             return False
 
-        # If you've already vouched this account, you cannot do it again, unless
-        # this account has a legacy vouch from you.
+        # If you've already vouched this account, you cannot do it again
         vouch_query = self.vouches_received.filter(voucher=voucher)
         if voucher and vouch_query.exists():
-            if vouch_query.filter(description='').exists():
-                return True
             return False
 
         return True
@@ -476,24 +473,12 @@ class UserProfile(UserProfilePrivacyModel):
         if not self.is_vouchable(vouched_by):
             return
 
-        now = datetime.now()
-        # Update a legacy vouch, if exists, by re-vouching
-        # https://bugzilla.mozilla.org/show_bug.cgi?id=1033306
-        query = self.vouches_received.filter(voucher=vouched_by)
-        if query.filter(description='').exists():
-            # If there isn't a date, provide one
-            vouch = query[0]
-            vouch.description = description
-            if not vouch.date:
-                vouch.date = now
-            vouch.save()
-        else:
-            vouch = self.vouches_received.create(
-                voucher=vouched_by,
-                date=now,
-                description=description,
-                autovouch=autovouch
-            )
+        vouch = self.vouches_received.create(
+            voucher=vouched_by,
+            date=datetime.now(),
+            description=description,
+            autovouch=autovouch
+        )
 
         self._email_now_vouched(vouched_by, description)
         return vouch

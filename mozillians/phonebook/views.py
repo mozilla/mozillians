@@ -91,7 +91,6 @@ def view_profile(request, username):
     privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
                         'privileged': PRIVILEGED, 'myself': None}
     privacy_level = None
-    profile_is_vouchable = False
 
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
@@ -127,7 +126,6 @@ def view_profile(request, username):
                 request.user.userprofile.privacy_level)
 
         if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
-            profile_is_vouchable = True
 
             vouch_form = forms.VouchForm(request.POST or None)
             data['vouch_form'] = vouch_form
@@ -140,7 +138,6 @@ def view_profile(request, username):
                 messages.info(request, msg)
                 return redirect('phonebook:profile_view', profile.user.username)
 
-    data['profile_is_vouchable'] = profile_is_vouchable
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
