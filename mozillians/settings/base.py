@@ -7,7 +7,6 @@ import sys
 
 from funfactory.manage import path
 from funfactory.settings_base import *  # noqa
-from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
 
 from django.utils.functional import lazy
@@ -86,10 +85,11 @@ JINGO_EXCLUDE_APPS = [
 ]
 
 
-def JINJA_CONFIG():
-    config = funfactory_JINJA_CONFIG()
-    config['extensions'].append('jingo_offline_compressor.jinja2ext.CompressorExtension')
-    return config
+def COMPRESS_JINJA2_GET_ENVIRONMENT():
+    from jingo import env
+    from compressor.contrib.jinja2ext import CompressorExtension
+    env.add_extension(CompressorExtension)
+    return env
 
 
 MIDDLEWARE_CLASSES = get_middleware(append=[
@@ -152,7 +152,6 @@ INSTALLED_APPS = get_apps(append=[
 
     'django.contrib.admin',
     'django_browserid',
-    'jingo_offline_compressor',
     'import_export',
     'waffle',
 

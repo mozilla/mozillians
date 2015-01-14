@@ -8,7 +8,6 @@ src/pystatsd
 src/happyforms
 src/django-csp
 src/django-browserid
-src/django-jingo-offline-compressor
 src/unidecode
 src/sorl-thumbnail
 src/django-waffle

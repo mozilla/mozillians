@@ -1,6 +1,6 @@
 import re
 
-from django.core.validators import URLValidator, email_re
+from django.core.validators import EmailValidator, URLValidator
 from django.db.models.loading import get_model
 from django.forms import ValidationError
 
@@ -71,8 +71,13 @@ def validate_username_not_url(username):
 
 def validate_email(value):
     """Validate that a username is email like."""
-    if not email_re.match(value):
+    _validate_email = EmailValidator()
+
+    try:
+        _validate_email(value)
+    except ValidationError:
         raise ValidationError(_('Enter a valid email address.'))
+
     return value
 
 
