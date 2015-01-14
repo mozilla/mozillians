@@ -12,6 +12,7 @@ from nose.tools import eq_, ok_
 from mozillians.api.tests import APIAppFactory
 from mozillians.common.tests import TestCase
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
+from mozillians.groups.models import GroupMembership
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.models import ExternalAccount
 from mozillians.users.tests import UserFactory
@@ -209,6 +210,33 @@ class UserResourceTests(TestCase):
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
         eq_(data['objects'][0]['id'], user_1.userprofile.id)
+
+    def test_search_groups_mixed_membership(self):
+        client = Client()
+        group = GroupFactory.create()
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
+        group.add_member(user_1.userprofile)
+        group.add_member(user_2.userprofile, GroupMembership.PENDING)
+
+        url = urlparams(self.mozilla_resource_url, groups=group.name)
+        response = client.get(url, follow=True)
+        data = json.loads(response.content)
+        eq_(len(data['objects']), 1)
+        eq_(data['objects'][0]['id'], user_1.userprofile.id)
+
+    def test_search_groups_pending_membership(self):
+        client = Client()
+        group = GroupFactory.create()
+        user_1 = UserFactory.create()
+        user_2 = UserFactory.create()
+        group.add_member(user_1.userprofile, GroupMembership.PENDING)
+        group.add_member(user_2.userprofile, GroupMembership.PENDING)
+
+        url = urlparams(self.mozilla_resource_url, groups=group.name)
+        response = client.get(url, follow=True)
+        data = json.loads(response.content)
+        eq_(len(data['objects']), 0)
 
     def test_search_combined_skills_country(self):
         country = CountryFactory.create(code='fr')

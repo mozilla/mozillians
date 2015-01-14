@@ -17,7 +17,7 @@ from mozillians.api.authenticators import AppAuthentication
 from mozillians.api.paginator import Paginator
 from mozillians.api.resources import (ClientCacheResourceMixIn,
                                       GraphiteMixIn)
-from mozillians.users.models import UserProfile
+from mozillians.users.models import GroupMembership, UserProfile
 
 
 class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
@@ -100,11 +100,15 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
                 **{'{0}__iexact'.format('ircname'):
                     getvalue('ircname')})
 
-        for group_filter in ['groups', 'skills']:
-            if group_filter in valid_filters:
-                database_filters[group_filter] = Q(
-                    **{'{0}__name__in'.format(group_filter):
-                       getvalue(group_filter).split(',')})
+        if 'groups' in valid_filters:
+            kwargs = {
+                'groups__name__in': getvalue('groups').split(','),
+                'groupmembership__status': GroupMembership.MEMBER
+            }
+            database_filters['groups'] = Q(**kwargs)
+
+        if 'skills' in valid_filters:
+            database_filters['skills'] = Q(skills__name__in=getvalue('skills').split(','))
 
         return database_filters
 
