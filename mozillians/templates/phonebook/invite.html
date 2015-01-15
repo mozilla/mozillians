@@ -36,7 +36,7 @@
     {% endif %}
 
     <div class="invite-box">
-      <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off">
+      <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off" novalidate>
         <div class="margins">
           {{ csrf() }}
           {{ mozillians_field(invite_form.recipient) }}
