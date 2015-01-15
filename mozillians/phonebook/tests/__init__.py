@@ -13,7 +13,7 @@ class InviteFactory(factory.DjangoModelFactory):
 def _get_privacy_fields(privacy_level):
     """Helper which returns a dict with privacy fields set to privacy_level"""
     data = {}
-    for field in UserProfilePrivacyModel._meta._fields():
+    for field in UserProfilePrivacyModel._meta.fields:
         data[field.name] = privacy_level
 
     # privacy_tshirt field has only one level of privacy available

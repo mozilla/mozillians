@@ -23,9 +23,6 @@
 [submodule "vendor-local/src/happyforms"]
 	path = vendor-local/src/happyforms
 	url = https://github.com/mozilla/happyforms.git
-[submodule "vendor-local/src/django-jingo-offline-compressor"]
-	path = vendor-local/src/django-jingo-offline-compressor
-	url = https://github.com/peterbe/django-jingo-offline-compressor.git
 [submodule "vendor-local/src/basket-client-submodule"]
 	path = vendor-local/src/basket-client-submodule
 	url = git://github.com/mozilla/basket-client.git

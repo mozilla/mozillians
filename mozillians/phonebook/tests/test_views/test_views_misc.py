@@ -306,7 +306,7 @@ class ImageTests(TestCase):
                 'language_set-TOTAL_FORMS': '0',
             }
 
-        for field in UserProfilePrivacyModel._meta._fields():
+        for field in UserProfilePrivacyModel._meta.fields:
             data[field.name] = MOZILLIANS
         data['privacy_tshirt'] = PRIVILEGED
 

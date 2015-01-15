@@ -14,24 +14,6 @@ patch()
 autocomplete_light.autodiscover()
 admin.autodiscover()
 
-# From socorro
-# funfactory puts the more limited CompressorExtension extension in
-# but we need the one from jingo_offline_compressor.jinja2ext otherwise we
-# might an error like this:
-#
-# AttributeError: 'CompressorExtension' object has no attribute 'nodelist'
-#
-from jingo_offline_compressor.jinja2ext import CompressorExtension
-import jingo
-try:
-    jingo.env.extensions.pop(
-        'compressor.contrib.jinja2ext.CompressorExtension'
-    )
-except KeyError:
-    # happens if the urlconf is loaded twice
-    pass
-jingo.env.add_extension(CompressorExtension)
-
 # Activate a locale so that jinja2 doesn't choke when running a shell
 # or individual tests that need translation and don't involve a web
 # request, like when testing emails.

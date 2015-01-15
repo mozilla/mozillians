@@ -91,7 +91,7 @@ class SearchFilter(django_filters.FilterSet):
     )
 
     vouched = django_filters.ChoiceFilter(
-        name='vouched', label=_lazy('Display only'), required=False,
+        name='vouched', label=_lazy(u'Display only'), required=False,
         choices=CHOICES, action=filter_vouched)
 
     class Meta:
@@ -157,12 +157,12 @@ class ProfileForm(happyforms.ModelForm):
     lat = forms.FloatField(widget=forms.HiddenInput)
     lng = forms.FloatField(widget=forms.HiddenInput)
     savecountry = forms.BooleanField(
-        label=_lazy('Required'),
+        label=_lazy(u'Required'),
         initial=True, required=False,
         widget=forms.CheckboxInput(attrs={'disabled': 'disabled'})
     )
-    saveregion = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
-    savecity = forms.BooleanField(label=_lazy('Save'), required=False, show_hidden_initial=True)
+    saveregion = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
+    savecity = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
 
     class Meta:
         model = UserProfile
@@ -303,7 +303,7 @@ class InviteForm(happyforms.ModelForm):
         label=_lazy(u'Personal message to be included in the invite email'),
         required=False, widget=forms.Textarea(),
     )
-    recipient = forms.EmailField(label=_lazy("Recipient's email"))
+    recipient = forms.EmailField(label=_lazy(u"Recipient's email"))
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
