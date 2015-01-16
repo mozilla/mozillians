@@ -140,7 +140,7 @@ class DateJoinedFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
 
         return map(lambda x: (str(x.year), x.year),
-                   User.objects.dates('date_joined', 'year'))
+                   User.objects.datetimes('date_joined', 'year'))
 
     def queryset(self, request, queryset):
         if self.value() is None:
