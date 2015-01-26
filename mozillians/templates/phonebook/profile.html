@@ -111,9 +111,11 @@
             {% if profile.email %}
               <section class="u-email">
                 <i class="icon-envelope-o"></i>
-                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
-                  <span class="email">{{ profile.email }}</span>
-                {% if user != shown_user %}</a>{% endif %}
+                {% if user != shown_user %}
+                  {{ profile.email|urlize }}
+                {% else %}
+                  {{ profile.email }}
+                {% endif %}
               </section>
             {% endif %}
             {% if profile.ircname %}
@@ -255,6 +257,23 @@
                   {%- else -%}
                     {{ account.identifier|simple_urlize() }}
                   {%- endif -%}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        {% if profile.alternate_emails.exists() %}
+          <div id="alternate_email" class="profile-entry">
+            <h3><i class="icon-envelope-o"></i> {{ _('Alternate email addresses') }}</h3>
+            <ul>
+              {% for email in profile.alternate_emails %}
+                <li>
+                  {% if user != shown_user %}
+                    {{ email.identifier|urlize }}
+                  {% else %}
+                    {{ email.identifier }}
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>

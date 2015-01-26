@@ -58,6 +58,21 @@ AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                         form=ExternalAccountForm, extra=1)
 
 
+class AlternateEmailForm(happyforms.ModelForm):
+    class Meta:
+        model = ExternalAccount
+        fields = ['privacy']
+
+AlternateEmailFormset = inlineformset_factory(UserProfile, ExternalAccount,
+                                              form=AlternateEmailForm, extra=0)
+
+
+class EmailPrivacyForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['privacy_email']
+
+
 class SearchForm(happyforms.Form):
     q = forms.CharField(required=False)
     limit = forms.IntegerField(
@@ -171,7 +186,7 @@ class ProfileForm(happyforms.ModelForm):
                   'title', 'allows_mozilla_sites',
                   'date_mozillian', 'story_link', 'timezone',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                  'privacy_email', 'privacy_timezone', 'privacy_tshirt',
+                  'privacy_timezone', 'privacy_tshirt',
                   'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
                   'privacy_geo_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',

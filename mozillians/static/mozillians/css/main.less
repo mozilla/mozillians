@@ -22,6 +22,7 @@
 // Invite/Invited
 // Special
 // Betasearch
+// Email settings
 
 /* Imports
 ==================== */
@@ -2078,4 +2079,47 @@ body#betasearch {
 
 #betasearch #id_groups, #id_skills {
     min-height: 90px;
+}
+
+/* Email settings
+================== */
+#add-email {
+    display: inline-block;
+
+    @media (max-width: 700px) {
+        margin-top: 20px;
+    }
+}
+
+#emails{
+    .delete{
+        opacity: 1.0;
+    }
+}
+
+fieldset {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+
+    &#alternate-email {
+        .alternate-email-fieldrow {
+            margin-bottom: 20px;
+            .email {
+                min-width: 300px;
+                display: inline-block;
+
+                @media (max-width: 700px) {
+                    margin-bottom: 20px;
+                }
+            }
+        }
+        .privacy-controls {
+            position: relative;
+            float: right;
+
+            @media (max-width: 700px) {
+                float: none;
+            }
+        }
+    }
 }

@@ -202,28 +202,6 @@ class LogoutTests(TestCase):
         ok_(logout_mock.called)
 
 
-class EmailChangeTests(TestCase):
-    @patch('mozillians.phonebook.views.forms.ProfileForm')
-    def test_email_change_verification_redirection(self, profile_form_mock):
-        profile_form_mock().is_valid.return_value = True
-        user = UserFactory.create(email='old@example.com')
-        data = {'full_name': 'foobar',
-                'email': 'new@example.com',
-                'username': user.username,
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
-        with self.login(user) as client:
-            response = client.post(url, data=data, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/verify_email.html')
-        eq_(user.email, 'old@example.com')
-
-
 class ImageTests(TestCase):
     def _upload_photo(self, user, file_path):
         """Helper for the next methods."""
