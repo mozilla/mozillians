@@ -111,11 +111,9 @@
             {% if profile.email %}
               <section class="u-email">
                 <i class="icon-envelope-o"></i>
-                {% if user != shown_user %}
-                  {{ profile.email|urlize }}
-                {% else %}
-                  {{ profile.email }}
-                {% endif %}
+                {% if user != shown_user %}<a href="mailto:{{ profile.email }}">{% endif %}
+                  <span class="email">{{ profile.email }}</span>
+                {% if user != shown_user %}</a>{% endif %}
               </section>
             {% endif %}
             {% if profile.ircname %}
