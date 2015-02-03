@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+from django.conf.locale import LANG_INFO
 from django.core.validators import URLValidator
 from django.forms import ValidationError
 from django.utils.translation import get_language
@@ -52,6 +53,14 @@ def langcode_to_name(code, locale=None):
     except KeyError:
         return code
     return lang
+
+
+def langname_to_code(name):
+    """Return locale code by language name
+    Return None for unknown language
+    """
+    reversed_lang_info = dict((lang['name'].lower(), loc) for loc, lang in LANG_INFO.iteritems())
+    return reversed_lang_info.get(name)
 
 
 @register.filter

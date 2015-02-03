@@ -40,6 +40,8 @@ urlpatterns = patterns(
         'views.list_mozillians_in_location', name='list_region_city'),
     url(r'^country/(?P<country>[A-Za-z0-9 \.]+)/region/(?P<region>.+)/$',
         'views.list_mozillians_in_location', name='list_region'),
+    url(r'^language/(?P<language>[A-Za-z]+)/',
+        'views.list_mozillians_by_language', name='list_language'),
 
 
     # Static pages need csrf for browserID post to work

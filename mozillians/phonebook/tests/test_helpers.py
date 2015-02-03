@@ -2,7 +2,7 @@ import tower
 from nose.tools import eq_
 
 from mozillians.common.tests import TestCase
-from mozillians.phonebook.helpers import langcode_to_name, simple_urlize
+from mozillians.phonebook.helpers import langcode_to_name, langname_to_code, simple_urlize
 
 
 class LanguageCodeToNameTests(TestCase):
@@ -18,6 +18,19 @@ class LanguageCodeToNameTests(TestCase):
         tower.activate('fr')
         name = langcode_to_name('foobar')
         eq_(name, 'foobar')
+
+
+class LanguageNameToCodeTests(TestCase):
+
+    def test_valid_name(self):
+        """Test language code with a valid name."""
+        code = langname_to_code('russian')
+        eq_(code, 'ru')
+
+    def test_invalid_name(self):
+        """Test language code with invalid name."""
+        code = langname_to_code('barfoo')
+        eq_(code, None)
 
 
 class SimpleUrlizeTests(TestCase):

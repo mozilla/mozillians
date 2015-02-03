@@ -23,6 +23,7 @@ from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
+from mozillians.phonebook.helpers import langname_to_code
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import ExternalAccount, UserProfile, UserProfileMappingType
 
@@ -483,6 +484,30 @@ def list_mozillians_in_location(request, country, region=None, city=None):
             'page': page,
             'show_pagination': show_pagination}
     return render(request, 'phonebook/location_list.html', data)
+
+
+def list_mozillians_by_language(request, language):
+    queryset = UserProfile.objects.vouched().filter(language__code=langname_to_code(language))
+    show_pagination = False
+
+    paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
+    page = request.GET.get('page', 1)
+
+    try:
+        people = paginator.page(page)
+    except PageNotAnInteger:
+        people = paginator.page(1)
+    except EmptyPage:
+        people = paginator.page(paginator.num_pages)
+
+    if paginator.count > settings.ITEMS_PER_PAGE:
+        show_pagination = True
+
+    data = {'people': people,
+            'language': language,
+            'page': page,
+            'show_pagination': show_pagination}
+    return render(request, 'phonebook/language_list.html', data)
 
 
 @allow_unvouched
