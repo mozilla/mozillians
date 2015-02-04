@@ -6,3 +6,4 @@ python-memcached==1.53
 unidecode
 urllib3
 django-import-export==0.2.2
+djangorestframework==2.3.13
