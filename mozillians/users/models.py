@@ -576,10 +576,14 @@ class UserProfile(UserProfilePrivacyModel):
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
+        autovouch = kwargs.pop('autovouch', True)
+
         super(UserProfile, self).save(*args, **kwargs)
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
-        self.auto_vouch()
+
+        if autovouch:
+            self.auto_vouch()
 
     def reverse_geocode(self):
         """
@@ -697,7 +701,7 @@ def update_vouch_flags(sender, instance, **kwargs):
     vouches = Vouch.objects.filter(vouchee=profile).count()
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
-    profile.save()
+    profile.save(**{'autovouch': False})
 
 
 class UsernameBlacklist(models.Model):

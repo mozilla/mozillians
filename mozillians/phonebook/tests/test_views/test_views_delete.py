@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotAllowed
 from django.test import Client
+from django.test.utils import override_settings
 
 from mock import patch, call
 from nose.tools import eq_, ok_
@@ -83,3 +84,18 @@ class DeleteTests(TestCase):
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
             call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
         ok_(not User.objects.filter(username=user.username).exists())
+
+    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
+    @override_settings(AUTO_VOUCH_REASON='Autovouch reason')
+    def test_delete_auto_vouch_domain(self):
+        user = UserFactory.create(email='foo@example.com')
+        description = 'Autovouch reason'
+        vouch = user.userprofile.vouches_received.filter(autovouch=True, description=description)
+        ok_(vouch.exists())
+
+        with self.login(user) as client:
+            response = client.post(
+                reverse('phonebook:profile_delete', prefix='/en-US/'),
+                follow=True)
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'phonebook/home.html')
