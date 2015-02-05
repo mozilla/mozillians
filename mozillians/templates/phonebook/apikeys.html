@@ -4,7 +4,7 @@
   {{ _('API') }}
 {% endblock %}
 
-{% block body_id %}edit-profile{% endblock %}
+{% block body_id %}apikeys{% endblock %}
 
 {% block content %}
 <header>
@@ -66,15 +66,22 @@
 
     {% endtrans %}
   </p>
-
   <p>
     <strong>{{ _('Your apps:') }}</strong>
   </p>
 
   <ul>
     {% for app in appsv2 %}
-    <li><strong>{{ app.name }}</strong>
-      {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}
+    <li class="api-key">
+      <div class="api-key">
+        <strong>{{ app.name }}</strong>
+        {% if app.url %}
+          <em>({{ app.url|urlize }})</em>
+        {% endif %}
+      </div>
+      <a href="{{ url('phonebook:apikey_delete', app.id) }}" class="delete">
+        {{ _('Delete') }}
+      </a>
       <ul>
         <li>
           {{ _('Key') }}: {{ app.key }}
@@ -88,7 +95,6 @@
     {{ _('You have no active apps.') }}
     {% endfor %}
   </ul>
-
   <p>
     <strong>Register a new app</strong>
   </p>
