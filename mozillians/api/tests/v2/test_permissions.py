@@ -14,7 +14,7 @@ from mozillians.users.tests import UserFactory
 
 class MozilliansPermissionTests(TestCase):
     def setUp(self):
-        Flag.objects.create(name='apiv2', everyone=True)
+        Flag.objects.create(name='apiv2-endpoint', everyone=True)
 
     def test_has_permission_valid_key(self):
         class DummyClass(object):
