@@ -10,9 +10,9 @@
 <header>
   <h1>{{ _('Mozillians API') }}</h1>
 </header>
-<h2>{{ _('API Version 1') }}</h4>
+<h2>{{ _('API Version 1') }}</h2>
 <p class="field_description">
-  {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api.html',
+  {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api/api.html',
            bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
                                  'product=Data%20Safety&cc=williamr@mozilla.com'
                                  '&short_desc=Phonebook%20API%20Usage%20Request'),
@@ -45,7 +45,7 @@
         <ul>
 
 {% if waffle.flag('apiv2') %}
-  <h2>{{ _('API Version 2') }}</h4>
+  <h2>{{ _('API Version 2') }}</h2>
 
   <p class="field_description">
     {% trans api_schema_url=url('api-root'),
@@ -66,7 +66,11 @@
 
     {% endtrans %}
   </p>
-  <strong>{{ _('Your apps:') }}</strong>
+
+  <p>
+    <strong>{{ _('Your apps:') }}</strong>
+  </p>
+
   <ul>
     {% for app in appsv2 %}
     <li><strong>{{ app.name }}</strong>
@@ -85,14 +89,28 @@
     {% endfor %}
   </ul>
 
-  <strong>Register a new app</strong>
+  <p>
+    <strong>Register a new app</strong>
+  </p>
+
   <form method="POST">
     <div class="margins">
       {{ csrf() }}
-      {{ mozillians_field(apikey_request_form.name) }}
-      {{ mozillians_field(apikey_request_form.description) }}
-      {{ mozillians_field(apikey_request_form.url) }}
-      <button type="submit">{{ _('Register App') }}</button>
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.name) }}
+      </fieldset>
+
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.description) }}
+      </fieldset>
+
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.url) }}
+      </fieldset>
+
+      <fieldset class="edit-controls">
+        <button type="submit">{{ _('Register App') }}</button>
+      </fieldset>
     </div>
   </form>
 {% endif %}
