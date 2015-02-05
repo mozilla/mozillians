@@ -53,10 +53,11 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
     email = serializers.Field(source='user.email')
+    alternate_emails = serializers.SerializerMethodField('get_alternate_emails')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
     city = serializers.SerializerMethodField('get_city')
-    external_accounts = ExternalAccountSerializer(many=True, source='externalaccount_set')
+    external_accounts = serializers.SerializerMethodField('get_external_accounts')
     languages = LanguageSerializer(many=True, source='language_set')
     is_public = serializers.Field(source='is_public')
     url = serializers.SerializerMethodField('get_url')
@@ -64,10 +65,10 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     # Add profile URL
     class Meta:
         model = UserProfile
-        fields = ('username', 'full_name', 'email', 'bio', 'photo', 'ircname',
-                  'date_mozillian', 'timezone', 'title', 'story_link',
-                  'languages', 'external_accounts', 'tshirt',
-                  'is_public', '_url', 'url', 'city', 'region', 'country')
+        fields = ('username', 'full_name', 'email', 'alternate_emails', 'bio', 'photo',
+                  'ircname', 'date_mozillian', 'timezone', 'title', 'story_link', 'languages',
+                  'external_accounts', 'tshirt', 'is_public', '_url', 'url', 'city', 'region',
+                  'country')
 
     def _transform_privacy_wrapper(self, field):
 
@@ -145,6 +146,18 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
             'value': city.name if city else '',
             'privacy': obj.get_privacy_geo_city_display(),
         }
+
+    def get_external_accounts(self, obj):
+        # Exclude alternate emails from ExternalAccount queryset
+        accounts = obj.externalaccount_set.exclude(type=ExternalAccount.TYPE_EMAIL)
+        serializer = ExternalAccountSerializer(accounts)
+        return serializer.data
+
+    def get_alternate_emails(self, obj):
+        # Filter alternate emails in ExternalAccount queryset
+        accounts = obj.externalaccount_set.filter(type=ExternalAccount.TYPE_EMAIL)
+        serializer = ExternalAccountSerializer(accounts)
+        return serializer.data
 
 
 # Filters
