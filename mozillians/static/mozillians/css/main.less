@@ -98,6 +98,7 @@
 }
 
 .well {
+  word-wrap: break-word;
   min-height: 20px;
   padding: 19px;
   margin-bottom: 20px;
@@ -704,11 +705,6 @@ footer#colophon {
         a {
             color: @linkSkyBlue;
         }
-    }
-
-    a:hover,
-    a:active {
-        color: lighten(@linkBlue, 10%);
     }
 }
 
@@ -1365,6 +1361,9 @@ form {
         padding-bottom: 20px;
         border-bottom: 1px solid lighten(@black,90%);
         position: relative;
+        input, textarea {
+            border: 1px solid lighten(@black,90%);
+        }
 
         label {
             margin-right: 8px;
