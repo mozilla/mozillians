@@ -18,8 +18,8 @@
         ]
     },
     "bugs": {
-        "list": "https://bugzilla.mozilla.org/buglist.cgi?quicksearch=OPEN%20product%3A%22Community%20Tools%22%20component%3APhonebook",
-        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook"
+        "list": "https://bugzilla.mozilla.org/buglist.cgi?quicksearch=OPEN%20product%3A%22Participation%20Infrastructure%22%20component%3APhonebook",
+        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook"
     },
     "urls": {
         "prod": "https://mozillians.org",

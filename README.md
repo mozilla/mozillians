@@ -17,7 +17,7 @@ Contribute
 
 File a bug
 ------
-[Create a bug](https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook) on bugzilla.mozilla.org in the `Community Tools > Phonebook` component. If you then want to give a Pull Request, mention the bug number in the pull request to help with tracking. Here's an example commit message for a bug fix:
+[Create a bug](https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook) on bugzilla.mozilla.org in the `Participation Infrastructure > Phonebook` component. If you then want to give a Pull Request, mention the bug number in the pull request to help with tracking. Here's an example commit message for a bug fix:
 ```
 [fix bug 937104] Update to latest playdoh.
 ```
