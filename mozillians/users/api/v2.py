@@ -25,12 +25,12 @@ class ExternalAccountSerializer(serializers.ModelSerializer):
 
 
 class WebsiteSerializer(serializers.ModelSerializer):
-    value = serializers.CharField(source='identifier')
+    website = serializers.CharField(source='identifier')
     privacy = serializers.CharField(source='get_privacy_display')
 
     class Meta:
         model = ExternalAccount
-        fields = ('value', 'privacy')
+        fields = ('website', 'privacy')
 
 
 class LanguageSerializer(serializers.ModelSerializer):
@@ -52,12 +52,13 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
-    email = serializers.Field(source='user.email')
+    email = serializers.Field(source='email')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
     city = serializers.SerializerMethodField('get_city')
-    external_accounts = ExternalAccountSerializer(many=True, source='externalaccount_set')
-    languages = LanguageSerializer(many=True, source='language_set')
+    external_accounts = ExternalAccountSerializer(many=True, source='accounts')
+    languages = LanguageSerializer(many=True, source='languages')
+    websites = WebsiteSerializer(many=True, source='websites')
     is_public = serializers.Field(source='is_public')
     url = serializers.SerializerMethodField('get_url')
 
@@ -66,7 +67,7 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
         model = UserProfile
         fields = ('username', 'full_name', 'email', 'bio', 'photo', 'ircname',
                   'date_mozillian', 'timezone', 'title', 'story_link',
-                  'languages', 'external_accounts', 'tshirt',
+                  'languages', 'external_accounts', 'websites', 'tshirt',
                   'is_public', '_url', 'url', 'city', 'region', 'country')
 
     def _transform_privacy_wrapper(self, field):

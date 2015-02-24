@@ -36,7 +36,7 @@ class WebsiteSerializerTests(TestCase):
                                   type=ExternalAccount.TYPE_WEBSITE, privacy=PUBLIC)
         serializer = WebsiteSerializer(account)
         data = serializer.data
-        eq_(data, {'value': 'http://example.com',
+        eq_(data, {'website': 'http://example.com',
                    'privacy': 'Public'})
 
 
