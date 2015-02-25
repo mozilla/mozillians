@@ -172,7 +172,7 @@ Mozillians development follows a `schedule`_ and a `roadmap`_ managed by the `Mo
 .. _Mozillians product and development team: https://wiki.mozilla.org/Mozillians#Team
 .. _schedule: https://wiki.mozilla.org/Mozillians#Schedule
 .. _roadmap: https://wiki.mozilla.org/Mozillians/RoadMap
-.. _All outstanding bugs: https://bugzilla.mozilla.org/buglist.cgi?product=Community%20Tools;component=Phonebook;resolution=---;list_id=5645789
-.. _Good first bugs: https://bugzilla.mozilla.org/buglist.cgi?list_id=5667806;classification=Other;status_whiteboard_type=allwordssubstr;query_format=advanced;status_whiteboard=mentor;bug_status=NEW;component=Phonebook;product=Community%20Tools
+.. _All outstanding bugs: https://bugzilla.mozilla.org/buglist.cgi?product=Participation%20Infrastructure;component=Phonebook;resolution=---;list_id=5645789
+.. _Good first bugs: https://bugzilla.mozilla.org/buglist.cgi?list_id=5667806;classification=Other;status_whiteboard_type=allwordssubstr;query_format=advanced;status_whiteboard=mentor;bug_status=NEW;component=Phonebook;product=Participation%20Infrastructure
 .. _pull request: https://github.com/YOUR_USERNAME/mozillians/pull/new/master
-.. _submit a bug: https://bugzilla.mozilla.org/enter_bug.cgi?product=Community%20Tools&component=Phonebook&status_whiteboard=&target_milestone=---&version=other
+.. _submit a bug: https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook&status_whiteboard=&target_milestone=---&version=other
