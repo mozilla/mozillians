@@ -12,8 +12,14 @@ class MozilliansPermission(BasePermission):
         if not waffle.flag_is_active(request, 'apiv2-endpoint'):
             return False
 
-        api_key = (request.REQUEST.get('api-key', None) or
-                   request.META.get('HTTP_X_API_KEY', None))
+        api_key = None
+
+        if request.user.is_authenticated():
+            api_query = APIv2App.objects.filter(owner=request.user.userprofile)
+            if api_query.exists():
+                api_key = api_query.order_by('privacy_level')[0].key
+
+        api_key = (request.REQUEST.get('api-key') or request.META.get('HTTP_X_API_KEY') or api_key)
 
         if api_key:
             try:
