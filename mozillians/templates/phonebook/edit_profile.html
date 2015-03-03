@@ -165,6 +165,12 @@
       <div id="gps_error" class="error-message" style="display:none;">
         <i class="icon-target"></i> {{ _('You have denied Location services.') }}
       </div>
+      <div id="location_wrong" >
+        <a id="improve_this_map" target="_blank"
+           href="http://www.openstreetmap.org/note/new#map=13/{{profile.lat}}/{{profile.lng}}&layers=N">
+          Improve this map</a>
+        <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[learn more]</a>
+      </div>
     </fieldset>
 
     <fieldset>
