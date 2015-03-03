@@ -42,6 +42,15 @@ class LanguageSerializer(serializers.ModelSerializer):
         fields = ('code', 'english', 'native')
 
 
+class AlternateEmailSerializer(serializers.ModelSerializer):
+    email = serializers.CharField(source='identifier')
+    privacy = serializers.CharField(source='get_privacy_display')
+
+    class Meta:
+        model = ExternalAccount
+        fields = ('email', 'privacy')
+
+
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
 
@@ -53,6 +62,7 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
     email = serializers.Field(source='email')
+    alternate_emails = AlternateEmailSerializer(many=True, source='alternate_emails')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
     city = serializers.SerializerMethodField('get_city')
@@ -65,10 +75,10 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     # Add profile URL
     class Meta:
         model = UserProfile
-        fields = ('username', 'full_name', 'email', 'bio', 'photo', 'ircname',
-                  'date_mozillian', 'timezone', 'title', 'story_link',
-                  'languages', 'external_accounts', 'websites', 'tshirt',
-                  'is_public', '_url', 'url', 'city', 'region', 'country')
+        fields = ('username', 'full_name', 'email', 'alternate_emails', 'bio', 'photo',
+                  'ircname', 'date_mozillian', 'timezone', 'title', 'story_link', 'languages',
+                  'external_accounts', 'websites', 'tshirt', 'is_public', '_url', 'url',
+                  'city', 'region', 'country')
 
     def _transform_privacy_wrapper(self, field):
 
