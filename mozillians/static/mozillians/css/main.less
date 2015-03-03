@@ -23,6 +23,7 @@
 // Special
 // Betasearch
 // Email settings
+// API keys
 
 /* Imports
 ==================== */
@@ -2123,5 +2124,26 @@ fieldset {
                 float: none;
             }
         }
+    }
+}
+
+/* API keys
+============ */
+
+#apikeys{
+    .delete {
+        .button-negative;
+        @media (max-width: 700px) {
+            margin-bottom: 10px;
+        }
+    }
+    div.api-key {
+        display: inline-block;
+        min-width: 300px;
+        margin-bottom: 10px;
+    }
+
+    li.api-key {
+        margin-bottom: 10px
     }
 }

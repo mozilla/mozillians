@@ -11,7 +11,6 @@ urlpatterns = patterns(
     url(r'^logout/$', 'views.logout', name='logout'),
     url(r'^register/$', 'views.register', name='register'),
     url(r'^user/edit/$', 'views.edit_profile', name='profile_edit'),
-    url(r'^user/apikeys/$', 'views.apikeys', name='apikeys'),
     url(r'^u/(?P<username>[\w.@+-]+)/$', 'views.view_profile',
         name='profile_view'),
     url(r'^user/edit/emails/$', 'views.edit_emails',
@@ -41,6 +40,8 @@ urlpatterns = patterns(
         'views.list_mozillians_in_location', name='list_region_city'),
     url(r'^country/(?P<country>[A-Za-z0-9 \.]+)/region/(?P<region>.+)/$',
         'views.list_mozillians_in_location', name='list_region'),
+    url(r'^apikeys/$', 'views.apikeys', name='apikeys'),
+    url(r'^apikey/(?P<api_pk>\d+)/delete/$', 'views.delete_apikey', name='apikey_delete'),
 
 
     # Static pages need csrf for browserID post to work

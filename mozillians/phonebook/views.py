@@ -478,6 +478,14 @@ def apikeys(request):
     return render(request, 'phonebook/apikeys.html', data)
 
 
+@waffle_flag('apiv2')
+def delete_apikey(request, api_pk):
+    api_key = get_object_or_404(APIv2App, pk=api_pk, owner=request.user.userprofile)
+    api_key.delete()
+    messages.success(request, _('API key successfully deleted.'))
+    return redirect('phonebook:apikeys')
+
+
 def list_mozillians_in_location(request, country, region=None, city=None):
     queryset = UserProfile.objects.vouched().filter(geo_country__name__iexact=country)
     show_pagination = False
