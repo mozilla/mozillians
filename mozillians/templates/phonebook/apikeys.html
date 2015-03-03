@@ -18,15 +18,9 @@
 <p class="field_description">
   {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api/api.html',
            bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                 'product=Data%20Safety&cc=williamr@mozilla.com'
-                                 '&short_desc=Phonebook%20API%20Usage%20Request'),
-     dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
-     Take a look at the list of the <a href="{{ api_schema_url }}">
-     API methods we've made available</a>. To use this API, you'll
-     need to get approval from the Privacy team. To get started,
-     <a href="{{ bugzilla_request_url }}">file a bug</a>. If you have
-     any questions, talk to us in our
-     <a href="{{ dev_form_url }}">development forum</a>.
+                                 'product=Participation Infrastructure&component=Phonebook') %}
+    API v1 is phasing out, please consider using API v2. For any support requests for API v1
+    file a bug <a href="{{ bugzilla_request_url }}">here</a>.
   {% endtrans %}
 </p>
 
@@ -49,7 +43,6 @@
   {% else %}
     {{ _('You have no active apps.') }}
   {% endfor %}
-</ul>
 
 {% if waffle.flag('apiv2') %}
   <p>
@@ -59,17 +52,12 @@
   <p class="field_description">
     {% trans api_schema_url=url('api-root'),
              bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                   'product=Data%20Safety&cc=williamr@mozilla.com'
-                                   '&short_desc=Phonebook%20API%20Version%202%20Usage%20Request'),
-             dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
-      Take a look at the list of the <a href="{{ api_schema_url }}">API methods we've
-      made available</a>.
-
-      You can instantly get a new API key by submitting a request bellow.
-      If you need a key with elevated permissions you'll have to
-      <a href="{{ bugzilla_request_url }}">file a bug</a>. If you have
-      any questions, talk to us in our <a href="{{ dev_form_url }}">
-      development forum</a>.
+                                   'product=Participation%20Infrastructure&'
+                                   'component=API%20Requests') %}
+      Take a look at the list of the API methods we've made available using our
+      <a href="{{ api_schema_url }}">browsable API</a> (API key required). You can instantly get a new API
+      key by submitting a request below. If you need a key with elevated permissions you'll have to
+      <a href="{{ bugzilla_request_url }}">file a bug</a>.
     {% endtrans %}
   </p>
 
