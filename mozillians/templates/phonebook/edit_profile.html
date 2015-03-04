@@ -427,17 +427,16 @@
       <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
     </fieldset>
 
-    <fieldset id="services">
+    <fieldset id="services" class="edit-controls">
       <h2>{{ _('Services') }}</h2>
       <p class="field_description">
         {% trans bugzilla_url='http://bugzilla.mozilla.org',
                  reps_url='http://reps.mozilla.org' %}
-          The Phonebook offers an API to help authorize
-          contributors and share profile data to other tools
-          and sites like <a id="services-bugzilla-url" href="{{ bugzilla_url }}">Bugzilla</a> and the
+          The Phonebook offers an API (currently v1) to help authorize contributors and share profile data to other
+          tools and sites like <a id="services-bugzilla-url" href="{{ bugzilla_url }}">Bugzilla</a> and the
           <a id="services-mozilla-reps" href="{{ reps_url }}">Mozilla Reps Portal</a>.
         {% endtrans %}
-      <h4>{{ _('API Version 1') }}</h4>
+      <h4>{{ _('Privacy') }}</h4>
       <p>
         {{ profile_form.allows_community_sites.label_tag() }}
         {{ profile_form.allows_community_sites }}
@@ -452,69 +451,10 @@
         and eventually dropped along with the API Version 1.
       </p>
 
-      {% if user.userprofile.is_vouched %}
-        <h5>{{ _('Developers') }}</h5>
-        <p class="field_description">
-          {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api/api.html',
-                   bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                         'product=Data%20Safety&cc=williamr@mozilla.com'
-                                         '&short_desc=Phonebook%20API%20Usage%20Request'),
-                   dev_form_url='http://groups.google.com/group/mozilla.dev.community-tools/' %}
-            Take a look at the list of
-            the <a id="services-api-methods" href="{{ api_schema_url }}">API methods we've
-            made available</a>. To use this API, you'll need to
-            get approval from the Privacy team. To get started,
-            <a id="services-bugzilla-request-url" href="{{ bugzilla_request_url }}">file
-            a bug</a>. If you have any questions, talk to us in
-            our <a id="services-development-forum" href="{{ dev_form_url }}">
-            development forum</a>.
-          {% endtrans %}
-        </p>
-        <ul>
-          <strong>{{ _('Your apps:') }}</strong>
-          {% for app in apps %}
-            <li>{{ app.name }} {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}<br>
-              <small><strong>{{ _('Key') }}:</strong> {{ app.key }}</small>
-            </li>
-          {% else %}
-            {{ _('You have no registered, active apps.') }}
-          {% endfor %}
-        </ul>
-      {% endif %}
       {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
-        <h4>{{ _('API Version 2') }}</h4>
-          <h5>{{ _('Developers') }}</h5>
-          <p class="field_description">
-            {% trans api_schema_url=url('api-root'),
-                     bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                           'product=Data%20Safety&cc=williamr@mozilla.com'
-                                           '&short_desc=Phonebook%20API%20Usage%20Request'),
-                     dev_form_url='http://groups.google.com/group/mozilla-dev-community-tools/' %}
-              Take a look at the list of
-              the <a href="{{ api_schema_url }}">API methods we've
-              made available</a>.
-
-              You can instantly get a new API key by submitting a
-              request. If you need a key with elevated permissions
-              you'll have to
-              <a href="{{ bugzilla_request_url }}">file a bug</a>. If
-              you have any questions, talk to us in our <a href="{{
-              dev_form_url }}"> development forum</a>.
-            {% endtrans %}
-          </p>
-          <p>
-            Manage your API keys from the <a href="{{ url('phonebook:apikeys') }}">Developers</a> page.
-          </p>
-          <ul>
-            <strong>{{ _('Your apps:') }}</strong>
-            {% for app in appsv2 %}
-              <li>{{ app.name }} {% if app.url %}<em>({{ app.url|urlize }})</em>{% endif %}<br>
-                <small><strong>{{ _('Key') }}:</strong> {{ app.key }}</small>
-              </li>
-            {% else %}
-              {{ _('You have no registered, active apps.') }}
-            {% endfor %}
-          </ul>
+        <h4>{{ _('Developers') }}</h4>
+        <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
+        <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
       {% endif %}
     </fieldset>
 
