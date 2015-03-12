@@ -6,10 +6,12 @@ from requests import ConnectionError, HTTPError
 
 from mozillians.common.tests import TestCase
 from mozillians.geo.models import Country, Region, City
-from mozillians.geo.lookup import (GeoLookupException, get_first_mapbox_geocode_result,
+from mozillians.geo.lookup import (GeoLookupException, deduplicate_cities,
+                                   get_first_mapbox_geocode_result,
                                    result_to_city, result_to_country_region_city,
                                    result_to_country, result_to_region, reverse_geocode)
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
+from mozillians.users.tests import UserFactory
 
 
 @patch('mozillians.geo.lookup.requests')
@@ -192,3 +194,37 @@ class TestResultToCity(TestCase):
         result_to_city(result, city.country, None)
         city = City.objects.get(pk=city.pk)
         eq_(new_name, city.name)
+
+    def test_deduplication_required(self):
+        city = CityFactory.create()
+        dup_city = CityFactory.create()
+        result = {
+            'city': {
+                'name': dup_city.name,
+                'id': city.mapbox_id,
+                'lat': dup_city.lat,
+                'lon': dup_city.lng,
+            }
+        }
+
+        result_to_city(result, dup_city.country, dup_city.region)
+        lookup_args = {
+            'region': dup_city.region,
+            'country': dup_city.country,
+            'name': dup_city.name,
+        }
+
+        ok_(City.objects.filter(**lookup_args).exists())
+        ok_(not City.objects.filter(mapbox_id=dup_city.mapbox_id).exists())
+
+    def test_deduplicate_cities(self):
+        cities = CityFactory.create_batch(2)
+        for city in cities:
+            UserFactory.create(userprofile={'geo_city': city})
+
+        deduplicate_cities(cities[0], cities[1])
+
+        city = City.objects.get(id=cities[0].id)
+
+        ok_(not City.objects.filter(id=cities[1].id).exists())
+        eq_(city.userprofile_set.all().count(), 2)
