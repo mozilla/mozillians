@@ -77,8 +77,8 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
         model = UserProfile
         fields = ('username', 'full_name', 'email', 'alternate_emails', 'bio', 'photo',
                   'ircname', 'date_mozillian', 'timezone', 'title', 'story_link', 'languages',
-                  'external_accounts', 'websites', 'tshirt', 'is_public', '_url', 'url',
-                  'city', 'region', 'country')
+                  'external_accounts', 'websites', 'tshirt', 'is_public', 'is_vouched',
+                  '_url', 'url', 'city', 'region', 'country')
 
     def _transform_privacy_wrapper(self, field):
 
