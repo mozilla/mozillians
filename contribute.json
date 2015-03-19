@@ -1,0 +1,30 @@
+{
+    "name": "Mozillians",
+    "description": "A community directory for Mozillians to connect with each other.",
+    "repository": {
+        "url": "https://github.com/mozilla/mozillians",
+        "license": "BSD 3-Clause",
+        "tests": "https://travis-ci.org/mozilla/mozillians"
+    },
+    "participate": {
+        "home": "http://mozillians.readthedocs.org/en/latest/contribute.html",
+        "docs": "http://mozillians.readthedocs.org/en/latest/installation/installation.html",
+        "irc": "irc://irc.mozilla.org/#mozillians",
+        "irc-contacts": ["nemo-yiannis"]
+    },
+    "bugs": {
+        "list": "https://bugzilla.mozilla.org/buglist.cgi?product=Participation%20Infrastructure;component=Phonebook;resolution=---",
+        "mentored": "https://bugzilla.mozilla.org/buglist.cgi?classification=Other;status_whiteboard_type=allwordssubstr;query_format=advanced;status_whiteboard=mentor;bug_status=NEW;component=Phonebook;product=Participation%20Infrastructure",
+        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook&status_whiteboard=&target_milestone=---&version=other"
+    },
+    "urls": {
+        "prod": "https://mozillians.org/",
+        "stage": "https://mozillians.allizom.org/",
+        "dev": "https://mozillians-dev.allizom.org/"
+    },
+    "keywords": [
+        "django",
+        "javascript",
+        "python"
+    ]
+}
