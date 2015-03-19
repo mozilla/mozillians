@@ -24,4 +24,3 @@ class TestContribute(TestCase):
         eq_(response.status_code, 200)
         ok_(json.loads(response.content))
         eq_(response['Content-Type'], 'application/json')
-        self.assertTemplateUsed(response, 'humans/contribute.json')
