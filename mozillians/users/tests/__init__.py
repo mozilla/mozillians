@@ -9,13 +9,15 @@ from mozillians.users.models import Language
 
 
 class UserFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = User
     username = factory.Sequence(lambda n: 'user{0}'.format(n))
     first_name = 'Joe'
     last_name = factory.Sequence(lambda n: 'Doe {0}'.format(n))
     email = factory.LazyAttribute(
         lambda a: '{0}.{1}@example.com'.format(
             a.first_name, a.last_name.replace(' ', '.')))
+
+    class Meta:
+        model = User
 
     @factory.post_generation
     def userprofile(self, create, extracted, **kwargs):
@@ -58,5 +60,7 @@ class UserFactory(factory.DjangoModelFactory):
 
 
 class LanguageFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = Language
     code = fuzzy.FuzzyChoice(choices=['en', 'fr', 'el', 'es'])
+
+    class Meta:
+        model = Language
