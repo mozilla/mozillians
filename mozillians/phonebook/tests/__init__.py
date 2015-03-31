@@ -6,8 +6,10 @@ from mozillians.users.models import UserProfilePrivacyModel
 
 
 class InviteFactory(factory.DjangoModelFactory):
-    FACTORY_FOR = Invite
     recipient = factory.Sequence(lambda n: 'user{0}@example.com'.format(n))
+
+    class Meta:
+        model = Invite
 
 
 def _get_privacy_fields(privacy_level):
