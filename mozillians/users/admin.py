@@ -1,3 +1,5 @@
+from socket import error as socket_error
+
 from django import forms
 from django.conf import settings
 from django.conf.urls import patterns, url
@@ -433,6 +435,22 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
         messages.success(request, 'Profile indexing started.')
         return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
 
+    def check_celery(self, request):
+        try:
+            investigator = mozillians.users.tasks.check_celery.delay()
+        except socket_error as e:
+            messages.error(request, 'Cannot connect to broker: %s' % e)
+            return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
+
+        try:
+            investigator.get(timeout=5)
+        except investigator.TimeoutError as e:
+            messages.error(request, 'Worker timeout: %s' % e)
+        else:
+            messages.success(request, 'Celery is OK')
+        finally:
+            return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
+
     def get_urls(self):
         """Return custom and UserProfileAdmin urls."""
 
@@ -443,8 +461,11 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             return update_wrapper(wrapper, view)
 
         urls = super(UserProfileAdmin, self).get_urls()
-        my_urls = patterns('', url(r'index_profiles', wrap(self.index_profiles),
-                                   name='users_index_profiles'))
+        my_urls = patterns(
+            '',
+            url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
+            url(r'check_celery', wrap(self.check_celery), name='users_check_celery')
+        )
         return my_urls + urls
 
 admin.site.register(UserProfile, UserProfileAdmin)

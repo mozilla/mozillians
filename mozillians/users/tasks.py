@@ -259,3 +259,9 @@ def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     now = datetime.now() - timedelta(days=days)
     (UserProfile.objects.filter(full_name='')
      .filter(user__date_joined__lt=now).delete())
+
+
+@task(ignore_result=False)
+def check_celery():
+    """Dummy celery task to check that everything runs smoothly."""
+    pass

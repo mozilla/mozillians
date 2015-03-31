@@ -3,6 +3,11 @@
 
 {% block object-tools-items %}
   <li>
+    <a href="{% url 'admin:users_check_celery' %}">
+      Check celery
+    </a>
+  </li>
+  <li>
     <a href="{% url 'admin:users_index_profiles' %}">
       Update Elastic Search Index
     </a>
