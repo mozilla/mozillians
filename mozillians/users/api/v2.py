@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 import django_filters
@@ -165,12 +166,19 @@ class UserProfileFilter(django_filters.FilterSet):
     country = django_filters.CharFilter(name='geo_country__name')
     country_code = django_filters.CharFilter(name='geo_country__code')
     username = django_filters.CharFilter(name='user__username')
-    email = django_filters.CharFilter(name='user__email')
+    email = django_filters.MethodFilter(action='filter_emails')
 
     class Meta:
         model = UserProfile
-        fields = ('is_vouched', 'city', 'region', 'country',
-                  'country_code', 'username', 'email', 'ircname', 'full_name')
+        fields = ('is_vouched', 'city', 'region', 'country', 'country_code',
+                  'username', 'email', 'ircname', 'full_name')
+
+    def filter_emails(self, queryset, value):
+        """Return users with email matching either primary or alternate email address"""
+        qs = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL, identifier=value)
+        users = qs.values_list('user__id', flat=True)
+        query = Q(id__in=users) | Q(user__email=value)
+        return self.queryset.filter(query).distinct()
 
 
 # Views
