@@ -1,7 +1,10 @@
 db:
-  image: orchardup/mysql
+  image: mysql:5.5
   environment:
     - MYSQL_DATABASE=mozillians
+    - MYSQL_USER=mozillians
+    - MYSQL_PASSWORD=mozillians
+    - MYSQL_ROOT_PASSWORD=root
 es:
   image: barnybug/elasticsearch:1.2.1
 web:

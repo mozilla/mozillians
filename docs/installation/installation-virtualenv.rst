@@ -163,6 +163,10 @@ Setting up a MySQL user and database for development:
     Bye
     $
 
+#. Install timezone info tables in mysql::
+
+   (venv)$ mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot mysql
+
 .. _MySQL site: http://dev.mysql.com/downloads/mysql/
 
 
