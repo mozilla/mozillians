@@ -182,6 +182,24 @@ class LastLoginFilter(SimpleListFilter):
         return queryset
 
 
+class AlternateEmailFilter(SimpleListFilter):
+    """Admin filter for users with alternate emails."""
+    title = 'alternate email'
+    parameter_name = 'alternate_email'
+
+    def lookups(self, request, model_admin):
+        return(('False', 'No'), ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+
+        if self.value() == 'True':
+            return queryset.filter(externalaccount__type=ExternalAccount.TYPE_EMAIL)
+
+        return queryset.exclude(externalaccount__type=ExternalAccount.TYPE_EMAIL)
+
+
 class LegacyVouchFilter(SimpleListFilter):
     """Admin filter for profiles with new or legacy vouch type."""
     title = 'vouch type'
@@ -334,7 +352,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     form = UserProfileAdminForm
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
-                   CompleteProfileFilter, PublicProfileFilter,
+                   CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
                    'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
