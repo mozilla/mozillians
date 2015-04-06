@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.http import Http404
+from django.test import RequestFactory
 
 from mock import Mock, patch
 from nose.tools import eq_, ok_
@@ -7,11 +8,12 @@ from nose.tools import eq_, ok_
 from mozillians.common.tests import TestCase
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
 from mozillians.users.managers import MOZILLIANS, PUBLIC
-from mozillians.users.models import ExternalAccount, Language
+from mozillians.users.models import ExternalAccount, Language, UserProfile
 from mozillians.users.tests import UserFactory
 from mozillians.users.api.v2 import (ExternalAccountSerializer,
                                      LanguageSerializer,
                                      UserProfileDetailedSerializer,
+                                     UserProfileFilter,
                                      UserProfileSerializer,
                                      UserProfileViewSet,
                                      WebsiteSerializer)
@@ -169,3 +171,28 @@ class UserProfileViewSetTests(TestCase):
         viewset.request = Mock()
         viewset.request.privacy_level = MOZILLIANS
         self.assertRaises(Http404, viewset.retrieve, viewset.request, -1)
+
+
+class UserProfileFilterTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_filter_emails_primary(self):
+        request = self.factory.get('/', {'email': 'foo@bar.com'})
+        user = UserFactory.create(email='foo@bar.com')
+        UserFactory.create_batch(2)
+        ExternalAccount.objects.create(user=user.userprofile, type=ExternalAccount.TYPE_EMAIL,
+                                       identifier='bar@bar.com')
+        f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
+        eq_(f.qs.count(), 1)
+        eq_(f.qs[0], user.userprofile)
+
+    def test_filter_emails_alternate(self):
+        request = self.factory.get('/', {'email': 'bar@bar.com'})
+        user = UserFactory.create(email='foo@bar.com')
+        UserFactory.create_batch(2)
+        ExternalAccount.objects.create(user=user.userprofile, type=ExternalAccount.TYPE_EMAIL,
+                                       identifier='bar@bar.com')
+        f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
+        eq_(f.qs.count(), 1)
+        eq_(f.qs[0], user.userprofile)
