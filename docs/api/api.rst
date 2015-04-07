@@ -4,15 +4,16 @@
 
 .. _api:
 
-=================
+===============
 Mozillians API
-=================
+===============
 
-The Mozillians.org API is a REST API that allows community sites to determine the vouched status of individual users, and allows Mozilla Corporation sites to get detailed information about users and groups in Mozillians.org. This document explains how to use the Mozillians.org API to enhance your application.
+The Mozillians.org API is a REST API that provides detailed information about users and groups in Mozillians.org. This document explains how to use the Mozillians.org API to enhance your application.
 
    .. note::
 
-        All endpoints of the API require authentication. Users can opt-out of being visible to either community or Mozillia Corporation API consumers by editing their profiles.
+      All endpoints of the API require authentication. Users can restrict visibility of their personal data by editing their profiles.
+
 
 Using API Data
 --------------
@@ -25,21 +26,8 @@ The Mozillians.org API exposes personal data about people who have created profi
 
 If you believe an application is misusing Mozillians.org API data, please `file a bug <https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook>`_.
 
-Getting an API Key
-------------------
-
-Community sites and Mozilla Corporation sites can request an API key by `submitting a bug <https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=API%20Requests>`_. The bug should include the **URL and description of the application** and **details about the expected use of API data**.
-
-All requests are reviewed by product owners and data safety experts; not all requests are approved. 
-
-API keys are granted per application, not per user.
-
-API Methods
------------
-
 .. toctree::
    :maxdepth: 2
 
-   api-users
-   api-groups
-   api-skills
+   apiv1/index
+   apiv2/index

@@ -2,13 +2,13 @@
 .. License, v. 2.0. If a copy of the MPL was not distributed with this
 .. file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-.. _api-groups:
+.. _apiv1-groups:
 
 ==================
 Groups
 ==================
 
-The ``groups`` method of the :doc:`Mozillians API <api>` returns information about groups.
+The ``groups`` method of the :doc:`Mozillians API </api/apiv1/index>` returns information about groups.
 
 **Requires Authentication**
     Yes
@@ -49,7 +49,7 @@ Return Codes
     Code  Description
     ====  ===========
     200:  OK Success!
-    401:  Wrong app_name or app_key OR application not activated OR application not authorized 
+    401:  Wrong app_name or app_key OR application not activated OR application not authorized
     ====  ===========
 
 Examples
@@ -71,7 +71,7 @@ Examples
                 "previous": null,
                 "total_count": 749
             },
-            "objects": 
+            "objects":
             [
                 {
                     "id": "471",
