@@ -10,7 +10,7 @@ Dependencies
 
 #. You need to install docker in your system. The `installation guide <https://docs.docker.com/installation/#installation>`_ covers many operating systems but for now we only support Linux and Mac OS X. *Version required*: 1.3.1 or newer.
 
-#. We are using an orchestration tool for docker called `fig <http://www.fig.sh/>`_ that helps us automate the procedure of initiating our docker containers required for development. Installation instructions can be found `in fig's documentation <http://www.fig.sh/install.html>`_. *Version required*: 1.0.1 or newer.
+#. We are using an orchestration tool for docker called `docker-compose <https://docs.docker.com/compose//>`_ that helps us automate the procedure of initiating our docker containers required for development. Installation instructions can be found `in Compose's documentation <https://docs.docker.com/compose/install/>`_. *Version required*: 1.0.1 or newer.
 
 Running Docker on Mac
 #####################
@@ -58,32 +58,37 @@ Building mozillians
 
 #. Start ``MySQL`` and ``ElasticSearch`` containers::
 
-     $ fig up -d db es
+     $ docker-compose up -d db es
 
 #. Update the product details::
 
-     $ fig run web python manage.py update_product_details -f
+     $ docker-compose run web python manage.py update_product_details -f
 
 #. Create the database tables and run the migrations::
 
-     $ fig run web python manage.py syncdb --noinput --migrate
+     $ docker-compose run web python manage.py syncdb --noinput --migrate
+
+#. Load the timezone tables to MySQL::
+
+     $ docker-compose run db /bin/bash
+     shell> mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot -h db_1 mysql
 
 #. Create user
 
    #. Run mozillians::
 
-        fig up
+        docker-compose up
 
    #. Load http://127.0.0.1:8000 or (for Mac users only) ``<IP>:8000`` where ``<IP>`` is the one returned by ``boot2docker ip`` command.
    #. Sign in with persona to create your profile.
    #. Stop the server with ``Ctrl^C``.
    #. Vouch your account and convert it to superuser::
 
-        fig run web ./scripts/su.sh
+        docker-compose run web ./scripts/su.sh
 
       .. note::
 
-         In case this command doesn't work, you can run ``./scripts/su.sh`` inside the container. In order to get shell access please run ``fig run web /bin/bash``.
+         In case this command doesn't work, you can run ``./scripts/su.sh`` inside the container. In order to get shell access please run ``docker-compose run web /bin/bash``.
 
 ******************
 Running mozillians
@@ -91,7 +96,7 @@ Running mozillians
 
 #. Run Mozillians::
 
-     $ fig up
+     $ docker-compose up
      (lots of output - be patient...)
 
 #. Develop!

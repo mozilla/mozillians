@@ -13,8 +13,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mozillians',
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': 'mozillians',
+        'PASSWORD': 'mozillians',
         'HOST': 'db_1',
         'PORT': '',
         'OPTIONS': {
