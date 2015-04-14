@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from mozillians.common.helpers import absolutify, markdown
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import UserProfile, ExternalAccount, Language
+from mozillians.users.models import ExternalAccount, GroupMembership, Language, UserProfile
 
 
 # Serializers
@@ -167,11 +167,16 @@ class UserProfileFilter(django_filters.FilterSet):
     country_code = django_filters.CharFilter(name='geo_country__code')
     username = django_filters.CharFilter(name='user__username')
     email = django_filters.MethodFilter(action='filter_emails')
+    language = django_filters.CharFilter(name='language__code')
+    account = django_filters.CharFilter(name='externalaccount__identifier', distinct=True)
+    group = django_filters.MethodFilter(action='filter_group')
+    skill = django_filters.CharFilter(name='skills__name')
 
     class Meta:
         model = UserProfile
         fields = ('is_vouched', 'city', 'region', 'country', 'country_code',
-                  'username', 'email', 'ircname', 'full_name')
+                  'username', 'email', 'ircname', 'full_name', 'language',
+                  'account', 'group', 'skill')
 
     def filter_emails(self, queryset, value):
         """Return users with email matching either primary or alternate email address"""
@@ -179,6 +184,10 @@ class UserProfileFilter(django_filters.FilterSet):
         users = qs.values_list('user__id', flat=True)
         query = Q(id__in=users) | Q(user__email=value)
         return self.queryset.filter(query).distinct()
+
+    def filter_group(self, queryset, value):
+        membership = GroupMembership.MEMBER
+        return self.queryset.filter(groups__name=value, groupmembership__status=membership)
 
 
 # Views
