@@ -63,12 +63,18 @@ class SkillDetailedSerializer(SkillSerializer):
 
 
 class GroupFilter(django_filters.FilterSet):
-    curator = django_filters.CharFilter()
 
     class Meta:
         model = Group
         fields = ('name', 'functional_area', 'curator',
                   'members_can_leave', 'accepting_new_members',)
+
+
+class SkillFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = Skill
+        fields = ('name',)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -104,6 +110,7 @@ class SkillViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
     ordering_fields = ('name',)
+    filter_class = SkillFilter
 
     def retrieve(self, request, pk):
         skill = get_object_or_404(self.queryset, pk=pk)

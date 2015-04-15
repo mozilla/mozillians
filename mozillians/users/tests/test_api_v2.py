@@ -7,8 +7,9 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
+from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import MOZILLIANS, PUBLIC
-from mozillians.users.models import ExternalAccount, Language, UserProfile
+from mozillians.users.models import GroupMembership, ExternalAccount, Language, UserProfile
 from mozillians.users.tests import UserFactory
 from mozillians.users.api.v2 import (ExternalAccountSerializer,
                                      LanguageSerializer,
@@ -196,3 +197,22 @@ class UserProfileFilterTest(TestCase):
         f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
         eq_(f.qs.count(), 1)
         eq_(f.qs[0], user.userprofile)
+
+    def test_filter_group_member(self):
+        request = self.factory.get('/', {'group': 'bar'})
+        user = UserFactory.create()
+        group = GroupFactory.create(name='bar')
+        group.add_member(user.userprofile)
+
+        f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
+        eq_(f.qs.count(), 1)
+        eq_(f.qs[0], user.userprofile)
+
+    def test_filter_group_pending(self):
+        request = self.factory.get('/', {'group': 'bar'})
+        user = UserFactory.create()
+        group = GroupFactory.create(name='bar')
+        group.add_member(user.userprofile, GroupMembership.PENDING)
+
+        f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
+        eq_(f.qs.count(), 0)
