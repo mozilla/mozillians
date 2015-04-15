@@ -2,13 +2,13 @@
 .. License, v. 2.0. If a copy of the MPL was not distributed with this
 .. file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-.. _api-users:
+.. _apiv1-users:
 
 ==================
 Users
 ==================
 
-The ``users`` method of the :doc:`Mozillians API <api>` returns user profile information.
+The ``users`` method of the :doc:`Mozillians API </api/apiv1/index>` returns user profile information.
 
 **Requires Authentication**
     Yes

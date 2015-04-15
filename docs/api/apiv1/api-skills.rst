@@ -2,13 +2,13 @@
 .. License, v. 2.0. If a copy of the MPL was not distributed with this
 .. file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-.. _api-skills:
+.. _apiv1-skills:
 
 ==================
 Skills
 ==================
 
-The ``skills`` method of the :doc:`Mozillians API <api>` returns information about skills.
+The ``skills`` method of the :doc:`Mozillians API </api/apiv1/index>` returns information about skills.
 
 **Requires Authentication**
     Yes
