@@ -50,12 +50,12 @@
   </p>
 
   <p class="field_description">
-    {% trans api_schema_url=url('api-root'),
+    {% trans api_schema_url='https://mozillians.readthedocs.org/en/latest/api/apiv2/index.html',
              bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
                                    'product=Participation%20Infrastructure&'
                                    'component=API%20Requests') %}
-      Take a look at the list of the API methods we've made available using our
-      <a href="{{ api_schema_url }}">browsable API</a> (API key required). You can instantly get a new API
+      Take a look at the list of the API methods we've made available in our
+      <a href="{{ api_schema_url }}">documentation</a>. You can instantly get a new API
       key by submitting a request below. If you need a key with elevated permissions you'll have to
       <a href="{{ bugzilla_request_url }}">file a bug</a>.
     {% endtrans %}
