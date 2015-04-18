@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('About Mozillians') }}{% endblock %}
+{% block body_id %}about{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <img id="photo-collage" src="{{ static('mozillians/img/about-dinomcvouch.png') }}"
+         alt="{{ _('Dino McVouch') }}">
+      <h1>{{ _('About Dino McVouch') }}</h1>
+
+      <p>
+      {% trans %}
+        Dino McVouch is Mozilians.org bot. Auto-vouches recognized
+        Mozillians and takes care of Mozillians.org.
+      {% endtrans %}
+      </p>
+  </div>
+{% endblock %}

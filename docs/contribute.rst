@@ -14,7 +14,7 @@ The below instructions are for software developers who want to work on Mozillian
 
 Git workflow
 ------------
-When you want to start contributing, you should :doc:`follow the installation instructions </installation-virtualenv>`, then...
+When you want to start contributing, you should :doc:`follow the installation instructions </installation/installation-virtualenv>`, then...
 
 #.  (Optional) Set your cloned fork to track upstream changes (changes to the main repository), then fetch and merge changes from the upstream branch::
 
@@ -29,9 +29,23 @@ When you want to start contributing, you should :doc:`follow the installation in
 
 #. Commit changes to the code!
 
+#. Code!
+
+#. Lint the code::
+
+    $ flake8 mozillians
+
+   and fix any errors.
+
 #. Run the tests::
 
-    $ ./manage.py tests
+    $ ./manage.py test
+
+   and make sure that all tests pass.
+
+   Learn more about :doc:`testing </testing>`.
+
+#. Commit changes to the code!
 
 #. When you're done, figure out how many commits you've made::
 
@@ -62,6 +76,65 @@ If you're asked to change your commit message, you can amend the message and for
   $ git push -f origin my_branch
 
 If you need more Git expertise, a good resource is the `Git book`_.
+
+Templates
+---------
+
+Mozillians.org uses `Jinja <http://jinja.pocoo.org/docs/>`_ templates, which
+are similar to Django templates but have some differences.
+
+Some helpers are available in all Jinja templates in Mozillians.org.
+
+display_context
+~~~~~~~~~~~~~~~
+
+Return a marked-up chunk of content containing the items
+in the template context, if ``settings.DEBUG`` is True.
+Otherwise returns an empty string.
+
+By default, callables are omitted. Pass include_callables=True
+to include them.
+
+The format of the result is::
+
+        <dl class="jinja-context">
+          <dt>key</dt><dd>value</dd>
+          <dt>key</dt><dd>value</dd>
+          ...
+        </dl>
+
+``repr`` is applied to the values to format them.
+
+Example usage::
+
+        {{ display_context() }}
+
+        {{ display_context(include_callables=True) }}
+
+get_context
+~~~~~~~~~~~
+Provide access to the Jinja :class:`Context` object in case
+you want to do more complicated things with it. Typically,
+``display_context()`` is easier to use.
+
+If ``settings.DEBUG`` is not True, returns an empty dictionary.
+
+Example usage::
+
+    {% set context=get_context() %}
+    {% for k, v in context|dictsort %}
+        {% if not is_callable(v) %}
+            {{ k }}: {{ v }}<br/>
+        {% endif %}
+    {% endfor %}
+
+is_callable
+~~~~~~~~~~~
+
+Return True if thing is callable.
+
+See get_context() for example usage.
+
 
 Server architecture
 -------------------
@@ -99,7 +172,7 @@ Mozillians development follows a `schedule`_ and a `roadmap`_ managed by the `Mo
 .. _Mozillians product and development team: https://wiki.mozilla.org/Mozillians#Team
 .. _schedule: https://wiki.mozilla.org/Mozillians#Schedule
 .. _roadmap: https://wiki.mozilla.org/Mozillians/RoadMap
-.. _All outstanding bugs: https://bugzilla.mozilla.org/buglist.cgi?product=Community%20Tools;component=Phonebook;resolution=---;list_id=5645789
-.. _Good first bugs: https://bugzilla.mozilla.org/buglist.cgi?list_id=5667806;classification=Other;status_whiteboard_type=allwordssubstr;query_format=advanced;status_whiteboard=mentor;bug_status=NEW;component=Phonebook;product=Community%20Tools
+.. _All outstanding bugs: https://bugzilla.mozilla.org/buglist.cgi?product=Participation%20Infrastructure;component=Phonebook;resolution=---;list_id=5645789
+.. _Good first bugs: https://bugzilla.mozilla.org/buglist.cgi?list_id=5667806;classification=Other;status_whiteboard_type=allwordssubstr;query_format=advanced;status_whiteboard=mentor;bug_status=NEW;component=Phonebook;product=Participation%20Infrastructure
 .. _pull request: https://github.com/YOUR_USERNAME/mozillians/pull/new/master
-.. _submit a bug: https://bugzilla.mozilla.org/enter_bug.cgi?alias=&assigned_to=nobody%40mozilla.org&blocked=&bug_file_loc=http%3A%2F%2F&bug_severity=normal&bug_status=NEW&cc=hoosteeno%40mozilla.com&cc=williamr%40mozilla.com&comment=&component=Phonebook&contenttypeentry=&contenttypemethod=autodetect&contenttypeselection=text%2Fplain&data=&defined_groups=1&dependson=&description=&flag_type-325=X&flag_type-37=X&flag_type-4=X&flag_type-607=X&flag_type-781=X&flag_type-787=X&flag_type-791=X&flag_type-800=X&form_name=enter_bug&keywords=&maketemplate=Remember%20values%20as%20bookmarkable%20template&op_sys=All&priority=--&product=Community%20Tools&qa_contact=&rep_platform=All&requestee_type-325=&requestee_type-4=&requestee_type-607=&requestee_type-781=&requestee_type-787=&requestee_type-791=&requestee_type-800=&short_desc=&status_whiteboard=&target_milestone=---&version=other
+.. _submit a bug: https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook&status_whiteboard=&target_milestone=---&version=other

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ _('API') }}
+{% endblock %}
+
+{% block body_id %}apikeys{% endblock %}
+
+{% block content %}
+<header>
+  <h1>{{ _('Mozillians API') }}</h1>
+</header>
+
+<p>
+  <h2>{{ _('API Version 1') }}</h2>
+</p>
+
+<p class="field_description">
+  {% trans api_schema_url='http://mozillians.readthedocs.org/en/latest/api/api.html',
+           bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                 'product=Participation Infrastructure&component=Phonebook') %}
+    API v1 is phasing out, please consider using API v2. For any support requests for API v1
+    file a bug <a href="{{ bugzilla_request_url }}">here</a>.
+  {% endtrans %}
+</p>
+
+<p>
+  <h3>{{ _('Your approved apps:') }}</h3>
+</p>
+
+  {% for app in apps %}
+    <div class="api-key">
+      <strong>{{ app.name }}</strong>
+      {% if app.url %}
+        <em>({{ app.url|urlize }})</em>
+      {% endif %}
+      <ul>
+        <li>
+          {{ _('Key') }}: {{ app.key }}
+        </li>
+      </ul>
+    </div>
+  {% else %}
+    {{ _('You have no active apps.') }}
+  {% endfor %}
+
+{% if waffle.flag('apiv2') %}
+  <p>
+    <h2>{{ _('API Version 2') }}</h2>
+  </p>
+
+  <p class="field_description">
+    {% trans api_schema_url='https://mozillians.readthedocs.org/en/latest/api/apiv2/index.html',
+             bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                                   'product=Participation%20Infrastructure&'
+                                   'component=API%20Requests') %}
+      Take a look at the list of the API methods we've made available in our
+      <a href="{{ api_schema_url }}">documentation</a>. You can instantly get a new API
+      key by submitting a request below. If you need a key with elevated permissions you'll have to
+      <a href="{{ bugzilla_request_url }}">file a bug</a>.
+    {% endtrans %}
+  </p>
+
+  <p>
+    <h3>{{ _('Your apps:') }}</h3>
+  </p>
+
+  {% for app in appsv2 %}
+    <div class="api-key">
+      <strong>{{ app.name }}</strong>
+      {% if app.url %}
+        <em>({{ app.url|urlize }})</em>
+      {% endif %}
+      <ul>
+        <li>
+          {{ _('Key') }}: {{ app.key }}
+        </li>
+        <li>
+          {{ _('Level') }}: {{ app.get_privacy_level_display() }}
+        </li>
+      </ul>
+      <a href="{{ url('phonebook:apikey_delete', app.id) }}" class="delete">
+        {{ _('Delete') }}
+      </a>
+    </div>
+  {% else %}
+    {{ _('You have no active apps.') }}
+  {% endfor %}
+
+  <p>
+    <h3>Register a new app</h3>
+  </p>
+
+  <form method="POST">
+    <div class="margins">
+      {{ csrf() }}
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.name) }}
+      </fieldset>
+
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.description) }}
+      </fieldset>
+
+      <fieldset>
+        {{ mozillians_field(apikey_request_form.url) }}
+      </fieldset>
+
+      <fieldset class="edit-controls">
+        <button type="submit">{{ _('Register App') }}</button>
+      </fieldset>
+    </div>
+  </form>
+{% endif %}
+
+{% endblock %}

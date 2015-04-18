@@ -27,16 +27,13 @@ if [ ! -d "$VENV" ]; then
     virtualenv $VENV --no-site-packages
 fi
 source $VENV/bin/activate
-pip install -r requirements/tests-compiled.txt
+pip install -r requirements/dev.txt
 pip install -r requirements/compiled.txt
 
-cat > settings/local.py <<SETTINGS
-import logging
-from settings import *
+cat > mozillians/settings/local.py <<SETTINGS
+# flake8: noqa
 
-ROOT_URLCONF = 'workspace.urls'
-
-# For absoluate urls
+ROOT_URLCONF = 'mozillians.urls'
 DOMAIN = "localhost"
 PROTOCOL = "http://"
 PORT = 8001
@@ -60,9 +57,6 @@ DATABASES = {
 # Disable BrowserID Cert Checking
 BROWSERID_DISABLE_CERT_CHECK = True
 
-#Serve Profile Photos from django
-UPLOAD_URL = '/media/uploads'
-
 # Statsd Defaults -- adjust as needed
 STATSD_HOST = 'localhost'
 STATSD_PORT = 8125
@@ -82,9 +76,20 @@ DEBUG = TEMPLATE_DEBUG = True
 
 # ElasticSearch
 ES_DISABLED = False
-ES_HOSTS = ['127.0.0.1:9200']
-ES_INDEXES = dict(default='test_${JOB_NAME}')
+ES_URLS = ['http://jenkins-es:9200']
+ES_INDEXES = dict(default='test_${JOB_NAME}', public='test_${JOB_NAME}_public')
 ES_TIMEOUT = 60
+
+COMPRESS_ENABLED = False
+SECRET_KEY = 'localdev'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+
 SETTINGS
 
 echo "Database name: ${JOB_NAME}"
@@ -98,14 +103,17 @@ echo "Updating product details."
 
 python manage.py update_product_details
 
+echo "Check PEP-8"
+flake8 mozillians
+
 echo "Starting tests..."
 export FORCE_DB=1
 
 if [ -z $COVERAGE ]; then
-    python manage.py test --noinput --with-xunit --logging-clear-handlers
+    python manage.py test --noinput
 else
-    coverage run --omit='*migrations*' manage.py test --noinput --with-xunit --logging-clear-handlers
-    coverage xml --omit='*migrations*' $(find apps lib -name '*.py')
+    coverage run --omit='*migrations*' manage.py test --noinput
+    coverage xml --omit='*migrations*' $(find mozillians -name '*.py')
 fi
 
 echo "FIN"

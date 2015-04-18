@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ _('Application Error') }}{% endblock %}
+{% block body_class %}error-page{% endblock %}
+
+{% block content %}
+  <h1>{{ _("We're Sorry, but Something Went Wrong!") }}</h1>
+
+  <a href="http://theoatmeal.com/blog/jitterbeast">
+    <img src="{{ static('mozillians/img/jitterbeast-500.gif') }}" id="jitterbeast"
+         alt="{{ _('Jitterbeasts by Matthew Inman of The Oatmeal') }}"
+         title="{{ _('Jitterbeasts by Matthew Inman of The Oatmeal') }}">
+  </a>
+
+  {% trans home_url=url('phonebook:home'),
+           bugzilla_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
+                         'product=Participation%20Infrastructure&component=Phonebook') %}
+    <p>
+      Sorry, but we encountered an unexpected error and can't process your
+      request. You can try again by refreshing your browser or you can
+      <a href="{{ bugzilla_url }}">
+      file a bug</a> letting us know what happened and we'll get right on
+      fixing the problem.
+    </p>
+
+    <p>
+      If refreshing the page didn't work, you can <a href="{{ home_url }}">head
+      to the Mozillians home page</a> to find out more about Mozillians.
+      Sorry about this!
+    </p>
+  {% endtrans %}
+
+  <div class="ui-helper-clearfix"></div>
+
+  <!--
+    Error information:
+
+    {% block error_info %}
+      500 Server Error
+    {% endblock %}
+  -->
+{% endblock content %}
+
+{# Don't display browserid block or user may enter a infinite authentication loop. #}
+{% block browserid_form %}
+{% endblock %}

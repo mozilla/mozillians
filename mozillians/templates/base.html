@@ -1,0 +1,240 @@
+<!doctype html>
+<html class="windows no-js" lang="{{ LANG }}" dir="{{ DIR }}"
+      data-ga-code="{{ settings.GA_ACCOUNT_CODE }}">
+<head>
+  <meta charset="utf-8">
+
+  <title>{{ _('Mozillians') }}: {% block page_title %}{{ _('Welcome') }}{% endblock %}</title>
+  <meta name="description" content="{{ _("Mozilla's contributor phonebook") }}">
+  <meta name="author" content="Mozilla">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="apple-touch-icon" sizes="72x72" href="{{ static('mozillians/img/apple-touch-icon-72.png') }}">
+  <link rel="apple-touch-icon" sizes="114x114" href="{{ static('mozillians/img/apple-touch-icon-114.png') }}">
+  <link rel="apple-touch-icon" sizes="144x144" href="{{ static('mozillians/img/apple-touch-icon-144.png') }}">
+  <link rel="apple-touch-icon" href="{{ static('mozillians/img/apple-touch-icon.png') }}">
+  <link rel="shortcut icon" type="image/ico" href="{{ static('mozillians/img/favicon.ico') }}">
+  {% include 'includes/canonical_url.html' %}
+
+  <link rel="search" type="application/opensearchdescription+xml"
+        title="{{ _('Mozillians') }}" href="{{ url('phonebook:search_plugin') }}">
+
+  {% block site_css %}
+    {% compress css %}
+      <link href="{{ static('mozillians/icons/style.css') }}" type="text/css" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/css/main.less') }}" type="text/less" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/js/libs/tag-it/css/jquery.tagit.css') }}" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/css/jquery-ui-1.11-custom.css') }}" rel="stylesheet" media="screen" />
+    {% endcompress %}
+  {% endblock %}
+  <link href="//mozorg.cdn.mozilla.net/media/css/tabzilla-min.css" rel="stylesheet" />
+
+  <!--[if lt IE 9]>
+    <script src="{{ static('mozillians/js/libs/html5shiv.js') }}"></script>
+  <![endif]-->
+
+  <!--[if IE]>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <![endif]-->
+
+  {% block feeds %}{% endblock %}
+  {% block extrahead %}{% endblock %}
+
+  {% block google_analytics %}
+    {% compress js %}
+      <script src="{{ static('mozillians/js/google-analytics.js') }}"></script>
+    {% endcompress %}
+  {% endblock %}
+</head>
+
+<body id="{% block body_id %}{% endblock %}"
+      class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedout{% endif %} {% block body_class %}{% endblock %}"
+      data-locale="{{ LANG }}" {% block body_attrs %}{% endblock %}>
+
+  {{ browserid_info() }}
+
+  <div id="outer-wrapper">
+    <div id="page">
+    {% block site_header %}
+      <div class="wrapper">
+        <header id="masthead">
+
+          <a href="http://www.mozilla.org/" id="tabzilla" data-infobar="translation">{{ _('Mozilla') }}</a>
+
+          <ul id="nav-access">
+            <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
+            <li><a href="#content">{{ _('Skip to main content') }}</a></li>
+          </ul>
+          {% block site_header_nav %}
+            <nav role="navigation">
+                <a class="brand" href="{{ url('phonebook:home') }}">
+                    <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
+                </a>
+                {% block search %}
+                  <form class="navbar-search"
+                      action="{{ url('phonebook:search') }}" method="GET">
+                    <input type="text" name="q" class="search-query"
+                           placeholder="{{ _('Search for people, groups and more') }}">
+                  </form>
+                {% endblock %}
+                {% if user.is_authenticated() %}
+                  {% if user.userprofile.is_complete %}
+                    <div id="nav-main">
+                      <span class="icon">
+                        <img src="{{ static('mozillians/img/persona-person-white.png') }}"
+                             alt="persona icon">
+                      </span>
+                      <a href="#" class="dropdown-toggle">
+                        <span class="username">
+                          {% if user.userprofile.full_name %}
+                            {{ user.userprofile.full_name }}
+                          {% else %}
+                            {{ user.username }}
+                          {% endif %}
+                        </span>
+                        <i class="icon-bars"></i>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a id="nav-profile" href="{{ url('phonebook:profile_view', user.username) }}">
+                            <i class="icon-eye"></i>
+                            {{ _('View Profile') }}
+                          </a>
+                        </li>
+                        <li>
+                          <a id="nav-edit-profile" href="{{ url('phonebook:profile_edit') }}">
+                            <i class="icon-pencil"></i>
+                            {{ _('Edit Your Profile') }}
+                          </a>
+                        </li>
+                        {% if user.userprofile.is_vouched %}
+                          <li>
+                            <a id="nav-groups" href="{{ url('groups:index_groups') }}">
+                              <i class="icon-group"></i>
+                              {{ _('Groups') }}
+                            </a>
+                          </li>
+                          <li>
+                            <a id="nav-invite" href="{{ url('phonebook:invite') }}">
+                              <i class="icon-plus-circle"></i>
+                              {{ _('Invite') }}
+                            </a>
+                          </li>
+                        {% endif %}
+                        <li>
+                          <a id="nav-logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
+                            <i class="icon-mail-reply"></i>
+                            {{ _('Log Out') }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  {% else %}
+                    <a id="nav-logout" class="browserid-logout no-profile" href="{{ url('phonebook:logout') }}">
+                      <i class="icon-mail-reply"></i>
+                      {{ _('Log Out') }}
+                    </a>
+                  {% endif %}
+                {% elif not show_start %}
+                  <a href="#" id="nav-login" class="persona-button browserid-login"
+                     title="{{_('Sign in')}}"
+                     data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}">
+                    <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
+                    <span class="signin">{{ _('Sign in') }}</span>
+                  </a>
+                {% endif %}
+            </nav>
+          {% endblock %}
+
+          {% block breadcrumbs %}{% endblock %}
+
+        </header>
+      </div>
+    {% endblock %}
+
+    {% block mosaic %}{% endblock %}
+
+    {% block content_wrapper %}
+      <div id="content-wrapper">
+        <div id="main" class="container">
+          {% block messages %}
+            {% for message in messages %}
+              {% with label = message.tags in ['error', 'success', 'info', 'warning'] %}
+                <div class="alert {% if label %}alert-{{ message.tags }}{% endif %}">
+                  {{ message }}
+                </div>
+              {% endwith %}
+            {% endfor %}
+          {% endblock messages %}
+          {% block content %}{% endblock %}
+          <a href="#" id="back-to-top">
+            <img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top">
+          </a>
+        </div>
+      </div>
+    {% endblock %}
+  </div><!-- close #wrapper -->
+
+    {% block site_footer %}
+      <footer id="colophon">
+          <div class="row">
+
+            <h5>
+              {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook',
+                   git_url='https://github.com/mozilla/mozillians' %}
+                Help make Mozillians better.
+                <a href="{{ bug_url }}">File a bug</a> or
+                <a href="{{ git_url }}">make some changes</a>.
+              {% endtrans %}
+            </h5>
+
+            <div class="footer-language row">
+            {% include 'includes/lang_switcher.html' %}
+            </div>
+
+            <hr>
+
+            <div class="footer-logo">
+              <a href="http://mozilla.org"><img src="{{ static('mozillians/img/footer-mozilla.png') }}" alt="mozilla"></a>
+            </div>
+
+            <div class="footer-license">
+              <p>
+                {% trans license_link='https://www.mozilla.org/en-US/foundation/licensing/website-content/' %}
+                Portions of this content are &copy;1998–{{ current_year }} by individual mozilla.org
+                contributors. Content available under
+                a <a href="{{ license_link }}">Creative Commons license</a>.
+                {% endtrans %}
+              </p>
+            </div>
+
+            <ul class="footer-nav details">
+              <li><a href="{{ url('phonebook:about') }}">{{_('About Mozillians')}}</a></li>
+              <li><a href="https://mozilla.org/contact/">{{_('Contact Us')}}</a></li>
+              <li><a href="https://mozilla.org/privacy/websites/">{{_('Privacy Policy')}}</a></li>
+              <li><a href="https://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
+              <li><a href="https://mozilla.org/legal/fraud-report/">{{_('Report Trademark Abuse')}}</a></li>
+            </ul>
+
+        </div>
+      </footer>
+    {% endblock %}
+  </div><!-- close #outer-wrapper -->
+
+  {% block site_js %}
+    {% compress js %}
+      <script src="{{ static('mozillians/js/libs/jquery-1.8.3.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/jquery-ui.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/jquery.placeholder.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/main.js') }}" rel="stylesheet"></script>
+    {% endcompress %}
+    <script src="//mozorg.cdn.mozilla.net/tabzilla/tabzilla.js"></script>
+    {% block browserid_form %}
+      {{ browserid_js() }}
+    {% endblock %}
+    {% block page_js %}{% endblock %}
+  {% endblock %}
+
+</body>
+</html>

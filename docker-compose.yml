@@ -1,0 +1,19 @@
+db:
+  image: mysql:5.5
+  environment:
+    - MYSQL_DATABASE=mozillians
+    - MYSQL_USER=mozillians
+    - MYSQL_PASSWORD=mozillians
+    - MYSQL_ROOT_PASSWORD=root
+es:
+  image: barnybug/elasticsearch:1.2.1
+web:
+  build: .
+  ports:
+    - "8000:8000"
+  volumes:
+    - .:/code
+  links:
+    - db
+    - es
+  command: python manage.py runserver 0.0.0.0:8000

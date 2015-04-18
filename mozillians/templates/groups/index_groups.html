@@ -1,0 +1,20 @@
+{% extends "groups/index_common.html" %}
+
+{% block page_title %}{{ _('Group Listing') }}{% endblock %}
+
+{% block body_id %}functional-areas{% endblock %}
+
+{% block page_header %}{{ _('Groups') }}{% endblock %}
+
+{% block description %}
+  {% trans %}
+    Mozillians work on all sorts of different things! From Add-on
+    developers to localizers, find Mozillians who work on similar things
+    using user-created groups.
+  {% endtrans %}
+{% endblock %}
+
+{% block content %}
+  <a class="large button right" href="{{ url('groups:group_add') }}">{{ _('Create Group') }} &nbsp; <i class="icon-group"></i> +</a>
+  {{ super() }}
+{% endblock content %}

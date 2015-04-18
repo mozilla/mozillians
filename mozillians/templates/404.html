@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ _('Page Not Found') }}{% endblock %}
+{% block body_classes %}error-page{% endblock %}
+
+{% block content %}
+  <h1>{{ _("Oh No! That Page Doesn't Exist!") }}</h1>
+
+  <a href="http://theoatmeal.com/comics/state_web_summer#tumblr">
+    <img src="{{ static('mozillians/img/tumbeast-404.png') }}" id="tumbeast"
+         alt="{{ _('Tumbeasts by Matthew Inman of The Oatmeal') }}"
+         title="{{ _('Tumbeasts by Matthew Inman of The Oatmeal') }}">
+  </a>
+
+  {% trans home_url=url('phonebook:home') %}
+    <p>
+      The page you requested couldn't be found. You can head to the <a
+      href="{{ home_url }}">Mozillians home page</a> to learn more about our
+      community phonebook, or you can try searching for the person you were
+      looking for using the search box at the top of this page.
+    </p>
+  {% endtrans %}
+
+  {% if user.is_anonymous() %}
+    {% trans join_url=url('phonebook:register') %}
+      <p>
+        Because you aren't authenticated, you may not have access to
+        private profiles in the phonebook. You should log in in case
+        you're trying to access a private profile. If you don't have
+        an account, <a href="{{ join_url }}">join us</a>.
+      </p>
+    {% endtrans %}
+  {% endif %}
+
+  <div class="ui-helper-clearfix"></div>
+
+  <!--
+    Error information:
+
+    {% block error_info %}
+      404 Page Not Found
+    {% endblock %}
+  -->
+{% endblock content %}

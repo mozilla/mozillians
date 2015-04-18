@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Email settings') }}{% endblock %}
+{% block body_id %}emails{% endblock %}
+
+{% block content %}
+
+<h1>{{ _('E-mail Settings') }}</h1>
+<p>{{ _('You can connect more than one Persona e-mail to your Mozillians profile. Visibility to other Mozillians is optional, but you will be able to sign in with any of them. Notifications from mozillians.org will only be sent to your primary address.') }}</p>
+
+<form method="POST" action="{{ url('phonebook:edit_emails') }}">
+    {{ csrf() }}
+
+    <h2>Primary e-mail address</h2>
+    <fieldset>
+      <label class="email">{{ email_privacy_form.instance.email }}</label>
+      {{ privacy_field(email_privacy_form.privacy_email) }}
+    </fieldset>
+
+    <h2>Secondary e-mail addresses</h2>
+    <fieldset id="alternate-email">
+      {{ alternate_email_formset.management_form }}
+
+      {% for form in alternate_email_formset %}
+        <div class="alternate-email-fieldrow">
+          <label class="email">{{ form.instance.identifier }}</label>
+          <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
+            Delete
+          </a>
+          <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
+            Make Primary
+          </a>
+          {{ form.id }}
+          {{ privacy_field(form.privacy) }}
+        </div>
+      {% endfor %}
+      <!-- Add e-mails -->
+      <div id="add-email">
+        <a href="#" id="nav-login" class="persona-button browserid-login">
+          <span class="icon">
+            <img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon">
+          </span>
+          <span class="signin">{{ _('Add e-mail using Persona') }}</span>
+        </a>
+      </div>
+    </fieldset>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/emails.js') }}"></script>
+  {% endcompress %}
+{% endblock %}

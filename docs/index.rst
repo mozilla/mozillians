@@ -16,12 +16,15 @@ This application is built on top of Playdoh_.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   installation
+   installation/installation
    testing
    invites
    contribute
+   api/api
+   mysql-anonymize
+   internationalization
 
 Indices and tables
 ------------------

@@ -1,0 +1,36 @@
+{
+    "name": "Mozillians.org",
+    "description": "Mozillians is the community directory for core Mozilla volunteers and staff. It's a tool used by everyone involved with Mozilla, and it's the primary way that Mozillians can find each other.",
+    "repository": {
+        "url": "https://github.com/mozilla/mozillians/",
+        "license": "BSD 3-Clause"
+    },
+    "participate": {
+        "home": "https://wiki.mozilla.org/Mozillians",
+        "docs": "http://mozillians.readthedocs.org",
+        "mailing-list": "https://lists.mozilla.org/listinfo/dev-community-tools",
+        "irc": "irc://irc.mozilla.org/#commtools",
+        "irc-contacts": [
+            "nemo-yiannis",
+            "tasos",
+            "pierros",
+            "nikos"
+        ]
+    },
+    "bugs": {
+        "list": "https://bugzilla.mozilla.org/buglist.cgi?quicksearch=OPEN%20product%3A%22Participation%20Infrastructure%22%20component%3APhonebook",
+        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook"
+    },
+    "urls": {
+        "prod": "https://mozillians.org",
+        "stage": "https://mozillians.allizom.org",
+        "dev": "https://mozillians-dev.allizom.org"
+    },
+    "keywords": [
+        "python",
+        "django",
+        "html",
+        "javascript",
+        "css"
+    ]
+}

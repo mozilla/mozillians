@@ -1,0 +1,33 @@
+{% trans %}
+Hi there,
+{% endtrans %}
+
+
+{% trans %}
+
+{{ sender }} has invited you to join mozillians.org,
+the community directory for Mozilla contributors. You
+can create a community profile for yourself and search
+for other contributors to learn more about them or get
+in touch.
+
+{% endtrans %}
+
+
+{% if personal_message %}
+{{ _('Personal message:') }}
+  {{ personal_message|indent(indentfirst=True) }}
+{% endif %}
+
+{% trans %}
+Take two minutes to create your mozillians.org profile:
+{% endtrans %}
+
+{{ link }}
+
+{% trans %}
+Thanks for contributing to Mozilla :)
+{% endtrans %}
+
+
+{{ _('The Mozillians.org team') }}
