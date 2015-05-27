@@ -18,9 +18,9 @@
 {% block content %}
   {% if (profile_form.errors or user_form.errors or accounts_formset.errors
          or language_formset.errors) %}
-      <div class="alert alert-error">
-        {{ _('Please correct the errors below.') }}
-      </div>
+    <div class="alert alert-error">
+      {{ _('Please correct the errors below.') }}
+    </div>
   {% endif %}
 
   <header>
@@ -252,12 +252,14 @@
         {{ accounts_formset.management_form }}
         {% for account_form in accounts_formset %}
           <div class="externalaccount-fieldrow
-                      {% if account_form.errors %} error{% endif %}">
+            {% if account_form.errors %}
+              error
+            {% endif %}">
             {{ account_form.non_field_errors() }}
             {% for field in account_form %}
-              {{ field.errors }}
-            {% endfor %}
-            {% for field in account_form %}
+              {% if field.errors %}
+                {{ field.errors }}
+              {% endif %}
               {% if not field.name == 'privacy' %}
                 {{ field }}
                 {% if field.name == 'DELETE' %}
@@ -409,7 +411,7 @@
       {{ language_formset.management_form }}
       {% for language_form in language_formset %}
         <div class="language-fieldrow
-                    {% if language_form.errors %} error{% endif %}">
+          {% if language_form.errors %} error{% endif %}">
           {{ language_form.non_field_errors() }}
           {% for field in language_form %}
             {{ field }}
