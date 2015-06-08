@@ -141,7 +141,7 @@ class UserForm(happyforms.ModelForm):
         # This causes a potential race condition however the worst that can
         # happen is bad UI.
         if (User.objects.filter(username=username).
-            exclude(pk=self.instance.id).exists()):
+                exclude(pk=self.instance.id).exists()):
             raise forms.ValidationError(_(u'This username is in use. Please try'
                                           u' another.'))
 
@@ -219,8 +219,7 @@ class ProfileForm(happyforms.ModelForm):
         if not re.match(r'^[a-zA-Z0-9 +.:,-]*$', self.cleaned_data['skills']):
             # Commas cannot be included in skill names because we use them to
             # separate names in a list
-            raise forms.ValidationError(_(u'Skills can only contain '
-                                          u'alphanumeric characters '
+            raise forms.ValidationError(_(u'Skills can only contain latin characters '
                                           u'and +.:-.'))
         skills = self.cleaned_data['skills']
         return filter(lambda x: x,
@@ -232,7 +231,7 @@ class ProfileForm(happyforms.ModelForm):
         if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
             # We only want to call reverse_geocode if some location data changed.
             if ('lat' in self.changed_data or 'lng' in self.changed_data or
-                'saveregion' in self.changed_data or 'savecity' in self.changed_data):
+                    'saveregion' in self.changed_data or 'savecity' in self.changed_data):
                 self.instance.lat = self.cleaned_data['lat']
                 self.instance.lng = self.cleaned_data['lng']
                 self.instance.reverse_geocode()
@@ -289,8 +288,7 @@ class EmailForm(happyforms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if (User.objects
-            .exclude(pk=self.initial['user_id']).filter(email=email).exists()):
+        if (User.objects.exclude(pk=self.initial['user_id']).filter(email=email).exists()):
             raise forms.ValidationError(_(u'Email is currently associated with another user.'))
         return email
 
