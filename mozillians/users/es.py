@@ -131,10 +131,10 @@ class UserProfileMappingType(MappingType, Indexable):
                 data = data.lower()
             doc.update({a: data})
 
-        doc['country'] = ([obj.geo_country.name, obj.geo_country.code]
+        doc['country'] = ([obj.geo_country.name.lower(), obj.geo_country.code]
                           if obj.geo_country else None)
-        doc['region'] = obj.geo_region.name if obj.geo_region else None
-        doc['city'] = obj.geo_city.name if obj.geo_city else None
+        doc['region'] = obj.geo_region.name.lower() if obj.geo_region else None
+        doc['city'] = obj.geo_city.name.lower() if obj.geo_city else None
 
         # user data
         attrs = ('username', 'email', 'last_login', 'date_joined')
