@@ -829,7 +829,7 @@ class ExternalAccount(models.Model):
                           'url': 'https://localize.mozilla.org/accounts/{identifier}/',
                           'validator': validate_username_not_url},
         TYPE_MOLOCOMOTION: {'name': 'Mozilla Locomotion',
-                            'url': 'http://mozilla.locamotion.org/accounts/{identifier}/',
+                            'url': 'http://mozilla.locamotion.org/user/{identifier}/',
                             'validator': validate_username_not_url},
         TYPE_MOPONTOON: {'name': 'Mozilla Pontoon',
                          'url': 'https://pontoon.mozilla.org/contributor/{identifier}/',
