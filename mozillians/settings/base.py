@@ -309,7 +309,7 @@ HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
 # These must both be set to a working mapbox token for the maps to work.
-MAPBOX_MAP_ID = 'examples.map-i86nkdio'
+MAPBOX_MAP_ID = 'examples.map-zr0njcqy'
 # This is the token for the edit profile page alone.
 MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
 
