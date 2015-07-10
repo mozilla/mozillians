@@ -1,5 +1,6 @@
+from django.test import TestCase as BaseTestCase
+
 import factory
-from test_utils import TestCase as BaseTestCase
 
 from mozillians.announcements import models
 

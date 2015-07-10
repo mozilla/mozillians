@@ -1,10 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.test import TestCase
 
 from bleach import clean
 from mock import patch
 from nose.tools import assert_raises, eq_, ok_
-from test_utils import TestCase
 
 from mozillians.funfacts.models import FunFact, _validate_query
 from mozillians.funfacts.tests import FunFactFactory
