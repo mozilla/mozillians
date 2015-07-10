@@ -1,43 +1,30 @@
-# encoding: utf-8
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-class Migration(SchemaMigration):
-
-    def forwards(self, orm):
-        
-        # Adding model 'Invite'
-        db.create_table('invite', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('inviter', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('recipient', self.gf('django.db.models.fields.EmailField')(max_length=75)),
-            ('redeemer', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=32)),
-            ('redeemed', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-        ))
-        db.send_create_signal('phonebook', ['Invite'])
+from django.db import models, migrations
 
 
-    def backwards(self, orm):
-        
-        # Deleting model 'Invite'
-        db.delete_table('invite')
+class Migration(migrations.Migration):
 
+    dependencies = [
+        ('users', '0001_initial'),
+    ]
 
-    models = {
-        'phonebook.invite': {
-            'Meta': {'object_name': 'Invite', 'db_table': "'invite'"},
-            'code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'inviter': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
-            'recipient': ('django.db.models.fields.EmailField', [], {'max_length': '75'}),
-            'redeemed': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'redeemer': ('django.db.models.fields.CharField', [], {'max_length': '32'})
-        }
-    }
-
-    complete_apps = ['phonebook']
+    operations = [
+        migrations.CreateModel(
+            name='Invite',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('recipient', models.EmailField(max_length=75, verbose_name='Recipient')),
+                ('code', models.CharField(unique=True, max_length=32)),
+                ('reason', models.TextField(default=b'', max_length=500)),
+                ('redeemed', models.DateTimeField(null=True)),
+                ('created', models.DateTimeField(auto_now_add=True)),
+                ('inviter', models.ForeignKey(related_name='invites', verbose_name='Inviter', to='users.UserProfile', null=True)),
+                ('redeemer', models.OneToOneField(null=True, blank=True, to='users.UserProfile', verbose_name='Redeemer')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+    ]

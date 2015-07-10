@@ -19,7 +19,6 @@ from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
-from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 from funfactory import utils
 
@@ -57,7 +56,6 @@ class PrivacyField(models.PositiveSmallIntegerField):
                   'choices': PRIVACY_CHOICES}
         myargs.update(kwargs)
         super(PrivacyField, self).__init__(*args, **myargs)
-add_introspection_rules([], ['^mozillians\.users\.models\.PrivacyField'])
 
 
 class UserProfilePrivacyModel(models.Model):

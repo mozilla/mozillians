@@ -161,8 +161,6 @@ INSTALLED_APPS = get_apps(append=[
     'waffle',
     'rest_framework',
 
-    # DB migrations
-    'south',
 ])
 
 # Auth
