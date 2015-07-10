@@ -157,7 +157,6 @@ INSTALLED_APPS = get_apps(append=[
     'autocomplete_light',
 
     'django.contrib.admin',
-    'django_browserid',
     'import_export',
     'waffle',
     'rest_framework',
