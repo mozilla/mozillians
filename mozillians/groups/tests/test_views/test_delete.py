@@ -1,3 +1,5 @@
+from django.test import RequestFactory
+
 from mock import patch, MagicMock
 from nose.tools import ok_
 
@@ -15,14 +17,16 @@ class ShowGroupDeleteTests(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
         self.user = UserFactory.create()
+        self.factory = RequestFactory()
 
     def get_context(self, group):
         """
         Call the show group view method on the group, and return the context that it
         would have used to render the page
         """
-        request = MagicMock()
+        request = self.factory.get('/')
         request.user = self.user
+        request._messages = MagicMock()
 
         with patch('mozillians.groups.views.render') as mock_render:
             with patch('django.views.decorators.cache.add_never_cache_headers'):
@@ -76,6 +80,7 @@ class GroupDeleteTest(TestCase):
     def setUp(self):
         self.group = GroupFactory.create()
         self.user = UserFactory.create()
+        self.factory = RequestFactory()
 
     def test_curator_only_member(self):
         # If user is curator and no other members, can delete the group
@@ -83,9 +88,9 @@ class GroupDeleteTest(TestCase):
         self.group.save()
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
 
-        request = MagicMock()
+        request = self.factory.post('/')
         request.user = self.user
-        request.method = 'POST'
+        request._messages = MagicMock()
 
         group_delete(request, self.group.url)
 
@@ -100,9 +105,9 @@ class GroupDeleteTest(TestCase):
         self.group.add_member(UserFactory.create().userprofile,
                               GroupMembership.PENDING)
 
-        request = MagicMock()
+        request = self.factory.post('/')
         request.user = self.user
-        request.method = 'POST'
+        request._messages = MagicMock()
 
         group_delete(request, self.group.url)
 
@@ -115,9 +120,9 @@ class GroupDeleteTest(TestCase):
         user2 = UserFactory.create()
         self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
 
-        request = MagicMock()
+        request = self.factory.post('/')
         request.user = self.user
-        request.method = 'POST'
+        request._messages = MagicMock()
 
         group_delete(request, self.group.url)
 
@@ -130,9 +135,9 @@ class GroupDeleteTest(TestCase):
         user2 = UserFactory.create()
         self.group.add_member(user2.userprofile, GroupMembership.MEMBER)
 
-        request = MagicMock()
+        request = self.factory.post('/')
         request.user = manager
-        request.method = 'POST'
+        request._messages = MagicMock()
 
         group_delete(request, self.group.url)
 

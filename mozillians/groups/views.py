@@ -85,7 +85,7 @@ def search(request, searched_object=Group):
     if request.is_ajax() and term:
         groups = searched_object.search(term).values_list('name', flat=True)
         return HttpResponse(json.dumps(list(groups)),
-                            mimetype='application/json')
+                            content_type='application/json')
 
     return HttpResponseBadRequest()
 

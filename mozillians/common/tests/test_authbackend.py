@@ -2,6 +2,7 @@ from json import loads
 
 from django.conf import settings
 from django.db import IntegrityError
+from django.http import HttpRequest
 
 from mock import patch, Mock
 from mozillians.common.tests import TestCase
@@ -49,10 +50,12 @@ class BrowserIDVerifyTests(TestCase):
         UserFactory.create(email='foo@example.com')
         user = UserFactory.create(email='la@example.com')
         Verify = BrowserIDVerify()
-        request_mock = Mock()
-        request_mock.user.is_authenticated.return_value = True
+        request_mock = Mock(spec=HttpRequest)
         request_mock.user = user
+        request_mock.user.is_authenticated = Mock()
+        request_mock.user.is_authenticated.return_value = True
         request_mock.POST = {'assertion': 'assertion'}
+        request_mock._messages = Mock()
         Verify.request = request_mock
         verify_mock.return_value = Mock(email='foo@example.com')
         get_audience_mock.return_value = 'audience'
