@@ -47,3 +47,6 @@
 [submodule "vendor-local/src/django"]
 	path = vendor-local/src/django
 	url = git://github.com/django/django.git
+[submodule "vendor-local/src/jingo"]
+	path = vendor-local/src/jingo
+	url = git://github.com/jbalogh/jingo.git
