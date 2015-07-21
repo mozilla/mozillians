@@ -742,7 +742,7 @@ class ExternalAccount(models.Model):
     TYPE_LANDLINE = 'Phone (Landline)'
     TYPE_MOBILE = 'Phone (Mobile)'
     TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
-    TYPE_MOLOCOMOTION = 'MOZILLALOCOMOTION'
+    TYPE_MOLOCAMOTION = 'MOZILLALOCAMOTION'
     TYPE_MOLOCATION = 'MOZILLALOCATION'
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
@@ -828,7 +828,7 @@ class ExternalAccount(models.Model):
         TYPE_MOVERBATIM: {'name': 'Mozilla Verbatim',
                           'url': 'https://localize.mozilla.org/accounts/{identifier}/',
                           'validator': validate_username_not_url},
-        TYPE_MOLOCOMOTION: {'name': 'Mozilla Locomotion',
+        TYPE_MOLOCAMOTION: {'name': 'Mozilla Locamotion',
                             'url': 'http://mozilla.locamotion.org/user/{identifier}/',
                             'validator': validate_username_not_url},
         TYPE_MOPONTOON: {'name': 'Mozilla Pontoon',
