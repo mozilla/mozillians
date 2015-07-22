@@ -137,6 +137,7 @@ def prime_app(ctx):
 def update_celery(ctx):
     ctx.remote(settings.REMOTE_UPDATE_SCRIPT)
     ctx.remote('/sbin/service %s restart' % settings.CELERY_SERVICE)
+    ctx.remote('/sbin/service %s restart' % settings.CELERYBEAT_SERVICE)
 
 
 @task
