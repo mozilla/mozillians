@@ -54,7 +54,7 @@ DOMAIN_METHODS = {
 
 # Accepted locales
 LANGUAGE_CODE = 'en-US'
-PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'es', 'hu', 'fr', 'it', 'ko',
+PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr', 'sv-SE', 'zh-TW',
                   'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk',)
 
