@@ -437,13 +437,29 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         ok_(not user.userprofile.is_public)
 
-    def test_is_public_indexable(self):
+    def test_is_not_public_indexable(self):
+        # Regression test after bug 1183220
         for field in PUBLIC_INDEXABLE_FIELDS:
             user = UserFactory.create(
-                userprofile={'privacy_{0}'.format(field): PUBLIC,
-                             'ircname': 'bar'})
-            ok_(user.userprofile.is_public_indexable,
-                'Field {0} did not set profile to public index'.format(field))
+                userprofile={
+                    'privacy_{0}'.format(field): PUBLIC,
+                    'ircname': 'bar'
+                }
+            )
+
+            ok_(not user.userprofile.is_public_indexable,
+                'Field {0} did not set profile to public'.format(field))
+
+    def test_is_public_indexable(self):
+        kwargs = {
+            'privacy_ircname': PUBLIC,
+            'privacy_email': PUBLIC,
+            'privacy_full_name': PUBLIC,
+            'ircname': 'bar'
+        }
+
+        user = UserFactory.create(userprofile=kwargs)
+        ok_(user.userprofile.is_public_indexable)
 
     def test_set_membership_group_matches_alias(self):
         group_1 = GroupFactory.create(name='foo')

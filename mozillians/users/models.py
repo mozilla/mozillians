@@ -276,10 +276,12 @@ class UserProfile(UserProfilePrivacyModel):
 
     @property
     def _is_public_indexable(self):
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            if getattr(self, field, None) and getattr(self, 'privacy_%s' % field, None) == PUBLIC:
-                return True
-        return False
+        def _is_field_public(field):
+            value = getattr(self, field, None)
+            privacy_field = getattr(self, 'privacy_%s' % field, None)
+            return value and privacy_field == PUBLIC
+
+        return all(map(_is_field_public, PUBLIC_INDEXABLE_FIELDS))
 
     @property
     def _languages(self):
