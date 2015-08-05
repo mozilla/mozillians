@@ -108,6 +108,20 @@
   {% else %}
 
     {# This is where the logged in homepage view starts. #}
+    <article id="search-info">
+      <h1>{{ _('Hello!') }}</h1>
+      <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
+        <input type="text" name="q" class="search-query"
+               placeholder="{{ _('Search for people, groups and more') }}">
+        <small>{{ _('Examples:') }}
+          {% trans search_url=url('phonebook:search') %}
+          <a href="{{ search_url }}?q=python">python</a>,
+          <a href="{{ search_url }}?q=berlin">Berlin</a>,
+          <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
+          {% endtrans %}
+        </small>
+      </form>
+    </article>
     <article id="profile-info">
       <a class="profile-photo" href="{{ url('phonebook:profile_view', user.username) }}">
         <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
@@ -169,18 +183,6 @@
        </div>
     </article>
     <article id="content-info">
-      <h1>{{ _('Hello!') }}</h1>
-      <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
-        <input type="text" name="q" class="search-query"
-               placeholder="{{ _('Search for people, groups and more') }}">
-        <small>{{ _('Examples:') }}
-          {% trans search_url=url('phonebook:search') %}
-          <a href="{{ search_url }}?q=python">python</a>,
-          <a href="{{ search_url }}?q=berlin">Berlin</a>,
-          <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
-          {% endtrans %}
-        </small>
-      </form>
       <section class="announcements-mozfacts">
         {% set announcement=latest_announcement() %}
         {% if announcement %}
