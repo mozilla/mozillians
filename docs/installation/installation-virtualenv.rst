@@ -43,7 +43,7 @@ If you're on Ubuntu or Debian, you might start with::
     python2.6 python2.6-dev python-virtualenv python-pip \
     gettext libjpeg-turbo8-dev \
     mysql-client mysql-server libmysqlclient-dev default-jre \
-    libxslt1.1 libxslt1-dev
+    libxslt2.1 libxslt1-dev libjpeg-dev zlib1g-dev libpng12-dev
 
 Then `install node <http://nodejs.org/>`_ and `lessc <http://lesscss.org/#using-less-installation>`_ (you only need node for ``lessc``).
 
