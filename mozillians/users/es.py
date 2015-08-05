@@ -27,9 +27,10 @@ class PrivacyAwareS(S):
 
         def _generator():
             while True:
-                obj = self._iterator.next()
+                mapped_obj = self._iterator.next()
+                obj = mapped_obj.get_object()
                 obj._privacy_level = getattr(self, '_privacy_level', None)
-                yield obj.get_object()
+                yield obj
         return _generator()
 
 
