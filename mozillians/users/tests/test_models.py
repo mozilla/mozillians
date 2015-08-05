@@ -20,7 +20,7 @@ from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
-from mozillians.users.es import UserProfileMappingType
+from mozillians.users.es import PrivacyAwareS, UserProfileMappingType
 from mozillians.users.tests import LanguageFactory, UserFactory
 
 
@@ -186,6 +186,16 @@ class UserProfileTests(TestCase):
 
     def test_get_mapping(self):
         ok_(UserProfileMappingType.get_mapping())
+
+    def test_privacy_aware_iterator(self):
+        UserFactory.create(userprofile={'ircname': 'foo'})
+        s = PrivacyAwareS(UserProfileMappingType)
+
+        # Manually set privacy level in UserProfileMappingType instance
+        s.privacy_level(PUBLIC)
+        q = s.query(ircname='foo')
+        eq_(len(q), 1)
+        eq_(q[0]._privacy_level, PUBLIC)
 
     @override_settings(ES_INDEXES={'default': 'index'})
     @patch('mozillians.users.es.PrivacyAwareS')
