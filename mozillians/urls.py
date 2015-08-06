@@ -5,10 +5,10 @@ from django.shortcuts import render
 
 import autocomplete_light
 import tower
-from funfactory.monkeypatches import patch
 
+from mozillians.common.monkeypatches import patch
 
-# Funfactory monkeypatches
+# Funfactory monkeypatches customized to work with Django 1.7 admin
 patch()
 
 autocomplete_light.autodiscover()
