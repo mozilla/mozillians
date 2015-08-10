@@ -82,6 +82,11 @@ class DiffTest(DiffMatchPatchTest):
     # Overlap.
     self.assertEquals(3, self.dmp.diff_commonOverlap("123456xxx", "xxxabcd"))
 
+    # Unicode.
+    # Some overly clever languages (C#) may treat ligatures as equal to their
+    # component letters.  E.g. U+FB01 == 'fi'
+    self.assertEquals(0, self.dmp.diff_commonOverlap("fi", u"\ufb01i"))
+
   def testDiffHalfMatch(self):
     # Detect a halfmatch.
     self.dmp.Diff_Timeout = 1
@@ -257,6 +262,11 @@ class DiffTest(DiffMatchPatchTest):
     self.dmp.diff_cleanupSemanticLossless(diffs)
     self.assertEquals([(self.dmp.DIFF_EQUAL, "xaa"), (self.dmp.DIFF_DELETE, "a")], diffs)
 
+    # Sentence boundaries.
+    diffs = [(self.dmp.DIFF_EQUAL, "The xxx. The "), (self.dmp.DIFF_INSERT, "zzz. The "), (self.dmp.DIFF_EQUAL, "yyy.")]
+    self.dmp.diff_cleanupSemanticLossless(diffs)
+    self.assertEquals([(self.dmp.DIFF_EQUAL, "The xxx."), (self.dmp.DIFF_INSERT, " The zzz."), (self.dmp.DIFF_EQUAL, " The yyy.")], diffs)
+
   def testDiffCleanupSemantic(self):
     # Cleanup semantically trivial equalities.
     # Null case.
@@ -303,6 +313,11 @@ class DiffTest(DiffMatchPatchTest):
     diffs = [(self.dmp.DIFF_DELETE, "abcxxx"), (self.dmp.DIFF_INSERT, "xxxdef")]
     self.dmp.diff_cleanupSemantic(diffs)
     self.assertEquals([(self.dmp.DIFF_DELETE, "abc"), (self.dmp.DIFF_EQUAL, "xxx"), (self.dmp.DIFF_INSERT, "def")], diffs)
+
+    # Reverse overlap elimination.
+    diffs = [(self.dmp.DIFF_DELETE, "xxxabc"), (self.dmp.DIFF_INSERT, "defxxx")]
+    self.dmp.diff_cleanupSemantic(diffs)
+    self.assertEquals([(self.dmp.DIFF_INSERT, "def"), (self.dmp.DIFF_EQUAL, "xxx"), (self.dmp.DIFF_DELETE, "abc")], diffs)
 
     # Two overlap eliminations.
     diffs = [(self.dmp.DIFF_DELETE, "abcd1212"), (self.dmp.DIFF_INSERT, "1212efghi"), (self.dmp.DIFF_EQUAL, "----"), (self.dmp.DIFF_DELETE, "A3"), (self.dmp.DIFF_INSERT, "3BC")]

@@ -1,10 +1,11 @@
 from __future__ import with_statement
 
-import tempfile
 from datetime import datetime
-import os.path
 
+import importlib
+import django
 from django.contrib import admin
+from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django.conf.urls import patterns, url
 from django.template.response import TemplateResponse
@@ -13,23 +14,38 @@ from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from .forms import (
     ImportForm,
     ConfirmImportForm,
     ExportForm,
+    export_action_form_factory,
 )
 from .resources import (
     modelresource_factory,
 )
 from .formats import base_formats
 from .results import RowResult
+from .tmp_storages import TempFolderStorage
 
 try:
     from django.utils.encoding import force_text
 except ImportError:
     from django.utils.encoding import force_unicode as force_text
 
+SKIP_ADMIN_LOG = getattr(settings, 'IMPORT_EXPORT_SKIP_ADMIN_LOG', False)
+TMP_STORAGE_CLASS = getattr(settings, 'IMPORT_EXPORT_TMP_STORAGE_CLASS', TempFolderStorage)
+if isinstance(TMP_STORAGE_CLASS, six.string_types):
+    try:
+        # Nod to tastypie's use of importlib.
+        parts = TMP_STORAGE_CLASS.split('.')
+        module_path, class_name = '.'.join(parts[:-1]), parts[-1]
+        module = importlib.import_module(module_path)
+        TMP_STORAGE_CLASS = getattr(module, class_name)
+    except ImportError as e:
+        msg = "Could not import '%s' for import_export setting 'IMPORT_EXPORT_TMP_STORAGE_CLASS'" % TMP_STORAGE_CLASS
+        raise ImportError(msg)
 
 #: import / export formats
 DEFAULT_FORMATS = (
@@ -43,7 +59,17 @@ DEFAULT_FORMATS = (
 )
 
 
-class ImportMixin(object):
+class ImportExportMixinBase(object):
+    def get_model_info(self):
+        # module_name is renamed to model_name in Django 1.8
+        app_label = self.model._meta.app_label
+        try:
+            return (app_label, self.model._meta.model_name,)
+        except AttributeError:
+            return (app_label, self.model._meta.module_name,)
+
+
+class ImportMixin(ImportExportMixinBase):
     """
     Import mixin.
     """
@@ -58,10 +84,25 @@ class ImportMixin(object):
     formats = DEFAULT_FORMATS
     #: import data encoding
     from_encoding = "utf-8"
+    skip_admin_log = None
+    # storage class for saving temporary files
+    tmp_storage_class = None
+
+    def get_skip_admin_log(self):
+        if self.skip_admin_log is None:
+            return SKIP_ADMIN_LOG
+        else:
+            return self.skip_admin_log
+
+    def get_tmp_storage_class(self):
+        if self.tmp_storage_class is None:
+            return TMP_STORAGE_CLASS
+        else:
+            return self.tmp_storage_class
 
     def get_urls(self):
         urls = super(ImportMixin, self).get_urls()
-        info = self.model._meta.app_label, self.model._meta.module_name
+        info = self.get_model_info()
         my_urls = patterns(
             '',
             url(r'^process_import/$',
@@ -105,42 +146,41 @@ class ImportMixin(object):
             input_format = import_formats[
                 int(confirm_form.cleaned_data['input_format'])
             ]()
-            import_file_name = os.path.join(
-                tempfile.gettempdir(),
-                confirm_form.cleaned_data['import_file_name']
-            )
-            import_file = open(import_file_name, input_format.get_read_mode())
-            data = import_file.read()
+            tmp_storage = self.get_tmp_storage_class()(name=confirm_form.cleaned_data['import_file_name'])
+            data = tmp_storage.read(input_format.get_read_mode())
             if not input_format.is_binary() and self.from_encoding:
                 data = force_text(data, self.from_encoding)
             dataset = input_format.create_dataset(data)
 
             result = resource.import_data(dataset, dry_run=False,
-                                 raise_errors=True)
+                                          raise_errors=True,
+                                          file_name=confirm_form.cleaned_data['original_file_name'],
+                                          user=request.user)
 
-            # Add imported objects to LogEntry
-            logentry_map = {
-                RowResult.IMPORT_TYPE_NEW: ADDITION,
-                RowResult.IMPORT_TYPE_UPDATE: CHANGE,
-                RowResult.IMPORT_TYPE_DELETE: DELETION,
-            }
-            content_type_id=ContentType.objects.get_for_model(self.model).pk
-            for row in result:
-                LogEntry.objects.log_action(
-                    user_id=request.user.pk,
-                    content_type_id=content_type_id,
-                    object_id=row.object_id,
-                    object_repr=row.object_repr,
-                    action_flag=logentry_map[row.import_type],
-                    change_message="%s through import_export" % row.import_type,
-                )
+            if not self.get_skip_admin_log():
+                # Add imported objects to LogEntry
+                logentry_map = {
+                    RowResult.IMPORT_TYPE_NEW: ADDITION,
+                    RowResult.IMPORT_TYPE_UPDATE: CHANGE,
+                    RowResult.IMPORT_TYPE_DELETE: DELETION,
+                }
+                content_type_id = ContentType.objects.get_for_model(self.model).pk
+                for row in result:
+                    if row.import_type != row.IMPORT_TYPE_SKIP:
+                        LogEntry.objects.log_action(
+                            user_id=request.user.pk,
+                            content_type_id=content_type_id,
+                            object_id=row.object_id,
+                            object_repr=row.object_repr,
+                            action_flag=logentry_map[row.import_type],
+                            change_message="%s through import_export" % row.import_type,
+                        )
 
             success_message = _('Import finished')
             messages.success(request, success_message)
-            import_file.close()
+            tmp_storage.remove()
 
-            url = reverse('admin:%s_%s_changelist' %
-                          (opts.app_label, opts.module_name),
+            url = reverse('admin:%s_%s_changelist' % self.get_model_info(),
                           current_app=self.admin_site.name)
             return HttpResponseRedirect(url)
 
@@ -167,28 +207,37 @@ class ImportMixin(object):
             import_file = form.cleaned_data['import_file']
             # first always write the uploaded file to disk as it may be a
             # memory file or else based on settings upload handlers
-            with tempfile.NamedTemporaryFile(delete=False) as uploaded_file:
-                for chunk in import_file.chunks():
-                    uploaded_file.write(chunk)
+            tmp_storage = self.get_tmp_storage_class()()
+            data = bytes()
+            for chunk in import_file.chunks():
+                data += chunk
+
+            tmp_storage.save(data, input_format.get_read_mode())
 
             # then read the file, using the proper format-specific mode
-            with open(uploaded_file.name,
-                      input_format.get_read_mode()) as uploaded_import_file:
-                # warning, big files may exceed memory
-                data = uploaded_import_file.read()
-                if not input_format.is_binary() and self.from_encoding:
-                    data = force_text(data, self.from_encoding)
-                dataset = input_format.create_dataset(data)
-                result = resource.import_data(dataset, dry_run=True,
-                                              raise_errors=False)
+            # warning, big files may exceed memory
+            data = tmp_storage.read(input_format.get_read_mode())
+            if not input_format.is_binary() and self.from_encoding:
+                data = force_text(data, self.from_encoding)
+            dataset = input_format.create_dataset(data)
+            result = resource.import_data(dataset, dry_run=True,
+                                          raise_errors=False,
+                                          file_name=import_file.name,
+                                          user=request.user)
 
             context['result'] = result
 
             if not result.has_errors():
                 context['confirm_form'] = ConfirmImportForm(initial={
-                    'import_file_name': os.path.basename(uploaded_file.name),
+                    'import_file_name': tmp_storage.name,
+                    'original_file_name': import_file.name,
                     'input_format': form.cleaned_data['input_format'],
                 })
+
+        if django.VERSION >= (1, 8, 0):
+            context.update(self.admin_site.each_context(request))
+        elif django.VERSION >= (1, 7, 0):
+            context.update(self.admin_site.each_context())
 
         context['form'] = form
         context['opts'] = self.model._meta
@@ -198,7 +247,7 @@ class ImportMixin(object):
                                 context, current_app=self.admin_site.name)
 
 
-class ExportMixin(object):
+class ExportMixin(ImportExportMixinBase):
     """
     Export mixin.
     """
@@ -215,12 +264,11 @@ class ExportMixin(object):
 
     def get_urls(self):
         urls = super(ExportMixin, self).get_urls()
-        info = self.model._meta.app_label, self.model._meta.module_name
         my_urls = patterns(
             '',
             url(r'^export/$',
                 self.admin_site.admin_view(self.export_action),
-                name='%s_%s_export' % info),
+                name='%s_%s_export' % self.get_model_info()),
         )
         return my_urls + urls
 
@@ -267,7 +315,20 @@ class ExportMixin(object):
                         self.list_max_show_all, self.list_editable,
                         self)
 
-        return cl.query_set
+        # query_set has been renamed to queryset in Django 1.8
+        try:
+            return cl.queryset
+        except AttributeError:
+            return cl.query_set
+
+    def get_export_data(self, file_format, queryset):
+        """
+        Returns file_format representation for given queryset.
+        """
+        resource_class = self.get_export_resource_class()
+        data = resource_class().export(queryset)
+        export_data = file_format.export_data(data)
+        return export_data
 
     def export_action(self, request, *args, **kwargs):
         formats = self.get_export_formats()
@@ -277,19 +338,26 @@ class ExportMixin(object):
                 int(form.cleaned_data['file_format'])
             ]()
 
-            resource_class = self.get_export_resource_class()
             queryset = self.get_export_queryset(request)
-            data = resource_class().export(queryset)
-            response = HttpResponse(
-                file_format.export_data(data),
-                mimetype='application/octet-stream',
-            )
+            export_data = self.get_export_data(file_format, queryset)
+            content_type = file_format.get_content_type()
+            # Django 1.7 uses the content_type kwarg instead of mimetype
+            try:
+                response = HttpResponse(export_data, content_type=content_type)
+            except TypeError:
+                response = HttpResponse(export_data, mimetype=content_type)
             response['Content-Disposition'] = 'attachment; filename=%s' % (
                 self.get_export_filename(file_format),
             )
             return response
 
         context = {}
+
+        if django.VERSION >= (1, 8, 0):
+            context.update(self.admin_site.each_context(request))
+        elif django.VERSION >= (1, 7, 0):
+            context.update(self.admin_site.each_context())
+
         context['form'] = form
         context['opts'] = self.model._meta
         return TemplateResponse(request, [self.export_template_name],
@@ -307,4 +375,64 @@ class ImportExportMixin(ImportMixin, ExportMixin):
 class ImportExportModelAdmin(ImportExportMixin, admin.ModelAdmin):
     """
     Subclass of ModelAdmin with import/export functionality.
+    """
+
+
+class ExportActionModelAdmin(ExportMixin, admin.ModelAdmin):
+    """
+    Subclass of ModelAdmin with export functionality implemented as an
+    admin action.
+    """
+
+    # Don't use custom change list template.
+    change_list_template = None
+
+    def __init__(self, *args, **kwargs):
+        """
+        Adds a custom action form initialized with the available export
+        formats.
+        """
+        choices = []
+        formats = self.get_export_formats()
+        if formats:
+            choices.append(('', '---'))
+            for i, f in enumerate(formats):
+                choices.append((str(i), f().get_title()))
+
+        self.action_form = export_action_form_factory(choices)
+        super(ExportActionModelAdmin, self).__init__(*args, **kwargs)
+
+    def export_admin_action(self, request, queryset):
+        """
+        Exports the selected rows using file_format.
+        """
+        export_format = request.POST.get('file_format')
+
+        if not export_format:
+            messages.warning(request, _('You must select an export format.'))
+        else:
+            formats = self.get_export_formats()
+            file_format = formats[int(export_format)]()
+
+            export_data = self.get_export_data(file_format, queryset)
+            content_type = file_format.get_content_type()
+            # Django 1.7 uses the content_type kwarg instead of mimetype
+            try:
+                response = HttpResponse(export_data, content_type=content_type)
+            except TypeError:
+                response = HttpResponse(export_data, mimetype=content_type)
+            response['Content-Disposition'] = 'attachment; filename=%s' % (
+                self.get_export_filename(file_format),
+            )
+            return response
+    export_admin_action.short_description = _(
+        'Export selected %(verbose_name_plural)s')
+
+    actions = [export_admin_action]
+
+
+class ImportExportActionModelAdmin(ImportMixin, ExportActionModelAdmin):
+    """
+    Subclass of ExportActionModelAdmin with import/export functionality.
+    Export functionality is implemented as an admin action.
     """
