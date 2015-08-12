@@ -126,6 +126,22 @@
               <section><i class="icon-shirt"></i>
                 {{ _('T-Shirt Size:') }} {{ profile.get_tshirt_display() }}</section>
             {% endif %}
+            {% if profile.pronoun  %}
+              <section class="pronoun">
+                {% if profile.pronoun == 1 %}
+                <i class="icon-mars"></i>Preferred pronoun: He/him
+                {% elif profile.pronoun == 2 %}
+                <i class="icon-venus"></i>Preferred pronoun: She/her
+                {% elif profile.pronoun == 3%}
+                <i class="icon-neuter"></i>Preferred pronoun: They/them
+                {% else %}
+                <i class="icon-neuter"></i>Preferred pronoun: Xe/Xem
+                {% endif %}
+              </section>
+              {% endif %}
+
+
+
         </div>
       </section>
 
@@ -341,6 +357,7 @@
   <span class="hidden" id="same_timezone_text">
     {%- trans %}Same time zone as yours.{% endtrans -%}
   </span>
+
 {% endblock %}
 
 {% block page_js %}

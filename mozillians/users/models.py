@@ -80,6 +80,7 @@ class UserProfilePrivacyModel(models.Model):
                                   default=PRIVILEGED)
     privacy_title = PrivacyField()
     privacy_story_link = PrivacyField()
+    privacy_pronoun = PrivacyField()
 
     CACHED_PRIVACY_FIELDS = None
 
@@ -203,6 +204,13 @@ class UserProfile(UserProfilePrivacyModel):
     referral_source = models.CharField(max_length=32,
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
+
+    pronoun = models.IntegerField(
+        _lazy(u'Pronoun'), blank=True, null=True, default=3,
+        choices=(
+            (1, _lazy(u'He/Him')),  (2, _lazy(u'She/Her')),
+            (3, _lazy(u'Them/They')), (4, _lazy(u'Xe/Xem'))
+        ))
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""

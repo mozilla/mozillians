@@ -185,13 +185,13 @@ class ProfileForm(happyforms.ModelForm):
         fields = ('full_name', 'ircname', 'bio', 'photo',
                   'allows_community_sites', 'tshirt',
                   'title', 'allows_mozilla_sites',
-                  'date_mozillian', 'story_link', 'timezone',
+                  'date_mozillian', 'story_link', 'timezone', 'pronoun',
                   'privacy_photo', 'privacy_full_name', 'privacy_ircname',
                   'privacy_timezone', 'privacy_tshirt',
                   'privacy_bio', 'privacy_geo_city', 'privacy_geo_region',
                   'privacy_geo_country', 'privacy_groups',
                   'privacy_skills', 'privacy_languages',
-                  'privacy_date_mozillian', 'privacy_story_link', 'privacy_title')
+                  'privacy_date_mozillian', 'privacy_story_link', 'privacy_title', 'privacy_pronoun')
         widgets = {'bio': forms.Textarea()}
 
     def clean_photo(self):
