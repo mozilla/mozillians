@@ -746,6 +746,7 @@ class ExternalAccount(models.Model):
     TYPE_MOLOCATION = 'MOZILLALOCATION'
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
+    TYPE_TELEGRAM = 'TELEGRAM'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -837,6 +838,9 @@ class ExternalAccount(models.Model):
         TYPE_TRANSIFEX: {'name': 'Transifex',
                          'url': 'https://www.transifex.com/accounts/profile/{identifier}/',
                          'validator': validate_username_not_url},
+        TYPE_TELEGRAM: {'name': 'Telegram',
+                        'url': 'https://telegram.me/{identifier}/',
+                        'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
