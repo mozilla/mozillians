@@ -997,53 +997,15 @@ body#home {
     }
     &.loggedin {
         #main {
-            #profile-info {
-                .span(3);
-                margin: 0;
-                position: relative;
-                a.profile-photo {
-                    .rounded-image;
-                    display:block;
-                    position:relative;
-                    left:auto;
-
-                    @media (max-width: @breakDesktop) {
-                        margin:0 auto;
-                    }
-                }
-                .profile-details {
-                    word-wrap: break-word;
-                    h2 { margin: 0 0 8px 0; }
-                    h4 { margin: 20px 0 0;  }
-                    @media (max-width: @breakDesktop) {
-                        h4 {
-                            margin: 0 0 6px 0;
-                            font-size: 22px;
-                        }
-                        section {
-                            padding-top: 20px;
-                            &.location { padding: 0; }
-                        }
-                    }
-                }
-                @media (max-width: @breakDesktop) {
-                    text-align: center;
-                    width: 100%;
-                }
-            }
-            #content-info {
+            #search-info {
                 .span(8);
                 padding: 0 10px 0 25px;
-                margin: 0;
                 border-left: 1px solid lighten(@black,90%);
-                h2 { margin: 30px 0 10px; }
-                h3 { font-size: 24px; }
-                section, form {
+                float: right;
+                margin-right: 64px;
+                margin-left: 0;
+                form {
                     margin-bottom: 20px;
-                }
-                @media (max-width: @breakMobileLandscape) {
-                    padding: 0;
-                    text-align: center;
                 }
                 #homepage-search {
                     input {
@@ -1070,6 +1032,68 @@ body#home {
                     @media (max-width: @breakDesktop) {
                         margin-top: 10px;
                     }
+                }
+                @media (max-width: @breakDesktop) {
+                    padding: 0;
+                    margin: 0;
+                    width: 100%;
+                    text-align: center;
+                    border: none;
+                    h1 {
+                        .hidden;
+                    }
+                }
+            }
+            #profile-info {
+                .span(3);
+                margin: 0;
+                position: absolute;
+                a.profile-photo {
+                    .rounded-image;
+                    display:block;
+                    position:relative;
+                    left:auto;
+
+                    @media (max-width: @breakDesktop) {
+                        margin:0 auto;
+                    }
+                }
+                .profile-details {
+                    word-wrap: break-word;
+                    h2 { margin: 0 0 8px 0; }
+                    h4 { margin: 20px 0 0;  }
+                    @media (max-width: @breakDesktop) {
+                        h4 {
+                            margin: 0 0 6px 0;
+                            font-size: 22px;
+                        }
+                        section {
+                            padding-top: 20px;
+                            &.location { padding: 0; }
+                        }
+                    }
+                }
+                @media (max-width: @breakDesktop) {
+                    position: relative;
+                    text-align: center;
+                    width: 100%;
+                }
+            }
+            #content-info {
+                .span(8);
+                padding: 0 10px 0 25px;
+                border-left: 1px solid lighten(@black,90%);
+                float: right;
+                margin-right: 64px;
+                margin-left: 0;
+                h2 { margin: 30px 0 10px; }
+                h3 { font-size: 24px; }
+                section {
+                    margin-bottom: 20px;
+                }
+                @media (max-width: @breakMobileLandscape) {
+                    padding: 0;
+                    text-align: center;
                 }
                 .announcements-mozfacts {
                     .clearfix;
@@ -1130,9 +1154,6 @@ body#home {
                 }
                 @media (max-width: @breakDesktop) {
                     border: none;
-                    h1 {
-                        .hidden;
-                    }
                     width: auto;
                 }
             }
