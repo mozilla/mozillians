@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding field 'UserProfile.privacy_photo'
         db.add_column('profile', 'privacy_photo', self.gf('django.db.models.fields.PositiveIntegerField')(default=3), keep_default=False)
 
@@ -47,9 +47,8 @@ class Migration(SchemaMigration):
         # Adding field 'UserProfile.privacy_vouched_by'
         db.add_column('profile', 'privacy_vouched_by', self.gf('django.db.models.fields.PositiveIntegerField')(default=3), keep_default=False)
 
-
     def backwards(self, orm):
-        
+
         # Deleting field 'UserProfile.privacy_photo'
         db.delete_column('profile', 'privacy_photo')
 
