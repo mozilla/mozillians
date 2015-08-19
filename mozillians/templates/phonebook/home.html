@@ -36,52 +36,60 @@
 
     <article id="information">
       <div class="container">
-        <section id="quote">
-            <span>
-              <img alt="Mitchell Baker, Chair of the Mozilla Foundation"
-                   src="{{ static('mozillians/img/homequote-mitchell-baker.png') }}">
-            </span>
-            <blockquote>
-              <p>
-              {% trans %}
-              It’s an exciting time for Mozilla and the Web. Another
-              two billion people will join the Internet community in
-              the coming years.
-              {% endtrans %}
-              </p>
-              <small>Mitchell Baker</small>
-            </blockquote>
-        </section>
+        <div class="row">
+          <div class="col-md-2">
+            <section id="quote">
+                <span>
+                  <img alt="Mitchell Baker, Chair of the Mozilla Foundation"
+                       src="{{ static('mozillians/img/homequote-mitchell-baker.png') }}">
+                </span>
+                <blockquote>
+                  <p>
+                    {% trans %}
+                      It’s an exciting time for Mozilla and the Web. Another
+                      two billion people will join the Internet community in
+                      the coming years.
+                    {% endtrans %}
+                  </p>
+                  <small>Mitchell Baker</small>
+                </blockquote>
+            </section>
+          </div>
 
-        <section id="about">
-            <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
-            <p>
-              {% trans %}
-              This site lists all core individuals and groups that
-              participate in the Mozilla Project. We call ourselves
-              Mozillians and this is where we connect and share with
-              one another.
-              {% endtrans %}
-            </p>
-        </section>
+          <div class="col-md-8">
+            <section id="about">
+                <h2>{{ _('Welcome to the Mozilla community directory') }}</h2>
+                <p>
+                  {% trans %}
+                  This site lists all core individuals and groups that
+                  participate in the Mozilla Project. We call ourselves
+                  Mozillians and this is where we connect and share with
+                  one another.
+                  {% endtrans %}
+                </p>
+            </section>
+          </div>
 
-        <section id="mozfacts">
-          {% set fact=random_funfact() %}
-          {% if fact %}
-            <h2>{{ fact.execute() }}</h2>
-            <p>
-              {{ fact.public_text }}
-            </p>
-          {% else %}
-            <h2>3000+</h2>
-            <p>
-              {% trans %}
-                Passionate Mozillians you can meet for work, play or a
-                cup of coffee.
-              {% endtrans %}
-            </p>
-          {% endif %}
-        </section>
+          <div class="col-md-2">
+            <section id="mozfacts">
+              {% set fact=random_funfact() %}
+              {% if fact %}
+                <h2>{{ fact.execute() }}</h2>
+                <p>
+                  {{ fact.public_text }}
+                </p>
+              {% else %}
+                <h2>3000+</h2>
+                <p>
+                  {% trans %}
+                    Passionate Mozillians you can meet for work, play or a
+                    cup of coffee.
+                  {% endtrans %}
+                </p>
+              {% endif %}
+            </section>
+          </div>
+        </div>
       </div>
     </article>
 
@@ -108,7 +116,7 @@
   {% else %}
 
     {# This is where the logged in homepage view starts. #}
-    <article id="search-info">
+    <article class="search-info search-top">
       <h1>{{ _('Hello!') }}</h1>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
         <input type="text" name="q" class="search-query"
@@ -122,124 +130,146 @@
         </small>
       </form>
     </article>
-    <article id="profile-info">
-      <a class="profile-photo" href="{{ url('phonebook:profile_view', user.username) }}">
-        <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
-      </a>
-      <div class="profile-details">
-        <h2>{{ user.username }}</h2>
-        {{ user.email }}
-        {% with profile = user.userprofile %}
-        {% if profile.geo_country or profile.geo_region or profile.geo_city %}
-          <section class="location">
-            {% include 'phonebook/includes/profile_location.html' %}
+    <div class="row">
+      <div class="col-md-3">
+        <article id="profile-info">
+          <a class="profile-photo" href="{{ url('phonebook:profile_view', user.username) }}">
+            <img src="{{ user.userprofile.get_photo_url('150x150') }}" alt="{{ user.username }}">
+          </a>
+          <div class="profile-details">
+            <h2>{{ user.username }}</h2>
+            {{ user.email }}
+            {% with profile = user.userprofile %}
+            {% if profile.geo_country or profile.geo_region or profile.geo_city %}
+              <section class="location">
+                {% include 'phonebook/includes/profile_location.html' %}
+              </section>
+            {% endif %}
+            {% endwith %}
+            {% if user.userprofile.groups.count() %}
+              <section class="groups">
+                <h4>{{ _('Groups') }}</h4>
+                {% for group in user.userprofile.get_annotated_groups() -%}
+                  <a href="{{ url('groups:show_group', group.url) }}">
+                    {%- if group.curator == user.userprofile -%}
+                      <i class="icon-crown"></i>
+                    {% endif %}
+                    {{ group.name }}
+                    {%- if group.pending %} {{ _('(membership requested)') }}{% endif -%}
+                  </a>
+                  {%- if not loop.last -%},{% endif %}
+                {% endfor %}
+              </section>
+            {% endif %}
+            {% if user.userprofile.languages.exists() %}
+              <section class="languages">
+                <h4>{{ _('Languages') }}</h4>
+                {% for language in user.userprofile.languages %}
+                  {{ langcode_to_name(language.code) }}
+                  {%- if not loop.last -%},{% endif %}
+                {% endfor %}
+              </section>
+            {% endif %}
+            {% if user.userprofile.skills.count() %}
+              <section class="skills">
+                <h4>{{ _('Skills') }}</h4>
+                {% for skill in user.userprofile.skills.all() %}
+                  <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
+                  {%- if not loop.last %},{% endif %}
+                {% endfor %}
+              </section>
+            {% endif %}
+
+            {# Using this placeholder code for now.
+            {% if user.userprofile.badges.count() %}
+              {% trans badges_count=user.userprofile.badges.count() %}
+                Has {{ badges_count }} skills.
+              {% endtrans %}
+            {% endif %}
+            #}
+           </div>
+        </article>
+      </div>
+      <div class="col-md-9">
+        <article class="search-info search-right">
+          <h1>{{ _('Hello!') }}</h1>
+          <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
+            <input type="text" name="q" class="search-query"
+                   placeholder="{{ _('Search for people, groups and more') }}">
+            <small>{{ _('Examples:') }}
+              {% trans search_url=url('phonebook:search') %}
+              <a href="{{ search_url }}?q=python">python</a>,
+              <a href="{{ search_url }}?q=berlin">Berlin</a>,
+              <a href="{{ search_url }}?q=mbrandt">mbrandt</a>
+              {% endtrans %}
+            </small>
+          </form>
+        </article>
+        <article id="content-info">
+          <section class="announcements-mozfacts">
+            {% set announcement=latest_announcement() %}
+            {% if announcement %}
+              {% if announcement.image %}
+                <img src="{{ thumbnail(announcement.image, '60x60').url }}">
+              {% endif %}
+              <h2>{{ announcement.title }}</h2>
+              <p> {{ announcement.get_template_text() }} </p>
+            {% else %}
+              {% set fact=random_funfact() %}
+              {% if fact %}
+                <h2>{{ fact.execute() }}</h2>
+                <p>{{ fact.public_text }}</p>
+              {% endif %}
+            {% endif %}
           </section>
-        {% endif %}
-        {% endwith %}
-        {% if user.userprofile.groups.count() %}
-          <section class="groups">
-            <h4>{{ _('Groups') }}</h4>
-            {% for group in user.userprofile.get_annotated_groups() -%}
-              <a href="{{ url('groups:show_group', group.url) }}">
-                {%- if group.curator == user.userprofile -%}
-                  <i class="icon-crown"></i>
+          <div class="row">
+            <div class="col-md-6">
+              <section class="functional-areas">
+                <span class="icon">
+                  <img src="{{ static('mozillians/img/homepage-funcareas.jpg') }}" alt="Functional areas">
+                </span>
+                <h2>{{ _('Functional areas') }}</h2>
+                {% trans %}
+                  <p>
+                    View Mozillians, Stewards and information for any
+                    functional area. Find out who works on what and how you
+                    can help out.
+                  </p>
+                {% endtrans %}
+                {% if user.userprofile.is_vouched %}
+                  <a href="{{ url('groups:index_functional_areas') }}">{{ _('Browse functional areas') }} <i class="icon-arrow-right"></i></a>
+                {% else %}
+                  {% trans %}
+                    <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse functional areas!</p>
+                  {% endtrans %}
                 {% endif %}
-                {{ group.name }}
-                {%- if group.pending %} {{ _('(membership requested)') }}{% endif -%}
-              </a>
-              {%- if not loop.last -%},{% endif %}
-            {% endfor %}
-          </section>
-        {% endif %}
-        {% if user.userprofile.languages.exists() %}
-          <section class="languages">
-            <h4>{{ _('Languages') }}</h4>
-            {% for language in user.userprofile.languages %}
-              {{ langcode_to_name(language.code) }}
-              {%- if not loop.last -%},{% endif %}
-            {% endfor %}
-          </section>
-        {% endif %}
-
-        {% if user.userprofile.skills.count() %}
-          <section class="skills">
-            <h4>{{ _('Skills') }}</h4>
-            {% for skill in user.userprofile.skills.all() %}
-              <a href="{{ url('groups:show_skill', skill.url) }}">{{ skill.name }}</a>
-              {%- if not loop.last %},{% endif %}
-            {% endfor %}
-          </section>
-        {% endif %}
-
-        {# Using this placeholder code for now.
-
-        {% if user.userprofile.badges.count() %}
-          {% trans badges_count=user.userprofile.badges.count() %}
-            Has {{ badges_count }} skills.
-          {% endtrans %}
-        {% endif %}
-
-        #}
-       </div>
-    </article>
-    <article id="content-info">
-      <section class="announcements-mozfacts">
-        {% set announcement=latest_announcement() %}
-        {% if announcement %}
-          {% if announcement.image %}
-            <img src="{{ thumbnail(announcement.image, '60x60').url }}">
-          {% endif %}
-          <h2>{{ announcement.title }}</h2>
-          <p> {{ announcement.get_template_text() }} </p>
-        {% else %}
-          {% set fact=random_funfact() %}
-          {% if fact %}
-            <h2>{{ fact.execute() }}</h2>
-            <p>{{ fact.public_text }}</p>
-          {% endif %}
-        {% endif %}
-      </section>
-      <section class="functional-areas">
-        <span class="icon">
-          <img src="{{ static('mozillians/img/homepage-funcareas.jpg') }}" alt="Functional areas">
-        </span>
-        <h2>{{ _('Functional areas') }}</h2>
-        {% trans %}
-          <p>
-            View Mozillians, Stewards and information for any
-            functional area. Find out who works on what and how you
-            can help out.
-          </p>
-        {% endtrans %}
-        {% if user.userprofile.is_vouched %}
-          <a href="{{ url('groups:index_functional_areas') }}">{{ _('Browse functional areas') }} <i class="icon-arrow-right"></i></a>
-        {% else %}
-          {% trans %}
-            <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse functional areas!</p>
-          {% endtrans %}
-        {% endif %}
-      </section>
-      <section class="groups">
-        <span class="icon">
-          <img src="{{ static('mozillians/img/homepage-groups.jpg') }}" alt="Groups">
-        </span>
-        <h2>{{ _('Groups') }}</h2>
-        {% trans %}
-          <p>
-            Find and join groups centered around interests,
-            technologies, geographies and more.
-          </p>
-        {% endtrans %}
-        {% if user.userprofile.is_vouched %}
-          <a href="{{ url('groups:index_groups') }}">{{ _('Browse groups') }} <i class="icon-arrow-right"></i></a>
-        {% else %}
-          {% trans %}
-            <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse groups!</p>
-          {% endtrans %}
-        {% endif %}
-      </section>
-    </article>
-
+              </section>
+            </div>
+            <div class="col-md-6">
+              <section class="groups">
+                <span class="icon">
+                  <img src="{{ static('mozillians/img/homepage-groups.jpg') }}" alt="Groups">
+                </span>
+                <h2>{{ _('Groups') }}</h2>
+                {% trans %}
+                  <p>
+                    Find and join groups centered around interests,
+                    technologies, geographies and more.
+                  </p>
+                {% endtrans %}
+                {% if user.userprofile.is_vouched %}
+                  <a href="{{ url('groups:index_groups') }}">{{ _('Browse groups') }} <i class="icon-arrow-right"></i></a>
+                {% else %}
+                  {% trans %}
+                    <p>Become <a href='https://wiki.mozilla.org/Mozillians/Vouching'>vouched</a> and you can browse groups!</p>
+                  {% endtrans %}
+                {% endif %}
+              </section>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
   {% endif %}
 
 {% endblock content %}
