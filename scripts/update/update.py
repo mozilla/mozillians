@@ -53,8 +53,7 @@ def update_assets(ctx):
 @task
 def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python2.7 manage.py syncdb")                             # South (new)
-        ctx.local("python2.7 manage.py migrate")                            # South (new)
+        ctx.local("python2.7 manage.py migrate --fake --noinput")
 
 
 @task
