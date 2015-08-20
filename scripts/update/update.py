@@ -18,6 +18,9 @@ from commander.deploy import task, hostgroups
 
 import commander_settings as settings
 
+# Setup virtualenv path.
+venv_bin_path = os.path.join(settings.SRC_DIR, '..', 'venv', 'bin')
+os.environ['PATH'] = venv_bin_path + os.pathsep + os.environ['PATH']
 
 NEW_RELIC_URL = 'https://rpm.newrelic.com/deployments.xml'
 GITHUB_URL = 'https://github.com/mozilla/mozillians/compare/{oldrev}...{newrev}'
