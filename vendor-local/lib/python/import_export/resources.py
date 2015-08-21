@@ -8,11 +8,12 @@ import traceback
 import tablib
 from diff_match_patch import diff_match_patch
 
+from django import VERSION
 from django.utils.safestring import mark_safe
-from django.utils.datastructures import SortedDict
 from django.utils import six
-from django.db import transaction
-from django.db.models.related import RelatedObject
+from django.db.models.fields import FieldDoesNotExist
+from django.db.models.query import QuerySet
+from django.db.transaction import TransactionManagementError
 from django.conf import settings
 
 from .results import Error, Result, RowResult
@@ -22,12 +23,39 @@ from .instance_loaders import (
     ModelInstanceLoader,
 )
 
+try:
+    from django.db.transaction import atomic, savepoint, savepoint_rollback, savepoint_commit  # noqa
+except ImportError:
+    from .django_compat import atomic, savepoint, savepoint_rollback, savepoint_commit  # noqa
+
+
+if VERSION < (1, 8):
+    from django.db.models.related import RelatedObject
+    ForeignObjectRel = RelatedObject
+else:
+    from django.db.models.fields.related import ForeignObjectRel
+    RelatedObject = None
 
 try:
     from django.utils.encoding import force_text
 except ImportError:
     from django.utils.encoding import force_unicode as force_text
 
+try:
+    from collections import OrderedDict
+except ImportError:
+    from django.utils.datastructures import SortedDict as OrderedDict
+
+# Set default logging handler to avoid "No handler found" warnings.
+import logging
+try:  # Python 2.7+
+    from logging import NullHandler
+except ImportError:
+    class NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+
+logging.getLogger(__name__).addHandler(NullHandler())
 
 USE_TRANSACTIONS = getattr(settings, 'IMPORT_EXPORT_USE_TRANSACTIONS', False)
 
@@ -78,22 +106,26 @@ class ResourceOptions(object):
     skip_unchanged = False
     report_skipped = True
 
-    def __new__(cls, meta=None):
-        overrides = {}
-
-        if meta:
-            for override_name in dir(meta):
-                if not override_name.startswith('_'):
-                    overrides[override_name] = getattr(meta, override_name)
-
-        return object.__new__(type(str('ResourceOptions'), (cls,), overrides))
-
 
 class DeclarativeMetaclass(type):
 
     def __new__(cls, name, bases, attrs):
         declared_fields = []
+        meta = ResourceOptions()
 
+        # If this class is subclassing another Resource, add that Resource's fields.
+        # Note that we loop over the bases in *reverse*. This is necessary in
+        # order to preserve the correct order of fields.
+        for base in bases[::-1]:
+            if hasattr(base, 'fields'):
+                declared_fields = list(six.iteritems(base.fields)) + declared_fields
+                # Collect the Meta options
+                options = getattr(base, 'Meta', None)
+                for option in [option for option in dir(options)
+                               if not option.startswith('_')]:
+                    setattr(meta, option, getattr(options, option))
+
+        # Add direct fields
         for field_name, obj in attrs.copy().items():
             if isinstance(obj, Field):
                 field = attrs.pop(field_name)
@@ -101,11 +133,16 @@ class DeclarativeMetaclass(type):
                     field.column_name = field_name
                 declared_fields.append((field_name, field))
 
-        attrs['fields'] = SortedDict(declared_fields)
+        attrs['fields'] = OrderedDict(declared_fields)
         new_class = super(DeclarativeMetaclass, cls).__new__(cls, name,
                 bases, attrs)
-        opts = getattr(new_class, 'Meta', None)
-        new_class._meta = ResourceOptions(opts)
+
+        # Add direct options
+        options = getattr(new_class, 'Meta', None)
+        for option in [option for option in dir(options) 
+                       if not option.startswith('_')]:
+            setattr(meta, option, getattr(options, option))
+        new_class._meta = meta
 
         return new_class
 
@@ -268,14 +305,15 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
         """
         return self.get_export_headers()
 
-    def before_import(self, dataset, dry_run):
+    def before_import(self, dataset, dry_run, **kwargs):
         """
         Override to add additional logic.
         """
         pass
 
+    @atomic()
     def import_data(self, dataset, dry_run=False, raise_errors=False,
-            use_transactions=None):
+            use_transactions=None, **kwargs):
         """
         Imports data from ``dataset``.
 
@@ -285,6 +323,7 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
             back.
         """
         result = Result()
+        result.diff_headers = self.get_diff_headers()
 
         if use_transactions is None:
             use_transactions = self.get_use_transactions()
@@ -293,23 +332,22 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
             # when transactions are used we want to create/update/delete object
             # as transaction will be rolled back if dry_run is set
             real_dry_run = False
-            transaction.enter_transaction_management()
-            transaction.managed(True)
+            sp1 = savepoint()
         else:
             real_dry_run = dry_run
 
-        instance_loader = self._meta.instance_loader_class(self, dataset)
-
         try:
-            self.before_import(dataset, real_dry_run)
+            self.before_import(dataset, real_dry_run, **kwargs)
         except Exception as e:
-            tb_info = traceback.format_exc(sys.exc_info()[2])
+            logging.exception(e)
+            tb_info = traceback.format_exc(2)
             result.base_errors.append(Error(repr(e), tb_info))
             if raise_errors:
                 if use_transactions:
-                    transaction.rollback()
-                    transaction.leave_transaction_management()
+                    savepoint_rollback(sp1)
                 raise
+
+        instance_loader = self._meta.instance_loader_class(self, dataset)
 
         for row in dataset.dict:
             try:
@@ -339,17 +377,20 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
                         self.save_instance(instance, real_dry_run)
                         self.save_m2m(instance, row, real_dry_run)
                         # Add object info to RowResult for LogEntry
-                        row_result.object_repr = str(instance)
+                        row_result.object_repr = force_text(instance)
                         row_result.object_id = instance.pk
                     row_result.diff = self.get_diff(original, instance,
                             real_dry_run)
             except Exception as e:
+                # There is no point logging a transaction error for each row
+                # when only the original error is likely to be relevant
+                if not isinstance(e, TransactionManagementError):
+                    logging.exception(e)
                 tb_info = traceback.format_exc(2)
-                row_result.errors.append(Error(e, tb_info))
+                row_result.errors.append(Error(e, tb_info, row))
                 if raise_errors:
                     if use_transactions:
-                        transaction.rollback()
-                        transaction.leave_transaction_management()
+                        savepoint_rollback(sp1)
                     six.reraise(*sys.exc_info())
             if (row_result.import_type != RowResult.IMPORT_TYPE_SKIP or
                         self._meta.report_skipped):
@@ -357,15 +398,15 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
 
         if use_transactions:
             if dry_run or result.has_errors():
-                transaction.rollback()
+                savepoint_rollback(sp1)
             else:
-                transaction.commit()
-            transaction.leave_transaction_management()
+                savepoint_commit(sp1)
 
         return result
 
     def get_export_order(self):
-        return self._meta.export_order or self.fields.keys()
+        order = tuple (self._meta.export_order or ())
+        return order + tuple (k for k in self.fields.keys() if k not in order)
 
     def export_field(self, field, obj):
         field_name = self.get_field_name(field)
@@ -378,7 +419,7 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
         return [self.export_field(field, obj) for field in self.get_fields()]
 
     def get_export_headers(self):
-        headers = [field.column_name for field in self.get_fields()]
+        headers = [force_text(field.column_name) for field in self.get_fields()]
         return headers
 
     def export(self, queryset=None):
@@ -389,9 +430,14 @@ class Resource(six.with_metaclass(DeclarativeMetaclass)):
             queryset = self.get_queryset()
         headers = self.get_export_headers()
         data = tablib.Dataset(headers=headers)
-        # Iterate without the queryset cache, to avoid wasting memory when
-        # exporting large datasets.
-        for obj in queryset.iterator():
+
+        if isinstance(queryset, QuerySet):
+            # Iterate without the queryset cache, to avoid wasting memory when
+            # exporting large datasets.
+            iterable = queryset.iterator()
+        else:
+            iterable = queryset
+        for obj in iterable:
             data.append(self.export_resource(obj))
         return data
 
@@ -420,13 +466,11 @@ class ModelDeclarativeMetaclass(DeclarativeMetaclass):
                 if f.name in declared_fields:
                     continue
 
-                FieldWidget = new_class.widget_from_django_field(f)
-                widget_kwargs = new_class.widget_kwargs_for_field(f.name)
-                field = Field(attribute=f.name, column_name=f.name,
-                        widget=FieldWidget(**widget_kwargs))
+                field = new_class.field_from_django_field(f.name, f,
+                    readonly=False)
                 field_list.append((f.name, field, ))
 
-            new_class.fields.update(SortedDict(field_list))
+            new_class.fields.update(OrderedDict(field_list))
 
             #add fields that follow relationships
             if opts.fields is not None:
@@ -439,20 +483,39 @@ class ModelDeclarativeMetaclass(DeclarativeMetaclass):
 
                     model = opts.model
                     attrs = field_name.split('__')
-                    for attr in attrs[0:-1]:
-                        f = model._meta.get_field_by_name(attr)[0]
-                        model = f.rel.to
-                    f = model._meta.get_field_by_name(attrs[-1])[0]
-                    if isinstance(f, RelatedObject):
+                    for i, attr in enumerate(attrs):
+                        verbose_path = ".".join([opts.model.__name__] + attrs[0:i+1])
+
+                        try:
+                            f = model._meta.get_field_by_name(attr)[0]
+                        except FieldDoesNotExist as e:
+                            logging.exception(e)
+                            raise FieldDoesNotExist("%s: %s has no field named '%s'" %
+                                (verbose_path, model.__name__, attr))
+
+                        if i < len(attrs) - 1:
+                            # We're not at the last attribute yet, so check that
+                            # we're looking at a relation, and move on to the
+                            # next model.
+                            if isinstance(f, ForeignObjectRel):
+                                if RelatedObject is None:
+                                    model = f.related_model
+                                else:
+                                    # Django < 1.8
+                                    model = f.model
+                            else:
+                                if f.rel is None:
+                                    raise KeyError('%s is not a relation' % verbose_path)
+                                model = f.rel.to
+
+                    if isinstance(f, ForeignObjectRel):
                         f = f.field
 
-                    FieldWidget = new_class.widget_from_django_field(f)
-                    widget_kwargs = new_class.widget_kwargs_for_field(field_name)
-                    field = Field(attribute=field_name, column_name=field_name,
-                            widget=FieldWidget(**widget_kwargs), readonly=True)
-                    field_list.append((field_name, field, ))
+                    field = new_class.field_from_django_field(field_name, f,
+                        readonly=True)
+                    field_list.append((field_name, field))
 
-                new_class.fields.update(SortedDict(field_list))
+                new_class.fields.update(OrderedDict(field_list))
 
         return new_class
 
@@ -482,7 +545,7 @@ class ModelResource(six.with_metaclass(ModelDeclarativeMetaclass, Resource)):
             result = widgets.DateTimeWidget
         elif internal_type in ('DateField', ):
             result = widgets.DateWidget
-        elif internal_type in ('IntegerField', 'PositiveIntegerField',
+        elif internal_type in ('IntegerField', 'PositiveIntegerField', 'BigIntegerField',
                 'PositiveSmallIntegerField', 'SmallIntegerField', 'AutoField'):
             result = widgets.IntegerWidget
         elif internal_type in ('BooleanField', 'NullBooleanField'):
@@ -497,6 +560,18 @@ class ModelResource(six.with_metaclass(ModelDeclarativeMetaclass, Resource)):
         if self._meta.widgets:
             return self._meta.widgets.get(field_name, {})
         return {}
+
+    @classmethod
+    def field_from_django_field(self, field_name, django_field, readonly):
+        """
+        Returns a Resource Field instance for the given Django model field.
+        """
+
+        FieldWidget = self.widget_from_django_field(django_field)
+        widget_kwargs = self.widget_kwargs_for_field(field_name)
+        field = Field(attribute=field_name, column_name=field_name,
+                widget=FieldWidget(**widget_kwargs), readonly=readonly)
+        return field
 
     def get_import_id_fields(self):
         return self._meta.import_id_fields
@@ -523,3 +598,4 @@ def modelresource_factory(model, resource_class=ModelResource):
 
     metaclass = ModelDeclarativeMetaclass
     return metaclass(class_name, (resource_class,), class_attrs)
+

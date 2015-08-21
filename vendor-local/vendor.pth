@@ -13,3 +13,5 @@ src/sorl-thumbnail
 src/django-waffle
 src/elasticsearch-py
 src/urllib3
+src/django
+src/jingo

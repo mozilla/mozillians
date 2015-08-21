@@ -1,4 +1,13 @@
+from django.apps import AppConfig
+
 import babel
+
+
+default_app_config = 'mozillians.users.UserConfig'
+
+
+class UserConfig(AppConfig):
+    name = 'mozillians.users'
 
 
 AVAILABLE_LANGUAGES = {}

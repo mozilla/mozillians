@@ -1,5 +1,6 @@
+from django.test import TestCase
+
 from nose.tools import ok_
-from test_utils import TestCase
 
 from mozillians.users.tests import UserFactory
 from mozillians.api.models import APIApp

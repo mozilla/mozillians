@@ -157,13 +157,10 @@ INSTALLED_APPS = get_apps(append=[
     'autocomplete_light',
 
     'django.contrib.admin',
-    'django_browserid',
     'import_export',
     'waffle',
     'rest_framework',
 
-    # DB migrations
-    'south',
 ])
 
 # Auth
@@ -364,3 +361,5 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ),
 }
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'

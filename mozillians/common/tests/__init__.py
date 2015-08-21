@@ -4,12 +4,12 @@ from contextlib import contextmanager, nested
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.test import TestCase as BaseTestCase
 from django.test.client import Client
 from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import make_decorator, ok_
-from test_utils import TestCase as BaseTestCase
 
 
 AUTHENTICATION_BACKENDS = (

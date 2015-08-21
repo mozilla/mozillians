@@ -47,8 +47,17 @@ class Field(object):
         Takes value stored in the data for the field and returns it as
         appropriate python object.
         """
-        value = data[self.column_name]
-        value = self.widget.clean(value)
+        try:
+            value = data[self.column_name]
+        except KeyError:
+            raise KeyError("Column '%s' not found in dataset. Available "
+                "columns are: %s" % (self.column_name, list(data.keys())))
+
+        try:
+            value = self.widget.clean(value)
+        except ValueError as e:
+            raise ValueError("Column '%s': %s" % (self.column_name, e))
+
         return value
 
     def get_value(self, obj):
@@ -71,7 +80,9 @@ class Field(object):
             if value is None:
                 return None
 
-        if callable(value):
+        # Manyrelatedmanagers are callable in Django >= 1.7 but we don't want
+        # to call them
+        if callable(value) and not hasattr(value, 'through'):
             value = value()
         return value
 
