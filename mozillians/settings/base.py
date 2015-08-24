@@ -192,8 +192,6 @@ MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 AUTO_VOUCH_REASON = 'An automatic vouch for being a Mozilla employee.'
 
-SOUTH_TESTS_MIGRATE = False
-
 # Django-CSP
 CSP_DEFAULT_SRC = ("'self'",
                    'http://*.mapbox.com',
