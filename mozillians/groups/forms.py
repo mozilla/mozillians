@@ -37,23 +37,6 @@ class GroupForm(happyforms.ModelForm):
                 del cleaned_data['new_member_criteria']
         return cleaned_data
 
-    def clean_name(self):
-        """Verify that name is unique in ALIAS_MODEL.
-
-        We have to duplicate code here and in
-        models.GroupBase.clean due to bug
-        https://code.djangoproject.com/ticket/16986. To update when we
-        upgrade to Django 1.7.
-
-        """
-        name = self.cleaned_data['name']
-        query = GroupAlias.objects.filter(name=name)
-        if self.instance.pk:
-            query = query.exclude(alias=self.instance)
-        if query.exists():
-            raise ValidationError(_('Group with this Name already exists.'))
-        return name
-
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',

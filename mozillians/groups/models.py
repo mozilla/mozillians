@@ -26,14 +26,8 @@ class GroupBase(models.Model):
         ordering = ['name']
 
     def clean(self):
-        """Verify that name is unique in ALIAS_MODEL.
+        """Verify that name is unique in ALIAS_MODEL."""
 
-        We have to duplicate code here and in
-        forms.GroupForm.clean_name due to bug
-        https://code.djangoproject.com/ticket/16986. To update when we
-        upgrade to Django 1.7.
-
-        """
         super(GroupBase, self).clean()
         query = self.ALIAS_MODEL.objects.filter(name=self.name)
         if self.pk:

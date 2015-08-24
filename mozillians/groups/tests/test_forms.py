@@ -12,6 +12,8 @@ class GroupFormTests(TestCase):
         form = GroupForm({'name': 'bar'})
         ok_(not form.is_valid())
         ok_('name' in form.errors)
+        msg = u'This name already exists.'
+        ok_(msg in form.errors['name'])
 
     def test_by_request_group_without_new_member_criteria(self):
         form_data = {'name': 'test group', 'accepting_new_members': 'by_request'}
