@@ -34,7 +34,7 @@ from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
-                                       UserProfileManager)
+                                       UserProfileManager, UserProfileQuerySet)
 from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
                                     update_basket_task, unindex_objects)
 
@@ -135,7 +135,7 @@ class UserProfile(UserProfilePrivacyModel):
         ('contribute', 'Get Involved'),
     )
 
-    objects = UserProfileManager()
+    objects = UserProfileManager.from_queryset(UserProfileQuerySet)()
 
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,

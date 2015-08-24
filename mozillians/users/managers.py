@@ -121,9 +121,3 @@ class UserProfileManager(Manager):
     """Custom Manager for UserProfile."""
 
     use_for_related_fields = True
-
-    def get_query_set(self):
-        return UserProfileQuerySet(self.model)
-
-    def __getattr__(self, name):
-        return getattr(self.get_query_set(), name)

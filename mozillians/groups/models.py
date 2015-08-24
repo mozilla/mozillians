@@ -8,7 +8,7 @@ from funfactory.utils import absolutify
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
-from mozillians.groups.managers import GroupBaseManager, GroupManager
+from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
 from mozillians.users.tasks import update_basket_task
@@ -19,7 +19,7 @@ class GroupBase(models.Model):
                             unique=True, verbose_name=_lazy(u'Name'))
     url = models.SlugField(blank=True)
 
-    objects = GroupBaseManager()
+    objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     class Meta:
         abstract = True
@@ -206,7 +206,7 @@ class Group(GroupBase):
                    u'curator a reminder')
     )
 
-    objects = GroupManager()
+    objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod
     def get_functional_areas(cls):
