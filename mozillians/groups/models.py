@@ -70,27 +70,23 @@ class GroupBase(models.Model):
     def user_can_leave(self, userprofile):
         return (
             # some groups don't allow leaving
-            getattr(self, 'members_can_leave', True)
-            and
+            getattr(self, 'members_can_leave', True) and
             # curators cannot leave their own groups
-            getattr(self, 'curator', None) != userprofile
-            and
+            getattr(self, 'curator', None) != userprofile and
             # only makes sense to leave a group they belong to (at least pending)
-            (self.has_member(userprofile=userprofile)
-             or self.has_pending_member(userprofile=userprofile))
+            (self.has_member(userprofile=userprofile) or
+                self.has_pending_member(userprofile=userprofile))
         )
 
     def user_can_join(self, userprofile):
         return (
             # Must be vouched
-            userprofile.is_vouched
-            and
+            userprofile.is_vouched and
             # some groups don't allow
-            (getattr(self, 'accepting_new_members', 'yes') != 'no')
-            and
+            (getattr(self, 'accepting_new_members', 'yes') != 'no') and
             # only makes sense to join if not already a member (full or pending)
-            not (self.has_member(userprofile=userprofile)
-                 or self.has_pending_member(userprofile=userprofile))
+            not (self.has_member(userprofile=userprofile) or
+                 self.has_pending_member(userprofile=userprofile))
         )
 
     # Read-only properties so clients don't care which subclasses have some fields

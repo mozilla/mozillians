@@ -18,9 +18,8 @@ class OldGroupRedirectionMiddleware(object):
     def process_response(self, request, response):
         group_url = re.match('^/group/(?P<id>\d+)-(?P<url>[-\w]+)/$',
                              request.path_info)
-        if (response.status_code == 404
-            and group_url
-            and (Group.objects.filter(url=group_url.group('url')).exists())):
+        if (response.status_code == 404 and
+                group_url and Group.objects.filter(url=group_url.group('url')).exists()):
 
             newurl = reverse('groups:show_group',
                              kwargs={'url': group_url.group('url')})

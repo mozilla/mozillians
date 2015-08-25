@@ -13,8 +13,8 @@ class AnnouncementManager(models.Manager):
         now = datetime.now()
         return (self.filter(publish_from__lte=now)
                     .filter(Q(publish_until__isnull=True) |
-                            (Q(publish_until__isnull=False)
-                             & Q(publish_until__gt=now))))
+                            (Q(publish_until__isnull=False) &
+                             Q(publish_until__gt=now))))
 
     def unpublished(self):
         """Return unpublished announcements."""

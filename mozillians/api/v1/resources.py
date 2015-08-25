@@ -18,8 +18,8 @@ class ClientCacheResourceMixIn(object):
         response = (super(ClientCacheResourceMixIn, self)
                     .create_response(request, data, **response_kwargs))
 
-        if (request.method == 'GET' and response.status_code == 200
-            and hasattr(self.Meta, 'cache_control')):
+        if (request.method == 'GET' and response.status_code == 200 and
+                hasattr(self.Meta, 'cache_control')):
             patch_cache_control(response, **self.Meta.cache_control)
 
         return response

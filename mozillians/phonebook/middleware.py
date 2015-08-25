@@ -29,8 +29,8 @@ class RegisterMiddleware():
         if settings.DEBUG:
             self.allow_urls.append(settings.MEDIA_URL)
 
-        if (user.is_authenticated() and not user.userprofile.is_complete
-            and not filter(lambda url: re.match(url, path), self.allow_urls)):
+        if (user.is_authenticated() and not user.userprofile.is_complete and not
+                filter(lambda url: re.match(url, path), self.allow_urls)):
             messages.warning(request, _('Please complete registration before proceeding.'))
             return redirect('phonebook:profile_edit')
 
@@ -44,13 +44,12 @@ class UsernameRedirectionMiddleware():
     """
 
     def process_response(self, request, response):
-        if (response.status_code == 404
-            and not request.path_info.startswith('/u/')
-            and not is_valid_path(request.path_info)
-            and User.objects.filter(
-                username__iexact=request.path_info[1:].strip('/')).exists()
-            and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
+        if (response.status_code == 404 and not
+            request.path_info.startswith('/u/') and not
+            is_valid_path(request.path_info) and
+            User.objects.filter(username__iexact=request.path_info[1:].strip('/')).exists() and
+            request.user.is_authenticated() and
+                request.user.userprofile.is_vouched):
 
             newurl = '/u' + request.path_info
             if request.GET:

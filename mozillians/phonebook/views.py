@@ -146,8 +146,8 @@ def view_profile(request, username):
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
-    if not (request.user.is_authenticated()
-            and (request.user.username == username or request.user.is_superuser)):
+    if not (request.user.is_authenticated() and
+            (request.user.username == username or request.user.is_superuser)):
         data['groups'] = [grp for grp in data['groups'] if not grp.pending]
 
     return render(request, 'phonebook/profile.html', data)
@@ -323,8 +323,8 @@ def search(request):
         include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
         functional_areas = Group.get_functional_areas()
-        public = not (request.user.is_authenticated()
-                      and request.user.userprofile.is_vouched)
+        public = not (request.user.is_authenticated() and
+                      request.user.userprofile.is_vouched)
 
         profiles = UserProfileMappingType.search(
             query, public=public, include_non_vouched=include_non_vouched)
@@ -378,8 +378,8 @@ def betasearch(request):
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
         page = request.GET.get('page', 1)
-        public = not (request.user.is_authenticated()
-                      and request.user.userprofile.is_vouched)
+        public = not (request.user.is_authenticated() and
+                      request.user.userprofile.is_vouched)
 
         profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
         profiles = UserProfileMappingType.search(query,

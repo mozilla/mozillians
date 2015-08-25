@@ -16,9 +16,8 @@ PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
 
 @register.filter
 def paragraphize(value):
-    return jinja2.Markup(
-            u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
-                         for p in PARAGRAPH_RE.split(jinja2.escape(value))))
+    return jinja2.Markup(u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
+                                      for p in PARAGRAPH_RE.split(jinja2.escape(value))))
 
 
 @register.inclusion_tag('includes/search_result.html')
