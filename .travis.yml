@@ -5,10 +5,11 @@ sudo: false
 services:
   - elasticsearch
 before_script:
-  - mysql -e 'create database mozillians character set utf8;'
-  - cp mozillians/settings/local.py-travis mozillians/settings/local.py
+  - flake8 mozillians
 before_install:
   - git submodule update --init --recursive
+  - mysql -e 'create database mozillians character set utf8;'
+  - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 install:
   - pip install -r requirements/compiled.txt
   - pip install -r requirements/dev.txt
