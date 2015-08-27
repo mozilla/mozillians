@@ -2,9 +2,16 @@
   {{ csrf() }}
   <div id="developer-tab" class="hidden-xs hidden-sm settings-tab">
     <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Developer') }}</div>
+      <div class="panel-heading">{{ _('API privacy') }}</div>
       <div class="panel-body">
-        <fieldset id="services" class="edit-controls">
+        {% if developer_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in developer_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <fieldset id="privacy" class="edit-controls">
           <p class="field_description">
             {% trans bugzilla_url='http://bugzilla.mozilla.org',
                      reps_url='http://reps.mozilla.org' %}
@@ -14,26 +21,34 @@
             {% endtrans %}
           <h4>{{ _('Privacy') }}</h4>
           <p>
-            {{ profile_form.allows_community_sites.label_tag() }}
-            {{ profile_form.allows_community_sites }}
+            {{ developer_form.allows_community_sites.label_tag() }}
+            {{ developer_form.allows_community_sites }}
           </p>
           <p>
-            {{ profile_form.allows_mozilla_sites.label_tag() }}
-            {{ profile_form.allows_mozilla_sites }}
+            {{ developer_form.allows_mozilla_sites.label_tag() }}
+            {{ developer_form.allows_mozilla_sites }}
           </p>
           <p>
             API Version 2, currently under testing, respects the defined
             per field privacy levels. These fields will become obsolete
             and eventually dropped along with the API Version 1.
           </p>
-
-          {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
-            <h4>{{ _('Developers') }}</h4>
-            <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
-            <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
-          {% endif %}
         </fieldset>
       </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="developer_section">{{ _('Update Privacy Settings') }}</button>
+      </div>
     </div>
+    {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Developer') }}</div>
+        <div class="panel-body">
+          <fieldset id="api" class="edit-controls">
+            <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
+            <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
+          </fieldset>
+        </div>
+      </div>
+    {% endif %}
   </div>
 </form>

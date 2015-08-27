@@ -2,15 +2,18 @@
   <div class="privacy-controls">
     <span class="info glyphicon glyphicon-eye-open" aria-hidden="true" title="{{ _('Choose visibility group for this field') }}"></span>
     <div class="btn-group btn-group-xs" role="group">
-    {% for value, text in field.field.choices %}
-      {% if value == 1 %}
-        <button type="button" class="btn btn-default active">{{ text }}</button>
-      {% else %}
-        <button type="button" class="privacy-toggle btn btn-default {% if value == field.value() %}active{% endif %}" data-target="{{ field.name }}" data-value="{{ value }}">{{ text }}</button>
-      {% endif %}
-    {% endfor %}
-    <input type="hidden" value="{{ field.value() }}" name="{{ field.name }}" id="{{ field.name }}">
+      {% for value, text in field.field.choices %}
+        {% if value == 1 %}
+          <button type="button" class="btn btn-default active">{{ text }}</button>
+        {% else %}
+          <button type="button" class="privacy-toggle btn btn-default {% if value == field.value()|int %}active{% endif %}" data-target="{{ field.name }}" data-value="{{ value }}">{{ text }}</button>
+        {% endif %}
+      {% endfor %}
+      <input type="hidden" value="{{ field.value() }}" name="{{ field.html_name }}" id="{{ field.auto_id }}">
     </div>
+    {% if field.errors %}
+      <div class="error-message">{{ field.errors }}</div>
+    {% endif %}
   </div>
 {% else %}
 

@@ -4,6 +4,13 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Groups') }}</div>
       <div class="panel-body">
+        {% if groups_privacy_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in groups_privacy_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
         <fieldset id="groups">
           <p class="field_description">
             {% trans %}
@@ -37,8 +44,11 @@
               </li>
             {% endfor %}
           </ul>
-          {{ privacy_field(profile_form.privacy_groups) }}
+          {{ privacy_field(groups_privacy_form.privacy_groups) }}
         </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="groups_section">{{ _('Update Groups') }}</button>
       </div>
     </div>
   </div>
