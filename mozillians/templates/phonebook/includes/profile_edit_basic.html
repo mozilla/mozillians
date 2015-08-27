@@ -1,5 +1,5 @@
 <div id="profile-tab" class="settings-tab">
-  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=#profile" enctype="multipart/form-data">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile" enctype="multipart/form-data">
     {{ csrf() }}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Basic Information') }}</div>

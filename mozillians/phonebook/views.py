@@ -206,7 +206,7 @@ def edit_profile(request):
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))
 
-        return redirect('phonebook:settings', user.username)
+        return redirect('phonebook:profile_view', user.username)
 
     emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
     email_privacy_form = forms.EmailPrivacyForm(request.POST or None, instance=profile)
