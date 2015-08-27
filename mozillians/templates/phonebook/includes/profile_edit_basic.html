@@ -5,10 +5,10 @@
       <div class="panel-heading">{{ _('Basic Information') }}</div>
       <div class="panel-body">
 
-      {% if (profile_form.non_field_errors() or user_form.non_field_errors()
+      {% if (basic_information_form.non_field_errors() or user_form.non_field_errors()
             or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
        <ul class="unstyled">
-         {% for error in profile_form.non_field_errors() %}
+         {% for error in basic_information_form.non_field_errors() %}
            <li class="alert alert-error">{{ error }}</li>
          {% endfor %}
          {% for error in user_form.non_field_errors() %}
@@ -43,7 +43,7 @@
               {% endif %}
             </div>
             <div class="col-md-3 text-right">
-              {{ privacy_field(profile_form.privacy_photo) }}
+              {{ privacy_field(basic_information_form.privacy_photo) }}
             </div>
           </div>
         </fieldset>
@@ -59,10 +59,10 @@
         <fieldset>
           <div class="row">
             <div class="col-md-6">
-              {{ mozillians_field(profile_form.full_name) }}
+              {{ mozillians_field(basic_information_form.full_name) }}
             </div>
             <div class="col-md-6 text-right">
-              {{ privacy_field(profile_form.privacy_full_name) }}
+              {{ privacy_field(basic_information_form.privacy_full_name) }}
             </div>
           </div>
         </fieldset>
@@ -70,7 +70,7 @@
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.bio) }}
+              {{ mozillians_field(basic_information_form.bio) }}
               <span class="under-input-field">
                 {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
                   Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
@@ -78,14 +78,14 @@
               </span>
             </div>
             <div class="col-md-3 text-right">
-              {{ privacy_field(profile_form.privacy_bio) }}
+              {{ privacy_field(basic_information_form.privacy_bio) }}
             </div>
           </div>
         </fieldset>
       </div>
 
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Information') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="basic_section">{{ _('Update Information') }}</button>
       </div>
     </div>
   </form>
@@ -136,6 +136,9 @@
           </div>
         </fieldset>
       </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="email_section">{{ _('Update Emails') }}</button>
+      </div>
     </div>
   </form>
 
@@ -156,16 +159,16 @@
               {% endtrans %}
             </p>
             <fieldset id="skills" data-autocomplete-url="{{ url('groups:search_skills') }}">
-              {{ mozillians_field(profile_form.skills) }}
+              {{ mozillians_field(skills_form.skills) }}
             </fieldset>
           </div>
           <div class="col-md-3">
-            {{ privacy_field(profile_form.privacy_skills) }}
+            {{ privacy_field(skills_form.privacy_skills) }}
           </div>
         </div>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Skills') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="skills_section">{{ _('Update Skills') }}</button>
       </div>
     </div>
   </form>
@@ -206,13 +209,13 @@
               <a href="#" id="languages-addfield" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_languages) }}
+              {{ privacy_field(language_privacy_form.privacy_languages) }}
             </div>
           </div>
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Languages') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="languages_section">{{ _('Update Languages') }}</button>
       </div>
     </div>
   </form>

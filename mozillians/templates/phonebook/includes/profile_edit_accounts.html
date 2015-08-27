@@ -33,7 +33,7 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update External Accounts') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="accounts_section">{{ _('Update External Accounts') }}</button>
       </div>
     </div>
 
@@ -43,16 +43,16 @@
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.ircname) }}
+              {{ mozillians_field(irc_form.ircname) }}
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_ircname) }}
+              {{ privacy_field(irc_form.privacy_ircname) }}
             </div>
           </div>
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update IRC information') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="irc_section">{{ _('Update IRC information') }}</button>
       </div>
     </div>
   </div>

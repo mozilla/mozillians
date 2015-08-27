@@ -37,8 +37,11 @@
               </li>
             {% endfor %}
           </ul>
-          {{ privacy_field(profile_form.privacy_groups) }}
+          {{ privacy_field(groups_privacy_form.privacy_groups) }}
         </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="groups_section">{{ _('Update Groups') }}</button>
       </div>
     </div>
   </div>

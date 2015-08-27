@@ -5,7 +5,7 @@
       <div class="panel-heading">{{ _('Location') }}</div>
       <div class="panel-body">
         <fieldset>
-          {% for error in profile_form.errors['location'] %}
+          {% for error in location_form.errors['location'] %}
             <span class="error-message">{{ error }}</span>
           {% endfor %}
           <div id="location">
@@ -31,10 +31,10 @@
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.timezone) }}
+              {{ mozillians_field(location_form.timezone) }}
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_timezone) }}
+              {{ privacy_field(location_form.privacy_timezone) }}
             </div>
           </div>
         </fieldset>
@@ -48,16 +48,16 @@
               </span>
             </div>
             <div class="col-md-3">
-              <div class="geocheckbox {% if profile_form.savecountry.errors %} error {% endif %}">
-                {{ profile_form.savecountry }}
-                {{ profile_form.savecountry.label_tag() }}
-                {% for error in profile_form.savecountry.errors %}
+              <div class="geocheckbox {% if location_form.savecountry.errors %} error {% endif %}">
+                {{ location_form.savecountry }}
+                {{ location_form.savecountry.label_tag() }}
+                {% for error in location_form.savecountry.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}
               </div>
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_geo_country) }}
+              {{ privacy_field(location_form.privacy_geo_country) }}
             </div>
           </div>
         </fieldset>
@@ -71,16 +71,16 @@
               </span>
             </div>
             <div class="col-md-3">
-              <div class="geocheckbox {% if profile_form.saveregion.errors %} error {% endif %}">
-                {{ profile_form.saveregion }}
-                {{ profile_form.saveregion.label_tag() }}
-                {% for error in profile_form.saveregion.errors %}
+              <div class="geocheckbox {% if location_form.saveregion.errors %} error {% endif %}">
+                {{ location_form.saveregion }}
+                {{ location_form.saveregion.label_tag() }}
+                {% for error in location_form.saveregion.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}
               </div>
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_geo_region) }}
+              {{ privacy_field(location_form.privacy_geo_region) }}
             </div>
           </div>
         </fieldset>
@@ -93,24 +93,24 @@
                     data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
             </div>
             <div class="col-md-3">
-              <div class="geocheckbox {% if profile_form.savecity.errors %} error {% endif %}">
-                {{ profile_form.savecity }}
-                {{ profile_form.savecity.label_tag() }}
-                {% for error in profile_form.savecity.errors %}
+              <div class="geocheckbox {% if location_form.savecity.errors %} error {% endif %}">
+                {{ location_form.savecity }}
+                {{ location_form.savecity.label_tag() }}
+                {% for error in location_form.savecity.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}
               </div>
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_geo_city) }}
+              {{ privacy_field(location_form.privacy_geo_city) }}
             </div>
           </div>
         </fieldset>
-        {{ profile_form.lat }}
-        {{ profile_form.lng }}
+        {{ location_form.lat }}
+        {{ location_form.lng }}
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Location') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="location_section">{{ _('Update Location') }}</button>
       </div>
     </div>
   </div>
