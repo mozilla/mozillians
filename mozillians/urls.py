@@ -12,7 +12,6 @@ from mozillians.common.monkeypatches import patch
 patch()
 
 autocomplete_light.autodiscover()
-admin.autodiscover()
 
 # Activate a locale so that jinja2 doesn't choke when running a shell
 # or individual tests that need translation and don't involve a web
