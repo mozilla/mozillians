@@ -11,12 +11,12 @@ import re
 import sys
 import urllib
 import urllib2
+import commander_settings as settings
+from commander.deploy import task, hostgroups
+
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from commander.deploy import task, hostgroups
-
-import commander_settings as settings
 
 # Setup virtualenv path.
 venv_bin_path = os.path.join(settings.SRC_DIR, '..', 'venv', 'bin')
@@ -56,7 +56,7 @@ def update_assets(ctx):
 @task
 def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python manage.py migrate --fake --noinput")
+        ctx.local("python manage.py migrate --noinput")
 
 
 @task
@@ -100,6 +100,7 @@ def update_es_indexes(ctx):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local("python manage.py cron index_all_profiles &")
 
+
 @task
 def validate_fun_facts(ctx):
     with ctx.lcd(settings.SRC_DIR):
@@ -112,8 +113,8 @@ def generate_humanstxt(ctx):
         ctx.local("python manage.py cron generate_humanstxt &")
 
 
-#@task
-#def install_cron(ctx):
+# @task
+# def install_cron(ctx):
 #    with ctx.lcd(settings.SRC_DIR):
 #        ctx.local("python ./scripts/crontab/gen-crons.py -k %s -u apache > /etc/cron.d/.%s" %
 #                  (settings.WWW_DIR, settings.CRON_NAME))
@@ -130,10 +131,12 @@ def deploy_app(ctx):
     ctx.remote(settings.REMOTE_UPDATE_SCRIPT)
     ctx.remote("/bin/touch %s" % settings.REMOTE_WSGI)
 
+
 @hostgroups(settings.WEB_HOSTGROUP, remote_kwargs={'ssh_key': settings.SSH_KEY})
 def prime_app(ctx):
     for http_port in range(80, 82):
         ctx.remote("for i in {1..10}; do curl -so /dev/null -H 'Host: %s' -I http://localhost:%s/ & sleep 1; done" % (settings.REMOTE_HOSTNAME, http_port))
+
 
 @hostgroups(settings.CELERY_HOSTGROUP, remote_kwargs={'ssh_key': settings.SSH_KEY})
 def update_celery(ctx):
