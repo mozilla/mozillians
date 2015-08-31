@@ -267,28 +267,6 @@ def edit_profile(request):
 
 @allow_unvouched
 @never_cache
-def edit_emails(request):
-    """Edit alternate email addresses."""
-    user = User.objects.get(pk=request.user.id)
-    profile = user.userprofile
-    emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
-    email_privacy_form = forms.EmailPrivacyForm(request.POST or None, instance=profile)
-    alternate_email_formset = forms.AlternateEmailFormset(request.POST or None,
-                                                          instance=profile,
-                                                          queryset=emails)
-
-    if alternate_email_formset.is_valid() and email_privacy_form.is_valid():
-        alternate_email_formset.save()
-        email_privacy_form.save()
-        return redirect('phonebook:edit_emails')
-
-    return render(request, 'phonebook/edit_emails.html',
-                  {'alternate_email_formset': alternate_email_formset,
-                   'email_privacy_form': email_privacy_form})
-
-
-@allow_unvouched
-@never_cache
 def delete_email(request, email_pk):
     """Delete alternate email address."""
     user = User.objects.get(pk=request.user.id)
@@ -299,7 +277,7 @@ def delete_email(request, email_pk):
         raise Http404()
 
     ExternalAccount.objects.get(pk=email_pk).delete()
-    return redirect('phonebook:edit_emails')
+    return redirect('phonebook:profile_edit')
 
 
 @allow_unvouched
@@ -327,7 +305,7 @@ def change_primary_email(request, email_pk):
         user.save()
         alternate_email.save()
 
-    return redirect('phonebook:edit_emails')
+    return redirect('phonebook:profile_edit')
 
 
 @allow_unvouched

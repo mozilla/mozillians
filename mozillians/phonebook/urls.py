@@ -13,8 +13,6 @@ urlpatterns = patterns(
     url(r'^user/edit/$', 'views.edit_profile', name='profile_edit'),
     url(r'^u/(?P<username>[\w.@+-]+)/$', 'views.view_profile',
         name='profile_view'),
-    url(r'^user/edit/emails/$', 'views.edit_emails',
-        name='edit_emails'),
     url(r'^user/delete/email/(?P<email_pk>\d+)/$', 'views.delete_email',
         name='delete_email'),
     url(r'^user/primary/email/(?P<email_pk>\d+)/$', 'views.change_primary_email',
