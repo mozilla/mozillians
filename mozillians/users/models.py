@@ -417,8 +417,7 @@ class UserProfile(UserProfilePrivacyModel):
                 .exclude(group__name__in=membership_list).delete()
         else:
             m2mfield.remove(*[g for g in m2mfield.all()
-                              if g.name not in membership_list
-                              and g.is_visible])
+                              if g.name not in membership_list and g.is_visible])
 
         # Add/create the rest of the groups
         groups_to_add = []

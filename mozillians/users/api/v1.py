@@ -26,7 +26,8 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     username = fields.CharField(attribute='user__username', null=True, readonly=True)
     vouched_by = fields.IntegerField(attribute='vouched_by__id',
                                      null=True, readonly=True)
-    date_vouched = fields.DateTimeField(attribute='date_vouched', null=True, readonly=True)
+    date_vouched = fields.DateTimeField(attribute='date_vouched', null=True,
+                                        readonly=True)
 
     groups = fields.CharField()
     skills = fields.CharField()
@@ -113,8 +114,8 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
         return database_filters
 
     def dehydrate(self, bundle):
-        if (bundle.request.GET.get('restricted', False)
-            or not bundle.data['allows_mozilla_sites']):
+        if (bundle.request.GET.get('restricted', False) or not
+                bundle.data['allows_mozilla_sites']):
             data = {}
             for key in self._meta.restricted_fields:
                 data[key] = bundle.data[key]
@@ -158,9 +159,8 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
         return super(UserResource, self).get_detail(request, **kwargs)
 
     def apply_filters(self, request, applicable_filters):
-        if (request.GET.get('restricted', False)
-            and 'email' not in applicable_filters
-            and len(applicable_filters) != 1):
+        if (request.GET.get('restricted', False) and
+                'email' not in applicable_filters and len(applicable_filters) != 1):
             raise ImmediateHttpResponse(response=http.HttpForbidden())
 
         mega_filter = Q()

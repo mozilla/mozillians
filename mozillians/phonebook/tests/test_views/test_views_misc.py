@@ -216,8 +216,7 @@ class ImageTests(TestCase):
                 'externalaccount_set-TOTAL_FORMS': '0',
                 'language_set-MAX_NUM_FORMS': '1000',
                 'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
+                'language_set-TOTAL_FORMS': '0'}
         data.update(_get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -281,8 +280,7 @@ class ImageTests(TestCase):
                 'externalaccount_set-TOTAL_FORMS': '0',
                 'language_set-MAX_NUM_FORMS': '1000',
                 'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
+                'language_set-TOTAL_FORMS': '0'}
 
         for field in UserProfilePrivacyModel._meta.fields:
             data[field.name] = MOZILLIANS
@@ -313,8 +311,8 @@ class DateValidationTests(TestCase):
                 'externalaccount_set-TOTAL_FORMS': '0',
                 'language_set-MAX_NUM_FORMS': '1000',
                 'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0',
-            }
+                'language_set-TOTAL_FORMS': '0'}
+
         data.update(_get_privacy_fields(MOZILLIANS))
 
         url = reverse('phonebook:profile_edit', prefix='/es/')

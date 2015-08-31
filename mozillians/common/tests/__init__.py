@@ -14,15 +14,15 @@ from nose.tools import make_decorator, ok_
 
 AUTHENTICATION_BACKENDS = (
     'mozillians.common.tests.authentication.DummyAuthenticationBackend',
-    )
+)
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.SHA1PasswordHasher',
-    )
+)
 ES_INDEXES = {
     'default': 'mozillians-test',
     'public': 'mozillians-public-test'
-    }
+}
 
 
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,

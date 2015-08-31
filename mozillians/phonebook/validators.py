@@ -33,8 +33,7 @@ def validate_username(username):
     username = username.lower()
     UsernameBlacklist = get_model('users', 'UsernameBlacklist')
 
-    if (UsernameBlacklist.
-        objects.filter(value=username, is_regex=False).exists()):
+    if UsernameBlacklist.objects.filter(value=username, is_regex=False).exists():
         return False
 
     for regex_value in UsernameBlacklist.objects.filter(is_regex=True):
