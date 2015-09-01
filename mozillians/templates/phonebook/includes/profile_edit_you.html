@@ -43,6 +43,7 @@
     </div>
   </form>
   <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=youandmozilla">
+    {{ csrf() }}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('T-Shirt Size') }}</div>
       <div class="panel-body">

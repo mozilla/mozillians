@@ -217,27 +217,24 @@
     </div>
   </form>
 
-  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile">
-    {{ csrf() }}
-    <div class="panel panel-danger">
-      <div class="panel-heading">
-        {{ _('Delete account') }}
-      </div>
-      <div class="panel-body">
-        <fieldset id="delete">
-          <input type="checkbox" class="acknowledge">
-          {% trans %}
-            I acknowledge that deleting my account will make it tougher
-            for me to show off my contributions and easily be found by
-            other members of the Mozilla community.
-          {% endtrans %}
-        </fieldset>
-      </div>
-      <div class="panel-footer">
-        <a href="{{ url('phonebook:profile_confirm_delete') }}" class="btn btn-danger delete">
-          {{ _('Delete Profile') }}
-        </a>
-      </div>
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      {{ _('Delete account') }}
     </div>
-  </form>
+    <div class="panel-body">
+      <fieldset id="delete">
+        <input type="checkbox" class="acknowledge">
+        {% trans %}
+          I acknowledge that deleting my account will make it tougher
+          for me to show off my contributions and easily be found by
+          other members of the Mozilla community.
+        {% endtrans %}
+      </fieldset>
+    </div>
+    <div class="panel-footer">
+      <a href="{{ url('phonebook:profile_confirm_delete') }}" class="btn btn-danger delete">
+        {{ _('Delete Profile') }}
+      </a>
+    </div>
+  </div>
 </div>
