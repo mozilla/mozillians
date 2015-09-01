@@ -14,7 +14,14 @@ $(function() {
 
     // Tabs
     $('.settings-tab').hide();
-    var content = location.hash;
+    var uri = URI(location.href);
+    var next_section = uri.query(true).next;
+    var hash = uri.hash();
+    if (next_section) {
+      content = '#' + next_section;
+    } else {
+      content = hash;
+    }
     if (content) {
         $(content + '-tab').show();
         $(content + '-li').addClass('active');
