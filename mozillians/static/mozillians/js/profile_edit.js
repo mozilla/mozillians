@@ -96,8 +96,10 @@ $(function() {
     // takes a jquery selector and the type of a formset to duplicate fields
     function cloneFormsetField(selector, type) {
         var $newElement = $(selector).clone(true);
-        var total = $('#id_' + type + '-TOTAL_FORMS').val();
-        $newElement.find(':input').each(function() {
+        var $parElement = $(selector).parent();
+        var $totalElement = $parElement.find('#id_' + type + '-TOTAL_FORMS');
+        var total = $totalElement.val();
+        $newElement.find(':input').not(':button').each(function() {
             var name = $(this).attr('name').replace('-' + (total-1) + '-','-' + total + '-');
             var id = 'id_' + name;
             $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
@@ -107,7 +109,7 @@ $(function() {
             $(this).attr('for', newFor);
         });
         total++;
-        $('#id_' + type + '-TOTAL_FORMS').val(total);
+        $totalElement.val(total);
         $newElement.find('.errorlist').remove();
         $newElement.removeClass('error');
         $(selector).after($newElement);

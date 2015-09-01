@@ -9,7 +9,7 @@
         <button type="button" class="privacy-toggle btn btn-default {% if value == field.value() %}active{% endif %}" data-target="{{ field.name }}" data-value="{{ value }}">{{ text }}</button>
       {% endif %}
     {% endfor %}
-    <input type="hidden" value="{{ field.value() }}" name="{{ field.name }}" id="{{ field.name }}">
+    <input type="hidden" value="{{ field.value() }}" name="{{ field.html_name }}" id="{{ field.auto_id }}">
     </div>
   </div>
 {% else %}
