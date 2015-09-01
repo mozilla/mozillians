@@ -1,16 +1,16 @@
-<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=youandmozilla" enctype="multipart/form-data">
-  {{ csrf() }}
-  <div id="youandmozilla-tab" class="hidden-xs hidden-sm settings-tab">
+<div id="youandmozilla-tab" class="hidden-xs hidden-sm settings-tab">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=youandmozilla">
+    {{ csrf() }}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Your Mozilla Contributions') }}</div>
       <div class="panel-body">
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.title) }}
+              {{ mozillians_field(contribution_form.title) }}
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_title) }}
+              {{ privacy_field(contribution_form.privacy_title) }}
             </div>
           </div>
         </fieldset>
@@ -18,10 +18,10 @@
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.date_mozillian) }}
+              {{ mozillians_field(contribution_form.date_mozillian) }}
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_date_mozillian) }}
+              {{ privacy_field(contribution_form.privacy_date_mozillian) }}
             </div>
           </div>
         </fieldset>
@@ -29,19 +29,20 @@
         <fieldset>
           <div class="row">
             <div class="col-md-9">
-              {{ mozillians_field(profile_form.story_link) }}
+              {{ mozillians_field(contribution_form.story_link) }}
             </div>
             <div class="col-md-3">
-              {{ privacy_field(profile_form.privacy_story_link) }}
+              {{ privacy_field(contribution_form.privacy_story_link) }}
             </div>
           </div>
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Contributions') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="contribution_section">{{ _('Update Contributions') }}</button>
       </div>
     </div>
-
+  </form>
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=youandmozilla">
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('T-Shirt Size') }}</div>
       <div class="panel-body">
@@ -55,10 +56,10 @@
           </p>
         </div>
         <div class="col-md-3 text-right">
-          {{ privacy_field(profile_form.privacy_tshirt) }}
+          {{ privacy_field(tshirt_form.privacy_tshirt) }}
         </div>
       </div>
-          {% with t_choices = profile_form.tshirt.field.choices %}
+          {% with t_choices = tshirt_form.tshirt.field.choices %}
             <div class="sizing">
               <div class="fitted">
                 <h4>
@@ -93,8 +94,8 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update T-shirt size') }}</button>
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="tshirt_section">{{ _('Update T-shirt size') }}</button>
       </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>
