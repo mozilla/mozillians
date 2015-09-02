@@ -1,11 +1,10 @@
 from django import forms
-from django.core.exceptions import ValidationError
 
 import happyforms
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group, GroupAlias
+from mozillians.groups.models import Group
 
 
 class SortForm(forms.Form):
