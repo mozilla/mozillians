@@ -22,7 +22,7 @@ Parameters
         *Required* **string** - The application's API key
 
     ``is_vouched``
-        *Optional* **string (true/false)** - Return only vouched/unvouched users
+        *Optional* **string (True/False)** - Return only vouched/unvouched users
 
     ``username``
         *Optional* **string** - Return user with matching username

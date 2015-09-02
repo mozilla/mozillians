@@ -28,13 +28,13 @@ Parameters
         *Optional* **integer** - Return results matching given mozillians id
 
     ``functional_area``
-        *Optional* **true/false** - Return results containing only groups that are functional areas
+        *Optional* **True/False** - Return results containing only groups that are functional areas
 
     ``members_can_leave``
-        *Optional* **true/false** - Return results containing groups with ``members_can_leave`` policy
+        *Optional* **True/False** - Return results containing groups with ``members_can_leave`` policy
 
     ``accepting_new_members``
-        *Optional* **true/false** - Return results containing only groups with ``accepting_new_members`` policy
+        *Optional* **True/False** - Return results containing only groups with ``accepting_new_members`` policy
 
     ``page``
         *Optional* **integer** - Return results contained in specific page
