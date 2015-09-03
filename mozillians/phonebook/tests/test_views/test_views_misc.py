@@ -205,18 +205,21 @@ class LogoutTests(TestCase):
 class ImageTests(TestCase):
     def _upload_photo(self, user, file_path):
         """Helper for the next methods."""
-        data = {'full_name': user.userprofile.full_name,
-                'email': user.email,
-                'username': user.username,
-                'lat': 40.005814,
-                'lng': -3.42071,
-                'photo': open(file_path, 'rb'),
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0'}
+        data = {
+            'full_name': user.userprofile.full_name,
+            'email': user.email,
+            'username': user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'photo': open(file_path, 'rb'),
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '0',
+            'basic_section': ''
+        }
         data.update(_get_privacy_fields(MOZILLIANS))
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:
@@ -270,17 +273,20 @@ class ImageTests(TestCase):
         self._upload_photo(user, file_path)
 
         # Re-save profile without uploading a new photo.
-        data = {'full_name': user.userprofile.full_name,
-                'email': user.email,
-                'username': user.username,
-                'lat': 40.005814,
-                'lng': -3.42071,
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0'}
+        data = {
+            'full_name': user.userprofile.full_name,
+            'email': user.email,
+            'username': user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '0',
+            'basic_section': ''
+        }
 
         for field in UserProfilePrivacyModel._meta.fields:
             data[field.name] = MOZILLIANS
@@ -299,20 +305,22 @@ class DateValidationTests(TestCase):
         Related bug 914448.
         """
         user = UserFactory.create(email='es@example.com')
-        data = {'full_name': user.userprofile.full_name,
-                'email': user.email,
-                'username': user.username,
-                'lat': 40.005814,
-                'lng': -3.42071,
-                'date_mozillian_year': '2013',
-                'date_mozillian_month': '1',
-                'externalaccount_set-MAX_NUM_FORMS': '1000',
-                'externalaccount_set-INITIAL_FORMS': '0',
-                'externalaccount_set-TOTAL_FORMS': '0',
-                'language_set-MAX_NUM_FORMS': '1000',
-                'language_set-INITIAL_FORMS': '0',
-                'language_set-TOTAL_FORMS': '0'}
-
+        data = {
+            'full_name': user.userprofile.full_name,
+            'email': user.email,
+            'username': user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'date_mozillian_year': '2013',
+            'date_mozillian_month': '1',
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '0',
+            'contribution_section': ''
+        }
         data.update(_get_privacy_fields(MOZILLIANS))
 
         url = reverse('phonebook:profile_edit', prefix='/es/')
