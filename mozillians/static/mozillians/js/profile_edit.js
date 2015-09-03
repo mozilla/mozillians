@@ -1,4 +1,12 @@
 $(function() {
+    // Favicon
+    var url = $("link[rel='shortcut icon']").remove().attr('href');
+    var favicon = document.createElement('link');
+    favicon.type = 'image/x-icon';
+    favicon.rel = 'shortcut icon';
+    favicon.href = url;
+    $('head').append(favicon);
+
     // Tabs
     $('.settings-tab').hide();
     var content = location.hash;
