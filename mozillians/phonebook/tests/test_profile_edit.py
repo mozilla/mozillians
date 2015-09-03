@@ -7,7 +7,7 @@ from requests import ConnectionError
 from mozillians.common.tests import TestCase
 from mozillians.geo.models import Country
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
-from mozillians.phonebook.forms import ProfileForm
+from mozillians.phonebook.forms import LocationForm
 from mozillians.phonebook.tests import _get_privacy_fields
 from mozillians.users.managers import MOZILLIANS
 from mozillians.users.models import UserProfile
@@ -38,6 +38,64 @@ class ProfileEditTests(TestCase):
         groups_url = reverse('groups:index_groups', prefix='/en-US/')
         ok_(groups_url not in response.content)
 
+    def test_section_does_not_exist(self):
+        """When not section exists in request.POST, 404 is raised."""
+        user = UserFactory.create(vouched=False)
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        data = {
+            'full_name': user.userprofile.full_name,
+            'email': user.email,
+            'username': user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-0-id': '',
+            'language_set-0-userprofile': '',
+            'language_set-0-code': 'en',
+            'language_set-1-id': '',
+            'language_set-1-userprofile': '',
+            'language_set-1-code': 'fr',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '2',
+        }
+        data.update(_get_privacy_fields(MOZILLIANS))
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        eq_(response.status_code, 404)
+
+    def test_wrong_section(self):
+        """When a wrong section is given in request.POST, 404 is raised."""
+        user = UserFactory.create(vouched=False)
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        data = {
+            'full_name': user.userprofile.full_name,
+            'email': user.email,
+            'username': user.username,
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'externalaccount_set-MAX_NUM_FORMS': '1000',
+            'externalaccount_set-INITIAL_FORMS': '0',
+            'externalaccount_set-TOTAL_FORMS': '0',
+            'language_set-0-id': '',
+            'language_set-0-userprofile': '',
+            'language_set-0-code': 'en',
+            'language_set-1-id': '',
+            'language_set-1-userprofile': '',
+            'language_set-1-code': 'fr',
+            'language_set-MAX_NUM_FORMS': '1000',
+            'language_set-INITIAL_FORMS': '0',
+            'language_set-TOTAL_FORMS': '2',
+            'foo_section': '',
+        }
+
+        data.update(_get_privacy_fields(MOZILLIANS))
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+        eq_(response.status_code, 404)
+
     def test_languages_get_saved(self):
         user = UserFactory.create(email='es@example.com')
         data = {
@@ -58,6 +116,7 @@ class ProfileEditTests(TestCase):
             'language_set-MAX_NUM_FORMS': '1000',
             'language_set-INITIAL_FORMS': '0',
             'language_set-TOTAL_FORMS': '2',
+            'languages_section': ''
         }
         data.update(_get_privacy_fields(MOZILLIANS))
 
@@ -81,10 +140,11 @@ class ProfileEditTests(TestCase):
             'language_set-MAX_NUM_FORMS': '1000',
             'language_set-INITIAL_FORMS': '0',
             'language_set-TOTAL_FORMS': '0',
+            'location_section': ''
         }
         data.update(_get_privacy_fields(MOZILLIANS))
 
-        form = ProfileForm(data=data)
+        form = LocationForm(data=data)
         eq_(form.is_valid(), False)
         ok_(form.errors.get('lat'))
         ok_(form.errors.get('lng'))
@@ -108,6 +168,7 @@ class LocationEditTests(TestCase):
             'language_set-MAX_NUM_FORMS': '1000',
             'language_set-INITIAL_FORMS': '0',
             'language_set-TOTAL_FORMS': '0',
+            'location_section': ''
         }
         self.country = CountryFactory.create(mapbox_id='country1', name='Petoria')
         self.region = RegionFactory.create(country=self.country, mapbox_id='reg1', name='Ontario')
@@ -117,8 +178,7 @@ class LocationEditTests(TestCase):
     def test_location_city_region_optout(self, mock_reverse_geocode):
         mock_reverse_geocode.return_value = (self.country, self.region, self.city)
         self.data.update(_get_privacy_fields(MOZILLIANS))
-
-        form = ProfileForm(data=self.data)
+        form = LocationForm(data=self.data)
         eq_(form.is_valid(), True)
         eq_(form.instance.geo_country, self.country)
         eq_(form.instance.geo_region, None)
@@ -135,7 +195,7 @@ class LocationEditTests(TestCase):
             'lng': self.user.userprofile.lng
         }
 
-        form = ProfileForm(data=self.data, initial=initial)
+        form = LocationForm(data=self.data, initial=initial)
         ok_(form.is_valid())
         ok_(mock_reverse_geocode.called)
 
@@ -150,7 +210,7 @@ class LocationEditTests(TestCase):
             'lng': self.user.userprofile.lng
         }
 
-        form = ProfileForm(data=self.data, initial=initial)
+        form = LocationForm(data=self.data, initial=initial)
         ok_(form.is_valid())
         ok_(not mock_reverse_geocode.called)
 
@@ -160,7 +220,7 @@ class LocationEditTests(TestCase):
         self.data.update({'savecity': True})
         self.data.update(_get_privacy_fields(MOZILLIANS))
 
-        form = ProfileForm(data=self.data)
+        form = LocationForm(data=self.data)
         ok_(not form.is_valid())
         ok_('saveregion' in form.errors)
 

@@ -13,11 +13,11 @@ class EditEmailsTests(TestCase):
         user = UserFactory.create()
 
         with self.login(user) as client:
-            url = reverse('phonebook:edit_emails')
+            url = reverse('phonebook:profile_edit')
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/edit_emails.html')
+        self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
 
     def test_delete_email_invalid(self):
         user = UserFactory.create()
@@ -41,7 +41,7 @@ class EditEmailsTests(TestCase):
             response = client.get(url, follow=True)
 
         ok_(not ExternalAccount.objects.filter(pk=email.pk).exists())
-        url = reverse('phonebook:edit_emails', prefix='/en-US/')
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
         self.assertRedirects(response, url, status_code=301)
 
     def test_change_primary_email_invalid(self):
@@ -67,7 +67,7 @@ class EditEmailsTests(TestCase):
             url = reverse('phonebook:change_primary_email', kwargs={'email_pk': email.pk})
             response = client.get(url, follow=True)
 
-        url = reverse('phonebook:edit_emails', prefix='/en-US/')
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
         self.assertRedirects(response, url, status_code=301)
 
         user = User.objects.get(pk=user.pk)
