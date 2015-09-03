@@ -51,6 +51,7 @@ $(function() {
           target.val(secondchoice.data('value'));
       }
     });
+
     // Switching all options for profile privacy on select
     $('.privacy-all select').change(function(){
         value = $(this).val();
@@ -143,4 +144,7 @@ $(function() {
         tagSource: $('#skills').data('autocomplete-url'),
         triggerKeys: ['enter', 'comma', 'tab']
     });
+
+    // Show tooltip on hover on desktops and on click on touch devices.
+    $(document).tooltip();
 });
