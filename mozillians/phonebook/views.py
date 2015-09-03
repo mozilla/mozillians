@@ -206,11 +206,19 @@ def edit_profile(request):
                           _(u'You changed your username; please note your '
                             u'profile URL has also changed.'))
 
-        return redirect('phonebook:profile_view', user.username)
+        return redirect('phonebook:settings', user.username)
+
+    emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
+    email_privacy_form = forms.EmailPrivacyForm(request.POST or None, instance=profile)
+    alternate_email_formset = forms.AlternateEmailFormset(request.POST or None,
+                                                          instance=profile,
+                                                          queryset=emails)
 
     data = dict(profile_form=profile_form,
                 user_form=user_form,
                 accounts_formset=accounts_formset,
+                email_privacy_form=email_privacy_form,
+                alternate_email_formset=alternate_email_formset,
                 user_groups=user_groups,
                 profile=request.user.userprofile,
                 language_formset=language_formset,
