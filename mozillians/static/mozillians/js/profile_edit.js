@@ -1,4 +1,18 @@
 $(function() {
+    // Privacy toggle buttons
+    $('.privacy-toggle').on('click', function(e) {
+          e.preventDefault();
+          var firstchoice = $(this);
+          var secondchoice = $(this).closest('.btn-group').find('.privacy-toggle');
+          secondchoice.removeClass('active');
+          firstchoice.toggleClass('active');
+          var target = $(this).closest('.btn-group').find('input');
+      if (firstchoice.hasClass('active')) {
+          target.val(firstchoice.data('value'));
+      } else {
+          target.val(secondchoice.data('value'));
+      }
+    });
     // Switching all options for profile privacy on select
     $('.privacy-all select').change(function(){
         value = $(this).val();
@@ -71,10 +85,6 @@ $(function() {
         cloneFormsetField('fieldset#languages > div:last', 'language_set');
         return false;
     });
-
-    // Show tooltip on hover on desktops and on click on touch
-    // devices.
-
 
     $('.tshirt-info').on({
         "touchstart mouseenter":function(event) {

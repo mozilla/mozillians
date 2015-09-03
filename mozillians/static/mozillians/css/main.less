@@ -1481,11 +1481,8 @@ form {
             }
         }
         .privacy-controls {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 190px;
-            text-align: right;
+            position: relative;
+            float: right;
             label { margin-top: 3px; }
             label.required:after {  // No need to mark the privacy controls required, they always have some value.
               content: '';
@@ -1494,8 +1491,9 @@ form {
                 position: relative;
                 top: auto;
                 right: auto;
-                padding-top: 25px;
+                padding-top: 5px;
                 label { margin: 0 8px 0 0; }
+                float: left;
             }
         }
         &.edit-controls {
@@ -1551,12 +1549,10 @@ form {
                 input { margin-right: 8px; }
                 .error-message { margin: 0; }
             }
-            .privacy-controls {
-                position: relative;
-                float: right;
-                .clearfix;
-                @media (max-width: @breakTablet) {
-                    float: none;
+                .privacy-controls {
+                    position: relative;
+                    float: right;
+                    .clearfix;
                 }
             }
         }
