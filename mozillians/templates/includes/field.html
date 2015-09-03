@@ -26,7 +26,7 @@
     {{ field.label_tag() }}
   {% endif %}
 
-  <div class="{% if field.errors %} error{% endif %}">
+  <div class="form-group{% if field.errors %} error{% endif %}">
     {% if not field|is_checkbox %}
       {{ field }}
     {% endif %}

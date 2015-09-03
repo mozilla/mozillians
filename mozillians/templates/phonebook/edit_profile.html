@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 
 {% block page_title %}
-  {% if profile.is_complete %}
-    {{ _('Edit Your Profile') }}
-  {% else %}
-    {{ _('Create Your Profile') }}
-  {% endif %}
+  {{ _('Settings') }}
 {% endblock %}
 {% block body_id %}edit-profile{% endblock %}
 
@@ -23,83 +19,31 @@
       </div>
   {% endif %}
 
-  <header>
-    <h1>
-      {% if profile.is_complete %}
-        {{ _('Edit Your Profile') }}
-      {% else %}
-        {{ _('Create Your Profile') }}
-      {% endif %}
-    </h1>
-    {% if profile.is_complete %}
-      <p>
-        {% trans %}
-          Modify your profile here and choose who can see your profile
-          fields. You can make parts of your profile publicly visible,
-          but please be careful about sharing your contact
-          information.
+  {% if not profile.is_complete %}
+    <div class="alert alert-info">
+      {% trans %}
+        You are just one step away from creating your profile.
       {% endtrans %}
-    {% else %}
-      <p class="alert alert-info">
-        {% trans %}
-          Our community directory is for Mozillians who are 13 and
-          older. We take safety issues very seriously, especially with
-          minors. If you are under 13, please don't create an account.
-      {% endtrans %}
-      </p>
-    {% endif %}
-  </header>
+    </div>
+  {% endif %}
 
-  <form action="{{ url('phonebook:profile_edit') }}" method="POST" enctype="multipart/form-data"
-        id="edit-profile-form" class="edit-profile">
-    {{ csrf() }}
-
-    <fieldset class="privacy-all">
-      <label for="privacy-global-settings">
-        {{ _('Make all of my profile fields visible to:') }}
-      </label>
-      <select id="privacy-global-settings">
-        <option value="-1" selected>{{ _('-- No Change --') }}</option>
-        <option value="3">{{ _('Mozillians') }}</option>
-        <option value="4">{{ _('Public') }}</option>
-      </select>
-    </fieldset>
-
-    {% if profile.is_complete %}
-      <fieldset id="edit-controls-top" class="edit-controls">
-        <button id="form-submit-top" type="submit">{{ _('Update Profile') }}</button>
-          <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
-            {{ _('Cancel') }}{# L10n: Cancel editing #}
-          </a>
-      </fieldset>
-    {% endif %}
-
-    {% if (profile_form.non_field_errors() or user_form.non_field_errors()
-           or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
-      <ul class="unstyled">
-        {% for error in profile_form.non_field_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in user_form.non_field_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in accounts_formset.non_form_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in language_formset.non_form_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-
-    <!-- Basic Information section -->
-    <fieldset>
-      <h2>{{ _('Basic Information') }}</h2>
-      <div id="photo">
-        <label for="id_photo"> {{ _('Profile Photo') }} </label>
-        <div class="profile-photo">
-          <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
+  {% if profile.is_complete %}
+    {# This is the full profile form for those who have completed registration. #}
+    <div class="row">
+      <div class="col-md-3 hidden-xs hidden-sm">
+        <div class="panel panel-default">
+          <div class="panel-heading">{{ _('Settings') }}</div>
+          <ul class="list-group settings-nav">
+            <li class="list-group-item" id="profile-li"><a href="#profile">{{ _('Profile') }}</a></li>
+            <li class="list-group-item" id="mylocation-li"><a href="#mylocation">{{ _('Location') }}</a></li>
+            <li class="list-group-item" id="youandmozilla-li"><a href="#youandmozilla">{{ _('You &amp; Mozilla') }}</a></li>
+            <li class="list-group-item" id="mygroups-li"><a href="#mygroups">{{ _('Groups') }}</a></li>
+            <li class="list-group-item" id="extaccounts-li"><a href="#extaccounts">{{ _('External Accounts') }}</a></li>
+            <li class="list-group-item" id="developer-li"><a href="#developer">{{ _('Developer') }}</a></li>
+          </ul>
         </div>
+      </div>
+
       <div class="col-md-{% if profile.is_complete %}9{% else %}12{% endif %}">
         <div class="settings-content">
           <!-- Profle Tab -->
@@ -130,14 +74,237 @@
         </div>
       </div>
     </div>
-      </div>
-      </div>
 
-                {% endif %}
+  {% else %}
+
+    {# This is the required-only profile form for new registrations. #}
+    <form class="edit-profile" id="edit-prfile-form" method="POST" action="" enctype="multipart/form-data">
+      {{ csrf() }}
+
+      {% if (profile_form.non_field_errors() or user_form.non_field_errors()
+             or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
+        <ul class="unstyled">
+          {% for error in profile_form.non_field_errors() %}
+            <li class="alert alert-error">{{ error }}</li>
+          {% endfor %}
+          {% for error in user_form.non_field_errors() %}
+            <li class="alert alert-error">{{ error }}</li>
+          {% endfor %}
+          {% for error in accounts_formset.non_form_errors() %}
+            <li class="alert alert-error">{{ error }}</li>
+          {% endfor %}
+          {% for error in language_formset.non_form_errors() %}
+            <li class="alert alert-error">{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Basic Information') }}</div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset>
+                <div id="photo" class="row">
+                  <div class="col-md-3">
+                    <label for="id_photo"> {{ _('Profile Photo') }} </label>
+                    <div class="profile-photo">
+                      <img src="{{ profile.get_photo_url('100x100') }}" alt="{{ _('Profile photo') }}">
+                    </div>
+                  </div>
+                  <div class="col-md-5">
+                    <input class="input-file photo" id="id_photo" type="file" name="photo">
+                    {% if profile.photo %}
+                      <div id="id_photo_delete">
+                        <label>
+                          <input type="checkbox" name="photo-clear" class="photo-delete">
+                          {{ _('Remove Profile Photo') }}
+                        </label>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-4">
+                    {{ privacy_field(profile_form.privacy_photo) }}
+                  </div>
+                </div>
+              </fieldset>
             </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-12">
+                    {{ mozillians_field(user_form.username) }}
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-6">
+                    {{ mozillians_field(profile_form.full_name) }}
+                  </div>
+                  <div class="col-md-6 text-right">
+                    {{ privacy_field(profile_form.privacy_full_name) }}
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
         </div>
       </div>
 
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Location') }}</div>
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset>
+                {% for error in profile_form.errors['location'] %}
+                  <span class="error-message">{{ error }}</span>
+                {% endfor %}
+                <div id="location">
+                  <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+                  <div id="location_gps_button"><i class="icon-target"></i></div>
+                  <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+                  <input id="location_search" type="search"/>
+                  <input id="location_search_button" class="button" type="button" value="Search location"/>
+                  <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+                  <ol id="location_search_results" class="scroll-shadows"></ol>
+                </div>
+                <div id="gps_error" class="error-message" style="display:none;">
+                  <i class="icon-target"></i> {{ _('You have denied Location services.') }}
+                </div>
+                <div id="location_wrong" >
+                  <a id="improve_this_map" target="_blank"
+                     href="http://www.openstreetmap.org/note/new#map=13/{{profile.lat}}/{{profile.lng}}&layers=N">
+                    Improve this map</a>
+                  <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[learn more]</a>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-9">
+                    {{ mozillians_field(profile_form.timezone) }}
+                  </div>
+                  <div class="col-md-3">
+                    {{ privacy_field(profile_form.privacy_timezone) }}
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-6">
+                    <label class="required">{{ _('Country') }}</label>
+                    <span id="display_country" class="geodisplay"
+                          data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
+                    </span>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="geocheckbox {% if profile_form.savecountry.errors %} error {% endif %}">
+                      {{ profile_form.savecountry }}
+                      {{ profile_form.savecountry.label_tag() }}
+                      {% for error in profile_form.savecountry.errors %}
+                        <span class="error-message">{{ error }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    {{ privacy_field(profile_form.privacy_geo_country) }}
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>{{ _('Region') }}</label>
+                    <span id="display_province" class="geodisplay"
+                          data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
+                    </span>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="geocheckbox {% if profile_form.saveregion.errors %} error {% endif %}">
+                      {{ profile_form.saveregion }}
+                      {{ profile_form.saveregion.label_tag() }}
+                      {% for error in profile_form.saveregion.errors %}
+                        <span class="error-message">{{ error }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    {{ privacy_field(profile_form.privacy_geo_region) }}
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <div class="row">
+                  <div class="col-md-6">
+                    <label>{{ _('City') }}</label>
+                    <span id="display_city" class="geodisplay"
+                          data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="geocheckbox {% if profile_form.savecity.errors %} error {% endif %}">
+                      {{ profile_form.savecity }}
+                      {{ profile_form.savecity.label_tag() }}
+                      {% for error in profile_form.savecity.errors %}
+                        <span class="error-message">{{ error }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    {{ privacy_field(profile_form.privacy_geo_city) }}
+                  </div>
+                </div>
+              </fieldset>
+              {{ profile_form.lat }}
+              {{ profile_form.lng }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset id="privacy-verify">
+                {% if profile_form.optin.errors %}
+                  <div class="error">
+                    {{ _('This field is required.') }}
+                  </div>
+                {% endif %}
+                  <label class="checkbox required">
+                    {{ profile_form.optin }}
+                  </label>
+                  <label id="{{ profile_form.optin.id_for_label }}" {% if profile_form.optin.errors %}class="error"{% endif %}>
+                    {% trans privacy_url='http://mozilla.org/privacy/websites/' %}
+                      I'm okay with you handling this info as you explain
+                      in <a href="{{ privacy_url }}">Mozilla's privacy
+                      policy</a>.
+                    {% endtrans %}
+                  </label>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Create Profile') }}</button>
+        </div>
+      </div>
+
+    </form>
+  {% endif %}
 {% endblock %}
 
 {% block page_js %}

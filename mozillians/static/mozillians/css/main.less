@@ -216,6 +216,10 @@ body {
                 color: #CD0000;
             }
         }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
     }
 
     .error-message {
@@ -225,6 +229,19 @@ body {
     .required:after {
         content: " *";
         color: @linkRed;
+    }
+
+    .info {
+        cursor: default;
+    }
+
+    .glyphicon {
+        vertical-align: middle;
+    }
+
+    .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
     }
 
     .row {
@@ -244,7 +261,17 @@ body {
             .open-sans-light;
             font-style: italic;
             font-size: 15px;
-            .border-radius(8px);
+            .border-radius(5px);
+        }
+        input[type=email],
+        input[type=password],
+        input[type=search],
+        input[type=text] {
+            height: 30px;
+        }
+        input[type=text].search-query {
+            padding: 0 0 0 30px;
+            box-sizing: content-box;
         }
         select {
             display: inline-block;
@@ -258,6 +285,9 @@ body {
             background-color: @white;
             border: 1px solid #CCCCCC;
             margin-bottom: 0;
+            @media (max-width: @breakMobileLandscape){
+                width: 100%;
+            }
         }
     }
     input[disabled] {
@@ -374,6 +404,18 @@ dl, dd {
 
 .hidden {
   display: none;
+}
+
+li.list-group-item {
+    margin-left: 0px;
+}
+
+li.active {
+    background-color: @blueDark;
+
+    a {
+        color: @white;
+    }
 }
 
 /* Navigation
@@ -606,7 +648,7 @@ nav {
             }
             img {
                 position: relative;
-                top: 2px;
+                top: 0px;
                 left: 5px;
                 width: 14px;
                 height: 15px;
@@ -1409,8 +1451,12 @@ form {
     fieldset {
         margin-bottom: 20px;
         padding-bottom: 20px;
-        border-bottom: 1px solid lighten(@black,90%);
         position: relative;
+
+        &:last-child {
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+        }
 
         label {
             margin-right: 8px;
@@ -1459,13 +1505,16 @@ form {
             }
             .profile-photo {
                 .rounded-image;
-                width: 70px;
-                height: 70px;
-                margin-left: 120px;
+                width: 100px;
+                height: 100px;
+                clear: both;
+                position: relative;
                 @media (max-width: @breakMobileLandscape) {
                     margin-left: 0;
-                    top: 30px;
                 }
+            }
+            input.photo {
+                margin: 40px 0 0 0;
             }
             label {
                @media (max-width: @breakMobileLandscape) {
@@ -1473,10 +1522,8 @@ form {
                }
             }
             input {
-                margin-top: 90px;
                 @media (max-width: @breakMobileLandscape) {
                     margin-left: 0;
-                    margin-top: 100px;
                 }
             }
         }
@@ -1518,15 +1565,19 @@ form {
             }
         }
         &#delete {
-            margin-top: 50px;
             border: none;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
         }
         div#id_photo_delete {
-            margin: 10px 0 0 100px;
+            margin: 10px 0 0 0;
             @media (max-width: @breakMobileLandscape) {
                 margin: 10px 0 0 0;
             }
-            input { margin: 0; }
+            input {
+                margin: 0;
+                vertical-align: middle;
+            }
             label {
                 float: none;
             }
@@ -1536,19 +1587,24 @@ form {
                 margin-top: 50px;
           }
         }
-        &#accounts {
-            .externalaccount-fieldrow {
-                margin: 0 0 25px 130px;
+        div#accounts {
+            div.externalaccount-fieldrow {
+                padding: 10px 0;
                 @media (max-width: @breakTablet) {
                     margin: 0;
                     padding: 25px 0;
                 }
-                input, select {
+                input[input=text], select {
                     float: left;
+                    @media (max-width: @breakMobileLandscape){
+                        width: 100%;
+                    }
                 }
-                input { margin-right: 8px; }
+                input {
+                    margin-right: 8px;
+                    vertical-align: top;
+                }
                 .error-message { margin: 0; }
-            }
                 .privacy-controls {
                     position: relative;
                     float: right;
@@ -1572,6 +1628,19 @@ form {
                     color: #CD0000;
                     text-decoration: underline;
                 }
+            }
+            label {
+                display: inline;
+                margin: 0px;
+                min-width: auto;
+                input[type="checkbox"] {
+                    margin: 0px;
+                    position: relative;
+                    display: inline;
+                }
+            }
+            #id_optin {
+                margin-left: 5px;
             }
         }
         &#shirts {
@@ -1683,7 +1752,6 @@ body#edit-profile {
     }
 
     .geocheckbox {
-      margin-left: 5%;
       display: inline;
 
       label {
@@ -1692,7 +1760,8 @@ body#edit-profile {
     }
     span.geodisplay {
       display: inline-block;
-      min-width: 100px;
+      min-width: 200px;
+      float:right;
     }
 
     // map things
@@ -1713,7 +1782,8 @@ body#edit-profile {
         bottom: 1.8em;
         width: 13em;
         @media (max-width: @breakMobileLandscape) {
-            width: 8em;
+            width: 6.4em;
+            right: 9.6em;
         }
         height: 2em;
       }
@@ -1786,9 +1856,32 @@ body#edit-profile {
         top:100px;
         left:10px;
       }
-
     }
 
+    .panel-heading {
+        .info {
+            float:right;
+        }
+    }
+
+    .settings-all {
+        cursor: pointer;
+    }
+
+    .field_description {
+        display: inline;
+        vertical-align: top;
+        float: left;
+        @media (max-width: @breakTablet) {
+            float: none;
+        }
+    }
+
+    input[type=text] {
+        @media (max-width: @breakMobileLandscape){
+            width: 100%;
+        }
+    }
 }
 
 /* Generic Groups, Functional Areas and Search Results
