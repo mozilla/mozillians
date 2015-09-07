@@ -67,7 +67,7 @@ $(function() {
 
     // Make deleting harder
     var $ack = $('#delete input:checkbox');
-    var $del = $('#delete .delete');
+    var $del = $('#delete-profile');
     $del.click(function(e) {
         if (! $ack.is(':checked')) {
             e.preventDefault();
@@ -75,10 +75,10 @@ $(function() {
     });
     $ack.click(function(e) {
         if ($ack.is(':checked')) {
-            $del.css({opacity: 1});
+            $del.removeClass('disabled');
         }
         else {
-            $del.css({opacity: 0.2});
+            $del.addClass('disabled');
         }
     });
 

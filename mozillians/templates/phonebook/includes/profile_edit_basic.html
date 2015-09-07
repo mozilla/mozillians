@@ -217,7 +217,7 @@
     </div>
   </form>
 
-  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=#profile" enctype="multipart/form-data">
+  <form class="edit-profile hidden-sm hidden-xs" method="POST" action="{{ url('phonebook:profile_edit') }}?next=#profile" enctype="multipart/form-data">
     {{ csrf() }}
     <div class="panel panel-danger">
       <div class="panel-heading">
@@ -234,7 +234,8 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <a href="{{ url('phonebook:profile_confirm_delete') }}" class="btn btn-danger delete">
+        <a href="{{ url('phonebook:profile_confirm_delete') }}" id="delete-profile"
+           class="btn btn-danger delete disabled">
           {{ _('Delete Profile') }}
         </a>
       </div>
