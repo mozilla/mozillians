@@ -1462,6 +1462,9 @@ form {
             margin-right: 8px;
             float: left;
             font-weight: bold;
+            @media (max-width: @breakMobileLandscape) {
+                float: none;
+            }
         }
         > label {
             min-width: 120px;
@@ -1515,6 +1518,9 @@ form {
             }
             input.photo {
                 margin: 40px 0 0 0;
+                @media (max-width: @breakMobileLandscape) {
+                    margin: 0;
+                }
             }
             label {
                @media (max-width: @breakMobileLandscape) {
