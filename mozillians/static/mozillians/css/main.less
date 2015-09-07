@@ -220,6 +220,12 @@ body {
         input[type="checkbox"] {
             margin-right: 5px;
         }
+        .checkbox {
+            input[type="checkbox"] {
+                margin-left: 0px;
+                position: relative;
+            }
+        }
     }
 
     .error-message {
@@ -292,6 +298,13 @@ body {
     }
     input[disabled] {
         background: @grayLighter;
+    }
+    .pagination {
+        form {
+            select {
+                width: auto;
+            }
+        }
     }
 }
 
@@ -1201,6 +1214,7 @@ body#home {
                             .border-radius(100%);
                         }
                         @media (max-width: @breakMobileLandscape) {
+                            top: -70px;
                             left: 40%;
                             width: 60px;
                             height: 60px;
@@ -1209,6 +1223,9 @@ body#home {
                     @media (max-width: @breakTablet) {
                         width: 100%;
                         margin-bottom: 50px;
+                    }
+                    @media (max-width: @breakMobileLandscape) {
+                        margin-bottom: 80px;
                     }
                 }
                 .groups {
@@ -1960,14 +1977,20 @@ body.search-page {
             }
         }
     }
-    form.sort-form {
-        label { display: none; }
-        input[type=submit] {
-            .button;
-            margin-left: 10px;
+    #outer-wrapper {
+        form.sort-form {
+            label { display: none; }
+            input[type=submit] {
+                .button;
+                margin-left: 10px;
+            }
+            margin: 20px 0;
+            select {
+                @media (max-width: @breakMobileLandscape){
+                    width: auto;
+                }
+            }
         }
-        margin: 20px 0;
-
     }
     .groups-areas {
         .clearfix;
