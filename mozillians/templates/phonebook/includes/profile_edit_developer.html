@@ -4,7 +4,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('API privacy') }}</div>
       <div class="panel-body">
-        <fieldset id="services" class="edit-controls">
+        <fieldset id="privacy" class="edit-controls">
           <p class="field_description">
             {% trans bugzilla_url='http://bugzilla.mozilla.org',
                      reps_url='http://reps.mozilla.org' %}
@@ -35,7 +35,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Developer') }}</div>
       <div class="panel-body">
-        <fieldset id="developer" class="edit-controls">
+        <fieldset id="api" class="edit-controls">
           {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
             <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
             <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
