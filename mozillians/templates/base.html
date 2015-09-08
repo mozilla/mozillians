@@ -22,7 +22,8 @@
 
   {% block site_css %}
     {% compress css %}
-      <link href="{{ static('mozillians/icons/style.css') }}" type="text/css" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/css/bootstrap.min.css') }}" rel="stylesheet" media="screen" />
+      <link href="{{ static('mozillians/icons/style.css') }}" type="text/css" rel="stylesheet" media="screen" /> 
       <link href="{{ static('mozillians/css/main.less') }}" type="text/less" rel="stylesheet" media="screen" />
       <link href="{{ static('mozillians/js/libs/tag-it/css/jquery.tagit.css') }}" rel="stylesheet" media="screen" />
       <link href="{{ static('mozillians/css/jquery-ui-1.11-custom.css') }}" rel="stylesheet" media="screen" />
@@ -105,7 +106,7 @@
                         <li>
                           <a id="nav-edit-profile" href="{{ url('phonebook:profile_edit') }}">
                             <i class="icon-pencil"></i>
-                            {{ _('Edit Your Profile') }}
+                            {{ _('Settings') }}
                           </a>
                         </li>
                         {% if user.userprofile.is_vouched %}
@@ -224,7 +225,8 @@
 
   {% block site_js %}
     {% compress js %}
-      <script src="{{ static('mozillians/js/libs/jquery-1.8.3.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/jquery-1.11.3.min.js') }}"></script>
+      <script src="{{ static('mozillians/js/libs/bootstrap.min.js') }}"></script>
       <script src="{{ static('mozillians/js/libs/jquery-ui.min.js') }}"></script>
       <script src="{{ static('mozillians/js/libs/jquery.placeholder.min.js') }}"></script>
       <script src="{{ static('mozillians/js/main.js') }}" rel="stylesheet"></script>

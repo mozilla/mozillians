@@ -1,29 +1,24 @@
-<div class="control-group photo {% if profile_form.photo.errors %}error{% endif %}">
-  <label class="control-label" for="id_photo">{{ profile_form.photo.label }}</label>
-  <div class="controls">
-    {{ privacy_field(profile_form.privacy_photo, profile.privacy_photo) }}
-    <div class="thumbnail">
-      <img id="profile-photo"
-           src="{{ profile.get_photo_url('70x70') }}"
-           alt="{{ _('Profile photo') }}">
+<fieldset>
+  <div id="photo" class="row">
+    <div class="col-md-3">
+      <label for="id_photo"> {{ _('Profile Photo') }} </label>
+      <div class="profile-photo">
+        <img src="{{ profile.get_photo_url('100x100') }}" alt="{{ _('Profile photo') }}">
+      </div>
     </div>
-    <ul class="photo_controls unstyled">
-      <li>
-        <input class="input-file" id="id_photo" type="file" name="photo">
-      </li>
-      {% for error in profile_form.photo.errors %}
-        <li>
-          <span class="help-inline">{{ error }}</span>
-        </li>
-      {% endfor %}
+    <div class="col-md-6">
+      <input class="input-file photo" id="id_photo" type="file" name="photo">
       {% if profile.photo %}
-        <li>
-          <label class="checkbox" for="id_photo_delete">
-            <input type="checkbox" name="photo-clear" id="id_photo_delete">
+        <div id="id_photo_delete">
+          <label>
+            <input type="checkbox" name="photo-clear" class="photo-delete">
             {{ _('Remove Profile Photo') }}
           </label>
-        </li>
+        </div>
       {% endif %}
-    </ul>
+    </div>
+    <div class="col-md-3 text-right">
+      {{ privacy_field(profile_form.privacy_photo) }}
+    </div>
   </div>
-</div>
+</fieldset>
