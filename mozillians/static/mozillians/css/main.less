@@ -99,14 +99,14 @@
 }
 
 .well {
-  min-height: 20px;
-  padding: 19px;
-  margin-bottom: 20px;
-  word-wrap: break-word;
-  background-color: @grayLight;
-  border: 1px solid darken(@grayLight, 7%);
-  .border-radius(4px);
-  .box-shadow(inset 0 1px 1px rgba(0,0,0,.05));
+    min-height: 20px;
+    padding: 19px;
+    margin-bottom: 20px;
+    word-wrap: break-word;
+    background-color: @grayLight;
+    border: 1px solid darken(@grayLight, 7%);
+    .border-radius(4px);
+    .box-shadow(inset 0 1px 1px rgba(0,0,0,.05));
 }
 
 .ellipsis{
@@ -128,6 +128,7 @@ body {
     #content-wrapper { background: @white; }
     &.loggedin {
         #masthead {
+            min-height: 55px;
             @media (max-width: @breakTablet) {
                 padding-bottom: 0;
             }
@@ -215,6 +216,10 @@ body {
                 color: #CD0000;
             }
         }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
     }
 
     .error-message {
@@ -224,6 +229,24 @@ body {
     .required:after {
         content: " *";
         color: @linkRed;
+    }
+
+    .info {
+        cursor: default;
+    }
+
+    .glyphicon {
+        vertical-align: middle;
+    }
+
+    .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+    }
+
+    .row {
+        margin-left: -15px;
+        margin-right: -15px;
     }
 }
 
@@ -238,7 +261,17 @@ body {
             .open-sans-light;
             font-style: italic;
             font-size: 15px;
-            .border-radius(8px);
+            .border-radius(5px);
+        }
+        input[type=email],
+        input[type=password],
+        input[type=search],
+        input[type=text] {
+            height: 30px;
+        }
+        input[type=text].search-query {
+            padding: 0 0 0 30px;
+            box-sizing: content-box;
         }
         select {
             display: inline-block;
@@ -252,6 +285,9 @@ body {
             background-color: @white;
             border: 1px solid #CCCCCC;
             margin-bottom: 0;
+            @media (max-width: @breakMobileLandscape){
+                width: 100%;
+            }
         }
     }
     input[disabled] {
@@ -370,8 +406,24 @@ dl, dd {
   display: none;
 }
 
+li.list-group-item {
+    margin-left: 0px;
+}
+
+li.active {
+    background-color: @blueDark;
+
+    a {
+        color: @white;
+    }
+}
+
 /* Navigation
 ==================== */
+header {
+    box-sizing: content-box;
+}
+
 #nav-access {
     position: absolute;
     top: auto;
@@ -400,7 +452,7 @@ nav {
     .brand {
         float: left;
         img {
-            width: 130px;
+            width: 145px;
             padding-right: 15px;
         }
     }
@@ -467,6 +519,7 @@ nav {
                 left: 5px;
                 width: 14px;
                 height: 15px;
+                vertical-align: baseline;
             }
         }
         a {
@@ -495,7 +548,8 @@ nav {
             min-width: 170px;
             margin: 5px 0 0 0;
             top: 100%;
-            right: -15px;
+            right: -13px;
+            left: auto;
             z-index: 1000;
             display: none;
             li {
@@ -888,7 +942,6 @@ body#home {
                 }
             }
             #quote, #mozfacts {
-                .span(2);
                 margin: 0;
                 p {
                     font-size: 13px;
@@ -896,7 +949,6 @@ body#home {
                 }
             }
             #about {
-                width: 550px;
                 float: left;
                 margin: 0 50px;
                 p {
@@ -919,13 +971,15 @@ body#home {
                 position: relative;
                 span {
                     .rounded-image;
-                    width: 60px;
-                    height: 60px;
+                    width: 72px;
+                    height: 72px;
                     left: 18px;
                     border: 6px solid @white;
+                    margin-top: -75px;
                 }
                 blockquote {
                     margin-top: 75px;
+                    font-size: 1em;
                     p {
                         &:after, &:before {
                             content: '"';
@@ -938,11 +992,16 @@ body#home {
                         }
                         &:before {
                             left: -20px;
-                            top: 67px;
+                            top: -8px;
                         }
                     }
                     small {
                         font-weight: bold;
+                        font-size: 12px;
+                        color: inherit;
+                        &:before {
+                            content: '';
+                        }
                     }
                 }
                 @media (max-width: @breakDesktop) {
@@ -997,13 +1056,12 @@ body#home {
     }
     &.loggedin {
         #main {
-            #search-info {
-                .span(8);
+            .search-info {
                 padding: 0 10px 0 25px;
                 border-left: 1px solid lighten(@black,90%);
-                float: right;
-                margin-right: 60px;
                 margin-left: 0;
+                float: left;
+                width: 100%;
                 form {
                     margin-bottom: 20px;
                 }
@@ -1036,16 +1094,27 @@ body#home {
                 @media (max-width: @breakDesktop) {
                     padding: 0;
                     margin: 0;
-                    width: 100%;
                     text-align: center;
                     border: none;
+                    float: none;
                     h1 {
                         .hidden;
                     }
                 }
             }
+            .search-top {
+                display: none;
+                @media (max-width: @breakDesktop) {
+                    display: block;
+                }
+            }
+            .search-right {
+                display: block;
+                @media (max-width: @breakDesktop) {
+                    display: none;
+                }
+            }
             #profile-info {
-                .span(3);
                 margin: 0;
                 position: relative;
                 a.profile-photo {
@@ -1080,11 +1149,9 @@ body#home {
                 }
             }
             #content-info {
-                .span(8);
                 padding: 0 10px 0 25px;
                 border-left: 1px solid lighten(@black,90%);
                 float: right;
-                margin-right: 60px;
                 margin-left: 0;
                 h2 { margin: 30px 0 10px; }
                 h3 { font-size: 24px; }
@@ -1110,7 +1177,6 @@ body#home {
 
                 }
                 .functional-areas, .groups {
-                    .span(4);
                     position: relative;
                     margin-bottom: 20px;
                     h2 {
@@ -1126,7 +1192,7 @@ body#home {
                     }
                     span.icon {
                         .rounded-image;
-                        top: -20px;
+                        top: -10px;
                         width: 40px;
                         height: 40px;
                         border: 3px solid @white;
@@ -1150,7 +1216,6 @@ body#home {
                 }
                 .functional-areas {
                     margin-left: 0 !important;
-                    margin-right: 20px;
                 }
                 @media (max-width: @breakDesktop) {
                     border: none;
@@ -1386,8 +1451,12 @@ form {
     fieldset {
         margin-bottom: 20px;
         padding-bottom: 20px;
-        border-bottom: 1px solid lighten(@black,90%);
         position: relative;
+
+        &:last-child {
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+        }
 
         label {
             margin-right: 8px;
@@ -1436,13 +1505,16 @@ form {
             }
             .profile-photo {
                 .rounded-image;
-                width: 70px;
-                height: 70px;
-                margin-left: 120px;
+                width: 100px;
+                height: 100px;
+                clear: both;
+                position: relative;
                 @media (max-width: @breakMobileLandscape) {
                     margin-left: 0;
-                    top: 30px;
                 }
+            }
+            input.photo {
+                margin: 40px 0 0 0;
             }
             label {
                @media (max-width: @breakMobileLandscape) {
@@ -1450,19 +1522,14 @@ form {
                }
             }
             input {
-                margin-top: 90px;
                 @media (max-width: @breakMobileLandscape) {
                     margin-left: 0;
-                    margin-top: 100px;
                 }
             }
         }
         .privacy-controls {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 190px;
-            text-align: right;
+            position: relative;
+            float: right;
             label { margin-top: 3px; }
             label.required:after {  // No need to mark the privacy controls required, they always have some value.
               content: '';
@@ -1471,8 +1538,9 @@ form {
                 position: relative;
                 top: auto;
                 right: auto;
-                padding-top: 25px;
+                padding-top: 5px;
                 label { margin: 0 8px 0 0; }
+                float: left;
             }
         }
         &.edit-controls {
@@ -1497,15 +1565,19 @@ form {
             }
         }
         &#delete {
-            margin-top: 50px;
             border: none;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
         }
         div#id_photo_delete {
-            margin: 10px 0 0 100px;
+            margin: 10px 0 0 0;
             @media (max-width: @breakMobileLandscape) {
                 margin: 10px 0 0 0;
             }
-            input { margin: 0; }
+            input {
+                margin: 0;
+                vertical-align: middle;
+            }
             label {
                 float: none;
             }
@@ -1515,25 +1587,28 @@ form {
                 margin-top: 50px;
           }
         }
-        &#accounts {
-            .externalaccount-fieldrow {
-                margin: 0 0 25px 130px;
+        div#accounts {
+            div.externalaccount-fieldrow {
+                padding: 10px 0;
                 @media (max-width: @breakTablet) {
                     margin: 0;
                     padding: 25px 0;
                 }
-                input, select {
+                input[input=text], select {
                     float: left;
+                    @media (max-width: @breakMobileLandscape){
+                        width: 100%;
+                    }
                 }
-                input { margin-right: 8px; }
+                input {
+                    margin-right: 8px;
+                    vertical-align: top;
+                }
                 .error-message { margin: 0; }
-            }
-            .privacy-controls {
-                position: relative;
-                float: right;
-                .clearfix;
-                @media (max-width: @breakTablet) {
-                    float: none;
+                .privacy-controls {
+                    position: relative;
+                    float: right;
+                    .clearfix;
                 }
             }
         }
@@ -1664,7 +1739,6 @@ body#edit-profile {
     }
 
     .geocheckbox {
-      margin-left: 5%;
       display: inline;
 
       label {
@@ -1674,6 +1748,7 @@ body#edit-profile {
     span.geodisplay {
       display: inline-block;
       min-width: 100px;
+      margin-left: 10px;
     }
 
     // map things
@@ -1767,9 +1842,32 @@ body#edit-profile {
         top:100px;
         left:10px;
       }
-
     }
 
+    .panel-heading {
+        .info {
+            float:right;
+        }
+    }
+
+    .settings-all {
+        cursor: pointer;
+    }
+
+    .field_description {
+        display: inline;
+        vertical-align: top;
+        float: left;
+        @media (max-width: @breakTablet) {
+            float: none;
+        }
+    }
+
+    input[type=text] {
+        @media (max-width: @breakMobileLandscape){
+            width: 100%;
+        }
+    }
 }
 
 /* Generic Groups, Functional Areas and Search Results
@@ -1857,7 +1955,7 @@ body.search-page {
             list-style: none;
             li {
                 float: left;
-                margin: 20px 20px 0 0;
+                margin: 20px 0 0 0;
                 padding: 0;
                 width: 290px;
                 height: 75px;
@@ -2122,9 +2220,6 @@ body#betasearch {
 }
 
 fieldset {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-
     &#alternate-email {
         .alternate-email-fieldrow {
             margin-bottom: 20px;

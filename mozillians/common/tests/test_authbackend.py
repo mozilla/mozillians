@@ -98,7 +98,7 @@ class BrowserIDVerifyTests(TestCase):
         request_mock.user.is_authenticated.return_value = True
         request_mock.user = user
         url = Verify.failure_url
-        eq_(url, '/user/edit/emails/')
+        eq_(url, '/user/edit/')
 
     def test_login_success_add_email(self):
         Verify = BrowserIDVerify()
@@ -109,7 +109,7 @@ class BrowserIDVerifyTests(TestCase):
         request_mock.user = user
         Verify.user = user
         response = loads(Verify.login_success().content)
-        eq_(response['redirect'], '/user/edit/emails/')
+        eq_(response['redirect'], '/user/edit/')
 
 
 class MozilliansAuthBackendTests(TestCase):
