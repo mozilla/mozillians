@@ -23,30 +23,7 @@
        </ul>
       {% endif %}
 
-        <fieldset>
-          <div id="photo" class="row">
-            <div class="col-md-3">
-              <label for="id_photo"> {{ _('Profile Photo') }} </label>
-              <div class="profile-photo">
-                <img src="{{ profile.get_photo_url('100x100') }}" alt="{{ _('Profile photo') }}">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <input class="input-file photo" id="id_photo" type="file" name="photo">
-              {% if profile.photo %}
-                <div id="id_photo_delete">
-                  <label>
-                    <input type="checkbox" name="photo-clear" class="photo-delete">
-                    {{ _('Remove Profile Photo') }}
-                  </label>
-                </div>
-              {% endif %}
-            </div>
-            <div class="col-md-3 text-right">
-              {{ privacy_field(profile_form.privacy_photo) }}
-            </div>
-          </div>
-        </fieldset>
+        {% include 'phonebook/includes/photo_form.html' %}
 
         <fieldset>
           <div class="row">
