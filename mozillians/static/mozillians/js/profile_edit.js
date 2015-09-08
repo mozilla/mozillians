@@ -1,4 +1,8 @@
 $(function() {
+    'use strict';
+
+    var mobile_breakdown = 992;
+
     // Favicon
     var url = $("link[rel='shortcut icon']").remove().attr('href');
     var favicon = document.createElement('link');
@@ -27,7 +31,7 @@ $(function() {
         $(content + '-tab').show();
         location.hash = content;
     });
-    if (screen.width < 992) {
+    if (screen.width < mobile_breakdown) {
         $('.settings-tab').show();
         $('.settings-nav > li').removeClass('active');
     }
@@ -39,17 +43,14 @@ $(function() {
 
     // Privacy toggle buttons
     $('.privacy-toggle').on('click', function(e) {
-          e.preventDefault();
-          var firstchoice = $(this);
-          var secondchoice = $(this).closest('.btn-group').find('.privacy-toggle');
-          secondchoice.removeClass('active');
-          firstchoice.toggleClass('active');
-          var target = $(this).closest('.btn-group').find('input');
-      if (firstchoice.hasClass('active')) {
-          target.val(firstchoice.data('value'));
-      } else {
-          target.val(secondchoice.data('value'));
-      }
+        e.preventDefault();
+        var firstchoice = $(this);
+        var secondchoice = $(this).siblings().not('input');
+        var target = $(this).closest('.btn-group').find('input');
+        firstchoice.addClass('active');
+        secondchoice.removeClass('active');
+        var choice = (firstchoice.hasClass('active') ? firstchoice : secondchoice);
+        target.val(choice.data('value'));
     });
 
     // Switching all options for profile privacy on select
