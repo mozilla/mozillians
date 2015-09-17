@@ -61,12 +61,12 @@ class BrowserIDVerify(Verify):
             })
         return super(BrowserIDVerify, self).login_success()
 
-    def login_failure(self, error=None):
+    def login_failure(self):
         if self.add_email:
             return JSONResponse({
                 'redirect': self.failure_url
             })
-        return super(BrowserIDVerify, self).login_failure(error)
+        return super(BrowserIDVerify, self).login_failure()
 
     def post(self, *args, **kwargs):
         self.add_email = False
