@@ -5,12 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
-from django.http import Http404
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
+from funfactory.helpers import urlparams
 from funfactory.urlresolvers import reverse
 from tower import ugettext as _
 from waffle.decorators import waffle_flag
@@ -157,93 +158,111 @@ def view_profile(request, username):
 @never_cache
 def edit_profile(request):
     """Edit user profile view."""
-    # Don't user request.user
+    # Don't use request.user
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
     user_groups = profile.groups.all().order_by('name')
     user_skills = stringify_groups(profile.skills.all().order_by('name'))
-
-    user_form = forms.UserForm(request.POST or None, instance=user)
-    queryset = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
-    accounts_formset = forms.AccountsFormset(request.POST or None,
-                                             instance=profile,
-                                             queryset=queryset)
-    new_profile = False
-    form = forms.ProfileForm
-    language_formset = forms.LanguagesFormset(request.POST or None,
-                                              instance=profile,
-                                              locale=request.locale)
-
-    if not profile.is_complete:
-        new_profile = True
-        form = forms.RegisterForm
-
-    profile_form = form(request.POST or None, request.FILES or None,
-                        instance=profile,
-                        initial={'skills': user_skills,
-                                 'saveregion': True if profile.geo_region else False,
-                                 'savecity': True if profile.geo_city else False,
-                                 'lat': profile.lat,
-                                 'lng': profile.lng})
-
-    all_forms = [user_form, profile_form, accounts_formset, language_formset]
-
-    # Using ``list`` to force calling is_valid on all the forms, even if earlier
-    # ones are not valid, so we detect and display all the errors.
-    if all(list(f.is_valid() for f in all_forms)):
-        old_username = request.user.username
-        user_form.save()
-        profile_form.save()
-        accounts_formset.save()
-        language_formset.save()
-
-        if new_profile:
-            redeem_invite(profile, request.session.get('invite-code'))
-            messages.info(request, _(u'Your account has been created.'))
-        elif user.username != old_username:
-            # Notify the user that their old profile URL won't work.
-            messages.info(request,
-                          _(u'You changed your username; please note your '
-                            u'profile URL has also changed.'))
-
-        return redirect('phonebook:profile_view', user.username)
-
-    data = dict(profile_form=profile_form,
-                user_form=user_form,
-                accounts_formset=accounts_formset,
-                user_groups=user_groups,
-                profile=request.user.userprofile,
-                language_formset=language_formset,
-                vouch_threshold=settings.CAN_VOUCH_THRESHOLD,
-                mapbox_id=settings.MAPBOX_PROFILE_ID,
-                apps=user.apiapp_set.filter(is_active=True),
-                appsv2=profile.apps.filter(enabled=True))
-
-    # If there are form errors, don't send a 200 OK.
-    status = 400 if any(f.errors for f in all_forms) else 200
-    return render(request, 'phonebook/edit_profile.html', data, status=status)
-
-
-@allow_unvouched
-@never_cache
-def edit_emails(request):
-    """Edit alternate email addresses."""
-    user = User.objects.get(pk=request.user.id)
-    profile = user.userprofile
     emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
-    email_privacy_form = forms.EmailPrivacyForm(request.POST or None, instance=profile)
-    alternate_email_formset = forms.AlternateEmailFormset(request.POST or None,
-                                                          instance=profile,
-                                                          queryset=emails)
+    accounts_qs = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
 
-    if alternate_email_formset.is_valid() and email_privacy_form.is_valid():
-        alternate_email_formset.save()
-        email_privacy_form.save()
-        return redirect('phonebook:edit_emails')
+    sections = {
+        'registration_section': ['user_form', 'registration_form'],
+        'basic_section': ['user_form', 'basic_information_form'],
+        'groups_section': ['groups_privacy_form'],
+        'skills_section': ['skills_form'],
+        'email_section': ['email_privacy_form', 'alternate_email_formset'],
+        'languages_section': ['language_privacy_form', 'language_formset'],
+        'accounts_section': ['accounts_formset'],
+        'irc_section': ['irc_form'],
+        'location_section': ['location_form'],
+        'contribution_section': ['contribution_form'],
+        'tshirt_section': ['tshirt_form'],
+        'developer_section': ['developer_form']
+    }
 
-    return render(request, 'phonebook/edit_emails.html',
-                  {'alternate_email_formset': alternate_email_formset,
-                   'email_privacy_form': email_privacy_form})
+    curr_sect = next((s for s in sections.keys() if s in request.POST), None)
+
+    def get_request_data(form):
+        if curr_sect and form in sections[curr_sect]:
+            return request.POST
+        return None
+
+    ctx = {}
+    ctx['user_form'] = forms.UserForm(get_request_data('user_form'), instance=user)
+    ctx['registration_form'] = forms.RegisterForm(get_request_data('registration_form'),
+                                                  request.FILES or None,
+                                                  instance=profile)
+    basic_information_data = get_request_data('basic_information_form')
+    ctx['basic_information_form'] = forms.BasicInformationForm(basic_information_data,
+                                                               request.FILES or None,
+                                                               instance=profile)
+    ctx['accounts_formset'] = forms.AccountsFormset(get_request_data('accounts_formset'),
+                                                    instance=profile,
+                                                    queryset=accounts_qs)
+    ctx['language_formset'] = forms.LanguagesFormset(get_request_data('language_formset'),
+                                                     instance=profile,
+                                                     locale=request.locale)
+    language_privacy_data = get_request_data('language_privacy_form')
+    ctx['language_privacy_form'] = forms.LanguagesPrivacyForm(language_privacy_data,
+                                                              instance=profile)
+    ctx['skills_form'] = forms.SkillsForm(get_request_data('skills_form'), instance=profile,
+                                          initial={'skills': user_skills})
+    location_initial = {
+        'saveregion': True if profile.geo_region else False,
+        'savecity': True if profile.geo_city else False,
+        'lat': profile.lat,
+        'lng': profile.lng
+    }
+    ctx['location_form'] = forms.LocationForm(get_request_data('location_form'), instance=profile,
+                                              initial=location_initial)
+    ctx['contribution_form'] = forms.ContributionForm(get_request_data('contribution_form'),
+                                                      instance=profile)
+    ctx['tshirt_form'] = forms.TshirtForm(get_request_data('tshirt_form'), instance=profile)
+    ctx['groups_privacy_form'] = forms.GroupsPrivacyForm(get_request_data('groups_privacy_form'),
+                                                         instance=profile)
+    ctx['irc_form'] = forms.IRCForm(get_request_data('irc_form'), instance=profile)
+    ctx['developer_form'] = forms.DeveloperForm(get_request_data('developer_form'),
+                                                instance=profile)
+    ctx['email_privacy_form'] = forms.EmailPrivacyForm(get_request_data('email_privacy_form'),
+                                                       instance=profile)
+    alternate_email_formset_data = get_request_data('alternate_email_formset')
+    ctx['alternate_email_formset'] = forms.AlternateEmailFormset(alternate_email_formset_data,
+                                                                 instance=profile,
+                                                                 queryset=emails)
+    forms_valid = True
+    if request.POST:
+        if not curr_sect:
+            raise Http404
+        curr_forms = map(lambda x: ctx[x], sections[curr_sect])
+        forms_valid = all(map(lambda x: x.is_valid(), curr_forms))
+        if forms_valid:
+            old_username = request.user.username
+            for f in curr_forms:
+                f.save()
+
+            if curr_sect == 'registration_section':
+                redeem_invite(profile, request.session.get('invite-code'))
+            elif user.username != old_username:
+                msg = (u'You changed your username; '
+                       u'please note your profile URL has also changed.')
+                messages.info(request, _(msg))
+
+            next_section = request.GET.get('next')
+            next_url = urlparams(reverse('phonebook:profile_edit'), next_section)
+            return HttpResponseRedirect(next_url)
+
+    ctx.update({
+        'user_groups': user_groups,
+        'profile': request.user.userprofile,
+        'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
+        'mapbox_id': settings.MAPBOX_PROFILE_ID,
+        'apps': user.apiapp_set.filter(is_active=True),
+        'appsv2': profile.apps.filter(enabled=True),
+        'forms_valid': forms_valid
+    })
+
+    return render(request, 'phonebook/edit_profile.html', ctx)
 
 
 @allow_unvouched
@@ -258,7 +277,7 @@ def delete_email(request, email_pk):
         raise Http404()
 
     ExternalAccount.objects.get(pk=email_pk).delete()
-    return redirect('phonebook:edit_emails')
+    return redirect('phonebook:profile_edit')
 
 
 @allow_unvouched
@@ -286,7 +305,7 @@ def change_primary_email(request, email_pk):
         user.save()
         alternate_email.save()
 
-    return redirect('phonebook:edit_emails')
+    return redirect('phonebook:profile_edit')
 
 
 @allow_unvouched

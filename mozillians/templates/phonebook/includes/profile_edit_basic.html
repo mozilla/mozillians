@@ -1,0 +1,237 @@
+<div id="profile-tab" class="settings-tab">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile" enctype="multipart/form-data">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Basic Information') }}</div>
+      <div class="panel-body">
+
+        {% if (basic_information_form.non_field_errors()
+               or user_form.non_field_errors()
+               or language_formset.non_form_errors()
+               or email_privacy_form.non_field_errors()
+               or alternate_email_formset.non_form_errors()
+               or skills_form.non_field_errors()) %}
+          <ul class="unstyled">
+            {% for error in basic_information_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in user_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in language_formset.non_form_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in email_privacy_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in alternate_email_formset.non_form_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in skills_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% include 'phonebook/includes/photo_form.html' %}
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              {{ mozillians_field(user_form.username) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8 col-sm-6">
+              {{ mozillians_field(basic_information_form.full_name) }}
+            </div>
+            <div class="col-md-4 text-right">
+              {{ privacy_field(basic_information_form.privacy_full_name) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-9 col-sm-6">
+              {{ mozillians_field(basic_information_form.bio) }}
+              <span class="under-input-field">
+                {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+                  Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+                {% endtrans %}
+              </span>
+            </div>
+            <div class="col-md-3 text-right">
+              {{ privacy_field(basic_information_form.privacy_bio) }}
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="basic_section">{{ _('Update Information') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Emails') }}</div>
+      <div class="panel-body">
+        <fieldset>
+          <p>{{ _('Primary e-mail address') }}</p>
+          <div class="row">
+            <div class="col-md-9">
+              <label class="email">{{ email_privacy_form.instance.email }}</label>
+            </div>
+            <div class="col-md-3 text-right">
+              {{ privacy_field(email_privacy_form.privacy_email) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset id="alternate-email">
+          <p>{{ _('Secondary e-mail addresses') }}</p>
+          {{ alternate_email_formset.management_form }}
+
+          {% for form in alternate_email_formset %}
+            <div class="alternate-email-fieldrow">
+              <label class="email">{{ form.instance.identifier }}</label>
+              <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
+                Delete
+              </a>
+              <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
+                Make Primary
+              </a>
+              {{ form.id }}
+              {{ privacy_field(form.privacy) }}
+            </div>
+          {% endfor %}
+
+          <!-- Add e-mails -->
+          <div id="add-email">
+            <a href="#" id="nav-login" class="persona-button browserid-login">
+              <span class="icon">
+                <img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon">
+              </span>
+              <span class="signin">{{ _('Add e-mail using Persona') }}</span>
+            </a>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="email_section">{{ _('Update Emails') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        {{ _('Skills') }}
+      </div>
+      <div class="panel-body">
+        <fieldset>
+          <div class="row">
+            <div class="col-md-9 col-sm-9">
+              <p class="field_description">
+                {% trans %}
+                  A skill is the learned capacity to carry out pre-determined
+                  results often with the minimum outlay of time, energy, or
+                  both.
+                {% endtrans %}
+              </p>
+            </div>
+            <div class="col-md-3 col-sm-3 text-right">
+              {{ privacy_field(skills_form.privacy_skills) }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <fieldset id="skills" data-autocomplete-url="{{ url('groups:search_skills') }}">
+                {{ mozillians_field(skills_form.skills) }}
+              </fieldset>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="skills_section">{{ _('Update Skills') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Languages') }}</div>
+      <div class="panel-body">
+        <fieldset>
+          <div class="row">
+            <div class="col-md-9 col-sm-9" id="languages">
+              <p class="field_description">
+                {% trans %}
+                  The Mozilla Project spans over many countries and
+                  languages. Share the languages you speak to be found
+                  easily by other Mozillians.
+                {% endtrans %}
+              </p>
+              {{ language_formset.management_form }}
+              {% for language_form in language_formset %}
+                <div class="language-fieldrow
+                            {% if language_form.errors %} error{% endif %}">
+                  {{ language_form.non_field_errors() }}
+                  {% for field in language_form %}
+                    {{ field }}
+                    {% if field.name == 'DELETE' %}
+                      <i class="icon-minus-circle"></i> {{ _('Delete') }}
+                    {% endif %}
+                  {% endfor %}
+                  <div class="error">
+                    {% for field in language_form %}
+                      {{ field.errors }}
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+              <a href="#" id="languages-addfield" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
+            </div>
+            <div class="col-md-3">
+              {{ privacy_field(language_privacy_form.privacy_languages) }}
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="languages_section">{{ _('Update Languages') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="panel panel-danger hidden-sm hidden-xs">
+    <div class="panel-heading">
+      {{ _('Delete account') }}
+    </div>
+    <div class="panel-body">
+      <fieldset id="delete">
+        <input type="checkbox" class="acknowledge">
+        {% trans %}
+          I acknowledge that deleting my account will make it tougher
+          for me to show off my contributions and easily be found by
+          other members of the Mozilla community.
+        {% endtrans %}
+      </fieldset>
+    </div>
+    <div class="panel-footer">
+      <a href="{{ url('phonebook:profile_confirm_delete') }}" id="delete-profile"
+         class="btn btn-danger delete disabled">
+        {{ _('Delete Profile') }}
+      </a>
+    </div>
+  </div>
+</div>

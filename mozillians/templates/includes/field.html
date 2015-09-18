@@ -1,6 +1,21 @@
 {% if privacy %}
   <div class="privacy-controls">
-{% endif %}
+    <span class="info glyphicon glyphicon-eye-open" aria-hidden="true" title="{{ _('Choose visibility group for this field') }}"></span>
+    <div class="btn-group btn-group-xs" role="group">
+      {% for value, text in field.field.choices %}
+        {% if value == 1 %}
+          <button type="button" class="btn btn-default active">{{ text }}</button>
+        {% else %}
+          <button type="button" class="privacy-toggle btn btn-default {% if value == field.value()|int %}active{% endif %}" data-target="{{ field.name }}" data-value="{{ value }}">{{ text }}</button>
+        {% endif %}
+      {% endfor %}
+      <input type="hidden" value="{{ field.value() }}" name="{{ field.html_name }}" id="{{ field.auto_id }}">
+    </div>
+    {% if field.errors %}
+      <div class="error-message">{{ field.errors }}</div>
+    {% endif %}
+  </div>
+{% else %}
 
   {% if field|is_checkbox %}
     {# for checkbox only, include the control inside the label element and before the label text #}
@@ -14,7 +29,7 @@
     {{ field.label_tag() }}
   {% endif %}
 
-  <div class="{% if field.errors %} error{% endif %}">
+  <div class="form-group{% if field.errors %} error{% endif %}">
     {% if not field|is_checkbox %}
       {{ field }}
     {% endif %}
@@ -28,8 +43,5 @@
         {{ field.help_text }}
       </p>
     {% endif %}
-  </div>
-
-{% if privacy %}
   </div>
 {% endif %}

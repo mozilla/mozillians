@@ -45,13 +45,13 @@ class BrowserIDVerify(Verify):
     @property
     def failure_url(self):
         if self.add_email:
-            return reverse('phonebook:edit_emails')
+            return reverse('phonebook:profile_edit')
         return super(BrowserIDVerify, self).failure_url
 
     @property
     def success_url(self):
         if self.add_email:
-            return reverse('phonebook:edit_emails')
+            return reverse('phonebook:profile_edit')
         return super(BrowserIDVerify, self).success_url
 
     def login_success(self):

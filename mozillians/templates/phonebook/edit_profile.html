@@ -1,558 +1,92 @@
 {% extends "base.html" %}
 
 {% block page_title %}
-  {% if profile.is_complete %}
-    {{ _('Edit Your Profile') }}
-  {% else %}
-    {{ _('Create Your Profile') }}
-  {% endif %}
+  {{ _('Settings') }}
 {% endblock %}
 {% block body_id %}edit-profile{% endblock %}
 
 {% block extrahead %}
   <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css"
         type="text/css" rel="stylesheet" media="screen" />
-  {{ profile_form.media.css }}
+  {{ registration_form.media.css }}
 {% endblock extrahead %}
 
 {% block content %}
-  {% if (profile_form.errors or user_form.errors or accounts_formset.errors
-         or language_formset.errors) %}
+  {% if not forms_valid %}
       <div class="alert alert-error">
         {{ _('Please correct the errors below.') }}
       </div>
   {% endif %}
 
-  <header>
-    <h1>
-      {% if profile.is_complete %}
-        {{ _('Edit Your Profile') }}
-      {% else %}
-        {{ _('Create Your Profile') }}
-      {% endif %}
-    </h1>
-    {% if profile.is_complete %}
-      <p>
-        {% trans %}
-          Modify your profile here and choose who can see your profile
-          fields. You can make parts of your profile publicly visible,
-          but please be careful about sharing your contact
-          information.
+  {% if not profile.is_complete %}
+    <div class="alert alert-info">
+      {% trans %}
+        You are just one step away from creating your profile.
       {% endtrans %}
-    {% else %}
-      <p class="alert alert-info">
-        {% trans %}
-          Our community directory is for Mozillians who are 13 and
-          older. We take safety issues very seriously, especially with
-          minors. If you are under 13, please don't create an account.
-      {% endtrans %}
-      </p>
-    {% endif %}
-  </header>
+    </div>
+  {% endif %}
 
-  <form action="{{ url('phonebook:profile_edit') }}" method="POST" enctype="multipart/form-data"
-        id="edit-profile-form" class="edit-profile">
-    {{ csrf() }}
-
-    <fieldset class="privacy-all">
-      <label for="privacy-global-settings">
-        {{ _('Make all of my profile fields visible to:') }}
-      </label>
-      <select id="privacy-global-settings">
-        <option value="-1" selected>{{ _('-- No Change --') }}</option>
-        <option value="3">{{ _('Mozillians') }}</option>
-        <option value="4">{{ _('Public') }}</option>
-      </select>
-    </fieldset>
-
-    {% if profile.is_complete %}
-      <fieldset id="edit-controls-top" class="edit-controls">
-        <button id="form-submit-top" type="submit">{{ _('Update Profile') }}</button>
-          <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
-            {{ _('Cancel') }}{# L10n: Cancel editing #}
-          </a>
-      </fieldset>
-    {% endif %}
-
-    {% if (profile_form.non_field_errors() or user_form.non_field_errors()
-           or accounts_formset.non_form_errors() or language_formset.non_form_errors()) %}
-      <ul class="unstyled">
-        {% for error in profile_form.non_field_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in user_form.non_field_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in accounts_formset.non_form_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-        {% for error in language_formset.non_form_errors() %}
-          <li class="alert alert-error">{{ error }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-
-    <!-- Basic Information section -->
-    <fieldset>
-      <h2>{{ _('Basic Information') }}</h2>
-      <div id="photo">
-        <label for="id_photo"> {{ _('Profile Photo') }} </label>
-        <div class="profile-photo">
-          <img src="{{ profile.get_photo_url('70x70') }}" alt="{{ _('Profile photo') }}">
+  {% if profile.is_complete %}
+    {# This is the full profile form for those who have completed registration. #}
+    <div class="row">
+      <div class="col-md-3 hidden-xs hidden-sm">
+        <div class="panel panel-default">
+          <div class="panel-heading">{{ _('Settings') }}</div>
+          <ul class="list-group settings-nav">
+            <li class="list-group-item" id="profile-li"><a href="#profile">{{ _('Profile') }}</a></li>
+            <li class="list-group-item" id="mylocation-li"><a href="#mylocation">{{ _('Location') }}</a></li>
+            <li class="list-group-item" id="youandmozilla-li"><a href="#youandmozilla">{{ _('You &amp; Mozilla') }}</a></li>
+            <li class="list-group-item" id="mygroups-li"><a href="#mygroups">{{ _('Groups') }}</a></li>
+            <li class="list-group-item" id="extaccounts-li"><a href="#extaccounts">{{ _('External Accounts') }}</a></li>
+            <li class="list-group-item" id="developer-li"><a href="#developer">{{ _('Developer') }}</a></li>
+          </ul>
         </div>
-        <input class="input-file" id="id_photo" type="file" name="photo">
-        {% if profile.photo %}
-          <div id="id_photo_delete">
-            <label>
-              <input type="checkbox" name="photo-clear">
-              {{ _('Remove Profile Photo') }}
-            </label>
-          </div>
-        {% endif %}
-        {{ privacy_field(profile_form.privacy_photo) }}
       </div>
-    </fieldset>
 
-    <fieldset>
-      {{ mozillians_field(user_form.username) }}
-    </fieldset>
+      <div class="col-md-{% if profile.is_complete %}9{% else %}12{% endif %}">
+        <div class="settings-content">
+          <!-- Profle Tab -->
+          {% include 'phonebook/includes/profile_edit_basic.html' %}
 
-    <fieldset>
-      {{ mozillians_field(profile_form.full_name) }}
-      {{ privacy_field(profile_form.privacy_full_name) }}
-    </fieldset>
+          <!-- Location Tab -->
+          {% include 'phonebook/includes/profile_edit_location.html' %}
 
-    <fieldset>
-      <label for="primary_email">{{ _('Primary e-mail') }}</label>
-      <span id="primary-email">{{ user.userprofile.email }}</span>
-      {% if profile.is_complete %}
-        <a class="button right" href="{{ url('phonebook:edit_emails') }}">
-          <i class="icon-user"></i> {{ _('Edit E-mail Addresses') }}
-        </a>
-      {% else %}
-        <div class="right small">
-          You can add additional e-mails after creating your profile.
-        </div>
-      {% endif %}
-    </fieldset>
+          <!-- You &amp; Mozilla -->
+          {% include 'phonebook/includes/profile_edit_you.html' %}
 
-    <fieldset>
-      {{ mozillians_field(profile_form.bio) }}
-      <span class="under-input-field">
-        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
-          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
-        {% endtrans %}
-      </span>
-      {{ privacy_field(profile_form.privacy_bio) }}
-    </fieldset>
-    <!-- End of Basic Information section -->
+          <!-- Groups -->
+          {% include 'phonebook/includes/profile_edit_groups.html' %}
 
-    <!-- Location section -->
-    <fieldset>
-      <h2 class="required">{{ _('Your location') }}</h2>
-      {% for error in profile_form.errors['location'] %}
-        <span class="error-message">{{ error }}</span>
-      {% endfor %}
-      <div id="location">
-        <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
-        <div id="location_gps_button"><i class="icon-target"></i></div>
-        <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
-        <input id="location_search" type="search"/>
-        <input id="location_search_button" class="button" type="button" value="Search location"/>
-        <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
-        <ol id="location_search_results" class="scroll-shadows"></ol>
-      </div>
-      <div id="gps_error" class="error-message" style="display:none;">
-        <i class="icon-target"></i> {{ _('You have denied Location services.') }}
-      </div>
-      <div id="location_wrong" >
-        <a id="improve_this_map" target="_blank"
-           href="http://www.openstreetmap.org/note/new#map=13/{{profile.lat}}/{{profile.lng}}&layers=N">
-          Improve this map</a>
-        <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[learn more]</a>
-      </div>
-    </fieldset>
+          <!-- External Accounts -->
+          {% include 'phonebook/includes/profile_edit_accounts.html' %}
 
-    <fieldset>
-      <label class="required">{{ _('Country') }}</label>
-      <span id="display_country" class="geodisplay"
-            data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
-      </span>
-      <div class="geocheckbox {% if profile_form.savecountry.errors %} error {% endif %}">
-        {{ profile_form.savecountry }}
-        {{ profile_form.savecountry.label_tag() }}
-        {% for error in profile_form.savecountry.errors %}
-          <span class="error-message">{{ error }}</span>
-        {% endfor %}
-      </div>
-      {{ privacy_field(profile_form.privacy_geo_country) }}
-    </fieldset>
+          <!-- Developer -->
+          {% include 'phonebook/includes/profile_edit_developer.html' %}
 
-    <fieldset>
-      <label>{{ _('Region') }}</label>
-      <span id="display_province" class="geodisplay"
-            data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
-      </span>
-      <div class="geocheckbox {% if profile_form.saveregion.errors %} error {% endif %}">
-        {{ profile_form.saveregion }}
-        {{ profile_form.saveregion.label_tag() }}
-        {% for error in profile_form.saveregion.errors %}
-          <span class="error-message">{{ error }}</span>
-        {% endfor %}
-      </div>
-      {{ privacy_field(profile_form.privacy_geo_region) }}
-    </fieldset>
-
-    <fieldset>
-      <label>{{ _('City') }}</label>
-      <span id="display_city" class="geodisplay"
-            data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
-      <div class="geocheckbox {% if profile_form.savecity.errors %} error {% endif %}">
-        {{ profile_form.savecity }}
-        {{ profile_form.savecity.label_tag() }}
-        {% for error in profile_form.savecity.errors %}
-          <span class="error-message">{{ error }}</span>
-        {% endfor %}
-      </div>
-      {{ privacy_field(profile_form.privacy_geo_city) }}
-    </fieldset>
-      {{ profile_form.lat }}
-      {{ profile_form.lng }}
-    <fieldset>
-      {{ mozillians_field(profile_form.timezone) }}
-      {{ privacy_field(profile_form.privacy_timezone) }}
-    </fieldset>
-    <!-- End of location section -->
-
-    <!-- Mozilla contributions section -->
-    <fieldset>
-      <h2>Your Mozilla Contributions</h2>
-      <div id="mozillian-contributions">
-        {{ mozillians_field(profile_form.title) }}
-        {{ privacy_field(profile_form.privacy_title) }}
-      </div>
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.date_mozillian) }}
-      {{ privacy_field(profile_form.privacy_date_mozillian) }}
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.story_link) }}
-      {{ privacy_field(profile_form.privacy_story_link) }}
-    </fieldset>
-    <!-- End of Mozilla contributions section -->
-
-    <!-- Accounts -->
-    <fieldset id="accounts">
-      <h2>Account Information</h2>
-      <div>
-        <label>{{ _('External Accounts') }}</label>
-        {{ accounts_formset.management_form }}
-        {% for account_form in accounts_formset %}
-          <div class="externalaccount-fieldrow
-                      {% if account_form.errors %} error{% endif %}">
-            {{ account_form.non_field_errors() }}
-            {% for field in account_form %}
-              {{ field.errors }}
-            {% endfor %}
-            {% for field in account_form %}
-              {% if not field.name == 'privacy' %}
-                {{ field }}
-                {% if field.name == 'DELETE' %}
-                  <i class="icon-minus-circle"></i> {{ _('Delete') }}
-                {% endif %}
-              {% else %}
-                {{ privacy_field(field) }}
-              {% endif %}
-            {% endfor %}
-          </div>
-        {% endfor %}
-        <span class="under-input-field">
-          <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add account') }}</a>
-        </span>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      {{ mozillians_field(profile_form.ircname) }}
-      {{ privacy_field(profile_form.privacy_ircname) }}
-    </fieldset>
-
-    <fieldset id="shirts">
-      <h2>{{ _('T-Shirt Size') }}</h2>
-      <p class="field_description">
-        {% trans %}
-          Like t-shirts? Add your size so we can give you a shirt at events or for other special occasions.
-        {% endtrans %}
-      </p>
-      {% with t_choices = profile_form.tshirt.field.choices %}
-        <div class="sizing">
-          <div class="fitted">
-            <h4>
-              {{ _('Fitted') }}
-              <div class="tshirt-info">
-                <i class="icon-info-circle"></i>
-                <span>
-                  {% trans %}
-                    A fitted-cut tshirt has a curved side hem which
-                    comes in at the waist and goes out at the upper
-                    and lower ends. Also known as "women's".
-                  {% endtrans %}
-                </span>
-              </div>
-            </h4>
-            {% for t_select in t_choices[1:7] %}
-              <div class="tshirt-option">
-                <input{% if profile.tshirt == t_select.0  %} checked{% endif %}
-                type="radio" name="tshirt" value="{{ t_select.0 }}">
-                <label>{{ t_select.1 }}</label>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="straightcut">
-            <h4>
-              {{ _('Straight-cut') }}
-              <div class="tshirt-info">
-                <i class="icon-info-circle"></i>
-                <span>
-                  {% trans %}
-                    A straight-cut shirt has wide shoulders and a body
-                    which is almost square. Often known as "men's" or "unisex".
-                  {% endtrans %}
-                </span>
-              </div>
-            </h4>
-            {% for t_select in t_choices[7:14] %}
-              <div class="tshirt-option">
-                <label>
-                  <input {% if profile.tshirt == t_select.0  %} checked {% endif %}
-                    type="radio" name="tshirt" value="{{ t_select.0 }}">
-                  {{ t_select.1 }}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      {% endwith %}
-      {{ privacy_field(profile_form.privacy_tshirt) }}
-    </fieldset>
-
-    <fieldset id="groups">
-      <h2>{{ _('Groups') }}</h2>
-      <p class="field_description">
-        {% trans %}
-          Groups are a community of Mozillians with some relation to
-          each other. This can be an interest, team, project, product
-          or sub-community.
-        {% endtrans %}
-      </p>
-      {% if profile.is_vouched %}
-        <p class="field_description">
-          {% trans browse=url('groups:index_groups') %}
-            To join a group, <a href="{{ browse }}">find the group's page</a>,
-            then click the Join Group button.
-          {% endtrans %}
-          {% trans %}
-            To leave a group, click its name below to go to its page, then click
-            the Leave Group button there.
-          {% endtrans %}
-        </p>
-      {% else %}
-        <p class="field_description">
-          {% trans %}
-            After you are vouched, you will be able to join groups.
-          {% endtrans %}
-        </p>
-      {% endif %}
-      <ul class="tagit">
-        {% for group in user_groups %}
-          <li class="tagit-choice tagit-choice-read-only ui-corner-all ui-state-default">
-            <a href="{{ url('groups:show_group', group.url) }}"><span class="tagit-label">{{ group.name }}</span></a>
-          </li>
-        {% endfor %}
-      </ul>
-      {{ privacy_field(profile_form.privacy_groups) }}
-    </fieldset>
-
-    <fieldset id="skills" data-autocomplete-url="{{ url('groups:search_skills') }}">
-      <h2>{{ _('Skills') }}</h2>
-      <p class="field_description">
-        {% trans %}
-          A skill is the learned capacity to carry out pre-determined
-          results often with the minimum outlay of time, energy, or
-          both.
-        {% endtrans %}
-      </p>
-      {{ mozillians_field(profile_form.skills) }}
-      {{ privacy_field(profile_form.privacy_skills) }}
-    </fieldset>
-
-    <fieldset id="languages">
-      <h2>{{ _('Languages') }}</h2>
-      <p class="field_description">
-        {% trans %}
-          The Mozilla Project spans over many countries and
-          languages. Share the languages you speak to be found
-          easily by other Mozillians.
-        {% endtrans %}
-      </p>
-      <div class="privacy-controls">
-        <div class="control-group">
-            <label class="control-label">{{ _('Visible to:') }}</label>
-            <div class="controls">
-              {{ privacy_field(profile_form.privacy_languages) }}
+          <div class="panel panel-info settings-all hidden-md hidden-lg">
+            <div class="panel-heading">
+              Show all Settings
+              <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
             </div>
+          </div>
+
         </div>
       </div>
-      {{ language_formset.management_form }}
-      {% for language_form in language_formset %}
-        <div class="language-fieldrow
-                    {% if language_form.errors %} error{% endif %}">
-          {{ language_form.non_field_errors() }}
-          {% for field in language_form %}
-            {{ field }}
-            {% if field.name == 'DELETE' %}
-              <i class="icon-minus-circle"></i> {{ _('Delete') }}
-            {% endif %}
-          {% endfor %}
-          <div class="error">
-            {% for field in language_form %}
-              {{ field.errors }}
-            {% endfor %}
-          </div>
-        </div>
-      {% endfor %}
-      <a href="#" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
-    </fieldset>
+    </div>
 
-    <fieldset id="services" class="edit-controls">
-      <h2>{{ _('Services') }}</h2>
-      <p class="field_description">
-        {% trans bugzilla_url='http://bugzilla.mozilla.org',
-                 reps_url='http://reps.mozilla.org' %}
-          The Phonebook offers an API (currently v1) to help authorize contributors and share profile data to other
-          tools and sites like <a id="services-bugzilla-url" href="{{ bugzilla_url }}">Bugzilla</a> and the
-          <a id="services-mozilla-reps" href="{{ reps_url }}">Mozilla Reps Portal</a>.
-        {% endtrans %}
-      <h4>{{ _('Privacy') }}</h4>
-      <p>
-        {{ profile_form.allows_community_sites.label_tag() }}
-        {{ profile_form.allows_community_sites }}
-      </p>
-      <p>
-        {{ profile_form.allows_mozilla_sites.label_tag() }}
-        {{ profile_form.allows_mozilla_sites }}
-      </p>
-      <p>
-        API Version 2, currently under testing, respects the defined
-        per field privacy levels. These fields will become obsolete
-        and eventually dropped along with the API Version 1.
-      </p>
-
-      {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
-        <h4>{{ _('Developers') }}</h4>
-        <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
-        <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
-      {% endif %}
-    </fieldset>
-
-    {% if profile.is_complete %}
-      <fieldset id="account-status">
-        <h2>{{ _('Account status') }}</h2>
-        <h5>
-        Vouched:
-        {% if profile.is_vouched %}
-          ✔  {{ _('Yes, you can view all profiles and access other Mozilla sites as a vouched Mozillian.') }}
-        {% else %}
-          ✘  {{ _('No, you can only access public Mozillian profiles.') }}
-        {% endif %}
-        </h5>
-        <h5>
-        Can vouch others:
-        {% if profile.can_vouch %}
-          ✔  {{ _('Yes, you can vouch for others.') }}
-        {% else %}
-          ✘
-          {% trans %}
-            No, you need at least {{ vouch_threshold }} vouches to vouch for others.
-          {% endtrans %}
-        {% endif %}
-        </h5>
-        {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
-          <a href="{{ vouching_url }}">Read more about vouching.</a>
-        {% endtrans %}
-      </fieldset>
-    {% endif %}
-
-    {% if not profile.is_complete %}
-      <fieldset id="privacy-verify">
-        {% if profile_form.optin.errors %}
-          <div class="error">
-            {{ _('This field is required.') }}
-          </div>
-        {% endif %}
-        <div class="controls">
-          <label class="checkbox required">
-            {{ profile_form.optin }}
-          </label>
-        </div>
-        <label for="{{ profile_form.optin.id_for_label }}" {% if profile_form.optin.errors %}class="error"{% endif %}>
-          {% trans privacy_url='http://mozilla.org/privacy/websites/' %}
-            I'm okay with you handling this info as you explain
-            in <a href="{{ privacy_url }}">Mozilla's privacy
-            policy</a>.
-          {% endtrans %}
-        </label>
-      </fieldset>
-
-      <p class="alert alert-info">
-        {% trans %}
-          You will begin to receive email communications from Mozilla
-          once you are a vouched Mozillian. You may unsubscribe at
-          anytime by clicking the link at the bottom of these emails.
-        {% endtrans %}
-      </p>
-    {% endif %}
-
-    <fieldset id="edit-controls" class="edit-controls">
-        {% if profile.is_complete %}
-          <button id="form-submit" type="submit">{{ _('Update Profile') }}</button>
-          <a class="cancel" href="{{ url('phonebook:profile_view', user.username) }}">
-            {{ _('Cancel') }}{# L10n: Cancel editing #}
-          </a>
-        {% else %}
-          <button type="submit">{{ _('Create Profile') }}</button>
-        {% endif %}
-    </fieldset>
-
-    {% if profile.is_complete %}
-      <fieldset id="delete">
-        <h2>{{ _('Delete Profile') }}</h2>
-        <input type="checkbox" class="acknowledge"></input>
-        <p class="field_description">
-          {% trans %}
-            I acknowledge that deleting my account will make it tougher
-            for me to show off my contributions and easily be found by
-            other members of the Mozilla community.
-          {% endtrans %}
-        </p>
-        <a href="{{ url('phonebook:profile_confirm_delete') }}" class="delete">
-          {{ _('Delete Profile') }}
-        </a>
-      </fieldset>
-    {% endif %}
-  </form>
-
+  {% else %}
+    {# This is the required-only profile form for new registrations. #}
+    {% include 'phonebook/includes/profile_edit_registration.html' %}
+  {% endif %}
 {% endblock %}
 
 {% block page_js %}
   <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
   {% compress js %}
+    <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit_mapbox.js') }}"></script>
   {% endcompress %}
-  {{ profile_form.media.js }}
+  {{ registration_form.media.js }}
 {% endblock %}
