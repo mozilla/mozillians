@@ -56,8 +56,8 @@
             </div>
             <div class="col-md-3 col-sm-3">
               <div class="geocheckbox {% if location_form.savecountry.errors %} error {% endif %}">
-                {{ location_form.savecountry }}
                 {{ location_form.savecountry.label_tag() }}
+                {{ location_form.savecountry }}
                 {% for error in location_form.savecountry.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}
@@ -79,8 +79,8 @@
             </div>
             <div class="col-md-3 col-sm-3">
               <div class="geocheckbox {% if location_form.saveregion.errors %} error {% endif %}">
-                {{ location_form.saveregion }}
                 {{ location_form.saveregion.label_tag() }}
+                {{ location_form.saveregion }}
                 {% for error in location_form.saveregion.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}
@@ -101,8 +101,8 @@
             </div>
             <div class="col-md-3 col-sm-3">
               <div class="geocheckbox {% if location_form.savecity.errors %} error {% endif %}">
-                {{ location_form.savecity }}
                 {{ location_form.savecity.label_tag() }}
+                {{ location_form.savecity }}
                 {% for error in location_form.savecity.errors %}
                   <span class="error-message">{{ error }}</span>
                 {% endfor %}

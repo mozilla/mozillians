@@ -220,6 +220,7 @@ body {
 
         input[type="checkbox"] {
             margin-right: 5px;
+            vertical-align: text-bottom;
         }
         .checkbox {
             input[type="checkbox"] {
@@ -231,6 +232,7 @@ body {
 
     .error-message {
         color: #CD0000;
+        display: block;
     }
 
     .required:after {
@@ -1495,8 +1497,10 @@ form {
             }
         }
         textarea {
+            max-width: 390px;
             @media (max-width: @breakMobileLandscape) {
                 width: 200px;
+                max-width: 250px;
             }
         }
         legend {
@@ -1523,10 +1527,7 @@ form {
         }
         &> div#photo {
             position: relative;
-            height: 150px;
-            @media (max-width: @breakMobileLandscape) {
-                height: 200px;
-            }
+            height: 130px;
             .profile-photo {
                 .rounded-image;
                 width: 100px;
@@ -1731,8 +1732,8 @@ form {
             }
         }
         .under-input-field {
-            padding-left: 130px;
-            @media (max-width: @breakMobileLandscape) {
+            padding-left: 35px;
+            @media (max-width: @breakDesktop) {
                 padding-left: 0px;
             }
         }
@@ -1925,19 +1926,31 @@ body#edit-profile {
     }
 }
 
-.registration {
+.registration-photo {
     .privacy-controls {
         float: left;
     }
+}
 
+.registration {
     fieldset {
-        margin-top: 5px;
-        margin-bottom: 10px;
-        padding-bottom: 0px;
-
         @media (max-width: @breakDesktop) {
             margin-top: 30px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
+        }
+    }
+
+    .geodisplay {
+        min-width: 250px;
+        margin-top: 3px;
+
+        @media (max-width: @breakDesktop) {
+            float: none;
+            min-width: 300px;
+        }
+        @media (max-width: @breakMobileLandscape){
+            min-width: 50%;
         }
     }
 }
@@ -1948,6 +1961,10 @@ body#edit-profile {
             margin-top: 10px;
         }
     }
+}
+
+.input-file {
+    margin-bottom: 15px;
 }
 
 /* Generic Groups, Functional Areas and Search Results
@@ -2307,22 +2324,22 @@ body#betasearch {
 }
 
 fieldset {
+    .email-label {
+        float: none;
+    }
+    .email-controls {
+        display: inline-block;
+    }
     &#alternate-email {
         .alternate-email-fieldrow {
             margin-bottom: 20px;
             .email {
                 min-width: 300px;
                 display: inline-block;
-
-                @media (max-width: 700px) {
-                    margin-bottom: 20px;
-                }
             }
         }
         .privacy-controls {
             position: relative;
-            float: right;
-
             @media (max-width: 700px) {
                 float: none;
             }
