@@ -154,6 +154,8 @@ class Group(GroupBase):
                                 blank=True, null=True,
                                 on_delete=models.SET_NULL,
                                 related_name='groups_curated')
+    curators = models.ManyToManyField('users.UserProfile',
+                                      related_name='groups_curated_new')
     irc_channel = models.CharField(
         max_length=63,
         verbose_name=_lazy(u'IRC Channel'),
