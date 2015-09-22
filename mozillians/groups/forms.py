@@ -6,6 +6,7 @@ from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group
+from mozillians.users.models import UserProfile
 
 
 class SortForm(forms.Form):
@@ -22,11 +23,16 @@ class SortForm(forms.Form):
 
 
 class GroupForm(happyforms.ModelForm):
+    curators = forms.ModelMultipleChoiceField(
+        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''),
+        required=False
+    )
 
     def clean(self):
         cleaned_data = super(GroupForm, self).clean()
         accepting_new = cleaned_data.get('accepting_new_members')
         criteria = cleaned_data.get('new_member_criteria')
+        curators = cleaned_data.get('curators')
 
         if not accepting_new == 'by_request':
             cleaned_data['new_member_criteria'] = u''
@@ -36,13 +42,34 @@ class GroupForm(happyforms.ModelForm):
                         'acceptance selection.')
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
+
+        if not curators:
+            msg = _(u'The group must have at least one curator.')
+            self._errors['curators'] = self.error_class([msg])
+
         return cleaned_data
+
+    def save(self, *args, **kwargs):
+        """Custom save method to add multiple curators."""
+        obj = super(GroupForm, self).save()
+
+        # Add the curators in the m2m field
+        obj.curators.clear()
+        for curator in self.cleaned_data['curators']:
+            obj.curators.add(curator)
+            # Ensure that all curators are members of the group
+            if not obj.has_member(curator):
+                obj.add_member(curator)
+        return obj
 
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',
                   'website', 'wiki', 'accepting_new_members',
-                  'new_member_criteria', 'terms']
+                  'new_member_criteria', 'terms', 'curators']
+        widgets = {
+            'curators': forms.SelectMultiple()
+        }
 
 
 class SuperuserGroupForm(GroupForm):

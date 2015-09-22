@@ -38,8 +38,7 @@ class TestGroupRemoveMember(TestCase):
     def test_as_manager_removing_curator(self):
         # but even manager cannot remove a curator
         user = UserFactory(manager=True)
-        self.group.curator = self.member.userprofile
-        self.group.save()
+        self.group.curators.add(self.member.userprofile)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -71,8 +70,7 @@ class TestGroupRemoveMember(TestCase):
     def test_as_curator(self):
         # curator can remove another
         curator = UserFactory()
-        self.group.curator = curator.userprofile
-        self.group.save()
+        self.group.curators.add(curator.userprofile)
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -92,8 +90,7 @@ class TestGroupRemoveMember(TestCase):
         self.group.members_can_leave = False
         self.group.save()
         curator = UserFactory()
-        self.group.curator = curator.userprofile
-        self.group.save()
+        self.group.curators.add(curator.userprofile)
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -102,8 +99,7 @@ class TestGroupRemoveMember(TestCase):
     def test_accepting_sends_email(self):
         # when curator accepts someone, they are sent an email
         curator = UserFactory()
-        self.group.curator = curator.userprofile
-        self.group.save()
+        self.group.curators.add(curator.userprofile)
         user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes membership request
@@ -128,8 +124,7 @@ class TestGroupRemoveMember(TestCase):
     def test_rejecting_sends_email(self):
         # when curator rejects someone, they are sent an email
         curator = UserFactory()
-        self.group.curator = curator.userprofile
-        self.group.save()
+        self.group.curators.add(curator.userprofile)
         user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes request
@@ -154,8 +149,7 @@ class TestGroupRemoveMember(TestCase):
     def test_remove_member_send_mail(self):
         # when curator remove someone, sent mail to member
         curator = UserFactory()
-        self.group.curator = curator.userprofile
-        self.group.save()
+        self.group.curators.add(curator.userprofile)
         user = UserFactory()
         self.group.add_member(user.userprofile)
         url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],

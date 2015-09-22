@@ -21,3 +21,18 @@ def slugify(s):
     if isinstance(s, str):
         s = unicode(s)
     return django_slugify(unidecode(s))
+
+
+@register.function
+def user_is_curator(group, userprofile):
+    """Check if a user is curator in the specific group."""
+    return group.curators.filter(user=userprofile).exists()
+
+
+@register.function
+def is_group_instance(obj):
+    """Check if the obj is of Group type."""
+
+    # Avoid circular dependencies
+    from mozillians.groups.models import Group
+    return isinstance(obj, Group)

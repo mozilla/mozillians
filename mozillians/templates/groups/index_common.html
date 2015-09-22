@@ -36,8 +36,10 @@
           <li class="group-item">
             <a href="{{ url('groups:show_group', group.url) }}"
                class="group-name" title="{{ group.name }}">
-              {% if group.curator == user.userprofile %}
-                <i class="icon-crown"></i>
+              {% if is_group_instance(group) %}
+                {% if user.userprofile in group.curators.all() %}
+                  <i class="icon-crown"></i>
+                {% endif %}
               {% endif %}
               {{ group.name|truncate(20, True) }}<br>
               <i class="icon-group"></i>

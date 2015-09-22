@@ -153,7 +153,8 @@ class CreateGroupTests(TestCase):
             'website': u'http://mozillians.org',
             'wiki': u'http://wiki.mozillians.org',
             'members_can_leave': 'checked',
-            'visible': 'checked'
+            'visible': 'checked',
+            'curators': [user.userprofile.id]
             # 'functional_area' not checked
         }
         with self.login(user) as client:
@@ -185,6 +186,7 @@ class CreateGroupTests(TestCase):
             'functional_area': 'checked',  # should be ignored
             'accepting_new_members': 'yes',
             'members_can_leave': False,  # should be ignored
+            'curators': [user.userprofile.id]
         }
         with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
@@ -217,8 +219,8 @@ class CreateGroupTests(TestCase):
             'wiki': u'http://wiki.mozillians.org',
             'members_can_leave': 'checked',
             'visible': 'checked',
-            'terms': 'Example terms'
-            # 'functional_area' not checked
+            'terms': 'Example terms',
+            'curators': [user.id]
         }
         with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
@@ -242,9 +244,10 @@ class CreateGroupTests(TestCase):
             'members_can_leave': True,
             'visible': True,
             'functional_area': False,
-            'curator': user.userprofile,
+            'curators': [user.userprofile.id]
         }
         group = GroupFactory(**data)
+        group.curators.add(user.userprofile)
         url = reverse('groups:group_edit', prefix='/en-US/', kwargs={'url': group.url})
         # Change some data
         data2 = data.copy()
