@@ -9,21 +9,11 @@ VirtualEnv Installation
    #commtools on irc.mozilla.org. Ping `giorgos`, `nemo-yiannis` or `tasos`,
    they will be happy to help.
 
-.. note::
-
-   You might ask why ``python2.6`` and not ``python2.7``. The reason is that we use
-   version 2.6 on our servers. Using ``python2.7`` during development will
-   probably have the same effects as 2.6. Ubuntu dropped ``python2.6`` support
-   since version 12.04, so you might want to try with 2.7. Debian 6 and 7 on the
-   other hand still ships with version 2.6. In the rest of the guide we will
-   assume you are using ``python2.6``.
-
-
 ************
 Dependencies
 ************
 
-**Prerequisites:** You'll need python2.6, python2.6-dev, virtualenv, pip,
+**Prerequisites:** You'll need python2.7, python2.7-dev, virtualenv, pip,
 a C compiler (for building some of the Python packages, like the DB interface),
 mysqlclient and mysql-dev (or the equivalent on your system), a MySQL server, `gettext`_,
 git, and lessc.  If you're working on translations, add subversion. Also,
@@ -40,7 +30,7 @@ to work.
 If you're on Ubuntu or Debian, you might start with::
 
     $ sudo apt-get install build-essential git-core subversion \
-    python2.6 python2.6-dev python-virtualenv python-pip \
+    python2.7 python2.7-dev python-virtualenv python-pip \
     gettext libjpeg-turbo8-dev \
     mysql-client mysql-server libmysqlclient-dev default-jre \
     libxslt2.1 libxslt1-dev libjpeg-dev zlib1g-dev libpng12-dev
@@ -178,9 +168,9 @@ Running Mozillians
 
      (venv)$ ./manage.py update_product_details -f
 
-#. Sync DB and apply migrations::
+#. Apply migrations::
 
-     (venv)$ ./manage.py syncdb --noinput --migrate
+     (venv)$ ./manage.py migrate
 
 #. Create user:
 
