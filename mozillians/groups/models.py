@@ -133,6 +133,8 @@ class GroupMembership(models.Model):
     group = models.ForeignKey('groups.Group', db_index=True)
     status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=10)
     date_joined = models.DateTimeField(null=True, blank=True)
+    # For some groups, after a period of time the membership status must be renewed
+    invalidate = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('userprofile', 'group')
