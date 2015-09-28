@@ -170,11 +170,10 @@ class GroupAdmin(GroupBaseAdmin):
 
     fieldsets = (
         ('Group', {
-            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible',
-                       'merge_with')
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible',)
         }),
         ('Functional Area', {
-            'fields': ('functional_area', 'curator')
+            'fields': ('functional_area', 'curator',)
         }),
         ('Membership', {
             'fields': (('accepting_new_members', 'new_member_criteria',),
@@ -186,6 +185,14 @@ class GroupAdmin(GroupBaseAdmin):
             'classes': ('collapse',)
         })
     )
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Conditionally update the fieldset to include the 'merge_with' field."""
+
+        # If there is an object, then it's about editing a group.
+        if obj:
+            self.fieldsets[0][1]['fields'] += ('merge_with',)
+        return super(GroupAdmin, self).get_form(request, obj, **kwargs)
 
     def full_member_count(self, obj):
         """Return number of members in group."""
