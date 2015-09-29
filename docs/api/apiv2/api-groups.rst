@@ -57,7 +57,7 @@ Examples
 
     Request::
 
-        /api/v2/groups?api_key=12345
+        /api/v2/groups?api-key=12345
 
     Response::
 
