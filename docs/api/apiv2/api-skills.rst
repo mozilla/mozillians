@@ -45,7 +45,7 @@ Examples
 
     Request::
 
-        /api/v2/skills?api_key=12345
+        /api/v2/skills?api-key=12345
 
     Response::
 
