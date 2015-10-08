@@ -339,12 +339,6 @@ VOUCH_COUNT_LIMIT = 6
 # All accounts need 1 vouches to be able to vouch.
 CAN_VOUCH_THRESHOLD = 3
 
-# This must be set to a working mapbox token for the maps to work.
-MAPBOX_MAP_ID = 'examples.map-i86nkdio'
-
-# This must be set in local for the maps to work
-MAPBOX_MAP_ID = ''
-
 REST_FRAMEWORK = {
     'URL_FIELD_NAME': '_url',
     'PAGINATE_BY': 30,
