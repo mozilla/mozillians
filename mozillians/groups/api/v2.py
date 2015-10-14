@@ -98,7 +98,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         # Exclude members in 'pending' state
         group._members = group.members.filter(privacy_groups__gte=self.request.privacy_level,
                                               groupmembership__status=GroupMembership.MEMBER)
-        serializer = GroupDetailedSerializer(group)
+        serializer = GroupDetailedSerializer(group, context={'request': self.request})
         return Response(serializer.data)
 
 
@@ -115,5 +115,5 @@ class SkillViewSet(viewsets.ReadOnlyModelViewSet):
     def retrieve(self, request, pk):
         skill = get_object_or_404(self.queryset, pk=pk)
         skill._members = skill.members.filter(privacy_groups__gte=self.request.privacy_level)
-        serializer = SkillDetailedSerializer(skill)
+        serializer = SkillDetailedSerializer(skill, context={'request': self.request})
         return Response(serializer.data)
