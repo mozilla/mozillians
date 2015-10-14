@@ -2,7 +2,7 @@
 from django.http import Http404
 from django.test import RequestFactory
 
-from mock import Mock, patch
+from mock import ANY, Mock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -54,11 +54,14 @@ class LanguageSerializerTests(TestCase):
 
 
 class UserProfileSerializerTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
     def test_base(self):
         user = UserFactory.create(username='foo')
         profile = user.userprofile
-
-        serializer = UserProfileSerializer(profile)
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileSerializer(profile, context=context)
         data = serializer.data
         eq_(data['username'], 'foo')
         eq_(data['is_vouched'], True)
@@ -66,73 +69,83 @@ class UserProfileSerializerTests(TestCase):
 
 
 class UserProfileDetailedSerializerTests(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
+
     def test_transform_timezone(self):
         user = UserFactory.create(userprofile={'timezone': 'Europe/Athens'})
         timezone_mock = Mock()
         timezone_mock.return_value = 99
         user.userprofile.timezone_offset = timezone_mock
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         timezone = {'value': 'Europe/Athens',
                     'utc_offset': 99,
                     'privacy': 'Mozillians'}
-        eq_(data['timezone'], timezone)
+        eq_(serializer.data['timezone'], timezone)
 
     def test_transform_bio(self):
         user = UserFactory.create(userprofile={'bio': '*foo*'})
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         bio = {'value': '*foo*',
                'html': '<p><em>foo</em></p>',
                'privacy': 'Mozillians'}
-        eq_(data['bio'], bio)
+        eq_(serializer.data['bio'], bio)
 
     def test_transform_photo(self):
         def _get_url(dimensions):
             return dimensions
 
         user = UserFactory.create(userprofile={'timezone': 'Europe/Athens'})
+        context = {'request': self.factory.get('/')}
         get_photo_url_mock = Mock()
         get_photo_url_mock.side_effect = _get_url
         user.userprofile.get_photo_url = get_photo_url_mock
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         photo = {'value': '300x300',
                  '150x150': '150x150',
                  '300x300': '300x300',
                  '500x500': '500x500',
                  'privacy': 'Mozillians'}
-        eq_(data['photo'], photo)
+        eq_(serializer.data['photo'], photo)
 
     def test_get_country(self):
+        context = {'request': self.factory.get('/')}
         country = CountryFactory.create(name='LA', code='IO')
         user = UserFactory.create(userprofile={'geo_country': country})
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         country = {'code': 'IO',
                    'value': 'LA',
                    'privacy': 'Mozillians'}
-        eq_(data['country'], country)
+        eq_(serializer.data['country'], country)
 
     def test_transform_region(self):
         region = RegionFactory.create(name='LA')
         user = UserFactory.create(userprofile={'geo_region': region})
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         region = {'value': 'LA',
                   'privacy': 'Mozillians'}
-        eq_(data['region'], region)
+        eq_(serializer.data['region'], region)
 
     def test_transform_city(self):
         city = CityFactory.create(name='LA')
         user = UserFactory.create(userprofile={'geo_city': city})
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         city = {'value': 'LA',
                 'privacy': 'Mozillians'}
-        eq_(data['city'], city)
+        eq_(serializer.data['city'], city)
 
     def test_transform_tshirt(self):
         user = UserFactory.create(userprofile={'tshirt': 9})
-        data = UserProfileDetailedSerializer(user.userprofile).data
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         tshirt = {'value': 9,
                   'english': 'Straight-cut Large',
                   'privacy': 'Privileged'}
-        eq_(data['tshirt'], tshirt)
+        eq_(serializer.data['tshirt'], tshirt)
 
 
 class UserProfileViewSetTests(TestCase):
@@ -165,7 +178,7 @@ class UserProfileViewSetTests(TestCase):
         with patch('mozillians.users.api.v2.UserProfileDetailedSerializer') as serializer_mock:
             viewset.retrieve(None, user.userprofile.id)
 
-        serializer_mock.assert_called_with(user.userprofile)
+        serializer_mock.assert_called_with(user.userprofile, context=ANY)
 
     def test_retrieve_non_existent(self):
         viewset = UserProfileViewSet()
