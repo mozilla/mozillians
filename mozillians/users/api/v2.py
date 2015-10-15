@@ -183,11 +183,11 @@ class UserProfileFilter(django_filters.FilterSet):
         qs = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL, identifier=value)
         users = qs.values_list('user__id', flat=True)
         query = Q(id__in=users) | Q(user__email=value)
-        return self.queryset.filter(query).distinct()
+        return queryset.filter(query).distinct()
 
     def filter_group(self, queryset, value):
         membership = GroupMembership.MEMBER
-        return self.queryset.filter(groups__name=value, groupmembership__status=membership)
+        return queryset.filter(groups__name=value, groupmembership__status=membership)
 
 
 # Views
