@@ -1,6 +1,6 @@
 Metadata-Version: 1.1
 Name: djangorestframework
-Version: 2.3.13
+Version: 2.4.8
 Summary: Web APIs for Django, made easy.
 Home-page: http://www.django-rest-framework.org
 Author: Tom Christie
