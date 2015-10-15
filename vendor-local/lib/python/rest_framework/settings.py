@@ -18,12 +18,10 @@ REST framework settings, checking for user settings first, then falling
 back to the defaults.
 """
 from __future__ import unicode_literals
-
 from django.conf import settings
-from django.utils import importlib
-
+from django.utils import six
 from rest_framework import ISO_8601
-from rest_framework.compat import six
+from rest_framework.compat import importlib
 
 
 USER_SETTINGS = getattr(settings, 'REST_FRAMEWORK', None)
@@ -46,16 +44,12 @@ DEFAULTS = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
-    'DEFAULT_THROTTLE_CLASSES': (
-    ),
-    'DEFAULT_CONTENT_NEGOTIATION_CLASS':
-        'rest_framework.negotiation.DefaultContentNegotiation',
+    'DEFAULT_THROTTLE_CLASSES': (),
+    'DEFAULT_CONTENT_NEGOTIATION_CLASS': 'rest_framework.negotiation.DefaultContentNegotiation',
 
     # Genric view behavior
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.ModelSerializer',
-    'DEFAULT_PAGINATION_SERIALIZER_CLASS':
-        'rest_framework.pagination.PaginationSerializer',
+    'DEFAULT_MODEL_SERIALIZER_CLASS': 'rest_framework.serializers.ModelSerializer',
+    'DEFAULT_PAGINATION_SERIALIZER_CLASS': 'rest_framework.pagination.PaginationSerializer',
     'DEFAULT_FILTER_BACKENDS': (),
 
     # Throttling
@@ -63,11 +57,16 @@ DEFAULTS = {
         'user': None,
         'anon': None,
     },
+    'NUM_PROXIES': None,
 
     # Pagination
     'PAGINATE_BY': None,
     'PAGINATE_BY_PARAM': None,
     'MAX_PAGINATE_BY': None,
+
+    # Filtering
+    'SEARCH_PARAM': 'search',
+    'ORDERING_PARAM': 'ordering',
 
     # Authentication
     'UNAUTHENTICATED_USER': 'django.contrib.auth.models.AnonymousUser',
@@ -115,6 +114,7 @@ DEFAULTS = {
 
     # Pending deprecation
     'FILTER_BACKEND': None,
+
 }
 
 

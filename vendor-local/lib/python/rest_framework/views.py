@@ -5,10 +5,9 @@ from __future__ import unicode_literals
 
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.utils.datastructures import SortedDict
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, exceptions
-from rest_framework.compat import smart_text, HttpResponseBase, View
+from rest_framework.compat import smart_text, HttpResponseBase, SortedDict, View
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
@@ -30,6 +29,7 @@ def get_view_name(view_cls, suffix=None):
         name += ' ' + suffix
 
     return name
+
 
 def get_view_description(view_cls, html=False):
     """
@@ -61,6 +61,7 @@ def exception_handler(exc):
             headers['WWW-Authenticate'] = exc.auth_header
         if getattr(exc, 'wait', None):
             headers['X-Throttle-Wait-Seconds'] = '%d' % exc.wait
+            headers['Retry-After'] = '%d' % exc.wait
 
         return Response({'detail': exc.detail},
                         status=exc.status_code,
@@ -101,7 +102,9 @@ class APIView(View):
         """
         view = super(APIView, cls).as_view(**initkwargs)
         view.cls = cls
-        return view
+        # Note: session based authentication is explicitly CSRF validated,
+        # all other authentication is CSRF exempt.
+        return csrf_exempt(view)
 
     @property
     def allowed_methods(self):
@@ -118,7 +121,6 @@ class APIView(View):
         if len(self.renderer_classes) > 1:
             headers['Vary'] = 'Accept'
         return headers
-
 
     def http_method_not_allowed(self, request, *args, **kwargs):
         """
@@ -370,9 +372,9 @@ class APIView(View):
         response.exception = True
         return response
 
-    # Note: session based authentication is explicitly CSRF validated,
-    # all other authentication is CSRF exempt.
-    @csrf_exempt
+    # Note: Views are made CSRF exempt from within `as_view` as to prevent
+    # accidental removal of this exemption in cases where `dispatch` needs to
+    # be overridden.
     def dispatch(self, request, *args, **kwargs):
         """
         `.dispatch()` is pretty much the same as Django's regular dispatch,

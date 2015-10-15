@@ -1,0 +1,6 @@
+rest_framework/authtoken
+rest_framework/utils
+rest_framework/templatetags
+rest_framework
+rest_framework/authtoken/migrations
+rest_framework/authtoken/south_migrations
