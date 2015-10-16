@@ -212,5 +212,5 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, pk):
         user = get_object_or_404(self.get_queryset(), pk=pk)
-        serializer = UserProfileDetailedSerializer(user)
+        serializer = UserProfileDetailedSerializer(user, context={'request': self.request})
         return Response(serializer.data)

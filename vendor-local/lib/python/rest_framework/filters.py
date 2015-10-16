@@ -5,7 +5,9 @@ returned by list views.
 from __future__ import unicode_literals
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from rest_framework.compat import django_filters, six, guardian, get_model_name
+from django.utils import six
+from rest_framework.compat import django_filters, guardian, get_model_name
+from rest_framework.settings import api_settings
 from functools import reduce
 import operator
 
@@ -43,7 +45,7 @@ class DjangoFilterBackend(BaseFilterBackend):
         if filter_class:
             filter_model = filter_class.Meta.model
 
-            assert issubclass(filter_model, queryset.model), \
+            assert issubclass(queryset.model, filter_model), \
                 'FilterSet model %s does not match queryset model %s' % \
                 (filter_model, queryset.model)
 
@@ -54,7 +56,6 @@ class DjangoFilterBackend(BaseFilterBackend):
                 class Meta:
                     model = queryset.model
                     fields = filter_fields
-                    order_by = True
             return AutoFilterSet
 
         return None
@@ -69,7 +70,8 @@ class DjangoFilterBackend(BaseFilterBackend):
 
 
 class SearchFilter(BaseFilterBackend):
-    search_param = 'search'  # The URL query parameter used for the search.
+    # The URL query parameter used for the search.
+    search_param = api_settings.SEARCH_PARAM
 
     def get_search_terms(self, request):
         """
@@ -107,12 +109,17 @@ class SearchFilter(BaseFilterBackend):
 
 
 class OrderingFilter(BaseFilterBackend):
-    ordering_param = 'ordering'  # The URL query parameter used for the ordering.
+    # The URL query parameter used for the ordering.
+    ordering_param = api_settings.ORDERING_PARAM
     ordering_fields = None
 
     def get_ordering(self, request):
         """
         Ordering is set by a comma delimited ?ordering=... query parameter.
+
+        The `ordering` query parameter can be overridden by setting
+        the `ordering_param` value on the OrderingFilter or by
+        specifying an `ORDERING_PARAM` value in the API settings.
         """
         params = request.QUERY_PARAMS.get(self.ordering_param)
         if params:
@@ -181,4 +188,9 @@ class DjangoObjectPermissionsFilter(BaseFilterBackend):
             'model_name': get_model_name(model_cls)
         }
         permission = self.perm_format % kwargs
-        return guardian.shortcuts.get_objects_for_user(user, permission, queryset)
+        if guardian.VERSION >= (1, 3):
+            # Maintain behavior compatibility with versions prior to 1.3
+            extra = {'accept_global_perms': False}
+        else:
+            extra = {}
+        return guardian.shortcuts.get_objects_for_user(user, permission, queryset, **extra)
