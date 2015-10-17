@@ -1,2 +1,0 @@
-tablib
-diff-match-patch

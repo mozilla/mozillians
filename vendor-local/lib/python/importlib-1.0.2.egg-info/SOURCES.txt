@@ -1,6 +1,0 @@
-README
-importlib/__init__.py
-importlib.egg-info/PKG-INFO
-importlib.egg-info/SOURCES.txt
-importlib.egg-info/dependency_links.txt
-importlib.egg-info/top_level.txt

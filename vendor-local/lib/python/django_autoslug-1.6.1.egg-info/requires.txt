@@ -1,7 +1,0 @@
-
-
-[translitcodec]
-translitcodec >= 0.3
-
-[cyrillic]
-pytils >= 0.2
