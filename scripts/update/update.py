@@ -31,10 +31,7 @@ def update_code(ctx, tag):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local("git fetch")
         ctx.local("git checkout -f %s" % tag)
-        ctx.local("git submodule sync")
-        ctx.local("git submodule update --init --recursive")
         ctx.local("find . -type f -name '.gitignore' -or -name '*.pyc' -delete")
-        ctx.local('git clean -xdff "vendor-local/"')
 
 
 @task
@@ -160,8 +157,33 @@ def update_info(ctx, tag):
 
 
 @task
+def setup_dependencies(ctx):
+    with ctx.lcd(settings.SRC_DIR):
+        # Creating a virtualenv tries to open virtualenv/bin/python for
+        # writing, but because virtualenv is using it, it fails.
+        # So we delete it and let virtualenv create a new one.
+        ctx.local('rm -f virtualenv/bin/python virtualenv/bin/python2.7')
+        ctx.local('virtualenv-2.7 --no-site-packages virtualenv')
+
+        # Activate virtualenv to append to the correct path to $PATH.
+        activate_env = os.path.join(settings.SRC_DIR, 'virtualenv', 'bin', 'activate_this.py')
+        execfile(activate_env, dict(__file__=activate_env))
+
+        ctx.local('pip --version')
+        ctx.local('./peep.sh install -r requirements/prod.txt')
+        # Make the virtualenv relocatable
+        ctx.local('virtualenv-2.7 --relocatable virtualenv')
+
+        # Fix lib64 symlink to be relative instead of absolute.
+        ctx.local('rm -f virtualenv/lib64')
+        with ctx.lcd('virtualenv'):
+            ctx.local('ln -s lib lib64')
+
+
+@task
 def pre_update(ctx, ref=settings.UPDATE_REF):
     update_code(ref)
+    setup_dependencies()
     update_info(ref)
 
 
