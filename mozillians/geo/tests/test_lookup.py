@@ -7,10 +7,11 @@ from requests import ConnectionError, HTTPError
 from mozillians.common.tests import TestCase
 from mozillians.geo.models import Country, Region, City
 from mozillians.geo.lookup import (GeoLookupException, deduplicate_cities,
-                                   get_first_mapbox_geocode_result,
-                                   result_to_city, result_to_country_region_city,
-                                   result_to_country, result_to_region, reverse_geocode)
+                                   get_first_mapbox_geocode_result, result_to_city,
+                                   result_to_country_region_city, result_to_country,
+                                   result_to_region, reverse_geocode)
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
+from mozillians.users.models import UserProfile
 from mozillians.users.tests import UserFactory
 
 
@@ -106,6 +107,32 @@ class TestResultToCountry(TestCase):
         ok_(isinstance(country, Country))
         eq_(country.code, u'gr')
 
+    def test_duplicate_results(self):
+        """Test that in case mapbox API returns a country already stored in DB
+        with diferrent mapbox_id, we gracefully update all entries and foreign keys
+        with the latest mapbox data."""
+
+        country = CountryFactory.create(mapbox_id='42')
+        user = UserFactory.create(userprofile={'geo_country': country})
+
+        result = {
+            'country': {
+                'name': country.name,
+                'id': '24'
+            }
+        }
+
+        result_to_country(result)
+
+        country_qs = Country.objects.filter(name=country.name)
+        eq_(country_qs.count(), 1)
+        eq_(country_qs[0].mapbox_id, '24')
+        ok_(not Country.objects.filter(mapbox_id='42').exists())
+
+        userprofile = UserProfile.objects.get(pk=user.userprofile.id)
+        eq_(userprofile.geo_country.name, country.name)
+        eq_(userprofile.geo_country.mapbox_id, '24')
+
 
 class TestResultToRegion(TestCase):
     def test_no_region(self):
@@ -139,6 +166,35 @@ class TestResultToRegion(TestCase):
         result_to_region(result, country)
         region = Region.objects.get(pk=region.pk)
         eq_(new_name, region.name)
+
+    def test_duplicate_results(self):
+        """Test that in case mapbox API returns a region already stored in DB
+        with diferrent mapbox_id, we gracefully update all entries and foreign keys
+        with the latest mapbox data."""
+
+        region = RegionFactory.create(mapbox_id='42')
+        user = UserFactory.create(userprofile={'geo_region': region})
+        result = {
+            'province': {
+                'name': region.name,
+                'id': '24'
+            }
+        }
+
+        result_to_region(result, region.country)
+        lookup_args = {
+            'name': region.name,
+            'country': region.country
+        }
+
+        region_qs = Region.objects.filter(**lookup_args)
+        ok_(region_qs.count(), 1)
+        eq_(region_qs[0].mapbox_id, '24')
+        ok_(not Region.objects.filter(mapbox_id='42').exists())
+
+        userprofile = UserProfile.objects.get(pk=user.userprofile.id)
+        eq_(userprofile.geo_region.name, region.name)
+        eq_(userprofile.geo_region.mapbox_id, '24')
 
 
 class TestResultToCity(TestCase):
