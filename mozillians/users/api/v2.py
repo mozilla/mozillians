@@ -63,6 +63,7 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
     email = serializers.Field(source='email')
+    photo = serializers.SerializerMethodField('get_photo')
     alternate_emails = AlternateEmailSerializer(many=True, source='alternate_emails')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
@@ -120,14 +121,18 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
             'privacy': obj.get_privacy_bio_display(),
         }
 
-    def transform_photo(self, obj, value):
+    def get_photo(self, obj):
         return {
             'value': obj.get_photo_url('300x300'),
             '150x150': obj.get_photo_url('150x150'),
             '300x300': obj.get_photo_url('300x300'),
             '500x500': obj.get_photo_url('500x500'),
-            'privacy': obj.get_privacy_photo_display(),
         }
+
+    def transform_photo(self, obj, value):
+        privacy_field = {'privacy': obj.get_privacy_photo_display()}
+        value.update(privacy_field)
+        return value
 
     def transform_tshirt(self, obj, value):
         return {
