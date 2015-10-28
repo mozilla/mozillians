@@ -147,7 +147,7 @@ class Group(GroupBase):
     ALIAS_MODEL = GroupAlias
 
     # Has a steward taken ownership of this group?
-    description = models.TextField(max_length=255,
+    description = models.TextField(max_length=1024,
                                    verbose_name=_lazy(u'Description'),
                                    default='', blank=True)
     curator = models.ForeignKey('users.UserProfile',
@@ -179,7 +179,7 @@ class Group(GroupBase):
         max_length=10
     )
     new_member_criteria = models.TextField(
-        max_length=255,
+        max_length=1024,
         default='',
         blank=True,
         verbose_name=_lazy(u'New Member Criteria'),
