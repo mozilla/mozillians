@@ -8,6 +8,7 @@ from django.db import transaction
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
@@ -242,10 +243,16 @@ def edit_profile(request):
                 f.save()
 
             if curr_sect == 'registration_section':
+                settings_url = reverse('phonebook:profile_edit')
+                settings_link = '<a href="{0}">settings</a>'.format(settings_url)
+                msg = _(u'Your registration is complete. '
+                        u'Feel free to visit the {0} page to complete '
+                        u'additional info for your profile.'.format(settings_link))
+                messages.info(request, mark_safe(msg))
                 redeem_invite(profile, request.session.get('invite-code'))
             elif user.username != old_username:
-                msg = (u'You changed your username; '
-                       u'please note your profile URL has also changed.')
+                msg = _(u'You changed your username; '
+                        u'please note your profile URL has also changed.')
                 messages.info(request, _(msg))
 
             next_section = request.GET.get('next')
