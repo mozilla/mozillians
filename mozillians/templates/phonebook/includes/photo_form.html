@@ -1,12 +1,16 @@
 <fieldset>
   <div id="photo" class="row">
-    <div class="{% if profile.is_complete %}col-md-3{% else %}col-md-4{% endif %}">
+    <div class="{% if profile.is_complete %}col-md-3{% else %}col-md-12{% endif %}">
       <label for="id_photo">{{ _('Profile Photo') }}</label>
       <div class="profile-photo">
         <img src="{{ profile.get_photo_url('100x100') }}" alt="{{ _('Profile photo') }}">
       </div>
     </div>
-    <div class="{% if profile.is_complete %}col-md-6 col-sm-6{% else %}col-md-8{% endif %}">
+    {% if not profile.is_complete %}
+      </div>
+      <div class="row">
+    {% endif %}
+    <div class="{% if profile.is_complete %}col-md-6 col-sm-6{% else %}col-md-12{% endif %}">
       <input class="input-file photo" id="id_photo" type="file" name="photo">
       {% if profile.photo %}
         <div id="id_photo_delete">
@@ -17,7 +21,11 @@
         </div>
       {% endif %}
     </div>
-    <div class="{% if profile.is_complete %}col-md-3 text-right{% else %}col-md-8 registration{% endif %}">
+    {% if not profile.is_complete %}
+      </div>
+      <div class="row">
+    {% endif %}
+    <div class="{% if profile.is_complete %}col-md-3 text-right{% else %}col-md-12 registration-photo{% endif %}">
       {% if profile.is_complete %}
         {{ privacy_field(basic_information_form.privacy_photo) }}
       {% else %}

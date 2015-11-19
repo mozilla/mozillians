@@ -16,27 +16,33 @@
      <div class="panel-heading">{{ _('Basic Information') }}</div>
      <div class="panel-body">
        <div class="row">
-         <div class="col-md-6">
+         <div class="col-md-4">
            {% include 'phonebook/includes/photo_form.html' %}
          </div>
 
-         <div class="col-md-6 registration">
+         <div class="col-md-8 registration">
            <fieldset>
              <div class="row">
-               <div class="col-md-12">
+               <div class="col-md-8 col-sm-8">
                  {{ mozillians_field(user_form.username) }}
+               </div>
+               <div class="col-md-4 col-sm-4 text-right">
+                 <div class="privacy-controls">
+                   <span class="info glyphicon glyphicon-eye-open" aria-hidden="true" title="{{ _('Choose visibility group for this field') }}"></span>
+                   <div class="btn-group btn-group-xs" role="group">
+                     <button type="button" class="btn btn-default active">{{ _('Public') }}</button>
+                   </div>
+                 </div>
                </div>
              </div>
            </fieldset>
 
            <fieldset>
              <div class="row">
-               <div class="col-md-12 col-sm-6">
+               <div class="col-md-8 col-sm-8">
                  {{ mozillians_field(registration_form.full_name) }}
                </div>
-             </div>
-             <div class="row">
-               <div class="col-md-12 registration">
+               <div class="col-md-4 col-sm-4 text-right">
                  {{ privacy_field(registration_form.privacy_full_name) }}
                </div>
              </div>
@@ -88,7 +94,7 @@
 
           <fieldset>
             <div class="row">
-              <div class="col-md-5 col-sm-6">
+              <div class="col-md-5 col-sm-6 registration">
                 <label class="required">{{ _('Country') }}</label>
                 <span id="display_country" class="geodisplay"
                       data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
@@ -96,8 +102,8 @@
               </div>
               <div class="col-md-4 col-sm-3">
                 <div class="geocheckbox {% if registration_form.savecountry.errors %} error {% endif %}">
-                  {{ registration_form.savecountry }}
                   {{ registration_form.savecountry.label_tag() }}
+                  {{ registration_form.savecountry }}
                   {% for error in registration_form.savecountry.errors %}
                     <span class="error-message">{{ error }}</span>
                   {% endfor %}
@@ -119,8 +125,8 @@
               </div>
               <div class="col-md-4 col-sm-3">
                 <div class="geocheckbox {% if registration_form.saveregion.errors %} error {% endif %}">
-                  {{ registration_form.saveregion }}
                   {{ registration_form.saveregion.label_tag() }}
+                  {{ registration_form.saveregion }}
                   {% for error in registration_form.saveregion.errors %}
                     <span class="error-message">{{ error }}</span>
                   {% endfor %}
@@ -141,8 +147,8 @@
               </div>
               <div class="col-md-4 col-sm-3">
                 <div class="geocheckbox {% if registration_form.savecity.errors %} error {% endif %}">
-                  {{ registration_form.savecity }}
                   {{ registration_form.savecity.label_tag() }}
+                  {{ registration_form.savecity }}
                   {% for error in registration_form.savecity.errors %}
                     <span class="error-message">{{ error }}</span>
                   {% endfor %}

@@ -37,8 +37,16 @@
 
         <fieldset>
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-8 col-sm-6">
               {{ mozillians_field(user_form.username) }}
+            </div>
+            <div class="col-md-4 col-sm-6 text-right">
+              <div class="privacy-controls">
+                <span class="info glyphicon glyphicon-eye-open" aria-hidden="true" title="{{ _('Choose visibility group for this field') }}"></span>
+                <div class="btn-group btn-group-xs" role="group">
+                  <button type="button" class="btn btn-default active">{{ _('Public') }}</button>
+                </div>
+              </div>
             </div>
           </div>
         </fieldset>
@@ -48,7 +56,7 @@
             <div class="col-md-8 col-sm-6">
               {{ mozillians_field(basic_information_form.full_name) }}
             </div>
-            <div class="col-md-4 text-right">
+            <div class="col-md-4 col-sm-6 text-right">
               {{ privacy_field(basic_information_form.privacy_full_name) }}
             </div>
           </div>
@@ -56,7 +64,7 @@
 
         <fieldset>
           <div class="row">
-            <div class="col-md-9 col-sm-6">
+            <div class="col-md-8 col-sm-6">
               {{ mozillians_field(basic_information_form.bio) }}
               <span class="under-input-field">
                 {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
@@ -64,7 +72,7 @@
                 {% endtrans %}
               </span>
             </div>
-            <div class="col-md-3 text-right">
+            <div class="col-md-4 col-sm-6 text-right">
               {{ privacy_field(basic_information_form.privacy_bio) }}
             </div>
           </div>
@@ -83,32 +91,39 @@
       <div class="panel-heading">{{ _('Emails') }}</div>
       <div class="panel-body">
         <fieldset>
-          <p>{{ _('Primary e-mail address') }}</p>
+          <label class="email-label">{{ _('Primary e-mail address') }}</label>
           <div class="row">
-            <div class="col-md-9">
-              <label class="email">{{ email_privacy_form.instance.email }}</label>
+            <div class="col-md-8 col-sm-6">
+              <span class="email">{{ email_privacy_form.instance.email }}</span>
             </div>
-            <div class="col-md-3 text-right">
+            <div class="col-md-4 col-sm-6 text-right">
               {{ privacy_field(email_privacy_form.privacy_email) }}
             </div>
           </div>
         </fieldset>
 
         <fieldset id="alternate-email">
-          <p>{{ _('Secondary e-mail addresses') }}</p>
+          <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
           {{ alternate_email_formset.management_form }}
 
           {% for form in alternate_email_formset %}
-            <div class="alternate-email-fieldrow">
-              <label class="email">{{ form.instance.identifier }}</label>
-              <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
-                Delete
-              </a>
-              <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
-                Make Primary
-              </a>
-              {{ form.id }}
-              {{ privacy_field(form.privacy) }}
+            <div class="row alternate-email-fieldrow">
+              <div class="col-sm-8">
+                <span class="email">{{ form.instance.identifier }}</span>
+                {{ form.id }}
+                <div class="email-controls">
+                  <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
+                    Delete
+                  </a>
+                  <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
+                    Make Primary
+                  </a>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                {{ privacy_field(form.privacy) }}
+              </div>
+
             </div>
           {% endfor %}
 
@@ -138,7 +153,7 @@
       <div class="panel-body">
         <fieldset>
           <div class="row">
-            <div class="col-md-9 col-sm-9">
+            <div class="col-sm-8">
               <p class="field_description">
                 {% trans %}
                   A skill is the learned capacity to carry out pre-determined
@@ -147,7 +162,7 @@
                 {% endtrans %}
               </p>
             </div>
-            <div class="col-md-3 col-sm-3 text-right">
+            <div class="col-sm-4 text-right">
               {{ privacy_field(skills_form.privacy_skills) }}
             </div>
           </div>
@@ -173,7 +188,7 @@
       <div class="panel-body">
         <fieldset>
           <div class="row">
-            <div class="col-md-9 col-sm-9" id="languages">
+            <div class="col-sm-8" id="languages">
               <p class="field_description">
                 {% trans %}
                   The Mozilla Project spans over many countries and
@@ -201,7 +216,7 @@
               {% endfor %}
               <a href="#" id="languages-addfield" class="addField"><i class="icon-plus-circle"></i> {{ _('Add language') }}</a>
             </div>
-            <div class="col-md-3">
+            <div class="col-sm-4">
               {{ privacy_field(language_privacy_form.privacy_languages) }}
             </div>
           </div>
