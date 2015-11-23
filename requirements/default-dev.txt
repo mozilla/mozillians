@@ -1,0 +1,60 @@
+# sha256: NNyVtworB6YbXWEDTDSwX4JRSqtUrSet7bSc7pEbuOk
+Sphinx==1.1.3
+
+# sha256: Ln675Z2MheYm422Z8NsvV4OUMT0_fOncnx2lfvbNdTc
+flake8==2.4.1
+
+# sha256: D41ubgIjuPsEEUtKcgk4DhrPJ-Ch3Rq5j-zghafDxSU
+nose==1.0.0
+
+# sha256: uDndLZwRfHAUMMFJlWkYpCOphjtIsJyQ4wpgE-fS9E8
+mock==1.0.1
+
+# sha256: Ik3Rv9j8259nJWxUMBR7TAEF1y9qyM47ymtIZEnsYGI
+django-nose==1.4.1
+
+# test-utils: master
+# sha256: ifAFimx-1y5qwpmyuDR6zd_VzM1g3Y_TCkoDHfCRy5s
+https://github.com/jbalogh/test-utils/archive/e42e031d31ea63d593e47d564545149a0f30b95f.tar.gz#egg=test-utils
+
+# sha256: 8PJ0mEuK5oDV1UIL_ivE_QIvtipd89uR-TIajbTPmk0
+lxml==2.1
+
+# sha256: RsUeuHi3h-gU7o-XN7CmIREDSutNHAZFCsWo6lpw5gI
+pyquery==1.2.9
+
+# sha256: sUbYzcKH2wf270SRdm2EGpMbGyZwQP74HrVZpHX-Pbk
+translate-toolkit==1.8.0
+
+# sha256: ZfstcU_VvbmwiDKZPCyEeLJdmMKj54dpbP52KsrmRUQ
+django-extensions==1.5.6
+
+# sha256: nSdx5Mib4Se8S6wFarfOrw4AZMcj1rbhlXOcOvT9XB0
+Werkzeug==0.10.4
+
+# sha256: y384GYc3cUvPtv2O1IlafRRDWTNZCXEM3-xKnzvn5nE
+coverage==4.0b3
+
+# sha256: ku47hrXBkhwtnawhe--JkMX4Usi8TZAYyv4PPzuBzTo
+nosenicedots==0.5
+
+# sha256: zYMG5kw6EV3soTZoXpRduI_-FxOCAS7JOO0kGiDdfro
+factory-boy==2.5.2
+
+# sha256: MxnZwEi7pMyJqWkRgdDgIYei8JtDQ_0vz2zL-EtO4Yo
+dennis==0.6.1
+
+# sha256: 7cVxMGHxCWYEi_a0DZpRSzgeC6hJxk4DTE72wYR9MAc
+blessings==1.6
+
+# sha256: Ln675Z2MheYm422Z8NsvV4OUMT0_fOncnx2lfvbNdTc
+flake8==2.4.1
+
+# sha256: X36m-zqpr-FG0H_W1c7feIdH2LDCnkRzJFPCstsePRY
+mccabe==0.3.1
+
+# sha256: FbQhMbJfN2Fl0ZX-ThewooMRGCqvkzDV61dbvtpaaYk
+pep8==1.5.7
+
+# sha256: P6gKELNtUWhr93RPXcmWIs1cmM6O1kAi5imGiq_Bd2k
+pyflakes==0.8.1

@@ -2,9 +2,9 @@ import logging
 import logging.handlers
 
 from django.conf import settings
+from django.utils.log import dictConfig
 
 import commonware.log
-import dictconfig
 
 
 class NullHandler(logging.Handler):
@@ -65,5 +65,5 @@ for logger in cfg['loggers'].values() + [cfg['root']]:
     if logger is not cfg['root'] and 'propagate' not in logger:
         logger['propagate'] = False
 
-dictconfig.dictConfig(cfg)
+dictConfig(cfg)
 

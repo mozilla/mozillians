@@ -4,22 +4,104 @@
 import logging
 import os.path
 import sys
-
-from funfactory.manage import path
-from funfactory.settings_base import *  # noqa
-from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
 
 from django.utils.functional import lazy
 
+
+DEV = False
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = ()
+MANAGERS = ADMINS
+
+DATABASES = {}  # See settings_local.
+
+SLAVE_DATABASES = []
+
+DATABASE_ROUTERS = ('multidb.PinningMasterSlaveRouter',)
+
+# Site ID is used by Django's Sites framework.
+SITE_ID = 1
+
+
+# CEF Logging
+CEF_PRODUCT = 'Mozillians'
+CEF_VENDOR = 'Mozilla'
+CEF_VERSION = '0'
+CEF_DEVICE_VERSION = '0'
+
+
+# Internationalization.
+
+# Local time zone for this installation. Choices can be found here:
+# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+# although not all choices may be available on all operating systems.
+# On Unix systems, a value of None will cause Django to use the same
+# timezone as the operating system.
+# If running in a Windows environment this must be set to the same as your
+# system time zone.
+TIME_ZONE = 'America/Los_Angeles'
+
+# If you set this to False, Django will make some optimizations so as not
+# to load the internationalization machinery.
+USE_I18N = True
+
+# If you set this to False, Django will not format dates, numbers and
+# calendars according to the current locale
+USE_L10N = True
+
+# Gettext text domain
+TEXT_DOMAIN = 'messages'
+STANDALONE_DOMAINS = [TEXT_DOMAIN, 'javascript']
+TOWER_KEYWORDS = {'_lazy': None}
+TOWER_ADD_HEADERS = True
+
+# Language code for this installation. All choices can be found here:
+# http://www.i18nguy.com/unicode/language-identifiers.html
+LANGUAGE_CODE = 'en-US'
+
+# Accepted locales
+
+# Tells the product_details module where to find our local JSON files.
+# This ultimately controls how LANGUAGES are constructed.
 # Log settings
+HAS_SYSLOG = True
+LOG_LEVEL = logging.INFO
 SYSLOG_TAG = "http_app_mozillians"
+LOGGING_CONFIG = None
 LOGGING = {
     'loggers': {
         'landing': {'level': logging.INFO},
         'phonebook': {'level': logging.INFO},
     },
 }
+
+DEV_LANGUAGES = None
+CANONICAL_LOCALES = {
+    'en': 'en-US',
+}
+
+
+def lazy_lang_url_map():
+    from django.conf import settings
+    langs = settings.DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
+    return dict([(i.lower(), i) for i in langs])
+
+LANGUAGE_URL_MAP = lazy(lazy_lang_url_map, dict)()
+
+
+# Override Django's built-in with our native names
+def lazy_langs():
+    from django.conf import settings
+    from product_details import product_details
+    langs = DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
+    return dict([(lang.lower(), product_details.languages[lang]['native'])
+                 for lang in langs if lang in product_details.languages])
+
+LANGUAGES = lazy(lazy_langs, dict)()
+SLAVE_DATABASES = []
 
 # Database settings
 DATABASES = {
@@ -37,6 +119,12 @@ DATABASES = {
     },
 }
 
+ROOT = os.path.dirname(os.path.dirname(__file__))
+ROOT_URLCONF = '%s.urls' % os.path.basename(ROOT)
+
+# path bases things off of ROOT
+path = lambda *a: os.path.abspath(os.path.join(ROOT, *a))
+
 # L10n
 LOCALE_PATHS = [path('locale')]
 
@@ -52,6 +140,9 @@ DOMAIN_METHODS = {
     ],
 }
 
+# Tells the product_details module where to find our local JSON files.
+# This ultimately controls how LANGUAGES are constructed.
+PROD_DETAILS_DIR = path('../lib/product_details_json')
 # Accepted locales
 LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
@@ -74,9 +165,18 @@ TEMPLATE_LOADERS = (
     # 'django.template.loaders.eggs.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-    append=['mozillians.common.context_processors.current_year',
-            'mozillians.common.context_processors.canonical_path'])
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.media',
+    'django.core.context_processors.request',
+    'session_csrf.context_processor',
+    'django.contrib.messages.context_processors.messages',
+    'mozillians.common.context_processors.i18n',
+    'mozillians.common.context_processors.globals',
+    'mozillians.common.context_processors.current_year',
+    'mozillians.common.context_processors.canonical_path'
+)
 
 
 JINGO_EXCLUDE_APPS = [
@@ -88,8 +188,12 @@ JINGO_EXCLUDE_APPS = [
 
 
 def JINJA_CONFIG():
-    config = funfactory_JINJA_CONFIG()
-    config['extensions'].append('compressor.contrib.jinja2ext.CompressorExtension')
+    config = {'extensions': ['tower.template.i18n',
+                             'jinja2.ext.do',
+                             'jinja2.ext.with_',
+                             'jinja2.ext.loopcontrols',
+                             'compressor.contrib.jinja2ext.CompressorExtension'],
+              'finalize': lambda x: x if x is not None else ''}
     return config
 
 
@@ -98,27 +202,37 @@ def COMPRESS_JINJA2_GET_ENVIRONMENT():
     return env
 
 
-MIDDLEWARE_CLASSES = get_middleware(append=[
+MIDDLEWARE_CLASSES = (
+    'mozillians.common.middleware.LocaleURLMiddleware',
+    'multidb.middleware.PinningRouterMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'commonware.middleware.FrameOptionsHeader',
+    'mobility.middleware.DetectMobileMiddleware',
+    'mobility.middleware.XMobileMiddleware',
     'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
-
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.TastyPieRequestTimingMiddleware',
-
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
     'mozillians.phonebook.middleware.UsernameRedirectionMiddleware',
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
-
     'waffle.middleware.WaffleMiddleware',
-])
+)
 
 # StrictTransport
 STS_SUBDOMAINS = True
 
 # Not all URLs need locale.
-SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
+SUPPORTED_NONLOCALES = [
+    'media',
+    'static',
+    'admin'
     'csp',
     'api',
     'browserid',
@@ -139,7 +253,21 @@ USERNAME_MAX_LENGTH = 30
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/login/'
 
-INSTALLED_APPS = get_apps(append=[
+INSTALLED_APPS = (
+    'funfactory',
+    'compressor',
+    'tower',
+    'cronjobs',
+    'django_browserid',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.staticfiles',
+    'commonware.response.cookies',
+    'djcelery',
+    'django_nose',
+    'session_csrf',
+    'product_details',
     'csp',
     'mozillians',
     'mozillians.users',
@@ -152,16 +280,13 @@ INSTALLED_APPS = get_apps(append=[
     'mozillians.announcements',
     'mozillians.humans',
     'mozillians.geo',
-
     'sorl.thumbnail',
     'autocomplete_light',
-
     'django.contrib.admin',
     'import_export',
     'waffle',
-    'rest_framework',
-
-])
+    'rest_framework'
+)
 
 # Auth
 PWD_ALGORITHM = 'bcrypt'
@@ -274,6 +399,8 @@ def _allowed_hosts():
     return [host]
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 
+MEDIA_ROOT = path('media')
+MEDIA_URL = '/media/'
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
@@ -297,6 +424,9 @@ ITEMS_PER_PAGE = 24
 
 COMPRESS_OFFLINE = True
 COMPRESS_ENABLED = True
+
+STATIC_ROOT = path('static')
+STATIC_URL = '/static/'
 
 HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
 HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales'

@@ -3,7 +3,7 @@ from django.conf import settings
 import cronjobs
 
 from celery.task.sets import TaskSet
-from celeryutils import chunked
+from mozillians.common.utils import chunked
 from elasticutils.contrib.django import get_es
 
 from mozillians.users.tasks import index_objects
