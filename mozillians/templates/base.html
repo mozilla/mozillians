@@ -160,10 +160,10 @@
       <div id="content-wrapper">
         <div id="main" class="container">
           {% block messages %}
-            {% for message in messages %}
-              {% with label = message.tags in ['error', 'success', 'info', 'warning'] %}
-                <div class="alert {% if label %}alert-{{ message.tags }}{% endif %}">
-                  {{ message }}
+            {% for m in messages %}
+              {% with label = m.tags in ['error', 'success', 'info', 'warning'] %}
+                <div class="alert {% if label %}alert-{{ m.tags }}{% endif %}">
+                  {{ m.message }}
                 </div>
               {% endwith %}
             {% endfor %}

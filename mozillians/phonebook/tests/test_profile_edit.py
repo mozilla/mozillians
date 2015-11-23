@@ -149,6 +149,26 @@ class ProfileEditTests(TestCase):
         ok_(form.errors.get('lat'))
         ok_(form.errors.get('lng'))
 
+    @patch('mozillians.phonebook.views.messages.info')
+    def test_succesful_registration(self, info_mock):
+        user = UserFactory.create(first_name='', last_name='')
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        data = {
+            'full_name': 'foo bar',
+            'email': 'foo@example.com',
+            'username': 'foobar',
+            'lat': 40.005814,
+            'lng': -3.42071,
+            'optin': True,
+            'registration_section': ''
+        }
+        data.update(_get_privacy_fields(MOZILLIANS))
+        with self.login(user) as client:
+            response = client.post(url, data, follow=True)
+
+        eq_(response.status_code, 200)
+        ok_(info_mock.called)
+
 
 class LocationEditTests(TestCase):
     def setUp(self):
