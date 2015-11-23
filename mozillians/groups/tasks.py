@@ -90,7 +90,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     # Using English for now
     tower.activate('en-us')
 
-    if old_status == GroupMembership.PENDING:
+    if old_status in [GroupMembership.PENDING, GroupMembership.PENDING_TERMS]:
         if new_status == GroupMembership.MEMBER:
             subject = _('Accepted to Mozillians group "%s"') % group.name
             template_name = 'groups/email/accepted.txt'

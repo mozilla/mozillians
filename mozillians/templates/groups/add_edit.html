@@ -72,6 +72,10 @@
       {{ mozillians_field(form.new_member_criteria, required=True) }}
     </fieldset>
 
+    <fieldset>
+      {{ mozillians_field(form.terms) }}
+    </fieldset>
+
     {% if user.userprofile.is_manager %}
       <h2>{{ _('Admin Settings') }}</h2>
 

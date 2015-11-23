@@ -559,6 +559,7 @@ class UserProfile(UserProfilePrivacyModel):
         for membership in self.groupmembership_set.filter(group_id__in=user_group_ids):
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
+            group.pending_terms = (membership.status == GroupMembership.PENDING_TERMS)
             groups.append(group)
         return groups
 

@@ -16,7 +16,10 @@ from mozillians.users.models import UserProfile
 from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.groups.forms import GroupForm, MembershipFilterForm, SortForm, SuperuserGroupForm
+from mozillians.common.helpers import get_object_or_none
+from mozillians.groups.forms import (GroupForm, TermsReviewForm,
+                                     MembershipFilterForm, SortForm,
+                                     SuperuserGroupForm)
 from mozillians.groups.models import Group, Skill, GroupMembership
 
 
@@ -110,6 +113,13 @@ def show(request, url, alias_model, template):
     data = {}
 
     if isinstance(group, Group):
+        # Has the user accepted the group terms
+        if group.terms:
+            membership = get_object_or_none(GroupMembership, group=group, userprofile=profile,
+                                            status=GroupMembership.PENDING_TERMS)
+            if membership:
+                return redirect(reverse('groups:review_terms', args=[group.url]))
+
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
 
@@ -256,13 +266,42 @@ def confirm_member(request, url, user_pk):
         if membership.status == GroupMembership.MEMBER:
             messages.error(request, _('This user is already a member of this group.'))
         else:
-            group.add_member(profile)
+            status = GroupMembership.MEMBER
+            if group.terms:
+                status = GroupMembership.PENDING_TERMS
+            group.add_member(profile, status=status)
             messages.info(request, _('This user has been added as a member of this group.'))
     return redirect(next_url)
 
 
 def edit(request, url, alias_model, template):
     return render(request, alias_model, template)
+
+
+def review_terms(request, url):
+    """Review group terms page."""
+    group = get_object_or_404(Group, url=url)
+    if not group.terms:
+        return redirect(reverse('groups:show_group', args=[group.url]))
+
+    membership = get_object_or_404(GroupMembership, group=group,
+                                   userprofile=request.user.userprofile,
+                                   status=GroupMembership.PENDING_TERMS)
+
+    membership_form = TermsReviewForm(request.POST or None)
+    if membership_form.is_valid():
+        if membership_form.cleaned_data['terms_accepted'] == 'True':
+            group.add_member(request.user.userprofile, GroupMembership.MEMBER)
+        else:
+            membership.delete()
+        return redirect(reverse('groups:show_group', args=[group.url]))
+
+    ctx = {
+        'group': group,
+        'membership_form': membership_form
+    }
+
+    return render(request, 'groups/terms.html', ctx)
 
 
 @require_POST
@@ -283,11 +322,15 @@ def join_group(request, url):
         messages.error(request, _('This group is not accepting requests to join.'))
     else:
         if group.accepting_new_members == 'yes':
-            group.add_member(profile_to_add)
+            status = GroupMembership.MEMBER
             messages.info(request, _('You have been added to this group.'))
+            if group.terms:
+                status = GroupMembership.PENDING_TERMS
         elif group.accepting_new_members == 'by_request':
-            group.add_member(profile_to_add, status=GroupMembership.PENDING)
+            status = GroupMembership.PENDING
             messages.info(request, _('Your membership request has been sent to the group curator.'))
+
+        group.add_member(profile_to_add, status=status)
 
     return redirect(reverse('groups:show_group', args=[group.url]))
 
