@@ -172,7 +172,6 @@ def edit_profile(request):
         'basic_section': ['user_form', 'basic_information_form'],
         'groups_section': ['groups_privacy_form'],
         'skills_section': ['skills_form'],
-        'email_section': ['email_privacy_form', 'alternate_email_formset'],
         'languages_section': ['language_privacy_form', 'language_formset'],
         'accounts_section': ['accounts_formset'],
         'irc_section': ['irc_form'],
@@ -227,10 +226,8 @@ def edit_profile(request):
                                                 instance=profile)
     ctx['email_privacy_form'] = forms.EmailPrivacyForm(get_request_data('email_privacy_form'),
                                                        instance=profile)
-    alternate_email_formset_data = get_request_data('alternate_email_formset')
-    ctx['alternate_email_formset'] = forms.AlternateEmailFormset(alternate_email_formset_data,
-                                                                 instance=profile,
-                                                                 queryset=emails)
+    ctx['alternate_email_formset'] = forms.AlternateEmailFormset(instance=profile, queryset=emails)
+
     forms_valid = True
     if request.POST:
         if not curr_sect:
@@ -293,7 +290,8 @@ def change_primary_email(request, email_pk):
     """Change primary email address."""
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
-    alternate_emails = ExternalAccount.objects.filter(user=profile, type=ExternalAccount.TYPE_EMAIL)
+    alternate_emails = ExternalAccount.objects.filter(user=profile,
+                                                      type=ExternalAccount.TYPE_EMAIL)
 
     # Only email owner can change primary email
     if not alternate_emails.filter(pk=email_pk).exists():
