@@ -488,12 +488,15 @@ class UserProfile(UserProfilePrivacyModel):
 
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
-        email = self.user.email
+        emails = [acc.identifier for acc in
+                  ExternalAccount.objects.filter(user=self, type=ExternalAccount.TYPE_EMAIL)]
+        emails.append(self.user.email)
 
-        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            if not self.vouches_received.filter(
-                    description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
-                self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
+        email_exists = any([email for email in emails
+                            if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
+        if email_exists and not self.vouches_received.filter(
+                description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
+            self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
     def _email_now_vouched(self, vouched_by, description=''):
         """Email this user, letting them know they are now vouched."""
@@ -863,6 +866,15 @@ class ExternalAccount(models.Model):
 
     def __unicode__(self):
         return self.type
+
+
+@receiver(dbsignals.post_save, sender=ExternalAccount, dispatch_uid='add_employee_vouch_sig')
+def add_employee_vouch(sender, instance, **kwargs):
+    """Add a vouch if an alternate email address is a mozilla* address."""
+
+    if kwargs.get('raw') or not instance.type == ExternalAccount.TYPE_EMAIL:
+        return
+    instance.user.auto_vouch()
 
 
 class Language(models.Model):

@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
 from django.test.utils import override_settings
 from django.utils import unittest
@@ -124,6 +125,56 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.can_vouch, True)
+
+    def test_vouch_alternate_mozilla_address(self):
+        user = UserFactory.create(vouched=False)
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
+                                                    identifier='test@mozilla.com')
+        vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
+                                           description=settings.AUTO_VOUCH_REASON)
+        eq_(vouch_query.count(), 1)
+        eq_(user.userprofile.is_vouched, True)
+
+    def test_vouch_multiple_mozilla_alternate_emails(self):
+        user = UserFactory.create(vouched=False)
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
+                                                    identifier='test1@mozilla.com')
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
+                                                    identifier='test2@mozilla.com')
+        vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
+                                           description=settings.AUTO_VOUCH_REASON)
+        eq_(vouch_query.count(), 1)
+        eq_(user.userprofile.is_vouched, True)
+
+    def test_vouch_non_mozilla_alternate_email(self):
+        user = UserFactory.create(vouched=False)
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
+                                                    identifier='test@example.com')
+        eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 0)
+        eq_(user.userprofile.is_vouched, False)
+
+    def test_vouch_mozilla_email_as_primary(self):
+        user = UserFactory.create(vouched=False, email='test1@mozilla.com')
+        eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 1)
+        eq_(user.userprofile.is_vouched, True)
+        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
+                                                    identifier='test2@example.com')
+        eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 1)
+
+    def change_alternate_mozilla_email_to_primary(self):
+        user = UserFactory.create(vouched=False, email='test@example.com')
+        alternate_email = user.userprofile.externalaccount_set.create(
+            type=ExternalAccount.TYPE_EMAIL, identifier='test@mozilla.com')
+
+        with self.login(user) as client:
+            url = reverse('phonebook:change_primary_email', args=[alternate_email.pk])
+            client.get(url, follow=True)
+        user = User.objects.get(pk=user.pk)
+        eq_(user.email, 'test@mozilla.com')
+        eq_(user.userprofile.is_vouched, True)
+        vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
+                                           description=settings.AUTO_VOUCH_REASON)
+        eq_(vouch_query.count(), 1)
 
 
 class UserProfileTests(TestCase):
