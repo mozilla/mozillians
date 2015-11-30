@@ -242,6 +242,8 @@ def edit_profile(request):
             for f in curr_forms:
                 f.save()
 
+            next_section = request.GET.get('next')
+            next_url = urlparams(reverse('phonebook:profile_edit'), next_section)
             if curr_sect == 'registration_section':
                 settings_url = reverse('phonebook:profile_edit')
                 settings_link = '<a href="{0}">settings</a>'.format(settings_url)
@@ -250,13 +252,11 @@ def edit_profile(request):
                         u'additional info for your profile.'.format(settings_link))
                 messages.info(request, mark_safe(msg))
                 redeem_invite(profile, request.session.get('invite-code'))
+                next_url = reverse('phonebook:profile_view', args=[user.username])
             elif user.username != old_username:
                 msg = _(u'You changed your username; '
                         u'please note your profile URL has also changed.')
                 messages.info(request, _(msg))
-
-            next_section = request.GET.get('next')
-            next_url = urlparams(reverse('phonebook:profile_edit'), next_section)
             return HttpResponseRedirect(next_url)
 
     ctx.update({
