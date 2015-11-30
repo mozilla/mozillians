@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.widgets import RadioSelect
 
 import happyforms
 from tower import ugettext as _
@@ -40,7 +41,7 @@ class GroupForm(happyforms.ModelForm):
         model = Group
         fields = ['name', 'description', 'irc_channel',
                   'website', 'wiki', 'accepting_new_members',
-                  'new_member_criteria']
+                  'new_member_criteria', 'terms']
 
 
 class SuperuserGroupForm(GroupForm):
@@ -58,6 +59,7 @@ class SuperuserGroupForm(GroupForm):
                   'members_can_leave',
                   'accepting_new_members',
                   'new_member_criteria',
+                  'terms'
                   ]
 
 
@@ -72,3 +74,11 @@ class MembershipFilterForm(forms.Form):
         if self.cleaned_data['filtr'] == '':
             return 'all'
         return self.cleaned_data['filtr']
+
+
+class TermsReviewForm(forms.Form):
+    terms_accepted = forms.ChoiceField(required=True, initial=True, widget=RadioSelect,
+                                       choices=[
+                                           (True, _('I accept these terms.')),
+                                           (False, _("I don't accept these terms."))
+                                       ])

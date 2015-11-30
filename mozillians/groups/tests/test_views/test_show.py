@@ -66,6 +66,31 @@ class ShowTests(TestCase):
         eq_(context['people'].paginator.count, 0)
         ok_(not context['is_pending'])
 
+    def test_show_review_terms_pending(self):
+        group = GroupFactory.create(terms='Example terms')
+        user = UserFactory.create()
+        group.add_member(user.userprofile, status=GroupMembership.PENDING_TERMS)
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/terms.html')
+
+    def test_show_review_terms_accepted(self):
+        group = GroupFactory.create(terms='Example terms')
+        user = UserFactory.create()
+        group.add_member(user.userprofile, status=GroupMembership.MEMBER)
+
+        url = reverse('groups:show_group', kwargs={'url': group.url})
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/group.html')
+
     def test_show_group_members_sorted(self):
         """
         Test show() where group members are sorted in alphabetical
@@ -482,3 +507,62 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
         ok_(member_membership in people)
+
+
+class TermsTests(TestCase):
+    def test_review_terms_page(self):
+        group = GroupFactory.create(terms='Example terms')
+        user = UserFactory.create()
+        group.add_member(user.userprofile, status=GroupMembership.PENDING_TERMS)
+
+        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+
+        with self.login(user) as client:
+            response = client.get(url, follow=True)
+
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/terms.html')
+
+    def test_accept_review_terms(self):
+        group = GroupFactory.create(terms='Example terms')
+        user = UserFactory.create()
+        group.add_member(user.userprofile, status=GroupMembership.PENDING_TERMS)
+        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+
+        membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING_TERMS)
+
+        data = {
+            'terms_accepted': True
+        }
+
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/group.html')
+
+        membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.MEMBER)
+
+    def test_deny_review_terms(self):
+        group = GroupFactory.create(terms='Example terms')
+        user = UserFactory.create()
+        group.add_member(user.userprofile, GroupMembership.PENDING_TERMS)
+        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+
+        membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING_TERMS)
+
+        data = {
+            'terms_accepted': False
+        }
+
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=True)
+
+        eq_(response.status_code, 200)
+        self.assertTemplateUsed(response, 'groups/group.html')
+
+        membership = GroupMembership.objects.filter(group=group, userprofile=user.userprofile)
+        ok_(not membership.exists())

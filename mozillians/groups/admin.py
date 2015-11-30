@@ -162,15 +162,16 @@ class GroupAdmin(GroupBaseAdmin):
     inlines = [GroupAliasInline]
     list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
                     'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
-                    'pending_member_count']
+                    'pending_member_count', 'pending_terms_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
     readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
-                       'max_reminder']
+                       'pending_terms_member_count', 'max_reminder']
 
     fieldsets = (
         ('Group', {
-            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible',)
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki',
+                       'visible', 'terms',)
         }),
         ('Functional Area', {
             'fields': ('functional_area', 'curator',)
@@ -178,7 +179,8 @@ class GroupAdmin(GroupBaseAdmin):
         ('Membership', {
             'fields': (('accepting_new_members', 'new_member_criteria',),
                        'members_can_leave',
-                       ('total_member_count', 'full_member_count', 'pending_member_count',), )
+                       ('total_member_count', 'full_member_count', 'pending_member_count',
+                        'pending_terms_member_count'), )
         }),
         ('Debug info', {
             'fields': ('max_reminder',),
@@ -199,8 +201,12 @@ class GroupAdmin(GroupBaseAdmin):
         return obj.groupmembership_set.filter(status=GroupMembership.MEMBER).count()
 
     def pending_member_count(self, obj):
-        """Return number of members in group."""
+        """Return number of pending members in group."""
         return obj.groupmembership_set.filter(status=GroupMembership.PENDING).count()
+
+    def pending_terms_member_count(self, obj):
+        """Return number of members in group who haven't accepted terms yet."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING_TERMS).count()
 
 
 class GroupMembershipResource(ModelResource):

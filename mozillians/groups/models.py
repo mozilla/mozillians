@@ -123,15 +123,17 @@ class GroupMembership(models.Model):
     # Possible membership statuses:
     MEMBER = u'member'
     PENDING = u'pending'  # Has requested to join group, not a member yet
+    PENDING_TERMS = u'pending_terms'
 
     MEMBERSHIP_STATUS_CHOICES = (
         (MEMBER, _lazy(u'Member')),
+        (PENDING_TERMS, _lazy(u'Pending terms')),
         (PENDING, _lazy(u'Pending')),
     )
 
     userprofile = models.ForeignKey('users.UserProfile', db_index=True)
     group = models.ForeignKey('groups.Group', db_index=True)
-    status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=10)
+    status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=15)
     date_joined = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -196,6 +198,7 @@ class Group(GroupBase):
                    u'curator a reminder')
     )
 
+    terms = models.TextField(default='', verbose_name=_('Terms'), blank=True)
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod
@@ -258,16 +261,25 @@ class Group(GroupBase):
         else:
             if membership.status != status:
                 # Status changed
+                # The only valid status change states are:
+                # PENDING to MEMBER
+                # PENDING to PENDING_TERMS
+                # PENDING_TERMS to MEMBER
+
                 old_status = membership.status
                 membership.status = status
-                if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
-                    # Request accepted
+                statuses = [(GroupMembership.PENDING, GroupMembership.MEMBER),
+                            (GroupMembership.PENDING, GroupMembership.PENDING_TERMS),
+                            (GroupMembership.PENDING_TERMS, GroupMembership.MEMBER)]
+                if (old_status, status) in statuses:
+                    # Status changed
                     membership.save()
-                    if self.functional_area:
-                        # Group is functional area, we want to sent this update to Basket.
-                        update_basket_task.delay(userprofile.id)
-                    email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-                # else? never demote people from full member to requested, that doesn't make sense
+                    if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
+                        if self.functional_area:
+                            # Group is functional area, we want to sent this update to Basket.
+                            update_basket_task.delay(userprofile.id)
+                        email_membership_change.delay(self.pk, userprofile.user.pk,
+                                                      old_status, status)
 
     def remove_member(self, userprofile, send_email=True):
         try:
