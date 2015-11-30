@@ -248,8 +248,8 @@ def edit_profile(request):
                 settings_url = reverse('phonebook:profile_edit')
                 settings_link = '<a href="{0}">settings</a>'.format(settings_url)
                 msg = _(u'Your registration is complete. '
-                        u'Feel free to visit the {0} page to complete '
-                        u'additional info for your profile.'.format(settings_link))
+                        u'Feel free to visit the {0} page to add '
+                        u'additional information to your profile.'.format(settings_link))
                 messages.info(request, mark_safe(msg))
                 redeem_invite(profile, request.session.get('invite-code'))
                 next_url = reverse('phonebook:profile_view', args=[user.username])
@@ -293,7 +293,8 @@ def change_primary_email(request, email_pk):
     """Change primary email address."""
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
-    alternate_emails = ExternalAccount.objects.filter(user=profile, type=ExternalAccount.TYPE_EMAIL)
+    alternate_emails = ExternalAccount.objects.filter(user=profile,
+                                                      type=ExternalAccount.TYPE_EMAIL)
 
     # Only email owner can change primary email
     if not alternate_emails.filter(pk=email_pk).exists():
