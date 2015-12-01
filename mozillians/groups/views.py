@@ -328,7 +328,8 @@ def join_group(request, url):
                 status = GroupMembership.PENDING_TERMS
         elif group.accepting_new_members == 'by_request':
             status = GroupMembership.PENDING
-            messages.info(request, _('Your membership request has been sent to the group curator.'))
+            messages.info(request, _('Your membership request has been sent '
+                                     'to the group curator.'))
 
         group.add_member(profile_to_add, status=status)
 
