@@ -32,7 +32,8 @@ class GroupForm(happyforms.ModelForm):
             cleaned_data['new_member_criteria'] = u''
         else:
             if not criteria:
-                msg = _(u'You must either specify the criteria or change the acceptance selection.')
+                msg = _(u'You must either specify the criteria or change the '
+                        'acceptance selection.')
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
         return cleaned_data

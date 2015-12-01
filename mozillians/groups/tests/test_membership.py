@@ -112,7 +112,8 @@ class TestGroupRemoveMember(TestCase):
         # that is used to email the member.
         url = reverse('groups:confirm_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/')
-        with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
             with self.login(curator) as client:
                 response = client.post(url, follow=False)
         eq_(302, response.status_code)
@@ -137,7 +138,8 @@ class TestGroupRemoveMember(TestCase):
         # that is used to email the member.
         url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/',)
-        with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
             with self.login(curator) as client:
                 response = client.post(url, follow=False)
         eq_(302, response.status_code)

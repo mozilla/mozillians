@@ -159,7 +159,8 @@ class UserProfile(UserProfilePrivacyModel):
 
     # validated geo data (validated that it's valid geo data, not that the
     # mozillian is there :-) )
-    geo_country = models.ForeignKey('geo.Country', blank=True, null=True, on_delete=models.SET_NULL)
+    geo_country = models.ForeignKey('geo.Country', blank=True, null=True,
+                                    on_delete=models.SET_NULL)
     geo_region = models.ForeignKey('geo.Region', blank=True, null=True, on_delete=models.SET_NULL)
     geo_city = models.ForeignKey('geo.City', blank=True, null=True, on_delete=models.SET_NULL)
     lat = models.FloatField(_lazy(u'Latitude'), blank=True, null=True)
