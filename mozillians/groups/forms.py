@@ -25,6 +25,11 @@ class SortForm(forms.Form):
 class GroupForm(happyforms.ModelForm):
     curators = forms.ModelMultipleChoiceField(
         queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''),
+        required=False)
+    invalidation_days = forms.IntegerField(
+        widget=forms.NumberInput(attrs={'placeholder': 'days'}),
+        min_value=1,
+        label='Membership will expire after',
         required=False
     )
 
@@ -66,7 +71,7 @@ class GroupForm(happyforms.ModelForm):
         model = Group
         fields = ['name', 'description', 'irc_channel',
                   'website', 'wiki', 'accepting_new_members',
-                  'new_member_criteria', 'terms', 'curators']
+                  'new_member_criteria', 'terms', 'curators', 'invalidation_days']
         widgets = {
             'curators': forms.SelectMultiple()
         }
@@ -87,7 +92,8 @@ class SuperuserGroupForm(GroupForm):
                   'members_can_leave',
                   'accepting_new_members',
                   'new_member_criteria',
-                  'terms'
+                  'terms',
+                  'invalidation_days'
                   ]
 
 
