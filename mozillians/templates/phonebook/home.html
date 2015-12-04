@@ -151,7 +151,7 @@
                 <h4>{{ _('Groups') }}</h4>
                 {% for group in user.userprofile.get_annotated_groups() -%}
                   <a href="{{ url('groups:show_group', group.url) }}">
-                    {%- if group.curator == user.userprofile -%}
+                    {%- if user.userprofile in group.curators.all() -%}
                       <i class="icon-crown"></i>
                     {% endif %}
                     {{ group.name }}

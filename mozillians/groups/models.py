@@ -62,11 +62,12 @@ class GroupBase(models.Model):
             group.delete()
 
     def user_can_leave(self, userprofile):
+        curators = self.curators.all()
         return (
             # some groups don't allow leaving
             getattr(self, 'members_can_leave', True) and
-            # curators cannot leave their own groups
-            getattr(self, 'curator', None) != userprofile and
+            # We need at least one curator
+            (curators.count() > 1 or userprofile not in curators) and
             # only makes sense to leave a group they belong to (at least pending)
             (self.has_member(userprofile=userprofile) or
                 self.has_pending_member(userprofile=userprofile))
@@ -150,10 +151,8 @@ class Group(GroupBase):
     description = models.TextField(max_length=1024,
                                    verbose_name=_lazy(u'Description'),
                                    default='', blank=True)
-    curator = models.ForeignKey('users.UserProfile',
-                                blank=True, null=True,
-                                on_delete=models.SET_NULL,
-                                related_name='groups_curated')
+    curators = models.ManyToManyField('users.UserProfile',
+                                      related_name='groups_curated')
     irc_channel = models.CharField(
         max_length=63,
         verbose_name=_lazy(u'IRC Channel'),
@@ -218,7 +217,7 @@ class Group(GroupBase):
     @classmethod
     def get_curated(cls):
         """Return all non-functional areas that are curated."""
-        return cls.get_non_functional_areas(curator__isnull=False)
+        return cls.get_non_functional_areas(curators__isnull=False)
 
     @classmethod
     def search(cls, query):
@@ -324,3 +323,10 @@ class SkillAlias(GroupAliasBase):
 
 class Skill(GroupBase):
     ALIAS_MODEL = SkillAlias
+
+    def user_can_leave(self, userprofile):
+        """Override the parent method.
+
+        All users can remove a skill.
+        """
+        return True

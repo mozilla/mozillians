@@ -172,8 +172,7 @@ class GroupBaseTests(TestCase):
     def test_curator_cant_leave(self):
         group = GroupFactory.create(members_can_leave=True)
         user = UserFactory.create()
-        group.curator = user.userprofile
-        group.save()
+        group.curators.add(user.userprofile)
         group.add_member(user.userprofile)
         ok_(not group.user_can_leave(user.userprofile))
 
@@ -219,11 +218,12 @@ class GroupTests(TestCase):
 
     def test_deleted_curator_sets_null(self):
         user = UserFactory.create()
-        group = GroupFactory.create(curator=user.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(user.userprofile)
 
         user.delete()
         group = Group.objects.get(id=group.id)
-        eq_(group.curator, None)
+        eq_(group.curators.all().count(), 0)
 
     def test_remove_member(self):
         user = UserFactory.create()
@@ -233,7 +233,8 @@ class GroupTests(TestCase):
         ok_(group.has_member(user.userprofile))
 
         group.remove_member(user.userprofile)
-        ok_(not GroupMembership.objects.filter(userprofile=user.userprofile, group=group).exists())
+        ok_(not GroupMembership.objects.filter(userprofile=user.userprofile,
+                                               group=group).exists())
         ok_(not group.has_member(user.userprofile))
 
     def test_add_member(self):

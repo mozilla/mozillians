@@ -1,7 +1,7 @@
 <div class="result">
   {% if group %}
     {% if is_curator %}
-      {% if user != profile.user %}
+      {% if user != profile.user and not user_is_curator(group, profile) %}
         <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
               method="GET">
           {{ csrf() }}

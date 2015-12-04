@@ -39,7 +39,7 @@ class ShowGroupDeleteTests(TestCase):
 
     def test_curator_and_no_other_members(self):
         # If curator only member, show delete button
-        self.group.curator = self.user.userprofile
+        self.group.curators.add(self.user.userprofile)
         self.group.save()
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
 
@@ -84,7 +84,7 @@ class GroupDeleteTest(TestCase):
 
     def test_curator_only_member(self):
         # If user is curator and no other members, can delete the group
-        self.group.curator = self.user.userprofile
+        self.group.curators.add(self.user.userprofile)
         self.group.save()
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
 
@@ -99,8 +99,7 @@ class GroupDeleteTest(TestCase):
 
     def test_multiple_members(self):
         # If there are other members, cannot delete
-        self.group.curator = self.user.userprofile
-        self.group.save()
+        self.group.curators.add(self.user.userprofile)
         self.group.add_member(self.user.userprofile, GroupMembership.MEMBER)
         self.group.add_member(UserFactory.create().userprofile,
                               GroupMembership.PENDING)

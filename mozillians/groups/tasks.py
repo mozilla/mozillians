@@ -27,15 +27,15 @@ def remove_empty_groups():
 @task(ignore_result=True)
 def send_pending_membership_emails():
     """
-    For each curated group that has pending memberships that the curator has not yet been
-    emailed about, send the curator an email with the count of all pending memberships
-    and a link to view and manage the requests.
+    For each curated group that has pending memberships that the curators have
+    not yet been emailed about, send to all the curators an email with the count
+    of all pending memberships and a link to view and manage the requests.
     """
     Group = get_model('groups', 'Group')
     GroupMembership = get_model('groups', 'GroupMembership')
 
     # Curated groups that have pending membership requests
-    groups = Group.objects.exclude(curator__isnull=True)
+    groups = Group.objects.exclude(curators__isnull=True)
     groups = groups.filter(groupmembership__status=GroupMembership.PENDING).distinct()
 
     for group in groups:
@@ -63,7 +63,8 @@ def send_pending_membership_emails():
             })
 
             send_mail(subject, body, settings.FROM_NOREPLY,
-                      [group.curator.user.email], fail_silently=False)
+                      [profile.user.email for profile in group.curators.all()],
+                      fail_silently=False)
 
             group.max_reminder = max_pk
             group.save()

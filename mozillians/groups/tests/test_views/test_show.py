@@ -183,7 +183,8 @@ class ShowTests(TestCase):
 
     def test_show_leave_button_value_with_curator(self):
         curator_user = UserFactory.create()
-        group = GroupFactory.create(curator=curator_user.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(curator_user.userprofile)
         user = UserFactory.create()
         group.add_member(user.userprofile)
         url = reverse('groups:show_group', kwargs={'url': group.url})
@@ -323,7 +324,7 @@ class ShowTests(TestCase):
         ok_(not response.context['is_pending'])
 
     def test_show_filter_accepting_new_members_no(self):
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'no'
         self.group.save()
 
@@ -333,7 +334,7 @@ class ShowTests(TestCase):
         eq_(response.context['membership_filter_form'], None)
 
     def test_show_filter_accepting_new_members_yes(self):
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'yes'
         self.group.save()
 
@@ -343,7 +344,7 @@ class ShowTests(TestCase):
         eq_(response.context['membership_filter_form'], None)
 
     def test_show_filter_accepting_new_members_by_request(self):
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
 
@@ -355,7 +356,7 @@ class ShowTests(TestCase):
     def test_remove_button_confirms(self):
         """GET to remove_member view displays confirmation"""
         # Make user 1 the group curator so they can remove users
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.save()
         group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
         next_url = "%s?filtr=members" % group_url
@@ -375,7 +376,7 @@ class ShowTests(TestCase):
     def test_post_remove_button_removes(self):
         """POST to remove_member view removes member"""
         # Make user 1 the group curator so they can remove users
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
 
@@ -398,7 +399,7 @@ class ShowTests(TestCase):
     def test_confirm_user(self):
         """POST to confirm user view changes member from pending to member"""
         # Make user 1 the group curator so they can remove users
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
 
@@ -426,7 +427,7 @@ class ShowTests(TestCase):
     def test_filter_members_only(self):
         """Filter `m` will filter out members that are only pending"""
         # Make user 1 the group curator so they can see requests
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
         # Make user 2 a full member
@@ -448,7 +449,7 @@ class ShowTests(TestCase):
     def test_filter_pending_only(self):
         """Filter `r` will show only member requests (pending)"""
         # Make user 1 the group curator so they can see requests
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
         # Make user 2 a full member
@@ -470,7 +471,7 @@ class ShowTests(TestCase):
     def test_filter_both(self):
         """If they specify both filters, they get all the members"""
         # Make user 1 the group curator so they can see requests
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
         # Make user 2 a full member
@@ -495,7 +496,7 @@ class ShowTests(TestCase):
         new members by request
         """
         # Make user 1 the group curator so they can see requests
-        self.group.curator = self.user_1.userprofile
+        self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'yes'
         self.group.save()
         # Make user 2 a full member

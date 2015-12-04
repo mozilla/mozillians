@@ -123,7 +123,7 @@ def show(request, url, alias_model, template):
         # Is this user's membership pending?
         is_pending = group.has_pending_member(profile)
 
-        is_curator = is_manager or (group.curator == request.user.userprofile)
+        is_curator = is_manager or (request.user.userprofile in group.curators.all())
 
         # initialize the form only when the group is moderated and user is curator of the group
         if is_curator and group.accepting_new_members == 'by_request':
@@ -142,7 +142,7 @@ def show(request, url, alias_model, template):
 
             memberships = group.groupmembership_set.filter(status__in=statuses)
 
-            # Curator can delete their group if there are no other members.
+            # Curators can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
 
         else:
@@ -204,7 +204,7 @@ def remove_member(request, url, user_pk):
     group = get_object_or_404(Group, url=url)
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
-    is_curator = (group.curator == this_userprofile)
+    is_curator = (this_userprofile in group.curators.all())
     is_manager = request.user.userprofile.is_manager
     group_url = reverse('groups:show_group', args=[group.url])
     next_url = request.REQUEST.get('next_url', group_url)
@@ -221,14 +221,18 @@ def remove_member(request, url, user_pk):
         if profile_to_remove != this_userprofile:
             raise Http404()
 
-    # Curators cannot be removed, by anyone at all.
-    if group.curator == profile_to_remove:
-        messages.error(request, _('A curator cannot be removed from a group.'))
+    # Curators cannot be removed, only by themselves and if there is another curator.
+    curators = group.curators.all()
+    if (profile_to_remove in curators and curators.count() <= 1 and
+            profile_to_remove != this_userprofile):
+        messages.error(request, _('The group needs at least one curator.'))
         return redirect(next_url)
 
     if request.method == 'POST':
         group.remove_member(profile_to_remove,
                             send_email=(profile_to_remove != this_userprofile))
+        if profile_to_remove in curators:
+            group.curators.remove(profile_to_remove)
         if this_userprofile == profile_to_remove:
             messages.info(request, _('You have been removed from this group.'))
         else:
@@ -251,7 +255,7 @@ def confirm_member(request, url, user_pk):
     """
     group = get_object_or_404(Group, url=url)
     profile = get_object_or_404(UserProfile, pk=user_pk)
-    is_curator = (group.curator == request.user.userprofile)
+    is_curator = (request.user.userprofile in group.curators.all())
     is_manager = request.user.userprofile.is_manager
     group_url = reverse('groups:show_group', args=[group.url])
     next_url = request.REQUEST.get('next_url', group_url)
@@ -329,7 +333,7 @@ def join_group(request, url):
         elif group.accepting_new_members == 'by_request':
             status = GroupMembership.PENDING
             messages.info(request, _('Your membership request has been sent '
-                                     'to the group curator.'))
+                                     'to the group curator(s).'))
 
         group.add_member(profile_to_add, status=status)
 
@@ -356,7 +360,7 @@ def group_delete(request, url):
     # Get the group to delete
     group = get_object_or_404(Group, url=url)
     # Only a group curator is allowed to delete a group
-    is_curator = profile == group.curator
+    is_curator = profile in group.curators.all()
     if not is_curator and not profile.is_manager:
         messages.error(request, _('You must be a curator to delete a group'))
         return redirect(reverse('groups:show_group', args=[group.url]))
@@ -383,26 +387,29 @@ def group_add_edit(request, url=None):
         # Get the group to edit
         group = get_object_or_404(Group, url=url)
         # Only a group curator or an admin is allowed to edit a group
-        is_curator = profile == group.curator
+        is_curator = profile in group.curators.all()
         if not (is_curator or is_manager):
             messages.error(request, _('You must be a curator or an admin to edit a group'))
             return redirect(reverse('groups:show_group', args=[group.url]))
     else:
-        group = Group(curator=profile)
+        group = Group()
 
     form_class = SuperuserGroupForm if is_manager else GroupForm
 
-    form = form_class(request.POST or None, instance=group)
+    curators_ids = [profile.id]
+    if url:
+        curators_ids += group.curators.all().values_list('id', flat=True)
+    form = form_class(request.POST or None, instance=group,
+                      initial={'curators': curators_ids})
+
     if form.is_valid():
         group = form.save()
-        # Ensure curator is in the group when it's created
-        if profile == group.curator and not group.has_member(profile):
-            group.add_member(profile)
+
         return redirect(reverse('groups:show_group', args=[group.url]))
 
     context = {
         'form': form,
         'creating': url is None,
-        'group': group if url else None,
+        'group': group if url else None
     }
     return render(request, 'groups/add_edit.html', context)

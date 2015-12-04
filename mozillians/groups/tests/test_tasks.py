@@ -36,7 +36,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # was last sent, send the curator an email.  It should contain the count of
         # all pending memberships.
         curator = UserFactory.create()
-        group = GroupFactory.create(curator=curator.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(curator.userprofile)
 
         # Add a couple of pending memberships
         group.add_member(UserFactory.create().userprofile, GroupMembership.PENDING)
@@ -68,7 +69,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # was last sent, send the curator an email.  It should contain the count of
         # all pending memberships, which should be one, and should use the singular text.
         curator = UserFactory.create()
-        group = GroupFactory.create(curator=curator.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(curator.userprofile)
 
         # Add one pending membership
         group.add_member(UserFactory.create().userprofile, GroupMembership.PENDING)
@@ -90,7 +92,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # last time a reminder email was sent, do not send the curator an email.
 
         # curated group:
-        group = GroupFactory.create(curator=UserFactory.create().userprofile)
+        group = GroupFactory.create()
+        group.curators.add(UserFactory.create().userprofile)
 
         # Pending membership
         user1 = UserFactory.create()
@@ -122,7 +125,8 @@ class SendPendingMembershipEmailsTests(TestCase):
 
 class EmailMembershipChangeTests(TestCase):
     def setUp(self):
-        self.group = GroupFactory.create(curator=UserFactory.create().userprofile)
+        self.group = GroupFactory.create()
+        self.group.curators.add(UserFactory.create().userprofile)
         self.user = UserFactory.create()
 
     def test_member_accepted(self):
