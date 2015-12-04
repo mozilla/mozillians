@@ -136,6 +136,7 @@ class GroupMembership(models.Model):
     group = models.ForeignKey('groups.Group', db_index=True)
     status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=15)
     date_joined = models.DateTimeField(null=True, blank=True)
+    updated_on = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         unique_together = ('userprofile', 'group')
@@ -198,6 +199,8 @@ class Group(GroupBase):
     )
 
     terms = models.TextField(default='', verbose_name=_('Terms'), blank=True)
+    invalidation_days = models.PositiveIntegerField(null=True, default=None, blank=True,
+                                                    verbose_name=_('Invalidation days'))
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod

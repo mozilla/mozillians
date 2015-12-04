@@ -72,6 +72,21 @@
       {{ mozillians_field(form.accepting_new_members) }}
     </fieldset>
 
+    <fieldset id="id_membership_can_expire">
+      <div class="form-group">
+        <label class="checkbox">
+          Membership can expire:
+          <span>
+            <input type="checkbox"></input>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <fieldset id="id_invalidation_days">
+      {{ mozillians_field(form.invalidation_days) }}
+    </fieldset>
+
     <fieldset id="id_new_member_criteria_fieldset">
       {{ mozillians_field(form.new_member_criteria, required=True) }}
     </fieldset>

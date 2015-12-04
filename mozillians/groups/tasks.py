@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -7,7 +9,7 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 import tower
-from celery.task import task
+from celery.task import periodic_task, task
 from tower import ugettext as _
 
 
@@ -134,3 +136,26 @@ def member_removed_email(group_pk, user_pk):
     body = template.render(Context(context))
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
+
+
+@periodic_task(run_every=timedelta(hours=24))
+def invalidate_group_membership():
+    """
+    For groups with defined `invalidation_days` we need to invalidate
+    user membership after timedelta.
+    """
+    from mozillians.groups.models import Group, GroupMembership
+
+    groups = Group.objects.filter(invalidation_days__isnull=False)
+
+    for group in groups:
+        last_update = datetime.now() - timedelta(days=group.invalidation_days)
+        memberships = group.groupmembership_set.filter(
+            updated_on__lte=last_update, status=GroupMembership.MEMBER)
+        if group.terms:
+            memberships.update(status=GroupMembership.PENDING_TERMS)
+        elif group.accepting_new_members == 'by_request':
+            memberships.update(status=GroupMembership.PENDING)
+        else:
+            for member in memberships:
+                group.remove_member(member.userprofile)

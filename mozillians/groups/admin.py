@@ -174,7 +174,7 @@ class GroupAdmin(GroupBaseAdmin):
     fieldsets = (
         ('Group', {
             'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki',
-                       'visible', 'terms',)
+                       'visible', 'terms', 'invalidation_days')
         }),
         ('Functional Area', {
             'fields': ('functional_area', 'curators',)
