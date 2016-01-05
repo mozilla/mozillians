@@ -24,9 +24,14 @@
                   {% endfor %}
                   {% for field in account_form %}
                     {% if not field.name == 'privacy' %}
-                      {{ field }}
                       {% if field.name == 'DELETE' %}
-                        <span class="delete-row">{{ _('Delete') }}</span>
+                        <div class="delete-controls">
+                          {{ field }}
+                          <i class="icon-minus-circle"></i>
+                          <span class="delete-row">{{ _('Delete') }}</span>
+                        </div>
+                      {% else %}
+                        {{ field }}
                       {% endif %}
                     {% else %}
                       {{ privacy_field(field) }}
