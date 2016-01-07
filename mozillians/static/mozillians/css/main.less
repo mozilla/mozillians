@@ -55,6 +55,15 @@
     font-style: italic;
 }
 
+@font-face {
+    font-family: 'Open Sans Light';
+    src: url('https://mozorg.cdn.mozilla.net/media/fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'),
+         url('https://mozorg.cdn.mozilla.net/media/fonts/OpenSans-Light-webfont.woff') format('woff'),
+         url('https://mozorg.cdn.mozilla.net/media/fonts/OpenSans-Light-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Colors
 ==================== */
 @white:       #FFFFFF;
@@ -716,10 +725,8 @@ a#back-to-top {
 
 /* Tabzilla
 ==================== */
-#tabzilla-nav {
-    input[type=search] {
-        height: auto;
-    }
+#tabzilla:before {
+    background-color: #0C99D5;
 }
 
 /* Footer
