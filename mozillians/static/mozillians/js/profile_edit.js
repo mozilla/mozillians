@@ -16,11 +16,9 @@ $(function() {
     $('.settings-tab').hide();
     var uri = URI(location.href);
     var next_section = uri.query(true).next;
-    var hash = uri.hash();
+    var content = uri.hash();
     if (next_section) {
       content = '#' + next_section;
-    } else {
-      content = hash;
     }
     if (content) {
         $(content + '-tab').show();
