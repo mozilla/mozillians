@@ -200,8 +200,10 @@ CSP_FONT_SRC = ("'self'",
                 'http://*.mozilla.net',
                 'https://*.mozilla.net',
                 'http://*.mozilla.org',
-                'https://*.mozilla.org')
-CSP_FRAME_SRC = ("'self'",
+                'https://*.mozilla.org',
+                'https://mozorg.cdn.mozilla.net',
+                'http://mozorg.cdn.mozilla.net')
+CSP_CHILD_SRC = ("'self'",
                  'https://login.persona.org',)
 CSP_IMG_SRC = ("'self'",
                'data:',
