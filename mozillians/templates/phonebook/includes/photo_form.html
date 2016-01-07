@@ -10,7 +10,7 @@
       </div>
       <div class="row">
     {% endif %}
-    <div class="{% if profile.is_complete %}col-md-6 col-sm-6{% else %}col-md-12{% endif %}">
+    <div class="{% if profile.is_complete %}col-md-4 col-sm-5{% else %}col-md-12{% endif %}">
       <input class="input-file photo" id="id_photo" type="file" name="photo">
       {% if profile.photo %}
         <div id="id_photo_delete">
@@ -25,7 +25,7 @@
       </div>
       <div class="row">
     {% endif %}
-    <div class="{% if profile.is_complete %}col-md-3 text-right{% else %}col-md-12 registration-photo{% endif %}">
+    <div class="{% if profile.is_complete %}col-md-5 text-right{% else %}col-md-12 registration-photo{% endif %}">
       {% if profile.is_complete %}
         {{ privacy_field(basic_information_form.privacy_photo) }}
       {% else %}
