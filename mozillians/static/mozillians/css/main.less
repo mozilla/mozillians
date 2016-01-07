@@ -257,9 +257,18 @@ body {
         vertical-align: middle;
     }
 
-    .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+    .btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
         border-top-right-radius: 3px;
         border-bottom-right-radius: 3px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+
+    .btn-group > .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        border-top-left-radius: 3px;
+        border-bottom-left-radius: 3px;
     }
 
     .row {
@@ -1568,6 +1577,12 @@ form {
             label { margin-top: 3px; }
             label.required:after {  // No need to mark the privacy controls required, they always have some value.
               content: '';
+            }
+            text-align: right;
+            .btn-group {
+                .privacy-toggle {
+                    float: right;
+                }
             }
             @media (max-width: @breakTablet) {
                 position: relative;
