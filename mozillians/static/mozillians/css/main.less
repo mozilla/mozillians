@@ -1654,7 +1654,7 @@ form {
                 padding: 10px 0;
                 @media (max-width: @breakTablet) {
                     margin: 0;
-                    padding: 25px 0;
+                    padding-bottom: 35px;
                 }
                 input[input=text], select {
                     float: left;
@@ -1671,6 +1671,33 @@ form {
                     position: relative;
                     float: right;
                     .clearfix;
+                }
+                .delete-controls {
+                    display: inline-block;
+                    input {
+                        margin-right: 0px;
+                        margin-top: 3px;
+                    }
+                    .delete-row {
+                        padding-left: 0px;
+                    }
+                }
+                @media (max-width: @breakTablet) {
+                    .privacy-controls {
+                        float: left;
+                        clear: both;
+                    }
+                    .delete-controls {
+                        display: block;
+                        float: left;
+                        margin-top: 5px;
+                        margin-left: 15px;
+                    }
+                }
+                @media (max-width: @breakMobileLandscape) {
+                    .delete-controls {
+                        float: right;
+                    }
                 }
             }
         }
