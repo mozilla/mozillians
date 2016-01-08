@@ -3,12 +3,12 @@ import json
 from django.core.urlresolvers import reverse
 from django.test.client import Client
 
-from funfactory.helpers import urlparams
-from funfactory.utils import absolutify
 from nose.tools import eq_
 
 from mozillians.api.tests import APIAppFactory
+from mozillians.common.helpers import urlparams
 from mozillians.common.tests import TestCase
+from mozillians.common.utils import absolutify
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 

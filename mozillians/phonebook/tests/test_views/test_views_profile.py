@@ -3,12 +3,10 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test.utils import override_settings
 
-from funfactory.helpers import urlparams
-
 from mock import patch
 from nose.tools import ok_, eq_
 
-from mozillians.common.helpers import redirect
+from mozillians.common.helpers import redirect, urlparams
 from mozillians.common.tests import TestCase
 from mozillians.users.managers import PUBLIC, MOZILLIANS, EMPLOYEES, PRIVILEGED
 from mozillians.users.tests import UserFactory

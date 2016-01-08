@@ -5,12 +5,12 @@ from django.core.urlresolvers import reverse
 from django.test.client import Client
 from django.test.utils import override_settings
 
-from funfactory.helpers import urlparams
-from funfactory.utils import absolutify
 from nose.tools import eq_, ok_
 
 from mozillians.api.tests import APIAppFactory
+from mozillians.common.helpers import urlparams
 from mozillians.common.tests import TestCase
+from mozillians.common.utils import absolutify
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
 from mozillians.groups.models import GroupMembership
 from mozillians.groups.tests import GroupFactory, SkillFactory

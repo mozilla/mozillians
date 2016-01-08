@@ -15,15 +15,15 @@ from django.template.loader import get_template
 
 
 import basket
-from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
 from tower import ugettext as _, ugettext_lazy as _lazy
-from funfactory import utils
 
+from mozillians.common import utils
 from mozillians.common.helpers import absolutify, gravatar
 from mozillians.common.helpers import offset_of_timezone
+from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
