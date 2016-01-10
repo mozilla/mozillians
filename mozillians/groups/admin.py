@@ -2,7 +2,10 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.core.urlresolvers import reverse
 from django.db.models import Count
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 import autocomplete_light
 from import_export.admin import ExportMixin
@@ -44,7 +47,7 @@ class CuratedGroupFilter(SimpleListFilter):
         if self.value() is None:
             return queryset
         value = self.value() == 'True'
-        return queryset.filter(curator__isnull=value)
+        return queryset.filter(curators__isnull=value)
 
 
 class FunctionalAreaFilter(SimpleListFilter):
@@ -160,25 +163,27 @@ class GroupAdmin(GroupBaseAdmin):
     form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
     add_form = autocomplete_light.modelform_factory(Group, form=GroupAddAdminForm)
     inlines = [GroupAliasInline]
-    list_display = ['name', 'curator', 'functional_area', 'accepting_new_members',
+    list_display = ['name', 'get_curators', 'functional_area', 'accepting_new_members',
                     'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
-                    'pending_member_count']
+                    'pending_member_count', 'pending_terms_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
                    NoURLFilter]
     readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
-                       'max_reminder']
+                       'pending_terms_member_count', 'max_reminder']
 
     fieldsets = (
         ('Group', {
-            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki', 'visible',)
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki',
+                       'visible', 'terms', 'invalidation_days')
         }),
         ('Functional Area', {
-            'fields': ('functional_area', 'curator',)
+            'fields': ('functional_area', 'curators',)
         }),
         ('Membership', {
             'fields': (('accepting_new_members', 'new_member_criteria',),
                        'members_can_leave',
-                       ('total_member_count', 'full_member_count', 'pending_member_count',), )
+                       ('total_member_count', 'full_member_count', 'pending_member_count',
+                        'pending_terms_member_count'), )
         }),
         ('Debug info', {
             'fields': ('max_reminder',),
@@ -199,8 +204,20 @@ class GroupAdmin(GroupBaseAdmin):
         return obj.groupmembership_set.filter(status=GroupMembership.MEMBER).count()
 
     def pending_member_count(self, obj):
-        """Return number of members in group."""
+        """Return number of pending members in group."""
         return obj.groupmembership_set.filter(status=GroupMembership.PENDING).count()
+
+    def pending_terms_member_count(self, obj):
+        """Return number of members in group who haven't accepted terms yet."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING_TERMS).count()
+
+    def get_curators(self, obj):
+        url = u"<a href='{0}'>{1}</a>"
+        profile_urls = [url.format(reverse('admin:users_userprofile_change', args=[profile.id]),
+                                   escape(profile.full_name))
+                        for profile in obj.curators.all()]
+        return mark_safe(', '.join(profile_urls))
+    get_curators.short_description = 'Curators'
 
 
 class GroupMembershipResource(ModelResource):

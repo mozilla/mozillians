@@ -105,7 +105,8 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
                 setattr(self, method_name, self._transform_privacy_wrapper(field))
 
     def get_url(self, obj):
-        return absolutify(reverse('phonebook:profile_view', kwargs={'username': obj.user.username}))
+        return absolutify(reverse('phonebook:profile_view',
+                                  kwargs={'username': obj.user.username}))
 
     def transform_timezone(self, obj, value):
         return {

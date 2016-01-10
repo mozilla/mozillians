@@ -62,11 +62,12 @@ class GroupBase(models.Model):
             group.delete()
 
     def user_can_leave(self, userprofile):
+        curators = self.curators.all()
         return (
             # some groups don't allow leaving
             getattr(self, 'members_can_leave', True) and
-            # curators cannot leave their own groups
-            getattr(self, 'curator', None) != userprofile and
+            # We need at least one curator
+            (curators.count() > 1 or userprofile not in curators) and
             # only makes sense to leave a group they belong to (at least pending)
             (self.has_member(userprofile=userprofile) or
                 self.has_pending_member(userprofile=userprofile))
@@ -123,18 +124,19 @@ class GroupMembership(models.Model):
     # Possible membership statuses:
     MEMBER = u'member'
     PENDING = u'pending'  # Has requested to join group, not a member yet
+    PENDING_TERMS = u'pending_terms'
 
     MEMBERSHIP_STATUS_CHOICES = (
         (MEMBER, _lazy(u'Member')),
+        (PENDING_TERMS, _lazy(u'Pending terms')),
         (PENDING, _lazy(u'Pending')),
     )
 
     userprofile = models.ForeignKey('users.UserProfile', db_index=True)
     group = models.ForeignKey('groups.Group', db_index=True)
-    status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=10)
+    status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=15)
     date_joined = models.DateTimeField(null=True, blank=True)
-    # For some groups, after a period of time the membership status must be renewed
-    invalidate = models.BooleanField(default=False)
+    updated_on = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         unique_together = ('userprofile', 'group')
@@ -150,10 +152,8 @@ class Group(GroupBase):
     description = models.TextField(max_length=1024,
                                    verbose_name=_lazy(u'Description'),
                                    default='', blank=True)
-    curator = models.ForeignKey('users.UserProfile',
-                                blank=True, null=True,
-                                on_delete=models.SET_NULL,
-                                related_name='groups_curated')
+    curators = models.ManyToManyField('users.UserProfile',
+                                      related_name='groups_curated')
     irc_channel = models.CharField(
         max_length=63,
         verbose_name=_lazy(u'IRC Channel'),
@@ -198,6 +198,9 @@ class Group(GroupBase):
                    u'curator a reminder')
     )
 
+    terms = models.TextField(default='', verbose_name=_('Terms'), blank=True)
+    invalidation_days = models.PositiveIntegerField(null=True, default=None, blank=True,
+                                                    verbose_name=_('Invalidation days'))
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod
@@ -217,7 +220,7 @@ class Group(GroupBase):
     @classmethod
     def get_curated(cls):
         """Return all non-functional areas that are curated."""
-        return cls.get_non_functional_areas(curator__isnull=False)
+        return cls.get_non_functional_areas(curators__isnull=False)
 
     @classmethod
     def search(cls, query):
@@ -260,16 +263,25 @@ class Group(GroupBase):
         else:
             if membership.status != status:
                 # Status changed
+                # The only valid status change states are:
+                # PENDING to MEMBER
+                # PENDING to PENDING_TERMS
+                # PENDING_TERMS to MEMBER
+
                 old_status = membership.status
                 membership.status = status
-                if (old_status, status) == (GroupMembership.PENDING, GroupMembership.MEMBER):
-                    # Request accepted
+                statuses = [(GroupMembership.PENDING, GroupMembership.MEMBER),
+                            (GroupMembership.PENDING, GroupMembership.PENDING_TERMS),
+                            (GroupMembership.PENDING_TERMS, GroupMembership.MEMBER)]
+                if (old_status, status) in statuses:
+                    # Status changed
                     membership.save()
-                    if self.functional_area:
-                        # Group is functional area, we want to sent this update to Basket.
-                        update_basket_task.delay(userprofile.id)
-                    email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-                # else? never demote people from full member to requested, that doesn't make sense
+                    if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
+                        if self.functional_area:
+                            # Group is functional area, we want to sent this update to Basket.
+                            update_basket_task.delay(userprofile.id)
+                        email_membership_change.delay(self.pk, userprofile.user.pk,
+                                                      old_status, status)
 
     def remove_member(self, userprofile, send_email=True):
         try:
@@ -314,3 +326,10 @@ class SkillAlias(GroupAliasBase):
 
 class Skill(GroupBase):
     ALIAS_MODEL = SkillAlias
+
+    def user_can_leave(self, userprofile):
+        """Override the parent method.
+
+        All users can remove a skill.
+        """
+        return True

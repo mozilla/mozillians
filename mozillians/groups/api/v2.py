@@ -33,13 +33,19 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class GroupDetailedSerializer(GroupSerializer):
     members = GroupMemberSerializer(many=True, source='_members')
+    curator = serializers.SerializerMethodField('get_curator')
 
     class Meta:
+        # The curator field is only listed here for compatibility reasons
+        # The curators field returns all the curators of a group
         model = Group
-        fields = ('id', 'name', 'description', 'curator',
+        fields = ('id', 'name', 'description', 'curator', 'curators',
                   'irc_channel', 'website', 'wiki',
                   'members_can_leave', 'accepting_new_members',
                   'new_member_criteria', 'functional_area', 'members', 'url')
+
+    def get_curator(self, obj):
+        return obj.curators.all().first()
 
 
 class SkillSerializer(serializers.HyperlinkedModelSerializer):
@@ -63,11 +69,15 @@ class SkillDetailedSerializer(SkillSerializer):
 
 
 class GroupFilter(django_filters.FilterSet):
+    curator = django_filters.MethodFilter(action='filter_curator')
 
     class Meta:
         model = Group
-        fields = ('name', 'functional_area', 'curator',
+        fields = ('name', 'functional_area', 'curators', 'curator',
                   'members_can_leave', 'accepting_new_members',)
+
+    def filter_curator(self, queryset, value):
+        return queryset.filter(curators=value)
 
 
 class SkillFilter(django_filters.FilterSet):

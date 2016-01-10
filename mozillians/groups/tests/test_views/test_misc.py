@@ -5,7 +5,7 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.models import Group, GroupAlias, Skill
+from mozillians.groups.models import Group, GroupAlias, GroupMembership, Skill
 from mozillians.groups.tests import (GroupFactory, SkillFactory)
 from mozillians.users.tests import UserFactory
 
@@ -28,6 +28,28 @@ class ToggleGroupSubscriptionTests(TestCase):
             client.post(self.join_url, follow=True)
         group = Group.objects.get(id=self.group.id)
         ok_(group.members.filter(id=self.user.userprofile.id).exists())
+        basket_task_mock.assert_called_with(self.user.userprofile.id)
+
+    @patch('mozillians.groups.models.update_basket_task.delay')
+    def test_group_subscription_terms(self, basket_task_mock):
+        group = GroupFactory.create(terms='Example terms')
+        join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
+        with self.login(self.user) as client:
+            client.post(join_url, follow=True)
+
+        membership = group.groupmembership_set.get(userprofile=self.user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING_TERMS)
+        basket_task_mock.assert_called_with(self.user.userprofile.id)
+
+    @patch('mozillians.groups.models.update_basket_task.delay')
+    def test_group_subscription_terms_by_request(self, basket_task_mock):
+        group = GroupFactory.create(accepting_new_members='by_request', terms='Example terms')
+        join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
+        with self.login(self.user) as client:
+            client.post(join_url, follow=True)
+
+        membership = group.groupmembership_set.get(userprofile=self.user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING)
         basket_task_mock.assert_called_with(self.user.userprofile.id)
 
     @patch('mozillians.groups.models.update_basket_task.delay')
@@ -132,6 +154,7 @@ class CreateGroupTests(TestCase):
             'wiki': u'http://wiki.mozillians.org',
             'members_can_leave': 'checked',
             'visible': 'checked',
+            'curators': [user.userprofile.id]
             # 'functional_area' not checked
         }
         with self.login(user) as client:
@@ -163,6 +186,7 @@ class CreateGroupTests(TestCase):
             'functional_area': 'checked',  # should be ignored
             'accepting_new_members': 'yes',
             'members_can_leave': False,  # should be ignored
+            'curators': [user.userprofile.id]
         }
         with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
@@ -181,6 +205,31 @@ class CreateGroupTests(TestCase):
         eq_(data['website'] + '/', group.website)
         eq_(data['wiki'] + '/', group.wiki)
 
+    def test_basic_group_creation_with_terms(self):
+        # Curator accepts terms by default
+        user = UserFactory.create(manager=True)
+        url = reverse('groups:group_add', prefix='/en-US/')
+        data = {
+            'name': u'Test Group',
+            'accepting_new_members': u'by_request',
+            'new_member_criteria': u'some criteria',
+            'description': u'lorem ipsum and lah-dee-dah',
+            'irc_channel': u'some text, this is not validated',
+            'website': u'http://mozillians.org',
+            'wiki': u'http://wiki.mozillians.org',
+            'members_can_leave': 'checked',
+            'visible': 'checked',
+            'terms': 'Example terms',
+            'curators': [user.id]
+        }
+        with self.login(user) as client:
+            response = client.post(url, data=data, follow=False)
+        eq_(302, response.status_code)
+        group = GroupAlias.objects.get(name=data['name']).alias
+        eq_(group.terms, 'Example terms')
+        membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.MEMBER)
+
     def test_group_edit(self):
         # Curator can edit a group and change (some of) its properties
         user = UserFactory.create()
@@ -195,9 +244,10 @@ class CreateGroupTests(TestCase):
             'members_can_leave': True,
             'visible': True,
             'functional_area': False,
-            'curator': user.userprofile,
+            'curators': [user.userprofile.id]
         }
         group = GroupFactory(**data)
+        group.curators.add(user.userprofile)
         url = reverse('groups:group_edit', prefix='/en-US/', kwargs={'url': group.url})
         # Change some data
         data2 = data.copy()

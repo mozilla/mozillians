@@ -155,7 +155,7 @@ Setting up a MySQL user and database for development:
 
 #. Install timezone info tables in mysql::
 
-   (venv)$ mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot mysql
+   (venv)$ mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -p mysql
 
 .. _MySQL site: http://dev.mysql.com/downloads/mysql/
 
@@ -205,7 +205,7 @@ Running Mozillians
 
    and start `elasticsearch` server again::
 
-     (venv)$ ./elasticsearch-0.90.10/bin/elasticsearch
+     (venv)$ ./elasticsearch-1.2.4/bin/elasticsearch -d
 
 Have fun!
 

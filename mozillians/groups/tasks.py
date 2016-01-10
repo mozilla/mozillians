@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -7,7 +9,7 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 import tower
-from celery.task import task
+from celery.task import periodic_task, task
 from tower import ugettext as _
 
 
@@ -27,15 +29,15 @@ def remove_empty_groups():
 @task(ignore_result=True)
 def send_pending_membership_emails():
     """
-    For each curated group that has pending memberships that the curator has not yet been
-    emailed about, send the curator an email with the count of all pending memberships
-    and a link to view and manage the requests.
+    For each curated group that has pending memberships that the curators have
+    not yet been emailed about, send to all the curators an email with the count
+    of all pending memberships and a link to view and manage the requests.
     """
     Group = get_model('groups', 'Group')
     GroupMembership = get_model('groups', 'GroupMembership')
 
     # Curated groups that have pending membership requests
-    groups = Group.objects.exclude(curator__isnull=True)
+    groups = Group.objects.exclude(curators__isnull=True)
     groups = groups.filter(groupmembership__status=GroupMembership.PENDING).distinct()
 
     for group in groups:
@@ -63,7 +65,8 @@ def send_pending_membership_emails():
             })
 
             send_mail(subject, body, settings.FROM_NOREPLY,
-                      [group.curator.user.email], fail_silently=False)
+                      [profile.user.email for profile in group.curators.all()],
+                      fail_silently=False)
 
             group.max_reminder = max_pk
             group.save()
@@ -90,7 +93,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     # Using English for now
     tower.activate('en-us')
 
-    if old_status == GroupMembership.PENDING:
+    if old_status in [GroupMembership.PENDING, GroupMembership.PENDING_TERMS]:
         if new_status == GroupMembership.MEMBER:
             subject = _('Accepted to Mozillians group "%s"') % group.name
             template_name = 'groups/email/accepted.txt'
@@ -133,3 +136,26 @@ def member_removed_email(group_pk, user_pk):
     body = template.render(Context(context))
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
+
+
+@periodic_task(run_every=timedelta(hours=24))
+def invalidate_group_membership():
+    """
+    For groups with defined `invalidation_days` we need to invalidate
+    user membership after timedelta.
+    """
+    from mozillians.groups.models import Group, GroupMembership
+
+    groups = Group.objects.filter(invalidation_days__isnull=False)
+
+    for group in groups:
+        last_update = datetime.now() - timedelta(days=group.invalidation_days)
+        memberships = group.groupmembership_set.filter(
+            updated_on__lte=last_update, status=GroupMembership.MEMBER)
+        if group.terms:
+            memberships.update(status=GroupMembership.PENDING_TERMS)
+        elif group.accepting_new_members == 'by_request':
+            memberships.update(status=GroupMembership.PENDING)
+        else:
+            for member in memberships:
+                group.remove_member(member.userprofile)

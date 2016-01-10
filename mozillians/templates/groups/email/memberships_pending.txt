@@ -1,5 +1,5 @@
-{% trans name=group.curator.full_name %}
-Hi {{ name }},
+{% trans name=group.name %}
+Hi {{ name }} curators,
 {% endtrans %}
 
 

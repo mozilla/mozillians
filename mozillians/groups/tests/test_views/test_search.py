@@ -53,8 +53,8 @@ class IndexFunctionalAreasTests(TestCase):
 
     def test_index_functional_areas(self):
         user = UserFactory.create()
-        group_1 = GroupFactory.create(curator=user.userprofile,
-                                      functional_area=True)
+        group_1 = GroupFactory.create(functional_area=True)
+        group_1.curators.add(user.userprofile)
         group_2 = GroupFactory.create()
         GroupFactory.create()
         group_1.add_member(user.userprofile)

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Review terms') }}{% endblock %}
+
+{% block body_id %}group-terms{% endblock %}
+
+{% block content %}
+  <h1>{{ _('Review terms') }}</h1>
+  <p>
+    {{ group.terms|markdown }}
+  </p>
+  <form action="{{ url('groups:review_terms', group.url) }}" method="POST">
+    {{ csrf() }}
+    <fieldset>
+      {% for radio in membership_form.terms_accepted %}
+        <div>
+          {{ radio.tag() }}
+          {{ radio.choice_label }}
+        </div>
+      {% endfor %}
+    </fieldset>
+    <button class="btn btn-primary" type="submit">Submit</button>
+  </form>
+{% endblock content %}

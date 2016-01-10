@@ -9,6 +9,15 @@ class GroupFactory(factory.DjangoModelFactory):
     class Meta:
         model = Group
 
+    @factory.post_generation
+    def curators(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for curator in extracted:
+                self.curators.add(curator)
+
 
 class SkillFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: 'Skill {0}'.format(n))

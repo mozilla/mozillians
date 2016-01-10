@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from mock import patch
 from django.template.loader import get_template
 from mozillians.groups.tasks import email_membership_change
@@ -8,6 +10,7 @@ from django.conf import settings
 from mozillians.common.tests import TestCase
 from mozillians.groups import tasks
 from mozillians.groups.models import Group, GroupMembership, Skill
+from mozillians.groups.tasks import invalidate_group_membership
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
@@ -36,7 +39,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # was last sent, send the curator an email.  It should contain the count of
         # all pending memberships.
         curator = UserFactory.create()
-        group = GroupFactory.create(curator=curator.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(curator.userprofile)
 
         # Add a couple of pending memberships
         group.add_member(UserFactory.create().userprofile, GroupMembership.PENDING)
@@ -68,7 +72,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # was last sent, send the curator an email.  It should contain the count of
         # all pending memberships, which should be one, and should use the singular text.
         curator = UserFactory.create()
-        group = GroupFactory.create(curator=curator.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(curator.userprofile)
 
         # Add one pending membership
         group.add_member(UserFactory.create().userprofile, GroupMembership.PENDING)
@@ -90,7 +95,8 @@ class SendPendingMembershipEmailsTests(TestCase):
         # last time a reminder email was sent, do not send the curator an email.
 
         # curated group:
-        group = GroupFactory.create(curator=UserFactory.create().userprofile)
+        group = GroupFactory.create()
+        group.curators.add(UserFactory.create().userprofile)
 
         # Pending membership
         user1 = UserFactory.create()
@@ -122,7 +128,8 @@ class SendPendingMembershipEmailsTests(TestCase):
 
 class EmailMembershipChangeTests(TestCase):
     def setUp(self):
-        self.group = GroupFactory.create(curator=UserFactory.create().userprofile)
+        self.group = GroupFactory.create()
+        self.group.curators.add(UserFactory.create().userprofile)
         self.user = UserFactory.create()
 
     def test_member_accepted(self):
@@ -158,3 +165,37 @@ class EmailMembershipChangeTests(TestCase):
         eq_([self.user.email], to_list)
         eq_('Not accepted to Mozillians group "%s"' % self.group.name, subject)
         ok_('You have not been accepted' in body)
+
+
+class MembershipInvalidationTests(TestCase):
+    def test_invalidate_group_with_terms(self):
+        group = GroupFactory.create(terms='Example terms.', invalidation_days=5)
+        user = UserFactory.create()
+        group.add_member(user.userprofile)
+        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        invalidate_group_membership()
+        membership = group.groupmembership_set.get(userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING_TERMS)
+
+    def test_invalidate_group_by_request(self):
+        group = GroupFactory.create(invalidation_days=5, accepting_new_members='by_request')
+        user = UserFactory.create()
+        group.add_member(user.userprofile)
+        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        invalidate_group_membership()
+        membership = group.groupmembership_set.get(userprofile=user.userprofile)
+        eq_(membership.status, GroupMembership.PENDING)
+
+    def test_invalidate_group_accepts_all(self):
+        group = GroupFactory.create(invalidation_days=5)
+        user = UserFactory.create()
+        group.add_member(user.userprofile)
+        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        invalidate_group_membership()
+        ok_(not group.groupmembership_set.filter(userprofile=user.userprofile).exists())

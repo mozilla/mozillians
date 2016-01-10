@@ -78,39 +78,44 @@
           {% endif %}
       </ul><!-- .curated-group-details -->
 
-      {% if group.curator %}  {# curated group #}
+      {% set curators = group.curators.all() %}
+      {% if curators %}  {# curated group #}
         <div class="curator">
           <h3>
             {% if group.functional_area %}
               {{ _('Community Steward') }}
+            {% elif curators|length > 1 %}
+              {{ _('Curators') }}
             {% else %}
               {{ _('Curator') }}
             {% endif %}
           </h3>
-          <div class="avatar">
-            <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
-              <img class="profile-photo"
-                   src="{{ group.curator.get_photo_url('70x70') }}"
-                   alt="{{ _('Profile Photo') }}">
-            </a>
-          </div>
-          <div class="details">
+          {% for curator in curators %}
+            <div class="avatar">
+              <a href="{{ url('phonebook:profile_view', curator.user.username) }}">
+                <img class="profile-photo"
+                     src="{{ curator.get_photo_url('70x70') }}"
+                     alt="{{ _('Profile Photo') }}">
+              </a>
+            </div>
+            <div class="details">
               <ul>
                 <li>
                   <span>
-                    <a href="{{ url('phonebook:profile_view', group.curator.user.username) }}">
-                      {{ group.curator.display_name }}
+                    <a href="{{ url('phonebook:profile_view', curator.user.username) }}">
+                      {{ curator.display_name }}
                     </a>
                   </span>
                 </li>
                 <li>
-                  <a href="mailto:{{ group.curator.user.email }}">
-                     <i class="icon-envelope-o"></i>
-                    {{ group.curator.user.email }}
+                  <a href="mailto:{{ curator.user.email }}">
+                    <i class="icon-envelope-o"></i>
+                    {{ curator.user.email }}
                   </a>
                 </li>
               </ul>
             </div><!-- details -->
+          {% endfor %}
         </div><!-- .curator -->
       {% endif %}
 
