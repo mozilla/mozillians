@@ -839,7 +839,7 @@ class ExternalAccount(models.Model):
                          'url': 'https://www.transifex.com/accounts/profile/{identifier}/',
                          'validator': validate_username_not_url},
         TYPE_TELEGRAM: {'name': 'Telegram',
-                        'url': 'https://telegram.me/{identifier}/',
+                        'url': 'https://telegram.me/{identifier}',
                         'validator': validate_username_not_url},
     }
 
