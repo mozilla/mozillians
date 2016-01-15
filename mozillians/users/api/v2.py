@@ -3,9 +3,10 @@ from django.shortcuts import get_object_or_404
 
 import django_filters
 from funfactory.urlresolvers import reverse
-from rest_framework import viewsets, serializers
+from rest_framework import serializers
 from rest_framework.response import Response
 
+from mozillians.api.v2.viewsets import NoCacheReadOnlyModelViewSet
 from mozillians.common.helpers import absolutify, markdown
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import ExternalAccount, GroupMembership, Language, UserProfile
@@ -197,7 +198,7 @@ class UserProfileFilter(django_filters.FilterSet):
 
 
 # Views
-class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
+class UserProfileViewSet(NoCacheReadOnlyModelViewSet):
     """
     Returns a list of Mozillians respecting authorization levels
     and privacy settings.
