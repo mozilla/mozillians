@@ -2,9 +2,10 @@ from django.shortcuts import get_object_or_404
 
 import django_filters
 from funfactory.urlresolvers import reverse
-from rest_framework import viewsets, serializers
+from rest_framework import serializers
 from rest_framework.response import Response
 
+from mozillians.api.v2.viewsets import NoCacheReadOnlyModelViewSet
 from mozillians.common.helpers import absolutify
 from mozillians.groups.models import Group, GroupMembership, Skill
 from mozillians.users.models import UserProfile
@@ -87,7 +88,7 @@ class SkillFilter(django_filters.FilterSet):
         fields = ('name',)
 
 
-class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+class GroupViewSet(NoCacheReadOnlyModelViewSet):
     """
     Returns a list of Mozillians groups respecting authorization
     levels and privacy settings.
@@ -112,7 +113,7 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class SkillViewSet(viewsets.ReadOnlyModelViewSet):
+class SkillViewSet(NoCacheReadOnlyModelViewSet):
     """
     Returns a list of Mozillians skills respecting authorization
     levels and privacy settings.
