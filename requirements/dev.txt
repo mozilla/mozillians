@@ -1,30 +1,128 @@
-# This file pulls in everything a developer needs. If it's a basic package
-# needed to run the site, it belongs in requirements/prod.txt. If it's a
-# package for developers (testing, docs, etc.), it goes in this file.
-
+# Install prod.txt requirements first
 -r prod.txt
 
-# Documentation
+# sha256: PnI_cNxHtK1co6tPHRw_dkOLPcdNaoQ97T4VTor5mDg
+# sha256: FI4EsYXTVBuNcC6M3j7lrNBrMcwNR0EnurqfRlKyqvE
+# sha256: E6DvX6_XsWz5lbwo_nqrB4DasbL9oPyJ4DNwmvi4pHs
+Pygments==2.1
+# sha256: hf5OSWveAKdoO-c26W4oA8ylTQ5F-f21L0ej1NCaci4
+# sha256: BbIlknZzLKHrHnyBNjVDH9sCXBIEk_HFovuIxjtU2eI
+# sha256: NNyVtworB6YbXWEDTDSwX4JRSqtUrSet7bSc7pEbuOk
 Sphinx==1.1.3
-
-# Testing
+# sha256: aUkbUwUVfDxuDwSnAZhNaud_1yn8HJrNJQd_HfOFMms
+# sha256: 619wCpv8lkILBVY1r5AC02YuQ9gMP_0x8iTCW8DV9GI
+Werkzeug==0.11.3
+# sha256: 7cVxMGHxCWYEi_a0DZpRSzgeC6hJxk4DTE72wYR9MAc
+blessings==1.6
+# sha256: mrHTE_mbIJ-PcaYp82gzAwyNfHIoLPd1aDS69WfcpmI
+# sha256: 9J4DYR9fJVd4jO64BxCxxnEQ-XxeZ0C5ft9wJF7qJAk
+click==4.0
+# sha256: bC_RJ81OLeywq0H-OsKUi4etLqBHDiS0vl9-f9_vjfM
+# sha256: CpCvpvXqCIidqQZtyjzi74XUdYfj9mygak-o06AFOsw
+# sha256: k8UEdfGJzSJuloi5iXoM08TF2ckLFzP6j2RFz8AYLFE
+# sha256: lMHmZhCAenkX2WftZBW51f3nSHqyoHu14FRWeGXvbvA
+# sha256: dqc6SKMI-4ekQX1jCwNF02Fm9InvF-paqORZb7UKIpY
+# sha256: vrltMs6M-kfsZDPZWjPkr6qXwZrBtKR-pApCT-3-58I
+# sha256: UHJ1Eq_nfgRMfX8v1M0P5isGUn-WWzNagQ2VZ0jgUU0
+# sha256: wAusD2s1uCrOBppqDYjo_UzRjZZPxeRzKc0CshI5f74
+# sha256: 6BPLqf8OPTetMdwSf6yF0j-aJtBGHvgEKsRTmyBF54E
+# sha256: lk-GOUy00P0rtA_83coyGs9DI7SNGqWpPbi3Q8igD3k
+# sha256: 0Hnja6zuqXB_1QsmgwVlQVEBEnRJSjPGCMB1gIkg7ag
+# sha256: jmDnIMrT7msKMvR1rkBAVSxWI4cKnKDT1CY_qomo2Ws
+# sha256: mQQ0lLKNZGADXdlBAmnNtDfuRg7cf5bwerRcV7qV5lE
+# sha256: btUh7TgA2PiRFkK5s8OJF4CpKdteVyyIxHE8EDJTD4I
+# sha256: ry9ZzjElI8OEp4JoIcrguV8yD-4XUTh6u6TwDu1zcWY
+# sha256: hbEnW216YczIAkpOmkyeiWOUd27c4aXQdewRb5GSVGI
+# sha256: fqoKM0I0du1jMX7gpTzAfA42taOQ4-lblRUufrazpvY
+# sha256: rd9jteOdVzxFnDkwslF2FGOVwdwa_ORxAGe7Xm3E6lg
+# sha256: C6bENF48GX9qO6kk0VXEAq0owICsDXlSlJPrF1gvvEE
+# sha256: 7iM4U5FXz8NfsdZ1fdeZEmgE3zk5PEpsX-iLQCyMCrQ
+# sha256: K-N0j0XS6wJZw8k6vMwVwQcl73Fb8IF6TAoaHa0qvGo
+# sha256: r27YA0Dl4bifp5T3MM51l2UfvaMxLlAAAmiLZ5wYTvk
+# sha256: 0xiDRfHHFh1wH9LqkVD5u24t-JDz3dbArqH1JeIdFUQ
+# sha256: 5lx4veFVpzTw1iRkfE1uD0f7SHU1WguVw31Td4hzf08
+# sha256: hF0PihdlB0syVvB9284paeWlMW39DrMokTcBDXZ3Mmo
+# sha256: 6WwTpA3zic6Mu17BCOX7g0mJ0b7f9diEblqj0nCl87Y
+# sha256: ANRkeXojb2VDNxga9ytLrqPTXQVspIDkXpFju130lrg
+coverage==4.0.3
+# sha256: BTWn4nAUh0snrjpNM-h0njRb36YnZhlSCLeZa_EQBoI
+cssselect==0.9.1
+# sha256: zD3Np4Nafq-oh_rZ1qabLV_XfAscKhYI9StI40XjcgY
+# sha256: HGJUWXd3_QA9ouj7UDw9vz2ej41V8FRwnA5lvjRnIJw
+decorator==4.0.6
+# sha256: 6eklwAl8b163cW5QylcVXtH2cPD6cqZhBTGYwYkKAvU
+# sha256: _eJnrrA6jUnjNB5_caIoxnSNzkO1wA9lWBeA2Ztwstk
+dennis==0.7
+# sha256: R5lTTzXrocB8tvmFmqW7cZiGdp9dNdKjjnSQzpDAzmk
+# sha256: -Y-ZHSsDkDOsX6pjjA0a-ycgq_TZ14FXPDWS1omUgKE
+django-extensions==1.6.1
+# sha256: 3OvUkoESYxYm9MTQ31l4fHSEBOZt2pUhEAMOqIPTuM0
+# sha256: x9txeBCraWX2bIzwOYqYydjfmC2jm0zX8WKRHriVlvo
+docutils==0.12
+# sha256: EWYQoXCRjfNC2yxLr7yPS5F4DEmHj5KdieNg8QrSnSo
+# sha256: deTJeG7SjRnsf7UA88ciGm64d0jLxvXi7qykw9aPMMs
+factory-boy==2.6.0
+# sha256: kPUHiRrRBz4Iz2kI61HV4d68PFpdVUQn6MP79zzfEu4
+fake-factory==0.5.3
+# sha256: j8ToZaKfPG7K5AGn3OGCR_ir0EbSTjkOFq-Zdsyceqg
+# sha256: Ln675Z2MheYm422Z8NsvV4OUMT0_fOncnx2lfvbNdTc
 flake8==2.4.1
-nose==1.0.0
-mock==1.0.1
--e git://github.com/jbalogh/django-nose.git#egg=django_nose
--e git://github.com/jbalogh/test-utils.git#egg=test-utils
+# sha256: F2PRVkET9euJ33eHmo0yEyc8TX_5Pcs3owcM3ww0_Xw
+ipdb==0.8.1
+# sha256: oWYMg_ZR3l8urefXVZHeBga8hpP7BGjxJQ0IzRpkqVI
+# sha256: UjOj0x61Z8gTXbMsX9aEE5Bt_LryJa8D048EVSiqP5A
+# sha256: OpKPWeisjdl4WMKDkIZ8h8CVEPH4u-l-TpxrA264T8A
+# sha256: XC2E2-KpwYPcAaOz2rpcqvS9DPxsg0jBfyEC3xKxmXc
+ipython==4.0.3
+# sha256: Yhjpq9YS-1rPsXXqfHsCYAbeTflpHZpzybOQz6GkHCs
+# sha256: OgYkolGiZGPJ36D_pjXsUcQmU4CYDZpQ1lYRw8K9gqY
+# sha256: DEP6hOk60OTb7K_8ZlasHK8aSDWbK7Cl2jr4QWTj9Js
+ipython-genutils==0.1.0
+# sha256: 3ofhJnEX0ug3WONA_marsZyCL2txrrMCx7PUnGK5qDw
+# sha256: ozO2ysnenm7Oj0O4OQq3ZapkVbq1OJpZcA6zRT4oROs
+# sha256: Y_yRWxb74vojzYJhzVipjuf7NAHMCMdvBguHddGWcls
+# sha256: 8PJ0mEuK5oDV1UIL_ivE_QIvtipd89uR-TIajbTPmk0
+# sha256: G1sAlOl3wMqnLTcpzqF0pbG_tv-qK1eyCtJQMEsKcT8
+# sha256: mx-lrUCB7rmCPGolbipfXI-PR1ntuqdFR8W3MyfAklU
+# sha256: Lfcn9cQKCNIkYpjT98mI9cYWq7NOdg84dFovaQADXZ8
 lxml==2.1
-pyquery
-
-# L10n
+# sha256: uDndLZwRfHAUMMFJlWkYpCOphjtIsJyQ4wpgE-fS9E8
+# sha256: j4MIDaoknQNsvM-4rlzG_wB7iNbZN1ITca-r57Gbrbw
+mock==1.0.1
+# sha256: ku47hrXBkhwtnawhe--JkMX4Usi8TZAYyv4PPzuBzTo
+nosenicedots==0.5
+# sha256: SG2cF_OkEoX6z0E0bzeZ53TX0N-2AKWrYZgG5urc8HI
+# sha256: raldEXxFWavmQICWHa9brdpoVhr900wnj4yiDy-kZtI
+path.py==8.1.2
+# sha256: IyeV68qvLhIDltu6o6Ep7aUXV-6q4ZEVWPTvjuQU_Gw
+pexpect==4.0.1
+# sha256: TCSid6IiC8mltS5F1HQz2dtLkjVjfLyGw2b3QTHagQk
+# sha256: LmBk_GlWEZL0GZfuAnM2uw0uUSbzcMm9JQoQULkD3tM
+pickleshare==0.6
+# sha256: 1woxXNXGrf563Pm1QbAjNIyLcUWH5TV4hsfpkKkSFvM
+# sha256: Q85g0F_6RCup08VyIZOq25PDgXS5-0ccjqfMv4NJu8o
+polib==1.0.7
+# sha256: 3LePshl7Scobey83sEe8icDaepD5C9W8F8POOIu271k
+ptyprocess==0.5
+# sha256: hkyYYmgbw9y8BtNCJIL0SSYc6fhRpU-NNx4opUrrYjc
+# sha256: yspzkfbekb5ketRHfIlSacNyWzUyIjKhhHjaKxLplgw
+pyquery==1.2.10
+# sha256: 3JcuBglLmvW4VbPfSmRjleQ9HJ0NOe00W3OTVg0LkXM
+simplegeneric==0.8.1
+# sha256: D9rFYU5cszKaOdSLu8S5WBOSCvdWXBSItdeH7yhjviY
+# sha256: RA4436XSomwIbUtCfPt67RfQotyni86QwzNU2iWSr1s
+# sha256: UeSlAEVtz4Lpm5AgslZPPrbXCYUa2vhP-yQl8SCooGQ
+traitlets==4.1.0
+# sha256: sUbYzcKH2wf270SRdm2EGpMbGyZwQP74HrVZpHX-Pbk
 translate-toolkit==1.8.0
-
-# Debug tools
-django-extensions
-Werkzeug
-
-coverage
-nosenicedots
-factory-boy
-dennis
-blessings
+# sha256: dap2aAC0psxgM44Bsbals1kqkfzCgQslYgSYuRVntHs
+https://github.com/jbalogh/test-utils/archive/master.zip#egg=test-utils
+# sha256: vWwID7NyrrywzhnjXdrHRPKr9ae--iB9stEJfUjv5jo
+# sha256: X36m-zqpr-FG0H_W1c7feIdH2LDCnkRzJFPCstsePRY
+mccabe==0.3.1
+# sha256: T8LkeK3c8XAWZX3_MLLY1hHoNB-sGczydogC9mNde4o
+# sha256: oRPV9a16errO-d9ew_KvI6IKKABZIVd7Fd1YTQmdWQA
+pep8==1.7.0
+# sha256: rEVxaVwQzhU2vNuhopS58tPmzJ0OoXG2fVCghkzj4EI
+# sha256: P6gKELNtUWhr93RPXcmWIs1cmM6O1kAi5imGiq_Bd2k
+pyflakes==0.8.1

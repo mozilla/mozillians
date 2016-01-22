@@ -1,4 +1,0 @@
--r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
-
-# Images
-Pillow==2.3.0
