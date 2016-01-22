@@ -10,7 +10,7 @@ PORT = 8000
 
 SITE_URL = '%s%s:%d' % (PROTOCOL, DOMAIN, PORT)
 
-DATABASES['default']['NAME'] = 'mozillians_dev'
+DATABASES['default']['NAME'] = 'mozillians'
 DATABASES['default']['USER'] = 'root'
 DATABASES['default']['PASSWORD'] = ''
 
