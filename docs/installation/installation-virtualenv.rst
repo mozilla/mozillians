@@ -56,15 +56,9 @@ When you want to start contributing...
 
 #.  Clone your fork to your local machine::
 
-       $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
+       $ git clone git@github.com:YOUR_USERNAME/mozillians.git mozillians
        (lots of output - be patient...)
        $ cd mozillians
-
-    .. note::
-
-       Make sure you use ``--recursive`` when checking the repo out! If you
-       didn't, you can load all the submodules with ``git submodule update --init
-       --recursive``.
 
 #. Create your python virtual environment::
 
@@ -83,7 +77,7 @@ When you want to start contributing...
 
 #. Install development and compiled requirements::
 
-     (venv)$ pip install -r requirements/compiled.txt -r requirements/dev.txt
+     (venv)$ ./peep.sh install -r requirements/dev.txt
      (lots more output - be patient again...)
      (venv) $
 
