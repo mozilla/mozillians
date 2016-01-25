@@ -41,5 +41,13 @@ ES_INDEXES = {'default': 'mozillians-dev',
               'public': 'mozillians-dev-public'}
 
 CELERY_ALWAYS_EAGER = True
-
 JAVA_BIN = '/usr/bin/java'
+SESSION_COOKIE_SECURE = False
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
+    }
+}
+BROWSERID_AUDIENCES = None
