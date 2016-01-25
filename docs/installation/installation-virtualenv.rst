@@ -138,7 +138,7 @@ Setting up a MySQL user and database for development:
 
 #. Create a ``mozillians`` database::
 
-    mysql> create database mozillians;
+    mysql> create database mozillians character set utf8;
 
 #. Give the mozillians user access to the mozillians database::
 
