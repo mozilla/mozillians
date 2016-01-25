@@ -2,12 +2,12 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 
 import django_filters
-from funfactory.urlresolvers import reverse
 from rest_framework import serializers
 from rest_framework.response import Response
 
 from mozillians.api.v2.viewsets import NoCacheReadOnlyModelViewSet
 from mozillians.common.helpers import absolutify, markdown
+from mozillians.common.urlresolvers import reverse
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import ExternalAccount, GroupMembership, Language, UserProfile
 

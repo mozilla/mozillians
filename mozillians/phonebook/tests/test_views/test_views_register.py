@@ -3,10 +3,10 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test.utils import override_settings
 
-from funfactory.helpers import urlparams
 from mock import patch
 from nose.tools import eq_, ok_
 
+from mozillians.common.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.tests import InviteFactory
 from mozillians.phonebook.utils import redeem_invite

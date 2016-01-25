@@ -3,16 +3,33 @@
 # Django settings for the mozillians project.
 import logging
 import os.path
+import socket
 import sys
 
-from funfactory.manage import path
-from funfactory.settings_base import *  # noqa
-from funfactory.settings_base import JINJA_CONFIG as funfactory_JINJA_CONFIG
 from urlparse import urljoin
+
+from django_sha2 import get_password_hashers
 
 from django.utils.functional import lazy
 
+PROJECT_MODULE = 'mozillians'
+ROOT_URLCONF = '%s.urls' % PROJECT_MODULE
+
+DEV = False
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = ()
+MANAGERS = ADMINS
+
+# Site ID is used by Django's Sites framework.
+SITE_ID = 1
+
 # Log settings
+LOG_LEVEL = logging.INFO
+HAS_SYSLOG = True
+LOGGING_CONFIG = None
+
 SYSLOG_TAG = "http_app_mozillians"
 LOGGING = {
     'loggers': {
@@ -20,6 +37,12 @@ LOGGING = {
         'phonebook': {'level': logging.INFO},
     },
 }
+
+# Repository directory
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+# path() bases things off of ROOT
+path = lambda *a: os.path.abspath(os.path.join(ROOT, *a))
 
 # Database settings
 DATABASES = {
@@ -37,7 +60,18 @@ DATABASES = {
     },
 }
 
+DATABASE_ROUTERS = ('multidb.PinningMasterSlaveRouter',)
+SLAVE_DATABASES = []
+
 # L10n
+TIME_ZONE = 'America/Los_Angeles'
+USE_I18N = True
+USE_L10N = True
+TEXT_DOMAIN = 'messages'
+STANDALONE_DOMAINS = [TEXT_DOMAIN, 'javascript']
+TOWER_KEYWORDS = {'_lazy': None}
+TOWER_ADD_HEADERS = True
+LANGUAGE_CODE = 'en-US'
 LOCALE_PATHS = [path('locale')]
 
 # Tells the extract script what files to parse for strings and what functions to use.
@@ -52,16 +86,48 @@ DOMAIN_METHODS = {
     ],
 }
 
+# Tells the product_details module where to find our local JSON files.
+# This ultimately controls how LANGUAGES are constructed.
+PROD_DETAILS_DIR = path('lib/product_details_json')
+
 # Accepted locales
 LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr',
                   'sv-SE', 'zh-TW', 'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk',)
+DEV_LANGUAGES = ('en-US',)
+CANONICAL_LOCALES = {
+    'en': 'en-US',
+}
 
 # List of RTL locales known to this project. Subset of LANGUAGES.
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 
-# For absoluate urls
+
+def lazy_lang_url_map():
+    from django.conf import settings
+    langs = settings.DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
+    return dict([(i.lower(), i) for i in langs])
+
+LANGUAGE_URL_MAP = lazy(lazy_lang_url_map, dict)()
+
+
+# Override Django's built-in with our native names
+def lazy_langs():
+    from django.conf import settings
+    from product_details import product_details
+    langs = DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
+    return dict([(lang.lower(), product_details.languages[lang]['native'])
+                 for lang in langs if lang in product_details.languages])
+
+LANGUAGES = lazy(lazy_langs, dict)()
+
+# For absolute urls
+try:
+    DOMAIN = socket.gethostname()
+except socket.error:
+    DOMAIN = 'localhost'
+
 PROTOCOL = "https://"
 PORT = 443
 
@@ -74,22 +140,71 @@ TEMPLATE_LOADERS = (
     # 'django.template.loaders.eggs.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = get_template_context_processors(
-    append=['mozillians.common.context_processors.current_year',
-            'mozillians.common.context_processors.canonical_path'])
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.media',
+    'django.core.context_processors.request',
+    'session_csrf.context_processor',
+    'django.contrib.messages.context_processors.messages',
+    'mozillians.common.context_processors.i18n',
+    'mozillians.common.context_processors.globals',
+    'mozillians.common.context_processors.current_year',
+    'mozillians.common.context_processors.canonical_path'
+)
 
+TEMPLATE_DIRS = (
+    path('templates'),
+)
+
+# Absolute path to the directory that holds media.
+MEDIA_ROOT = path('media')
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+MEDIA_URL = '/media/'
+
+# Absolute path to the directory static files should be collected to.
+STATIC_ROOT = path('static')
+
+# URL prefix for static files.
+STATIC_URL = '/static/'
+
+# Storage of static files
+COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_CSS_FILTERS = (
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.CSSMinFilter'
+)
+COMPRESS_PRECOMPILERS = (
+    ('text/less', 'lessc {infile} {outfile}'),
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
 
 JINGO_EXCLUDE_APPS = [
     'admin',
     'autocomplete_light',
     'browserid',
+    'registration',
     'rest_framework',
 ]
 
 
 def JINJA_CONFIG():
-    config = funfactory_JINJA_CONFIG()
-    config['extensions'].append('compressor.contrib.jinja2ext.CompressorExtension')
+    config = {
+        'extensions': [
+            'tower.template.i18n',
+            'jinja2.ext.do',
+            'jinja2.ext.with_',
+            'jinja2.ext.loopcontrols',
+            'compressor.contrib.jinja2ext.CompressorExtension'
+        ],
+        'finalize': lambda x: x if x is not None else ''
+    }
     return config
 
 
@@ -98,13 +213,25 @@ def COMPRESS_JINJA2_GET_ENVIRONMENT():
     return env
 
 
-MIDDLEWARE_CLASSES = get_middleware(append=[
+MIDDLEWARE_CLASSES = (
+    'mozillians.common.middleware.LocaleURLMiddleware',
+    'multidb.middleware.PinningRouterMiddleware',
+
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
+
+    'django.contrib.messages.middleware.MessageMiddleware',
+
+    'commonware.middleware.FrameOptionsHeader',
+    'mobility.middleware.DetectMobileMiddleware',
+    'mobility.middleware.XMobileMiddleware',
     'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
-
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
-    'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
@@ -112,13 +239,23 @@ MIDDLEWARE_CLASSES = get_middleware(append=[
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
 
     'waffle.middleware.WaffleMiddleware',
-])
+)
+
+# Path to Java. Used for compress_assets.
+JAVA_BIN = '/usr/bin/java'
+
+# Sessions
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
 
 # StrictTransport
 STS_SUBDOMAINS = True
 
 # Not all URLs need locale.
-SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
+SUPPORTED_NONLOCALES = [
+    'media',
+    'static',
+    'admin',
     'csp',
     'api',
     'browserid',
@@ -128,6 +265,7 @@ SUPPORTED_NONLOCALES = list(SUPPORTED_NONLOCALES) + [
     'humans.txt'
 ]
 
+# Authentication settings
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'mozillians.common.authbackend.MozilliansAuthBackend'
@@ -139,8 +277,27 @@ USERNAME_MAX_LENGTH = 30
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/login/'
 
-INSTALLED_APPS = get_apps(append=[
+INSTALLED_APPS = (
+    # Django contrib apps
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.staticfiles',
+    'django.contrib.messages',
+    'django.contrib.admin',
+
+    # Third-party apps, patches, fixes
+    'compressor',
+    'tower',
+    'cronjobs',
+    'django_browserid',
+    'commonware.response.cookies',
+    'djcelery',
+    'django_nose',
+    'session_csrf',
+    'product_details',
     'csp',
+
     'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
@@ -155,19 +312,28 @@ INSTALLED_APPS = get_apps(append=[
 
     'sorl.thumbnail',
     'autocomplete_light',
-
-    'django.contrib.admin',
     'import_export',
     'waffle',
     'rest_framework',
-
-])
+)
 
 # Auth
+BASE_PASSWORD_HASHERS = (
+    'django_sha2.hashers.BcryptHMACCombinedPasswordVerifier',
+    'django_sha2.hashers.SHA512PasswordHasher',
+    'django_sha2.hashers.SHA256PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+)
+
 PWD_ALGORITHM = 'bcrypt'
+
 HMAC_KEYS = {
     '2011-01-01': 'cheesecake',
 }
+
+PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
@@ -287,7 +453,21 @@ DEFAULT_AVATAR = 'img/default_avatar.png'
 DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
+# Celery configuration
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+# True says to simulate background tasks without actually using celeryd.
+# Good for local development in case celeryd is not running.
+CELERY_ALWAYS_EAGER = True
+BROKER_CONNECTION_TIMEOUT = 0.1
+CELERY_RESULT_BACKEND = 'amqp'
+CELERY_IGNORE_RESULT = True
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+
+# Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
+# The task can catch that and recover but should exit ASAP.
+CELERYD_TASK_SOFT_TIME_LIMIT = 60 * 2
+
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 SECRET_KEY = ''
@@ -357,3 +537,6 @@ REST_FRAMEWORK = {
 }
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+
+# django-mobility
+MOBILE_COOKIE = 'mobile'

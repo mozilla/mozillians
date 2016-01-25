@@ -1,11 +1,11 @@
 from django.core.urlresolvers import reverse
 from django.test import Client
-from funfactory.helpers import urlparams
 
 from mock import patch
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_
 
+from mozillians.common.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.users.tests import UserFactory
 

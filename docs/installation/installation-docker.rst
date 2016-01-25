@@ -48,7 +48,7 @@ Building mozillians
 #. `Fork the main Mozillians repository <https://github.com/mozilla/mozillians>`_.
 #. Clone your fork to your local machine::
 
-     $ git clone --recursive git@github.com:YOUR_USERNAME/mozillians.git mozillians
+     $ git clone git@github.com:YOUR_USERNAME/mozillians.git mozillians
      (lots of output - be patient...)
      $ cd mozillians
 

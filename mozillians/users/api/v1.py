@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 
-from funfactory import utils
 from tastypie import fields, http
 from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.bundle import Bundle
@@ -17,6 +16,7 @@ from mozillians.api.v1.authenticators import AppAuthentication
 from mozillians.api.v1.paginator import Paginator
 from mozillians.api.v1.resources import (ClientCacheResourceMixIn,
                                          GraphiteMixIn)
+from mozillians.common import utils
 from mozillians.users.models import GroupMembership, UserProfile
 
 

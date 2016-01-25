@@ -1,5 +1,4 @@
 import os
-import site
 
 try:
     import newrelic.agent
@@ -14,13 +13,7 @@ if newrelic:
         newrelic = False
 
 os.environ['CELERY_LOADER'] = 'django'
-
-# Add the app dir to the python path so we can import manage.
-wsgidir = os.path.dirname(__file__)
-site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
-
-# manage adds /apps, /lib, and /vendor to the Python path.
-import manage
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mozillians.settings")
 
 from django.core.wsgi import get_wsgi_application
 

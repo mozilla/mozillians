@@ -1,7 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum
 
-from funfactory import utils
 from tastypie import fields
 from tastypie.authorization import ReadOnlyAuthorization
 from tastypie.resources import ModelResource
@@ -12,6 +11,7 @@ from mozillians.api.v1.resources import (AdvancedSortingResourceMixIn,
                                          ClientCacheResourceMixIn,
                                          GraphiteMixIn)
 from mozillians.api.v1.paginator import Paginator
+from mozillians.common.utils import absolutify
 from mozillians.groups.models import Group, Skill
 
 
@@ -46,7 +46,7 @@ class GroupResource(GroupBaseResource):
 
     def dehydrate_url(self, bundle):
         url = reverse('groups:show_group', args=[bundle.obj.url])
-        return utils.absolutify(url)
+        return absolutify(url)
 
 
 class SkillResource(GroupBaseResource):
