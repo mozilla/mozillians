@@ -232,7 +232,6 @@ MIDDLEWARE_CLASSES = (
     'csp.middleware.CSPMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
-    'django_statsd.middleware.TastyPieRequestTimingMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
