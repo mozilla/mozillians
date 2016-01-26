@@ -168,7 +168,7 @@ def setup_dependencies(ctx):
         ctx.local('virtualenv-2.7 --no-site-packages venv')
 
         # Activate venv to append to the correct path to $PATH.
-        activate_env = os.path.join(settings.SRC_DIR, 'venv', 'bin', 'activate_this.py')
+        activate_env = os.path.join(venv_bin_path, 'activate_this.py')
         execfile(activate_env, dict(__file__=activate_env))
 
         ctx.local('pip --version')
