@@ -18,7 +18,7 @@ from commander.deploy import task, hostgroups
 import commander_settings as settings
 
 
-# Setup virtualenv path.
+# Setup venv path.
 venv_bin_path = os.path.join(settings.SRC_DIR, '..', 'venv', 'bin')
 os.environ['PATH'] = venv_bin_path + os.pathsep + os.environ['PATH']
 
@@ -159,24 +159,24 @@ def update_info(ctx, tag):
 @task
 def setup_dependencies(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        # Creating a virtualenv tries to open virtualenv/bin/python for
-        # writing, but because virtualenv is using it, it fails.
+        # Creating a venv tries to open virtualenv/bin/python for
+        # writing, but because venv is using it, it fails.
         # So we delete it and let virtualenv create a new one.
-        ctx.local('rm -f virtualenv/bin/python virtualenv/bin/python2.7')
-        ctx.local('virtualenv-2.7 --no-site-packages virtualenv')
+        ctx.local('rm -f venv/bin/python venv/bin/python2.7')
+        ctx.local('virtualenv-2.7 --no-site-packages venv')
 
-        # Activate virtualenv to append to the correct path to $PATH.
-        activate_env = os.path.join(settings.SRC_DIR, 'virtualenv', 'bin', 'activate_this.py')
+        # Activate venv to append to the correct path to $PATH.
+        activate_env = os.path.join(settings.SRC_DIR, 'venv', 'bin', 'activate_this.py')
         execfile(activate_env, dict(__file__=activate_env))
 
         ctx.local('pip --version')
         ctx.local('./peep.sh install -r requirements/prod.txt')
-        # Make the virtualenv relocatable
-        ctx.local('virtualenv-2.7 --relocatable virtualenv')
+        # Make the venv relocatable
+        ctx.local('virtualenv-2.7 --relocatable venv')
 
         # Fix lib64 symlink to be relative instead of absolute.
-        ctx.local('rm -f virtualenv/lib64')
-        with ctx.lcd('virtualenv'):
+        ctx.local('rm -f venv/lib64')
+        with ctx.lcd('venv'):
             ctx.local('ln -s lib lib64')
 
 
