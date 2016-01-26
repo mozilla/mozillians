@@ -171,8 +171,6 @@ def setup_dependencies(ctx):
 
         ctx.local('pip --version')
         ctx.local('./peep.sh install -r requirements/prod.txt')
-        # Make the venv relocatable
-        ctx.local('virtualenv-2.7 --relocatable venv')
 
         # Fix lib64 symlink to be relative instead of absolute.
         ctx.local('rm -f venv/lib64')
