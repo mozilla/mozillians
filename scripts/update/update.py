@@ -45,6 +45,7 @@ def update_locales(ctx):
 @task
 def update_assets(ctx):
     with ctx.lcd(settings.SRC_DIR):
+        ctx.local("which python")
         ctx.local("LANG=en_US.UTF-8 python manage.py collectstatic --noinput --no-default-ignore -i .git")
         ctx.local("LANG=en_US.UTF-8 python manage.py compress --engine jinja2")
         ctx.local("LANG=en_US.UTF-8 python manage.py update_product_details")
@@ -150,6 +151,7 @@ def update_info(ctx, tag):
         ctx.local("git log -3")
         ctx.local("git status")
         ctx.local("git submodule status")
+        ctx.local("which python")
         ctx.local("python manage.py migrate --list")
         with ctx.lcd("locale"):
             ctx.local("svn info")
