@@ -46,9 +46,9 @@ def update_locales(ctx):
 def update_assets(ctx):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local("which python")
-        ctx.local("LANG=en_US.UTF-8 python manage.py collectstatic --noinput --no-default-ignore -i .git")
-        ctx.local("LANG=en_US.UTF-8 python manage.py compress --engine jinja2")
-        ctx.local("LANG=en_US.UTF-8 python manage.py update_product_details")
+        ctx.local("LANG=en_US.UTF-8 ./venv/bin/python manage.py collectstatic --noinput --no-default-ignore -i .git")
+        ctx.local("LANG=en_US.UTF-8 ./venv/bin/python manage.py compress --engine jinja2")
+        ctx.local("LANG=en_US.UTF-8 ./venv/bin/python manage.py update_product_details")
 
 
 @task
