@@ -183,8 +183,8 @@ def setup_dependencies(ctx):
 @task
 def pre_update(ctx, ref=settings.UPDATE_REF):
     update_code(ref)
-    update_info(ref)
     setup_dependencies()
+    update_info(ref)
 
 
 @task
