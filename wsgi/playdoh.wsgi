@@ -1,4 +1,5 @@
 import os
+import site
 
 try:
     import newrelic.agent
@@ -15,8 +16,11 @@ if newrelic:
 os.environ['CELERY_LOADER'] = 'django'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mozillians.settings")
 
-from django.core.wsgi import get_wsgi_application
+# Add `mozillians` to the python path
+wsgidir = os.path.dirname(__file__)
+site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
 
+from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
 if newrelic:
