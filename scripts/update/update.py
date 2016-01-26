@@ -45,15 +45,15 @@ def update_locales(ctx):
 @task
 def update_assets(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("LANG=en_US.UTF-8 python manage.py collectstatic --noinput --no-default-ignore -i .git")
-        ctx.local("LANG=en_US.UTF-8 python manage.py compress --engine jinja2")
-        ctx.local("LANG=en_US.UTF-8 python manage.py update_product_details")
+        ctx.local("LANG=en_US.UTF-8 python2.7 manage.py collectstatic --noinput --no-default-ignore -i .git")
+        ctx.local("LANG=en_US.UTF-8 python2.7 manage.py compress --engine jinja2")
+        ctx.local("LANG=en_US.UTF-8 python2.7 manage.py update_product_details")
 
 
 @task
 def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python manage.py migrate --noinput")
+        ctx.local("python2.7 manage.py migrate --noinput")
 
 
 @task
@@ -95,25 +95,25 @@ def ping_newrelic(ctx):
 @task
 def update_es_indexes(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python manage.py cron index_all_profiles &")
+        ctx.local("python2.7 manage.py cron index_all_profiles &")
 
 
 @task
 def validate_fun_facts(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python manage.py cron validate_fun_facts")
+        ctx.local("python2.7 manage.py cron validate_fun_facts")
 
 
 @task
 def generate_humanstxt(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local("python manage.py cron generate_humanstxt &")
+        ctx.local("python2.7 manage.py cron generate_humanstxt &")
 
 
 # @task
 # def install_cron(ctx):
 #    with ctx.lcd(settings.SRC_DIR):
-#        ctx.local("python ./scripts/crontab/gen-crons.py -k %s -u apache > /etc/cron.d/.%s" %
+#        ctx.local("python2.7 ./scripts/crontab/gen-crons.py -k %s -u apache > /etc/cron.d/.%s" %
 #                  (settings.WWW_DIR, settings.CRON_NAME))
 #        ctx.local("mv /etc/cron.d/.%s /etc/cron.d/%s" % (settings.CRON_NAME, settings.CRON_NAME))
 
@@ -150,7 +150,8 @@ def update_info(ctx, tag):
         ctx.local("git log -3")
         ctx.local("git status")
         ctx.local("git submodule status")
-        ctx.local("python manage.py migrate --list")
+        ctx.local("python2.7 manage.py migrate --list")
+
         with ctx.lcd("locale"):
             ctx.local("svn info")
             ctx.local("svn status")
