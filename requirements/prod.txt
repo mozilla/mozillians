@@ -73,9 +73,6 @@ jingo==0.7.1
 # sha256: qyLRMiCZCYcwpX_VnWEPYHOPlaHLaNrMotHEfLDL6O4
 # sha256: gRBAtkfl1WhvhNtBXv1pfmJQAIsRK2kJunesBZ4UDHQ
 MySQL-python==1.2.5
-# sha256: Z0Gl1-i49TFRqr1H_T3xGVrtVAsWmy12hLkE_xErSDw
-# sha256: hT0YypWKWYeHzrjCl6NpdFuCllvygnaGEnLxR0WXeZk
-kombu==3.0.33
 # sha256: yZ3CGs0UNFEkSmn3c0FskYVqJtnuAuRcSNpEWFjqgpw
 # sha256: tkmPm4wHNXZdg_TaIasLU45QnILYJm73rVOsBvoz3C8
 # sha256: MS4TUTcCDujyZeNTW2bL9lqNIFlGdKXzRe8bWyomqYI
@@ -114,8 +111,6 @@ python-dateutil==1.5
 amqplib==1.0.2
 # sha256: vPcTcdmXu0ajFop7Y6rma1bMyswCWvkxDbQxVoHviGg
 python-memcached==1.53
-# sha256: N4Ethjya0-NcBzTELgvwMgzow77YLNIK1UyzTRWBV7o
-anyjson==0.3.3
 # sha256: pLrqtgYUKCOdh8m2GfgUvGvWa5xMccAjMBpQ3cUZ7rQ
 # sha256: PGmiHjfnf3VOb8CevacKzZLJDYpY8ppBzAJINRN43cM
 python-mimeparse==0.1.4
@@ -179,6 +174,7 @@ pytz==2012j
 # sha256: 5OrQWbAmhOYs-g0shw2iJBb-MkXZ6wrDOvCgzovTDaY
 # sha256: _m6DKVI2XFzZjfuE9E_OWjTbZu67BTrEumUCzCq2lNA
 sorl-thumbnail==11.12.1b
-# sha256: 4O0M5rj_5WkKLoVseQjcVX4OYFKD1ohd0TYdefKSiQg
-# sha256: LepNFtBzyQLDuJ2blmIPtnKawPepI7vHd8tK2CfAxho
-amqp==1.4.9
+# sha256: N4Ethjya0-NcBzTELgvwMgzow77YLNIK1UyzTRWBV7o
+anyjson==0.3.3
+# sha256: YBKTHxpXJLUrDlNdRi-BxHwtFStdrl-kOEPTBtvPPcg
+kombu==2.1.8
