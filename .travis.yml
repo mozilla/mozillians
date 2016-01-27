@@ -5,10 +5,10 @@ sudo: false
 services:
   - elasticsearch
 before_script:
-  - flake8 mozillians
   - mysql -e 'SET @@GLOBAL.wait_timeout=28800'
 before_install:
-  - git submodule update --init --recursive
+  - pip install flake8
+  - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8;'
   - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 install:
