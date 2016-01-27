@@ -6,11 +6,12 @@ import os.path
 import socket
 import sys
 
-from urlparse import urljoin
+from django.utils.functional import lazy
 
+import djcelery
+from urlparse import urljoin
 from django_sha2 import get_password_hashers
 
-from django.utils.functional import lazy
 
 PROJECT_MODULE = 'mozillians'
 ROOT_URLCONF = '%s.urls' % PROJECT_MODULE
@@ -455,6 +456,9 @@ DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 # Celery configuration
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+# Django-celery setup
+djcelery.setup_loader()
 
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
