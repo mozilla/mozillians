@@ -7,6 +7,17 @@ db:
     - MYSQL_ROOT_PASSWORD=root
 es:
   image: barnybug/elasticsearch:1.2.1
+broker:
+  image: rabbitmq
+celery:
+  build: .
+  volumes:
+    - .:/code
+  links:
+    - db
+    - es
+    - broker
+  command: python manage.py celeryd -l INFO
 web:
   build: .
   ports:
@@ -16,4 +27,6 @@ web:
   links:
     - db
     - es
+    - broker
+    - celery
   command: python manage.py runserver 0.0.0.0:8000
