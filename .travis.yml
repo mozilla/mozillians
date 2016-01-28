@@ -1,21 +1,18 @@
 language: python
+sudo: false
 python:
   - "2.7.11"
-sudo: false
 services:
   - elasticsearch
-before_script:
-  - mysql -e 'SET @@GLOBAL.wait_timeout=28800'
 before_install:
-  - pip install -U pip==7
   - pip install flake8
   - flake8 mozillians
-  - mysql -e 'create database mozillians character set utf8;'
+  - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
   - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 install:
   - npm install -g less
-  - ./peep.sh install -r requirements/dev.txt
   - pip install coverage
+  - pip install --require-hashes --no-deps -r requirements/dev.txt
 script:
   - coverage run --source=mozillians manage.py test
 after_success:

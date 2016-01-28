@@ -74,9 +74,10 @@ When you want to start contributing...
       (virtual environment's root directory name) will be prepended
       to your PS1.
 
-#. Install development and compiled requirements::
+#. Install development requirements::
 
-     (venv)$ ./peep.sh install -r requirements/dev.txt
+     (venv)$ python ./scripts/pipstrap.py
+     (venv)$ pip install --require-hashes --no-deps -r requirements/dev.txt
      (lots more output - be patient again...)
      (venv) $
 
