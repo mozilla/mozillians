@@ -192,7 +192,7 @@ class UserProfileFilter(django_filters.FilterSet):
     class Meta:
         model = UserProfile
         fields = ('is_vouched', 'city', 'region', 'country', 'country_code',
-                  'username', 'email', 'ircname', 'full_name', 'language',
+                  'username', 'email', 'ircname', 'full_name',
                   'account', 'group', 'skill')
 
     def filter_emails(self, queryset, value):

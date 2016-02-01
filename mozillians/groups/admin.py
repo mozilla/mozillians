@@ -150,7 +150,7 @@ class GroupAddAdminForm(forms.ModelForm):
 
     class Meta:
         model = Group
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
         }
@@ -160,7 +160,7 @@ class GroupEditAdminForm(GroupBaseEditAdminForm):
 
     class Meta:
         model = Group
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
         }
@@ -241,7 +241,7 @@ class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
 
     class Meta:
         model = GroupMembership
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'userprofile': autocomplete.ModelSelect2(url='users:vouched-autocomplete'),
             'group': autocomplete.ModelSelect2(url='groups:group-autocomplete')
@@ -270,12 +270,14 @@ class SkillAddAdminForm(forms.ModelForm):
 
     class Meta:
         model = Skill
+        fields = '__all__'
 
 
 class SkillEditAdminForm(GroupBaseEditAdminForm):
 
     class Meta:
         model = Skill
+        fields = '__all__'
 
 
 class SkillAdmin(GroupBaseAdmin):

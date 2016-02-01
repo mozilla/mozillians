@@ -363,7 +363,7 @@ class BaseLanguageFormSet(BaseInlineFormSet):
 
 LanguagesFormset = inlineformset_factory(UserProfile, Language,
                                          formset=BaseLanguageFormSet,
-                                         extra=1)
+                                         extra=1, fields='__all__')
 
 
 class EmailForm(happyforms.Form):

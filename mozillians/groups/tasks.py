@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Count, Max
 from django.db.models.loading import get_model
-from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 import tower
@@ -112,7 +111,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
         'user': user,
     }
     template = get_template(template_name)
-    body = template.render(Context(context))
+    body = template.render(context)
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
 
@@ -133,7 +132,7 @@ def member_removed_email(group_pk, user_pk):
         'group': group,
         'user': user,
     }
-    body = template.render(Context(context))
+    body = template.render(context)
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
 

@@ -7,7 +7,6 @@ from hashlib import md5
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
-from django.template import Context
 from django.template.loader import get_template
 from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
@@ -87,7 +86,7 @@ def mozillians_field(element, required=False):
     Takes a field and renders the appropriate elements.
     """
     template = get_template('includes/field.html')
-    context = Context({'field': element, 'flag_required': required})
+    context = {'field': element, 'flag_required': required}
 
     return mark_safe(template.render(context))
 
@@ -98,8 +97,7 @@ def privacy_field(element):
                                            'data-privacy-original': element.value(),
                                            'label': _('Visible to:')})
     template = get_template('includes/field.html')
-    context = Context({'field': element,
-                       'privacy': True})
+    context = {'field': element, 'privacy': True}
     return mark_safe(template.render(context))
 
 
@@ -110,7 +108,7 @@ def mozillians_form(element):
     Takes a form and renders the appropriate elements.
     """
     template = get_template('includes/form.html')
-    context = Context({'form': element})
+    context = {'form': element}
 
     return mark_safe(template.render(context))
 

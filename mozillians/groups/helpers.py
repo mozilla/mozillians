@@ -26,7 +26,7 @@ def slugify(s):
 @register.function
 def user_is_curator(group, userprofile):
     """Check if a user is curator in the specific group."""
-    return group.curators.filter(user=userprofile).exists()
+    return group.curators.filter(id=userprofile.id).exists()
 
 
 @register.function

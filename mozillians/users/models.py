@@ -117,7 +117,7 @@ class UserProfilePrivacyModel(models.Model):
                 # Figure out a good default value for it (to show to users
                 # who aren't privileged to see the actual value)
                 if isinstance(field, ManyToManyField):
-                    default = field.related.parent_model.objects.none()
+                    default = field.related.model.objects.none()
                 else:
                     default = field.get_default()
                 privacy_fields[name] = default
@@ -146,7 +146,7 @@ class UserProfile(UserProfilePrivacyModel):
     can_vouch = models.BooleanField(
         default=False,
         help_text='You can edit can_vouch status by editing invidual vouches')
-    last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
+    last_updated = models.DateTimeField(auto_now=True)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')

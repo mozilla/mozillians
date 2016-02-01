@@ -54,6 +54,7 @@ class MozSpaceAdmin(ExportMixin, admin.ModelAdmin):
         url = reverse('admin:auth_user_change', args=[obj.id])
         full_name = obj.coordinator.userprofile.full_name
         return u'<a href="%s">%s</a>' % (url, full_name)
+
     coordinator_link.allow_tags = True
     coordinator_link.short_description = 'coordinator'
 

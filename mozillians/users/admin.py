@@ -341,6 +341,7 @@ class UserProfileAdminForm(forms.ModelForm):
 
     class Meta:
         model = UserProfile
+        fields = '__all__'
 
 
 class UserProfileResource(ModelResource):
@@ -533,7 +534,7 @@ class VouchAutocompleteForm(forms.ModelForm):
 
     class Meta:
         model = Vouch
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'vouchee': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
             'voucher': autocomplete.ModelSelect2(url='users:voucher-autocomplete')
