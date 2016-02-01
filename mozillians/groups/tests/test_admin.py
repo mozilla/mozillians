@@ -18,7 +18,7 @@ class TestGroupAdmin(TestCase):
         group.add_member(user.userprofile)
         admin = GroupAdmin(model=Group, admin_site=site)
         mock_request = Mock(spec=HttpRequest)
-        qset = admin.queryset(mock_request)
+        qset = admin.get_queryset(mock_request)
 
         g = qset.get(name=group.name)
         eq_(1, g.member_count)

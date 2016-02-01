@@ -21,15 +21,13 @@ class ValidateQueryTests(TestCase):
         """Test that invalid query raises ValidationError."""
         query = 'number'
         assert_raises(ValidationError, _validate_query, query)
-        transaction_mock.commit_manually.assert_called_once_with()
-        transaction_mock.rollback.assert_called_once_with()
+        transaction_mock.atomic.assert_called_once_with()
 
     @patch('mozillians.funfacts.models.transaction', wraps=transaction)
     def test_transaction_valid_query(self, transaction_mock):
         query = 'UserProfile.objects.aggregate(number=Count("id"))'
         _validate_query(query)
-        transaction_mock.commit_manually.assert_called_once_with()
-        transaction_mock.rollback.assert_called_once_with()
+        transaction_mock.atomic.assert_called_once_with()
 
 
 class FunFactManagerTests(TestCase):
@@ -69,13 +67,11 @@ class FunFactTests(TestCase):
     def test_execute_valid_funfact(self, transaction_mock):
         fact = FunFactFactory.create()
         fact.execute()
-        transaction_mock.commit_manually.assert_called_once_with()
-        transaction_mock.rollback.assert_called_once_with()
+        transaction_mock.atomic.assert_called_once_with()
 
     @patch('mozillians.funfacts.models.transaction', wraps=transaction)
     def test_execute_invalid_funfact(self, transaction_mock):
         fact = FunFactFactory.create(number='number')
         return_value = fact.execute()
         ok_(return_value.startswith('Error'))
-        transaction_mock.commit_manually.assert_called_once_with()
-        transaction_mock.rollback.assert_called_once_with()
+        transaction_mock.atomic.assert_called_once_with()

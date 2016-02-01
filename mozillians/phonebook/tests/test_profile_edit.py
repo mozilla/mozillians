@@ -25,7 +25,7 @@ class ProfileEditTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         groups_url = reverse('groups:index_groups', prefix='/en-US/')
-        ok_(groups_url in response.content)
+        ok_(groups_url in unicode(response.content, 'utf-8'))
 
     def test_profile_edit_unvouched_doesnt_link_to_groups_page(self):
         """An unvouched user editing their profile is not shown a link to the groups page.
@@ -36,7 +36,7 @@ class ProfileEditTests(TestCase):
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
         groups_url = reverse('groups:index_groups', prefix='/en-US/')
-        ok_(groups_url not in response.content)
+        ok_(groups_url not in unicode(response.content, 'utf-8'))
 
     def test_section_does_not_exist(self):
         """When not section exists in request.POST, 404 is raised."""

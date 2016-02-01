@@ -1,0 +1,58 @@
+{% if vouch_form %}
+  <div class="vouch-box">
+    <div class="margins">
+      {% if not invite_form %}
+        {% if not profile.is_vouched %}
+          <h4>
+            {% trans full_name=profile.full_name %}
+              Does this profile belong to a Mozillian? Let us know
+              how {{ full_name }} has contributed to the project.
+            {% endtrans %}
+          </h4>
+        {% else %}
+          <h4>
+            {% trans full_name=profile.full_name %}
+              Do you know this Mozillian? Let us know how
+              {{ full_name }} has contributed to the project.
+            {% endtrans %}
+          </h4>
+        {% endif %}
+      {% endif %}
+        {% csrf_token %}
+        {{ mozillians_field(vouch_form.description) }}
+        {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+          Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+        {% endtrans %}
+        {{ _('Characters remaining:') }}
+        <span class="character-countdown">500</span>
+        <div id="vouch-submit">
+          <button class="button" type="submit"><i class="icon-key"></i>
+            {% if invite_form %}
+              {{ _('Send invite') }}
+            {% else %}
+              {% trans name=profile.display_name %}
+                Vouch for {{ name }}
+              {% endtrans %}
+            {% endif %}
+          </button>
+        </div>
+      <div class="clear"></div>
+      <p>{{ _('Only vouch for users who have made significant contributions and are at least 13 years old.') }}</p>
+      {% if (profile and not profile.is_vouched) or invite_form %}
+        <p>{{ _('Once vouched, they will be able to:') }}</p>
+        <ul>
+          <li>{{ _('View all profiles and join groups.') }}</li>
+          <li>{{ _('Access special video content on Air Mozilla.') }}</li>
+          <li>{{ _('Join the Mozilla Exchange Yammer network.') }}</li>
+          <li>{{ _('Use other Mozilla apps as a vouched user.') }}</li>
+        </ul>
+      {% endif %}
+      <p>{{ _('Vouches cannot be edited or retracted.') }}
+        <br><br>
+        {% trans vouching_url='https://wiki.mozilla.org/Mozillians/Vouching' %}
+          <a href="{{ vouching_url }}">Read more about vouching.</a>
+        {% endtrans %}
+      </p>
+    </div>
+  </div>
+{% endif %}

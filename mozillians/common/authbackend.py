@@ -14,7 +14,7 @@ from django_browserid.auth import BrowserIDBackend
 from django_browserid.base import RemoteVerifier, get_audience
 from django_browserid.http import JSONResponse
 from django_browserid.views import Verify
-from tower import ugettext as _
+from django.utils.translation import ugettext as _
 
 from mozillians.users.models import ExternalAccount, UserProfile
 

@@ -9,11 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponsePermanentRedirect
 from django.utils.encoding import iri_to_uri, smart_str
 
-import tower
-from tower import ugettext_lazy as _lazy
+from django.utils.translation import ugettext_lazy as _lazy, activate
 
 from mozillians.common import urlresolvers
-from mozillians.common.helpers import redirect, urlparams
+from mozillians.common.templatetags.helpers import redirect, urlparams
 from mozillians.common.urlresolvers import reverse
 
 
@@ -127,4 +126,4 @@ class LocaleURLMiddleware(object):
 
         request.path_info = '/' + prefixer.shortened_path
         request.locale = prefixer.locale
-        tower.activate(prefixer.locale)
+        activate(prefixer.locale)

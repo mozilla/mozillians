@@ -3,13 +3,13 @@ from django.db import models
 from django.utils.timezone import now
 
 from autoslug.fields import AutoSlugField
-from tower import ugettext as _
-from tower import ugettext_lazy as _lazy
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _lazy
 
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
-from mozillians.groups.helpers import slugify
+from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
 from mozillians.users.tasks import update_basket_task
 

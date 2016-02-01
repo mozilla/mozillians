@@ -24,7 +24,7 @@ class DeleteTests(TestCase):
             response = client.get(reverse('phonebook:profile_confirm_delete'),
                                   follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/confirm_delete.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/confirm_delete.html')
 
     def test_confirm_delete_vouched(self):
         user = UserFactory.create()
@@ -32,7 +32,7 @@ class DeleteTests(TestCase):
             response = client.get(reverse('phonebook:profile_confirm_delete'),
                                   follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/confirm_delete.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/confirm_delete.html')
 
     def test_delete_get_method(self):
         user = UserFactory.create()
@@ -57,7 +57,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
@@ -76,7 +76,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(
             user.email, user.userprofile.basket_token)
@@ -98,4 +98,4 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')

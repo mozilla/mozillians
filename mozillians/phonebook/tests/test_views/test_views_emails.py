@@ -17,7 +17,7 @@ class EditEmailsTests(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/edit_profile.html')
 
     def test_delete_email_invalid(self):
         user = UserFactory.create()

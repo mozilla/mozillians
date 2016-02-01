@@ -3,7 +3,7 @@ from datetime import datetime
 from mock import patch
 from nose.tools import eq_
 
-from mozillians.announcements.helpers import latest_announcement
+from mozillians.announcements.templatetags.helpers import latest_announcement
 from mozillians.announcements.tests import AnnouncementFactory, TestCase
 
 

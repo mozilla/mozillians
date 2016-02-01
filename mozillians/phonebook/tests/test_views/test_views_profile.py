@@ -6,7 +6,7 @@ from django.test.utils import override_settings
 from mock import patch
 from nose.tools import ok_, eq_
 
-from mozillians.common.helpers import redirect, urlparams
+from mozillians.common.templatetags.helpers import redirect, urlparams
 from mozillians.common.tests import TestCase
 from mozillians.users.managers import PUBLIC, MOZILLIANS, EMPLOYEES, PRIVILEGED
 from mozillians.users.tests import UserFactory
@@ -44,7 +44,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
 
@@ -54,7 +54,7 @@ class ViewProfileTests(TestCase):
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
         response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, PUBLIC)
@@ -67,7 +67,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, PUBLIC)
@@ -81,7 +81,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, MOZILLIANS)
@@ -94,7 +94,7 @@ class ViewProfileTests(TestCase):
         url = reverse('phonebook:profile_view',
                       kwargs={'username': lookup_user.username})
         response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, PUBLIC)
@@ -108,7 +108,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, PUBLIC)
@@ -123,7 +123,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': lookup_user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], lookup_user)
         eq_(response.context['profile'], lookup_user.userprofile)
         eq_(response.context['profile']._privacy_level, MOZILLIANS)
@@ -135,7 +135,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, None)
@@ -147,7 +147,7 @@ class ViewProfileTests(TestCase):
             url = reverse('phonebook:profile_view',
                           kwargs={'username': user.username})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, None)
@@ -160,7 +160,7 @@ class ViewProfileTests(TestCase):
         url = urlparams(url, view_as='anonymous')
         with self.login(user) as client:
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, PUBLIC)
@@ -173,7 +173,7 @@ class ViewProfileTests(TestCase):
         url = urlparams(url, view_as='mozillian')
         with self.login(user) as client:
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, MOZILLIANS)
@@ -186,7 +186,7 @@ class ViewProfileTests(TestCase):
         url = urlparams(url, view_as='employee')
         with self.login(user) as client:
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, EMPLOYEES)
@@ -199,7 +199,7 @@ class ViewProfileTests(TestCase):
         url = urlparams(url, view_as='privileged')
         with self.login(user) as client:
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
         eq_(response.context['profile']._privacy_level, PRIVILEGED)

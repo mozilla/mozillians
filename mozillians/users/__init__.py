@@ -42,7 +42,9 @@ def get_languages_for_locale(locale):
             local_lang[lc] = REFERENCE_LANGUAGE[lc]
 
         # Remove unwanted and testing languages.
-        map(local_lang.pop, REMOVE_LANGS)
+        for lang in REMOVE_LANGS:
+            if lang in local_lang:
+                local_lang.pop(lang)
 
         # Sort based on language name.
         local_lang = sorted([(key, value.capitalize())

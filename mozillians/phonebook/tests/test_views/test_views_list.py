@@ -5,7 +5,7 @@ from mock import patch
 from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_
 
-from mozillians.common.helpers import urlparams
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.users.tests import UserFactory
 
@@ -39,7 +39,7 @@ class ListTests(TestCase):
             url = reverse('phonebook:list_country', kwargs={'country': country.name})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/location_list.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/location_list.html')
         eq_(response.context['country_name'], country.name)
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], None)
@@ -113,7 +113,7 @@ class ListTests(TestCase):
                 kwargs={'country': country.name, 'region': region.name})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/location_list.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/location_list.html')
         eq_(response.context['country_name'], country.name)
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], region.name)
@@ -140,7 +140,7 @@ class ListTests(TestCase):
                           kwargs={'country': country.name, 'city': city.name})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/location_list.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/location_list.html')
         eq_(response.context['country_name'], country.name)
         eq_(response.context['city_name'], city.name)
         eq_(response.context['region_name'], None)
@@ -177,7 +177,7 @@ class ListTests(TestCase):
                                   'city': city.name})
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/location_list.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/location_list.html')
         eq_(response.context['country_name'], country.name)
         eq_(response.context['city_name'], city.name)
         eq_(response.context['region_name'], region.name)
@@ -190,7 +190,7 @@ class ListTests(TestCase):
             url = reverse('phonebook:list_country',
                           kwargs={'country': 'invalid'})
             response = client.get(url, follow=True)
-        self.assertTemplateUsed(response, 'phonebook/location_list.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/location_list.html')
         eq_(response.context['country_name'], 'invalid')
         eq_(response.context['city_name'], None)
         eq_(response.context['region_name'], None)

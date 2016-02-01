@@ -7,12 +7,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 import django_filters
 import happyforms
-from PIL import Image
 from dal import autocomplete, fields as dal_fields
-from tower import ugettext as _, ugettext_lazy as _lazy
+from PIL import Image
 
 from mozillians.api.models import APIv2App
 from mozillians.groups.models import Skill

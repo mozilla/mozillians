@@ -6,7 +6,7 @@ from django.test import Client
 
 from nose.tools import eq_, ok_
 
-from mozillians.common.helpers import urlparams
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
@@ -28,7 +28,7 @@ class IndexTests(TestCase):
         with self.login(user_1) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'groups/index_groups.html')
+        self.assertJinja2TemplateUsed(response, 'groups/index_groups.html')
         eq_(set(response.context['groups'].paginator.object_list), set([group_1, group_2]))
 
         # Member counts
@@ -63,7 +63,7 @@ class IndexFunctionalAreasTests(TestCase):
         with self.login(user) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'groups/index_areas.html')
+        self.assertJinja2TemplateUsed(response, 'groups/index_areas.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([group_1]))
 
@@ -94,7 +94,7 @@ class IndexSkillsTests(TestCase):
         with self.login(user) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'groups/index_skills.html')
+        self.assertJinja2TemplateUsed(response, 'groups/index_skills.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([skill_1, skill_2]))
 

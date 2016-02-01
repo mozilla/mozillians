@@ -8,7 +8,7 @@ from django.test.utils import override_settings
 from nose.tools import eq_, ok_
 
 from mozillians.api.tests import APIAppFactory
-from mozillians.common.helpers import urlparams
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.common.utils import absolutify
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Confirm Profile Deletion') }}{% endblock %}
+{% block body_id %}confirm-delete{% endblock %}
+
+{% block content %}
+<h1>{{ _('Confirm Profile Deletion') }}</h1>
+
+<form action="{{ url('phonebook:profile_delete') }}" method="POST"
+      class="blue-pastels">
+  {% csrf_token %}
+  <h2>{{ _('Are You Sure You Want to Leave Mozillians?') }}</h2>
+  <p>
+    {% trans %}
+      Deleting your profile is immediate and irreversible. Any
+      information in your profile will be permanently lost. If you want
+      to join Mozillians again, you will need to get vouched again.
+    {% endtrans %}
+  </p>
+  <div id="actions">
+    <a href="{{ url('phonebook:profile_edit') }}"
+       class="button" id="cancel-action">
+      {{ _("No: don't delete my profile") }}
+    </a>
+    <button class="button button-negative" id="delete-action">
+      {{ _("I'm sure: delete my profile") }}
+    </button>
+  </div>
+</form>
+{% endblock %}

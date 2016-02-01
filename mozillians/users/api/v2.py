@@ -6,7 +6,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 
 from mozillians.api.v2.viewsets import NoCacheReadOnlyModelViewSet
-from mozillians.common.helpers import absolutify, markdown
+from mozillians.common.templatetags.helpers import absolutify, markdown
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group, GroupMembership
 from mozillians.users.managers import PUBLIC

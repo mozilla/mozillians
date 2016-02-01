@@ -9,6 +9,7 @@ import sys
 from django.utils.functional import lazy
 
 from urlparse import urljoin
+from django_jinja.builtins import DEFAULT_EXTENSIONS
 from django_sha2 import get_password_hashers
 
 
@@ -66,24 +67,23 @@ SLAVE_DATABASES = []
 TIME_ZONE = 'America/Los_Angeles'
 USE_I18N = True
 USE_L10N = True
-TEXT_DOMAIN = 'messages'
-STANDALONE_DOMAINS = [TEXT_DOMAIN, 'javascript']
-TOWER_KEYWORDS = {'_lazy': None}
-TOWER_ADD_HEADERS = True
+TEXT_DOMAIN = 'django'
+STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = 'en-US'
 LOCALE_PATHS = [path('locale')]
 
 # Tells the extract script what files to parse for strings and what functions to use.
-DOMAIN_METHODS = {
-    'messages': [
-        ('mozillians/**.py',
-            'tower.management.commands.extract.extract_tower_python'),
-        ('mozillians/**/templates/**.html',
-            'tower.management.commands.extract.extract_tower_template'),
-        ('templates/**.html',
-            'tower.management.commands.extract.extract_tower_template'),
-    ],
+PUENTE = {
+    'BASE_DIR': ROOT,
+    'DOMAIN_METHODS': {
+        'django': [
+            ('mozillians/**.py', 'python'),
+            ('mozillians/**/templates/**.html', 'django'),
+            ('mozillians/**/jinja2/**.html', 'jinja2')
+        ]
+    }
 }
+
 
 # Tells the product_details module where to find our local JSON files.
 # This ultimately controls how LANGUAGES are constructed.
@@ -103,21 +103,17 @@ CANONICAL_LOCALES = {
 RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 
 
-def lazy_lang_url_map():
-    from django.conf import settings
-    langs = settings.DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
-    return dict([(i.lower(), i) for i in langs])
+def get_langs():
+    return DEV_LANGUAGES if DEV else PROD_LANGUAGES
 
-LANGUAGE_URL_MAP = lazy(lazy_lang_url_map, dict)()
+LANGUAGE_URL_MAP = dict([(i.lower(), i) for i in get_langs()])
 
 
-# Override Django's built-in with our native names
 def lazy_langs():
-    from django.conf import settings
     from product_details import product_details
-    langs = DEV_LANGUAGES if settings.DEV else settings.PROD_LANGUAGES
+
     return dict([(lang.lower(), product_details.languages[lang]['native'])
-                 for lang in langs if lang in product_details.languages])
+                 for lang in get_langs() if lang in product_details.languages])
 
 LANGUAGES = lazy(lazy_langs, dict)()
 
@@ -132,29 +128,63 @@ PORT = 443
 
 # Templates.
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'jingo.Loader',
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-)
 
-TEMPLATE_CONTEXT_PROCESSORS = (
+COMMON_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',
-    'session_csrf.context_processor',
+    'django.template.context_processors.debug',
+    'django.template.context_processors.media',
+    'django.template.context_processors.request',
+    'django.template.context_processors.static',
+    'django.template.context_processors.tz',
     'django.contrib.messages.context_processors.messages',
+    'session_csrf.context_processor',
     'mozillians.common.context_processors.i18n',
     'mozillians.common.context_processors.globals',
     'mozillians.common.context_processors.current_year',
-    'mozillians.common.context_processors.canonical_path'
-)
+    'mozillians.common.context_processors.canonical_path',
+]
 
-TEMPLATE_DIRS = (
-    path('mozillians/templates'),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django_jinja.backend.Jinja2',
+        'DIRS': [path('mozillians/jinja2')],
+        'NAME': 'jinja2',
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'debug': DEBUG,
+            'app_dirname': 'jinja2',
+            'match_extension': None,
+            'newstyle_gettext': True,
+            'undefined': 'jinja2.Undefined',
+            'extensions': DEFAULT_EXTENSIONS + [
+                'compressor.contrib.jinja2ext.CompressorExtension',
+                'waffle.jinja.WaffleExtension',
+                'puente.ext.i18n',
+            ],
+            'globals': {
+                'browserid_info': 'django_browserid.helpers.browserid_info',
+                'browserid_login': 'django_browserid.helpers.browserid_login',
+                'browserid_logout': 'django_browserid.helpers.browserid_logout',
+                'browserid_js': 'django_browserid.helpers.browserid_js'
+            },
+            'context_processors': COMMON_CONTEXT_PROCESSORS
+        }
+    },
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [path('mozillians/templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'debug': DEBUG,
+            'context_processors': COMMON_CONTEXT_PROCESSORS
+        }
+    }
+]
+
+
+def COMPRESS_JINJA2_GET_ENVIRONMENT():
+    from django.template import engines
+    return engines['jinja2'].env
 
 # Absolute path to the directory that holds media.
 MEDIA_ROOT = path('media')
@@ -183,34 +213,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
-
-JINGO_EXCLUDE_APPS = [
-    'admin',
-    'autocomplete_light',
-    'browserid',
-    'registration',
-    'rest_framework',
-]
-
-
-def JINJA_CONFIG():
-    config = {
-        'extensions': [
-            'tower.template.i18n',
-            'jinja2.ext.do',
-            'jinja2.ext.with_',
-            'jinja2.ext.loopcontrols',
-            'compressor.contrib.jinja2ext.CompressorExtension'
-        ],
-        'finalize': lambda x: x if x is not None else ''
-    }
-    return config
-
-
-def COMPRESS_JINJA2_GET_ENVIRONMENT():
-    from jingo import env
-    return env
-
 
 MIDDLEWARE_CLASSES = (
     'mozillians.common.middleware.LocaleURLMiddleware',
@@ -289,12 +291,12 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Third-party apps, patches, fixes
+    'django_jinja',
+    'puente',
     'compressor',
-    'tower',
     'cronjobs',
     'django_browserid',
     'commonware.response.cookies',
-    'djcelery',
     'django_nose',
     'session_csrf',
     'product_details',
@@ -509,7 +511,7 @@ MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
 
 def _browserid_request_args():
     from django.conf import settings
-    from tower import ugettext_lazy as _lazy
+    from django.utils.translation import ugettext_lazy as _lazy
 
     args = {
         'siteName': _lazy('Mozillians'),

@@ -16,11 +16,11 @@ def _validate_query(query):
     if 'number' not in query:
         raise ValidationError('Query must populate "number"')
 
-    with transaction.atomic():
-        try:
+    try:
+        with transaction.atomic():
             eval(query)
-        except BaseException, exp:
-            raise ValidationError('Invalid query: %s' % exp)
+    except BaseException, exp:
+        raise ValidationError('Invalid query: %s' % exp)
 
 
 class FunFactManager(models.Manager):

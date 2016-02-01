@@ -167,9 +167,8 @@ class CreateGroupTests(TestCase):
         ok_(not group.functional_area)
         eq_(data['description'], group.description)
         eq_(data['irc_channel'], group.irc_channel)
-        # URLs get '/' added, I'm not sure why
-        eq_(data['website'] + '/', group.website)
-        eq_(data['wiki'] + '/', group.wiki)
+        eq_(data['website'], group.website)
+        eq_(data['wiki'], group.wiki)
 
     def test_basic_group_creation_as_non_manager(self):
         # non-managers cannot set some of the parameters, try though they might
@@ -201,9 +200,8 @@ class CreateGroupTests(TestCase):
         ok_(not group.functional_area)
         eq_(data['description'], group.description)
         eq_(data['irc_channel'], group.irc_channel)
-        # URLs get '/' added, I'm not sure why
-        eq_(data['website'] + '/', group.website)
-        eq_(data['wiki'] + '/', group.wiki)
+        eq_(data['website'], group.website)
+        eq_(data['wiki'], group.wiki)
 
     def test_basic_group_creation_with_terms(self):
         # Curator accepts terms by default

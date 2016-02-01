@@ -12,13 +12,13 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_page, never_cache
 from django.views.decorators.http import require_POST
 
-from tower import ugettext as _
+from django.utils.translation import ugettext as _
 from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
 from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
-from mozillians.common.helpers import redirect, urlparams
+from mozillians.common.templatetags.helpers import redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group

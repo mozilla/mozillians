@@ -19,7 +19,7 @@ class APIKeysTest(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/apikeys.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/apikeys.html')
 
     def test_delete_apikey_invalid(self):
         user = UserFactory.create()
@@ -43,7 +43,7 @@ class APIKeysTest(TestCase):
 
         ok_(success_mock.called)
         eq_(response.status_code, 200)
-        self.assertTemplateUsed(response, 'phonebook/apikeys.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/apikeys.html')
 
     def test_request_apikey(self):
         user = UserFactory.create()

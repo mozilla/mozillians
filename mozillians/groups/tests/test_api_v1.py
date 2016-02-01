@@ -6,7 +6,7 @@ from django.test.client import Client
 from nose.tools import eq_
 
 from mozillians.api.tests import APIAppFactory
-from mozillians.common.helpers import urlparams
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.common.utils import absolutify
 from mozillians.groups.tests import GroupFactory, SkillFactory

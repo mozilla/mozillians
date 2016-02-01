@@ -11,12 +11,12 @@ from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
+from django.utils.translation import ugettext as _
 
 from dal import autocomplete
-from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.common.helpers import get_object_or_none
+from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.forms import (GroupForm, TermsReviewForm,
                                      MembershipFilterForm, SortForm,

@@ -1,7 +1,7 @@
 from django.db.models import Q, Manager, get_model
 from django.db.models.query import QuerySet, ValuesQuerySet
 
-from tower import ugettext_lazy as _lazy
+from django.utils.translation import ugettext_lazy as _lazy
 
 
 PRIVILEGED = 1

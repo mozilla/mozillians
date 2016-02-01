@@ -90,7 +90,7 @@ class ProfileFormsTests(TestCase):
         form = ContributionForm(data=data, instance=user.userprofile)
         ok_(form.is_valid(), msg=dict(form.errors))
 
-        eq_(form.cleaned_data['story_link'], u'http://somelink.com/')
+        eq_(form.cleaned_data['story_link'], u'http://somelink.com')
 
         data['story_link'] = 'Foobar'
         form = ContributionForm(data=data, instance=user.userprofile)

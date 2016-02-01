@@ -22,7 +22,7 @@ from import_export.resources import ModelResource
 from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
-from mozillians.common.helpers import get_datetime
+from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles

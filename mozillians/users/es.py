@@ -4,7 +4,7 @@ from elasticsearch import TransportError
 from elasticsearch.exceptions import NotFoundError
 from elasticutils.contrib.django import Indexable, MappingType, S, get_es
 
-from mozillians.phonebook.helpers import langcode_to_name
+from mozillians.phonebook.templatetags.helpers import langcode_to_name
 from mozillians.users.managers import MOZILLIANS, PUBLIC
 
 ES_MAPPING_TYPE_NAME = 'user-profile'

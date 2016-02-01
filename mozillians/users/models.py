@@ -18,11 +18,11 @@ import basket
 from product_details import product_details
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
-from tower import ugettext as _, ugettext_lazy as _lazy
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common import utils
-from mozillians.common.helpers import absolutify, gravatar
-from mozillians.common.helpers import offset_of_timezone
+from mozillians.common.templatetags.helpers import absolutify, gravatar
+from mozillians.common.templatetags.helpers import offset_of_timezone
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)

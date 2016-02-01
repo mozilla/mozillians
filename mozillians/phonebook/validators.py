@@ -4,7 +4,7 @@ from django.core.validators import EmailValidator, URLValidator
 from django.db.models.loading import get_model
 from django.forms import ValidationError
 
-from tower import ugettext as _
+from django.utils.translation import ugettext as _
 
 
 def validate_twitter(username):
