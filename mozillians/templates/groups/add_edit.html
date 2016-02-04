@@ -52,7 +52,7 @@
       {{ mozillians_field(form.description) }}
     </fieldset>
 
-    <fieldset>
+    <fieldset id="group-curators" data-autocomplete-url="{{ url('groups:search_people') }}">
       {{ mozillians_field(form.curators) }}
     </fieldset>
 
@@ -127,6 +127,7 @@
 
 {% block page_js %}
   {% compress js %}
+    <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js' )}}"></script>
     <script src="{{ static('mozillians/js/group-edit.js') }}"></script>
   {% endcompress %}
 {% endblock %}

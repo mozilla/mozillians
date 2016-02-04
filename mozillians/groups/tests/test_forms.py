@@ -23,21 +23,21 @@ class GroupFormTests(TestCase):
         ok_('new_member_criteria' in form.errors)
 
     def test_by_request_group_with_new_member_criteria(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=True)
         form_data = {'name': 'test group',
                      'accepting_new_members': 'by_request',
                      'new_member_criteria': 'some criteria',
-                     'curators': [user.userprofile.id]}
+                     'curators': user.userprofile.full_name}
         form = GroupForm(data=form_data)
         ok_(form.is_valid())
         ok_('new_member_criteria' in form.cleaned_data)
 
     def test_no_saved_criteria(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=True)
         form_data = {'name': 'test group',
                      'accepting_new_members': 'no',
                      'new_member_criteria': 'some criteria',
-                     'curators': [user.userprofile.id]}
+                     'curators': user.userprofile.full_name}
         form = GroupForm(data=form_data)
         ok_(form.is_valid())
         eq_(u'', form.cleaned_data['new_member_criteria'])
