@@ -65,8 +65,7 @@ class FunFact(models.Model):
         return self.name
 
     def clean(self):
-        self.public_text = bleach.clean(self.public_text, tags=ALLOWED_TAGS,
-                                        strip=True)
+        self.public_text = bleach.clean(self.public_text, tags=ALLOWED_TAGS, strip=True)
 
     def execute(self):
         if not (self.divisor or self.number):

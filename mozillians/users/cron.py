@@ -14,9 +14,8 @@ from mozillians.users.models import UserProfile, UserProfileMappingType
 def index_all_profiles():
     # Get an es object, delete index and re-create it
     es = get_es(timeout=settings.ES_INDEXING_TIMEOUT)
-    mappings = {'mappings':
-                {UserProfileMappingType.get_mapping_type_name():
-                 UserProfileMappingType.get_mapping()}}
+    mappings = {'mappings': {UserProfileMappingType.get_mapping_type_name():
+                             UserProfileMappingType.get_mapping()}}
 
     def _recreate_index(index):
         es.indices.delete(index=index, ignore=[400, 404])

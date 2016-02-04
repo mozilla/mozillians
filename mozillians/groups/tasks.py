@@ -20,8 +20,7 @@ def remove_empty_groups():
     Skill = get_model('groups', 'Skill')
 
     for model in [Group, Skill]:
-        (model.objects
-         .annotate(mcount=Count('members')).filter(mcount=0).delete())
+        model.objects.annotate(mcount=Count('members')).filter(mcount=0).delete()
 
 
 # TODO: Schedule this task nightly
