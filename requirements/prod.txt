@@ -135,8 +135,8 @@ diff-match-patch==20121119
 django-appconf==1.0.1
 # sha256: 3rTczTYxdaVUZdxlaZwAHDHbBeUJ6KQfzPPbYcFASsY
 statsd==1.0.0
-# sha256: __xQ7GLRNdRE3p1B3reS_yObrAhI55TRe2IF5-8QTJ4
-django-autocomplete-light==1.4.13
+# sha256: QlWFxOe0eZaRJQMTgcTLT4cawHXEAoIrg6j1VgFTHQo
+django-autocomplete-light==3.0.4
 # sha256: sfDTXD0rLEDTOjEMqZ83IjJkh58uU8Y8Hsv67vwmkZ0
 # sha256: QcLa1_SR9VV-Ing6mvgb7WL3tvsNev1MLuMB8-tCjJM
 tablib==0.10.0
