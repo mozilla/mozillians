@@ -22,7 +22,11 @@ Parameters
         *Required* **string** - The application's API key
 
     ``name``
-        *Optional* **string** - Return results matching given name
+        *Optional* **string** - Return results matching the given name
+
+        *Available filters* **icontains** - Return results containing the given name
+
+        *Example:* /api/v2/groups?api-key=12345name__icontains=foo
 
     ``curator``
         *Optional* **integer** - Return results matching given mozillians id
