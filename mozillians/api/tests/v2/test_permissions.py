@@ -4,7 +4,6 @@ from django.utils.timezone import now
 
 from mock import call, patch
 from nose.tools import ok_
-from waffle.models import Flag
 
 from mozillians.api.models import APIv2App
 from mozillians.api.tests import APIv2AppFactory
@@ -14,8 +13,6 @@ from mozillians.users.tests import UserFactory
 
 
 class MozilliansPermissionTests(TestCase):
-    def setUp(self):
-        Flag.objects.create(name='apiv2-endpoint', everyone=True)
 
     def test_has_permission_valid_key(self):
         class DummyClass(object):

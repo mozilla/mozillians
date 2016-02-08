@@ -1,6 +1,5 @@
 from django.utils.timezone import now
 
-import waffle
 from django_statsd.clients import statsd
 from rest_framework.permissions import BasePermission
 
@@ -9,9 +8,6 @@ from mozillians.api.models import APIv2App
 
 class MozilliansPermission(BasePermission):
     def has_permission(self, request, view):
-        if not waffle.flag_is_active(request, 'apiv2-endpoint'):
-            return False
-
         api_key = None
 
         if request.user.is_authenticated():
