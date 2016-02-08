@@ -6,6 +6,7 @@ services:
   - elasticsearch
 before_script:
   - flake8 mozillians
+  - mysql -e 'SET @@GLOBAL.wait_timeout=28800'
 before_install:
   - git submodule update --init --recursive
   - mysql -e 'create database mozillians character set utf8;'
