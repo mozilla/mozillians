@@ -482,7 +482,6 @@ def delete_invite(request, invite_pk):
     return redirect('phonebook:invite')
 
 
-@waffle_flag('apiv2')
 def apikeys(request):
     profile = request.user.userprofile
     apikey_request_form = forms.APIKeyRequestForm(
@@ -504,7 +503,6 @@ def apikeys(request):
     return render(request, 'phonebook/apikeys.html', data)
 
 
-@waffle_flag('apiv2')
 def delete_apikey(request, api_pk):
     api_key = get_object_or_404(APIv2App, pk=api_pk, owner=request.user.userprofile)
     api_key.delete()

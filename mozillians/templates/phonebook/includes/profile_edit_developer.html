@@ -39,7 +39,7 @@
         <button class="btn btn-primary" id="form-submit-top" type="submit" name="developer_section">{{ _('Update Privacy Settings') }}</button>
       </div>
     </div>
-    {% if user.userprofile.is_vouched and waffle.flag('apiv2') %}
+    {% if user.userprofile.is_vouched %}
       <div class="panel panel-default">
         <div class="panel-heading">{{ _('Developer') }}</div>
         <div class="panel-body">

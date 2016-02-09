@@ -2,7 +2,6 @@ from django.core.urlresolvers import reverse
 
 from mock import patch
 from nose.tools import eq_, ok_
-from waffle import Flag
 
 from mozillians.api.models import APIv2App
 from mozillians.api.tests import APIv2AppFactory
@@ -11,8 +10,6 @@ from mozillians.users.tests import UserFactory
 
 
 class APIKeysTest(TestCase):
-    def setUp(self):
-        Flag.objects.create(name='apiv2', everyone=True)
 
     def test_view_apikeys(self):
         user = UserFactory.create()
