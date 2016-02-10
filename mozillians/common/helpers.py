@@ -54,19 +54,16 @@ def urlparams(url_, hash=None, **query):
     query_dict = dict(urlparse.parse_qsl(smart_str(q))) if q else {}
     query_dict.update((k, v) for k, v in query.items())
 
-    query_string = _urlencode([(k, v) for k, v in query_dict.items()
-                               if v is not None])
+    query_string = _urlencode([(k, v) for k, v in query_dict.items() if v is not None])
     new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
                                query_string, fragment)
     return new.geturl()
 
 
-def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL,
-             size=175, rating='pg'):
+def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
     url = GRAVATAR_URL.format(emaildigest=md5(email).hexdigest())
-    url = urlparams(url, d=utils.absolutify(default_avatar_url),
-                    s=size, r=rating)
+    url = urlparams(url, d=utils.absolutify(default_avatar_url), s=size, r=rating)
     return url
 
 
@@ -97,12 +94,9 @@ def mozillians_field(element, required=False):
 
 @register.function
 def privacy_field(element):
-    element = field_with_attrs(
-        element,
-        **{'class': 'privacy-choice',
-           'data-privacy-original': element.value(),
-           'label': _('Visible to:')}
-    )
+    element = field_with_attrs(element, **{'class': 'privacy-choice',
+                                           'data-privacy-original': element.value(),
+                                           'label': _('Visible to:')})
     template = get_template('includes/field.html')
     context = Context({'field': element,
                        'privacy': True})

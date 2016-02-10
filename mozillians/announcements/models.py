@@ -33,11 +33,9 @@ class Announcement(models.Model):
                                   'will be rescaled automatically to '
                                   'a square.'),
                        upload_to=_calculate_image_filename)
-    publish_from = models.DateTimeField(
-        help_text='Timezone is %s' % settings.TIME_ZONE)
-    publish_until = models.DateTimeField(
-        blank=True, null=True,
-        help_text='Timezone is %s' % settings.TIME_ZONE)
+    publish_from = models.DateTimeField(help_text='Timezone is %s' % settings.TIME_ZONE)
+    publish_until = models.DateTimeField(blank=True, null=True,
+                                         help_text='Timezone is %s' % settings.TIME_ZONE)
 
     def clean(self):
         self.text = bleach.clean(self.text, tags=ALLOWED_TAGS, strip=True)

@@ -151,10 +151,8 @@ class UserProfile(UserProfilePrivacyModel):
                                     through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
-    photo = ImageField(default='', blank=True,
-                       upload_to=_calculate_photo_filename)
-    ircname = models.CharField(max_length=63,
-                               verbose_name=_lazy(u'IRC Nickname'),
+    photo = ImageField(default='', blank=True, upload_to=_calculate_photo_filename)
+    ircname = models.CharField(max_length=63, verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
 
     # validated geo data (validated that it's valid geo data, not that the
@@ -414,8 +412,8 @@ class UserProfile(UserProfilePrivacyModel):
 
         # Remove any visible groups that weren't supplied in this list.
         if model is Group:
-            GroupMembership.objects.filter(userprofile=self, group__visible=True)\
-                .exclude(group__name__in=membership_list).delete()
+            (GroupMembership.objects.filter(userprofile=self, group__visible=True)
+                                    .exclude(group__name__in=membership_list).delete())
         else:
             m2mfield.remove(*[g for g in m2mfield.all()
                               if g.name not in membership_list and g.is_visible])
@@ -583,7 +581,6 @@ class UserProfile(UserProfilePrivacyModel):
         super(UserProfile, self).save(*args, **kwargs)
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
-
         if autovouch:
             self.auto_vouch()
 
@@ -624,8 +621,7 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
     if not raw:
         up, created = UserProfile.objects.get_or_create(user=instance)
         if not created:
-            dbsignals.post_save.send(sender=UserProfile, instance=up,
-                                     created=created, raw=raw)
+            dbsignals.post_save.send(sender=UserProfile, instance=up, created=created, raw=raw)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
@@ -845,11 +841,10 @@ class ExternalAccount(models.Model):
 
     user = models.ForeignKey(UserProfile)
     identifier = models.CharField(max_length=255, verbose_name=_lazy(u'Account Username'))
-    type = models.CharField(
-        max_length=30,
-        choices=sorted([(k, v['name']) for (k, v) in ACCOUNT_TYPES.iteritems() if k != TYPE_EMAIL],
-                       key=lambda x: x[1]),
-        verbose_name=_lazy(u'Account Type'))
+    type = models.CharField(max_length=30,
+                            choices=sorted([(k, v['name']) for (k, v) in ACCOUNT_TYPES.iteritems()
+                                            if k != TYPE_EMAIL], key=lambda x: x[1]),
+                            verbose_name=_lazy(u'Account Type'))
     privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:

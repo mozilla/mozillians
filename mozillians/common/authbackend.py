@@ -35,8 +35,7 @@ def calculate_username(email):
         if len(suggested_username) > settings.USERNAME_MAX_LENGTH:
             # We failed to calculate a name for you, default to a
             # email digest.
-            return base64.urlsafe_b64encode(
-                hashlib.sha1(email).digest()).rstrip('=')
+            return base64.urlsafe_b64encode(hashlib.sha1(email).digest()).rstrip('=')
 
     return suggested_username
 
@@ -56,16 +55,12 @@ class BrowserIDVerify(Verify):
 
     def login_success(self):
         if self.add_email:
-            return JSONResponse({
-                'redirect': self.success_url
-            })
+            return JSONResponse({'redirect': self.success_url})
         return super(BrowserIDVerify, self).login_success()
 
     def login_failure(self):
         if self.add_email:
-            return JSONResponse({
-                'redirect': self.failure_url
-            })
+            return JSONResponse({'redirect': self.failure_url})
         return super(BrowserIDVerify, self).login_failure()
 
     def post(self, *args, **kwargs):
@@ -74,7 +69,6 @@ class BrowserIDVerify(Verify):
             return super(BrowserIDVerify, self).post(*args, **kwargs)
 
         self.add_email = True
-
         assertion = self.request.POST.get('assertion')
         if not assertion:
             return self.login_failure()

@@ -170,11 +170,9 @@ class Group(GroupBase):
     members_can_leave = models.BooleanField(default=True)
     accepting_new_members = models.CharField(
         verbose_name=_lazy(u'Accepting new members'),
-        choices=(
-            ('yes', _lazy(u'Yes')),
-            ('by_request', _lazy(u'By request')),
-            ('no', _lazy(u'No')),
-        ),
+        choices=(('yes', _lazy(u'Yes')),
+                 ('by_request', _lazy(u'By request')),
+                 ('no', _lazy(u'No')),),
         default='yes',
         max_length=10
     )
@@ -249,8 +247,7 @@ class Group(GroupBase):
         If user is already in the group with a different status, their status will
         be updated if the change is a promotion. Otherwise, their status will not change.
         """
-        defaults = dict(status=status,
-                        date_joined=now())
+        defaults = dict(status=status, date_joined=now())
         membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                                     group=self,
                                                                     defaults=defaults)

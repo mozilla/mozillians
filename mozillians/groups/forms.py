@@ -93,8 +93,7 @@ class SuperuserGroupForm(GroupForm):
                   'accepting_new_members',
                   'new_member_criteria',
                   'terms',
-                  'invalidation_days'
-                  ]
+                  'invalidation_days']
 
 
 class MembershipFilterForm(forms.Form):

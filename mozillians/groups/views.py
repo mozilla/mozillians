@@ -183,17 +183,18 @@ def show(request, url, alias_model, template):
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
 
-    extra_data = dict(people=people,
-                      group=group,
-                      in_group=in_group,
-                      is_curator=is_curator,
-                      is_pending=is_pending,
-                      show_pagination=show_pagination,
-                      show_delete_group_button=show_delete_group_button,
-                      show_join_button=group.user_can_join(request.user.userprofile),
-                      show_leave_button=group.user_can_leave(request.user.userprofile),
-                      members=group.member_count,
-                      )
+    extra_data = dict(
+        people=people,
+        group=group,
+        in_group=in_group,
+        is_curator=is_curator,
+        is_pending=is_pending,
+        show_pagination=show_pagination,
+        show_delete_group_button=show_delete_group_button,
+        show_join_button=group.user_can_join(request.user.userprofile),
+        show_leave_button=group.user_can_leave(request.user.userprofile),
+        members=group.member_count,
+    )
 
     data.update(extra_data)
 

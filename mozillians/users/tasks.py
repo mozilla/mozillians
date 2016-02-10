@@ -54,8 +54,7 @@ def _email_basket_managers(action, email, error_message):
               settings.BASKET_MANAGERS, fail_silently=False)
 
 
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY,
-      max_retries=BASKET_TASK_MAX_RETRIES)
+@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
 def update_basket_task(instance_id):
     """Update Basket Task.
 
@@ -171,19 +170,16 @@ def update_basket_task(instance_id):
 
     # We have a token, proceed with the update
     try:
-        basket.request('post', 'custom_update_phonebook',
-                       token=token, data=data)
+        basket.request('post', 'custom_update_phonebook', token=token, data=data)
     except (requests.exceptions.RequestException,
             basket.BasketException) as exception:
         try:
             update_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
-            _email_basket_managers('update_phonebook', email,
-                                   exception.message)
+            _email_basket_managers('update_phonebook', email, exception.message)
 
 
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY,
-      max_retries=BASKET_TASK_MAX_RETRIES)
+@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
 def unsubscribe_from_basket_task(email, basket_token):
     """Remove from Basket Task.
 
