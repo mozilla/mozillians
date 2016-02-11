@@ -27,6 +27,9 @@ Parameters
     ``name``
         *Optional* **string** - Return results matching the given name
 
+        *Available filters* **icontains** - Return results containing the given name
+
+        *Example:* /api/v2/skills?api-key=12345name__icontains=foo
 
 Return Codes
 ------------

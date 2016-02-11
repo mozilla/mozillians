@@ -74,8 +74,14 @@ class GroupFilter(django_filters.FilterSet):
 
     class Meta:
         model = Group
-        fields = ('name', 'functional_area', 'curators', 'curator',
-                  'members_can_leave', 'accepting_new_members',)
+        fields = {
+            'name': ['exact', 'icontains'],
+            'functional_area': ['exact'],
+            'curators': ['exact'],
+            'curator': ['exact'],
+            'members_can_leave': ['exact'],
+            'accepting_new_members': ['exact'],
+        }
 
     def filter_curator(self, queryset, value):
         return queryset.filter(curators=value)
@@ -85,7 +91,9 @@ class SkillFilter(django_filters.FilterSet):
 
     class Meta:
         model = Skill
-        fields = ('name',)
+        fields = {
+            'name': ['exact', 'icontains']
+        }
 
 
 class GroupViewSet(NoCacheReadOnlyModelViewSet):
