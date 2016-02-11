@@ -45,6 +45,9 @@ $(function() {
         $(this).hide();
         $('.settings-tab').removeClass('hidden-sm');
         $('.settings-tab').removeClass('hidden-xs');
+        $('.settings-tab').addClass('visible-sm');
+        $('.settings-tab').addClass('visible-xs');
+
     });
 
     // Privacy toggle buttons
