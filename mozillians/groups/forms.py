@@ -24,8 +24,7 @@ class SortForm(forms.Form):
 
 class GroupForm(happyforms.ModelForm):
     curators = forms.ModelMultipleChoiceField(
-        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''),
-        required=False)
+        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''))
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
