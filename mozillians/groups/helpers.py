@@ -13,6 +13,14 @@ def stringify_groups(groups):
     return u','.join([group.name for group in groups])
 
 
+def stringify_users(users):
+    """Change a list of UserProfile objects into a
+    space-delimited string.
+
+    """
+    return u','.join([user.full_name for user in users])
+
+
 def slugify(s):
     """Slugify function that dumbs down but preserves non-Latin chars"""
 

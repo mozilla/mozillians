@@ -1,12 +1,10 @@
-import json
-
 from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, Http404
+from django.http import HttpResponseBadRequest, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
@@ -20,6 +18,7 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups.forms import (GroupForm, TermsReviewForm,
                                      MembershipFilterForm, SortForm,
                                      SuperuserGroupForm)
+from mozillians.groups.helpers import stringify_users
 from mozillians.groups.models import Group, Skill, GroupMembership
 
 
@@ -78,17 +77,19 @@ def index_functional_areas(request):
 
 @allow_unvouched
 @cache_control(must_revalidate=True, max_age=3600)
-def search(request, searched_object=Group):
+def autocomplete_search(request, searched_object=Group):
     """Simple wildcard search for a group using a GET parameter.
 
-    Used for group/skill auto-completion.
+    Used for group/skill/people auto-completion.
 
     """
     term = request.GET.get('term', None)
     if request.is_ajax() and term:
-        groups = searched_object.search(term).values_list('name', flat=True)
-        return HttpResponse(json.dumps(list(groups)),
-                            content_type='application/json')
+        if searched_object.__name__ in ['Group', 'Skill']:
+            result = searched_object.search(term).values_list('name', flat=True)
+        elif searched_object.__name__ == 'UserProfile':
+            result = searched_object.search_vouched(term).values_list('full_name', flat=True)
+        return JsonResponse(list(result), safe=False)
 
     return HttpResponseBadRequest()
 
@@ -387,6 +388,8 @@ def group_add_edit(request, url=None):
     if url:
         # Get the group to edit
         group = get_object_or_404(Group, url=url)
+        # Get the names of the curators
+        curators = stringify_users(group.curators.all().order_by('full_name'))
         # Only a group curator or an admin is allowed to edit a group
         is_curator = profile in group.curators.all()
         if not (is_curator or is_manager):
@@ -394,14 +397,12 @@ def group_add_edit(request, url=None):
             return redirect(reverse('groups:show_group', args=[group.url]))
     else:
         group = Group()
+        curators = stringify_users([profile])
 
     form_class = SuperuserGroupForm if is_manager else GroupForm
 
-    curators_ids = [profile.id]
-    if url:
-        curators_ids += group.curators.all().values_list('id', flat=True)
     form = form_class(request.POST or None, instance=group,
-                      initial={'curators': curators_ids})
+                      initial={'curators': curators})
 
     if form.is_valid():
         group = form.save()

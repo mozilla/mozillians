@@ -35,4 +35,14 @@ $(function(){
     // Hide/show field when document loads
     checkCriteria($id_accepting_new_members.val());
     checkMembershipInvalidation();
+
+    $('#id_curators').tagit({
+        allowSpaces: true,
+        caseSensitive: false,
+        singleField: false,
+        singleFieldDelimiter: ',',
+        removeConfirmation: true,
+        tagSource: $('#group-curators').data('autocomplete-url'),
+        triggerKeys: ['enter', 'comma', 'tab']
+    });
 });

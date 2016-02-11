@@ -23,8 +23,9 @@ class SortForm(forms.Form):
 
 
 class GroupForm(happyforms.ModelForm):
-    curators = forms.ModelMultipleChoiceField(
-        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''))
+    curators = forms.CharField(label='Curators',
+                               help_text=_lazy(u'Start typing to add a curator '
+                                               '(example: John Doe, )'))
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
@@ -36,7 +37,6 @@ class GroupForm(happyforms.ModelForm):
         cleaned_data = super(GroupForm, self).clean()
         accepting_new = cleaned_data.get('accepting_new_members')
         criteria = cleaned_data.get('new_member_criteria')
-        curators = cleaned_data.get('curators')
 
         if not accepting_new == 'by_request':
             cleaned_data['new_member_criteria'] = u''
@@ -47,11 +47,24 @@ class GroupForm(happyforms.ModelForm):
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
 
-        if not curators:
-            msg = _(u'The group must have at least one curator.')
-            self._errors['curators'] = self.error_class([msg])
-
         return cleaned_data
+
+    def clean_curators(self):
+        """ Clean the list of possible curators."""
+        msg = ''
+        possible_curators = self.cleaned_data.get('curators').split(',')
+        for full_name in possible_curators:
+            # Make sure that the user is vouched!
+            if not UserProfile.objects.filter(full_name=full_name, is_vouched=True).exists():
+                msg = _('The name "{0}" you chose does not '
+                        'belong to a vouched Mozillian.'.format(full_name))
+                break
+
+        if not possible_curators:
+            msg = _(u'The group must have at least one curator.')
+        if msg:
+            raise forms.ValidationError(msg)
+        return possible_curators
 
     def save(self, *args, **kwargs):
         """Custom save method to add multiple curators."""
@@ -60,20 +73,18 @@ class GroupForm(happyforms.ModelForm):
         # Add the curators in the m2m field
         obj.curators.clear()
         for curator in self.cleaned_data['curators']:
-            obj.curators.add(curator)
+            cur_obj = UserProfile.objects.get(full_name=curator)
+            obj.curators.add(cur_obj)
             # Ensure that all curators are members of the group
-            if not obj.has_member(curator):
-                obj.add_member(curator)
+            if not obj.has_member(cur_obj):
+                obj.add_member(cur_obj)
         return obj
 
     class Meta:
         model = Group
         fields = ['name', 'description', 'irc_channel',
                   'website', 'wiki', 'accepting_new_members',
-                  'new_member_criteria', 'terms', 'curators', 'invalidation_days']
-        widgets = {
-            'curators': forms.SelectMultiple()
-        }
+                  'new_member_criteria', 'terms', 'invalidation_days']
 
 
 class SuperuserGroupForm(GroupForm):

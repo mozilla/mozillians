@@ -258,6 +258,13 @@ class UserProfile(UserProfilePrivacyModel):
             return accounts.filter(privacy__gte=self._privacy_level)
         return accounts
 
+    @classmethod
+    def search_vouched(cls, query):
+        query = query.lower()
+        results = cls.objects.filter(full_name__icontains=query, is_vouched=True)
+        results = results.distinct()
+        return results
+
     @property
     def _accounts(self):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))

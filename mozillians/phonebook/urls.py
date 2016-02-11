@@ -41,7 +41,6 @@ urlpatterns = patterns(
     url(r'^apikeys/$', 'views.apikeys', name='apikeys'),
     url(r'^apikey/(?P<api_pk>\d+)/delete/$', 'views.delete_apikey', name='apikey_delete'),
 
-
     # Static pages need csrf for browserID post to work
     url(r'^about/$',
         allow_public(TemplateView.as_view(template_name='phonebook/about.html')),

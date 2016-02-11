@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
 from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
+from mozillians.users.models import UserProfile
 
 
 urlpatterns = patterns(
@@ -16,8 +17,6 @@ urlpatterns = patterns(
     url('^group/(?P<url>[-\w]+)/$', 'views.show',
         {'alias_model': GroupAlias, 'template': 'groups/group.html'},
         name='show_group'),
-    url('^groups/search/$', 'views.search',
-        dict(searched_object=Group), name='search_groups'),
     url('^group/(?P<url>[-\w]+)/join/$',
         'views.join_group', name='join_group'),
     url('^group/(?P<url>[-\w]+)/remove/(?P<user_pk>\d+)/$',
@@ -31,6 +30,10 @@ urlpatterns = patterns(
         name='show_skill'),
     url('^skill/(?P<url>[-\w]+)/toggle/$', 'views.toggle_skill_subscription',
         name='toggle_skill_subscription'),
-    url('^skills/search/$', 'views.search',
+    url('^skills/search/$', 'views.autocomplete_search',
         dict(searched_object=Skill), name='search_skills'),
+    url('^groups/search/$', 'views.autocomplete_search',
+        dict(searched_object=Group), name='search_groups'),
+    url('^people/search/$', 'views.autocomplete_search',
+        dict(searched_object=UserProfile), name='search_people'),
 )
