@@ -53,7 +53,8 @@ ES_INDEXES = {'default': 'mozillians-dev',
               'public': 'mozillians-dev-public'}
 ES_TIMEOUT = 60
 
-CELERY_ALWAYS_EAGER = True
+CELERY_ALWAYS_EAGER = False
+BROKER_URL = 'amqp://guest:guest@broker:5672//'
 
 JAVA_BIN = '/usr/bin/java'
 
