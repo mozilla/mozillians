@@ -8,8 +8,9 @@ from rest_framework.response import Response
 from mozillians.api.v2.viewsets import NoCacheReadOnlyModelViewSet
 from mozillians.common.helpers import absolutify, markdown
 from mozillians.common.urlresolvers import reverse
+from mozillians.groups.models import Group, GroupMembership
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import ExternalAccount, GroupMembership, Language, UserProfile
+from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
 # Serializers
@@ -53,6 +54,14 @@ class AlternateEmailSerializer(serializers.ModelSerializer):
         fields = ('email', 'privacy')
 
 
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    name = serializers.CharField(source='name')
+
+    class Meta:
+        model = Group
+        fields = ('name', '_url')
+
+
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
 
@@ -66,6 +75,7 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     email = serializers.Field(source='email')
     photo = serializers.SerializerMethodField('get_photo')
     alternate_emails = AlternateEmailSerializer(many=True, source='alternate_emails')
+    groups = GroupSerializer(many=True, source='_groups')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
     city = serializers.SerializerMethodField('get_city')
@@ -78,7 +88,7 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     # Add profile URL
     class Meta:
         model = UserProfile
-        fields = ('username', 'full_name', 'email', 'alternate_emails', 'bio', 'photo',
+        fields = ('username', 'full_name', 'email', 'alternate_emails', 'groups', 'bio', 'photo',
                   'ircname', 'date_mozillian', 'timezone', 'title', 'story_link', 'languages',
                   'external_accounts', 'websites', 'tshirt', 'is_public', 'is_vouched',
                   '_url', 'url', 'city', 'region', 'country')
@@ -219,5 +229,8 @@ class UserProfileViewSet(NoCacheReadOnlyModelViewSet):
 
     def retrieve(self, request, pk):
         user = get_object_or_404(self.get_queryset(), pk=pk)
+        group_ids = user.groupmembership_set.filter(
+            status=GroupMembership.MEMBER).values_list('group_id', flat=True)
+        user._groups = Group.objects.filter(id__in=group_ids)
         serializer = UserProfileDetailedSerializer(user, context={'request': self.request})
         return Response(serializer.data)

@@ -7,6 +7,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
+from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import MOZILLIANS, PUBLIC
 from mozillians.users.models import GroupMembership, ExternalAccount, Language, UserProfile
@@ -74,6 +75,7 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_transform_timezone(self):
         user = UserFactory.create(userprofile={'timezone': 'Europe/Athens'})
+        user.userprofile._groups = Group.objects.none()
         timezone_mock = Mock()
         timezone_mock.return_value = 99
         user.userprofile.timezone_offset = timezone_mock
@@ -86,6 +88,7 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_transform_bio(self):
         user = UserFactory.create(userprofile={'bio': '*foo*'})
+        user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         bio = {'value': '*foo*',
@@ -98,6 +101,7 @@ class UserProfileDetailedSerializerTests(TestCase):
             return dimensions
 
         user = UserFactory.create(userprofile={'timezone': 'Europe/Athens'})
+        user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         get_photo_url_mock = Mock()
         get_photo_url_mock.side_effect = _get_url
@@ -114,6 +118,7 @@ class UserProfileDetailedSerializerTests(TestCase):
         context = {'request': self.factory.get('/')}
         country = CountryFactory.create(name='LA', code='IO')
         user = UserFactory.create(userprofile={'geo_country': country})
+        user.userprofile._groups = Group.objects.none()
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         country = {'code': 'IO',
                    'value': 'LA',
@@ -123,6 +128,7 @@ class UserProfileDetailedSerializerTests(TestCase):
     def test_transform_region(self):
         region = RegionFactory.create(name='LA')
         user = UserFactory.create(userprofile={'geo_region': region})
+        user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         region = {'value': 'LA',
@@ -132,6 +138,7 @@ class UserProfileDetailedSerializerTests(TestCase):
     def test_transform_city(self):
         city = CityFactory.create(name='LA')
         user = UserFactory.create(userprofile={'geo_city': city})
+        user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         city = {'value': 'LA',
@@ -140,6 +147,7 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_transform_tshirt(self):
         user = UserFactory.create(userprofile={'tshirt': 9})
+        user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         tshirt = {'value': 9,
