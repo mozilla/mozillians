@@ -3,15 +3,12 @@ from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
 
-import autocomplete_light
 import tower
 
 from mozillians.common.monkeypatches import patch
 
 # Funfactory monkeypatches customized to work with Django 1.7 admin
 patch()
-
-autocomplete_light.autodiscover()
 
 # Activate a locale so that jinja2 doesn't choke when running a shell
 # or individual tests that need translation and don't involve a web
@@ -40,13 +37,17 @@ urlpatterns = patterns(
     url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.groups.urls', 'groups')),
     url(r'', include('mozillians.phonebook.urls', 'phonebook')),
+    url(r'', include('mozillians.users.urls', 'users')),
+    url(r'', include('mozillians.mozspaces.urls', 'mozspaces')),
 
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^_autocomplete/', include('autocomplete_light.urls')),
 
     url(r'', include('mozillians.humans.urls', 'humans')),
 )
+
+admin.site.site_header = 'Mozillians Administration'
+admin.site.site_title = 'Mozillians'
 
 # In DEBUG mode, serve media files through Django, and serve error pages
 # via predictable routes. Add in qunit tests.

@@ -1,4 +1,5 @@
 from django.conf.urls import include, patterns, url
+from django.contrib.auth.decorators import login_required
 
 from rest_framework import routers
 from tastypie.api import Api
@@ -7,6 +8,7 @@ import mozillians.groups.api.v1
 import mozillians.groups.api.v2
 import mozillians.users.api.v1
 import mozillians.users.api.v2
+from mozillians.users.views import VouchedAutocomplete
 
 
 # API v1 URLs
@@ -25,4 +27,7 @@ urlpatterns = patterns(
     '',
     url(r'', include(v1_api.urls)),
     url(r'^v2/', include(router.urls), name='v2root'),
+    # Django-autocomplete-light urls
+    url(r'api-v2-autocomplete/$', login_required(VouchedAutocomplete.as_view()),
+        name='api-v2-autocomplete'),
 )
