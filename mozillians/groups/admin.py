@@ -7,7 +7,7 @@ from django.db.models import Count
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-import autocomplete_light
+from dal import autocomplete
 from import_export.admin import ExportMixin
 from import_export.fields import Field
 from import_export.resources import ModelResource
@@ -150,18 +150,26 @@ class GroupAddAdminForm(forms.ModelForm):
 
     class Meta:
         model = Group
+        fields = ('__all__')
+        widgets = {
+            'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+        }
 
 
 class GroupEditAdminForm(GroupBaseEditAdminForm):
 
     class Meta:
         model = Group
+        fields = ('__all__')
+        widgets = {
+            'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+        }
 
 
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
-    form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
-    add_form = autocomplete_light.modelform_factory(Group, form=GroupAddAdminForm)
+    form = GroupEditAdminForm
+    add_form = GroupAddAdminForm
     inlines = [GroupAliasInline]
     list_display = ['name', 'get_curators', 'functional_area', 'accepting_new_members',
                     'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
@@ -229,14 +237,14 @@ class GroupMembershipResource(ModelResource):
         model = GroupMembership
 
 
-class GroupMembershipAdminForm(forms.ModelForm):
+class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
 
     class Meta:
         model = GroupMembership
+        fields = ('__all__')
         widgets = {
-            # Use autocomplete_light to allow any user profile.
-            'userprofile': autocomplete_light.ChoiceWidget('UserProfiles'),
-            'group': autocomplete_light.ChoiceWidget('Groups'),
+            'userprofile': autocomplete.ModelSelect2(url='users:vouched-autocomplete'),
+            'group': autocomplete.ModelSelect2(url='groups:group-autocomplete')
         }
 
 
@@ -251,7 +259,7 @@ class GroupMembershipAdmin(ExportMixin, admin.ModelAdmin):
         'userprofile__geo_country__name', 'userprofile__user__username',
         'userprofile__user__email'
     ]
-    form = GroupMembershipAdminForm
+    form = BaseGroupMembershipAutocompleteForm
 
 
 class SkillAliasInline(admin.StackedInline):

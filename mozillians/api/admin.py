@@ -1,11 +1,12 @@
+from django import forms
 from django.contrib import admin
 
-import autocomplete_light
+from dal import autocomplete
 from import_export import fields
 from import_export.admin import ExportMixin
 from import_export.resources import ModelResource
 
-from models import APIApp, APIv2App
+from mozillians.api.models import APIApp, APIv2App
 
 
 class APIAppResource(ModelResource):
@@ -28,7 +29,6 @@ class APIAppAdmin(ExportMixin, admin.ModelAdmin):
     owner_email.admin_order_field = 'owner__email'
     owner_email.short_description = 'Email'
 
-    form = autocomplete_light.modelform_factory(APIApp)
     resource_class = APIAppResource
 
 admin.site.register(APIApp, APIAppAdmin)
@@ -40,6 +40,16 @@ class APIv2AppResource(ModelResource):
 
     class Meta:
         model = APIv2App
+
+
+class APIv2AppForm(forms.ModelForm):
+
+    class Meta:
+        model = APIv2App
+        fields = ('__all__')
+        widgets = {
+            'owner': autocomplete.ModelSelect2(url='api-v2-autocomplete')
+        }
 
 
 class APIv2AppAdmin(ExportMixin, admin.ModelAdmin):
@@ -55,7 +65,7 @@ class APIv2AppAdmin(ExportMixin, admin.ModelAdmin):
     owner_email.admin_order_field = 'owner__user__email'
     owner_email.short_description = 'Email'
 
-    form = autocomplete_light.modelform_factory(APIv2App)
+    form = APIv2AppForm
     resource_class = APIv2AppResource
 
     fieldsets = (

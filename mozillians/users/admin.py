@@ -13,7 +13,7 @@ from django.db.models import Count, Q
 from django.forms import ValidationError
 from django.http import HttpResponseRedirect
 
-import autocomplete_light
+from dal import autocomplete
 from celery.task.sets import TaskSet
 from functools import update_wrapper
 from import_export.admin import ExportMixin
@@ -23,6 +23,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
 from mozillians.common.helpers import get_datetime
+from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (PUBLIC, Language, ExternalAccount, Vouch,
@@ -252,10 +253,18 @@ class SkillInline(admin.TabularInline):
     extra = 1
 
 
+class UserMembershipAutocompleteForm(BaseGroupMembershipAutocompleteForm):
+
+    class Meta:
+        widgets = {
+            'group': autocomplete.ModelSelect2(url='groups:group-autocomplete'),
+        }
+
+
 class GroupMembershipInline(admin.TabularInline):
     model = GroupMembership
     extra = 1
-    form = autocomplete_light.modelform_factory(GroupMembership)
+    form = UserMembershipAutocompleteForm
 
 
 class LanguageInline(admin.TabularInline):
@@ -518,13 +527,14 @@ class GroupAdmin(ExportMixin, GroupAdmin):
 admin.site.register(Group, GroupAdmin)
 
 
-class VouchAdminForm(forms.ModelForm):
+class VouchAutocompleteForm(forms.ModelForm):
 
     class Meta:
         model = Vouch
+        fields = ('__all__')
         widgets = {
-            'voucher': autocomplete_light.ChoiceWidget('UserProfiles'),
-            'vouchee': autocomplete_light.ChoiceWidget('UserProfiles'),
+            'vouchee': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
+            'voucher': autocomplete.ModelSelect2(url='users:voucher-autocomplete')
         }
 
 
@@ -534,6 +544,6 @@ class VouchAdmin(admin.ModelAdmin):
                      'vouchee__user__username', 'vouchee__full_name']
     list_display = ['vouchee', 'voucher', 'date', 'autovouch']
     list_filter = ['autovouch']
-    form = VouchAdminForm
+    form = VouchAutocompleteForm
 
 admin.site.register(Vouch, VouchAdmin)

@@ -1,4 +1,7 @@
 from django.conf.urls import patterns, url
+from django.contrib.auth.decorators import login_required
+
+from dal import autocomplete
 
 from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
 
@@ -33,4 +36,8 @@ urlpatterns = patterns(
         name='toggle_skill_subscription'),
     url('^skills/search/$', 'views.search',
         dict(searched_object=Skill), name='search_skills'),
+    # Django-autocomplete-light urls
+    url('group-autocomplete/$',
+        login_required(autocomplete.Select2QuerySetView.as_view(model=Group)),
+        name='group-autocomplete'),
 )
