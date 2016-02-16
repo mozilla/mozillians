@@ -155,7 +155,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 TEMPLATE_DIRS = (
-    path('templates'),
+    path('mozillians/templates'),
 )
 
 # Absolute path to the directory that holds media.
