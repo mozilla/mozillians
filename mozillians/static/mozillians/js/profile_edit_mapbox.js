@@ -54,14 +54,12 @@
 
 
     // GEOCODERS
-    var xhr = $.ajax();
 
     function forwardGeocode(query,takeFirstResult){
         if(query){
             if(takeFirstResult){ results_el.hide(); }
             search_loading_el.show();
-            xhr.abort();
-            xhr = $.ajax({
+            var xhr = $.ajax({
                 url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+query+'.json',
                 success:function(data){
                     results_el.children().remove();
@@ -94,8 +92,7 @@
     }
 
     function reverseGeocode(coordinates, modifyForm){
-        xhr.abort();
-        xhr = $.ajax({
+        var xhr = $.ajax({
             url:'https://api.tiles.mapbox.com/v3/'+mapboxString+'/geocode/'+coordinates.lng+','+coordinates.lat+'.json',
             success: function(data){
                 you.setLatLng(data.results[0][0]);
