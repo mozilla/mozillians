@@ -29,10 +29,7 @@ def _list_groups(request, template, query):
     sort_form = SortForm(request.GET)
     show_pagination = False
 
-    if sort_form.is_valid():
-        query = query.order_by(sort_form.cleaned_data['sort'], 'name')
-    else:
-        query = query.order_by('name')
+    query = query.order_by('name')
 
     paginator = Paginator(query, settings.ITEMS_PER_PAGE)
 
