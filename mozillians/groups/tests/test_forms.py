@@ -2,6 +2,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.forms import GroupForm
+from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupAliasFactory, GroupFactory
 from mozillians.users.tests import UserFactory
 
@@ -41,3 +42,33 @@ class GroupFormTests(TestCase):
         form = GroupForm(data=form_data)
         ok_(form.is_valid())
         eq_(u'', form.cleaned_data['new_member_criteria'])
+
+    def test_legacy_group_curators_validation(self):
+        group = GroupFactory.create()
+
+        # Update form without adding curators
+        form_data = {'name': 'test_group',
+                     'accepting_new_members': 'by_request',
+                     'new_member_criteria': 'some criteria'}
+        form = GroupForm(instance=group, data=form_data)
+
+        ok_(form.is_valid())
+
+        # Ensure that groups has no curators
+        group = Group.objects.get(id=group.id)
+        ok_(not group.curators.exists())
+
+    def test_group_curators_validation(self):
+        group = GroupFactory.create()
+        curator = UserFactory.create()
+        group.curators.add(curator.userprofile)
+
+        # Update form without adding curators
+        form_data = {'name': 'test_group',
+                     'accepting_new_members': 'by_request',
+                     'new_member_criteria': 'some criteria',
+                     'curators': []}
+        form = GroupForm(instance=group, data=form_data)
+
+        ok_(not form.is_valid())
+        eq_(form.errors, {'curators': [u'The group must have at least one curator.']})

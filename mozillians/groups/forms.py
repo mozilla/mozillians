@@ -24,7 +24,9 @@ class SortForm(forms.Form):
 
 class GroupForm(happyforms.ModelForm):
     curators = forms.ModelMultipleChoiceField(
-        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''))
+        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''),
+        required=False
+    )
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
@@ -47,7 +49,11 @@ class GroupForm(happyforms.ModelForm):
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
 
-        if not curators:
+        # Check if group is a legacy group without curators.
+        # In this case we should allow curators relation to be empty.
+        group_has_curators = self.instance.pk and self.instance.curators.exists()
+
+        if not curators and group_has_curators:
             msg = _(u'The group must have at least one curator.')
             self._errors['curators'] = self.error_class([msg])
 
