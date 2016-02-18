@@ -39,3 +39,19 @@ class VouchedAutocomplete(BaseProfileAdminAutocomplete):
         if self.q:
             qs = qs.filter(self.q_base_filter)
         return qs
+
+
+class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        # Allow only vouched users to perform this query.
+        if not self.request.user.userprofile.is_vouched:
+            return UserProfile.objects.none()
+
+        qs = UserProfile.objects.vouched()
+
+        if self.q:
+            qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__email__icontains=self.q) |
+                           Q(user__username__icontains=self.q))
+        return qs

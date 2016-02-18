@@ -11,6 +11,7 @@ from django.forms.models import BaseInlineFormSet, inlineformset_factory
 import django_filters
 import happyforms
 from PIL import Image
+from dal import autocomplete
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.api.models import APIv2App
@@ -189,32 +190,26 @@ class BasicInformationForm(happyforms.ModelForm):
         return photo
 
 
+class SkillCreateField(autocomplete.CreateModelMultipleField):
+
+    def create_value(self, value):
+        """This is used to craete a new Skill,
+        if it doesn't already exist in the database.
+        """
+        return Skill.objects.create(name=value).id
+
+
 class SkillsForm(happyforms.ModelForm):
-    skills = forms.CharField(
-        label='',
-        help_text=_lazy(u'Start typing to add a skill (example: Python, '
-                        u'javascript, Graphic Design, User Research)'),
-        required=False)
+    skills = SkillCreateField(
+        required=False,
+        queryset=Skill.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(url='groups:skills-autocomplete'),
+        help_text=(u'Start typing to add a skill (example: Python, javascript, '
+                   u'Graphic Design, User Research)'))
 
     class Meta:
         model = UserProfile
-        fields = ('privacy_skills',)
-
-    def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 +.:,-]*$', self.cleaned_data['skills']):
-            # Commas cannot be included in skill names because we use them to
-            # separate names in a list
-            raise forms.ValidationError(_(u'Skills can only contain latin characters '
-                                          u'and +.:-.'))
-        skills = self.cleaned_data['skills']
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          skills.lower().split(',')))
-
-    def save(self, *args, **kwargs):
-        """Save the data to profile."""
-        self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        super(SkillsForm, self).save(*args, **kwargs)
+        fields = ('privacy_skills', 'skills',)
 
 
 class LanguagesPrivacyForm(happyforms.ModelForm):

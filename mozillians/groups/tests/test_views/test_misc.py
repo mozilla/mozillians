@@ -220,7 +220,7 @@ class CreateGroupTests(TestCase):
             'members_can_leave': 'checked',
             'visible': 'checked',
             'terms': 'Example terms',
-            'curators': [user.id]
+            'curators': [user.userprofile.id]
         }
         with self.login(user) as client:
             response = client.post(url, data=data, follow=False)
@@ -263,18 +263,6 @@ class CreateGroupTests(TestCase):
         ok_(group.visible)
         ok_(group.members_can_leave)
         ok_(not group.functional_area)
-
-    def test_group_add_initial_curators(self):
-        user = UserFactory.create()
-        url = reverse('groups:group_add', prefix='/en-US/')
-
-        with self.login(user) as client:
-            response = client.get(url)
-        eq_(response.status_code, 200)
-
-        initial_curators = response.context['form'].initial['curators']
-        eq_(len(initial_curators), 1)
-        eq_(initial_curators[0], user.userprofile.id)
 
     def test_group_manager_edit_initial_curators(self):
         user = UserFactory.create(manager=True)
