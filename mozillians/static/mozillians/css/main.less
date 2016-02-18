@@ -2234,6 +2234,10 @@ body#group-show {
         .row {
             .clearfix;
         }
+        .group-description {
+            clear: both;
+            padding-top: 10px;
+        }
         .curated-group-details {
             .span(5);
             list-style: none;
@@ -2250,24 +2254,33 @@ body#group-show {
                 width: 100%;
             }
         }
-        .curator {
+        .curators {
             .span(5);
             @media (max-width: @breakMobileLandscape) {
                 width: 100%;
             }
-            .avatar {
-                .rounded-image;
-                width: 60px;
-                height: 60px;
-
-            }
-            ul {
-                margin-left: 60px;
-                padding: 0;
-                list-style: none;
-            }
             h3 {
                 font-size: 1.3em;
+            }
+            .curator {
+                min-width: 70px;
+                min-height: 70px;
+                display: inline-block;
+                .avatar {
+                    .rounded-image;
+                    width: 60px;
+                    height: 60px;
+                }
+                ul {
+                    margin-left: 60px;
+                    padding: 0;
+                    list-style: none;
+                    li {
+                        display: block;
+                        word-break: break-all;
+                        margin-right: 5px;
+                    }
+                }
             }
         }
     }
