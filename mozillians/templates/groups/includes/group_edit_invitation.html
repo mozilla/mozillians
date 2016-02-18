@@ -1,0 +1,98 @@
+<div role="tabpanel" class="tab-pane fade" id="invitation">
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=invitation">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Pending Invitations') }}</div>
+      <div class="panel-body">
+        <fieldset>
+          <div class="row invitee">
+            <div class="col-sm-8">
+              <div class="avatar">
+                <span>
+                  <a href="#">
+                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
+                  </a>
+                </span>
+              </div>
+              <a href="#">mozillian1@mozilla.org</a>
+            </div>
+            <div class="col-sm-4">
+              <div class="email-controls right">
+                <a class="delete" href="#">
+                  Delete
+                </a>
+                <a class="button" href="#">
+                  Resend
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="row invitee">
+            <div class="col-sm-8">
+              <div class="avatar">
+                <span>
+                  <a href="#">
+                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
+                  </a>
+                </span>
+              </div>
+              <a href="#">mozillian2@mozilla.org</a>
+            </div>
+            <div class="col-sm-4">
+              <div class="email-controls right">
+                <a class="delete" href="#">
+                  Delete
+                </a>
+                <a class="button" href="#">
+                  Resend
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="row invitee">
+            <div class="col-sm-8">
+              <div class="avatar">
+                <span>
+                  <a href="#">
+                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
+                  </a>
+                </span>
+              </div>
+              <a href="#">mozillian3@mozilla.org</a>
+            </div>
+            <div class="col-sm-4">
+              <div class="email-controls right">
+                <a class="delete" href="#">
+                  Delete
+                </a>
+                <a class="button" href="#">
+                  Resend
+                </a>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=invitation">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Invite new member') }}</div>
+      <div class="panel-body">
+        <fieldset>
+          <div class="form-group">
+            <input id="id_username" name="username" value="" type="text">
+            <p class="help-block">
+              Start typing a mozillian username.
+            </p>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Invite') }}</button>
+      </div>
+    </div>
+  </form>
+</div>

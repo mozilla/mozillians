@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ _('Group settings') }}
+{% endblock %}
+{% block body_id %}group-edit{% endblock %}
+
+{% block content %}
+  {% if form.errors %}
+    <div class="alert alert-error">
+      {{ _('Please correct the errors below.') }}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-sm-3 hidden-xs" id="groups-nav">
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Groups') }}</div>
+        <ul class="nav nav-tabs settings-nav" role="tablist">
+          <li role="presentation" class="active"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
+          <li role="presentation"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
+          <li role="presentation"><a href="#invitation" aria-controls="invitation" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
+          <li role="presentation"><a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">{{ _('Admin') }}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-sm-9">
+      <div class="tab-content">
+        <!-- Description Tab -->
+        {% include 'groups/includes/group_edit_description.html' %}
+
+        <!-- Access Tab -->
+        {% include 'groups/includes/group_edit_access.html' %}
+
+        <!-- Invitations Tab -->
+        {% include 'groups/includes/group_edit_invitation.html' %}
+
+        <!-- Admin Tab -->
+        {% include 'groups/includes/group_edit_admin.html' %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
+    <script src="{{ static('mozillians/js/group_edit.js') }}"></script>
+  {% endcompress %}
+{% endblock %}

@@ -1,0 +1,90 @@
+<div role="tabpanel" class="tab-pane fade in active" id="description">
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=description" enctype="multipart/form-data">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Description') }}</div>
+      <div class="panel-body">
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <label class="required" for="id_name">Name:</label>
+              <div class="form-group">
+                <input id="id_name" name="name" value="" type="text">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8">
+              <label class="required" for="id_description">Description:</label>
+              <div class="form-group">
+                <textarea cols="40" id="id_description" name="bio" rows="10"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <label class="required" for="id_irc">IRC Channel:</label>
+              <div class="form-group">
+                <input id="id_irc" name="irc" value="" type="text">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <label class="required" for="id_website">Website:</label>
+              <div class="form-group">
+                <input id="id_website" name="website" value="" type="url">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <label class="required" for="id_wiki">Wiki:</label>
+              <div class="form-group">
+                <input id="id_wiki" name="wiki" value="" type="url">
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Description') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      {{ _('Delete Group') }}
+    </div>
+    <div class="panel-body">
+      <fieldset id="delete">
+        <input type="checkbox" class="acknowledge">
+        {% trans %}
+          I acknowledge that deleting this group ...
+        {% endtrans %}
+      </fieldset>
+    </div>
+    <div class="panel-footer">
+      <a href="{{ url('groups:group_delete', group.url) }}" id="delete-group"
+         class="btn btn-danger delete disabled">
+        {{ _('Delete Group') }}
+      </a>
+    </div>
+  </div>
+</div>

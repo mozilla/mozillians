@@ -1,0 +1,118 @@
+<div role="tabpanel" class="tab-pane fade" id="access">
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Access') }}</div>
+      <div class="panel-body">
+        <fieldset id="access">
+          <div class="sizing">
+            <div>
+              <label class="required" for="id_type">Group type</label>
+            </div>
+            <div class="access-option">
+              <input name="access-type" value="1" type="radio">
+              <label>Open</label>
+            </div>
+            <div class="access-option">
+              <input name="access-type" value="2" type="radio">
+              <label>Reviewed</label>
+            </div>
+            <div class="access-option">
+              <input name="access-type" value="3" type="radio">
+              <label>Closed</label>
+            </div>
+          </div>
+
+          <div class="access-description">
+            <h4>Open</h4>
+            <p>
+              Cake danish pastry pudding fruitcake. Cupcake icing lollipop macaroon halvah chocolate bar biscuit macaroon cake. Tiramisu bonbon carrot cake liquorice brownie chocolate topping cake. Sesame snaps cupcake cotton candy cake donut. Sugar plum muffin gingerbread tootsie roll. Dragée ice cream ice cream tootsie roll muffin jujubes sweet lemon drops.
+            </p>
+          </div>
+
+          <div class="access-description">
+            <h4>Reviewed</h4>
+            <p>
+              Sweet roll ice cream chocolate bar muffin chocolate toffee sweet. Icing cookie brownie bear claw. Ice cream dessert pudding topping tiramisu liquorice. Icing donut topping sweet dragée carrot cake gingerbread liquorice. Brownie tiramisu chocolate cake jelly-o. Jujubes sesame snaps powder jujubes sweet. Muffin candy canes gingerbread bonbon cotton candy. Muffin danish cotton candy croissant toffee sweet tart.
+            </p>
+          </div>
+
+          <div class="access-description">
+            <h4>Closed</h4>
+            <p>
+              Candy canes danish tiramisu. Macaroon ice cream dragée fruitcake topping marzipan jelly. Jelly-o gingerbread lemon drops jelly beans gummies. Toffee brownie toffee. Marshmallow bear claw halvah. Pie cookie caramels ice cream oat cake candy. Dragée jelly-o bear claw. Jelly beans gummies carrot cake powder marshmallow cake.
+            </p>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update type') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Terms') }}</div>
+      <div class="panel-body">
+        <fieldset style="margin-bottom: 0px;">
+          <input type="checkbox" class="acknowledge">
+          {% trans %}
+            New members should accept terms
+          {% endtrans %}
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8 col-sm-6">
+              <label class="required" for="id_username">Terms:</label>
+              <div class="form-group">
+                <textarea cols="40" id="id_bio" name="bio" rows="10"></textarea>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="email_section">{{ _('Update Terms') }}</button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {{ csrf() }}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Expiration') }}</div>
+      <div class="panel-body">
+
+        <fieldset>
+          <input type="checkbox" class="acknowledge">
+          {% trans %}
+            Membership can expire
+          {% endtrans %}
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8 col-sm-6">
+
+              <label class="" for="id_username">Expire membership after:</label>
+              <div class="form-group">
+                <input id="id_username" name="username" value="" type="text">
+              </div>
+            </div>
+            <div id="username-privacy" class="col-md-4 col-sm-6 text-right">
+
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Expiration settings') }}</button>
+      </div>
+    </div>
+  </form>
+</div>

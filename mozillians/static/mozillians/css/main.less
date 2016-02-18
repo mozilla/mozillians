@@ -669,6 +669,32 @@ nav {
     }
 }
 
+.settings-nav {
+    li {
+        width: 100%;
+        margin: 0;
+        cursor: pointer;
+
+        a {
+            margin: 0;
+            border: none;
+        }
+
+        &.active {
+            background-color: @blueDark;
+
+            a,
+            a:hover,
+            a:active,
+            a:focus {
+                border: none;
+                background-color: inherit;
+                color: white;
+            }
+        }
+    }
+}
+
 .persona-button {
     .border-radius(3px);
     span {
@@ -2320,6 +2346,35 @@ form.group-add {
     select[multiple] {
         height: 100px !important;
         width: 450px;
+    }
+}
+
+form.edit-group {
+    #access {
+        .access-option { float: left; }
+        .access-type label {
+            float: none;
+            font-weight: normal;
+        }
+        label {
+            float: none;
+        }
+    }
+    .access-description {
+        clear:both;
+        margin-top:50px;
+    }
+    .invitee {
+        margin-top: 10px;
+        .delete {
+            opacity: 1;
+        }
+        .avatar {
+            display: inline;
+            .profile-photo {
+                width: 30px;
+            }
+        }
     }
 }
 

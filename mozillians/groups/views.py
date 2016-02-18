@@ -456,3 +456,40 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
         }
 
         return JsonResponse(data)
+
+
+@never_cache
+def group_edit(request, url=None):
+    """
+    Edit a group.
+    """
+
+    profile = request.user.userprofile
+    is_manager = request.user.userprofile.is_manager
+
+    # Get the group to edit
+    group = get_object_or_404(Group, url=url)
+    # Only a group curator or an admin is allowed to edit a group
+    is_curator = profile in group.curators.all()
+    if not (is_curator or is_manager):
+        messages.error(request, _('You must be a curator or an admin to edit a group'))
+        return redirect(reverse('groups:show_group', args=[group.url]))
+
+    form_class = SuperuserGroupForm if is_manager else GroupForm
+
+    curators_ids = [profile.id]
+    curators_ids += group.curators.all().values_list('id', flat=True)
+    form = form_class(request.POST or None, instance=group,
+                      initial={'curators': curators_ids})
+
+    if form.is_valid():
+        group = form.save()
+
+        return redirect(reverse('groups:show_group', args=[group.url]))
+
+    context = {
+        'form': form,
+        'creating': url is None,
+        'group': group
+    }
+    return render(request, 'groups/edit.html', context)
