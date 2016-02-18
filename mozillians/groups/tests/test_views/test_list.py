@@ -15,8 +15,8 @@ from mozillians.users.tests import UserFactory
 class ListTests(TestCase):
     def setUp(self):
         self.user = UserFactory.create()
-        self.group_1 = GroupFactory.create()
-        self.group_2 = GroupFactory.create()
+        self.group_1 = GroupFactory.create(name='abc')
+        self.group_2 = GroupFactory.create(name='def')
         self.group_2.add_member(self.user.userprofile)
         self.query = Group.objects.filter(pk__in=[self.group_1.pk, self.group_2.pk])
         self.template = 'groups/index.html'
