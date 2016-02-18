@@ -66,7 +66,7 @@ Building mozillians
 
 #. Create the database tables and run the migrations::
 
-     $ docker-compose run web python manage.py syncdb --noinput --migrate
+     $ docker-compose run web python manage.py migrate --noinput
 
 #. Load the timezone tables to MySQL::
 
