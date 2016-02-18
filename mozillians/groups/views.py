@@ -397,11 +397,10 @@ def group_add_edit(request, url=None):
 
     form_class = SuperuserGroupForm if is_manager else GroupForm
 
-    group_has_curators = group.pk and group.curators.exists()
-    curators_ids = [profile.id] if group_has_curators else []
-
+    curators_ids = [profile.id]
     if url:
-        curators_ids += group.curators.all().values_list('id', flat=True)
+        curators_ids = group.curators.all().values_list('id', flat=True)
+
     form = form_class(request.POST or None, instance=group,
                       initial={'curators': curators_ids})
 
