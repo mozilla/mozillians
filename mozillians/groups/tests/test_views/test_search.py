@@ -149,9 +149,9 @@ class SearchTests(TestCase):
         eq_(response.get('content-type'), 'application/json')
 
     def test_search_incomplete_profile(self):
-        user = UserFactory.create(vouched=False, userprofile={'full_name': ''})
+        user = UserFactory.create(vouched=True, userprofile={'full_name': ''})
         group = GroupFactory.create(visible=True)
-        url = urlparams(reverse('groups:search_skills'), term=group.name)
+        url = urlparams(reverse('groups:skills-autocomplete'), q=group.name)
         with self.login(user) as client:
             response = client.get(url, follow=True,
                                   **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
@@ -168,7 +168,7 @@ class SearchTests(TestCase):
         user = UserFactory.create()
         skill_1 = SkillFactory.create()
         SkillFactory.create()
-        url = urlparams(reverse('groups:search_skills'), term=skill_1.name)
+        url = urlparams(reverse('groups:skills-autocomplete'), q=skill_1.name)
         with self.login(user) as client:
             response = client.get(url, follow=True,
                                   **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
@@ -176,8 +176,8 @@ class SearchTests(TestCase):
         eq_(response.get('content-type'), 'application/json')
 
         data = json.loads(response.content)
-        eq_(len(data), 1, 'Non autocomplete skills are included in search')
-        eq_(data[0], skill_1.name)
+        eq_(len(data['results']), 1, 'Non autocomplete skills are included in search')
+        eq_(data['results'][0]['id'], skill_1.id)
 
     def test_search_no_ajax(self):
         user = UserFactory.create()

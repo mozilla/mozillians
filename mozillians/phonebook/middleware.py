@@ -18,7 +18,7 @@ class RegisterMiddleware():
             r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
             r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
             r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
-            r'^/[\w-]+{0}'.format(reverse('groups:search_skills')),
+            r'^/[\w-]+{0}'.format(reverse('groups:skills-autocomplete')),
             r'^/browserid/',
         ]
 

@@ -21,7 +21,6 @@ from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.helpers import redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
-from mozillians.groups.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
@@ -162,7 +161,6 @@ def edit_profile(request):
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
     user_groups = profile.groups.all().order_by('name')
-    user_skills = stringify_groups(profile.skills.all().order_by('name'))
     emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
     accounts_qs = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
 
@@ -206,8 +204,7 @@ def edit_profile(request):
     language_privacy_data = get_request_data('language_privacy_form')
     ctx['language_privacy_form'] = forms.LanguagesPrivacyForm(language_privacy_data,
                                                               instance=profile)
-    ctx['skills_form'] = forms.SkillsForm(get_request_data('skills_form'), instance=profile,
-                                          initial={'skills': user_skills})
+    ctx['skills_form'] = forms.SkillsForm(get_request_data('skills_form'), instance=profile)
     location_initial = {
         'saveregion': True if profile.geo_region else False,
         'savecity': True if profile.geo_city else False,
