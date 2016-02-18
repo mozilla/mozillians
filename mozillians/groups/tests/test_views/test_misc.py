@@ -220,7 +220,7 @@ class CreateGroupTests(TestCase):
             'members_can_leave': 'checked',
             'visible': 'checked',
             'terms': 'Example terms',
-            'curators': [user.id]
+            'curators': [user.userprofile.id]
         }
         with self.login(user) as client:
             response = client.post(url, data=data, follow=False)

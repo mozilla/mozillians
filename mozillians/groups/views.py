@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
-from mozillians.users.models import UserProfile
+from dal import autocomplete
 from tower import ugettext as _
 
 from mozillians.common.decorators import allow_unvouched
@@ -21,6 +21,7 @@ from mozillians.groups.forms import (GroupForm, TermsReviewForm,
                                      MembershipFilterForm, SortForm,
                                      SuperuserGroupForm)
 from mozillians.groups.models import Group, Skill, GroupMembership
+from mozillians.users.models import UserProfile
 
 
 def _list_groups(request, template, query):
@@ -397,7 +398,10 @@ def group_add_edit(request, url=None):
 
     form_class = SuperuserGroupForm if is_manager else GroupForm
 
+    # Add the creator of a group as curator
     curators_ids = [profile.id]
+    # If we are editing add the existing curators. If the group has no curator in edit
+    # mode, append an empty list
     if url:
         curators_ids = group.curators.all().values_list('id', flat=True)
 
@@ -415,3 +419,13 @@ def group_add_edit(request, url=None):
         'group': group if url else None
     }
     return render(request, 'groups/add_edit.html', context)
+
+
+class SkillsAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+
+        qs = Skill.objects.all()
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
