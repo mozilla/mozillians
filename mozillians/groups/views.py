@@ -397,7 +397,16 @@ def group_add_edit(request, url=None):
         group = Group()
 
     form_class = SuperuserGroupForm if is_manager else GroupForm
-    form = form_class(request.POST or None, instance=group)
+
+    # Add the creator of a group as curator
+    curators_ids = [profile.id]
+    # If we are editing add the existing curators. If the group has no curator in edit
+    # mode, append an empty list
+    if url:
+        curators_ids = group.curators.all().values_list('id', flat=True)
+
+    form = form_class(request.POST or None, instance=group,
+                      initial={'curators': curators_ids})
 
     if form.is_valid():
         group = form.save()

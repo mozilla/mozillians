@@ -6,8 +6,13 @@ from mozillians.users.models import UserProfile
 
 
 class BaseProfileAdminAutocomplete(autocomplete.Select2QuerySetView):
+    """Base class for django-autocomplete-light."""
 
     def get_queryset(self):
+        """Base queryset used only in admin.
+
+        Return all the users who have completed their profile registration.
+        """
         if not self.request.user.is_staff:
             return UserProfile.objects.none()
 
@@ -24,6 +29,7 @@ class BaseProfileAdminAutocomplete(autocomplete.Select2QuerySetView):
 class VoucherAutocomplete(BaseProfileAdminAutocomplete):
 
     def get_queryset(self):
+        """Augment base queryset by returning only users who can vouch."""
         qs = super(VoucherAutocomplete, self).get_queryset().filter(can_vouch=True)
 
         if self.q:
@@ -34,6 +40,7 @@ class VoucherAutocomplete(BaseProfileAdminAutocomplete):
 class VouchedAutocomplete(BaseProfileAdminAutocomplete):
 
     def get_queryset(self):
+        """Augment base queryset by returning only vouched users."""
         qs = super(VouchedAutocomplete, self).get_queryset().vouched()
 
         if self.q:
@@ -44,6 +51,8 @@ class VouchedAutocomplete(BaseProfileAdminAutocomplete):
 class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
+        """Augment base queryset by returning only vouched users."""
+
         # Allow only vouched users to perform this query.
         if not self.request.user.userprofile.is_vouched:
             return UserProfile.objects.none()

@@ -83,14 +83,8 @@ class GroupForm(happyforms.ModelForm):
 class SuperuserGroupForm(GroupForm):
     """Form used by superusers (admins) when editing a group"""
 
-    class Meta:
-        model = Group
-        fields = ('name', 'description', 'irc_channel', 'website', 'wiki', 'visible',
-                  'functional_area', 'members_can_leave', 'accepting_new_members',
-                  'new_member_criteria', 'curators', 'terms', 'invalidation_days',)
-        widgets = {
-            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
-        }
+    class Meta(GroupForm.Meta):
+        fields = GroupForm.Meta.fields + ('visible', 'functional_area', 'members_can_leave',)
 
 
 class MembershipFilterForm(forms.Form):

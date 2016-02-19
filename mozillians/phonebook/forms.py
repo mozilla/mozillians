@@ -11,7 +11,7 @@ from django.forms.models import BaseInlineFormSet, inlineformset_factory
 import django_filters
 import happyforms
 from PIL import Image
-from dal import autocomplete
+from dal import autocomplete, fields as dal_fields
 from tower import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.api.models import APIv2App
@@ -190,7 +190,7 @@ class BasicInformationForm(happyforms.ModelForm):
         return photo
 
 
-class SkillCreateField(autocomplete.CreateModelMultipleField):
+class SkillCreateField(dal_fields.CreateModelFieldMixin, forms.ModelMultipleChoiceField):
 
     def create_value(self, value):
         """This is used to craete a new Skill,
@@ -198,14 +198,48 @@ class SkillCreateField(autocomplete.CreateModelMultipleField):
         """
         return Skill.objects.create(name=value).id
 
+    def clean(self, value):
+        """Custom clean method.
+
+        Allow only certain characters when creating a new instance.
+        """
+        new_value = ''
+        # value is a list of strings (IDs of saved objects or string values)
+        for item in value:
+            try:
+                return super(SkillCreateField, self).clean(value)
+            except forms.ValidationError as e:
+                new_value = e.params.get('pk', None)
+
+            if new_value:
+                if re.match(r'^[a-zA-Z0-9 +.:,-]*$', new_value):
+                    new_db_item = self.create_value(new_value)
+                    value[value.index(new_value)] = new_db_item
+                else:
+                    value.pop(value.index(new_value))
+                    msg = _(u'Skills can only contain latin characters and +.:-.')
+                    self.error_messages['invalid_choice'] = msg
+                    raise forms.ValidationError(self.error_messages['invalid_choice'],
+                                                code='invalid_choice')
+
+        return super(SkillCreateField, self).clean(value)
+
 
 class SkillsForm(happyforms.ModelForm):
     skills = SkillCreateField(
         required=False,
         queryset=Skill.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(url='groups:skills-autocomplete'),
-        help_text=(u'Start typing to add a skill (example: Python, javascript, '
-                   u'Graphic Design, User Research)'))
+        widget=autocomplete.ModelSelect2Multiple(url='groups:skills-autocomplete'))
+
+    def __init__(self, *args, **kwargs):
+        super(SkillsForm, self).__init__(*args, **kwargs)
+        self.fields['skills'].help_text = (u'Start typing to add a skill (example: Python, '
+                                           u'javascript, Graphic Design, User Research)')
+
+    def save(self, *args, **kwargs):
+        """Save the data to profile."""
+        self.instance.set_membership(Skill, self.cleaned_data['skills'])
+        super(SkillsForm, self).save(*args, **kwargs)
 
     class Meta:
         model = UserProfile
