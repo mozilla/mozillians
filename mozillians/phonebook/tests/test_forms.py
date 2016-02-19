@@ -69,18 +69,16 @@ class ProfileFormsTests(TestCase):
         data = model_to_dict(user.userprofile)
 
         # valid names
-        data['skills'] = 'lO ngN,am3+.:-'
+        data['skills'] = ['lO ngN,am3+.:-']
         form = SkillsForm(data=data, instance=user.userprofile)
         ok_(form.is_valid(), msg=dict(form.errors))
 
         # Save the form
         form.save()
-        # We should end up with two skills - note the names are lower-cased
-        ok_(Skill.objects.filter(name='lo ngn').exists())
-        ok_(Skill.objects.filter(name='am3+.:-').exists())
+        ok_(Skill.objects.filter(name='lo ngn,am3+.:-').exists())
 
         # an invalid name - ';' is not a valid character
-        data['skills'] = 'lOngName+.:-;'
+        data['skills'] = ['lOngName+.:-;']
         form = SkillsForm(data=data, instance=user.userprofile)
         ok_(not form.is_valid())
         ok_('skills' in form.errors)

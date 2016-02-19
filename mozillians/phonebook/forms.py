@@ -205,13 +205,22 @@ class SkillCreateField(dal_fields.CreateModelFieldMixin, forms.ModelMultipleChoi
         """
         new_value = ''
         # value is a list of strings (IDs of saved objects or string values)
+        # eg ['1', '9', 'foo']
         for item in value:
+
             try:
+                # Try to validate the list. If the given list has not only
+                # PK values, Django's _check_values in ModelMultipleChoiceField
+                # will raise a ValidationError
                 return super(SkillCreateField, self).clean(value)
             except forms.ValidationError as e:
+                # catch the non-numberic value (eg 'foo')
                 new_value = e.params.get('pk', None)
 
             if new_value:
+                # Feed the value to the regex. If we have a match then create
+                # a new Skill in the db and add the corresponding PK to the list of
+                # IDS. Else we have an invalid input, remove it and raise a ValidationError
                 if re.match(r'^[a-zA-Z0-9 +.:,-]*$', new_value):
                     new_db_item = self.create_value(new_value)
                     value[value.index(new_value)] = new_db_item
