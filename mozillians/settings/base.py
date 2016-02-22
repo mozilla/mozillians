@@ -279,6 +279,9 @@ LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/login/'
 
 INSTALLED_APPS = (
+    'dal',
+    'dal_select2',
+
     # Django contrib apps
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -298,7 +301,6 @@ INSTALLED_APPS = (
     'session_csrf',
     'product_details',
     'csp',
-
     'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
@@ -312,7 +314,6 @@ INSTALLED_APPS = (
     'mozillians.geo',
 
     'sorl.thumbnail',
-    'autocomplete_light',
     'import_export',
     'waffle',
     'rest_framework',

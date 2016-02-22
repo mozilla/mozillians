@@ -2,11 +2,11 @@ from django import forms
 from django.forms.widgets import RadioSelect
 
 import happyforms
+from dal import autocomplete
 from tower import ugettext as _
 from tower import ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group
-from mozillians.users.models import UserProfile
 
 
 class SortForm(forms.Form):
@@ -23,16 +23,18 @@ class SortForm(forms.Form):
 
 
 class GroupForm(happyforms.ModelForm):
-    curators = forms.ModelMultipleChoiceField(
-        queryset=UserProfile.objects.filter(is_vouched=True).exclude(full_name=''),
-        required=False
-    )
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
         label='Membership will expire after',
         required=False
     )
+
+    def __init__(self, *args, **kwargs):
+        super(GroupForm, self).__init__(*args, **kwargs)
+        self.fields['curators'].required = False
+        self.fields['curators'].help_text = (u'Start typing the name/email/username '
+                                             'of a Mozillian.')
 
     def clean(self):
         cleaned_data = super(GroupForm, self).clean()
@@ -61,44 +63,28 @@ class GroupForm(happyforms.ModelForm):
 
     def save(self, *args, **kwargs):
         """Custom save method to add multiple curators."""
-        obj = super(GroupForm, self).save()
+        obj = super(GroupForm, self).save(*args, **kwargs)
 
-        # Add the curators in the m2m field
-        obj.curators.clear()
         for curator in self.cleaned_data['curators']:
-            obj.curators.add(curator)
-            # Ensure that all curators are members of the group
             if not obj.has_member(curator):
                 obj.add_member(curator)
         return obj
 
     class Meta:
         model = Group
-        fields = ['name', 'description', 'irc_channel',
-                  'website', 'wiki', 'accepting_new_members',
-                  'new_member_criteria', 'terms', 'curators', 'invalidation_days']
+        fields = ('name', 'description', 'irc_channel', 'website', 'wiki',
+                  'accepting_new_members', 'new_member_criteria', 'terms', 'curators',
+                  'invalidation_days',)
         widgets = {
-            'curators': forms.SelectMultiple()
+            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
         }
 
 
 class SuperuserGroupForm(GroupForm):
     """Form used by superusers (admins) when editing a group"""
 
-    class Meta:
-        model = Group
-        fields = ['name',
-                  'description',
-                  'irc_channel',
-                  'website',
-                  'wiki',
-                  'visible',
-                  'functional_area',
-                  'members_can_leave',
-                  'accepting_new_members',
-                  'new_member_criteria',
-                  'terms',
-                  'invalidation_days']
+    class Meta(GroupForm.Meta):
+        fields = GroupForm.Meta.fields + ('visible', 'functional_area', 'members_can_leave',)
 
 
 class MembershipFilterForm(forms.Form):

@@ -148,16 +148,12 @@ $(function() {
         },
     });
 
-    $('#id_skills').tagit({
-        allowSpaces: true,
-        caseSensitive: false,
-        singleField: true,
-        singleFieldDelimiter: ',',
-        removeConfirmation: true,
-        tagSource: $('#skills').data('autocomplete-url'),
-        triggerKeys: ['enter', 'comma', 'tab']
-    });
-
     // Show tooltip on hover on desktops and on click on touch devices.
     $(document).tooltip();
+});
+
+$(window).bind('load', function() {
+    $('.select2-selection__choice').each(function(index, elem){
+        $(this).attr('title', '');
+    });
 });
