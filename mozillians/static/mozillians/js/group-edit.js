@@ -36,3 +36,9 @@ $(function(){
     checkCriteria($id_accepting_new_members.val());
     checkMembershipInvalidation();
 });
+
+$(window).bind('load', function() {
+    $('li.select2-selection__choice').each(function(index, elem){
+        $(this).attr('title', '');
+    });
+});
