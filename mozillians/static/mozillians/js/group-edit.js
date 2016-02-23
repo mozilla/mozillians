@@ -35,10 +35,10 @@ $(function(){
     // Hide/show field when document loads
     checkCriteria($id_accepting_new_members.val());
     checkMembershipInvalidation();
-});
 
-$(window).bind('load', function() {
-    $('li.select2-selection__choice').each(function(index, elem){
-        $(this).attr('title', '');
+    $('#curators').on('DOMNodeInserted', 'li', function() {
+        $('.select2-selection__choice').each(function(index, elem){
+            $(this).attr('title', '');
+        });
     });
 });
