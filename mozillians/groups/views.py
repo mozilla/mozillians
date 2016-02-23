@@ -2,6 +2,7 @@ import json
 
 from collections import defaultdict
 
+from django.http import JsonResponse
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
@@ -423,9 +424,35 @@ def group_add_edit(request, url=None):
 
 class SkillsAutocomplete(autocomplete.Select2QuerySetView):
 
+    def __init__(self, *args, **kwargs):
+        super(SkillsAutocomplete, self).__init__(*args, **kwargs)
+        self.cached_skills = list(Skill.objects.all().values_list('name', flat=True))
+
     def get_queryset(self):
 
         qs = Skill.objects.all()
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs
+
+    def render_to_response(self, context):
+        """Override base render_to_response.
+
+        Return a JSON response in Select2 format."""
+        create_option = []
+
+        q = self.request.GET.get('q', None)
+
+        if (self.request.GET.get('create', None) == 'true' and q and
+                q not in self.cached_skills):
+            create_option = [{
+                'id': q,
+                'text': 'Create "%s"' % q
+            }]
+
+        data = {
+            'results': self.get_results(context) + create_option,
+            'more': self.has_more(context)
+        }
+
+        return JsonResponse(data)
