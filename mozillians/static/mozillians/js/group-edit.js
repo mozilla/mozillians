@@ -45,6 +45,10 @@ $(function(){
         checkGroupTerms();
     });
 
+    // Initialize membership expiration checkbox
+    if ($id_invalidation_days.find(':input').val()) {
+        $id_membership_can_expire.prop('checked', true)
+    }
 
     // Hide/show field when document loads
     checkCriteria($id_accepting_new_members.val());
