@@ -1,7 +1,7 @@
 $(function(){
     $id_accepting_new_members = $('#id_accepting_new_members');
     $id_new_member_criteria_fieldset = $('#id_new_member_criteria_fieldset');
-    $id_invalidation_days = $('#id_invalidation_days');
+    $id_invalidation_days = $('#id_group_invalidation_days');
     $id_membership_can_expire = $('#id_membership_can_expire :input');
     $id_group_terms = $('#id_group_terms');
     $id_group_has_terms = $('#id_group_has_terms :input');
