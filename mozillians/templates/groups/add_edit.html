@@ -92,7 +92,18 @@
         {{ mozillians_field(form.invalidation_days) }}
       </fieldset>
 
-      <fieldset>
+      <fieldset id="id_group_has_terms">
+        <div class="form-group">
+          <label class="checkbox">
+            Group has terms:
+            <span>
+              <input type="checkbox"></input>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset id="id_group_terms">
         {{ mozillians_field(form.terms) }}
       </fieldset>
     {% endif %}
