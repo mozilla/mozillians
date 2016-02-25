@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
 
-from mock import patch
-from django.template.loader import get_template
-from mozillians.groups.tasks import email_membership_change
-from nose.tools import eq_, ok_
-
 from django.conf import settings
+from django.template.loader import get_template
+
+from mock import patch
+from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups import tasks
 from mozillians.groups.models import Group, GroupMembership, Skill
-from mozillians.groups.tasks import invalidate_group_membership
+from mozillians.groups.tasks import invalidate_group_membership, email_membership_change
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
@@ -168,34 +167,80 @@ class EmailMembershipChangeTests(TestCase):
 
 
 class MembershipInvalidationTests(TestCase):
-    def test_invalidate_group_with_terms(self):
+    """ Test membership invalidation."""
+
+    @patch('mozillians.groups.tasks.waffle.switch_is_active')
+    def test_invalidate_group_with_terms(self, mocked_waffle_switch):
+        mocked_waffle_switch.return_value = False
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
         group = GroupFactory.create(terms='Example terms.', invalidation_days=5)
-        user = UserFactory.create()
-        group.add_member(user.userprofile)
-        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
+        group.curators.add(curator.userprofile)
+        group.add_member(member.userprofile)
+        group.add_member(curator.userprofile)
+
+        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
         membership.update(updated_on=datetime.now() - timedelta(days=10))
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
         eq_(membership[0].status, GroupMembership.MEMBER)
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
         invalidate_group_membership()
-        membership = group.groupmembership_set.get(userprofile=user.userprofile)
+
+        membership = group.groupmembership_set.get(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.get(userprofile=curator.userprofile)
         eq_(membership.status, GroupMembership.PENDING_TERMS)
+        eq_(curator_membership.status, GroupMembership.MEMBER)
 
-    def test_invalidate_group_by_request(self):
+    @patch('mozillians.groups.tasks.waffle.switch_is_active')
+    def test_invalidate_group_by_request(self, mocked_waffle_switch):
+        mocked_waffle_switch.return_value = False
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
         group = GroupFactory.create(invalidation_days=5, accepting_new_members='by_request')
-        user = UserFactory.create()
-        group.add_member(user.userprofile)
-        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
-        membership.update(updated_on=datetime.now() - timedelta(days=10))
-        eq_(membership[0].status, GroupMembership.MEMBER)
-        invalidate_group_membership()
-        membership = group.groupmembership_set.get(userprofile=user.userprofile)
-        eq_(membership.status, GroupMembership.PENDING)
+        group.curators.add(curator.userprofile)
+        group.add_member(curator.userprofile)
+        group.add_member(member.userprofile)
 
-    def test_invalidate_group_accepts_all(self):
-        group = GroupFactory.create(invalidation_days=5)
-        user = UserFactory.create()
-        group.add_member(user.userprofile)
-        membership = group.groupmembership_set.filter(userprofile=user.userprofile)
+        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
         membership.update(updated_on=datetime.now() - timedelta(days=10))
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
         eq_(membership[0].status, GroupMembership.MEMBER)
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
         invalidate_group_membership()
-        ok_(not group.groupmembership_set.filter(userprofile=user.userprofile).exists())
+
+        membership = group.groupmembership_set.get(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.get(userprofile=curator.userprofile)
+        eq_(membership.status, GroupMembership.PENDING)
+        eq_(curator_membership.status, GroupMembership.MEMBER)
+
+    @patch('mozillians.groups.tasks.waffle.switch_is_active')
+    def test_invalidate_group_accepts_all(self, mocked_waffle_switch):
+        mocked_waffle_switch.return_value = False
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
+        group = GroupFactory.create(invalidation_days=5)
+        group.curators.add(curator.userprofile)
+        group.add_member(curator.userprofile)
+        group.add_member(member.userprofile)
+
+        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
+        invalidate_group_membership()
+
+        ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
+        ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
