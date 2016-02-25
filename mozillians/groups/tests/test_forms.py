@@ -72,3 +72,27 @@ class GroupFormTests(TestCase):
 
         ok_(not form.is_valid())
         eq_(form.errors, {'curators': [u'The group must have at least one curator.']})
+
+    def test_new_group_without_curators(self):
+        # Create a new group without curators
+        form_data = {'name': 'test_group',
+                     'accepting_new_members': 'by_request',
+                     'new_member_criteria': 'some criteria',
+                     'curators': []}
+        form = GroupForm(data=form_data)
+
+        ok_(not form.is_valid())
+        eq_(form.errors, {'curators': [u'The group must have at least one curator.']})
+
+    def test_create_new_group(self):
+        # Create a new group without curators
+        curator = UserFactory.create(vouched=True)
+        form_data = {'name': 'test_group',
+                     'accepting_new_members': 'by_request',
+                     'new_member_criteria': 'some criteria',
+                     'curators': [curator.id]}
+        form = GroupForm(data=form_data)
+
+        ok_(form.is_valid())
+        form.save()
+        eq_(Group.objects.all().count(), 1)

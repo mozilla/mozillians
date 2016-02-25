@@ -27,12 +27,16 @@ class GroupForm(happyforms.ModelForm):
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
         label='Membership will expire after',
-        required=False
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
         super(GroupForm, self).__init__(*args, **kwargs)
         self.fields['curators'].required = False
+        self.fields['curators'].error_messages['required'] = (
+            _(u'The group must have at least one curator.'))
+        if not self.instance.pk:
+            self.fields['curators'].required = True
         self.fields['curators'].help_text = (u'Start typing the name/email/username '
                                              'of a Mozillian.')
 
