@@ -9,6 +9,7 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 import tower
+import waffle
 from celery.task import periodic_task, task
 from tower import ugettext as _
 
@@ -148,9 +149,11 @@ def invalidate_group_membership():
     groups = Group.objects.filter(invalidation_days__isnull=False)
 
     for group in groups:
-        last_update = datetime.now() - timedelta(days=group.invalidation_days)
-        memberships = group.groupmembership_set.filter(
-            updated_on__lte=last_update, status=GroupMembership.MEMBER)
+
+        if not waffle.switch_is_active('force-group-expiration'):
+            last_update = datetime.now() - timedelta(days=group.invalidation_days)
+            memberships = group.groupmembership_set.filter(
+                updated_on__lte=last_update, status=GroupMembership.MEMBER)
         if group.terms:
             memberships.update(status=GroupMembership.PENDING_TERMS)
         elif group.accepting_new_members == 'by_request':
