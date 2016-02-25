@@ -50,6 +50,11 @@ $(function(){
         $id_membership_can_expire.prop('checked', true)
     }
 
+    // Initialize terms expiration checkbox
+    if ($id_group_terms.find('textarea').val()) {
+        $id_group_has_terms.prop('checked', true)
+    }
+
     // Hide/show field when document loads
     checkCriteria($id_accepting_new_members.val());
     checkMembershipInvalidation();
