@@ -149,11 +149,14 @@ def invalidate_group_membership():
     groups = Group.objects.filter(invalidation_days__isnull=False)
 
     for group in groups:
+        curator_ids = group.curators.all().values_list('id', flat=True)
+        memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
+                                                .exclude(userprofile__id__in=curator_ids))
 
         if not waffle.switch_is_active('force-group-expiration'):
             last_update = datetime.now() - timedelta(days=group.invalidation_days)
-            memberships = group.groupmembership_set.filter(
-                updated_on__lte=last_update, status=GroupMembership.MEMBER)
+            memberships = memberships.filter(updated_on__lte=last_update)
+
         if group.terms:
             memberships.update(status=GroupMembership.PENDING_TERMS)
         elif group.accepting_new_members == 'by_request':
