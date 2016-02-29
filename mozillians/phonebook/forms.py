@@ -44,7 +44,7 @@ AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
 
 
 class SearchForm(happyforms.Form):
-    q = forms.CharField(required=False)
+    q = forms.CharField(required=False, max_length=140)
     limit = forms.IntegerField(
         widget=forms.HiddenInput, required=False, min_value=1,
         max_value=settings.ITEMS_PER_PAGE)
