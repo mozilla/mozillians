@@ -21,7 +21,7 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups.forms import (GroupForm, TermsReviewForm,
                                      MembershipFilterForm, SortForm,
                                      SuperuserGroupForm)
-from mozillians.groups.models import Group, Skill, GroupMembership
+from mozillians.groups.models import Group, Invite, Skill, GroupMembership
 from mozillians.users.models import UserProfile
 
 
@@ -184,6 +184,7 @@ def show(request, url, alias_model, template):
         people = paginator.page(paginator.num_pages)
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
+    invitation = get_object_or_none(Invite, group=group, redeemer=profile, redeemed__isnull=True)
 
     extra_data = dict(
         people=people,
@@ -196,6 +197,7 @@ def show(request, url, alias_model, template):
         show_join_button=group.user_can_join(request.user.userprofile),
         show_leave_button=group.user_can_leave(request.user.userprofile),
         members=group.member_count,
+        invitation=invitation,
     )
 
     data.update(extra_data)
@@ -420,6 +422,19 @@ def group_add_edit(request, url=None):
         'group': group if url else None
     }
     return render(request, 'groups/add_edit.html', context)
+
+
+@never_cache
+def accept_reject_invitation(request, invite_pk, accept):
+    """Accept or reject group invitation."""
+
+    invite = get_object_or_404(Invite, pk=invite_pk, redeemer=request.user.userprofile)
+    if accept:
+        invite.accept()
+    else:
+        invite.reject()
+
+    return redirect(reverse('groups:show_group', args=[invite.group.url]))
 
 
 class SkillsAutocomplete(autocomplete.Select2QuerySetView):

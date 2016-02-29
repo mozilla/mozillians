@@ -10,19 +10,27 @@ from tower import ugettext as _, ugettext_lazy as _lazy
 from mozillians.common.helpers import urlparams
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
-from mozillians.users.models import UserProfile
 
 
-class Invite(models.Model):
-    inviter = models.ForeignKey(UserProfile, related_name='invites', null=True,
-                                verbose_name=_lazy(u'Inviter'))
-    recipient = models.EmailField(verbose_name=_lazy(u'Recipient'))
-    redeemer = models.OneToOneField(UserProfile, blank=True, null=True,
+class BaseInvite(models.Model):
+    inviter = models.ForeignKey('users.UserProfile',
+                                related_name='%(app_label)s_invites',
+                                null=True, verbose_name=_lazy(u'Inviter'))
+    redeemer = models.OneToOneField('users.UserProfile',
+                                    related_name='%(app_label)s_invites_received',
+                                    blank=True, null=True,
                                     verbose_name=_lazy(u'Redeemer'))
-    code = models.CharField(max_length=32, unique=True)
-    reason = models.TextField(max_length=500, default='')
     redeemed = models.DateTimeField(null=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Invite(BaseInvite):
+    code = models.CharField(max_length=32, unique=True)
+    recipient = models.EmailField(verbose_name=_lazy(u'Recipient'))
+    reason = models.TextField(max_length=500, default='')
 
     def __unicode__(self):
         return 'Invite {0} for {1}'.format(self.id, self.recipient)

@@ -11,6 +11,7 @@ from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
+from mozillians.phonebook.models import BaseInvite
 from mozillians.users.tasks import update_basket_task
 
 
@@ -330,3 +331,22 @@ class Skill(GroupBase):
         All users can remove a skill.
         """
         return True
+
+
+class Invite(BaseInvite):
+    group = models.ForeignKey('Group', related_name='invites')
+    accepted = models.NullBooleanField()
+
+    def __unicode__(self):
+        return 'Group invite {0} for {1}'.format(self.id, self.redeemer)
+
+    def accept(self):
+        self.group.add_member(self.redeemer, GroupMembership.MEMBER)
+        self.accepted = True
+        self.redeemed = now()
+        self.save()
+
+    def reject(self):
+        self.accepted = False
+        self.redeemed = now()
+        self.save()
