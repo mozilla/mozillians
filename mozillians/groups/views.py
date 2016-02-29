@@ -444,7 +444,7 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
         q = self.request.GET.get('q', None)
 
         if (self.request.GET.get('create', None) == 'true' and q and
-                q not in self.cached_skills):
+                q.lower() not in self.cached_skills):
             create_option = [{
                 'id': q,
                 'text': 'Create "%s"' % q
