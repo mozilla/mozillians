@@ -1,0 +1,55 @@
+<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mygroups">
+  {{ csrf() }}
+  <div id="mygroups-tab" class="hidden-xs hidden-sm settings-tab">
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Groups') }}</div>
+      <div class="panel-body">
+        {% if groups_privacy_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in groups_privacy_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <fieldset id="groups">
+          <p class="field_description">
+            {% trans %}
+              Groups are a community of Mozillians with some relation to
+              each other. This can be an interest, team, project, product
+              or sub-community.
+            {% endtrans %}
+          </p>
+          {% if profile.is_vouched %}
+            <p class="field_description">
+              {% trans browse=url('groups:index_groups') %}
+                To join a group, <a href="{{ browse }}">find the group's page</a>,
+                then click the Join Group button.
+              {% endtrans %}
+              {% trans %}
+                To leave a group, click its name below to go to its page, then click
+                the Leave Group button there.
+              {% endtrans %}
+            </p>
+          {% else %}
+            <p class="field_description">
+              {% trans %}
+                After you are vouched, you will be able to join groups.
+              {% endtrans %}
+            </p>
+          {% endif %}
+          <ul class="tagit">
+            {% for group in user_groups %}
+              <li class="tagit-choice tagit-choice-read-only ui-corner-all ui-state-default">
+                <a href="{{ url('groups:show_group', group.url) }}"><span class="tagit-label">{{ group.name }}</span></a>
+              </li>
+            {% endfor %}
+          </ul>
+          {{ privacy_field(groups_privacy_form.privacy_groups) }}
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="groups_section">{{ _('Update Groups') }}</button>
+      </div>
+    </div>
+  </div>
+</form>

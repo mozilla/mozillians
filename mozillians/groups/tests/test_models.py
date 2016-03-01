@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias, GroupMembership
-from mozillians.groups.tests import GroupAliasFactory, GroupFactory, \
-    SkillFactory
+from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
+                                     SkillFactory)
 from mozillians.users.tests import UserFactory
 
 
@@ -42,11 +43,11 @@ class GroupBaseTests(TestCase):
         merge_group_1 = GroupFactory.create()
         merge_group_2 = GroupFactory.create()
 
-        user1 = UserFactory.create(userprofile={'is_vouched': True})
-        user2 = UserFactory.create(userprofile={'is_vouched': True})
-        user3 = UserFactory.create(userprofile={'is_vouched': True})
-        user4 = UserFactory.create(userprofile={'is_vouched': True})
-        user5 = UserFactory.create(userprofile={'is_vouched': True})
+        user1 = UserFactory.create()
+        user2 = UserFactory.create()
+        user3 = UserFactory.create()
+        user4 = UserFactory.create()
+        user5 = UserFactory.create()
 
         master_group.add_member(user1.userprofile, GroupMembership.MEMBER)
         master_group.add_member(user2.userprofile, GroupMembership.PENDING)
@@ -126,69 +127,79 @@ class GroupBaseTests(TestCase):
 
     def test_can_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(group.user_can_join(user.userprofile))
 
     def test_can_join_by_request(self):
         group = GroupFactory.create(accepting_new_members='by_request')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(group.user_can_join(user.userprofile))
 
     def test_unvouched_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': False})
+        user = UserFactory.create(vouched=False)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_member_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_pending_cant_join(self):
         group = GroupFactory.create(accepting_new_members='yes')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING)
         ok_(not group.user_can_join(user.userprofile))
 
     def test_cant_join_antisocial_group(self):
         group = GroupFactory.create(accepting_new_members='no')
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(not group.user_can_join(user.userprofile))
 
     def test_member_can_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(group.user_can_leave(user.userprofile))
 
     def test_pending_can_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING)
         ok_(group.user_can_leave(user.userprofile))
 
     def test_curator_cant_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
-        group.curator = user.userprofile
-        group.save()
+        user = UserFactory.create()
+        group.curators.add(user.userprofile)
         group.add_member(user.userprofile)
         ok_(not group.user_can_leave(user.userprofile))
 
     def test_nonmember_cant_leave(self):
         group = GroupFactory.create(members_can_leave=True)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         ok_(not group.user_can_leave(user.userprofile))
 
     def test_cant_leave_unleavable_group(self):
         group = GroupFactory.create(members_can_leave=False)
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         group.add_member(user.userprofile)
         ok_(not group.user_can_leave(user.userprofile))
 
+    def test_unique_name(self):
+        group = GroupFactory.create()
+        GroupAliasFactory.create(alias=group, name='bar')
+        group_2 = GroupFactory.build(name='bar')
+        self.assertRaises(ValidationError, group_2.clean)
+
 
 class GroupTests(TestCase):
+    def test_visible(self):
+        group_1 = GroupFactory.create(visible=True)
+        GroupFactory.create(visible=False)
+        eq_(set(Group.objects.visible()), set([group_1]))
+
     def test_get_non_functional_areas(self):
         UserFactory.create()
         UserFactory.create()
@@ -207,11 +218,12 @@ class GroupTests(TestCase):
 
     def test_deleted_curator_sets_null(self):
         user = UserFactory.create()
-        group = GroupFactory.create(curator=user.userprofile)
+        group = GroupFactory.create()
+        group.curators.add(user.userprofile)
 
         user.delete()
         group = Group.objects.get(id=group.id)
-        eq_(group.curator, None)
+        eq_(group.curators.all().count(), 0)
 
     def test_remove_member(self):
         user = UserFactory.create()
@@ -221,7 +233,8 @@ class GroupTests(TestCase):
         ok_(group.has_member(user.userprofile))
 
         group.remove_member(user.userprofile)
-        ok_(not GroupMembership.objects.filter(userprofile=user.userprofile, group=group).exists())
+        ok_(not GroupMembership.objects.filter(userprofile=user.userprofile,
+                                               group=group).exists())
         ok_(not group.has_member(user.userprofile))
 
     def test_add_member(self):

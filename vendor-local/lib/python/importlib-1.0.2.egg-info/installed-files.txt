@@ -1,7 +1,0 @@
-../importlib/__init__.py
-../importlib/__init__.pyc
-./
-top_level.txt
-SOURCES.txt
-PKG-INFO
-dependency_links.txt

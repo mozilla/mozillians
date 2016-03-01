@@ -1,5 +1,0 @@
--r ../vendor/src/funfactory/funfactory/requirements/compiled.txt
-
-# Images
-PIL
-sorl-thumbnail

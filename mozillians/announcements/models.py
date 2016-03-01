@@ -1,18 +1,19 @@
 import os
 import uuid
-from datetime import datetime
 
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 import bleach
+from jinja2 import Markup
 from sorl.thumbnail import ImageField
 
 from mozillians.announcements.managers import AnnouncementManager
 
 
-ALLOWED_TAGS = ['em', 'strong', 'a']
+ALLOWED_TAGS = ['em', 'strong', 'a', 'u']
 
 
 def _calculate_image_filename(instance, filename):
@@ -32,11 +33,9 @@ class Announcement(models.Model):
                                   'will be rescaled automatically to '
                                   'a square.'),
                        upload_to=_calculate_image_filename)
-    publish_from = models.DateTimeField(
-        help_text='Timezone is %s' % settings.TIME_ZONE)
-    publish_until = models.DateTimeField(
-        blank=True, null=True,
-        help_text='Timezone is %s' % settings.TIME_ZONE)
+    publish_from = models.DateTimeField(help_text='Timezone is %s' % settings.TIME_ZONE)
+    publish_until = models.DateTimeField(blank=True, null=True,
+                                         help_text='Timezone is %s' % settings.TIME_ZONE)
 
     def clean(self):
         self.text = bleach.clean(self.text, tags=ALLOWED_TAGS, strip=True)
@@ -45,9 +44,13 @@ class Announcement(models.Model):
 
     @property
     def published(self):
-        now = datetime.now()
+        now = timezone.now()
         return ((self.publish_from <= now) and
                 (self.publish_until > now if self.publish_until else True))
+
+    def get_template_text(self):
+        """Mark text as template safe so html tags are not escaped."""
+        return Markup(self.text)
 
     def __unicode__(self):
         return self.title

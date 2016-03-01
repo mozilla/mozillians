@@ -14,16 +14,14 @@ if newrelic:
         newrelic = False
 
 os.environ['CELERY_LOADER'] = 'django'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mozillians.settings")
 
-# Add the app dir to the python path so we can import manage.
+# Add `mozillians` to the python path
 wsgidir = os.path.dirname(__file__)
 site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
 
-# manage adds /apps, /lib, and /vendor to the Python path.
-import manage
-
-import django.core.handlers.wsgi
-application = django.core.handlers.wsgi.WSGIHandler()
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
 
 if newrelic:
     application = newrelic.agent.wsgi_application()(application)

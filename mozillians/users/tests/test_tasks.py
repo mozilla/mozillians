@@ -1,12 +1,12 @@
-from contextlib import nested
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
+from elasticsearch.exceptions import NotFoundError
 from mock import MagicMock, Mock, call, patch
-from nose.tools import ok_
-from pyes.exceptions import ElasticSearchException
+from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory
@@ -14,7 +14,7 @@ from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
                                     remove_incomplete_accounts, unindex_objects,
-                                    remove_from_basket_task, update_basket_task)
+                                    unsubscribe_from_basket_task)
 from mozillians.users.tests import UserFactory
 
 
@@ -24,17 +24,13 @@ class IncompleteAccountsTests(TestCase):
     @patch('mozillians.users.tasks.datetime')
     def test_remove_incomplete_accounts(self, datetime_mock):
         """Test remove incomplete accounts."""
-        complete_user = UserFactory.create(
-            date_joined=datetime(2012, 01, 01))
-        complete_vouched_user = UserFactory.create(
-            date_joined=datetime(2013, 01, 01),
-            userprofile={'is_vouched': True})
-        incomplete_user_not_old = UserFactory.create(
-            date_joined=datetime(2013, 01, 01),
-            userprofile={'full_name': ''})
-        incomplete_user_old = UserFactory.create(
-            date_joined=datetime(2012, 01, 01),
-            userprofile={'full_name': ''})
+        complete_user = UserFactory.create(vouched=False,
+                                           date_joined=datetime(2012, 01, 01))
+        complete_vouched_user = UserFactory.create(date_joined=datetime(2013, 01, 01))
+        incomplete_user_not_old = UserFactory.create(date_joined=datetime(2013, 01, 01),
+                                                     userprofile={'full_name': ''})
+        incomplete_user_old = UserFactory.create(date_joined=datetime(2012, 01, 01),
+                                                 userprofile={'full_name': ''})
 
         datetime_mock.now.return_value = datetime(2013, 01, 01)
 
@@ -51,59 +47,57 @@ class ElasticSearchIndexTests(TestCase):
     def test_index_objects(self, get_es_mock):
         user_1 = UserFactory.create()
         user_2 = UserFactory.create()
+        mapping_type = MagicMock()
         model = MagicMock()
-        model.objects.filter.return_value = [
-            user_1.userprofile, user_2.userprofile]
-        index_objects(
-            model, [user_1.userprofile.id, user_2.userprofile.id], False)
-        model.objects.assert_has_calls([
-            call.filter(id__in=[user_1.userprofile.id, user_2.userprofile.id])])
-        model.index.assert_has_calls([
-            call(model.extract_document(), bulk=True, id_=user_1.userprofile.id,
-                 es=get_es_mock(), public_index=False),
-            call(model.extract_document(), bulk=True, id_=user_2.userprofile.id,
-                 es=get_es_mock(), public_index=False)])
-        model.refresh_index.assert_has_calls([
-            call(es=get_es_mock()),
-            call(es=get_es_mock())])
+        mapping_type.get_model.return_value = model
+        model.objects.filter.return_value = [user_1.userprofile,
+                                             user_2.userprofile]
+        mapping_type.extract_document.return_value = 'foo'
+        index_objects(mapping_type,
+                      [user_1.userprofile.id, user_2.userprofile.id],
+                      public_index=False)
+        mapping_type.bulk_index.assert_has_calls([
+            call(['foo', 'foo'], id_field='id', es=get_es_mock(),
+                 index=mapping_type.get_index(False))])
 
     @patch('mozillians.users.tasks.get_es')
     def test_index_objects_public(self, get_es_mock):
         user_1 = UserFactory.create()
         user_2 = UserFactory.create()
+        mapping_type = MagicMock()
         model = MagicMock()
-        model.objects.privacy_level().filter.return_value = [
-            user_1.userprofile, user_2.userprofile]
-        index_objects(
-            model, [user_1.userprofile.id, user_2.userprofile.id], True)
+        mapping_type.get_model.return_value = model
+        qs = model.objects.filter().public_indexable().privacy_level
+        qs.return_value = [user_1.userprofile, user_2.userprofile]
+        mapping_type.extract_document.return_value = 'foo'
+        index_objects(mapping_type,
+                      [user_1.userprofile.id, user_2.userprofile.id],
+                      public_index=True)
+
         model.objects.assert_has_calls([
-            call.filter(id__in=[user_1.userprofile.id, user_2.userprofile.id]),
-            call.privacy_level(PUBLIC)])
-        model.index.assert_has_calls([
-            call(model.extract_document(), bulk=True, id_=user_1.userprofile.id,
-                 es=get_es_mock(), public_index=True),
-            call(model.extract_document(), bulk=True, id_=user_2.userprofile.id,
-                 es=get_es_mock(), public_index=True)])
-        model.refresh_index.assert_has_calls([
-            call(es=get_es_mock()),
-            call(es=get_es_mock())])
+            call.filter(id__in=(user_1.userprofile.id, user_2.userprofile.id)),
+            call.filter().public_indexable(),
+            call.filter().public_indexable().privacy_level(PUBLIC),
+        ])
+        mapping_type.bulk_index.assert_has_calls([
+            call(['foo', 'foo'], id_field='id', es=get_es_mock(),
+                 index=mapping_type.get_index(True))])
 
     @patch('mozillians.users.tasks.get_es')
     def test_unindex_objects(self, get_es_mock):
-        model = MagicMock()
-        unindex_objects(model, [1, 2, 3], 'foo')
-        ok_(model.unindex.called)
-        model.assert_has_calls([
-            call.unindex(es=get_es_mock(), public_index='foo', id=1),
-            call.unindex(es=get_es_mock(), public_index='foo', id=2),
-            call.unindex(es=get_es_mock(), public_index='foo', id=3)])
+        mapping_type = MagicMock()
+        unindex_objects(mapping_type, [1, 2, 3], 'foo')
+        ok_(mapping_type.unindex.called)
+        mapping_type.assert_has_calls([
+            call.unindex(1, es=get_es_mock(), public_index='foo'),
+            call.unindex(2, es=get_es_mock(), public_index='foo'),
+            call.unindex(3, es=get_es_mock(), public_index='foo')])
 
     def test_unindex_raises_not_found_exception(self):
-        exception = ElasticSearchException(
-            error=404, status=404, result={'not found': 'not found'})
-        model = Mock()
-        model.unindex = Mock(side_effect=exception)
-        unindex_objects(model, [1, 2, 3], 'foo')
+        exception = NotFoundError(404, {'not found': 'not found '}, {'foo': 'foo'})
+        mapping_type = Mock()
+        mapping_type.unindex(side_effect=exception)
+        unindex_objects(mapping_type, [1, 2, 3], 'foo')
 
 
 class BasketTests(TestCase):
@@ -131,77 +125,96 @@ class BasketTests(TestCase):
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    def test_update_basket_task_with_token(self):
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens',
-                                               'basket_token': 'token'})
-        group = GroupFactory.create(name='Web Development',
-                                    curator=user.userprofile)
-        GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.add_member(user.userprofile)
-        data = {'country': 'gr',
-                'city': 'athens',
-                'WEB_DEVELOPMENT': 'Y',
-                'MARKETING': 'N'}
-
-        with nested(patch('mozillians.users.tasks.basket.subscribe'),
-                    patch('mozillians.users.tasks.request')) \
-                as (subscribe_mock, request_mock):
-            update_basket_task(user.userprofile.id)
-
-        ok_(not subscribe_mock.called)
-        request_mock.assert_called_with(
-            'post', 'custom_update_phonebook', token='token', data=data)
-
-    @override_settings(BASKET_NEWSLETTER='newsletter')
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.request')
-    @patch.object(UserProfile, 'lookup_basket_token')
     @patch('mozillians.users.tasks.basket')
-    def test_update_basket_task_without_token(self, basket_mock, lookup_token_mock, request_mock):
-        lookup_token_mock.return_value = "basket_token"
-
-        user = UserFactory.create(userprofile={'is_vouched': True,
-                                               'country': 'gr',
-                                               'city': 'athens'})
-        group = GroupFactory.create(
-            name='Web Development', curator=user.userprofile)
-        GroupFactory.create(name='Marketing', curator=user.userprofile)
-        group.add_member(user.userprofile)
+    def test_update_basket_task(self, mock_basket):
+        # When a user is created or added to a group, the appropriate
+        # calls to update basket are made
+        email = 'foo@example.com'
+        token = 'footoken'
+        mock_basket.lookup_user.return_value = {
+            'email': email,
+        }
+        mock_basket.subscribe.return_value = {
+            'token': token,
+        }
+        user = UserFactory.create(email=email)
+        mock_basket.subscribe.reset_mock()  # forget that subscribe was called
+        group = GroupFactory.create(name='Web Development',
+                                    functional_area=True)
+        GroupFactory.create(name='Marketing', functional_area=True)
         data = {'country': 'gr',
-                'city': 'athens',
+                'city': 'Athens',
                 'WEB_DEVELOPMENT': 'Y',
                 'MARKETING': 'N'}
 
-        basket_mock.subscribe.return_value = {}
+        group.add_member(user.userprofile)
 
-        update_basket_task(user.userprofile.id)
-
-        basket_mock.subscribe.assert_called_with(
-            user.email, 'newsletter', trigger_welcome='N')
-        request_mock.assert_called_with(
-            'post', 'custom_update_phonebook', token='basket_token', data=data)
-        ok_(UserProfile.objects.filter(
-            basket_token='basket_token', id=user.userprofile.id).exists())
+        # We just added a group, we should not need to subscribe anything
+        ok_(not mock_basket.subscribe.called)
+        # But we do need to update their phonebook record
+        mock_basket.request.assert_called_with(
+            'post', 'custom_update_phonebook', token=token, data=data)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
+    @patch('mozillians.users.tasks.basket')
+    def test_change_email(self, mock_basket):
+        # When a user's email is changed, their old email is unsubscribed
+        # from all newsletters and their new email is subscribed to them.
+
+        # Create a new user
+        email = 'foo@example.com'
+        token = 'first token'
+        mock_basket.lookup_user.return_value = {
+            'email': email,  # the old value
+            'token': token,
+            'newsletters': ['foo', 'bar']
+        }
+        mock_basket.subscribe.return_value = {
+            'token': token,
+        }
+        user = UserFactory.create(email=email)
+        up = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(token, up.basket_token)
+
+        new_email = 'bar@example.com'
+        new_token = 'NEW token'
+        mock_basket.subscribe.return_value = {
+            'token': new_token,
+        }
+        user.email = new_email
+        user.save()
+        mock_basket.lookup_user.assert_called_with(token=token)
+        mock_basket.unsubscribe.assert_called_with(
+            token=token, email=email, optout='Y', newsletters=[settings.BASKET_NEWSLETTER]
+        )
+        mock_basket.subscribe.assert_called_with(
+            new_email,
+            [settings.BASKET_NEWSLETTER],
+            trigger_welcome='N',
+            sync='Y'
+        )
+        up = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(new_token, up.basket_token)
+
+    @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.basket.unsubscribe')
-    def test_remove_from_basket_task(self, unsubscribe_mock):
+    def test_unsubscribe_from_basket_task(self, unsubscribe_mock):
         user = UserFactory.create(userprofile={'basket_token': 'foo'})
-        remove_from_basket_task(user.email, user.userprofile.basket_token)
+        with patch('mozillians.users.tasks.BASKET_ENABLED', True):
+            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token)
         unsubscribe_mock.assert_called_with(
             user.userprofile.basket_token, user.email, newsletters='newsletter')
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.basket.unsubscribe')
+    @patch('mozillians.users.tasks.basket')
     @patch.object(UserProfile, 'lookup_basket_token')
-    def test_remove_from_basket_task_without_token(self, lookup_token_mock, unsubscribe_mock):
+    def test_unsubscribe_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
         lookup_token_mock.return_value = 'basket_token'
+        basket_mock.lookup_user.return_value = {'token': 'basket_token'}
         user = UserFactory.create(userprofile={'basket_token': ''})
-        remove_from_basket_task(user.email, user.userprofile.basket_token)
+        with patch('mozillians.users.tasks.BASKET_ENABLED', True):
+            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token)
         user = User.objects.get(pk=user.pk)  # refresh data from DB
-        unsubscribe_mock.assert_called_with(
+        basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters='newsletter')

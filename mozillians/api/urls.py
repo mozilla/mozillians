@@ -1,19 +1,33 @@
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
+from django.contrib.auth.decorators import login_required
 
+from rest_framework import routers
 from tastypie.api import Api
 
-import mozillians.groups.api
-import mozillians.users.api
+import mozillians.groups.api.v1
+import mozillians.groups.api.v2
+import mozillians.users.api.v1
+import mozillians.users.api.v2
+from mozillians.users.views import VouchedAutocomplete
 
 
+# API v1 URLs
 v1_api = Api(api_name='v1')
-v1_api.register(mozillians.users.api.UserResource())
-v1_api.register(mozillians.users.api.CountryResource())
-v1_api.register(mozillians.users.api.CityResource())
-v1_api.register(mozillians.groups.api.GroupResource())
-v1_api.register(mozillians.groups.api.LanguageResource())
-v1_api.register(mozillians.groups.api.SkillResource())
+v1_api.register(mozillians.users.api.v1.UserResource())
+v1_api.register(mozillians.groups.api.v1.GroupResource())
+v1_api.register(mozillians.groups.api.v1.SkillResource())
+
+# API v2 URLs
+router = routers.DefaultRouter()
+router.register(r'users', mozillians.users.api.v2.UserProfileViewSet)
+router.register(r'groups', mozillians.groups.api.v2.GroupViewSet)
+router.register(r'skills', mozillians.groups.api.v2.SkillViewSet)
 
 urlpatterns = patterns(
     '',
-    url(r'', include(v1_api.urls)),)
+    url(r'', include(v1_api.urls)),
+    url(r'^v2/', include(router.urls), name='v2root'),
+    # Django-autocomplete-light urls
+    url(r'api-v2-autocomplete/$', login_required(VouchedAutocomplete.as_view()),
+        name='api-v2-autocomplete'),
+)

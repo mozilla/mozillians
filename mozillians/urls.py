@@ -1,40 +1,19 @@
 from django.conf import settings
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-from django.views.decorators.cache import cache_page
-from django.views.i18n import javascript_catalog
 
-import autocomplete_light
+import tower
 
-from funfactory.monkeypatches import patch
+from mozillians.common.monkeypatches import patch
 
-from mozillians.common.decorators import allow_public
-
-
-# Funfactory monkeypatches
+# Funfactory monkeypatches customized to work with Django 1.7 admin
 patch()
 
-autocomplete_light.autodiscover()
-admin.autodiscover()
-
-# From socorro
-# funfactory puts the more limited CompressorExtension extension in
-# but we need the one from jingo_offline_compressor.jinja2ext otherwise we
-# might an error like this:
-#
-# AttributeError: 'CompressorExtension' object has no attribute 'nodelist'
-#
-from jingo_offline_compressor.jinja2ext import CompressorExtension
-import jingo
-try:
-    jingo.env.extensions.pop(
-        'compressor.contrib.jinja2ext.CompressorExtension'
-    )
-except KeyError:
-    # happens if the urlconf is loaded twice
-    pass
-jingo.env.add_extension(CompressorExtension)
+# Activate a locale so that jinja2 doesn't choke when running a shell
+# or individual tests that need translation and don't involve a web
+# request, like when testing emails.
+tower.activate('en-US')
 
 
 def error_page(request, template, status=None):
@@ -54,21 +33,21 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 
 urlpatterns = patterns(
     '',
-    url(r'^browserid/', include('django_browserid.urls')),
+    url(r'', include('django_browserid.urls')),
     url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.groups.urls', 'groups')),
     url(r'', include('mozillians.phonebook.urls', 'phonebook')),
+    url(r'', include('mozillians.users.urls', 'users')),
+    url(r'', include('mozillians.mozspaces.urls', 'mozspaces')),
 
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^_autocomplete/', include('autocomplete_light.urls')),
-
-    url(r'^jsi18n/$',
-        allow_public(cache_page(60 * 60 * 24 * 365)(javascript_catalog)),
-        {'domain': 'javascript', 'packages': ['mozillians']}, name='jsi18n'),
 
     url(r'', include('mozillians.humans.urls', 'humans')),
 )
+
+admin.site.site_header = 'Mozillians Administration'
+admin.site.site_title = 'Mozillians'
 
 # In DEBUG mode, serve media files through Django, and serve error pages
 # via predictable routes. Add in qunit tests.

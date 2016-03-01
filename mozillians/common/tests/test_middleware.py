@@ -12,7 +12,7 @@ class StrongholdTests(TestCase):
     urls = 'mozillians.common.tests.stronghold_urls'
 
     def test_vouched_user_vouched_view(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('vouched', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -20,7 +20,7 @@ class StrongholdTests(TestCase):
         eq_(response.content, 'Hi!')
 
     def test_vouched_user_unvouched_view(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('unvouched', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -28,7 +28,7 @@ class StrongholdTests(TestCase):
         eq_(response.content, 'Hi!')
 
     def test_vouched_user_public_view(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('public', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -36,7 +36,7 @@ class StrongholdTests(TestCase):
         eq_(response.content, 'Hi!')
 
     def test_vouched_user_excepted_view(self):
-        user = UserFactory.create(userprofile={'is_vouched': True})
+        user = UserFactory.create()
         url = reverse('excepted', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -45,13 +45,13 @@ class StrongholdTests(TestCase):
 
     @requires_vouch()
     def test_unvouched_user_vouched_view(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         url = reverse('vouched', prefix='/en-US/')
         with self.login(user) as client:
             client.get(url, follow=True)
 
     def test_unvouched_user_unvouched_view(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         url = reverse('unvouched', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -59,7 +59,7 @@ class StrongholdTests(TestCase):
         eq_(response.content, 'Hi!')
 
     def test_unvouched_user_public_view(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         url = reverse('public', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -67,7 +67,7 @@ class StrongholdTests(TestCase):
         eq_(response.content, 'Hi!')
 
     def test_unvouched_user_excepted_view(self):
-        user = UserFactory.create()
+        user = UserFactory.create(vouched=False)
         url = reverse('excepted', prefix='/en-US/')
         with self.login(user) as client:
             response = client.get(url, follow=True)

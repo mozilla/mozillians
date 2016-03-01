@@ -9,6 +9,7 @@ REMOTE_UPDATE_SCRIPT = "/data/bin/update-www.sh mozillians.allizom.org"
 WEB_HOSTGROUP = 'genericrhel6-stage'
 CELERY_HOSTGROUP = 'genericrhel6-celery-stage'
 CELERY_SERVICE = 'celeryd-mozillians-stage'
+CELERYBEAT_SERVICE = 'celeryd-mozillians-stage-beat'
 
 UPDATE_REF = 'origin/master'
 SSH_KEY = None

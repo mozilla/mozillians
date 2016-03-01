@@ -2,17 +2,22 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.db.models import Count, Sum
+from django.core.urlresolvers import reverse
+from django.db.models import Count
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
-import autocomplete_light
+from dal import autocomplete
+from import_export.admin import ExportMixin
+from import_export.fields import Field
+from import_export.resources import ModelResource
 
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
-                                      Language, LanguageAlias,
                                       Skill, SkillAlias)
 
 
 class EmptyGroupFilter(SimpleListFilter):
-    title = 'empty_group'
+    title = 'utilization'
     parameter_name = 'empty_group'
 
     def lookups(self, request, model_admin):
@@ -42,12 +47,12 @@ class CuratedGroupFilter(SimpleListFilter):
         if self.value() is None:
             return queryset
         value = self.value() == 'True'
-        return queryset.filter(curator__isnull=value)
+        return queryset.filter(curators__isnull=value)
 
 
 class FunctionalAreaFilter(SimpleListFilter):
     """Admin filter for functional areas."""
-    title = 'functional_areas'
+    title = 'functional area'
     parameter_name = 'functional_area'
 
     def lookups(self, request, model_admin):
@@ -63,7 +68,7 @@ class FunctionalAreaFilter(SimpleListFilter):
 
 class VisibleGroupFilter(SimpleListFilter):
     """Admin filter for visible groups."""
-    title = 'visible_groups'
+    title = 'visibility'
     parameter_name = 'visible'
 
     def lookups(self, request, model_admin):
@@ -75,6 +80,20 @@ class VisibleGroupFilter(SimpleListFilter):
             return queryset
         value = self.value() == '1'
         return queryset.filter(visible=value)
+
+
+class NoURLFilter(SimpleListFilter):
+    """Admin filter for groups without a url."""
+    title = 'no URL'
+    parameter_name = 'empty_url'
+
+    def lookups(self, request, model_admin):
+        return (('True', 'No URL'),)
+
+    def queryset(self, request, queryset):
+        if self.value() == 'True':
+            return queryset.filter(url='')
+        return queryset
 
 
 class GroupBaseEditAdminForm(forms.ModelForm):
@@ -92,14 +111,14 @@ class GroupBaseEditAdminForm(forms.ModelForm):
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
-class GroupBaseAdmin(admin.ModelAdmin):
+class GroupBaseAdmin(ExportMixin, admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
-    list_display = ['name', 'member_count', 'vouched_member_count']
+    list_display = ['name', 'total_member_count']
     list_display_links = ['name']
-    list_filter = [EmptyGroupFilter]
-    readonly_fields = ['url']
+    list_filter = [EmptyGroupFilter, NoURLFilter]
+    readonly_fields = ['url', 'total_member_count']
 
     def get_form(self, request, obj=None, **kwargs):
         defaults = {}
@@ -108,29 +127,18 @@ class GroupBaseAdmin(admin.ModelAdmin):
         defaults.update(kwargs)
         return super(GroupBaseAdmin, self).get_form(request, obj, **defaults)
 
-    def queryset(self, request):
-        # The Sum('members__is_vouched') annotation only works for
-        # databases where the Boolean type is really an integer. It works
-        # for Sqlite3 or MySQL, but fails on Postgres. If Mozillians ever
-        # switches from MySQL to a database where this won't work, we'll
-        # need to revisit this.
-        return (super(GroupBaseAdmin, self)
-                .queryset(request)
-                .annotate(member_count=Count('members'),
-                          vouched_member_count=Sum('members__is_vouched')))
+    def total_member_count(self, obj):
+        """Return total number of members in group.
 
-    def member_count(self, obj):
-        """Return number of members in group."""
-        return obj.member_count
-    member_count.admin_order_field = 'member_count'
+        Do not use annonated value member_count directly (bug 908053).
+        """
+        return obj.members.count()
+    total_member_count.admin_order_field = 'member_count'
 
-    def vouched_member_count(self, obj):
-        """Return number of vouched members in group"""
-        # Annotated field, could be None or a float
-        if obj.vouched_member_count:
-            return int(obj.vouched_member_count)
-        return 0
-    vouched_member_count.admin_order_field = 'vouched_member_count'
+    class Media:
+        css = {
+            'all': ('mozillians/css/admin.css',)
+        }
 
 
 class GroupAliasInline(admin.StackedInline):
@@ -142,40 +150,116 @@ class GroupAddAdminForm(forms.ModelForm):
 
     class Meta:
         model = Group
+        fields = ('__all__')
+        widgets = {
+            'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+        }
 
 
 class GroupEditAdminForm(GroupBaseEditAdminForm):
 
     class Meta:
         model = Group
-
-
-class GroupMemberInline(admin.TabularInline):
-    model = GroupMembership
-    form = autocomplete_light.modelform_factory(GroupMembership)
+        fields = ('__all__')
+        widgets = {
+            'curators': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+        }
 
 
 class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
-    form = autocomplete_light.modelform_factory(Group, form=GroupEditAdminForm)
-    add_form = autocomplete_light.modelform_factory(Group,
-                                                    form=GroupAddAdminForm)
-    inlines = [GroupAliasInline, GroupMemberInline]
-    list_display = ['name', 'curator', 'wiki', 'website', 'irc_channel',
-                    'functional_area', 'accepting_new_members', 'members_can_leave', 'visible',
-                    'member_count', 'vouched_member_count']
-    list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter]
+    form = GroupEditAdminForm
+    add_form = GroupAddAdminForm
+    inlines = [GroupAliasInline]
+    list_display = ['name', 'get_curators', 'functional_area', 'accepting_new_members',
+                    'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
+                    'pending_member_count', 'pending_terms_member_count']
+    list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
+                   NoURLFilter]
+    readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
+                       'pending_terms_member_count', 'max_reminder']
+
+    fieldsets = (
+        ('Group', {
+            'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki',
+                       'visible', 'terms', 'invalidation_days')
+        }),
+        ('Functional Area', {
+            'fields': ('functional_area', 'curators',)
+        }),
+        ('Membership', {
+            'fields': (('accepting_new_members', 'new_member_criteria',),
+                       'members_can_leave',
+                       ('total_member_count', 'full_member_count', 'pending_member_count',
+                        'pending_terms_member_count'), )
+        }),
+        ('Debug info', {
+            'fields': ('max_reminder',),
+            'classes': ('collapse',)
+        })
+    )
+
+    def get_form(self, request, obj=None, **kwargs):
+        """Conditionally update the fieldset to include the 'merge_with' field."""
+
+        # If there is an object, then it's about editing a group.
+        if obj:
+            self.fieldsets[0][1]['fields'] += ('merge_with',)
+        return super(GroupAdmin, self).get_form(request, obj, **kwargs)
+
+    def full_member_count(self, obj):
+        """Return number of members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.MEMBER).count()
+
+    def pending_member_count(self, obj):
+        """Return number of pending members in group."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING).count()
+
+    def pending_terms_member_count(self, obj):
+        """Return number of members in group who haven't accepted terms yet."""
+        return obj.groupmembership_set.filter(status=GroupMembership.PENDING_TERMS).count()
+
+    def get_curators(self, obj):
+        url = u"<a href='{0}'>{1}</a>"
+        profile_urls = [url.format(reverse('admin:users_userprofile_change', args=[profile.id]),
+                                   escape(profile.full_name))
+                        for profile in obj.curators.all()]
+        return mark_safe(', '.join(profile_urls))
+    get_curators.short_description = 'Curators'
 
 
-class GroupMembershipAdmin(admin.ModelAdmin):
+class GroupMembershipResource(ModelResource):
+    """django-import-export Groupmembership Resource."""
+    username = Field(attribute='userprofile__user__username')
+    group_name = Field(attribute='group__name')
+
+    class Meta:
+        model = GroupMembership
+
+
+class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
+
+    class Meta:
+        model = GroupMembership
+        fields = ('__all__')
+        widgets = {
+            'userprofile': autocomplete.ModelSelect2(url='users:vouched-autocomplete'),
+            'group': autocomplete.ModelSelect2(url='groups:group-autocomplete')
+        }
+
+
+class GroupMembershipAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = GroupMembershipResource
     list_display = ['group', 'userprofile']
-    search_fields = ['group__name', 'group__url', 'group__description',
-                     'group__aliases__name', 'group__aliases__url',
-                     'userprofile__full_name', 'userprofile__ircname',
-                     'userprofile__region', 'userprofile__city', 'userprofile__country',
-                     'userprofile__user__username', 'userprofile__user__email'
-                     ]
-    form = autocomplete_light.modelform_factory(GroupMembership)
+    search_fields = [
+        'group__name', 'group__url', 'group__description',
+        'group__aliases__name', 'group__aliases__url',
+        'userprofile__full_name', 'userprofile__ircname',
+        'userprofile__geo_region__name', 'userprofile__geo_city__name',
+        'userprofile__geo_country__name', 'userprofile__user__username',
+        'userprofile__user__email'
+    ]
+    form = BaseGroupMembershipAutocompleteForm
 
 
 class SkillAliasInline(admin.StackedInline):
@@ -199,29 +283,6 @@ class SkillAdmin(GroupBaseAdmin):
     add_form = SkillAddAdminForm
     inlines = [SkillAliasInline]
 
-
-class LanguageAliasInline(admin.StackedInline):
-    model = LanguageAlias
-
-
-class LanguageAddAdminForm(forms.ModelForm):
-
-    class Meta:
-        model = Language
-
-
-class LanguageEditAdminForm(GroupBaseEditAdminForm):
-
-    class Meta:
-        model = Language
-
-
-class LanguageAdmin(GroupBaseAdmin):
-    form = LanguageEditAdminForm
-    add_form = LanguageAddAdminForm
-    inlines = [LanguageAliasInline]
-
 admin.site.register(Group, GroupAdmin)
 admin.site.register(GroupMembership, GroupMembershipAdmin)
-admin.site.register(Language, LanguageAdmin)
 admin.site.register(Skill, SkillAdmin)

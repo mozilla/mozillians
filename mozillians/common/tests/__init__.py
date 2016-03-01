@@ -4,26 +4,39 @@ from contextlib import contextmanager, nested
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.test import TestCase as BaseTestCase
 from django.test.client import Client
 from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import make_decorator, ok_
-from test_utils import TestCase as BaseTestCase
 
 
 AUTHENTICATION_BACKENDS = (
     'mozillians.common.tests.authentication.DummyAuthenticationBackend',
-    )
+)
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+)
 ES_INDEXES = {
     'default': 'mozillians-test',
     'public': 'mozillians-public-test'
-    }
+}
 
 
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
+                   PASSWORD_HASHERS=PASSWORD_HASHERS,
                    ES_INDEXES=ES_INDEXES)
 class TestCase(BaseTestCase):
+    def __init__(self, *args, **kwargs):
+        from elasticutils.contrib.django import get_es
+        es = get_es()
+
+        es.indices.create(index=ES_INDEXES['default'], ignore=400)
+        es.indices.create(index=ES_INDEXES['public'], ignore=400)
+        super(TestCase, self).__init__(*args, **kwargs)
+
     @contextmanager
     def login(self, user):
         client = Client()

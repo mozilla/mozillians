@@ -1,6 +1,7 @@
+from django.test import TestCase
+
 from mock import call, patch
 from nose.tools import eq_
-from test_utils import TestCase
 
 from mozillians.funfacts.cron import validate_fun_facts
 from mozillians.funfacts.models import FunFact, _validate_query

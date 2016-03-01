@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 from datetime import datetime
@@ -10,33 +11,37 @@ from django.db.models import signals as dbsignals, ManyToManyField
 from django.dispatch import receiver
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
+from django.template.loader import get_template
+
 
 import basket
-from elasticutils.contrib.django import S, get_es
-from elasticutils.contrib.django.models import SearchMixin
-from funfactory.urlresolvers import reverse
 from product_details import product_details
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
-from south.modelsinspector import add_introspection_rules
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.common.helpers import gravatar
+from mozillians.common import utils
+from mozillians.common.helpers import absolutify, gravatar
 from mozillians.common.helpers import offset_of_timezone
+from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
-                                      Language, LanguageAlias,
                                       Skill, SkillAlias)
-from mozillians.phonebook.validators import validate_twitter, validate_website
+from mozillians.phonebook.validators import (validate_email, validate_twitter,
+                                             validate_website, validate_username_not_url,
+                                             validate_phone_number)
+from mozillians.users.es import UserProfileMappingType
+from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
-                                       UserProfileManager)
-from mozillians.users.tasks import (index_objects, remove_from_basket_task,
+                                       UserProfileManager, UserProfileQuerySet)
+from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
                                     update_basket_task, unindex_objects)
 
 
 COUNTRIES = product_details.get_regions('en-US')
 AVATAR_SIZE = (300, 300)
+logger = logging.getLogger(__name__)
 
 
 def _calculate_photo_filename(instance, filename):
@@ -51,30 +56,6 @@ class PrivacyField(models.PositiveSmallIntegerField):
                   'choices': PRIVACY_CHOICES}
         myargs.update(kwargs)
         super(PrivacyField, self).__init__(*args, **myargs)
-add_introspection_rules([], ['^mozillians\.users\.models\.PrivacyField'])
-
-
-class PrivacyAwareS(S):
-
-    def privacy_level(self, level=MOZILLIANS):
-        """Set privacy level for query set."""
-        self._privacy_level = level
-        return self
-
-    def _clone(self, *args, **kwargs):
-        new = super(PrivacyAwareS, self)._clone(*args, **kwargs)
-        new._privacy_level = getattr(self, '_privacy_level', None)
-        return new
-
-    def __iter__(self):
-        self._iterator = super(PrivacyAwareS, self).__iter__()
-
-        def _generator():
-            while True:
-                obj = self._iterator.next()
-                obj._privacy_level = getattr(self, '_privacy_level', None)
-                yield obj
-        return _generator()
 
 
 class UserProfilePrivacyModel(models.Model):
@@ -85,18 +66,18 @@ class UserProfilePrivacyModel(models.Model):
     privacy_ircname = PrivacyField()
     privacy_email = PrivacyField()
     privacy_bio = PrivacyField()
-    privacy_city = PrivacyField()
-    privacy_region = PrivacyField()
-    privacy_country = PrivacyField()
+    privacy_geo_city = PrivacyField()
+    privacy_geo_region = PrivacyField()
+    privacy_geo_country = PrivacyField()
     privacy_groups = PrivacyField()
     privacy_skills = PrivacyField()
     privacy_languages = PrivacyField()
-    privacy_vouched_by = PrivacyField()
     privacy_date_mozillian = PrivacyField()
     privacy_timezone = PrivacyField()
     privacy_tshirt = PrivacyField(choices=((PRIVILEGED, _lazy(u'Privileged')),),
                                   default=PRIVILEGED)
     privacy_title = PrivacyField()
+    privacy_story_link = PrivacyField()
 
     CACHED_PRIVACY_FIELDS = None
 
@@ -118,6 +99,10 @@ class UserProfilePrivacyModel(models.Model):
         model that are privacy-controlled, and whose values are the default
         values to use for those fields when the user is not privileged to
         view their actual value.
+
+        Note: should be only used through UserProfile class. We should
+        fix this.
+
         """
         # Cache on the class object
         if cls.CACHED_PRIVACY_FIELDS is None:
@@ -136,43 +121,49 @@ class UserProfilePrivacyModel(models.Model):
                 else:
                     default = field.get_default()
                 privacy_fields[name] = default
-            # HACK: There's not really an email field on UserProfile, but it's faked with a property
-            if 'privacy_email' in field_names:
-                privacy_fields['email'] = u''
+            # HACK: There's not really an email field on UserProfile,
+            # but it's faked with a property
+            privacy_fields['email'] = u''
+
             cls.CACHED_PRIVACY_FIELDS = privacy_fields
         return cls.CACHED_PRIVACY_FIELDS
 
 
-class UserProfile(UserProfilePrivacyModel, SearchMixin):
-    objects = UserProfileManager()
+class UserProfile(UserProfilePrivacyModel):
+    REFERRAL_SOURCE_CHOICES = (
+        ('direct', 'Mozillians'),
+        ('contribute', 'Get Involved'),
+    )
+
+    objects = UserProfileManager.from_queryset(UserProfileQuerySet)()
 
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
                                  verbose_name=_lazy(u'Full Name'))
-    is_vouched = models.BooleanField(default=False)
+    is_vouched = models.BooleanField(
+        default=False,
+        help_text='You can edit vouched status by editing invidual vouches')
+    can_vouch = models.BooleanField(
+        default=False,
+        help_text='You can edit can_vouch status by editing invidual vouches')
     last_updated = models.DateTimeField(auto_now=True, default=datetime.now)
-    vouched_by = models.ForeignKey('UserProfile', null=True, default=None,
-                                   on_delete=models.SET_NULL, blank=True,
-                                   related_name='vouchees')
-    date_vouched = models.DateTimeField(null=True, blank=True, default=None)
     groups = models.ManyToManyField(Group, blank=True, related_name='members',
                                     through=GroupMembership)
     skills = models.ManyToManyField(Skill, blank=True, related_name='members')
-    languages = models.ManyToManyField(Language, blank=True,
-                                       related_name='members')
     bio = models.TextField(verbose_name=_lazy(u'Bio'), default='', blank=True)
-    photo = ImageField(default='', blank=True,
-                       upload_to=_calculate_photo_filename)
-    ircname = models.CharField(max_length=63,
-                               verbose_name=_lazy(u'IRC Nickname'),
+    photo = ImageField(default='', blank=True, upload_to=_calculate_photo_filename)
+    ircname = models.CharField(max_length=63, verbose_name=_lazy(u'IRC Nickname'),
                                default='', blank=True)
-    country = models.CharField(max_length=50, default='',
-                               choices=COUNTRIES.items(),
-                               verbose_name=_lazy(u'Country'))
-    region = models.CharField(max_length=255, default='', blank=True,
-                              verbose_name=_lazy(u'Province/State'))
-    city = models.CharField(max_length=255, default='', blank=True,
-                            verbose_name=_lazy(u'City'))
+
+    # validated geo data (validated that it's valid geo data, not that the
+    # mozillian is there :-) )
+    geo_country = models.ForeignKey('geo.Country', blank=True, null=True,
+                                    on_delete=models.SET_NULL)
+    geo_region = models.ForeignKey('geo.Region', blank=True, null=True, on_delete=models.SET_NULL)
+    geo_city = models.ForeignKey('geo.City', blank=True, null=True, on_delete=models.SET_NULL)
+    lat = models.FloatField(_lazy(u'Latitude'), blank=True, null=True)
+    lng = models.FloatField(_lazy(u'Longitude'), blank=True, null=True)
+
     allows_community_sites = models.BooleanField(
         default=True,
         verbose_name=_lazy(u'Sites that can determine my vouched status'),
@@ -200,6 +191,23 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     title = models.CharField(_lazy(u'What do you do for Mozilla?'),
                              max_length=70, blank=True, default='')
 
+    story_link = models.URLField(
+        _lazy(u'Link to your contribution story'),
+        help_text=_lazy(u'If you have created something public that '
+                        u'tells the story of how you came to be a '
+                        u'Mozillian, specify that link here.'),
+        max_length=1024, blank=True, default='')
+    referral_source = models.CharField(max_length=32,
+                                       choices=REFERRAL_SOURCE_CHOICES,
+                                       default='direct')
+
+    def __unicode__(self):
+        """Return this user's name when their profile is called."""
+        return self.display_name
+
+    def get_absolute_url(self):
+        return reverse('phonebook:profile_view', args=[self.user.username])
+
     class Meta:
         db_table = 'profile'
         ordering = ['full_name']
@@ -214,37 +222,30 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         Otherwise it returns a default privacy respecting value for
         the attribute, as defined in the privacy_fields dictionary.
 
-        Special case is the vouched_by attribute:
-
-        Since vouched_by refers to another UserProfile object with
-        different privacy settings per attribute, we need to load that
-        object and check if any of its privacy enabled attributes are
-        available in the current privacy level.
-
-        If yes, we return the real UserProfile object, making sure
-        that we set the privacy_level of the returned instance to the
-        same privacy level as this instance.
-
-        If the object is not available in the current privacy level,
-        we return None.
-
+        special_functions provides methods that privacy safe their
+        respective properties, where the privacy modifications are
+        more complex.
         """
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         privacy_fields = UserProfile.privacy_fields()
         privacy_level = _getattr('_privacy_level')
+        special_functions = {
+            'accounts': '_accounts',
+            'alternate_emails': '_alternate_emails',
+            'email': '_primary_email',
+            'is_public_indexable': '_is_public_indexable',
+            'languages': '_languages',
+            'vouches_made': '_vouches_made',
+            'vouches_received': '_vouches_received',
+            'vouched_by': '_vouched_by',
+            'websites': '_websites'
+        }
+
+        if attrname in special_functions:
+            return _getattr(special_functions[attrname])
 
         if not privacy_level or attrname not in privacy_fields:
             return _getattr(attrname)
-
-        if attrname == 'vouched_by':
-            voucher = _getattr('vouched_by')
-            if voucher:
-                voucher.set_instance_privacy_level(privacy_level)
-                for field in privacy_fields:
-                    if ((getattr(voucher, 'privacy_%s' % field) >=
-                         privacy_level)):
-                        return voucher
-            return None
 
         field_privacy = _getattr('privacy_%s' % attrname)
         if field_privacy < privacy_level:
@@ -252,122 +253,97 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
         return _getattr(attrname)
 
-    @classmethod
-    def extract_document(cls, obj_id, obj=None):
-        """Method used by elasticutils."""
-        if obj is None:
-            obj = cls.objects.get(pk=obj_id)
-        d = {}
-
-        attrs = ('id', 'is_vouched', 'ircname',
-                 'region', 'city', 'allows_mozilla_sites',
-                 'allows_community_sites')
-        for a in attrs:
-            data = getattr(obj, a)
-            if isinstance(data, basestring):
-                data = data.lower()
-            d.update({a: data})
-
-        if obj.country:
-            d.update({'country':
-                      [obj.country, COUNTRIES[obj.country].lower()]})
-
-        # user data
-        attrs = ('username', 'email', 'last_login', 'date_joined')
-        for a in attrs:
-            data = getattr(obj.user, a)
-            if isinstance(data, basestring):
-                data = data.lower()
-            d.update({a: data})
-
-        d.update(dict(fullname=obj.full_name.lower()))
-        d.update(dict(name=obj.full_name.lower()))
-        d.update(dict(bio=obj.bio))
-        d.update(dict(has_photo=bool(obj.photo)))
-
-        for attribute in ['groups', 'skills', 'languages']:
-            groups = []
-            for g in getattr(obj, attribute).all():
-                groups.extend(g.aliases.values_list('name', flat=True))
-            d[attribute] = groups
-        return d
-
-    @classmethod
-    def get_mapping(cls):
-        """Returns an ElasticSearch mapping."""
-        return {
-            'properties': {
-                'id': {'type': 'integer'},
-                'name': {'type': 'string', 'index': 'not_analyzed'},
-                'fullname': {'type': 'string', 'analyzer': 'standard'},
-                'email': {'type': 'string', 'index': 'not_analyzed'},
-                'ircname': {'type': 'string', 'index': 'not_analyzed'},
-                'username': {'type': 'string', 'index': 'not_analyzed'},
-                'country': {'type': 'string', 'analyzer': 'whitespace'},
-                'region': {'type': 'string', 'analyzer': 'whitespace'},
-                'city': {'type': 'string', 'analyzer': 'whitespace'},
-                'skills': {'type': 'string', 'analyzer': 'whitespace'},
-                'groups': {'type': 'string', 'analyzer': 'whitespace'},
-                'languages': {'type': 'string', 'index': 'not_analyzed'},
-                'bio': {'type': 'string', 'analyzer': 'snowball'},
-                'is_vouched': {'type': 'boolean'},
-                'allows_mozilla_sites': {'type': 'boolean'},
-                'allows_community_sites': {'type': 'boolean'},
-                'photo': {'type': 'boolean'},
-                'last_updated': {'type': 'date'},
-                'date_joined': {'type': 'date'}}}
-
-    @classmethod
-    def search(cls, query, include_non_vouched=False, public=False):
-        """Sensible default search for UserProfiles."""
-        query = query.lower().strip()
-        fields = ('username', 'bio__text', 'email', 'ircname',
-                  'country__text', 'country__text_phrase',
-                  'region__text', 'region__text_phrase',
-                  'city__text', 'city__text_phrase',
-                  'fullname__text', 'fullname__text_phrase',
-                  'fullname__prefix', 'fullname__fuzzy'
-                  'groups__text')
-        s = PrivacyAwareS(cls)
-        if public:
-            s = s.privacy_level(PUBLIC)
-        s = s.indexes(cls.get_index(public))
-
-        if query:
-            q = dict((field, query) for field in fields)
-            s = (s.boost(fullname__text_phrase=5, username=5, email=5,
-                         ircname=5, fullname__text=4, country__text_phrase=4,
-                         region__text_phrase=4, city__text_phrase=4,
-                         fullname__prefix=3, fullname__fuzzy=2,
-                         bio__text=2).query(or_=q))
-
-        s = s.order_by('_score', 'name')
-
-        if not include_non_vouched:
-            s = s.filter(is_vouched=True)
-
-        return s
-
-    @property
-    def accounts(self):
-        accounts_query = self.externalaccount_set.exclude(type=ExternalAccount.TYPE_WEBSITE)
+    def _filter_accounts_privacy(self, accounts):
         if self._privacy_level:
-            accounts_query = accounts_query.filter(privacy__gte=self._privacy_level)
-        return accounts_query
+            return accounts.filter(privacy__gte=self._privacy_level)
+        return accounts
 
     @property
-    def websites(self):
-        websites_query = self.externalaccount_set.filter(type=ExternalAccount.TYPE_WEBSITE)
+    def _accounts(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        excluded_types = [ExternalAccount.TYPE_WEBSITE, ExternalAccount.TYPE_EMAIL]
+        accounts = _getattr('externalaccount_set').exclude(type__in=excluded_types)
+        return self._filter_accounts_privacy(accounts)
+
+    @property
+    def _alternate_emails(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_EMAIL)
+        return self._filter_accounts_privacy(accounts)
+
+    @property
+    def _is_public_indexable(self):
+        for field in PUBLIC_INDEXABLE_FIELDS:
+            if getattr(self, field, None) and getattr(self, 'privacy_%s' % field, None) == PUBLIC:
+                return True
+        return False
+
+    @property
+    def _languages(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        if self._privacy_level > _getattr('privacy_languages'):
+            return _getattr('language_set').none()
+        return _getattr('language_set').all()
+
+    @property
+    def _primary_email(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        privacy_fields = UserProfile.privacy_fields()
+        if self._privacy_level and _getattr('privacy_email') < self._privacy_level:
+            email = privacy_fields['email']
+            return email
+        return _getattr('user').email
+
+    @property
+    def _vouched_by(self):
+        privacy_level = self._privacy_level
+        voucher = (UserProfile.objects.filter(vouches_made__vouchee=self)
+                   .order_by('vouches_made__date'))
+
+        if voucher.exists():
+            voucher = voucher[0]
+            if privacy_level:
+                voucher.set_instance_privacy_level(privacy_level)
+                for field in UserProfile.privacy_fields():
+                    if getattr(voucher, 'privacy_%s' % field) >= privacy_level:
+                        return voucher
+                return None
+            return voucher
+
+        return None
+
+    def _vouches(self, type):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+
+        vouch_ids = []
+        for vouch in _getattr(type).all():
+            vouch.vouchee.set_instance_privacy_level(self._privacy_level)
+            for field in UserProfile.privacy_fields():
+                if getattr(vouch.vouchee, 'privacy_%s' % field, 0) >= self._privacy_level:
+                    vouch_ids.append(vouch.id)
+        vouches = _getattr(type).filter(pk__in=vouch_ids)
+
+        return vouches
+
+    @property
+    def _vouches_made(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         if self._privacy_level:
-            websites_query = websites_query.filter(privacy__gte=self._privacy_level)
-        return websites_query
+            return self._vouches('vouches_made')
+        return _getattr('vouches_made')
 
     @property
-    def email(self):
-        """Privacy aware email property."""
-        if self._privacy_level and self.privacy_email < self._privacy_level:
-            return type(self).privacy_fields()['email']
-        return self.user.email
+    def _vouches_received(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        if self._privacy_level:
+            return self._vouches('vouches_received')
+        return _getattr('vouches_received')
+
+    @property
+    def _websites(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_WEBSITE)
+        return self._filter_accounts_privacy(accounts)
 
     @property
     def display_name(self):
@@ -376,7 +352,7 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def privacy_level(self):
         """Return user privacy clearance."""
-        if (self.groups.filter(name='privileged').exists() or self.user.is_superuser):
+        if (self.user.groups.filter(name='Managers').exists() or self.user.is_superuser):
             return PRIVILEGED
         if self.groups.filter(name='staff').exists():
             return EMPLOYEES
@@ -395,29 +371,24 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
     @property
     def is_public(self):
         """Return True is any of the privacy protected fields is PUBLIC."""
+        # TODO needs update
+
         for field in type(self).privacy_fields():
             if getattr(self, 'privacy_%s' % field, None) == PUBLIC:
                 return True
         return False
 
     @property
-    def is_public_indexable(self):
-        """For profile to be public indexable should have at least
-        full_name OR ircname OR email set to PUBLIC.
+    def is_manager(self):
+        return self.user.is_superuser or self.user.groups.filter(name='Managers').exists()
 
-        """
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            if (getattr(self, 'privacy_%s' % field, None) == PUBLIC and
-                    getattr(self, field, None)):
-                return True
-        return False
-
-    def __unicode__(self):
-        """Return this user's name when their profile is called."""
-        return self.display_name
-
-    def get_absolute_url(self):
-        return reverse('phonebook:profile_view', args=[self.user.username])
+    @property
+    def date_vouched(self):
+        """ Return the date of the first vouch, if available."""
+        vouches = self.vouches_received.all().order_by('date')[:1]
+        if vouches:
+            return vouches[0].date
+        return None
 
     def set_instance_privacy_level(self, level):
         """Sets privacy level of instance."""
@@ -431,25 +402,21 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
             self.save()
 
     def set_membership(self, model, membership_list):
-        """Alters membership to Groups, Skills and Languages."""
+        """Alters membership to Groups and Skills."""
         if model is Group:
             m2mfield = self.groups
             alias_model = GroupAlias
         elif model is Skill:
             m2mfield = self.skills
             alias_model = SkillAlias
-        elif model is Language:
-            m2mfield = self.languages
-            alias_model = LanguageAlias
 
         # Remove any visible groups that weren't supplied in this list.
         if model is Group:
-            GroupMembership.objects.filter(userprofile=self, group__visible=True)\
-                .exclude(group__name__in=membership_list).delete()
+            (GroupMembership.objects.filter(userprofile=self, group__visible=True)
+                                    .exclude(group__name__in=membership_list).delete())
         else:
             m2mfield.remove(*[g for g in m2mfield.all()
-                              if g.name not in membership_list
-                              and g.is_visible])
+                              if g.name not in membership_list and g.is_visible])
 
         # Add/create the rest of the groups
         groups_to_add = []
@@ -485,49 +452,75 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
         privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
         if (not self.photo and self.privacy_photo >= privacy_level):
             return gravatar(self.user.email, size=geometry)
-        return self.get_photo_thumbnail(geometry, **kwargs).url
+        return absolutify(self.get_photo_thumbnail(geometry, **kwargs).url)
 
-    def vouch(self, vouched_by, commit=True):
-        if self.is_vouched:
+    def is_vouchable(self, voucher):
+        """Check whether self can receive a vouch from voucher."""
+        # If there's a voucher, they must be able to vouch.
+        if voucher and not voucher.can_vouch:
+            return False
+
+        # Maximum VOUCH_COUNT_LIMIT vouches per account, no matter what.
+        if self.vouches_received.all().count() >= settings.VOUCH_COUNT_LIMIT:
+            return False
+
+        # If you've already vouched this account, you cannot do it again
+        vouch_query = self.vouches_received.filter(voucher=voucher)
+        if voucher and vouch_query.exists():
+            return False
+
+        return True
+
+    def vouch(self, vouched_by, description='', autovouch=False):
+        if not self.is_vouchable(vouched_by):
             return
 
-        self.is_vouched = True
-        self.vouched_by = vouched_by
-        self.date_vouched = datetime.now()
+        vouch = self.vouches_received.create(
+            voucher=vouched_by,
+            date=datetime.now(),
+            description=description,
+            autovouch=autovouch
+        )
 
-        if commit:
-            self.save()
-
-        self._email_now_vouched()
+        self._email_now_vouched(vouched_by, description)
+        return vouch
 
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
-        email = self.user.email
-        if any(email.endswith('@' + x) for x in settings.AUTO_VOUCH_DOMAINS):
-            self.vouch(None, commit=False)
+        emails = [acc.identifier for acc in
+                  ExternalAccount.objects.filter(user=self, type=ExternalAccount.TYPE_EMAIL)]
+        emails.append(self.user.email)
 
-    def add_to_staff_group(self):
-        """Keep users in the staff group if they're autovouchable."""
-        email = self.user.email
-        staff, created = Group.objects.get_or_create(
-            name='staff',
-            defaults=dict(visible=False,
-                          members_can_leave=False,
-                          accepting_new_members='no')
-        )
-        if any(email.endswith('@' + x) for x in
-               settings.AUTO_VOUCH_DOMAINS):
-            staff.add_member(self)
-        elif self.groups.filter(pk=staff.pk).exists():
-            staff.remove_member(self)
+        email_exists = any([email for email in emails
+                            if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
+        if email_exists and not self.vouches_received.filter(
+                description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
+            self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
-    def _email_now_vouched(self):
+    def _email_now_vouched(self, vouched_by, description=''):
         """Email this user, letting them know they are now vouched."""
-        subject = _(u'You are now vouched on Mozillians!')
-        message = _(u'You\'ve now been vouched on Mozillians.org. '
-                    u'You\'ll now be able to search, vouch '
-                    u'and invite other Mozillians onto the site.')
-        send_mail(subject, message, settings.FROM_NOREPLY,
+        name = None
+        voucher_profile_link = None
+        vouchee_profile_link = utils.absolutify(self.get_absolute_url())
+        if vouched_by:
+            name = vouched_by.full_name
+            voucher_profile_link = utils.absolutify(vouched_by.get_absolute_url())
+
+        number_of_vouches = self.vouches_received.all().count()
+        template = get_template('phonebook/emails/vouch_confirmation_email.txt')
+        message = template.render({
+            'voucher_name': name,
+            'voucher_profile_url': voucher_profile_link,
+            'vouchee_profile_url': vouchee_profile_link,
+            'vouch_description': description,
+            'functional_areas_url': utils.absolutify(reverse('groups:index_functional_areas')),
+            'groups_url': utils.absolutify(reverse('groups:index_groups')),
+            'first_vouch': number_of_vouches == 1,
+            'can_vouch_threshold': number_of_vouches == settings.CAN_VOUCH_THRESHOLD,
+        })
+        subject = _(u'You have been vouched on Mozillians.org')
+        filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
+        send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.user.email])
 
     def lookup_basket_token(self):
@@ -550,14 +543,25 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def get_annotated_groups(self):
         """
-        Return a list of all the groups the user is a member of or pending
+        Return a list of all the visible groups the user is a member of or pending
         membership. The groups pending membership will have a .pending attribute
         set to True, others will have it set False.
         """
         groups = []
-        for membership in GroupMembership.objects.filter(userprofile=self):
+        # Query this way so we only get the groups that the privacy controls allow the
+        # current user to see. We have to force evaluation of this query first, otherwise
+        # Django combines the whole thing into one query and loses the privacy control.
+        groups_manager = self.groups
+        # checks to avoid AttributeError exception b/c self.groups may returns
+        # EmptyQuerySet instead of the default manager due to privacy controls
+        if hasattr(groups_manager, 'visible'):
+            user_group_ids = list(groups_manager.visible().values_list('id', flat=True))
+        else:
+            user_group_ids = []
+        for membership in self.groupmembership_set.filter(group_id__in=user_group_ids):
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
+            group.pending_terms = (membership.status == GroupMembership.PENDING_TERMS)
             groups.append(group)
         return groups
 
@@ -572,46 +576,43 @@ class UserProfile(UserProfilePrivacyModel, SearchMixin):
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
-        self.auto_vouch()
+        autovouch = kwargs.pop('autovouch', True)
+
         super(UserProfile, self).save(*args, **kwargs)
-        self.add_to_staff_group()
+        # Auto_vouch follows the first save, because you can't
+        # create foreign keys without a database id.
+        if autovouch:
+            self.auto_vouch()
 
-    @classmethod
-    def get_index(cls, public_index=False):
-        if public_index:
-            return settings.ES_INDEXES['public']
-        return settings.ES_INDEXES['default']
-
-    @classmethod
-    def refresh_index(cls, timesleep=0, es=None, public_index=False):
-        if es is None:
-            es = get_es()
-
-        es.refresh(cls.get_index(public_index), timesleep=timesleep)
-
-    @classmethod
-    def index(cls, document, id_=None, bulk=False, force_insert=False,
-              es=None, public_index=False):
-        """ Overide elasticutils.index() to support more than one index
-        for UserProfile model.
-
+    def reverse_geocode(self):
         """
-        if bulk and es is None:
-            raise ValueError('bulk is True, but es is None')
+        Use the user's lat and lng to set their city, region, and country.
+        Does not save the profile.
+        """
+        if self.lat is None or self.lng is None:
+            return
 
-        if es is None:
-            es = get_es()
-
-        es.index(document, index=cls.get_index(public_index),
-                 doc_type=cls.get_mapping_type(),
-                 id=id_, bulk=bulk, force_insert=force_insert)
-
-    @classmethod
-    def unindex(cls, id, es=None, public_index=False):
-        if es is None:
-            es = get_es()
-
-        es.delete(cls.get_index(public_index), cls.get_mapping_type(), id)
+        from mozillians.geo.models import Country
+        from mozillians.geo.lookup import reverse_geocode, GeoLookupException
+        try:
+            result = reverse_geocode(self.lat, self.lng)
+        except GeoLookupException:
+            if self.geo_country:
+                # If self.geo_country is already set, just give up.
+                pass
+            else:
+                # No country set, we need to at least set the placeholder one.
+                self.geo_country = Country.objects.get(mapbox_id='geo_error')
+                self.geo_region = None
+                self.geo_city = None
+        else:
+            if result:
+                country, region, city = result
+                self.geo_country = country
+                self.geo_region = region
+                self.geo_city = city
+            else:
+                logger.error('Got back NONE from reverse_geocode on %s, %s' % (self.lng, self.lat))
 
 
 @receiver(dbsignals.post_save, sender=User,
@@ -620,39 +621,83 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
     if not raw:
         up, created = UserProfile.objects.get_or_create(user=instance)
         if not created:
-            dbsignals.post_save.send(sender=UserProfile, instance=up,
-                                     created=created, raw=raw)
+            dbsignals.post_save.send(sender=UserProfile, instance=up, created=created, raw=raw)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_basket_sig')
 def update_basket(sender, instance, **kwargs):
-    update_basket_task.delay(instance.id)
+    if instance.is_vouched:
+        update_basket_task.delay(instance.id)
+    elif instance.basket_token:
+        unsubscribe_from_basket_task.delay(instance.email, instance.basket_token)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
           dispatch_uid='update_search_index_sig')
 def update_search_index(sender, instance, **kwargs):
     if instance.is_complete:
-        index_objects.delay(sender, [instance.id], public_index=False)
+        index_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
         if instance.is_public_indexable:
-            index_objects.delay(sender, [instance.id], public_index=True)
+            index_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
         else:
-            unindex_objects.delay(UserProfile, [instance.id], public_index=True)
+            unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
 
 
 @receiver(dbsignals.pre_delete, sender=UserProfile,
           dispatch_uid='remove_from_search_index_sig')
 def remove_from_search_index(sender, instance, **kwargs):
-    unindex_objects.delay(UserProfile, [instance.id], public_index=False)
-    unindex_objects.delay(UserProfile, [instance.id], public_index=True)
+    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
+    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
 
 
-@receiver(dbsignals.pre_delete, sender=User,
-          dispatch_uid='remove_from_basket_sig')
-def remove_from_basket(sender, instance, **kwargs):
-    remove_from_basket_task.delay(instance.email,
-                                  instance.userprofile.basket_token)
+@receiver(dbsignals.pre_delete, sender=UserProfile,
+          dispatch_uid='unsubscribe_from_basket_sig')
+def unsubscribe_from_basket(sender, instance, **kwargs):
+    unsubscribe_from_basket_task.delay(instance.email, instance.basket_token)
+
+
+@receiver(dbsignals.post_delete, sender=UserProfile,
+          dispatch_uid='delete_user_obj_sig')
+def delete_user_obj_sig(sender, instance, **kwargs):
+    if instance.user:
+        instance.user.delete()
+
+
+class Vouch(models.Model):
+    vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
+    voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
+                                null=True, default=None, blank=True,
+                                on_delete=models.SET_NULL)
+    description = models.TextField(max_length=500, verbose_name=_lazy(u'Reason for Vouching'),
+                                   default='')
+    autovouch = models.BooleanField(default=False)
+    date = models.DateTimeField()
+
+    class Meta:
+        verbose_name_plural = 'vouches'
+        unique_together = ('vouchee', 'voucher')
+        ordering = ['-date']
+
+    def __unicode__(self):
+        return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
+
+
+@receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
+@receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
+def update_vouch_flags(sender, instance, **kwargs):
+    if kwargs.get('raw'):
+        return
+    try:
+        profile = instance.vouchee
+    except UserProfile.DoesNotExist:
+        # In this case we delete not only the vouches but the
+        # UserProfile as well. Do nothing.
+        return
+    vouches = Vouch.objects.filter(vouchee=profile).count()
+    profile.is_vouched = vouches > 0
+    profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
+    profile.save(**{'autovouch': False})
 
 
 class UsernameBlacklist(models.Model):
@@ -670,6 +715,7 @@ class ExternalAccount(models.Model):
     # Constants for type field values.
     TYPE_AMO = 'AMO'
     TYPE_BMO = 'BMO'
+    TYPE_EMAIL = 'EMAIL'
     TYPE_GITHUB = 'GITHUB'
     TYPE_MDN = 'MDN'
     TYPE_SUMO = 'SUMO'
@@ -681,38 +727,125 @@ class ExternalAccount(models.Model):
     TYPE_YAHOO = 'YAHOO'
     TYPE_WEBSITE = 'WEBSITE'
     TYPE_BITBUCKET = 'BITBUCKET'
+    TYPE_SLIDESHARE = 'SLIDESHARE'
+    TYPE_WEBMAKER = 'WEBMAKER'
+    TYPE_MOWIKI = 'MOZILLAWIKI'
+    TYPE_REMO = 'REMO'
+    TYPE_LINKEDIN = 'LINKEDIN'
+    TYPE_JABBER = 'JABBER'
+    TYPE_DISCOURSE = 'DISCOURSE'
+    TYPE_LANYRD = 'LANYRD'
+    TYPE_LANDLINE = 'Phone (Landline)'
+    TYPE_MOBILE = 'Phone (Mobile)'
+    TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
+    TYPE_MOLOCAMOTION = 'MOZILLALOCAMOTION'
+    TYPE_MOLOCATION = 'MOZILLALOCATION'
+    TYPE_MOPONTOON = 'MOZILLAPONTOON'
+    TYPE_TRANSIFEX = 'TRANSIFEX'
+    TYPE_TELEGRAM = 'TELEGRAM'
 
+    # Account type field documentation:
+    # name: The name of the service that this account belongs to. What
+    #       users see
+    # url: If the service features profile pages for its users, then
+    #      this field should be a link to that profile page. User's
+    #      identifier should be replaced by the special string
+    #      {identifier}.
+    # validator: Points to a function which will clean and validate
+    #            user's entry. Function should return the cleaned
+    #            data.
     ACCOUNT_TYPES = {
         TYPE_AMO: {'name': 'Mozilla Add-ons',
-                   'url': 'https://addons.mozilla.org/user/{identifier}/'},
+                   'url': 'https://addons.mozilla.org/user/{identifier}/',
+                   'validator': validate_username_not_url},
         TYPE_BMO: {'name': 'Bugzilla (BMO)',
-                   'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}'},
-        TYPE_GITHUB: {'name': 'GitHub', 'url': 'https://github.com/{identifier}'},
-        TYPE_BITBUCKET: {'name': 'Bitbucket', 'url': 'https://bitbucket.org/{identifier}'},
-        TYPE_MDN: {'name': 'MDN', 'url': 'https://developer.mozilla.org/profiles/{identifier}'},
-        TYPE_SUMO: {'name': 'Mozilla Support', 'url': ''},
-        TYPE_FACEBOOK: {'name': 'Facebook', 'url': 'https://www.facebook.com/{identifier}'},
+                   'url': 'https://bugzilla.mozilla.org/user_profile?login={identifier}',
+                   'validator': validate_username_not_url},
+        TYPE_EMAIL: {'name': 'Alternate email address',
+                     'url': '',
+                     'validator': validate_email},
+        TYPE_GITHUB: {'name': 'GitHub',
+                      'url': 'https://github.com/{identifier}',
+                      'validator': validate_username_not_url},
+        TYPE_BITBUCKET: {'name': 'Bitbucket',
+                         'url': 'https://bitbucket.org/{identifier}',
+                         'validator': validate_username_not_url},
+        TYPE_MDN: {'name': 'MDN',
+                   'url': 'https://developer.mozilla.org/profiles/{identifier}',
+                   'validator': validate_username_not_url},
+        TYPE_MOLOCATION: {'name': 'Mozilla Location Service',
+                          'url': 'https://location.services.mozilla.com/leaders#{identifier}',
+                          'validator': validate_username_not_url},
+        TYPE_SUMO: {'name': 'Mozilla Support',
+                    'url': 'https://support.mozilla.org/user/{identifier}',
+                    'validator': validate_username_not_url},
+        TYPE_FACEBOOK: {'name': 'Facebook',
+                        'url': 'https://www.facebook.com/{identifier}',
+                        'validator': validate_username_not_url},
         TYPE_TWITTER: {'name': 'Twitter',
                        'url': 'https://twitter.com/{identifier}',
                        'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
-        TYPE_GTALK: {'name': 'Google Talk', 'url': ''},
+        TYPE_GTALK: {'name': 'Google+ Hangouts',
+                     'url': '',
+                     'validator': validate_email},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
+        TYPE_SLIDESHARE: {'name': 'SlideShare',
+                          'url': 'http://www.slideshare.net/{identifier}',
+                          'validator': validate_username_not_url},
         TYPE_YAHOO: {'name': 'Yahoo! Messenger', 'url': ''},
         TYPE_WEBSITE: {'name': 'Website URL',
-                       'url': '{identifier}',
-                       'validator': validate_website}
+                       'url': '',
+                       'validator': validate_website},
+        TYPE_WEBMAKER: {'name': 'Mozilla Webmaker',
+                        'url': 'https://{identifier}.makes.org',
+                        'validator': validate_username_not_url},
+        TYPE_MOWIKI: {'name': 'Mozilla Wiki', 'url': 'https://wiki.mozilla.org/User:{identifier}',
+                      'validator': validate_username_not_url},
+        TYPE_REMO: {'name': 'Mozilla Reps', 'url': 'https://reps.mozilla.org/u/{identifier}/',
+                    'validator': validate_username_not_url},
+        TYPE_LINKEDIN: {'name': 'LinkedIn',
+                        'url': '',
+                        'validator': validate_website},
+        TYPE_JABBER: {'name': 'XMPP/Jabber',
+                      'url': '',
+                      'validator': validate_email},
+        TYPE_DISCOURSE: {'name': 'Mozilla Discourse',
+                         'url': 'https://discourse.mozilla-community.org/users/{identifier}',
+                         'validator': validate_username_not_url},
+        TYPE_LANYRD: {'name': 'Lanyrd',
+                      'url': 'http://lanyrd.com/profile/{identifier}/',
+                      'validator': validate_username_not_url},
+        TYPE_LANDLINE: {'name': 'Phone (Landline)',
+                        'url': '',
+                        'validator': validate_phone_number},
+        TYPE_MOBILE: {'name': 'Phone (Mobile)',
+                      'url': '',
+                      'validator': validate_phone_number},
+        TYPE_MOVERBATIM: {'name': 'Mozilla Verbatim',
+                          'url': 'https://localize.mozilla.org/accounts/{identifier}/',
+                          'validator': validate_username_not_url},
+        TYPE_MOLOCAMOTION: {'name': 'Mozilla Locamotion',
+                            'url': 'http://mozilla.locamotion.org/user/{identifier}/',
+                            'validator': validate_username_not_url},
+        TYPE_MOPONTOON: {'name': 'Mozilla Pontoon',
+                         'url': 'https://pontoon.mozilla.org/contributor/{identifier}/',
+                         'validator': validate_email},
+        TYPE_TRANSIFEX: {'name': 'Transifex',
+                         'url': 'https://www.transifex.com/accounts/profile/{identifier}/',
+                         'validator': validate_username_not_url},
+        TYPE_TELEGRAM: {'name': 'Telegram',
+                        'url': 'https://telegram.me/{identifier}',
+                        'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
     identifier = models.CharField(max_length=255, verbose_name=_lazy(u'Account Username'))
-    type = models.CharField(
-        max_length=30,
-        choices=sorted([(k, v['name'])
-                        for (k, v) in ACCOUNT_TYPES.iteritems()], key=lambda x: x[1]),
-        verbose_name=_lazy(u'Account Type'))
-    privacy = models.PositiveIntegerField(default=MOZILLIANS,
-                                          choices=PRIVACY_CHOICES)
+    type = models.CharField(max_length=30,
+                            choices=sorted([(k, v['name']) for (k, v) in ACCOUNT_TYPES.iteritems()
+                                            if k != TYPE_EMAIL], key=lambda x: x[1]),
+                            verbose_name=_lazy(u'Account Type'))
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     class Meta:
         ordering = ['type']
@@ -727,3 +860,44 @@ class ExternalAccount(models.Model):
             return _('You already have an account with this name and type.')
         else:
             return super(ExternalAccount, self).unique_error_message(model_class, unique_check)
+
+    def __unicode__(self):
+        return self.type
+
+
+@receiver(dbsignals.post_save, sender=ExternalAccount, dispatch_uid='add_employee_vouch_sig')
+def add_employee_vouch(sender, instance, **kwargs):
+    """Add a vouch if an alternate email address is a mozilla* address."""
+
+    if kwargs.get('raw') or not instance.type == ExternalAccount.TYPE_EMAIL:
+        return
+    instance.user.auto_vouch()
+
+
+class Language(models.Model):
+    code = models.CharField(max_length=63, choices=get_languages_for_locale('en'))
+    userprofile = models.ForeignKey(UserProfile)
+
+    class Meta:
+        ordering = ['code']
+        unique_together = ('code', 'userprofile')
+
+    def __unicode__(self):
+        return self.code
+
+    def get_english(self):
+        return self.get_code_display()
+
+    def get_native(self):
+        if not getattr(self, '_native', None):
+            languages = get_languages_for_locale(self.code)
+            for code, language in languages:
+                if code == self.code:
+                    self._native = language
+                    break
+        return self._native
+
+    def unique_error_message(self, model_class, unique_check):
+        if (model_class == type(self) and unique_check == ('code', 'userprofile')):
+            return _('This language has already been selected.')
+        return super(Language, self).unique_error_message(model_class, unique_check)

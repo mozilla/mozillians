@@ -1,0 +1,124 @@
+<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mylocation">
+  {{ csrf() }}
+  <div id="mylocation-tab" class="settings-tab">
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Location') }}</div>
+      <div class="panel-body">
+        {% if location_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in location_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <fieldset>
+          {% for error in location_form.errors['location'] %}
+            <span class="error-message">{{ error }}</span>
+          {% endfor %}
+          <div id="location">
+            <div id="map" data-mapboxid="{{ mapbox_id }}"></div>
+            <div id="location_gps_button"><i class="icon-target"></i></div>
+            <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+            <input id="location_search" type="search"/>
+            <input id="location_search_button" class="button" type="button" value="Search location"/>
+            <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
+            <ol id="location_search_results" class="scroll-shadows"></ol>
+          </div>
+          <div id="gps_error" class="error-message" style="display:none;">
+            <i class="icon-target"></i> {{ _('You have denied Location services.') }}
+          </div>
+          <div id="location_wrong" >
+            <a id="improve_this_map" target="_blank"
+               href="http://www.openstreetmap.org/note/new#map=13/{{profile.lat}}/{{profile.lng}}&layers=N">
+              Improve this map</a>
+            <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[learn more]</a>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-sm-8">
+              {{ mozillians_field(location_form.timezone) }}
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_timezone) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-sm-5">
+              <label class="required">{{ _('Country') }}</label>
+              <span id="display_country" class="geodisplay"
+                    data-mapbox="{{ profile.geo_country.name if profile.geo_country else ''}}">
+              </span>
+            </div>
+            <div class="col-sm-3">
+              <div class="geocheckbox {% if location_form.savecountry.errors %} error {% endif %}">
+                {{ location_form.savecountry.label_tag() }}
+                {{ location_form.savecountry }}
+                {% for error in location_form.savecountry.errors %}
+                  <span class="error-message">{{ error }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_geo_country) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-sm-5">
+              <label>{{ _('Region') }}</label>
+              <span id="display_province" class="geodisplay"
+                    data-mapbox="{{ profile.geo_region.name if profile.geo_region else ''}}">
+              </span>
+            </div>
+            <div class="col-sm-3">
+              <div class="geocheckbox {% if location_form.saveregion.errors %} error {% endif %}">
+                {{ location_form.saveregion.label_tag() }}
+                {{ location_form.saveregion }}
+                {% for error in location_form.saveregion.errors %}
+                  <span class="error-message">{{ error }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_geo_region) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-sm-5">
+              <label>{{ _('City') }}</label>
+              <span id="display_city" class="geodisplay"
+                    data-mapbox="{{ profile.geo_city.name if profile.geo_city else ''}}"></span>
+            </div>
+            <div class="col-sm-3">
+              <div class="geocheckbox {% if location_form.savecity.errors %} error {% endif %}">
+                {{ location_form.savecity.label_tag() }}
+                {{ location_form.savecity }}
+                {% for error in location_form.savecity.errors %}
+                  <span class="error-message">{{ error }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="col-md-4">
+              {{ privacy_field(location_form.privacy_geo_city) }}
+            </div>
+          </div>
+        </fieldset>
+        {{ location_form.lat }}
+        {{ location_form.lng }}
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-top" type="submit" name="location_section">{{ _('Update Location') }}</button>
+      </div>
+    </div>
+  </div>
+</form>

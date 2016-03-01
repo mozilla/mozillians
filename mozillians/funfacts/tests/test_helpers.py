@@ -1,6 +1,7 @@
+from django.test import TestCase
+
 from mock import patch
 from nose.tools import eq_
-from test_utils import TestCase
 
 from mozillians.funfacts.helpers import random_funfact
 from mozillians.funfacts.tests import FunFactFactory

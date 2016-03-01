@@ -13,22 +13,25 @@ from mozillians.common.middleware import safe_query_string
 
 class RegisterMiddleware():
     """Redirect authenticated users with incomplete profile to register view."""
+    def __init__(self):
+        self.allow_urls = [
+            r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
+            r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
+            r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
+            r'^/[\w-]+{0}'.format(reverse('groups:skills-autocomplete')),
+            r'^/browserid/',
+        ]
+
     def process_request(self, request):
         user = request.user
         path = request.path
-        allow_urls = [r'^/[\w-]+{0}'.format(reverse('phonebook:logout')),
-                      r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
-                      r'^/browserid/',
-                      r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
-                      r'^/[\w-]+/jsi18n/']
 
         if settings.DEBUG:
-            allow_urls.append(settings.MEDIA_URL)
+            self.allow_urls.append(settings.MEDIA_URL)
 
-        if (user.is_authenticated() and not user.userprofile.is_complete
-            and not filter(lambda url: re.match(url, path), allow_urls)):
-            messages.warning(request, _('Please complete registration '
-                                        'before proceeding.'))
+        if (user.is_authenticated() and not user.userprofile.is_complete and not
+                filter(lambda url: re.match(url, path), self.allow_urls)):
+            messages.warning(request, _('Please complete registration before proceeding.'))
             return redirect('phonebook:profile_edit')
 
 
@@ -41,13 +44,12 @@ class UsernameRedirectionMiddleware():
     """
 
     def process_response(self, request, response):
-        if (response.status_code == 404
-            and not request.path_info.startswith('/u/')
-            and not is_valid_path(request.path_info)
-            and User.objects.filter(
-                username__iexact=request.path_info[1:].strip('/')).exists()
-            and request.user.is_authenticated()
-            and request.user.userprofile.is_vouched):
+        if (response.status_code == 404 and not
+            request.path_info.startswith('/u/') and not
+            is_valid_path(request.path_info) and
+            User.objects.filter(username__iexact=request.path_info[1:].strip('/')).exists() and
+            request.user.is_authenticated() and
+                request.user.userprofile.is_vouched):
 
             newurl = '/u' + request.path_info
             if request.GET:

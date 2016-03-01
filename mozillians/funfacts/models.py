@@ -5,9 +5,9 @@ from django.db.models import Count, Avg, Min, Max  # noqa
 
 import bleach
 
-from mozillians.groups.models import Group, Language, Skill  # noqa
+from mozillians.groups.models import Group, Skill  # noqa
 from mozillians.mozspaces.models import MozSpace  # noqa
-from mozillians.users.models import UserProfile  # noqa
+from mozillians.users.models import Language, UserProfile  # noqa
 
 ALLOWED_TAGS = ['em', 'strong']
 
@@ -65,8 +65,7 @@ class FunFact(models.Model):
         return self.name
 
     def clean(self):
-        self.public_text = bleach.clean(self.public_text, tags=ALLOWED_TAGS,
-                                        strip=True)
+        self.public_text = bleach.clean(self.public_text, tags=ALLOWED_TAGS, strip=True)
 
     def execute(self):
         if not (self.divisor or self.number):

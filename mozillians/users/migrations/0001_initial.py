@@ -1,92 +1,148 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import sorl.thumbnail.fields
 import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
-
-class Migration(SchemaMigration):
-
-    def forwards(self, orm):
-
-        # Adding model 'UserProfile'
-        db.create_table('profile', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
-            ('confirmation_code', self.gf('django.db.models.fields.CharField')(unique=True, max_length=32)),
-            ('is_confirmed', self.gf('django.db.models.fields.BooleanField')(default=False)),
-        ))
-        db.send_create_signal('users', ['UserProfile'])
-
-        # Adding M2M table for field groups on 'UserProfile'
-        db.create_table('profile_groups', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('userprofile', models.ForeignKey(orm['users.userprofile'], null=False)),
-            ('group', models.ForeignKey(orm['groups.group'], null=False))
-        ))
-        db.create_unique('profile_groups', ['userprofile_id', 'group_id'])
+import django.db.models.deletion
+from django.conf import settings
+import mozillians.users.models
 
 
-    def backwards(self, orm):
+class Migration(migrations.Migration):
 
-        # Deleting model 'UserProfile'
-        db.delete_table('profile')
+    dependencies = [
+        ('geo', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('groups', '0001_initial'),
+    ]
 
-        # Removing M2M table for field groups on 'UserProfile'
-        db.delete_table('profile_groups')
-
-
-    models = {
-        'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        'auth.permission': {
-            'Meta': {'ordering': "('content_type__app_label', 'content_type__model', 'codename')", 'unique_together': "(('content_type', 'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'groups.group': {
-            'Meta': {'object_name': 'Group', 'db_table': "'group'"},
-            'auto_complete': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'db_index': 'True'}),
-            'system': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'db_index': 'True'})
-        },
-        'users.userprofile': {
-            'Meta': {'object_name': 'UserProfile', 'db_table': "'profile'"},
-            'confirmation_code': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '32'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['groups.Group']", 'symmetrical': 'False'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_confirmed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['auth.User']", 'unique': 'True'})
-        }
-    }
-
-    complete_apps = ['users']
+    operations = [
+        migrations.CreateModel(
+            name='ExternalAccount',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('identifier', models.CharField(max_length=255, verbose_name='Account Username')),
+                ('type', models.CharField(max_length=30, verbose_name='Account Type', choices=[(b'AIM', b'AIM'), (b'BITBUCKET', b'Bitbucket'), (b'BMO', b'Bugzilla (BMO)'), (b'FACEBOOK', b'Facebook'), (b'GITHUB', b'GitHub'), (b'GTALK', b'Google+ Hangouts'), (b'LANYRD', b'Lanyrd'), (b'LINKEDIN', b'LinkedIn'), (b'MDN', b'MDN'), (b'AMO', b'Mozilla Add-ons'), (b'DISCOURSE', b'Mozilla Discourse'), (b'MOZILLALOCAMOTION', b'Mozilla Locamotion'), (b'MOZILLALOCATION', b'Mozilla Location Service'), (b'MOZILLAPONTOON', b'Mozilla Pontoon'), (b'REMO', b'Mozilla Reps'), (b'SUMO', b'Mozilla Support'), (b'MOZILLAVERBATIM', b'Mozilla Verbatim'), (b'WEBMAKER', b'Mozilla Webmaker'), (b'MOZILLAWIKI', b'Mozilla Wiki'), (b'Phone (Landline)', b'Phone (Landline)'), (b'Phone (Mobile)', b'Phone (Mobile)'), (b'SKYPE', b'Skype'), (b'SLIDESHARE', b'SlideShare'), (b'TELEGRAM', b'Telegram'), (b'TRANSIFEX', b'Transifex'), (b'TWITTER', b'Twitter'), (b'WEBSITE', b'Website URL'), (b'JABBER', b'XMPP/Jabber'), (b'YAHOO', b'Yahoo! Messenger')])),
+                ('privacy', models.PositiveIntegerField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+            ],
+            options={
+                'ordering': ['type'],
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Language',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('code', models.CharField(max_length=63, choices=[(b'ab', 'Abkhazian'), (b'ace', 'Achinese'), (b'ach', 'Acoli'), (b'ada', 'Adangme'), (b'ady', 'Adyghe'), (b'aa', 'Afar'), (b'afh', 'Afrihili'), (b'af', 'Afrikaans'), (b'afa', 'Afro-asiatic language'), (b'ain', 'Ainu'), (b'ak', 'Akan'), (b'akk', 'Akkadian'), (b'sq', 'Albanian'), (b'ale', 'Aleut'), (b'alg', 'Algonquian language'), (b'tut', 'Altaic language'), (b'am', 'Amharic'), (b'egy', 'Ancient egyptian'), (b'grc', 'Ancient greek'), (b'anp', 'Angika'), (b'apa', 'Apache language'), (b'ar', 'Arabic'), (b'an', 'Aragonese'), (b'arc', 'Aramaic'), (b'arp', 'Arapaho'), (b'arn', 'Araucanian'), (b'arw', 'Arawak'), (b'hy', 'Armenian'), (b'rup', 'Aromanian'), (b'as', 'Assamese'), (b'ast', 'Asturian'), (b'ath', 'Athapascan language'), (b'cch', 'Atsam'), (b'aus', 'Australian language'), (b'map', 'Austronesian'), (b'av', 'Avaric'), (b'ae', 'Avestan'), (b'awa', 'Awadhi'), (b'ay', 'Aymara'), (b'az', 'Azerbaijani'), (b'ban', 'Balinese'), (b'bat', 'Baltic language'), (b'bal', 'Baluchi'), (b'bm', 'Bambara'), (b'bai', 'Bamileke language'), (b'bad', 'Banda'), (b'bnt', 'Bantu'), (b'bas', 'Basa'), (b'ba', 'Bashkir'), (b'eu', 'Basque'), (b'btk', 'Batak'), (b'bej', 'Beja'), (b'be', 'Belarusian'), (b'bem', 'Bemba'), (b'bn', 'Bengali'), (b'ber', 'Berber'), (b'bho', 'Bhojpuri'), (b'bh', 'Bihari'), (b'bik', 'Bikol'), (b'bin', 'Bini'), (b'bi', 'Bislama'), (b'byn', 'Blin'), (b'zbl', 'Blissymbols'), (b'bs', 'Bosnian'), (b'bra', 'Braj'), (b'pt_BR', 'Brazilian portuguese'), (b'br', 'Breton'), (b'bug', 'Buginese'), (b'bg', 'Bulgarian'), (b'bua', 'Buriat'), (b'my', 'Burmese'), (b'cad', 'Caddo'), (b'car', 'Carib'), (b'ca', 'Catalan'), (b'cau', 'Caucasian language'), (b'ceb', 'Cebuano'), (b'cel', 'Celtic language'), (b'cai', 'Central american indian language'), (b'chg', 'Chagatai'), (b'cmc', 'Chamic language'), (b'ch', 'Chamorro'), (b'ce', 'Chechen'), (b'chr', 'Cherokee'), (b'chy', 'Cheyenne'), (b'chb', 'Chibcha'), (b'zh', 'Chinese'), (b'chn', 'Chinook jargon'), (b'chp', 'Chipewyan'), (b'cho', 'Choctaw'), (b'cu', 'Church slavic'), (b'chk', 'Chuukese'), (b'cv', 'Chuvash'), (b'nwc', 'Classical newari'), (b'syc', 'Classical syriac'), (b'cop', 'Coptic'), (b'kw', 'Cornish'), (b'co', 'Corsican'), (b'cr', 'Cree'), (b'mus', 'Creek'), (b'crp', 'Creole or pidgin'), (b'crh', 'Crimean turkish'), (b'hr', 'Croatian'), (b'cus', 'Cushitic language'), (b'cs', 'Czech'), (b'dak', 'Dakota'), (b'da', 'Danish'), (b'dar', 'Dargwa'), (b'day', 'Dayak'), (b'del', 'Delaware'), (b'din', 'Dinka'), (b'dv', 'Divehi'), (b'doi', 'Dogri'), (b'dgr', 'Dogrib'), (b'dra', 'Dravidian language'), (b'dua', 'Duala'), (b'nl', 'Dutch'), (b'dyu', 'Dyula'), (b'dz', 'Dzongkha'), (b'frs', 'Eastern frisian'), (b'efi', 'Efik'), (b'eka', 'Ekajuk'), (b'elx', 'Elamite'), (b'en', 'English'), (b'myv', 'Erzya'), (b'eo', 'Esperanto'), (b'et', 'Estonian'), (b'ee', 'Ewe'), (b'ewo', 'Ewondo'), (b'fan', 'Fang'), (b'fat', 'Fanti'), (b'fo', 'Faroese'), (b'fj', 'Fijian'), (b'fil', 'Filipino'), (b'fi', 'Finnish'), (b'fiu', 'Finno-ugrian language'), (b'nl_BE', 'Flemish'), (b'fon', 'Fon'), (b'fr', 'French'), (b'fur', 'Friulian'), (b'ff', 'Fulah'), (b'gaa', 'Ga'), (b'gl', 'Galician'), (b'lg', 'Ganda'), (b'gay', 'Gayo'), (b'gba', 'Gbaya'), (b'gez', 'Geez'), (b'ka', 'Georgian'), (b'de', 'German'), (b'gem', 'Germanic language'), (b'gil', 'Gilbertese'), (b'gon', 'Gondi'), (b'gor', 'Gorontalo'), (b'got', 'Gothic'), (b'grb', 'Grebo'), (b'el', 'Greek'), (b'gn', 'Guarani'), (b'gu', 'Gujarati'), (b'gwi', 'Gwich\u02bcin'), (b'hai', 'Haida'), (b'ht', 'Haitian'), (b'ha', 'Hausa'), (b'haw', 'Hawaiian'), (b'he', 'Hebrew'), (b'hz', 'Herero'), (b'hil', 'Hiligaynon'), (b'him', 'Himachali'), (b'hi', 'Hindi'), (b'ho', 'Hiri motu'), (b'hit', 'Hittite'), (b'hmn', 'Hmong'), (b'hu', 'Hungarian'), (b'hup', 'Hupa'), (b'iba', 'Iban'), (b'pt_PT', 'Iberian portuguese'), (b'es_ES', 'Iberian spanish'), (b'is', 'Icelandic'), (b'io', 'Ido'), (b'ig', 'Igbo'), (b'ijo', 'Ijo'), (b'ilo', 'Iloko'), (b'smn', 'Inari sami'), (b'inc', 'Indic language'), (b'ine', 'Indo-european language'), (b'id', 'Indonesian'), (b'inh', 'Ingush'), (b'ia', 'Interlingua'), (b'ie', 'Interlingue'), (b'iu', 'Inuktitut'), (b'ik', 'Inupiaq'), (b'ira', 'Iranian language'), (b'ga', 'Irish'), (b'iro', 'Iroquoian language'), (b'it', 'Italian'), (b'ja', 'Japanese'), (b'jv', 'Javanese'), (b'kaj', 'Jju'), (b'jrb', 'Judeo-arabic'), (b'jpr', 'Judeo-persian'), (b'kbd', 'Kabardian'), (b'kab', 'Kabyle'), (b'kac', 'Kachin'), (b'kl', 'Kalaallisut'), (b'xal', 'Kalmyk'), (b'kam', 'Kamba'), (b'kn', 'Kannada'), (b'kr', 'Kanuri'), (b'kaa', 'Kara-kalpak'), (b'krc', 'Karachay-balkar'), (b'krl', 'Karelian'), (b'kar', 'Karen'), (b'ks', 'Kashmiri'), (b'csb', 'Kashubian'), (b'kaw', 'Kawi'), (b'kk', 'Kazakh'), (b'kha', 'Khasi'), (b'km', 'Khmer'), (b'khi', 'Khoisan language'), (b'kho', 'Khotanese'), (b'ki', 'Kikuyu'), (b'kmb', 'Kimbundu'), (b'rw', 'Kinyarwanda'), (b'ky', 'Kirghiz'), (b'tlh', 'Klingon'), (b'kv', 'Komi'), (b'kg', 'Kongo'), (b'kok', 'Konkani'), (b'ko', 'Korean'), (b'kfo', 'Koro'), (b'kos', 'Kosraean'), (b'kpe', 'Kpelle'), (b'kro', 'Kru'), (b'kj', 'Kuanyama'), (b'kum', 'Kumyk'), (b'ku', 'Kurdish'), (b'kru', 'Kurukh'), (b'kut', 'Kutenai'), (b'lad', 'Ladino'), (b'lah', 'Lahnda'), (b'lam', 'Lamba'), (b'lo', 'Lao'), (b'la', 'Latin'), (b'es_419', 'Latin american spanish'), (b'lv', 'Latvian'), (b'lez', 'Lezghian'), (b'li', 'Limburgish'), (b'ln', 'Lingala'), (b'lt', 'Lithuanian'), (b'jbo', 'Lojban'), (b'nds', 'Low german'), (b'dsb', 'Lower sorbian'), (b'loz', 'Lozi'), (b'lu', 'Luba-katanga'), (b'lua', 'Luba-lulua'), (b'lui', 'Luiseno'), (b'smj', 'Lule sami'), (b'lun', 'Lunda'), (b'luo', 'Luo'), (b'lus', 'Lushai'), (b'lb', 'Luxembourgish'), (b'mk', 'Macedonian'), (b'mad', 'Madurese'), (b'mag', 'Magahi'), (b'mai', 'Maithili'), (b'mak', 'Makasar'), (b'mg', 'Malagasy'), (b'ms', 'Malay'), (b'ml', 'Malayalam'), (b'mt', 'Maltese'), (b'mnc', 'Manchu'), (b'mdr', 'Mandar'), (b'man', 'Mandingo'), (b'mni', 'Manipuri'), (b'mno', 'Manobo language'), (b'gv', 'Manx'), (b'mi', 'Maori'), (b'mr', 'Marathi'), (b'chm', 'Mari'), (b'mh', 'Marshallese'), (b'mwr', 'Marwari'), (b'mas', 'Masai'), (b'myn', 'Mayan language'), (b'men', 'Mende'), (b'mic', 'Micmac'), (b'dum', 'Middle dutch'), (b'enm', 'Middle english'), (b'frm', 'Middle french'), (b'gmh', 'Middle high german'), (b'mga', 'Middle irish'), (b'min', 'Minangkabau'), (b'mwl', 'Mirandese'), (b'moh', 'Mohawk'), (b'mdf', 'Moksha'), (b'mo', 'Moldavian'), (b'mkh', 'Mon-khmer language'), (b'lol', 'Mongo'), (b'mn', 'Mongolian'), (b'mos', 'Mossi'), (b'mun', 'Munda language'), (b'nah', 'Nahuatl'), (b'na', 'Nauru'), (b'nv', 'Navajo'), (b'ng', 'Ndonga'), (b'nap', 'Neapolitan'), (b'ne', 'Nepali'), (b'new', 'Newari'), (b'nia', 'Nias'), (b'nic', 'Niger-kordofanian language'), (b'ssa', 'Nilo-saharan language'), (b'niu', 'Niuean'), (b'nog', 'Nogai'), (b'nai', 'North american indian language'), (b'nd', 'North ndebele'), (b'frr', 'Northern frisian'), (b'se', 'Northern sami'), (b'nso', 'Northern sotho'), (b'no', 'Norwegian'), (b'nb', 'Norwegian bokm\xe5l'), (b'nn', 'Norwegian nynorsk'), (b'nub', 'Nubian language'), (b'nym', 'Nyamwezi'), (b'ny', 'Nyanja'), (b'nyn', 'Nyankole'), (b'tog', 'Nyasa tonga'), (b'nyo', 'Nyoro'), (b'nzi', 'Nzima'), (b'nqo', 'N\u2019ko'), (b'oc', 'Occitan'), (b'oj', 'Ojibwa'), (b'ang', 'Old english'), (b'fro', 'Old french'), (b'goh', 'Old high german'), (b'sga', 'Old irish'), (b'non', 'Old norse'), (b'peo', 'Old persian'), (b'pro', 'Old proven\xe7al'), (b'or', 'Oriya'), (b'om', 'Oromo'), (b'osa', 'Osage'), (b'os', 'Ossetic'), (b'oto', 'Otomian language'), (b'ota', 'Ottoman turkish'), (b'pal', 'Pahlavi'), (b'pau', 'Palauan'), (b'pi', 'Pali'), (b'pam', 'Pampanga'), (b'pag', 'Pangasinan'), (b'pap', 'Papiamento'), (b'paa', 'Papuan language'), (b'ps', 'Pashto'), (b'fa', 'Persian'), (b'phi', 'Philippine language'), (b'phn', 'Phoenician'), (b'pon', 'Pohnpeian'), (b'pl', 'Polish'), (b'pt', 'Portuguese'), (b'pra', 'Prakrit language'), (b'pa', 'Punjabi'), (b'qu', 'Quechua'), (b'raj', 'Rajasthani'), (b'rap', 'Rapanui'), (b'rar', 'Rarotongan'), (b'rm', 'Rhaeto-romance'), (b'roa', 'Romance language'), (b'ro', 'Romanian'), (b'rom', 'Romany'), (b'root', 'Root'), (b'rn', 'Rundi'), (b'ru', 'Russian'), (b'sal', 'Salishan language'), (b'sam', 'Samaritan aramaic'), (b'smi', 'Sami language'), (b'sm', 'Samoan'), (b'sad', 'Sandawe'), (b'sg', 'Sango'), (b'sa', 'Sanskrit'), (b'sat', 'Santali'), (b'sc', 'Sardinian'), (b'sas', 'Sasak'), (b'sco', 'Scots'), (b'gd', 'Scottish gaelic'), (b'sel', 'Selkup'), (b'sem', 'Semitic language'), (b'sr', 'Serbian'), (b'sh', 'Serbo-croatian'), (b'srr', 'Serer'), (b'shn', 'Shan'), (b'sn', 'Shona'), (b'ii', 'Sichuan yi'), (b'scn', 'Sicilian'), (b'sid', 'Sidamo'), (b'sgn', 'Sign language'), (b'bla', 'Siksika'), (b'zh_Hans', 'Simplified chinese'), (b'sd', 'Sindhi'), (b'si', 'Sinhala'), (b'sit', 'Sino-tibetan language'), (b'sio', 'Siouan language'), (b'sms', 'Skolt sami'), (b'den', 'Slave'), (b'sla', 'Slavic language'), (b'sk', 'Slovak'), (b'sl', 'Slovenian'), (b'sog', 'Sogdien'), (b'so', 'Somali'), (b'son', 'Songhai'), (b'snk', 'Soninke'), (b'wen', 'Sorbian language'), (b'sai', 'South american indian language'), (b'nr', 'South ndebele'), (b'alt', 'Southern altai'), (b'sma', 'Southern sami'), (b'st', 'Southern sotho'), (b'es', 'Spanish'), (b'srn', 'Sranan tongo'), (b'suk', 'Sukuma'), (b'sux', 'Sumerian'), (b'su', 'Sundanese'), (b'sus', 'Susu'), (b'sw', 'Swahili'), (b'ss', 'Swati'), (b'sv', 'Swedish'), (b'gsw', 'Swiss german'), (b'syr', 'Syriac'), (b'tl', 'Tagalog'), (b'ty', 'Tahitian'), (b'tai', 'Tai language'), (b'tg', 'Tajik'), (b'tmh', 'Tamashek'), (b'ta', 'Tamil'), (b'tt', 'Tatar'), (b'te', 'Telugu'), (b'ter', 'Tereno'), (b'tet', 'Tetum'), (b'th', 'Thai'), (b'bo', 'Tibetan'), (b'tig', 'Tigre'), (b'ti', 'Tigrinya'), (b'tem', 'Timne'), (b'tiv', 'Tiv'), (b'tli', 'Tlingit'), (b'tpi', 'Tok pisin'), (b'tkl', 'Tokelau'), (b'to', 'Tonga'), (b'zh_Hant', 'Traditional chinese'), (b'tsi', 'Tsimshian'), (b'ts', 'Tsonga'), (b'tn', 'Tswana'), (b'tum', 'Tumbuka'), (b'tup', 'Tupi language'), (b'tr', 'Turkish'), (b'tk', 'Turkmen'), (b'tvl', 'Tuvalu'), (b'tyv', 'Tuvinian'), (b'tw', 'Twi'), (b'kcg', 'Tyap'), (b'udm', 'Udmurt'), (b'uga', 'Ugaritic'), (b'ug', 'Uighur'), (b'uk', 'Ukrainian'), (b'umb', 'Umbundu'), (b'hsb', 'Upper sorbian'), (b'ur', 'Urdu'), (b'uz', 'Uzbek'), (b'vai', 'Vai'), (b've', 'Venda'), (b'vi', 'Vietnamese'), (b'vo', 'Volap\xfck'), (b'vot', 'Votic'), (b'wak', 'Wakashan language'), (b'wal', 'Walamo'), (b'wa', 'Walloon'), (b'war', 'Waray'), (b'was', 'Washo'), (b'cy', 'Welsh'), (b'fy', 'Western frisian'), (b'wo', 'Wolof'), (b'xh', 'Xhosa'), (b'sah', 'Yakut'), (b'yao', 'Yao'), (b'yap', 'Yapese'), (b'yi', 'Yiddish'), (b'yo', 'Yoruba'), (b'ypk', 'Yupik language'), (b'znd', 'Zande'), (b'zap', 'Zapotec'), (b'zza', 'Zaza'), (b'zen', 'Zenaga'), (b'za', 'Zhuang'), (b'zu', 'Zulu'), (b'zun', 'Zuni')])),
+            ],
+            options={
+                'ordering': ['code'],
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='UsernameBlacklist',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.CharField(unique=True, max_length=30)),
+                ('is_regex', models.BooleanField(default=False)),
+            ],
+            options={
+                'ordering': ['value'],
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='UserProfile',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('privacy_photo', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_full_name', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_ircname', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_email', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_bio', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_geo_city', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_geo_region', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_geo_country', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_groups', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_skills', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_languages', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_date_mozillian', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_timezone', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_tshirt', mozillians.users.models.PrivacyField(default=1, choices=[(1, 'Privileged')])),
+                ('privacy_title', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('privacy_story_link', mozillians.users.models.PrivacyField(default=3, choices=[(3, 'Mozillians'), (4, 'Public')])),
+                ('full_name', models.CharField(default=b'', max_length=255, verbose_name='Full Name')),
+                ('is_vouched', models.BooleanField(default=False, help_text=b'You can edit vouched status by editing invidual vouches')),
+                ('can_vouch', models.BooleanField(default=False, help_text=b'You can edit can_vouch status by editing invidual vouches')),
+                ('last_updated', models.DateTimeField(default=datetime.datetime.now, auto_now=True)),
+                ('bio', models.TextField(default=b'', verbose_name='Bio', blank=True)),
+                ('photo', sorl.thumbnail.fields.ImageField(default=b'', upload_to=mozillians.users.models._calculate_photo_filename, blank=True)),
+                ('ircname', models.CharField(default=b'', max_length=63, verbose_name='IRC Nickname', blank=True)),
+                ('lat', models.FloatField(null=True, verbose_name='Latitude', blank=True)),
+                ('lng', models.FloatField(null=True, verbose_name='Longitude', blank=True)),
+                ('allows_community_sites', models.BooleanField(default=True, verbose_name='Sites that can determine my vouched status', choices=[(True, 'All Community Sites'), (False, 'Only Mozilla Properties')])),
+                ('allows_mozilla_sites', models.BooleanField(default=True, verbose_name='Allow Mozilla sites to access my profile data?', choices=[(True, 'Yes'), (False, 'No')])),
+                ('basket_token', models.CharField(default=b'', max_length=1024, blank=True)),
+                ('date_mozillian', models.DateField(default=None, null=True, verbose_name=b'When was involved with Mozilla', blank=True)),
+                ('timezone', models.CharField(default=b'', max_length=100, blank=True, choices=[(b'Africa/Abidjan', b'Africa/Abidjan'), (b'Africa/Accra', b'Africa/Accra'), (b'Africa/Addis_Ababa', b'Africa/Addis_Ababa'), (b'Africa/Algiers', b'Africa/Algiers'), (b'Africa/Asmara', b'Africa/Asmara'), (b'Africa/Bamako', b'Africa/Bamako'), (b'Africa/Bangui', b'Africa/Bangui'), (b'Africa/Banjul', b'Africa/Banjul'), (b'Africa/Bissau', b'Africa/Bissau'), (b'Africa/Blantyre', b'Africa/Blantyre'), (b'Africa/Brazzaville', b'Africa/Brazzaville'), (b'Africa/Bujumbura', b'Africa/Bujumbura'), (b'Africa/Cairo', b'Africa/Cairo'), (b'Africa/Casablanca', b'Africa/Casablanca'), (b'Africa/Ceuta', b'Africa/Ceuta'), (b'Africa/Conakry', b'Africa/Conakry'), (b'Africa/Dakar', b'Africa/Dakar'), (b'Africa/Dar_es_Salaam', b'Africa/Dar_es_Salaam'), (b'Africa/Djibouti', b'Africa/Djibouti'), (b'Africa/Douala', b'Africa/Douala'), (b'Africa/El_Aaiun', b'Africa/El_Aaiun'), (b'Africa/Freetown', b'Africa/Freetown'), (b'Africa/Gaborone', b'Africa/Gaborone'), (b'Africa/Harare', b'Africa/Harare'), (b'Africa/Johannesburg', b'Africa/Johannesburg'), (b'Africa/Juba', b'Africa/Juba'), (b'Africa/Kampala', b'Africa/Kampala'), (b'Africa/Khartoum', b'Africa/Khartoum'), (b'Africa/Kigali', b'Africa/Kigali'), (b'Africa/Kinshasa', b'Africa/Kinshasa'), (b'Africa/Lagos', b'Africa/Lagos'), (b'Africa/Libreville', b'Africa/Libreville'), (b'Africa/Lome', b'Africa/Lome'), (b'Africa/Luanda', b'Africa/Luanda'), (b'Africa/Lubumbashi', b'Africa/Lubumbashi'), (b'Africa/Lusaka', b'Africa/Lusaka'), (b'Africa/Malabo', b'Africa/Malabo'), (b'Africa/Maputo', b'Africa/Maputo'), (b'Africa/Maseru', b'Africa/Maseru'), (b'Africa/Mbabane', b'Africa/Mbabane'), (b'Africa/Mogadishu', b'Africa/Mogadishu'), (b'Africa/Monrovia', b'Africa/Monrovia'), (b'Africa/Nairobi', b'Africa/Nairobi'), (b'Africa/Ndjamena', b'Africa/Ndjamena'), (b'Africa/Niamey', b'Africa/Niamey'), (b'Africa/Nouakchott', b'Africa/Nouakchott'), (b'Africa/Ouagadougou', b'Africa/Ouagadougou'), (b'Africa/Porto-Novo', b'Africa/Porto-Novo'), (b'Africa/Sao_Tome', b'Africa/Sao_Tome'), (b'Africa/Tripoli', b'Africa/Tripoli'), (b'Africa/Tunis', b'Africa/Tunis'), (b'Africa/Windhoek', b'Africa/Windhoek'), (b'America/Adak', b'America/Adak'), (b'America/Anchorage', b'America/Anchorage'), (b'America/Anguilla', b'America/Anguilla'), (b'America/Antigua', b'America/Antigua'), (b'America/Araguaina', b'America/Araguaina'), (b'America/Argentina/Buenos_Aires', b'America/Argentina/Buenos_Aires'), (b'America/Argentina/Catamarca', b'America/Argentina/Catamarca'), (b'America/Argentina/Cordoba', b'America/Argentina/Cordoba'), (b'America/Argentina/Jujuy', b'America/Argentina/Jujuy'), (b'America/Argentina/La_Rioja', b'America/Argentina/La_Rioja'), (b'America/Argentina/Mendoza', b'America/Argentina/Mendoza'), (b'America/Argentina/Rio_Gallegos', b'America/Argentina/Rio_Gallegos'), (b'America/Argentina/Salta', b'America/Argentina/Salta'), (b'America/Argentina/San_Juan', b'America/Argentina/San_Juan'), (b'America/Argentina/San_Luis', b'America/Argentina/San_Luis'), (b'America/Argentina/Tucuman', b'America/Argentina/Tucuman'), (b'America/Argentina/Ushuaia', b'America/Argentina/Ushuaia'), (b'America/Aruba', b'America/Aruba'), (b'America/Asuncion', b'America/Asuncion'), (b'America/Atikokan', b'America/Atikokan'), (b'America/Bahia', b'America/Bahia'), (b'America/Bahia_Banderas', b'America/Bahia_Banderas'), (b'America/Barbados', b'America/Barbados'), (b'America/Belem', b'America/Belem'), (b'America/Belize', b'America/Belize'), (b'America/Blanc-Sablon', b'America/Blanc-Sablon'), (b'America/Boa_Vista', b'America/Boa_Vista'), (b'America/Bogota', b'America/Bogota'), (b'America/Boise', b'America/Boise'), (b'America/Cambridge_Bay', b'America/Cambridge_Bay'), (b'America/Campo_Grande', b'America/Campo_Grande'), (b'America/Cancun', b'America/Cancun'), (b'America/Caracas', b'America/Caracas'), (b'America/Cayenne', b'America/Cayenne'), (b'America/Cayman', b'America/Cayman'), (b'America/Chicago', b'America/Chicago'), (b'America/Chihuahua', b'America/Chihuahua'), (b'America/Costa_Rica', b'America/Costa_Rica'), (b'America/Creston', b'America/Creston'), (b'America/Cuiaba', b'America/Cuiaba'), (b'America/Curacao', b'America/Curacao'), (b'America/Danmarkshavn', b'America/Danmarkshavn'), (b'America/Dawson', b'America/Dawson'), (b'America/Dawson_Creek', b'America/Dawson_Creek'), (b'America/Denver', b'America/Denver'), (b'America/Detroit', b'America/Detroit'), (b'America/Dominica', b'America/Dominica'), (b'America/Edmonton', b'America/Edmonton'), (b'America/Eirunepe', b'America/Eirunepe'), (b'America/El_Salvador', b'America/El_Salvador'), (b'America/Fortaleza', b'America/Fortaleza'), (b'America/Glace_Bay', b'America/Glace_Bay'), (b'America/Godthab', b'America/Godthab'), (b'America/Goose_Bay', b'America/Goose_Bay'), (b'America/Grand_Turk', b'America/Grand_Turk'), (b'America/Grenada', b'America/Grenada'), (b'America/Guadeloupe', b'America/Guadeloupe'), (b'America/Guatemala', b'America/Guatemala'), (b'America/Guayaquil', b'America/Guayaquil'), (b'America/Guyana', b'America/Guyana'), (b'America/Halifax', b'America/Halifax'), (b'America/Havana', b'America/Havana'), (b'America/Hermosillo', b'America/Hermosillo'), (b'America/Indiana/Indianapolis', b'America/Indiana/Indianapolis'), (b'America/Indiana/Knox', b'America/Indiana/Knox'), (b'America/Indiana/Marengo', b'America/Indiana/Marengo'), (b'America/Indiana/Petersburg', b'America/Indiana/Petersburg'), (b'America/Indiana/Tell_City', b'America/Indiana/Tell_City'), (b'America/Indiana/Vevay', b'America/Indiana/Vevay'), (b'America/Indiana/Vincennes', b'America/Indiana/Vincennes'), (b'America/Indiana/Winamac', b'America/Indiana/Winamac'), (b'America/Inuvik', b'America/Inuvik'), (b'America/Iqaluit', b'America/Iqaluit'), (b'America/Jamaica', b'America/Jamaica'), (b'America/Juneau', b'America/Juneau'), (b'America/Kentucky/Louisville', b'America/Kentucky/Louisville'), (b'America/Kentucky/Monticello', b'America/Kentucky/Monticello'), (b'America/Kralendijk', b'America/Kralendijk'), (b'America/La_Paz', b'America/La_Paz'), (b'America/Lima', b'America/Lima'), (b'America/Los_Angeles', b'America/Los_Angeles'), (b'America/Lower_Princes', b'America/Lower_Princes'), (b'America/Maceio', b'America/Maceio'), (b'America/Managua', b'America/Managua'), (b'America/Manaus', b'America/Manaus'), (b'America/Marigot', b'America/Marigot'), (b'America/Martinique', b'America/Martinique'), (b'America/Matamoros', b'America/Matamoros'), (b'America/Mazatlan', b'America/Mazatlan'), (b'America/Menominee', b'America/Menominee'), (b'America/Merida', b'America/Merida'), (b'America/Metlakatla', b'America/Metlakatla'), (b'America/Mexico_City', b'America/Mexico_City'), (b'America/Miquelon', b'America/Miquelon'), (b'America/Moncton', b'America/Moncton'), (b'America/Monterrey', b'America/Monterrey'), (b'America/Montevideo', b'America/Montevideo'), (b'America/Montreal', b'America/Montreal'), (b'America/Montserrat', b'America/Montserrat'), (b'America/Nassau', b'America/Nassau'), (b'America/New_York', b'America/New_York'), (b'America/Nipigon', b'America/Nipigon'), (b'America/Nome', b'America/Nome'), (b'America/Noronha', b'America/Noronha'), (b'America/North_Dakota/Beulah', b'America/North_Dakota/Beulah'), (b'America/North_Dakota/Center', b'America/North_Dakota/Center'), (b'America/North_Dakota/New_Salem', b'America/North_Dakota/New_Salem'), (b'America/Ojinaga', b'America/Ojinaga'), (b'America/Panama', b'America/Panama'), (b'America/Pangnirtung', b'America/Pangnirtung'), (b'America/Paramaribo', b'America/Paramaribo'), (b'America/Phoenix', b'America/Phoenix'), (b'America/Port-au-Prince', b'America/Port-au-Prince'), (b'America/Port_of_Spain', b'America/Port_of_Spain'), (b'America/Porto_Velho', b'America/Porto_Velho'), (b'America/Puerto_Rico', b'America/Puerto_Rico'), (b'America/Rainy_River', b'America/Rainy_River'), (b'America/Rankin_Inlet', b'America/Rankin_Inlet'), (b'America/Recife', b'America/Recife'), (b'America/Regina', b'America/Regina'), (b'America/Resolute', b'America/Resolute'), (b'America/Rio_Branco', b'America/Rio_Branco'), (b'America/Santa_Isabel', b'America/Santa_Isabel'), (b'America/Santarem', b'America/Santarem'), (b'America/Santiago', b'America/Santiago'), (b'America/Santo_Domingo', b'America/Santo_Domingo'), (b'America/Sao_Paulo', b'America/Sao_Paulo'), (b'America/Scoresbysund', b'America/Scoresbysund'), (b'America/Shiprock', b'America/Shiprock'), (b'America/Sitka', b'America/Sitka'), (b'America/St_Barthelemy', b'America/St_Barthelemy'), (b'America/St_Johns', b'America/St_Johns'), (b'America/St_Kitts', b'America/St_Kitts'), (b'America/St_Lucia', b'America/St_Lucia'), (b'America/St_Thomas', b'America/St_Thomas'), (b'America/St_Vincent', b'America/St_Vincent'), (b'America/Swift_Current', b'America/Swift_Current'), (b'America/Tegucigalpa', b'America/Tegucigalpa'), (b'America/Thule', b'America/Thule'), (b'America/Thunder_Bay', b'America/Thunder_Bay'), (b'America/Tijuana', b'America/Tijuana'), (b'America/Toronto', b'America/Toronto'), (b'America/Tortola', b'America/Tortola'), (b'America/Vancouver', b'America/Vancouver'), (b'America/Whitehorse', b'America/Whitehorse'), (b'America/Winnipeg', b'America/Winnipeg'), (b'America/Yakutat', b'America/Yakutat'), (b'America/Yellowknife', b'America/Yellowknife'), (b'Antarctica/Casey', b'Antarctica/Casey'), (b'Antarctica/Davis', b'Antarctica/Davis'), (b'Antarctica/DumontDUrville', b'Antarctica/DumontDUrville'), (b'Antarctica/Macquarie', b'Antarctica/Macquarie'), (b'Antarctica/Mawson', b'Antarctica/Mawson'), (b'Antarctica/McMurdo', b'Antarctica/McMurdo'), (b'Antarctica/Palmer', b'Antarctica/Palmer'), (b'Antarctica/Rothera', b'Antarctica/Rothera'), (b'Antarctica/South_Pole', b'Antarctica/South_Pole'), (b'Antarctica/Syowa', b'Antarctica/Syowa'), (b'Antarctica/Vostok', b'Antarctica/Vostok'), (b'Arctic/Longyearbyen', b'Arctic/Longyearbyen'), (b'Asia/Aden', b'Asia/Aden'), (b'Asia/Almaty', b'Asia/Almaty'), (b'Asia/Amman', b'Asia/Amman'), (b'Asia/Anadyr', b'Asia/Anadyr'), (b'Asia/Aqtau', b'Asia/Aqtau'), (b'Asia/Aqtobe', b'Asia/Aqtobe'), (b'Asia/Ashgabat', b'Asia/Ashgabat'), (b'Asia/Baghdad', b'Asia/Baghdad'), (b'Asia/Bahrain', b'Asia/Bahrain'), (b'Asia/Baku', b'Asia/Baku'), (b'Asia/Bangkok', b'Asia/Bangkok'), (b'Asia/Beirut', b'Asia/Beirut'), (b'Asia/Bishkek', b'Asia/Bishkek'), (b'Asia/Brunei', b'Asia/Brunei'), (b'Asia/Choibalsan', b'Asia/Choibalsan'), (b'Asia/Chongqing', b'Asia/Chongqing'), (b'Asia/Colombo', b'Asia/Colombo'), (b'Asia/Damascus', b'Asia/Damascus'), (b'Asia/Dhaka', b'Asia/Dhaka'), (b'Asia/Dili', b'Asia/Dili'), (b'Asia/Dubai', b'Asia/Dubai'), (b'Asia/Dushanbe', b'Asia/Dushanbe'), (b'Asia/Gaza', b'Asia/Gaza'), (b'Asia/Harbin', b'Asia/Harbin'), (b'Asia/Hebron', b'Asia/Hebron'), (b'Asia/Ho_Chi_Minh', b'Asia/Ho_Chi_Minh'), (b'Asia/Hong_Kong', b'Asia/Hong_Kong'), (b'Asia/Hovd', b'Asia/Hovd'), (b'Asia/Irkutsk', b'Asia/Irkutsk'), (b'Asia/Jakarta', b'Asia/Jakarta'), (b'Asia/Jayapura', b'Asia/Jayapura'), (b'Asia/Jerusalem', b'Asia/Jerusalem'), (b'Asia/Kabul', b'Asia/Kabul'), (b'Asia/Kamchatka', b'Asia/Kamchatka'), (b'Asia/Karachi', b'Asia/Karachi'), (b'Asia/Kashgar', b'Asia/Kashgar'), (b'Asia/Kathmandu', b'Asia/Kathmandu'), (b'Asia/Kolkata', b'Asia/Kolkata'), (b'Asia/Krasnoyarsk', b'Asia/Krasnoyarsk'), (b'Asia/Kuala_Lumpur', b'Asia/Kuala_Lumpur'), (b'Asia/Kuching', b'Asia/Kuching'), (b'Asia/Kuwait', b'Asia/Kuwait'), (b'Asia/Macau', b'Asia/Macau'), (b'Asia/Magadan', b'Asia/Magadan'), (b'Asia/Makassar', b'Asia/Makassar'), (b'Asia/Manila', b'Asia/Manila'), (b'Asia/Muscat', b'Asia/Muscat'), (b'Asia/Nicosia', b'Asia/Nicosia'), (b'Asia/Novokuznetsk', b'Asia/Novokuznetsk'), (b'Asia/Novosibirsk', b'Asia/Novosibirsk'), (b'Asia/Omsk', b'Asia/Omsk'), (b'Asia/Oral', b'Asia/Oral'), (b'Asia/Phnom_Penh', b'Asia/Phnom_Penh'), (b'Asia/Pontianak', b'Asia/Pontianak'), (b'Asia/Pyongyang', b'Asia/Pyongyang'), (b'Asia/Qatar', b'Asia/Qatar'), (b'Asia/Qyzylorda', b'Asia/Qyzylorda'), (b'Asia/Rangoon', b'Asia/Rangoon'), (b'Asia/Riyadh', b'Asia/Riyadh'), (b'Asia/Sakhalin', b'Asia/Sakhalin'), (b'Asia/Samarkand', b'Asia/Samarkand'), (b'Asia/Seoul', b'Asia/Seoul'), (b'Asia/Shanghai', b'Asia/Shanghai'), (b'Asia/Singapore', b'Asia/Singapore'), (b'Asia/Taipei', b'Asia/Taipei'), (b'Asia/Tashkent', b'Asia/Tashkent'), (b'Asia/Tbilisi', b'Asia/Tbilisi'), (b'Asia/Tehran', b'Asia/Tehran'), (b'Asia/Thimphu', b'Asia/Thimphu'), (b'Asia/Tokyo', b'Asia/Tokyo'), (b'Asia/Ulaanbaatar', b'Asia/Ulaanbaatar'), (b'Asia/Urumqi', b'Asia/Urumqi'), (b'Asia/Vientiane', b'Asia/Vientiane'), (b'Asia/Vladivostok', b'Asia/Vladivostok'), (b'Asia/Yakutsk', b'Asia/Yakutsk'), (b'Asia/Yekaterinburg', b'Asia/Yekaterinburg'), (b'Asia/Yerevan', b'Asia/Yerevan'), (b'Atlantic/Azores', b'Atlantic/Azores'), (b'Atlantic/Bermuda', b'Atlantic/Bermuda'), (b'Atlantic/Canary', b'Atlantic/Canary'), (b'Atlantic/Cape_Verde', b'Atlantic/Cape_Verde'), (b'Atlantic/Faroe', b'Atlantic/Faroe'), (b'Atlantic/Madeira', b'Atlantic/Madeira'), (b'Atlantic/Reykjavik', b'Atlantic/Reykjavik'), (b'Atlantic/South_Georgia', b'Atlantic/South_Georgia'), (b'Atlantic/St_Helena', b'Atlantic/St_Helena'), (b'Atlantic/Stanley', b'Atlantic/Stanley'), (b'Australia/Adelaide', b'Australia/Adelaide'), (b'Australia/Brisbane', b'Australia/Brisbane'), (b'Australia/Broken_Hill', b'Australia/Broken_Hill'), (b'Australia/Currie', b'Australia/Currie'), (b'Australia/Darwin', b'Australia/Darwin'), (b'Australia/Eucla', b'Australia/Eucla'), (b'Australia/Hobart', b'Australia/Hobart'), (b'Australia/Lindeman', b'Australia/Lindeman'), (b'Australia/Lord_Howe', b'Australia/Lord_Howe'), (b'Australia/Melbourne', b'Australia/Melbourne'), (b'Australia/Perth', b'Australia/Perth'), (b'Australia/Sydney', b'Australia/Sydney'), (b'Canada/Atlantic', b'Canada/Atlantic'), (b'Canada/Central', b'Canada/Central'), (b'Canada/Eastern', b'Canada/Eastern'), (b'Canada/Mountain', b'Canada/Mountain'), (b'Canada/Newfoundland', b'Canada/Newfoundland'), (b'Canada/Pacific', b'Canada/Pacific'), (b'Europe/Amsterdam', b'Europe/Amsterdam'), (b'Europe/Andorra', b'Europe/Andorra'), (b'Europe/Athens', b'Europe/Athens'), (b'Europe/Belgrade', b'Europe/Belgrade'), (b'Europe/Berlin', b'Europe/Berlin'), (b'Europe/Bratislava', b'Europe/Bratislava'), (b'Europe/Brussels', b'Europe/Brussels'), (b'Europe/Bucharest', b'Europe/Bucharest'), (b'Europe/Budapest', b'Europe/Budapest'), (b'Europe/Chisinau', b'Europe/Chisinau'), (b'Europe/Copenhagen', b'Europe/Copenhagen'), (b'Europe/Dublin', b'Europe/Dublin'), (b'Europe/Gibraltar', b'Europe/Gibraltar'), (b'Europe/Guernsey', b'Europe/Guernsey'), (b'Europe/Helsinki', b'Europe/Helsinki'), (b'Europe/Isle_of_Man', b'Europe/Isle_of_Man'), (b'Europe/Istanbul', b'Europe/Istanbul'), (b'Europe/Jersey', b'Europe/Jersey'), (b'Europe/Kaliningrad', b'Europe/Kaliningrad'), (b'Europe/Kiev', b'Europe/Kiev'), (b'Europe/Lisbon', b'Europe/Lisbon'), (b'Europe/Ljubljana', b'Europe/Ljubljana'), (b'Europe/London', b'Europe/London'), (b'Europe/Luxembourg', b'Europe/Luxembourg'), (b'Europe/Madrid', b'Europe/Madrid'), (b'Europe/Malta', b'Europe/Malta'), (b'Europe/Mariehamn', b'Europe/Mariehamn'), (b'Europe/Minsk', b'Europe/Minsk'), (b'Europe/Monaco', b'Europe/Monaco'), (b'Europe/Moscow', b'Europe/Moscow'), (b'Europe/Oslo', b'Europe/Oslo'), (b'Europe/Paris', b'Europe/Paris'), (b'Europe/Podgorica', b'Europe/Podgorica'), (b'Europe/Prague', b'Europe/Prague'), (b'Europe/Riga', b'Europe/Riga'), (b'Europe/Rome', b'Europe/Rome'), (b'Europe/Samara', b'Europe/Samara'), (b'Europe/San_Marino', b'Europe/San_Marino'), (b'Europe/Sarajevo', b'Europe/Sarajevo'), (b'Europe/Simferopol', b'Europe/Simferopol'), (b'Europe/Skopje', b'Europe/Skopje'), (b'Europe/Sofia', b'Europe/Sofia'), (b'Europe/Stockholm', b'Europe/Stockholm'), (b'Europe/Tallinn', b'Europe/Tallinn'), (b'Europe/Tirane', b'Europe/Tirane'), (b'Europe/Uzhgorod', b'Europe/Uzhgorod'), (b'Europe/Vaduz', b'Europe/Vaduz'), (b'Europe/Vatican', b'Europe/Vatican'), (b'Europe/Vienna', b'Europe/Vienna'), (b'Europe/Vilnius', b'Europe/Vilnius'), (b'Europe/Volgograd', b'Europe/Volgograd'), (b'Europe/Warsaw', b'Europe/Warsaw'), (b'Europe/Zagreb', b'Europe/Zagreb'), (b'Europe/Zaporozhye', b'Europe/Zaporozhye'), (b'Europe/Zurich', b'Europe/Zurich'), (b'GMT', b'GMT'), (b'Indian/Antananarivo', b'Indian/Antananarivo'), (b'Indian/Chagos', b'Indian/Chagos'), (b'Indian/Christmas', b'Indian/Christmas'), (b'Indian/Cocos', b'Indian/Cocos'), (b'Indian/Comoro', b'Indian/Comoro'), (b'Indian/Kerguelen', b'Indian/Kerguelen'), (b'Indian/Mahe', b'Indian/Mahe'), (b'Indian/Maldives', b'Indian/Maldives'), (b'Indian/Mauritius', b'Indian/Mauritius'), (b'Indian/Mayotte', b'Indian/Mayotte'), (b'Indian/Reunion', b'Indian/Reunion'), (b'Pacific/Apia', b'Pacific/Apia'), (b'Pacific/Auckland', b'Pacific/Auckland'), (b'Pacific/Chatham', b'Pacific/Chatham'), (b'Pacific/Chuuk', b'Pacific/Chuuk'), (b'Pacific/Easter', b'Pacific/Easter'), (b'Pacific/Efate', b'Pacific/Efate'), (b'Pacific/Enderbury', b'Pacific/Enderbury'), (b'Pacific/Fakaofo', b'Pacific/Fakaofo'), (b'Pacific/Fiji', b'Pacific/Fiji'), (b'Pacific/Funafuti', b'Pacific/Funafuti'), (b'Pacific/Galapagos', b'Pacific/Galapagos'), (b'Pacific/Gambier', b'Pacific/Gambier'), (b'Pacific/Guadalcanal', b'Pacific/Guadalcanal'), (b'Pacific/Guam', b'Pacific/Guam'), (b'Pacific/Honolulu', b'Pacific/Honolulu'), (b'Pacific/Johnston', b'Pacific/Johnston'), (b'Pacific/Kiritimati', b'Pacific/Kiritimati'), (b'Pacific/Kosrae', b'Pacific/Kosrae'), (b'Pacific/Kwajalein', b'Pacific/Kwajalein'), (b'Pacific/Majuro', b'Pacific/Majuro'), (b'Pacific/Marquesas', b'Pacific/Marquesas'), (b'Pacific/Midway', b'Pacific/Midway'), (b'Pacific/Nauru', b'Pacific/Nauru'), (b'Pacific/Niue', b'Pacific/Niue'), (b'Pacific/Norfolk', b'Pacific/Norfolk'), (b'Pacific/Noumea', b'Pacific/Noumea'), (b'Pacific/Pago_Pago', b'Pacific/Pago_Pago'), (b'Pacific/Palau', b'Pacific/Palau'), (b'Pacific/Pitcairn', b'Pacific/Pitcairn'), (b'Pacific/Pohnpei', b'Pacific/Pohnpei'), (b'Pacific/Port_Moresby', b'Pacific/Port_Moresby'), (b'Pacific/Rarotonga', b'Pacific/Rarotonga'), (b'Pacific/Saipan', b'Pacific/Saipan'), (b'Pacific/Tahiti', b'Pacific/Tahiti'), (b'Pacific/Tarawa', b'Pacific/Tarawa'), (b'Pacific/Tongatapu', b'Pacific/Tongatapu'), (b'Pacific/Wake', b'Pacific/Wake'), (b'Pacific/Wallis', b'Pacific/Wallis'), (b'US/Alaska', b'US/Alaska'), (b'US/Arizona', b'US/Arizona'), (b'US/Central', b'US/Central'), (b'US/Eastern', b'US/Eastern'), (b'US/Hawaii', b'US/Hawaii'), (b'US/Mountain', b'US/Mountain'), (b'US/Pacific', b'US/Pacific'), (b'UTC', b'UTC')])),
+                ('tshirt', models.IntegerField(default=None, null=True, verbose_name='T-Shirt', blank=True, choices=[(1, 'Fitted Small'), (2, 'Fitted Medium'), (3, 'Fitted Large'), (4, 'Fitted X-Large'), (5, 'Fitted XX-Large'), (6, 'Fitted XXX-Large'), (7, 'Straight-cut Small'), (8, 'Straight-cut Medium'), (9, 'Straight-cut Large'), (10, 'Straight-cut X-Large'), (11, 'Straight-cut XX-Large'), (12, 'Straight-cut XXX-Large')])),
+                ('title', models.CharField(default=b'', max_length=70, verbose_name='What do you do for Mozilla?', blank=True)),
+                ('story_link', models.URLField(default=b'', help_text='If you have created something public that tells the story of how you came to be a Mozillian, specify that link here.', max_length=1024, verbose_name='Link to your contribution story', blank=True)),
+                ('referral_source', models.CharField(default=b'direct', max_length=32, choices=[(b'direct', b'Mozillians'), (b'contribute', b'Get Involved')])),
+                ('geo_city', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, blank=True, to='geo.City', null=True)),
+                ('geo_country', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, blank=True, to='geo.Country', null=True)),
+                ('geo_region', models.ForeignKey(on_delete=django.db.models.deletion.SET_NULL, blank=True, to='geo.Region', null=True)),
+                ('groups', models.ManyToManyField(related_name='members', through='groups.GroupMembership', to='groups.Group', blank=True)),
+                ('skills', models.ManyToManyField(related_name='members', to='groups.Skill', blank=True)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'ordering': ['full_name'],
+                'db_table': 'profile',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Vouch',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('description', models.TextField(default=b'', max_length=500, verbose_name='Reason for Vouching')),
+                ('autovouch', models.BooleanField(default=False)),
+                ('date', models.DateTimeField(default=None, null=True)),
+                ('vouchee', models.ForeignKey(related_name='vouches_received', to='users.UserProfile')),
+                ('voucher', models.ForeignKey(related_name='vouches_made', on_delete=django.db.models.deletion.SET_NULL, default=None, blank=True, to='users.UserProfile', null=True)),
+            ],
+            options={
+                'ordering': ['-date'],
+                'verbose_name_plural': 'vouches',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AlterUniqueTogether(
+            name='vouch',
+            unique_together=set([('vouchee', 'voucher')]),
+        ),
+        migrations.AddField(
+            model_name='language',
+            name='userprofile',
+            field=models.ForeignKey(to='users.UserProfile'),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='language',
+            unique_together=set([('code', 'userprofile')]),
+        ),
+        migrations.AddField(
+            model_name='externalaccount',
+            name='user',
+            field=models.ForeignKey(to='users.UserProfile'),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='externalaccount',
+            unique_together=set([('identifier', 'type', 'user')]),
+        ),
+    ]

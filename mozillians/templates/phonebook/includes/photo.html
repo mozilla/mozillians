@@ -1,7 +1,0 @@
-<a href="{{ url('phonebook:profile', profile.user.username) }}">
-<img class="photo u-photo profile-photo" src="{{ image_url }}" id="profile-photo"
-  {% if show_gravatar_info %}
-    title="{{ _('This is your Gravatar, change it at gravatar.com') }}"
-  {% endif %}
-  alt="{{ _('Profile photo') }}">
-</a>

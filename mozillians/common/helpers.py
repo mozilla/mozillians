@@ -1,23 +1,27 @@
-from datetime import datetime
+import urllib
+import urlparse
+
+from datetime import datetime, timedelta
 from hashlib import md5
 
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
 from django.template import Context
 from django.template.loader import get_template
+from django.utils.encoding import smart_str
 from django.utils.safestring import mark_safe
 
 import bleach
 import markdown as markdown_module
-from funfactory.helpers import urlparams
-from funfactory.urlresolvers import reverse
-from funfactory import utils
 from jingo import register
 from jinja2 import Markup, contextfunction
 from pytz import timezone, utc
 from sorl.thumbnail import get_thumbnail
 from tower import ugettext as _
 
+from mozillians.common.urlresolvers import reverse
+from mozillians.common import utils
 
 GRAVATAR_URL = 'https://secure.gravatar.com/avatar/{emaildigest}'
 
@@ -27,12 +31,39 @@ def absolutify(url):
     return utils.absolutify(url)
 
 
-def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL,
-             size=175, rating='pg'):
+def _urlencode(items):
+    """A Unicode-safe URLencoder."""
+    try:
+        return urllib.urlencode(items)
+    except UnicodeEncodeError:
+        return urllib.urlencode([(k, smart_str(v)) for k, v in items])
+
+
+@register.filter
+def urlparams(url_, hash=None, **query):
+    """Add a fragment and/or query paramaters to a URL.
+
+    New query params will be appended to exising parameters, except duplicate
+    names, which will be replaced.
+    """
+    url = urlparse.urlparse(url_)
+    fragment = hash if hash is not None else url.fragment
+
+    # Use dict(parse_qsl) so we don't get lists of values.
+    q = url.query
+    query_dict = dict(urlparse.parse_qsl(smart_str(q))) if q else {}
+    query_dict.update((k, v) for k, v in query.items())
+
+    query_string = _urlencode([(k, v) for k, v in query_dict.items() if v is not None])
+    new = urlparse.ParseResult(url.scheme, url.netloc, url.path, url.params,
+                               query_string, fragment)
+    return new.geturl()
+
+
+def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
     url = GRAVATAR_URL.format(emaildigest=md5(email).hexdigest())
-    url = urlparams(url, d=utils.absolutify(default_avatar_url),
-                    s=size, r=rating)
+    url = urlparams(url, d=utils.absolutify(default_avatar_url), s=size, r=rating)
     return url
 
 
@@ -50,25 +81,22 @@ def field_with_attrs(bfield, **kwargs):
 
 
 @register.function
-def mozillians_field(element):
+def mozillians_field(element, required=False):
     """Renders fields in jinja2.
 
     Takes a field and renders the appropriate elements.
     """
     template = get_template('includes/field.html')
-    context = Context({'field': element})
+    context = Context({'field': element, 'flag_required': required})
 
     return mark_safe(template.render(context))
 
 
 @register.function
 def privacy_field(element):
-    element = field_with_attrs(
-        element,
-        **{'class': 'privacy-choice',
-           'data-privacy-original': element.value(),
-           'label': _('Visible to:')}
-    )
+    element = field_with_attrs(element, **{'class': 'privacy-choice',
+                                           'data-privacy-original': element.value(),
+                                           'label': _('Visible to:')})
     template = get_template('includes/field.html')
     context = Context({'field': element,
                        'privacy': True})
@@ -225,3 +253,33 @@ def offset_of_timezone(timezone_name):
     offset = now.tzinfo.utcoffset(now)  # timedelta
     minutes = offset.seconds / 60 + offset.days * 24 * 60
     return minutes
+
+
+def get_datetime(days=0, weeks=0):
+    """Return a datetime object, given an offset in days and/or weeks.
+
+    The offset can be either positive or negative.
+    """
+    return (datetime.today() + timedelta(days=days, weeks=weeks))
+
+
+def get_object_or_none(model_class, **kwargs):
+    """Identical to get_object_or_404, except instead of returning Http404,
+    this returns None.
+
+    """
+    try:
+        return model_class.objects.get(**kwargs)
+    except model_class.DoesNotExist:
+        return None
+
+
+@register.function
+def static(path):
+    return staticfiles_storage.url(path)
+
+
+@register.function
+def url(viewname, *args, **kwargs):
+    """Helper for Django's ``reverse`` in templates."""
+    return reverse(viewname, args=args, kwargs=kwargs)

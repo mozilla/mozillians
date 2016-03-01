@@ -13,33 +13,32 @@ from mozillians.users.tests import UserFactory
 class TestGroupRemoveMember(TestCase):
     def setUp(self):
         self.group = GroupFactory()
-        self.member = UserFactory(userprofile={'is_vouched': True})
+        self.member = UserFactory()
         self.group.add_member(self.member.userprofile)
         self.url = reverse('groups:remove_member', prefix='/en-US/',
-                           kwargs={'group_pk': self.group.pk,
+                           kwargs={'url': self.group.url,
                                    'user_pk': self.member.userprofile.pk})
 
-    def test_as_superuser(self):
-        # superuser can remove another from a group they're not curator of
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
+    def test_as_manager(self):
+        # manager can remove another from a group they're not curator of
+        user = UserFactory(manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
-    def test_as_superuser_from_unleavable_group(self):
-        # superuser can remove people even from unleavable groups
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
+    def test_as_manager_from_unleavable_group(self):
+        # manager can remove people even from unleavable groups
+        user = UserFactory(manager=True)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
-    def test_as_superuser_removing_curator(self):
-        # but even superuser cannot remove a curator
-        user = UserFactory(is_superuser=True, userprofile={'is_vouched': True})
-        self.group.curator = self.member.userprofile
-        self.group.save()
+    def test_as_manager_removing_curator(self):
+        # but even manager cannot remove a curator
+        user = UserFactory(manager=True)
+        self.group.curators.add(self.member.userprofile)
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -63,28 +62,35 @@ class TestGroupRemoveMember(TestCase):
 
     def test_as_simple_user_removing_another(self):
         # user cannot remove anyone else
-        user = UserFactory(userprofile={'is_vouched': True})
+        user = UserFactory()
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(404, response.status_code)
 
     def test_as_curator(self):
         # curator can remove another
-        curator = UserFactory(userprofile={'is_vouched': True})
-        self.group.curator = curator.userprofile
-        self.group.save()
+        curator = UserFactory()
+        self.group.curators.add(curator.userprofile)
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
         ok_(not self.group.has_member(self.member))
 
+    def test_as_curator_twice(self):
+        # removing a second time doesn't blow up
+        curator = UserFactory()
+        self.group.curator = curator.userprofile
+        self.group.save()
+        with self.login(curator) as client:
+            client.post(self.url, follow=False)
+            client.post(self.url, follow=False)
+
     def test_as_curator_from_unleavable(self):
         # curator can remove another even from an unleavable group
         self.group.members_can_leave = False
         self.group.save()
-        curator = UserFactory(userprofile={'is_vouched': True})
-        self.group.curator = curator.userprofile
-        self.group.save()
+        curator = UserFactory()
+        self.group.curators.add(curator.userprofile)
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
@@ -92,18 +98,18 @@ class TestGroupRemoveMember(TestCase):
 
     def test_accepting_sends_email(self):
         # when curator accepts someone, they are sent an email
-        curator = UserFactory(userprofile={'is_vouched': True})
-        self.group.curator = curator.userprofile
-        self.group.save()
-        user = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
+        self.group.curators.add(curator.userprofile)
+        user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes membership request
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:confirm_member', args=[self.group.pk, user.userprofile.pk],
+        url = reverse('groups:confirm_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/')
-        with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
             with self.login(curator) as client:
                 response = client.post(url, follow=False)
         eq_(302, response.status_code)
@@ -117,18 +123,18 @@ class TestGroupRemoveMember(TestCase):
 
     def test_rejecting_sends_email(self):
         # when curator rejects someone, they are sent an email
-        curator = UserFactory(userprofile={'is_vouched': True})
-        self.group.curator = curator.userprofile
-        self.group.save()
-        user = UserFactory(userprofile={'is_vouched': True})
+        curator = UserFactory()
+        self.group.curators.add(curator.userprofile)
+        user = UserFactory()
         self.group.add_member(user.userprofile, GroupMembership.PENDING)
         # no email when someone makes request
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:remove_member', args=[self.group.pk, user.userprofile.pk],
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/',)
-        with patch('mozillians.groups.models.email_membership_change', autospec=True) as mock_email:
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
             with self.login(curator) as client:
                 response = client.post(url, follow=False)
         eq_(302, response.status_code)
@@ -139,3 +145,21 @@ class TestGroupRemoveMember(TestCase):
         eq_(user.pk, user_pk)
         eq_(GroupMembership.PENDING, old_status)
         ok_(new_status is None)
+
+    def test_remove_member_send_mail(self):
+        # when curator remove someone, sent mail to member
+        curator = UserFactory()
+        self.group.curators.add(curator.userprofile)
+        user = UserFactory()
+        self.group.add_member(user.userprofile)
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
+                      prefix='/fr/',)
+        with patch('mozillians.groups.models.member_removed_email', autospec=True) as mock_email:
+            with self.login(curator) as client:
+                response = client.post(url, follow=False)
+        eq_(302, response.status_code)
+        # email sent for curated group
+        ok_(mock_email.delay.called)
+        group_pk, user_pk = mock_email.delay.call_args[0]
+        eq_(self.group.pk, group_pk)
+        eq_(user.pk, user_pk)

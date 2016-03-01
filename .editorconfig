@@ -1,0 +1,16 @@
+root = true
+
+# General configuration
+[*]
+charset = utf-8
+indent_style = space
+end_of_line = lf
+trim_trailing_whitespace = true
+
+# Python, Javscript, css and less configuration
+[*.{py,js,css,less}]
+indent_size = 4
+
+# Html and yaml configuration
+[*.{html,yml}]
+indent_size = 2

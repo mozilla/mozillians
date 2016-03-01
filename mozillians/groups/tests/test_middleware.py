@@ -9,7 +9,7 @@ from mozillians.users.tests import UserFactory
 
 class OldGroupRedirectionMiddlewareTests(TestCase):
     def setUp(self):
-        self.user = UserFactory.create(userprofile={'is_vouched': True})
+        self.user = UserFactory.create()
 
     def test_valid_name(self):
         """Valid group with name that matches the old group regex doens't redirect."""

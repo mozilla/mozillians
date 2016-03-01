@@ -6,18 +6,21 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
-from django.forms.models import inlineformset_factory
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 
+import django_filters
 import happyforms
 from PIL import Image
-from product_details import product_details
+from dal import autocomplete, fields as dal_fields
 from tower import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.groups.models import Language, Skill
+from mozillians.api.models import APIv2App
+from mozillians.groups.models import Skill
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
-from mozillians.users.models import ExternalAccount, UserProfile
+from mozillians.users import get_languages_for_locale
+from mozillians.users.models import ExternalAccount, Language, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -31,16 +34,45 @@ class ExternalAccountForm(happyforms.ModelForm):
     def clean(self):
         cleaned_data = super(ExternalAccountForm, self).clean()
         identifier = cleaned_data.get('identifier')
-        type = cleaned_data.get('type')
+        account_type = cleaned_data.get('type')
 
-        if type:
-            validator = ExternalAccount.ACCOUNT_TYPES[type].get('validator')
+        if account_type and identifier:
+            # If the Account expects an identifier and user provided a
+            # full URL, try to extract the identifier from the URL.
+            url = ExternalAccount.ACCOUNT_TYPES[account_type].get('url')
+            if url and identifier.startswith('http'):
+                url_pattern_re = url.replace('{identifier}', '(.+)')
+                identifier = identifier.rstrip('/')
+                url_pattern_re = url_pattern_re.rstrip('/')
+                match = re.match(url_pattern_re, identifier)
+                if match:
+                    identifier = match.groups()[0]
+
+            validator = ExternalAccount.ACCOUNT_TYPES[account_type].get('validator')
             if validator:
-                cleaned_data['identifier'] = validator(identifier)
+                identifier = validator(identifier)
+
+            cleaned_data['identifier'] = identifier
+
         return cleaned_data
 
 AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                         form=ExternalAccountForm, extra=1)
+
+
+class AlternateEmailForm(happyforms.ModelForm):
+    class Meta:
+        model = ExternalAccount
+        fields = ['privacy']
+
+AlternateEmailFormset = inlineformset_factory(UserProfile, ExternalAccount,
+                                              form=AlternateEmailForm, extra=0)
+
+
+class EmailPrivacyForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['privacy_email']
 
 
 class SearchForm(happyforms.Form):
@@ -54,6 +86,38 @@ class SearchForm(happyforms.Form):
     def clean_limit(self):
         limit = self.cleaned_data['limit'] or settings.ITEMS_PER_PAGE
         return limit
+
+
+def filter_vouched(qs, choice):
+    if choice == SearchFilter.CHOICE_ONLY_VOUCHED:
+        return qs.filter(is_vouched=True)
+    elif choice == SearchFilter.CHOICE_ONLY_UNVOUCHED:
+        return qs.filter(is_vouched=False)
+    return qs
+
+
+class SearchFilter(django_filters.FilterSet):
+    CHOICE_ONLY_VOUCHED = 'yes'
+    CHOICE_ONLY_UNVOUCHED = 'no'
+    CHOICE_ALL = 'all'
+
+    CHOICES = (
+        (CHOICE_ONLY_VOUCHED, _lazy('Vouched')),
+        (CHOICE_ONLY_UNVOUCHED, _lazy('Unvouched')),
+        (CHOICE_ALL, _lazy('All')),
+    )
+
+    vouched = django_filters.ChoiceFilter(
+        name='vouched', label=_lazy(u'Display only'), required=False,
+        choices=CHOICES, action=filter_vouched)
+
+    class Meta:
+        model = UserProfile
+        fields = ['vouched', 'skills', 'groups', 'timezone']
+
+    def __init__(self, *args, **kwargs):
+        super(SearchFilter, self).__init__(*args, **kwargs)
+        self.filters['timezone'].field.choices.insert(0, ('', _lazy(u'All timezones')))
 
 
 class UserForm(happyforms.ModelForm):
@@ -78,7 +142,7 @@ class UserForm(happyforms.ModelForm):
         # This causes a potential race condition however the worst that can
         # happen is bad UI.
         if (User.objects.filter(username=username).
-            exclude(pk=self.instance.id).exists()):
+                exclude(pk=self.instance.id).exists()):
             raise forms.ValidationError(_(u'This username is in use. Please try'
                                           u' another.'))
 
@@ -93,45 +157,16 @@ class UserForm(happyforms.ModelForm):
         return username
 
 
-class ProfileForm(happyforms.ModelForm):
+class BasicInformationForm(happyforms.ModelForm):
     photo = forms.ImageField(label=_lazy(u'Profile Photo'), required=False)
     photo_delete = forms.BooleanField(label=_lazy(u'Remove Profile Photo'),
                                       required=False)
-    date_mozillian = forms.DateField(
-        required=False,
-        label=_lazy(u'When did you get involved with Mozilla?'),
-        widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
-                               required=False))
-    languages = forms.CharField(
-        label=_lazy(u'Start typing to add a language you speak (example: '
-                    u'English, French, German)'), required=False)
-    skills = forms.CharField(
-        label=_lazy(u'Start typing to add a skill (example: Python, '
-                    u'javascript, Graphic Design, User Research)'),
-        required=False)
 
     class Meta:
         model = UserProfile
-        fields = ('full_name', 'ircname', 'bio', 'photo', 'country',
-                  'region', 'city', 'allows_community_sites', 'tshirt',
-                  'title', 'allows_mozilla_sites',
-                  'date_mozillian', 'timezone',
-                  'privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                  'privacy_email', 'privacy_timezone', 'privacy_tshirt',
-                  'privacy_bio', 'privacy_city', 'privacy_region',
-                  'privacy_country', 'privacy_groups',
-                  'privacy_skills', 'privacy_languages',
-                  'privacy_date_mozillian', 'privacy_title')
+        fields = ('photo', 'privacy_photo', 'full_name',
+                  'privacy_full_name', 'bio', 'privacy_bio',)
         widgets = {'bio': forms.Textarea()}
-
-    def __init__(self, *args, **kwargs):
-        locale = kwargs.pop('locale', 'en-US')
-
-        super(ProfileForm, self).__init__(*args, **kwargs)
-        country_list = product_details.get_regions(locale).items()
-        country_list = sorted(country_list, key=lambda country: country[1])
-        country_list.insert(0, ('', '----'))
-        self.fields['country'].choices = country_list
 
     def clean_photo(self):
         """Clean possible bad Image data.
@@ -154,33 +189,180 @@ class ProfileForm(happyforms.ModelForm):
                 photo.size = cleaned_photo.tell()
         return photo
 
-    def clean_languages(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$',
-                        self.cleaned_data['languages']):
-            raise forms.ValidationError(_(u'Languages can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
-        languages = self.cleaned_data['languages']
 
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          languages.lower().split(',')))
+class SkillCreateField(dal_fields.CreateModelFieldMixin, forms.ModelMultipleChoiceField):
 
-    def clean_skills(self):
-        if not re.match(r'^[a-zA-Z0-9 .:,-]*$', self.cleaned_data['skills']):
-            raise forms.ValidationError(_(u'Skills can only contain '
-                                          u'alphanumeric characters, dashes, '
-                                          u'spaces.'))
-        skills = self.cleaned_data['skills']
-        return filter(lambda x: x,
-                      map(lambda x: x.strip() or False,
-                          skills.lower().split(',')))
+    def create_value(self, value):
+        """This is used to craete a new Skill,
+        if it doesn't already exist in the database.
+        """
+        return Skill.objects.create(name=value).id
 
-    def save(self):
+    def clean(self, value):
+        """Custom clean method.
+
+        Allow only certain characters when creating a new instance.
+        """
+        new_value = ''
+        # value is a list of strings (IDs of saved objects or string values)
+        # eg ['1', '9', 'foo']
+        for item in value:
+
+            try:
+                # Try to validate the list. If the given list has not only
+                # PK values, Django's _check_values in ModelMultipleChoiceField
+                # will raise a ValidationError
+                return super(SkillCreateField, self).clean(value)
+            except forms.ValidationError as e:
+                # catch the non-numberic value (eg 'foo')
+                new_value = e.params.get('pk', None)
+
+            if new_value:
+                # Feed the value to the regex. If we have a match then create
+                # a new Skill in the db and add the corresponding PK to the list of
+                # IDS. Else we have an invalid input, remove it and raise a ValidationError
+                if re.match(r'^[a-zA-Z0-9 +.:,-]*$', new_value):
+                    new_db_item = self.create_value(new_value)
+                    value[value.index(new_value)] = new_db_item
+                else:
+                    value.pop(value.index(new_value))
+                    msg = _(u'Skills can only contain latin characters and +.:-.')
+                    self.error_messages['invalid_choice'] = msg
+                    raise forms.ValidationError(self.error_messages['invalid_choice'],
+                                                code='invalid_choice')
+
+        return super(SkillCreateField, self).clean(value)
+
+
+class SkillsForm(happyforms.ModelForm):
+    skills = SkillCreateField(
+        required=False,
+        queryset=Skill.objects.all(),
+        widget=autocomplete.ModelSelect2Multiple(url='groups:skills-autocomplete'))
+
+    def __init__(self, *args, **kwargs):
+        super(SkillsForm, self).__init__(*args, **kwargs)
+        self.fields['skills'].help_text = (u'Start typing to add a skill (example: Python, '
+                                           u'javascript, Graphic Design, User Research)')
+
+    def save(self, *args, **kwargs):
         """Save the data to profile."""
         self.instance.set_membership(Skill, self.cleaned_data['skills'])
-        self.instance.set_membership(Language, self.cleaned_data['languages'])
-        super(ProfileForm, self).save()
+        super(SkillsForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = UserProfile
+        fields = ('privacy_skills', 'skills',)
+
+
+class LanguagesPrivacyForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('privacy_languages',)
+
+
+class LocationForm(happyforms.ModelForm):
+    lat = forms.FloatField(widget=forms.HiddenInput)
+    lng = forms.FloatField(widget=forms.HiddenInput)
+    savecountry = forms.BooleanField(label=_lazy(u'Required'),
+                                     initial=True, required=False,
+                                     widget=forms.CheckboxInput(attrs={'disabled': 'disabled'}))
+    saveregion = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
+    savecity = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ('timezone', 'privacy_timezone', 'privacy_geo_city', 'privacy_geo_region',
+                  'privacy_geo_country',)
+
+    def clean(self):
+        # If lng/lat were provided, make sure they point at a country somewhere...
+        if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
+            # We only want to call reverse_geocode if some location data changed.
+            if ('lat' in self.changed_data or 'lng' in self.changed_data or
+                    'saveregion' in self.changed_data or 'savecity' in self.changed_data):
+                self.instance.lat = self.cleaned_data['lat']
+                self.instance.lng = self.cleaned_data['lng']
+                self.instance.reverse_geocode()
+                if not self.instance.geo_country:
+                    error_msg = _('Location must be inside a country.')
+                    self.errors['savecountry'] = self.error_class([error_msg])
+                    del self.cleaned_data['savecountry']
+                # If the user doesn't want their region/city saved, respect it.
+                if not self.cleaned_data.get('saveregion'):
+                    if not self.cleaned_data.get('savecity'):
+                        self.instance.geo_region = None
+                    else:
+                        error_msg = _('Region must also be saved if city is saved.')
+                        self.errors['saveregion'] = self.error_class([error_msg])
+
+                if not self.cleaned_data.get('savecity'):
+                    self.instance.geo_city = None
+        else:
+            self.errors['location'] = self.error_class([_('Search for your country on the map.')])
+            self.errors['savecountry'] = self.error_class([_('Country cannot be empty.')])
+            del self.cleaned_data['savecountry']
+
+        return self.cleaned_data
+
+
+class ContributionForm(happyforms.ModelForm):
+    date_mozillian = forms.DateField(
+        required=False,
+        label=_lazy(u'When did you get involved with Mozilla?'),
+        widget=MonthYearWidget(years=range(1998, datetime.today().year + 1),
+                               required=False))
+
+    class Meta:
+        model = UserProfile
+        fields = ('title', 'privacy_title',
+                  'date_mozillian', 'privacy_date_mozillian',
+                  'story_link', 'privacy_story_link',)
+
+
+class TshirtForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('tshirt', 'privacy_tshirt',)
+
+
+class GroupsPrivacyForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('privacy_groups',)
+
+
+class IRCForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('ircname', 'privacy_ircname',)
+
+
+class DeveloperForm(happyforms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('allows_community_sites', 'allows_mozilla_sites',)
+
+
+class BaseLanguageFormSet(BaseInlineFormSet):
+
+    def __init__(self, *args, **kwargs):
+        self.locale = kwargs.pop('locale', 'en')
+        super(BaseLanguageFormSet, self).__init__(*args, **kwargs)
+
+    def add_fields(self, form, index):
+        super(BaseLanguageFormSet, self).add_fields(form, index)
+        choices = [('', '---------')] + get_languages_for_locale(self.locale)
+        form.fields['code'].choices = choices
+
+    class Meta:
+        models = Language
+        fields = ['code']
+
+
+LanguagesFormset = inlineformset_factory(UserProfile, Language,
+                                         formset=BaseLanguageFormSet,
+                                         extra=1)
 
 
 class EmailForm(happyforms.Form):
@@ -188,8 +370,7 @@ class EmailForm(happyforms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if (User.objects
-            .exclude(pk=self.initial['user_id']).filter(email=email).exists()):
+        if (User.objects.exclude(pk=self.initial['user_id']).filter(email=email).exists()):
             raise forms.ValidationError(_(u'Email is currently associated with another user.'))
         return email
 
@@ -197,18 +378,34 @@ class EmailForm(happyforms.Form):
         return self.cleaned_data['email'] != self.initial['email']
 
 
-class RegisterForm(ProfileForm):
+class RegisterForm(BasicInformationForm, LocationForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
 
+    class Meta:
+        model = UserProfile
+        fields = ('photo', 'full_name', 'timezone', 'privacy_photo', 'privacy_full_name', 'optin',
+                  'privacy_timezone', 'privacy_geo_city', 'privacy_geo_region',
+                  'privacy_geo_country',)
+
 
 class VouchForm(happyforms.Form):
-    """Vouching is captured via a user's id."""
-    vouchee = forms.IntegerField(widget=forms.HiddenInput)
+    """Vouching is captured via a user's id and a description of the reason for vouching."""
+    description = forms.CharField(
+        label=_lazy(u'Provide a reason for vouching with relevant links'),
+        widget=forms.Textarea(attrs={'rows': 10, 'cols': 20, 'maxlength': 500}),
+        max_length=500,
+        error_messages={'required': _(u'You must enter a reason for vouching for this person.')}
+    )
 
 
 class InviteForm(happyforms.ModelForm):
+    message = forms.CharField(
+        label=_lazy(u'Personal message to be included in the invite email'),
+        required=False, widget=forms.Textarea(),
+    )
+    recipient = forms.EmailField(label=_lazy(u"Recipient's email"))
 
     def clean_recipient(self):
         recipient = self.cleaned_data['recipient']
@@ -220,4 +417,11 @@ class InviteForm(happyforms.ModelForm):
 
     class Meta:
         model = Invite
-        fields = ['recipient', 'message']
+        fields = ['recipient']
+
+
+class APIKeyRequestForm(happyforms.ModelForm):
+
+    class Meta:
+        model = APIv2App
+        fields = ('name', 'description', 'url',)
