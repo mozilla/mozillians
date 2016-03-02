@@ -13,8 +13,7 @@ if newrelic:
     else:
         newrelic = False
 
-os.environ['CELERY_LOADER'] = 'django'
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mozillians.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mozillians.settings')
 
 # Add `mozillians` to the python path
 wsgidir = os.path.dirname(__file__)

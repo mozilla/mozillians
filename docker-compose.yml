@@ -17,7 +17,9 @@ celery:
     - db
     - es
     - broker
-  command: python manage.py celeryd -l INFO
+  command: celery -A mozillians worker -l INFO
+  environment:
+    - C_FORCE_ROOT=true
 web:
   build: .
   ports:
