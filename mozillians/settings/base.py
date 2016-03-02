@@ -8,7 +8,6 @@ import sys
 
 from django.utils.functional import lazy
 
-import djcelery
 from urlparse import urljoin
 from django_sha2 import get_password_hashers
 
@@ -458,9 +457,6 @@ DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 # Celery configuration
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
-# Django-celery setup
-djcelery.setup_loader()
-
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
 CELERY_ALWAYS_EAGER = True
@@ -468,6 +464,7 @@ BROKER_CONNECTION_TIMEOUT = 0.1
 CELERY_RESULT_BACKEND = 'amqp'
 CELERY_IGNORE_RESULT = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_ACCEPT_CONTENT = ['pickle']
 
 # Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
 # The task can catch that and recover but should exit ASAP.
