@@ -1,4 +1,3 @@
-import sys
 from socket import error as socket_error
 
 from django import forms
@@ -474,12 +473,12 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             investigator.get(timeout=5)
         except investigator.TimeoutError as e:
             messages.error(request, 'Worker timeout: %s' % e)
-        except:
-            messages.error(request, 'An error occured: %s' % sys.exc_info()[0])
+        except Exception as e:
+            raise e
         else:
             messages.success(request, 'Celery is OK')
-        finally:
-            return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
+
+        return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
 
     def get_urls(self):
         """Return custom and UserProfileAdmin urls."""
