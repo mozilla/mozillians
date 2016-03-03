@@ -1,3 +1,4 @@
+import sys
 from socket import error as socket_error
 
 from django import forms
@@ -473,6 +474,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             investigator.get(timeout=5)
         except investigator.TimeoutError as e:
             messages.error(request, 'Worker timeout: %s' % e)
+        except:
+            messages.error(request, 'An error occured: %s' % sys.exc_info()[0])
         else:
             messages.success(request, 'Celery is OK')
         finally:
