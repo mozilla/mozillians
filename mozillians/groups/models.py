@@ -330,3 +330,23 @@ class Skill(GroupBase):
         All users can remove a skill.
         """
         return True
+
+
+class Invite(models.Model):
+    inviter = models.ForeignKey('users.UserProfile',
+                                null=True, verbose_name=_lazy(u'Inviter'),
+                                on_delete=models.SET_NULL,
+                                related_name='group_invites')
+    redeemer = models.ForeignKey('users.UserProfile',
+                                 verbose_name=_lazy(u'Redeemer'),
+                                 related_name='group_invites_redeemed')
+    group = models.ForeignKey('Group', related_name='invites')
+    accepted = models.NullBooleanField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = (('group', 'redeemer'),)
+
+    def __unicode__(self):
+        return 'Invite #{}'.format(self.id)

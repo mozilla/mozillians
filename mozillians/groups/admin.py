@@ -13,7 +13,8 @@ from import_export.fields import Field
 from import_export.resources import ModelResource
 
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
-                                      Skill, SkillAlias)
+                                      Invite, Skill, SkillAlias)
+from mozillians.phonebook.admin import RedeemedInviteFilter
 
 
 class EmptyGroupFilter(SimpleListFilter):
@@ -283,6 +284,28 @@ class SkillAdmin(GroupBaseAdmin):
     add_form = SkillAddAdminForm
     inlines = [SkillAliasInline]
 
+
+class InviteAutocompleteForm(forms.ModelForm):
+
+    class Meta:
+        model = Invite
+        fields = ('__all__')
+        widgets = {
+            'inviter': autocomplete.ModelSelect2(url='users:vouched-autocomplete'),
+            'redeemer': autocomplete.ModelSelect2(url='users:vouched-autocomplete'),
+            'group': autocomplete.ModelSelect2(url='groups:group-autocomplete')
+        }
+
+
+class InviteAdmin(ExportMixin, admin.ModelAdmin):
+    search_fields = ['inviter', 'redeemer', 'group']
+    list_display = ['inviter', 'redeemer', 'group']
+    readonly_fields = ['accepted', 'created', 'updated']
+    list_filter = [RedeemedInviteFilter]
+    form = InviteAutocompleteForm
+
+
 admin.site.register(Group, GroupAdmin)
 admin.site.register(GroupMembership, GroupMembershipAdmin)
 admin.site.register(Skill, SkillAdmin)
+admin.site.register(Invite, InviteAdmin)
