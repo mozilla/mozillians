@@ -466,6 +466,7 @@ CELERY_IGNORE_RESULT = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_TASK_RESULT_EXPIRES = 3600
+CELERY_SEND_TASK_ERROR_EMAILS = True
 
 # Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
 # The task can catch that and recover but should exit ASAP.
