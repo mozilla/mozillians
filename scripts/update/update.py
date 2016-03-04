@@ -55,8 +55,6 @@ def update_assets(ctx):
 def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local("python manage.py migrate --noinput")
-        ctx.local("python manage.py migrate djcelery zero")
-        ctx.local("python manage.py migrate djcelery")
 
 
 @task
