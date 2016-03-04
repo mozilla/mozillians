@@ -6,7 +6,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias, GroupMembership
-from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
+from mozillians.groups.tests import (GroupAliasFactory, GroupFactory, InviteFactory,
                                      SkillFactory)
 from mozillians.users.tests import UserFactory
 
@@ -283,3 +283,21 @@ class GroupAliasBaseTests(TestCase):
         # throwing it away
         group = GroupFactory.create(name=u'A (ñâme)-with_ελλάδα "s0me" \'screwy\' chars')
         eq_(u'a-name-with_ellada-s0me-screwy-chars', group.url)
+
+
+class GroupInviteTests(TestCase):
+    def test_accept_invitation(self):
+        (inviter, redeemer) = UserFactory.create_batch(2)
+        invite = InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile)
+        invite.accept()
+        ok_(invite.accepted)
+        ok_(invite.redeemed)
+        ok_(invite.group.has_member(invite.redeemer))
+
+    def test_reject_invitation(self):
+        (inviter, redeemer) = UserFactory.create_batch(2)
+        invite = InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile)
+        invite.reject()
+        ok_(invite.accepted is False)
+        ok_(invite.redeemed)
+        ok_(not invite.group.has_member(invite.redeemer))

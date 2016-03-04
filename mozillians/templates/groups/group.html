@@ -9,6 +9,21 @@
   search-page
 {% endblock %}
 
+{% block messages %}
+  {% if invitation %}
+    <div class="alert alert-info">
+      You have been invited to join this group.
+      <div>
+        <a class="button"
+           href="{{ url('groups:accept_invitation', invitation.pk) }}">Accept</a>
+        <a class="button button-negative"
+           href="{{ url('groups:reject_invitation', invitation.pk) }}">Reject</a>
+      </div>
+    </div>
+  {% endif  %}
+  {{ super() }}
+{% endblock messages %}
+
 {% block content %}
 
     <h1 id="group_name">

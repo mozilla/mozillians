@@ -27,6 +27,10 @@ urlpatterns = patterns(
         'views.remove_member', name='remove_member'),
     url('^group/(?P<url>[-\w]+)/confirm/(?P<user_pk>\d+)/$',
         'views.confirm_member', name='confirm_member'),
+    url('^invitation/(?P<invite_pk>\d+)/accept/$',
+        'views.accept_reject_invitation', {'accept': True}, name='accept_invitation'),
+    url('^invitation/(?P<invite_pk>\d+)/reject/$',
+        'views.accept_reject_invitation', {'accept': False}, name='reject_invitation'),
 
     url('^skills/$', 'views.index_skills', name='index_skills'),
     url('^skill/(?P<url>[-\w]+)/$', 'views.show',

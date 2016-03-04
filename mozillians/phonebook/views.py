@@ -461,7 +461,7 @@ def invite(request):
                   {
                       'invite_form': invite_form,
                       'vouch_form': vouch_form,
-                      'invites': profile.invites.all(),
+                      'invites': profile.phonebook_invites.all(),
                       'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
                   })
 
