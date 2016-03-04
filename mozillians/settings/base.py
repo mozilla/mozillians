@@ -465,6 +465,7 @@ CELERY_RESULT_BACKEND = 'amqp'
 CELERY_IGNORE_RESULT = True
 CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_TASK_RESULT_EXPIRES = 3600
 
 # Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
 # The task can catch that and recover but should exit ASAP.
