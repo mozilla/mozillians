@@ -10,6 +10,9 @@ from django.utils.translation import ugettext_lazy as _lazy
 from mozillians.groups.models import Group, Invite
 
 
+MAX_INVALIDATION_DAYS = 2 * 365
+
+
 class SortForm(forms.Form):
     """Group Index Sort Form."""
     sort = forms.ChoiceField(required=False,
@@ -90,6 +93,15 @@ class GroupInvalidationForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(GroupInvalidationForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        super(GroupInvalidationForm, self).clean()
+        # Max invalidation period is 2 years
+        if self.cleaned_data['invalidation_days'] > MAX_INVALIDATION_DAYS:
+            msg = _(u'The maximum expiration date for a group cannot exceed two years.')
+            self._errors['invalidation_days'] = self.error_class([msg])
+
+        return self.cleaned_data
 
     class Meta:
         model = Group
