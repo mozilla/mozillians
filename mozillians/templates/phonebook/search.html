@@ -29,7 +29,7 @@
   <h1>{{ _('Search') }}</h1>
   <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
     {{ field_with_attrs(search_form.q,
-                        placeholder=_('Search for people, groups and more')) }}
+                        placeholder=_('Search for people, groups and more'), maxlength="140") }}
 
     {{ search_form.limit }}
     <button type="submit">
