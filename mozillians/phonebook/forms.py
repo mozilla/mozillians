@@ -193,10 +193,11 @@ class BasicInformationForm(happyforms.ModelForm):
 class SkillCreateField(dal_fields.CreateModelFieldMixin, forms.ModelMultipleChoiceField):
 
     def create_value(self, value):
-        """This is used to craete a new Skill,
+        """This is used to create a new Skill,
         if it doesn't already exist in the database.
         """
-        return Skill.objects.create(name=value).id
+        skill, _created = Skill.objects.get_or_create(name=value)
+        return skill.id
 
     def clean(self, value):
         """Custom clean method.
