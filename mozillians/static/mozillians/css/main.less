@@ -75,6 +75,13 @@
 @blueDark:    #277AC1;
 @blueLight:   #43A6E2;
 
+/* Mixins
+==================== */
+
+@footerDesktop: 290px;
+@footerTablet: 380px;
+@footerMobile: 410px;
+
 #gradient {
     .vertical-transparent-fade(@direction, @startColor, @endColor) {
         background-color: @endColor;
@@ -133,8 +140,47 @@
 .html-rtl .right{float:left;}
 .clear{clear:both;}
 
+html,
+body,
+#outer-wrapper {
+  height: 100%;
+}
+
 body {
-    #content-wrapper { background: @white; }
+    #page {
+        min-height: 100%;
+        margin-bottom: -@footerDesktop;
+        background-color: @white;
+        @media (max-width: @breakTablet) {
+            margin-bottom: -@footerTablet;
+        }
+        @media (max-width: @breakMobileLandscape) {
+            margin-bottom: -@footerMobile;
+        }
+        #content-wrapper {
+            background: @white;
+        }
+        .wrapper {
+            background: url("/static/mozillians/img/sandstone/bg-sky.png") #eaeff2;
+            width: 100%;
+            #masthead {
+                max-width: 950px;
+            }
+        }
+    }
+    // Placeholder for pushing the footer
+    #page:after {
+        content: "";
+        display: block;
+        height: @footerDesktop;
+        @media (max-width: @breakTablet) {
+            height: @footerTablet;
+        }
+        @media (max-width: @breakMobileLandscape) {
+            height: @footerMobile;
+        }
+    }
+
     &.loggedin {
         #masthead {
             min-height: 55px;
@@ -147,7 +193,6 @@ body {
         }
         #main {
             padding: 25px 0 50px;
-            min-height: 500px;
             @media (max-width: @breakTablet) {
                 padding: 25px 20px 50px 20px;
             }
@@ -177,7 +222,6 @@ body {
         }
         &.old {
             #main {
-                min-height: 500px;
                 input[type=text], input[type=password],
                 input[type=email], input[type=url],
                 input[type=search],
@@ -192,6 +236,9 @@ body {
         }
     }
     &.loggedout {
+        #outer-wrapper {
+            background: url("/static/mozillians/img/sandstone/bg-sky.png") #eaeff2;
+        }
         #masthead {
             z-index: 1000;
             nav {
@@ -213,7 +260,6 @@ body {
         }
         #main {
             padding: 25px 0 50px;
-            min-height: 500px;
         }
     }
     form {
@@ -309,7 +355,6 @@ body {
 }
 
 #outer-wrapper {
-    background: url("/static/mozillians/img/sandstone/bg-sky.png") #eaeff2;
     form {
         textarea,
         input[type=email],
@@ -800,6 +845,14 @@ footer#colophon {
     background-color: #57585c;
     color: @white;
     margin: 0;
+    height: @footerDesktop;
+    @media (max-width: @breakTablet) {
+        height: @footerTablet;
+    }
+    @media (max-width: @breakMobileLandscape) {
+        height: @footerMobile;
+    }
+
     hr {
         border: 0;
         height: 5px;
@@ -863,8 +916,9 @@ footer#colophon {
 ==================== */
 body#home {
     &.loggedout {
-        #content-wrapper {
-            background: inherit;
+        #content-wrapper,
+        #page {
+            background: url('/static/mozillians/img/sandstone/bg-sky.png?56036ce2aff2') #eaeff2;
         }
         nav #nav-login {
             @media (max-width: @breakTablet) {
@@ -872,7 +926,7 @@ body#home {
             }
         }
         #main {
-        padding: 0;
+            padding: 0;
             &.container {
                 width: auto;
                 padding-right: 0;
@@ -1112,14 +1166,22 @@ body#home {
             }
         }
 
+        #page {
+            margin-bottom: calc(-@footerDesktop * 2);
+        }
+        #page:after {
+            height: calc(@footerDesktop * 2);
+        }
+
         #get-involved {
             color: @white;
             background: url("/static/mozillians/img/homepage-getinvolved-bkg.png") repeat-x;
             background-color: #2c80c5;
             float: none;
+            height: @footerDesktop;
             .content {
-                .span(6);
-                .offset(2);
+                width: 460px;
+                margin: auto;
                 padding: 40px 0;
                 h2 {
                     color: @white;
@@ -1135,11 +1197,8 @@ body#home {
                         .button-hover-box-shadow(darken(#4d4e53, 10%));
                     }
                 }
-                @media (max-width: @breakDesktop) {
+                @media (max-width: @breakMobileLandscape) {
                     width: auto;
-                    .offset(0);
-                }
-                @media (max-width: @breakTablet) {
                     padding: 40px 0 20px;
                 }
             }
