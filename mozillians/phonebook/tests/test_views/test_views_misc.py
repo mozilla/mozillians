@@ -9,7 +9,7 @@ from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import eq_, ok_
-from waffle import Flag
+from waffle.models import Flag
 
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite

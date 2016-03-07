@@ -41,8 +41,8 @@ django-tastypie==0.12.2
 # sha256: 47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU
 # sha256: FJhZ0rQ9qC72E3CgDCd1eMr2BIYl0UVtuMvyLkmTjdY
 Babel==0.9.6
-# sha256: 10erSV9JDXxVts9yHGpBn-OoNK2uOfyLelW8rf6v8mk
-django-waffle==0.10
+# sha256: dEJWIK08Kh8FFR8MyFGrfiYYbaOfsDma_Aqo7uu9IBs
+django-waffle==0.10.1
 # sha256: aoy0QBER4BG1ecjFKlHNq5cAQcxUOBS72Vd6RSn-HNs
 BeautifulSoup==3.2.1
 # sha256: 7vQ0hslJr6VeoFIp_0oe6oyKpIrviyRrR3HvkRNXvkU
