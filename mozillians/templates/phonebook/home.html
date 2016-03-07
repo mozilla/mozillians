@@ -30,7 +30,7 @@
       <hr>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
           <input type="text" name="q" class="search-query"
-                 placeholder="{{ _('Search for people, groups and more') }}">
+                 placeholder="{{ _('Search for people, groups and more') }}" maxlength="140">
        </form>
     </div>
 
@@ -120,7 +120,7 @@
       <h1>{{ _('Hello!') }}</h1>
       <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
         <input type="text" name="q" class="search-query"
-               placeholder="{{ _('Search for people, groups and more') }}">
+               placeholder="{{ _('Search for people, groups and more') }}" maxlength="140">
         <small>{{ _('Examples:') }}
           {% trans search_url=url('phonebook:search') %}
           <a href="{{ search_url }}?q=python">python</a>,
@@ -195,7 +195,7 @@
           <h1>{{ _('Hello!') }}</h1>
           <form id="homepage-search" action="{{ url('phonebook:search') }}" method="GET">
             <input type="text" name="q" class="search-query"
-                   placeholder="{{ _('Search for people, groups and more') }}">
+                   placeholder="{{ _('Search for people, groups and more') }}" maxlength="140">
             <small>{{ _('Examples:') }}
               {% trans search_url=url('phonebook:search') %}
               <a href="{{ search_url }}?q=python">python</a>,
