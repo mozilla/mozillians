@@ -8,9 +8,10 @@ import sys
 
 from django.utils.functional import lazy
 
-from urlparse import urljoin
+import djcelery
 from django_jinja.builtins import DEFAULT_EXTENSIONS
 from django_sha2 import get_password_hashers
+from urlparse import urljoin
 
 
 PROJECT_MODULE = 'mozillians'
@@ -470,6 +471,7 @@ DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 # Celery configuration
+djcelery.setup_loader()
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # True says to simulate background tasks without actually using celeryd.
