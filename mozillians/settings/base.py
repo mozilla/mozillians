@@ -292,6 +292,7 @@ INSTALLED_APPS = (
 
     # Third-party apps, patches, fixes
     'django_jinja',
+    'djcelery',
     'puente',
     'compressor',
     'cronjobs',
