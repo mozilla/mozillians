@@ -96,6 +96,23 @@ class NoURLFilter(SimpleListFilter):
         return queryset
 
 
+class InvalidateGroupFilter(SimpleListFilter):
+    """Admin filter for groups that can expire."""
+    title = 'Group Expiration'
+    parameter_name = 'expires'
+
+    def lookups(self, request, model_admin):
+        return (('0', 'Group does not expire'),
+                ('1', 'Group expires'),)
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        if self.value() == '1':
+            return queryset.filter(invalidation_days__isnull=False)
+        return queryset.filter(invalidation_days__isnull=True)
+
+
 class GroupBaseEditAdminForm(forms.ModelForm):
     merge_with = forms.ModelMultipleChoiceField(
         required=False, queryset=None,
@@ -175,7 +192,7 @@ class GroupAdmin(GroupBaseAdmin):
                     'members_can_leave', 'visible', 'total_member_count', 'full_member_count',
                     'pending_member_count', 'pending_terms_member_count']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
-                   NoURLFilter]
+                   NoURLFilter, InvalidateGroupFilter]
     readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
                        'pending_terms_member_count', 'max_reminder']
 
