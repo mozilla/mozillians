@@ -8,8 +8,8 @@ import sys
 
 from django.utils.functional import lazy
 
-from urlparse import urljoin
 from django_sha2 import get_password_hashers
+from urlparse import urljoin
 
 
 PROJECT_MODULE = 'mozillians'
@@ -42,7 +42,7 @@ LOGGING = {
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 # path() bases things off of ROOT
-path = lambda *a: os.path.abspath(os.path.join(ROOT, *a))
+path = lambda *a: os.path.abspath(os.path.join(ROOT, *a))  # noqa
 
 # Database settings
 DATABASES = {
@@ -455,6 +455,8 @@ DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 # Celery configuration
+import djcelery  # noqa
+djcelery.setup_loader()
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # True says to simulate background tasks without actually using celeryd.
