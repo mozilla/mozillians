@@ -235,3 +235,7 @@ amqp==1.4.9
 # sha256: DPBwvj_A2GKLAI2ml6pcD4m9YsjdkjgoPVvNvOcLvsY
 # sha256: syja4OWUAx17D_3tUf1t9gZ31FCa7jZ3ATo6L3baTnA
 django-babel==0.4.0
+# sha256: 3ZWRqnNQCwi32yQ2f40yxkcAIfOdWrTlDHwC5EAThvE
+rjsmin==1.0.12
+# sha256: yoe2ldPXhkFXdzphJj5au5YAbp_w4CHv-Qy-DhuhgnA
+rcssmin==1.0.6
