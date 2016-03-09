@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.utils import timezone
 
-from mozillians.common.helpers import get_object_or_none
+from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.users.models import UserProfile, Vouch
 
 

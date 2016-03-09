@@ -12,6 +12,7 @@ before_install:
   - mysql -e 'create database mozillians character set utf8;'
   - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 install:
+  - npm install -g less
   - ./peep.sh install -r requirements/dev.txt
   - pip install coverage
 script:

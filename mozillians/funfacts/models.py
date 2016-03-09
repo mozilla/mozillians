@@ -16,13 +16,11 @@ def _validate_query(query):
     if 'number' not in query:
         raise ValidationError('Query must populate "number"')
 
-    with transaction.commit_manually():
-        try:
+    try:
+        with transaction.atomic():
             eval(query)
-        except BaseException, exp:
-            raise ValidationError('Invalid query: %s' % exp)
-        finally:
-            transaction.rollback()
+    except BaseException, exp:
+        raise ValidationError('Invalid query: %s' % exp)
 
 
 class FunFactManager(models.Manager):
@@ -71,14 +69,12 @@ class FunFact(models.Model):
         if not (self.divisor or self.number):
             return 'n/a'
 
-        with transaction.commit_manually():
-            try:
+        try:
+            with transaction.atomic():
                 if self.divisor:
                     number = eval(self.number)['number']
                     divisor = eval(self.divisor)['number']
                     return '%.0f%%' % (float(number) / divisor * 100)
                 return '%d' % eval(self.number)['number']
-            except Exception, exp:
-                return 'Error: %s' % exp
-            finally:
-                transaction.rollback()
+        except Exception, exp:
+            return 'Error: %s' % exp

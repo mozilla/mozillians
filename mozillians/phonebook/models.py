@@ -5,9 +5,9 @@ from django.db import models
 from django.dispatch import receiver
 from django.template.loader import get_template
 
-from tower import ugettext as _, ugettext_lazy as _lazy
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
-from mozillians.common.helpers import urlparams
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
 from mozillians.users.models import UserProfile

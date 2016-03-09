@@ -3,8 +3,8 @@ from django.forms.widgets import RadioSelect
 
 import happyforms
 from dal import autocomplete
-from tower import ugettext as _
-from tower import ugettext_lazy as _lazy
+from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group
 

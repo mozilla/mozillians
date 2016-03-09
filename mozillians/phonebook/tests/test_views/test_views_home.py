@@ -11,17 +11,17 @@ class HomeTests(TestCase):
     def test_home_anonymous(self):
         client = Client()
         response = client.get(reverse('phonebook:home'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
         ok_('profile' not in response.context)
 
     def test_home_unvouched(self):
         user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:home'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
     def test_home_vouched(self):
         user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:home'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')

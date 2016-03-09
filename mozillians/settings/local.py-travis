@@ -44,7 +44,10 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = True
+from .base import TEMPLATES
+for backend in TEMPLATES:
+    backend['OPTIONS']['debug'] = DEBUG
 
 # ElasticSearch
 ES_DISABLED = False

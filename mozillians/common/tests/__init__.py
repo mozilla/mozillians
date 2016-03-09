@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import os
+
 from contextlib import contextmanager, nested
 
 from django.contrib.auth.decorators import login_required
@@ -10,6 +12,8 @@ from django.test.utils import override_settings
 
 from mock import patch
 from nose.tools import make_decorator, ok_
+
+from mozillians.settings.base import path
 
 
 AUTHENTICATION_BACKENDS = (
@@ -42,6 +46,11 @@ class TestCase(BaseTestCase):
         client = Client()
         client.login(email=user.email)
         yield client
+
+    def assertJinja2TemplateUsed(self, response, template_name, **kwargs):
+        relative_path = os.path.join('mozillians/jinja2/', template_name)
+        absolute_path = path(relative_path)
+        self.assertTemplateUsed(response, absolute_path, **kwargs)
 
 
 def requires_login():

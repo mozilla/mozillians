@@ -2,8 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
 from django.shortcuts import render
-
-import tower
+from django.utils.translation import activate
 
 from mozillians.common.monkeypatches import patch
 
@@ -13,7 +12,7 @@ patch()
 # Activate a locale so that jinja2 doesn't choke when running a shell
 # or individual tests that need translation and don't involve a web
 # request, like when testing emails.
-tower.activate('en-US')
+activate('en-US')
 
 
 def error_page(request, template, status=None):

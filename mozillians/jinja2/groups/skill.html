@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Skill: {name}')|f(name=group.name) }}{% endblock %}
+
+{% block body_id %}group-show{% endblock %}
+
+{% block body_class %}
+  {{ super() }}
+  search-page
+{% endblock %}
+
+{% block content %}
+  <h1>
+    {{ _('Skill') }}: {{ group.name }}
+  </h1>
+  <form action="{{ url('groups:toggle_skill_subscription', group.url) }}"
+        id="toggle-group" method="post">
+    {% csrf_token %}
+    <button class="button {{ ('button-negative' if in_group) }}">
+      {% if not in_group %}
+        {{ _('Add Skill') }}
+      {% else %}
+        {{ _('Remove Skill') }}
+      {% endif %}
+    </button>
+  </form>
+
+  {% if not people.paginator.count %}
+    <div class="well">
+      <p id="not-found">
+        {% trans name=group.name %}
+          Sorry, we cannot find any mozillians with skill {{ name }}
+        {% endtrans %}
+      </p>
+    </div>
+  {% else %}
+    {% with items=people %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
+    <div class="row">
+      {% for people_slice in people|slice(3) -%}
+          {% for person in people_slice %}
+            {{ search_result(person) }}
+          {% endfor %}
+      {% endfor %}
+    </div>
+    {% with items=people %}
+      {% include 'includes/pagination.html' %}
+    {% endwith %}
+  {% endif %}
+{% endblock content %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/pagination.js') }}"></script>
+  {% endcompress %}
+{% endblock %}

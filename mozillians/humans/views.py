@@ -3,7 +3,7 @@ from django.shortcuts import redirect
 from django.views.static import serve
 
 from mozillians.common.decorators import allow_public
-from mozillians.common.helpers import absolutify
+from mozillians.common.templatetags.helpers import absolutify
 
 
 @allow_public

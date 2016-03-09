@@ -78,7 +78,7 @@ class SignaledFunctionsTests(TestCase):
         vouchee = UserFactory.create(vouched=False)
         vouchee.userprofile.vouch(voucher.userprofile)
         voucher.delete()
-        vouch = Vouch.objects.get(vouchee=vouchee)
+        vouch = Vouch.objects.get(vouchee=vouchee.userprofile)
         eq_(vouch.voucher, None)
 
     @patch('mozillians.users.models.update_basket_task.delay')

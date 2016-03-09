@@ -1,7 +1,7 @@
 from nose.tools import eq_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.helpers import stringify_groups
+from mozillians.groups.templatetags.helpers import stringify_groups
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 

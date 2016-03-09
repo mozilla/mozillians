@@ -5,13 +5,13 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Count, Max
 from django.db.models.loading import get_model
-from django.template import Context
 from django.template.loader import get_template, render_to_string
+from django.utils.translation import activate, ungettext
+from django.utils.translation import ugettext as _
 
-import tower
 import waffle
+
 from celery.task import periodic_task, task
-from tower import ugettext as _
 
 
 @task(ignore_result=True)
@@ -48,10 +48,10 @@ def send_pending_membership_emails():
         if max_pk > group.max_reminder:
             # TODO: Switch locale to curator's preferred language so translation will occur
             # Using English for now
-            tower.activate('en-us')
+            activate('en-us')
 
             count = pending_memberships.count()
-            subject = tower.ungettext(
+            subject = ungettext(
                 '%(count)d outstanding request to join Mozillians group "%(name)s"',
                 '%(count)d outstanding requests to join Mozillians group "%(name)s"',
                 count
@@ -91,7 +91,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
 
     # TODO: Switch locale to user's preferred language so translation will occur
     # Using English for now
-    tower.activate('en-us')
+    activate('en-us')
 
     if old_status in [GroupMembership.PENDING, GroupMembership.PENDING_TERMS]:
         if new_status == GroupMembership.MEMBER:
@@ -112,7 +112,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
         'user': user,
     }
     template = get_template(template_name)
-    body = template.render(Context(context))
+    body = template.render(context)
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
 
@@ -125,7 +125,7 @@ def member_removed_email(group_pk, user_pk):
     Group = get_model('groups', 'Group')
     group = Group.objects.get(pk=group_pk)
     user = User.objects.get(pk=user_pk)
-    tower.activate('en-us')
+    activate('en-us')
     template_name = 'groups/email/member_removed.txt'
     subject = _('Removed from Mozillians group "%s"') % group.name
     template = get_template(template_name)
@@ -133,7 +133,7 @@ def member_removed_email(group_pk, user_pk):
         'group': group,
         'user': user,
     }
-    body = template.render(Context(context))
+    body = template.render(context)
     send_mail(subject, body, settings.FROM_NOREPLY,
               [user.email], fail_silently=False)
 

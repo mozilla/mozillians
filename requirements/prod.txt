@@ -1,6 +1,6 @@
-# sha256: UE5EGWeseGBKs18DABj8mm-icOam6YRx0jEf139wZ0s
-# sha256: smA0Iw78731g5SZ4kO2mVt_EnFZ_JxJdkH7uT-f5puw
-django-compressor==1.4
+# sha256: 0t5OOpP794nu-Xm0VcCWLIPbVwIoWGVL9OWW00-ePLE
+# sha256: sWGCYHmODCbvUsjmwU1EV4N1bsqS8qsbjbi-6OzJuMM
+django-compressor==2.0
 # sha256: F3KVsUQkAMks22fo4Y-f9ZRvtEL4WBO50IN4I3IuoI0
 django-cronjobs==0.2.3
 # sha256: tserLDN8nNof7AVoyrbZk7lNIQBMHFeLgw1zqcfo80g
@@ -32,25 +32,17 @@ django-statsd-mozilla==0.3.8.2
 # sha256: IWJc4ZHMtzT0e5DvkrYD0ENmu2fQ61K9BgqNduZwYBg
 # sha256: f-zPgRqMLGC8In4NlWAV8Opgl8gEZg6PSkraDnSBfCQ
 django-tastypie==0.12.2
-# sha256: sp3RANvPvirYPtj68Qds7brkkS7zGJ6KoJL-0gWtQMQ
-# sha256: icQ-q-HrYGRVwZIaWVJBssDJjbsbCqrzXdzy50KMmII
-# sha256: wNNCSz6KQeU9U2pEi-hfGWnRhtr1cfJ3w9LBslgkHGc
-# sha256: uZoOQwJ9KtXx6PValu6l8l0G-KNdmvMMwp_xqhlsCIs
-# sha256: Zefz3zlMvRYzRSRzRaKVZFGp8QJJfr8Ssyuj8inz7Mg
-# sha256: SjoIXs8fzSc2VzU4_6EU8fQzGzu73Wk4Hm4XLEnJdQ8
-# sha256: 47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU
-# sha256: FJhZ0rQ9qC72E3CgDCd1eMr2BIYl0UVtuMvyLkmTjdY
-Babel==0.9.6
-# sha256: dEJWIK08Kh8FFR8MyFGrfiYYbaOfsDma_Aqo7uu9IBs
-django-waffle==0.10.1
+# sha256: _tB8vNyz3nm1OoIg7r7SHJP427Pbzh2caxxLCeiuzys
+# sha256: 2MtMDngUiu6JVg-f4hWHqldznJdbuJ_2ax6ELMaXQo8
+Babel==2.2.0
+# sha256: nNnjqXaEmjzYFoMNeBG5NUPB3J2p88sczC-dqDG4sCU
+# sha256: kUtLh0-mJQoIl7wwtn4CA02SpyNatyqRv22km3F1HeQ
+django-waffle==0.11
 # sha256: aoy0QBER4BG1ecjFKlHNq5cAQcxUOBS72Vd6RSn-HNs
 BeautifulSoup==3.2.1
 # sha256: 7vQ0hslJr6VeoFIp_0oe6oyKpIrviyRrR3HvkRNXvkU
 # sha256: ZAtwWueBXsYFAWMbe2EQheUcf3ZgfZBVi_4ojz-Et6o
 djangorestframework==2.4.8
-# sha256: EAFkVWiXwSGfM3BuY6ZWuISNM9CbAWHi3u_MUJeM9i0
-# sha256: IDkUT86PG2A9A_paVkNXjfGtAHxO1BphfwKjlD9wWaE
-Django==1.7.11
 # sha256: U6gisBsElN-WWMBOhyFhgOXsvoWxeGc92Eix-AnVwQA
 # sha256: u5PYXKflDWjkGXhSu226YJi7dyUA-C9dsv9KgHEVBck
 elasticsearch==1.2.0
@@ -68,8 +60,6 @@ Markdown==2.4
 html5lib==0.95
 # sha256: pOwa_1m5WhS0XrLiN2GgF56YMZ2lp-t2tW6ozce4ccM
 MarkupSafe==0.23
-# sha256: xJWo39CpwdPY7QISG7sotsnTTU2jCqk6fmOcDz17Bjk
-jingo==0.7.1
 # sha256: qyLRMiCZCYcwpX_VnWEPYHOPlaHLaNrMotHEfLDL6O4
 # sha256: gRBAtkfl1WhvhNtBXv1pfmJQAIsRK2kJunesBZ4UDHQ
 MySQL-python==1.2.5
@@ -153,8 +143,9 @@ django-browserid==1.0.0
 urllib3==1.9.1
 # sha256: JUqVsKQ4bfH9lJgjlC9jEsgPujyIxe-tecrYZIvF_rU
 django-celery==3.1.17
-# sha256: mq4WtWKGak3apeiXhymrrbvtVEco2I4LnJr3sx3Qcu0
-django-nose==1.2
+# sha256: Gbja9M1eZmA9xYAY8DhBFwl94YcUd1M4zbdqlNSNiWY
+# sha256: kvdDM2cBF0bMPL09XmfcwRBmyLhWe5pRSUju6hH6WEM
+django-nose==1.4.3
 # sha256: n4KpA86-rHgRg7cKHnuummALFPLnGHalvaeUTautX0w
 https://github.com/mozilla/happyforms/archive/master.zip#egg=happyforms
 # sha256: 7PtznHX-9-MbfAyCzpG10swOn2oUs97FlaummAxzHP0
@@ -181,9 +172,6 @@ pytz==2015.7
 sorl-thumbnail==11.12.1b
 # sha256: N4Ethjya0-NcBzTELgvwMgzow77YLNIK1UyzTRWBV7o
 anyjson==0.3.3
-# sha256: Z0Gl1-i49TFRqr1H_T3xGVrtVAsWmy12hLkE_xErSDw
-# sha256: hT0YypWKWYeHzrjCl6NpdFuCllvygnaGEnLxR0WXeZk
-kombu==3.0.33
 # sha256: RTvHzC2NgI2O8Gv-ym2yMOTel1198X1DzF-Kc4rIlpE
 # sha256: XHjgQW9jcnIjFKozu_lE02Gu83hwv1f3V5YIRrUtD7c
 # sha256: QuOdbdEblhhW1DEAbwn2bwCvhWv8nMUCaei91q9FhqM
@@ -220,9 +208,17 @@ bcrypt==2.0.0
 # sha256: -USg_N9Ja209aYcuYnyEF-1GBm4W_6YB5DV70R4-Pg0
 # sha256: RPdvbD_GVIYIIXhRkuyim9ZlMa9X0JtoHm1SWEYEp-c
 cffi==1.5.0
-# sha256: 4O0M5rj_5WkKLoVseQjcVX4OYFKD1ohd0TYdefKSiQg
-# sha256: LepNFtBzyQLDuJ2blmIPtnKawPepI7vHd8tK2CfAxho
-amqp==1.4.9
+# sha256: Z0Gl1-i49TFRqr1H_T3xGVrtVAsWmy12hLkE_xErSDw
+# sha256: hT0YypWKWYeHzrjCl6NpdFuCllvygnaGEnLxR0WXeZk
+kombu==3.0.33
+# sha256: _CtqZSAbJ3EegA6y4SYv9Coy8Ce9ImfjQSHxvSvWuTM
+django-jinja==2.1.2
+# sha256: vF7oVSESdXfSNDCDLi-Cdobv23zpWyMvVPvrW5FmOXw
+# sha256: hPdpwOpgeCnHe9iz1tb7wWWJzXpdTlAj9xfNPV3lRHM
+puente==0.4.1
+# sha256: VL6dbqtswOLaVYwSrqbP99WgEkyKRw4f9hE0up7TfyA
+# sha256: 7BSL5zVI2gkN12wujFfJjosehPLLh1ALm-VCAYekNfs
+django==1.8.11
 # sha256: JJOe2M7J9sH65iMS3MqnHKu6968HxwpVk1x9NGOC0Qs
 # sha256: eia8y7ppzZElWO3OpyaOY6sYS2-1I7EnOISLBQgwRnM
 # sha256: B-d0FQU05hr3A1OxJi0r2tKcPzvuAfLHxzNz9c2W68Q
@@ -233,3 +229,9 @@ amqp==1.4.9
 # sha256: DeOlJroe5vVhyeTdYLjDq5nRJx8tMjEKgZNud1g7n_0
 # sha256: 0hYYE4cxf4aWxtHICiSRJY0DdJPB8MbrWJkqVJSB534
 billiard==3.3.0.22
+# sha256: 4O0M5rj_5WkKLoVseQjcVX4OYFKD1ohd0TYdefKSiQg
+# sha256: LepNFtBzyQLDuJ2blmIPtnKawPepI7vHd8tK2CfAxho
+amqp==1.4.9
+# sha256: DPBwvj_A2GKLAI2ml6pcD4m9YsjdkjgoPVvNvOcLvsY
+# sha256: syja4OWUAx17D_3tUf1t9gZ31FCa7jZ3ATo6L3baTnA
+django-babel==0.4.0

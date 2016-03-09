@@ -16,16 +16,16 @@ class LoginTests(TestCase):
         user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
     def test_login_vouched(self):
         user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/home.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
     def test_login_incomplete_profile(self):
         user = UserFactory.create(userprofile={'full_name': ''})
         with self.login(user) as client:
             response = client.get(reverse('phonebook:login'), follow=True)
-        self.assertTemplateUsed(response, 'phonebook/edit_profile.html')
+        self.assertJinja2TemplateUsed(response, 'phonebook/edit_profile.html')

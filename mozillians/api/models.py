@@ -5,7 +5,7 @@ from hashlib import sha1
 from django.contrib.auth.models import User
 from django.db import models
 
-from tower import ugettext_lazy as _lazy
+from django.utils.translation import ugettext_lazy as _lazy
 
 from mozillians.users.managers import PRIVACY_CHOICES, PRIVILEGED, PUBLIC
 from mozillians.users.models import PrivacyField, UserProfile

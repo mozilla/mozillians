@@ -25,7 +25,7 @@ class TestGroupRemoveMember(TestCase):
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(not self.group.has_member(self.member))
+        ok_(not self.group.has_member(self.member.userprofile))
 
     def test_as_manager_from_unleavable_group(self):
         # manager can remove people even from unleavable groups
@@ -33,7 +33,7 @@ class TestGroupRemoveMember(TestCase):
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(not self.group.has_member(self.member))
+        ok_(not self.group.has_member(self.member.userprofile))
 
     def test_as_manager_removing_curator(self):
         # but even manager cannot remove a curator
@@ -42,14 +42,14 @@ class TestGroupRemoveMember(TestCase):
         with self.login(user) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(self.group.has_member(self.member))
+        ok_(self.group.has_member(self.member.userprofile))
 
     def test_as_simple_user_removing_self(self):
         # user can remove themselves
         with self.login(self.member) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(not self.group.has_member(self.member))
+        ok_(not self.group.has_member(self.member.userprofile))
 
     def test_as_simple_user_removing_self_from_unleavable_group(self):
         # user cannot leave an unleavable group
@@ -58,7 +58,7 @@ class TestGroupRemoveMember(TestCase):
         with self.login(self.member) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(self.group.has_member(self.member))
+        ok_(self.group.has_member(self.member.userprofile))
 
     def test_as_simple_user_removing_another(self):
         # user cannot remove anyone else
@@ -74,7 +74,7 @@ class TestGroupRemoveMember(TestCase):
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(not self.group.has_member(self.member))
+        ok_(not self.group.has_member(self.member.userprofile))
 
     def test_as_curator_twice(self):
         # removing a second time doesn't blow up
@@ -94,7 +94,7 @@ class TestGroupRemoveMember(TestCase):
         with self.login(curator) as client:
             response = client.post(self.url, follow=False)
         eq_(302, response.status_code)
-        ok_(not self.group.has_member(self.member))
+        ok_(not self.group.has_member(self.member.userprofile))
 
     def test_accepting_sends_email(self):
         # when curator accepts someone, they are sent an email

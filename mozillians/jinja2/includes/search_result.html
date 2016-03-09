@@ -1,0 +1,62 @@
+<div class="result">
+  {% if group %}
+    {% if is_curator %}
+      {% if user != profile.user and not user_is_curator(group, profile) %}
+        <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
+              method="GET">
+          {% csrf_token %}
+          <input type="hidden" name="next_url" value="{{ request.get_full_path() }}" />
+          <button type="submit" class="button remove">{{ _('Remove') }} <i class="icon-close"></i></button>
+        </form>
+      {% endif %}
+      {% if group.has_pending_member(profile) %}
+        <form action="{{ url('groups:confirm_member', url=group.url, user_pk=profile.pk) }}"
+              method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="next_url" value="{{ request.get_full_path() }}" />
+          <button type="submit" class="status-pending">{{ _('Confirm Request') }}</span></button>
+        </form>
+      {% endif %}
+    {% elif user == profile.user and group.has_pending_member(profile) %}
+      <div class="status-pending">{{ _('Requested') }}</div>
+    {% endif %}
+  {% endif %}
+  <div class="card">
+    <div class="avatar">
+      <span>
+        <a title="{{ profile.display_name }}"
+           href="{{ url('phonebook:profile_view', profile.user.username) }}">
+          <img class="profile-photo"
+               src="{{ profile.get_photo_url('70x70') }}"
+               alt="{{ _('Profile Photo') }}">
+        </a>
+      </span>
+    </div>
+    <div class="details">
+      <ul>
+        <li>
+          <h2>
+            <a title="{{ profile.display_name }}"
+               href="{{ url('phonebook:profile_view', profile.user.username) }}">
+              {{ profile.display_name|truncate(20, True) }}
+            </a>
+          </h2>
+        </li>
+        {% if profile.email %}
+          <li>
+            <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
+            <i class="icon-envelope-o"></i> {{ profile.email|truncate(20, True) }}
+            </a>
+          </li>
+        {% endif %}
+        {% if profile.ircname %}
+          <li>
+            <span title="{{ profile.ircname }}">
+              <i class="icon-comments-o"></i> IRC: {{ profile.ircname|truncate(20, True) }}
+            </span>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
