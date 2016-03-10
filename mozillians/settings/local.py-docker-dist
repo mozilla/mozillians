@@ -64,8 +64,6 @@ JAVA_BIN = '/usr/bin/java'
 
 SESSION_COOKIE_SECURE = False
 
-CACHES = {}
-
 STATSD_CLIENT = 'django_statsd.clients.log'
 
 # Basket
@@ -81,8 +79,9 @@ SECRET_KEY = 'localdev'
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake'
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': 'memcached_1:11211',
+        'KEY_PREFIX': 'mozillians_local_dev'
     }
 }
 

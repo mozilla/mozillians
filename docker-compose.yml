@@ -7,6 +7,8 @@ db:
     - MYSQL_ROOT_PASSWORD=root
 es:
   image: barnybug/elasticsearch:1.2.1
+memcached:
+  image: memcached
 broker:
   image: rabbitmq
 celery:
@@ -17,6 +19,7 @@ celery:
     - db
     - es
     - broker
+    - memcached
   command: celery -A mozillians worker -l INFO
   environment:
     - C_FORCE_ROOT=true
@@ -31,4 +34,5 @@ web:
     - es
     - broker
     - celery
+    - memcached
   command: python manage.py runserver 0.0.0.0:8000
