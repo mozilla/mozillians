@@ -1,4 +1,4 @@
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.contrib.auth.decorators import login_required
 
 from rest_framework import routers
@@ -23,11 +23,10 @@ router.register(r'users', mozillians.users.api.v2.UserProfileViewSet)
 router.register(r'groups', mozillians.groups.api.v2.GroupViewSet)
 router.register(r'skills', mozillians.groups.api.v2.SkillViewSet)
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'', include(v1_api.urls)),
     url(r'^v2/', include(router.urls), name='v2root'),
     # Django-autocomplete-light urls
     url(r'api-v2-autocomplete/$', login_required(VouchedAutocomplete.as_view()),
         name='api-v2-autocomplete'),
-)
+]
