@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-from django.views.decorators.cache import cache_page, never_cache
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
 
 from django.utils.translation import ugettext as _
@@ -431,7 +431,7 @@ def betasearch(request):
 
 
 @allow_public
-@cache_page(60 * 60 * 168)  # 1 week.
+@cache_control(public=True, must_revalidate=True, max_age=3600 * 24 * 7)  # 1 week.
 def search_plugin(request):
     """Render an OpenSearch Plugin."""
     return render(request, 'phonebook/search_opensearch.xml',
