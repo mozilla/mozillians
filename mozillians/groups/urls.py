@@ -14,7 +14,7 @@ urlpatterns = patterns(
         name='index_functional_areas'),
 
     url('^groups/$', 'views.index_groups', name='index_groups'),
-    url('^groups/add/$', 'views.group_add_edit', name='group_add'),
+    url('^groups/add/$', 'views.group_edit', name='group_add'),
     url('^group/(?P<url>[-\w]+)/edit/$', 'views.group_edit', name='group_edit'),
     url('^group/(?P<url>[-\w]+)/delete/$', 'views.group_delete', name='group_delete'),
     url('^group/(?P<url>[-\w]+)/terms/$', 'views.review_terms', name='review_terms'),
@@ -44,4 +44,6 @@ urlpatterns = patterns(
         name='skills-autocomplete'),
     url('^curators/autocomplete/$', CuratorsAutocomplete.as_view(),
         name='curators-autocomplete'),
+    # Invites section
+    url('^invite/(?P<invite_pk>\d+)/delete/$', 'views.delete_invite', name='delete_invite'),
 )

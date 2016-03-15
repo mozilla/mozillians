@@ -2,73 +2,70 @@
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
     <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Access') }}</div>
+      <div class="panel-heading">{{ _('Group Type') }}</div>
       <div class="panel-body">
+
+        {% if (criteria_form.non_field_errors() or
+               curator_form.non_field_errors() or
+               terms_form.non_field_errors() or
+               invalidation_form.non_field_errors()) %}
+          <ul class="unstyled">
+            {% for error in criteria_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in curator_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in terms_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in invalidation_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
         <fieldset id="access">
           <div class="sizing">
-            <div>
-              <label class="required" for="id_type">Group type</label>
-            </div>
-            <div class="access-option">
-              <input name="access-type" value="1" type="radio">
-              <label>Open</label>
-            </div>
-            <div class="access-option">
-              <input name="access-type" value="2" type="radio">
-              <label>Reviewed</label>
-            </div>
-            <div class="access-option">
-              <input name="access-type" value="3" type="radio">
-              <label>Closed</label>
-            </div>
+            {{ mozillians_field(criteria_form.accepting_new_members) }}
           </div>
 
           <div class="access-description">
             <h4>Open</h4>
             <p>
-              Cake danish pastry pudding fruitcake. Cupcake icing lollipop macaroon halvah chocolate bar biscuit macaroon cake. Tiramisu bonbon carrot cake liquorice brownie chocolate topping cake. Sesame snaps cupcake cotton candy cake donut. Sugar plum muffin gingerbread tootsie roll. Dragée ice cream ice cream tootsie roll muffin jujubes sweet lemon drops.
+              The most common group type. When "Open",
+              a group can be joined by any mozillian freely, without review or approval.
+              Group Curators can invite and/or remove people from the group if needed.
+              When in doubt for group type, default to "Open".
             </p>
           </div>
 
           <div class="access-description">
             <h4>Reviewed</h4>
             <p>
-              Sweet roll ice cream chocolate bar muffin chocolate toffee sweet. Icing cookie brownie bear claw. Ice cream dessert pudding topping tiramisu liquorice. Icing donut topping sweet dragée carrot cake gingerbread liquorice. Brownie tiramisu chocolate cake jelly-o. Jujubes sesame snaps powder jujubes sweet. Muffin candy canes gingerbread bonbon cotton candy. Muffin danish cotton candy croissant toffee sweet tart.
+              When "Reviewed", Mozillians are presented with an "Request to Join" button on the group page.
+              Once clicked, Group Curators are receiving a pending request notification,
+              prompting them to review and accept or deny the membership.
+              Group Curators can invite and/or remove people from the group if needed.
             </p>
           </div>
 
           <div class="access-description">
             <h4>Closed</h4>
             <p>
-              Candy canes danish tiramisu. Macaroon ice cream dragée fruitcake topping marzipan jelly. Jelly-o gingerbread lemon drops jelly beans gummies. Toffee brownie toffee. Marshmallow bear claw halvah. Pie cookie caramels ice cream oat cake candy. Dragée jelly-o bear claw. Jelly beans gummies carrot cake powder marshmallow cake.
+              "Closed" group type provides more tight control over a group.
+              Mozillians are unable to request membership, and can only be invited to join the group by Group Curators.
+              Group Curators of course remove people from the group if needed.
+              Avoid using this group type unless you are absolutely sure you need it.
             </p>
           </div>
         </fieldset>
-      </div>
-      <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-type" type="submit">{{ _('Update type') }}</button>
-      </div>
-    </div>
-  </form>
 
-  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
-    {% csrf_token %}
-    <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Terms') }}</div>
-      <div class="panel-body">
-        <fieldset style="margin-bottom: 0px;">
-          <input type="checkbox" class="acknowledge">
-          {% trans %}
-            New members should accept terms
-          {% endtrans %}
-        </fieldset>
-
-        <fieldset>
+        <fieldset id="id_new_member_criteria_fieldset">
           <div class="row">
-            <div class="col-md-8 col-sm-6">
-              <label class="required" for="id_username">Terms:</label>
+            <div class="col-md-12">
               <div class="form-group">
-                <textarea cols="40" id="id_bio" name="bio" rows="10"></textarea>
+                {{ mozillians_field(criteria_form.new_member_criteria, required=True) }}
               </div>
             </div>
           </div>
@@ -76,7 +73,9 @@
 
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Terms') }}</button>
+        <button class="btn btn-primary" id="form-submit-type" type="submit" name="criteria_form">
+          {{ _('Update type') }}
+        </button>
       </div>
     </div>
   </form>
@@ -84,35 +83,97 @@
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
     <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Expiration') }}</div>
+      <div class="panel-heading">{{ _('Curators') }}</div>
       <div class="panel-body">
 
-        <fieldset>
-          <input type="checkbox" class="acknowledge">
-          {% trans %}
-            Membership can expire
-          {% endtrans %}
-        </fieldset>
-
-        <fieldset>
+        <fieldset id="curators">
           <div class="row">
-            <div class="col-md-8 col-sm-6">
-
-              <label class="" for="id_username">Expire membership after:</label>
+            <div class="col-md-8">
               <div class="form-group">
-                <input id="id_username" name="username" value="" type="text">
+                {{ mozillians_field(curator_form.curators) }}
               </div>
-            </div>
-            <div id="username-privacy" class="col-md-4 col-sm-6 text-right">
-
             </div>
           </div>
         </fieldset>
 
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-expiration" type="submit">{{ _('Update Expiration settings') }}</button>
+        <button class="btn btn-primary" id="form-submit-curators" type="submit" name="curator_form">
+          {{ _('Update Curators') }}
+        </button>
       </div>
     </div>
   </form>
+
+  {% if waffle.flag('group-terms-invalidation') %}
+    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Terms') }}</div>
+        <div class="panel-body">
+
+          <fieldset id="id_group_has_terms">
+            <div class="form-group">
+              <label class="checkbox">
+                {{ _('New members should accept terms') }}
+                <span>
+                  <input type="checkbox" class="acknowledge"></input>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset id="id_group_terms">
+            <div class="row">
+              <div class="col-md-8 col-sm-6">
+                <div class="form-group">
+                  {{ mozillians_field(terms_form.terms) }}
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-terms" type="submit" name="terms_form">{{ _('Update Terms') }}</button>
+        </div>
+      </div>
+    </form>
+
+    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Expiration') }}</div>
+        <div class="panel-body">
+
+          <fieldset id="id_membership_can_expire">
+            <div class="form-group">
+              <label class="checkbox">
+                {{ _('Membership can expire:') }}
+                <span>
+                  <input type="checkbox" class="acknowledge"></input>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset id="id_group_invalidation_days">
+            <div class="row">
+              <div class="col-md-8 col-sm-6">
+                <div class="form-group">
+                  {{ mozillians_field(invalidation_form.invalidation_days) }}
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-invalidation" type="submit" name="invalidation_form">
+            {{ _('Update Expiration settings') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
 </div>

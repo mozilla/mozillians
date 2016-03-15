@@ -170,9 +170,9 @@ class Group(GroupBase):
     members_can_leave = models.BooleanField(default=True)
     accepting_new_members = models.CharField(
         verbose_name=_lazy(u'Accepting new members'),
-        choices=(('yes', _lazy(u'Yes')),
-                 ('by_request', _lazy(u'By request')),
-                 ('no', _lazy(u'No')),),
+        choices=(('yes', _lazy(u'Open')),
+                 ('by_request', _lazy(u'Reviewed')),
+                 ('no', _lazy(u'Closed')),),
         default='yes',
         max_length=10
     )
@@ -337,7 +337,7 @@ class Skill(GroupBase):
 class Invite(models.Model):
     inviter = models.ForeignKey('users.UserProfile', null=True, on_delete=models.SET_NULL,
                                 related_name='invite_sent', verbose_name=_lazy(u'Inviter'))
-    redeemer = models.ForeignKey('users.UserProfile', related_name='group_invited',
+    redeemer = models.ForeignKey('users.UserProfile', related_name='groups_invited',
                                  verbose_name=_lazy(u'Redeemer'))
     group = models.ForeignKey('Group')
     accepted = models.NullBooleanField()

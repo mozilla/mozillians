@@ -4,74 +4,47 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Pending Invitations') }}</div>
       <div class="panel-body">
+        {% if invite_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in invite_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
         <fieldset>
-          <div class="row invitee">
-            <div class="col-sm-8">
-              <div class="avatar">
-                <span>
-                  <a href="#">
-                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
-                  </a>
-                </span>
+          {% if invites %}
+            {% for redeemer in invites %}
+              <div class="row invitee">
+                <div class="col-sm-8">
+
+                  <div class="avatar">
+                    <a href="{{ url('phonebook:profile_view', redeemer.user.username) }}">
+                      <img class="profile-photo"
+                          src="{{ redeemer.get_photo_url('70x70') }}"
+                          alt="{{ _('Profile Photo') }}"
+                          title={{ redeemer.display_name }}>
+                      {{ redeemer.display_name }}
+                    </a>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div class="invite-controls right">
+                    <a href="{{ url('groups:delete_invite', redeemer.groups_invited.get(group=group).pk) }}">
+                      <span class="glyphicon glyphicon-remove" title="{{ _('Delete') }}" aria-hidden="true"></span>
+                    </a>
+                    <a href="#">
+                      <span class="glyphicon glyphicon-repeat"title="{{ _('Resend') }}" aria-hidden="true"></span>
+                    </a>
+                  </div>
+                </div>
               </div>
-              <a href="#">mozillian1@mozilla.org</a>
-            </div>
-            <div class="col-sm-4">
-              <div class="email-controls right">
-                <a class="delete" href="#">
-                  Delete
-                </a>
-                <a class="button" href="#">
-                  Resend
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="row invitee">
-            <div class="col-sm-8">
-              <div class="avatar">
-                <span>
-                  <a href="#">
-                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
-                  </a>
-                </span>
-              </div>
-              <a href="#">mozillian2@mozilla.org</a>
-            </div>
-            <div class="col-sm-4">
-              <div class="email-controls right">
-                <a class="delete" href="#">
-                  Delete
-                </a>
-                <a class="button" href="#">
-                  Resend
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="row invitee">
-            <div class="col-sm-8">
-              <div class="avatar">
-                <span>
-                  <a href="#">
-                    <img class="profile-photo" src="https://secure.gravatar.com/avatar/95f04bc159ccefbea4cb2547289839b8?s=70x70&amp;r=pg&amp;d=https%3A%2F%2Fmozillians-dev.allizom.org%2Fmedia%2Fimg%2Fdefault_avatar.png" alt="Profile Photo">
-                  </a>
-                </span>
-              </div>
-              <a href="#">mozillian3@mozilla.org</a>
-            </div>
-            <div class="col-sm-4">
-              <div class="email-controls right">
-                <a class="delete" href="#">
-                  Delete
-                </a>
-                <a class="button" href="#">
-                  Resend
-                </a>
-              </div>
-            </div>
-          </div>
+            {% endfor %}
+          {% else %}
+            <p> This group has no pending invitations.</p>
+          {% endif %}
         </fieldset>
+
       </div>
     </div>
   </form>
@@ -81,17 +54,17 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Invite new member') }}</div>
       <div class="panel-body">
+
         <fieldset>
           <div class="form-group">
-            <input id="id_username" name="username" value="" type="text">
-            <p class="help-block">
-              Start typing a mozillian username.
-            </p>
+            {{ mozillians_field(invite_form.invites) }}
           </div>
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-invite" type="submit">{{ _('Invite') }}</button>
+        <button class="btn btn-primary" id="form-submit-invite" type="submit" name="invite_form">
+          {{ _('Invite') }}
+        </button>
       </div>
     </div>
   </form>

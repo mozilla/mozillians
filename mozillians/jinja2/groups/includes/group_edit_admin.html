@@ -4,21 +4,35 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Administration') }}</div>
       <div class="panel-body">
-        <fieldset style="margin-bottom: 0px;">
-          <input type="checkbox" class="acknowledge" name="visible">
-          {% trans %}
-            Is this group visible on Groups page?
-          {% endtrans %}
+        {% if admin_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in admin_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <fieldset>
+          <span class="acknowledge">
+            {{ mozillians_field(admin_form.visible) }}
+          </span>
         </fieldset>
-        <fieldset style="margin-bottom: 0px;">
-          <input type="checkbox" class="acknowledge" name="leave">
-          {% trans %}
-            Can group members leave?
-          {% endtrans %}
+
+        <fieldset>
+          <span class="acknowledge">
+            {{ mozillians_field(admin_form.members_can_leave) }}
+          </span>
         </fieldset>
+
+        <fieldset>
+          <span class="acknowledge">
+            {{ mozillians_field(admin_form.functional_area) }}
+          </span>
+        </fieldset>
+
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-administration" type="submit">
+        <button class="btn btn-primary" id="form-submit-admin" type="submit" name="admin_form">
           {{ _('Update administration settings') }}
         </button>
       </div>

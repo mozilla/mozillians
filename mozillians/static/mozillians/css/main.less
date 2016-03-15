@@ -2191,6 +2191,10 @@ body.search-page {
     }
 }
 
+label[for=delete-checkbox] {
+    font-weight: normal;
+}
+
 /* Search Results
 ================== */
 body#search {
@@ -2342,13 +2346,6 @@ body#group-show {
     }
 }
 
-form.group-add {
-    select[multiple] {
-        height: 100px !important;
-        width: 450px;
-    }
-}
-
 form.edit-group {
     #access {
         .access-option { float: left; }
@@ -2372,9 +2369,19 @@ form.edit-group {
         .avatar {
             display: inline;
             .profile-photo {
+                .rounded-image;
+                position:relative;
+                left:auto;
                 width: 30px;
+                height: 30px;
             }
         }
+    }
+    .invite-controls a {
+        color: @black;
+    }
+    .invite-controls a:first-child {
+        margin-right: 10px;
     }
 }
 
