@@ -492,4 +492,4 @@ def group_edit(request, url=None):
         'creating': url is None,
         'group': group
     }
-    return render(request, 'groups/edit.html', context)
+    return render(request, 'groups/edit_group.html', context)

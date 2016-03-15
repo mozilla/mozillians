@@ -3,7 +3,7 @@
 {% block page_title %}
   {{ _('Group settings') }}
 {% endblock %}
-{% block body_id %}group-edit{% endblock %}
+{% block body_id %}edit-group{% endblock %}
 
 {% block content %}
   {% if form.errors %}
@@ -29,13 +29,10 @@
       <div class="tab-content">
         <!-- Description Tab -->
         {% include 'groups/includes/group_edit_description.html' %}
-
         <!-- Access Tab -->
         {% include 'groups/includes/group_edit_access.html' %}
-
         <!-- Invitations Tab -->
         {% include 'groups/includes/group_edit_invitation.html' %}
-
         <!-- Admin Tab -->
         {% include 'groups/includes/group_edit_admin.html' %}
       </div>

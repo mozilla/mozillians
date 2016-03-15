@@ -1,6 +1,6 @@
 <div role="tabpanel" class="tab-pane fade" id="admin">
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=admin">
-    {{ csrf() }}
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Administration') }}</div>
       <div class="panel-body">
@@ -18,7 +18,9 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update administration settings') }}</button>
+        <button class="btn btn-primary" id="form-submit-administration" type="submit">
+          {{ _('Update administration settings') }}
+        </button>
       </div>
     </div>
   </form>

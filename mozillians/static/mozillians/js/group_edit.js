@@ -1,4 +1,4 @@
-$(function(){
+$(function() {
 
     function checksize() {
         if ($("#groups-nav").css("display") == "none" ){
@@ -54,12 +54,12 @@ $(function(){
 
     // Initialize membership expiration checkbox
     if ($id_invalidation_days.find(':input').val()) {
-        $id_membership_can_expire.prop('checked', true)
+        $id_membership_can_expire.prop('checked', true);
     }
 
     // Initialize terms expiration checkbox
     if ($id_group_terms.find('textarea').val()) {
-        $id_group_has_terms.prop('checked', true)
+        $id_group_has_terms.prop('checked', true);
     }
 
     // Hide/show field when document loads
@@ -68,9 +68,10 @@ $(function(){
     checkGroupTerms();
 
     $('#curators').on('DOMNodeInserted', 'li', function() {
-        $('.select2-selection__choice').each(function(index, elem){
+        $('.select2-selection__choice').each(function(index, elem) {
             $(this).attr('title', '');
         });
+    });
 
     // Favicon
     var url = $("link[rel='shortcut icon']").remove().attr('href');

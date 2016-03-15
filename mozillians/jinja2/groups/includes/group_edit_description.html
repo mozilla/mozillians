@@ -1,6 +1,6 @@
 <div role="tabpanel" class="tab-pane fade in active" id="description">
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=description" enctype="multipart/form-data">
-    {{ csrf() }}
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Description') }}</div>
       <div class="panel-body">
@@ -63,7 +63,7 @@
       </div>
 
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Update Description') }}</button>
+        <button class="btn btn-primary" id="form-submit-description" type="submit">{{ _('Update Description') }}</button>
       </div>
     </div>
   </form>

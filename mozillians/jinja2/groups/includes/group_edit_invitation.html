@@ -1,6 +1,6 @@
 <div role="tabpanel" class="tab-pane fade" id="invitation">
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=invitation">
-    {{ csrf() }}
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Pending Invitations') }}</div>
       <div class="panel-body">
@@ -77,7 +77,7 @@
   </form>
 
   <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=invitation">
-    {{ csrf() }}
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Invite new member') }}</div>
       <div class="panel-body">
@@ -91,7 +91,7 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit">{{ _('Invite') }}</button>
+        <button class="btn btn-primary" id="form-submit-invite" type="submit">{{ _('Invite') }}</button>
       </div>
     </div>
   </form>
