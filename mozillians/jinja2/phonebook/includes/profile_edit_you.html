@@ -38,7 +38,9 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit" name="contribution_section">{{ _('Update Contributions') }}</button>
+        <button class="btn btn-primary" id="form-submit-contribution" type="submit"
+                name="contribution_section">{{ _('Update Contributions') }}
+        </button>
       </div>
     </div>
   </form>
@@ -65,7 +67,8 @@
               <div class="fitted">
                 <h4>
                   {{ _('Fitted') }}
-                  <span title="{{ _('A fitted-cut tshirt has a curved side hem which comes in at the waist and goes out at the upper and lower ends. Also known as women\'s.') }}" class="glyphicon glyphicon-info-sign info" aria-hidden="true"></span>
+                  <span title="{{ _('A fitted-cut tshirt has a curved side hem which comes in at the waist and goes out at the upper and lower ends. Also known as women\'s.') }}"
+                        class="glyphicon glyphicon-info-sign info" aria-hidden="true"></span>
                 </h4>
                 {% for t_select in t_choices[1:7] %}
                   <div class="tshirt-option">
@@ -78,7 +81,8 @@
               <div class="straightcut">
                 <h4>
                   {{ _('Straight-cut') }}
-                  <span title="{{ _('A straight-cut shirt has wide shoulders and a body which is almost square. Often known as men\'s or unisex.') }}" class="glyphicon glyphicon-info-sign info" aria-hidden="true"></span>
+                  <span title="{{ _('A straight-cut shirt has wide shoulders and a body which is almost square. Often known as men\'s or unisex.') }}"
+                        class="glyphicon glyphicon-info-sign info" aria-hidden="true"></span>
                 </h4>
                 {% for t_select in t_choices[7:14] %}
                   <div class="tshirt-option">
@@ -95,7 +99,9 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-top" type="submit" name="tshirt_section">{{ _('Update T-shirt size') }}</button>
+        <button class="btn btn-primary" id="form-submit-tshirt" type="submit"
+                name="tshirt_section">{{ _('Update T-shirt size') }}
+        </button>
       </div>
     </div>
   </form>
