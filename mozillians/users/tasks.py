@@ -71,9 +71,12 @@ def update_basket_task(instance_id):
     # Python died.
 
     from models import UserProfile
-    instance = UserProfile.objects.get(pk=instance_id)
+    try:
+        instance = UserProfile.objects.get(pk=instance_id)
+    except UserProfile.DoesNotExist:
+        instance = None
 
-    if not BASKET_ENABLED or not instance.is_vouched:
+    if not BASKET_ENABLED or not instance or not instance.is_vouched:
         return
 
     email = instance.user.email
