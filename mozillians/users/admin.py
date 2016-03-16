@@ -358,7 +358,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline,
                AlternateEmailInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
-                     'geo_country__name', 'geo_region__name', 'geo_city__name']
+                     'geo_country__name', 'geo_region__name', 'geo_city__name', 'id']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
