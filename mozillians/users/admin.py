@@ -262,7 +262,16 @@ class MissingLanguagesFilter(SimpleListFilter):
         return queryset
 
 
+class LanguageResource(ModelResource):
+    """django-import-export Language resource."""
+    email = Field(attribute='userprofile__user__email')
+
+    class Meta:
+        model = Language
+
+
 class LanguageAdmin(ExportMixin, admin.ModelAdmin):
+    resource_class = LanguageResource
     search_fields = ['userprofile__full_name', 'userprofile__user__email', 'code']
     list_display = ['get_code', 'get_language_name', 'userprofile']
     list_filter = ['code', MissingLanguagesFilter]
