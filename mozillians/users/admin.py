@@ -25,6 +25,7 @@ import mozillians.users.tasks
 from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
+from mozillians.users.models import get_languages_for_locale
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (PUBLIC, Language, ExternalAccount, Vouch,
                                      UserProfile, UsernameBlacklist)
@@ -239,11 +240,40 @@ class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
 admin.site.register(UsernameBlacklist, UsernameBlacklistAdmin)
 
 
+class MissingLanguagesFilter(SimpleListFilter):
+    title = 'Missing language'
+    parameter_name = 'missing_language'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        current_language_codes = set(Language.objects.values_list('code', flat=True))
+        babel_language_codes = set([code for code, lang in get_languages_for_locale('en')])
+
+        if self.value() == 'True':
+            missing_language_codes = current_language_codes.difference(babel_language_codes)
+            return queryset.filter(code__in=list(missing_language_codes))
+
+        if self.value() == 'False':
+            return queryset.filter(code__in=list(babel_language_codes))
+
+        return queryset
+
+
 class LanguageAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ['userprofile__full_name', 'userprofile__user__email', 'code']
-    list_display = ['code', 'userprofile']
-    list_filter = ['code']
+    list_display = ['get_code', 'get_language_name', 'userprofile']
+    list_filter = ['code', MissingLanguagesFilter]
 
+    def get_code(self, obj):
+        return obj.code
+    get_code.short_description = 'Code'
+
+    def get_language_name(self, obj):
+        return obj.get_code_display()
+    get_language_name.short_description = 'Name'
 
 admin.site.register(Language, LanguageAdmin)
 
