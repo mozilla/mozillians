@@ -199,6 +199,8 @@ class Group(GroupBase):
     terms = models.TextField(default='', verbose_name=_('Terms'), blank=True)
     invalidation_days = models.PositiveIntegerField(null=True, default=None, blank=True,
                                                     verbose_name=_('Invalidation days'))
+    invites = models.ManyToManyField('users.UserProfile', related_name='invites_received',
+                                     through='Invite', through_fields=('group', 'redeemer'))
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod
@@ -333,20 +335,17 @@ class Skill(GroupBase):
 
 
 class Invite(models.Model):
-    inviter = models.ForeignKey('users.UserProfile',
-                                null=True, verbose_name=_lazy(u'Inviter'),
-                                on_delete=models.SET_NULL,
-                                related_name='group_invites')
-    redeemer = models.ForeignKey('users.UserProfile',
-                                 verbose_name=_lazy(u'Redeemer'),
-                                 related_name='group_invites_redeemed')
-    group = models.ForeignKey('Group', related_name='invites')
+    inviter = models.ForeignKey('users.UserProfile', null=True, on_delete=models.SET_NULL,
+                                related_name='invite_sent', verbose_name=_lazy(u'Inviter'))
+    redeemer = models.ForeignKey('users.UserProfile', related_name='group_invited',
+                                 verbose_name=_lazy(u'Redeemer'))
+    group = models.ForeignKey('Group')
     accepted = models.NullBooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('group', 'redeemer'),)
+        unique_together = ('group', 'redeemer')
 
     def __unicode__(self):
         return 'Invite #{}'.format(self.id)
