@@ -1,0 +1,179 @@
+<div role="tabpanel" class="tab-pane fade" id="access">
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Group Type') }}</div>
+      <div class="panel-body">
+
+        {% if (criteria_form.non_field_errors() or
+               curator_form.non_field_errors() or
+               terms_form.non_field_errors() or
+               invalidation_form.non_field_errors()) %}
+          <ul class="unstyled">
+            {% for error in criteria_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in curator_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in terms_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in invalidation_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <fieldset id="access">
+          <div class="sizing">
+            {{ mozillians_field(criteria_form.accepting_new_members) }}
+          </div>
+
+          <div class="access-description">
+            <h4>Open</h4>
+            <p>
+              The most common group type. When "Open",
+              a group can be joined by any mozillian freely, without review or approval.
+              Group Curators can invite and/or remove people from the group if needed.
+              When in doubt for group type, default to "Open".
+            </p>
+          </div>
+
+          <div class="access-description">
+            <h4>Reviewed</h4>
+            <p>
+              When "Reviewed", Mozillians are presented with an "Request to Join" button on the group page.
+              Once clicked, Group Curators are receiving a pending request notification,
+              prompting them to review and accept or deny the membership.
+              Group Curators can invite and/or remove people from the group if needed.
+            </p>
+          </div>
+
+          <div class="access-description">
+            <h4>Closed</h4>
+            <p>
+              "Closed" group type provides more tight control over a group.
+              Mozillians are unable to request membership, and can only be invited to join the group by Group Curators.
+              Group Curators of course remove people from the group if needed.
+              Avoid using this group type unless you are absolutely sure you need it.
+            </p>
+          </div>
+        </fieldset>
+
+        <fieldset id="id_new_member_criteria_fieldset">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {{ mozillians_field(criteria_form.new_member_criteria, required=True) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-type" type="submit" name="criteria_form">
+          {{ _('Update type') }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Curators') }}</div>
+      <div class="panel-body">
+
+        <fieldset id="curators">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group">
+                {{ mozillians_field(curator_form.curators) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-curators" type="submit" name="curator_form">
+          {{ _('Update Curators') }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% if waffle.flag('group-terms-invalidation') %}
+    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Terms') }}</div>
+        <div class="panel-body">
+
+          <fieldset id="id_group_has_terms">
+            <div class="form-group">
+              <label class="checkbox">
+                {{ _('New members should accept terms') }}
+                <span>
+                  <input type="checkbox" class="acknowledge"></input>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset id="id_group_terms">
+            <div class="row">
+              <div class="col-md-8 col-sm-6">
+                <div class="form-group">
+                  {{ mozillians_field(terms_form.terms) }}
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-terms" type="submit" name="terms_form">{{ _('Update Terms') }}</button>
+        </div>
+      </div>
+    </form>
+
+    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Expiration') }}</div>
+        <div class="panel-body">
+
+          <fieldset id="id_membership_can_expire">
+            <div class="form-group">
+              <label class="checkbox">
+                {{ _('Membership can expire:') }}
+                <span>
+                  <input type="checkbox" class="acknowledge"></input>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset id="id_group_invalidation_days">
+            <div class="row">
+              <div class="col-md-8 col-sm-6">
+                <div class="form-group">
+                  {{ mozillians_field(invalidation_form.invalidation_days) }}
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-invalidation" type="submit" name="invalidation_form">
+            {{ _('Update Expiration settings') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
+</div>

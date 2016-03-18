@@ -3,10 +3,11 @@ from django.forms.widgets import RadioSelect
 
 import happyforms
 from dal import autocomplete
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy as _lazy
 
-from mozillians.groups.models import Group
+from mozillians.groups.models import Group, Invite
 
 
 class SortForm(forms.Form):
@@ -22,7 +23,63 @@ class SortForm(forms.Form):
         return self.cleaned_data['sort']
 
 
-class GroupForm(happyforms.ModelForm):
+class GroupBasicForm(happyforms.ModelForm):
+    """Model Form for the minimum information that a group needs."""
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupBasicForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Group
+        fields = ('name', 'description', 'irc_channel', 'website', 'wiki',)
+
+
+class GroupCuratorsForm(happyforms.ModelForm):
+    """Model Form for adding group curators."""
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupCuratorsForm, self).__init__(*args, **kwargs)
+        self.fields['curators'].required = False
+        self.fields['curators'].error_messages['required'] = (
+            _(u'The group must have at least one curator.'))
+        if not self.instance.pk:
+            self.fields['curators'].required = True
+        self.fields['curators'].help_text = _('Start typing the name/email/username of '
+                                              'a vouched Mozillian.')
+
+    def clean(self):
+        cleaned_data = super(GroupCuratorsForm, self).clean()
+        curators = cleaned_data.get('curators')
+        # Check if group is a legacy group without curators.
+        # In this case we should allow curators relation to be empty.
+        group_has_curators = self.instance.pk and self.instance.curators.exists()
+
+        if not curators and group_has_curators:
+            msg = _(u'The group must have at least one curator.')
+            self._errors['curators'] = self.error_class([msg])
+
+        return cleaned_data
+
+    def save(self, *args, **kwargs):
+        """Custom save method to add multiple curators."""
+        obj = super(GroupCuratorsForm, self).save(*args, **kwargs)
+
+        for curator in self.cleaned_data['curators']:
+            if not obj.has_member(curator):
+                obj.add_member(curator)
+        return obj
+
+    class Meta:
+        model = Group
+        fields = ('curators',)
+        widgets = {
+            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
+        }
+
+
+class GroupInvalidationForm(happyforms.ModelForm):
+    """Model Form for editing access related fields."""
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
@@ -31,14 +88,109 @@ class GroupForm(happyforms.ModelForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super(GroupForm, self).__init__(*args, **kwargs)
-        self.fields['curators'].required = False
-        self.fields['curators'].error_messages['required'] = (
-            _(u'The group must have at least one curator.'))
-        if not self.instance.pk:
-            self.fields['curators'].required = True
-        self.fields['curators'].help_text = (u'Start typing the name/email/username '
-                                             'of a Mozillian.')
+        self.request = kwargs.pop('request', None)
+        super(GroupInvalidationForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Group
+        fields = ('invalidation_days',)
+
+
+class GroupTermsForm(happyforms.ModelForm):
+    """Model Form for handling group terms."""
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupTermsForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Group
+        fields = ('terms',)
+
+
+class GroupInviteForm(happyforms.ModelForm):
+    """Model form to handle the invites to a group."""
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupInviteForm, self).__init__(*args, **kwargs)
+        self.fields['invites'].required = False
+        self.fields['invites'].help_text = _('Start typing the name/email/username '
+                                             'of a vouched Mozillian.')
+
+    def clean(self):
+        """Custom clean method."""
+        super(GroupInviteForm, self).clean()
+        user = self.request.user
+        if (self.instance.curators.filter(id=user.userprofile.id).exists() or
+                not user.is_superuser):
+            msg = _(u'You need to be the curator of this group before inviting someone to join.')
+            self._errors['invites'] = self.error_class([msg])
+            del self.cleaned_data['invites']
+        return self.cleaned_data
+
+    def save(self, *args, **kwargs):
+        """Custom save method to add data to the through model."""
+        for profile in self.cleaned_data['invites']:
+            if not Invite.objects.filter(group=self.instance, redeemer=profile).exists():
+                invite, created = Invite.objects.get_or_create(
+                    group=self.instance, redeemer=profile, inviter=self.request.user.userprofile)
+
+    class Meta:
+        model = Group
+        fields = ('invites',)
+        widgets = {
+            'invites': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+        }
+
+
+class GroupAdminForm(happyforms.ModelForm):
+    """Model form to administrate a group."""
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupAdminForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = Group
+        fields = ('visible', 'members_can_leave', 'functional_area',)
+
+
+class HorizontalRadioRenderer(forms.RadioSelect.renderer):
+    def render(self):
+        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+
+
+class GroupCriteriaForm(happyforms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupCriteriaForm, self).__init__(*args, **kwargs)
+        self.fields['accepting_new_members'].label = 'Select Group Type'
+
+    def clean(self):
+        cleaned_data = super(GroupCriteriaForm, self).clean()
+        accepting_new = cleaned_data.get('accepting_new_members')
+        criteria = cleaned_data.get('new_member_criteria')
+
+        if not accepting_new == 'by_request':
+            cleaned_data['new_member_criteria'] = u''
+        else:
+            if not criteria:
+                msg = _(u'You must either specify the criteria or change the '
+                        'acceptance selection.')
+                self._errors['new_member_criteria'] = self.error_class([msg])
+                del cleaned_data['new_member_criteria']
+
+        return cleaned_data
+
+    class Meta:
+        model = Group
+        fields = ('accepting_new_members', 'new_member_criteria',)
+        widgets = {
+            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }
+
+
+class GroupForm(happyforms.ModelForm):
 
     def clean(self):
         cleaned_data = super(GroupForm, self).clean()
@@ -65,30 +217,11 @@ class GroupForm(happyforms.ModelForm):
 
         return cleaned_data
 
-    def save(self, *args, **kwargs):
-        """Custom save method to add multiple curators."""
-        obj = super(GroupForm, self).save(*args, **kwargs)
-
-        for curator in self.cleaned_data['curators']:
-            if not obj.has_member(curator):
-                obj.add_member(curator)
-        return obj
-
     class Meta:
         model = Group
         fields = ('name', 'description', 'irc_channel', 'website', 'wiki',
                   'accepting_new_members', 'new_member_criteria', 'terms', 'curators',
-                  'invalidation_days',)
-        widgets = {
-            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
-        }
-
-
-class SuperuserGroupForm(GroupForm):
-    """Form used by superusers (admins) when editing a group"""
-
-    class Meta(GroupForm.Meta):
-        fields = GroupForm.Meta.fields + ('visible', 'functional_area', 'members_can_leave',)
+                  'invalidation_days', 'invites',)
 
 
 class MembershipFilterForm(forms.Form):
@@ -110,3 +243,12 @@ class TermsReviewForm(forms.Form):
                                            (True, _('I accept these terms.')),
                                            (False, _("I don't accept these terms."))
                                        ])
+
+
+class CreateGroupForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ('name', 'accepting_new_members')
+        widgets = {
+            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ _('Group settings') }}
+{% endblock %}
+{% block body_id %}edit-group{% endblock %}
+
+{% block content %}
+  {% if not forms_valid %}
+    <div class="alert alert-error">
+      {{ _('Please correct the errors below.') }}
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-sm-3 hidden-xs" id="groups-nav">
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Groups') }}</div>
+        <ul class="nav nav-tabs settings-nav" role="tablist">
+          <li role="presentation" class="active"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
+          <li role="presentation"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
+          {% if user_is_curator or user_is_superuser %}
+            <li role="presentation"><a href="#invitation" aria-controls="invitation" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
+          {% endif %}
+          {% if user.userprofile.is_manager %}
+            <li role="presentation"><a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">{{ _('Administration') }}</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-sm-9">
+      <div class="tab-content">
+        <!-- Description Tab -->
+        {% include 'groups/includes/group_edit_description.html' %}
+        <!-- Access Tab -->
+        {% include 'groups/includes/group_edit_access.html' %}
+        <!-- Invitations Tab -->
+        {% if user_is_curator or user_is_superuser %}
+          {% include 'groups/includes/group_edit_invitation.html' %}
+        {% endif %}
+        <!-- Admin Tab -->
+        {% if user.userprofile.is_manager %}
+          {% include 'groups/includes/group_edit_admin.html' %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
+    <script src="{{ static('mozillians/js/group_edit.js') }}"></script>
+  {% endcompress %}
+  {{ curator_form.media }}
+{% endblock %}

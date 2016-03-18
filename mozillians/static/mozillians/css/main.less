@@ -669,6 +669,32 @@ nav {
     }
 }
 
+.settings-nav {
+    li {
+        width: 100%;
+        margin: 0;
+        cursor: pointer;
+
+        a {
+            margin: 0;
+            border: none;
+        }
+
+        &.active {
+            background-color: @blueDark;
+
+            a,
+            a:hover,
+            a:active,
+            a:focus {
+                border: none;
+                background-color: inherit;
+                color: white;
+            }
+        }
+    }
+}
+
 .persona-button {
     .border-radius(3px);
     span {
@@ -2165,6 +2191,10 @@ body.search-page {
     }
 }
 
+label[for=delete-checkbox] {
+    font-weight: normal;
+}
+
 /* Search Results
 ================== */
 body#search {
@@ -2316,10 +2346,42 @@ body#group-show {
     }
 }
 
-form.group-add {
-    select[multiple] {
-        height: 100px !important;
-        width: 450px;
+form.edit-group,form.add-group {
+    #access {
+        .access-option { float: left; }
+        .access-type label {
+            float: none;
+            font-weight: normal;
+        }
+        label {
+            float: none;
+        }
+    }
+    .access-description {
+        clear:both;
+        margin-top:50px;
+    }
+    .invitee {
+        margin-top: 10px;
+        .delete {
+            opacity: 1;
+        }
+        .avatar {
+            display: inline;
+            .profile-photo {
+                .rounded-image;
+                position:relative;
+                left:auto;
+                width: 30px;
+                height: 30px;
+            }
+        }
+    }
+    .invite-controls a {
+        color: @black;
+    }
+    .invite-controls a:first-child {
+        margin-right: 10px;
     }
 }
 

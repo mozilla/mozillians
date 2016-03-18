@@ -1,0 +1,102 @@
+<div role="tabpanel" class="tab-pane fade in active" id="description">
+  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=description" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Description') }}</div>
+      <div class="panel-body">
+
+        {% if basic_form.non_field_errors() %}
+          <ul class="unstyled">
+            {% for error in basic_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {{ mozillians_field(basic_form.name) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-group">
+                {{ mozillians_field(basic_form.description) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {{ mozillians_field(basic_form.irc_channel) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {{ mozillians_field(basic_form.website) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                {{ mozillians_field(basic_form.wiki) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-description" type="submit" name='basic_form'>
+          {{ _('Update Description') }}
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% if show_delete_group_button %}
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+        {{ _('Delete Group') }}
+      </div>
+      <div class="panel-body">
+        <fieldset id="delete">
+          <label for="delete-checkbox">
+            <input id="delete-checkbox" type="checkbox" class="acknowledge">
+              {% trans %}
+                I acknowledge that deleting this group is an action that can not be undone.
+                All the information related to this group will be lost foreover.
+              {% endtrans %}
+          </label>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <form action="{{ url('groups:group_delete', group.url) }}" method="post">
+          {% csrf_token %}
+          <button class="btn btn-danger delete disabled" id="delete-group">
+            {{ _('Delete Group') }}
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+</div>

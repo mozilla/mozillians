@@ -1,11 +1,18 @@
-$(function(){
+$(function() {
+
+    function checksize() {
+        if ($("#groups-nav").css("display") == "none" ){
+            $('.tab-pane').show();
+            $('.tab-pane').removeClass('fade');
+        }
+    }
+
     $id_accepting_new_members = $('#id_accepting_new_members');
     $id_new_member_criteria_fieldset = $('#id_new_member_criteria_fieldset');
     $id_invalidation_days = $('#id_group_invalidation_days');
     $id_membership_can_expire = $('#id_membership_can_expire :input');
     $id_group_terms = $('#id_group_terms');
     $id_group_has_terms = $('#id_group_has_terms :input');
-
 
     // Hide/show new member criteria field based on moderation
     function checkCriteria(modVal) {
@@ -47,12 +54,12 @@ $(function(){
 
     // Initialize membership expiration checkbox
     if ($id_invalidation_days.find(':input').val()) {
-        $id_membership_can_expire.prop('checked', true)
+        $id_membership_can_expire.prop('checked', true);
     }
 
     // Initialize terms expiration checkbox
     if ($id_group_terms.find('textarea').val()) {
-        $id_group_has_terms.prop('checked', true)
+        $id_group_has_terms.prop('checked', true);
     }
 
     // Hide/show field when document loads
@@ -61,8 +68,48 @@ $(function(){
     checkGroupTerms();
 
     $('#curators').on('DOMNodeInserted', 'li', function() {
-        $('.select2-selection__choice').each(function(index, elem){
+        $('.select2-selection__choice').each(function(index, elem) {
             $(this).attr('title', '');
         });
+    });
+
+    // Favicon
+    var url = $("link[rel='shortcut icon']").remove().attr('href');
+    var favicon = document.createElement('link');
+    favicon.type = 'image/x-icon';
+    favicon.rel = 'shortcut icon';
+    favicon.href = url;
+    $('head').append(favicon);
+
+    // Tabs
+    var uri = URI(location.href);
+    var next_section = uri.query(true).next;
+    var content = window.location.hash;
+    if (next_section) {
+      content = '#' + next_section;
+    }
+    if (content) {
+        $('ul.nav a[href="' + content + '"]').tab('show');
+    }
+
+    // Show all settings on mobile
+    checksize();
+    $(window).resize(checksize);
+
+    // Make deleting harder
+    var $ack = $('#delete input:checkbox');
+    var $del = $('#delete-group');
+    $del.click(function(e) {
+        if (! $ack.is(':checked')) {
+            e.preventDefault();
+        }
+    });
+    $ack.click(function(e) {
+        if ($ack.is(':checked')) {
+            $del.removeClass('disabled');
+        }
+        else {
+            $del.addClass('disabled');
+        }
     });
 });

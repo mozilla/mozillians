@@ -15,6 +15,45 @@
 {% endblock %}
 
 {% block content %}
-  <a class="large button right" href="{{ url('groups:group_add') }}">{{ _('Create Group') }} &nbsp; <i class="icon-group"></i> +</a>
+  <a class="large button right" href="#" data-toggle="modal" data-target="#GroupModal">
+    {{ _('Create Group') }} &nbsp; <i class="icon-group"></i> +
+  </a>
   {{ super() }}
+
+  <!-- Modal -->
+  <form class="add-group" method="POST" action="{{ url('groups:index_groups') }}">
+    {% csrf_token %}
+    <div class="modal fade" id="GroupModal" tabindex="-1" role="dialog" aria-labelledby="GroupModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="GroupModalLabel">{{ _('Create Group') }}</h4>
+          </div>
+          <div class="modal-body">
+            <fieldset id="access">
+              <div class="form-group">
+                <label class="required" for="id_name">{{ _('Name') }}</label>
+                {{ group_form.name }}
+              </div>
+            </fieldset>
+            <fieldset id="access">
+              <div class="form-group">
+                <div class="sizing">
+                  <div>
+                    <label class="required">{{ _('Group type') }}</label>
+                  </div>
+                  {{ group_form.accepting_new_members }}
+                </div>
+              </div>
+            </fieldset>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Cancel') }}</button>
+            <button type="button submit" class="btn btn-primary">{{ _('Save') }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 {% endblock content %}
