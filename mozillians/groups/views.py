@@ -68,6 +68,7 @@ def index_groups(request):
     group_form = forms.CreateGroupForm(request.POST or None)
     if group_form.is_valid():
         group = group_form.save()
+        group.curators.add(request.user.userprofile)
         return redirect(reverse('groups:group_edit', args=[group.url]))
 
     query = Group.get_non_functional_areas()
