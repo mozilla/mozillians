@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 from dal import autocomplete
 
 from mozillians.common.decorators import allow_unvouched
-from mozillians.common.templatetags.helpers import get_object_or_none
+from mozillians.common.templatetags.helpers import get_object_or_none, urlparams
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups import forms
 from mozillians.groups.models import Group, GroupMembership, Invite, Skill
@@ -453,8 +453,9 @@ def group_edit(request, url=None):
     form = group_forms[form_key] if form_key else None
     if form and form.is_bound and form.is_valid():
         form.save()
-
-        return redirect(reverse('groups:show_group', args=[group.url]))
+        next_section = request.GET.get('next')
+        next_url = urlparams(reverse('groups:group_edit', args=[group.url]), next_section)
+        return HttpResponseRedirect(next_url)
 
     context = {
         'group': group if url else None,
