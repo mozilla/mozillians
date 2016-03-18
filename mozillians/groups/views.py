@@ -23,7 +23,7 @@ from mozillians.groups.models import Group, GroupMembership, Invite, Skill
 from mozillians.users.models import UserProfile
 
 
-def _list_groups(request, template, query):
+def _list_groups(request, template, query, context=None):
     """Lists groups from given query."""
 
     sort_form = forms.SortForm(request.GET)
@@ -47,7 +47,14 @@ def _list_groups(request, template, query):
     if paginator.count > settings.ITEMS_PER_PAGE:
         show_pagination = True
 
-    data = dict(groups=groups, page=page, sort_form=sort_form, show_pagination=show_pagination)
+    data = {
+        'groups': groups,
+        'page': page,
+        'sort_form': sort_form,
+        'show_pagination': show_pagination
+    }
+
+    data.update(context)
     return render(request, template, data)
 
 
@@ -57,9 +64,18 @@ def index_groups(request):
     Doesn't list functional areas, invisible groups, and groups with
     no vouched members
     """
+
+    group_form = forms.CreateGroupForm(request.POST or None)
+    if group_form.is_valid():
+        group = group_form.save()
+        return redirect(reverse('groups:group_edit', args=[group.url]))
+
     query = Group.get_non_functional_areas()
     template = 'groups/index_groups.html'
-    return _list_groups(request, template, query)
+    context = {
+        'group_form': group_form
+    }
+    return _list_groups(request, template, query, context)
 
 
 def index_skills(request):

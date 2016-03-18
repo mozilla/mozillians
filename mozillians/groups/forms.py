@@ -243,3 +243,12 @@ class TermsReviewForm(forms.Form):
                                            (True, _('I accept these terms.')),
                                            (False, _("I don't accept these terms."))
                                        ])
+
+
+class CreateGroupForm(forms.ModelForm):
+    class Meta:
+        model = Group
+        fields = ('name', 'accepting_new_members')
+        widgets = {
+            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }
