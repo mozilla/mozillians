@@ -234,12 +234,14 @@
     </div>
     <div class="panel-body">
       <fieldset id="delete">
-        <input type="checkbox" class="acknowledge">
-        {% trans %}
-          I acknowledge that deleting my account will make it tougher
-          for me to show off my contributions and easily be found by
-          other members of the Mozilla community.
-        {% endtrans %}
+        <label for="delete-checkbox">
+          <input id="delete-checkbox" type="checkbox" class="acknowledge">
+          {% trans %}
+            I acknowledge that deleting my account will make it tougher
+            for me to show off my contributions and easily be found by
+            other members of the Mozilla community.
+          {% endtrans %}
+        </label>
       </fieldset>
     </div>
     <div class="panel-footer">
