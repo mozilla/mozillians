@@ -21,9 +21,9 @@
   {{ super() }}
 
   <!-- Modal -->
-  <form class="add-group" method="POST" action="{{ url('groups:index_groups') }}">
-    {% csrf_token %}
-    <div class="modal fade" id="GroupModal" tabindex="-1" role="dialog" aria-labelledby="GroupModalLabel">
+  <div class="modal fade" id="GroupModal" tabindex="-1" role="dialog" aria-labelledby="GroupModalLabel">
+    <form class="add-group" method="POST" action="{{ url('groups:index_groups') }}">
+      {% csrf_token %}
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -33,17 +33,13 @@
           <div class="modal-body">
             <fieldset id="access">
               <div class="form-group">
-                <label class="required" for="id_name">{{ _('Name') }}</label>
-                {{ group_form.name }}
+                {{ mozillians_field(group_form.name) }}
               </div>
             </fieldset>
             <fieldset id="access">
               <div class="form-group">
                 <div class="sizing">
-                  <div>
-                    <label class="required">{{ _('Group type') }}</label>
-                  </div>
-                  {{ group_form.accepting_new_members }}
+                  {{ mozillians_field(group_form.accepting_new_members) }}
                 </div>
               </div>
             </fieldset>
@@ -54,6 +50,12 @@
           </div>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
+  </div>
 {% endblock content %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/group_index.js') }}"></script>
+  {% endcompress %}
+{% endblock %}
