@@ -8,6 +8,7 @@ from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy as _lazy
 
 from mozillians.groups.models import Group, Invite
+from mozillians.groups.tasks import notify_redeemer_invitation
 
 
 MAX_INVALIDATION_DAYS = 2 * 365
@@ -149,6 +150,7 @@ class GroupInviteForm(happyforms.ModelForm):
             if not Invite.objects.filter(group=self.instance, redeemer=profile).exists():
                 invite, created = Invite.objects.get_or_create(
                     group=self.instance, redeemer=profile, inviter=self.request.user.userprofile)
+                notify_redeemer_invitation.delay(invite.pk)
 
     class Meta:
         model = Group

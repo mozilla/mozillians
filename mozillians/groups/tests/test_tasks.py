@@ -2,15 +2,16 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.template.loader import get_template
+from django.test import override_settings
 
-from mock import patch
+from mock import patch, ANY
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups import tasks
 from mozillians.groups.models import Group, GroupMembership, Skill
 from mozillians.groups.tasks import invalidate_group_membership, email_membership_change
-from mozillians.groups.tests import GroupFactory, SkillFactory
+from mozillians.groups.tests import GroupFactory, InviteFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -244,3 +245,94 @@ class MembershipInvalidationTests(TestCase):
 
         ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+
+
+class InvitationEmailTests(TestCase):
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_send_invitation_email(self, mock_send_email):
+        inviter, redeemer = UserFactory.create_batch(2)
+        group = GroupFactory.create(name='Foo')
+        template_name = 'groups/email/invite_email.txt'
+        invite = InviteFactory.create(inviter=inviter.userprofile,
+                                      redeemer=redeemer.userprofile,
+                                      group=group)
+
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            tasks.notify_redeemer_invitation(invite.pk)
+
+        args = [
+            '[Mozillians] You have been invited to join group "foo"',
+            ANY,
+            'noreply@example.com',
+            [redeemer.userprofile.email]
+        ]
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        mock_send_email.assert_called_once_with(*args)
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_send_invitation_accepted_email(self, mock_send_email):
+        inviter = UserFactory.create()
+        redeemer = UserFactory.create(userprofile={'full_name': 'foo bar'})
+        group = GroupFactory.create(name='Foo')
+        template_name = 'groups/email/invite_accepted_email.txt'
+        invite = InviteFactory.create(inviter=inviter.userprofile,
+                                      redeemer=redeemer.userprofile,
+                                      group=group)
+
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            tasks.notify_curators_invitation_accepted(invite.pk)
+        args = [
+            '[Mozillians] foo bar has accepted your invitation to join group "foo"',
+            ANY,
+            'noreply@example.com',
+            [inviter.userprofile.email]
+        ]
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        mock_send_email.assert_called_once_with(*args)
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_send_invitation_rejected_email(self, mock_send_email):
+        inviter = UserFactory.create()
+        redeemer = UserFactory.create(userprofile={'full_name': 'foo bar'})
+        group = GroupFactory.create(name='Foo')
+        template_name = 'groups/email/invite_rejected_email.txt'
+        InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile,
+                             group=group)
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            args = [redeemer.userprofile.pk, inviter.userprofile.pk, group.pk]
+            tasks.notify_curators_invitation_rejected(*args)
+        args = [
+            '[Mozillians] foo bar has rejected your invitation to join group "foo"',
+            ANY,
+            'noreply@example.com',
+            [inviter.userprofile.email]
+        ]
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        mock_send_email.assert_called_once_with(*args)
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_send_invitation_invalid_email(self, mock_send_email):
+        inviter, redeemer = UserFactory.create_batch(2)
+        group = GroupFactory.create(name='Foo')
+        template_name = 'groups/email/invite_invalid_email.txt'
+        InviteFactory.create(inviter=inviter.userprofile,
+                             redeemer=redeemer.userprofile,
+                             group=group)
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            tasks.notify_redeemer_invitation_invalid(redeemer.userprofile.pk, group.pk)
+        args = [
+            '[Mozillians] Invitation to group "foo" is no longer valid',
+            ANY,
+            'noreply@example.com',
+            [redeemer.userprofile.email]
+        ]
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        mock_send_email.assert_called_once_with(*args)

@@ -20,6 +20,9 @@ from mozillians.common.templatetags.helpers import get_object_or_none, urlparams
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups import forms
 from mozillians.groups.models import Group, GroupMembership, Invite, Skill
+from mozillians.groups.tasks import (notify_curators_invitation_accepted,
+                                     notify_redeemer_invitation_invalid,
+                                     notify_curators_invitation_rejected)
 from mozillians.users.models import UserProfile
 
 
@@ -162,6 +165,8 @@ def show(request, url, alias_model, template):
 
             # Curators can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
+            invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted=False)
+            data.update(invitation=invitation)
 
         else:
             # only show full members, or this user
@@ -417,7 +422,7 @@ def group_edit(request, url=None):
         messages.error(request, _('You must be a curator or an admin to edit a group'))
         return redirect(reverse('groups:show_group', args=[group.url]))
 
-    invites = group.invites.all()
+    invites = group.invites.filter(groups_invited__accepted=False)
     show_delete_group_button = is_curator and group.members.all().count() == 1
 
     # Prepare the forms for rendering
@@ -521,9 +526,29 @@ def delete_invite(request, invite_pk):
             request.user.userprofile.is_manager):
         redeemer = invite.redeemer
         invite.delete()
-
-        # TODO:Revoke any celery tasks if needed and shoot revokation emails.
-        msg = _(u'The invitation to {0} has been successfully revoked. ').format(redeemer)
+        notify_redeemer_invitation_invalid.delay(redeemer.pk, group.pk)
+        msg = _(u'The invitation to {0} has been successfully revoked.').format(redeemer)
         messages.success(request, msg)
         return redirect(reverse('groups:group_edit', args=[group.url]))
     raise Http404()
+
+
+@never_cache
+def accept_reject_invitation(request, invite_pk, action):
+    """Accept or reject group invitation."""
+
+    redeemer = request.user.userprofile
+    invite = get_object_or_404(Invite, pk=invite_pk, redeemer=redeemer)
+    if action == 'accept':
+        if invite.group.terms:
+            invite.group.add_member(redeemer, GroupMembership.PENDING_TERMS)
+        else:
+            invite.group.add_member(redeemer, GroupMembership.MEMBER)
+        invite.accepted = True
+        invite.save()
+        notify_curators_invitation_accepted.delay(invite.pk)
+    else:
+        notify_curators_invitation_rejected.delay(redeemer.pk, invite.inviter.pk, invite.group.pk)
+        invite.delete()
+
+    return redirect(reverse('groups:show_group', args=[invite.group.url]))

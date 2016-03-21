@@ -46,4 +46,6 @@ urlpatterns = patterns(
         name='curators-autocomplete'),
     # Invites section
     url('^groups/invite/(?P<invite_pk>\d+)/delete/$', 'views.delete_invite', name='delete_invite'),
+    url('^groups/(?P<invite_pk>\d+)/(?P<action>accept|reject)/$',
+        'views.accept_reject_invitation', name='accept_reject_invitation'),
 )
