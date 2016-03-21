@@ -2346,8 +2346,9 @@ body#group-show {
     }
 }
 
-form.edit-group,form.add-group {
-    #access {
+form.edit-group,
+form.add-group {
+    #group_type {
         .access-option { float: left; }
         .access-type label {
             float: none;
@@ -2356,10 +2357,34 @@ form.edit-group,form.add-group {
         label {
             float: none;
         }
+        .access-description {
+            clear:both;
+            margin-top:50px;
+            p:last-child {
+                margin-bottom: 0px;
+            }
+        }
     }
-    .access-description {
-        clear:both;
-        margin-top:50px;
+    #group_type,
+    #id_group_has_terms,
+    #id_membership_can_expire {
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+    }
+    #id_new_member_criteria_fieldset,
+    #id_group_terms,
+    #id_group_invalidation_days {
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+    #id_group_terms {
+        .under-input-field {
+            padding-left: 0px;
+        }
+    }
+    .text-muted {
+        margin: 20px 0;
+        text-align: center;
     }
     .invitee {
         margin-top: 10px;
@@ -2382,6 +2407,12 @@ form.edit-group,form.add-group {
     }
     .invite-controls a:first-child {
         margin-right: 10px;
+    }
+}
+
+form.add-group {
+    fieldset {
+        margin-bottom: 0px;
     }
 }
 
