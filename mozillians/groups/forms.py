@@ -121,8 +121,9 @@ class GroupInviteForm(happyforms.ModelForm):
         """Custom clean method."""
         super(GroupInviteForm, self).clean()
         user = self.request.user
-        if (self.instance.curators.filter(id=user.userprofile.id).exists() or
-                not user.is_superuser):
+        is_manager = user.userprofile.is_manager
+        is_curator = self.instance.curators.filter(id=user.userprofile.id).exists()
+        if not is_curator and not is_manager:
             msg = _(u'You need to be the curator of this group before inviting someone to join.')
             self._errors['invites'] = self.error_class([msg])
             del self.cleaned_data['invites']
@@ -139,7 +140,7 @@ class GroupInviteForm(happyforms.ModelForm):
         model = Group
         fields = ('invites',)
         widgets = {
-            'invites': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+            'invites': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
         }
 
 
@@ -148,6 +149,17 @@ class GroupAdminForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(GroupAdminForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """Custom clean method."""
+        super(GroupAdminForm, self).clean()
+        profile = self.request.user.userprofile
+
+        if not profile.is_manager:
+            msg = _(u'You need to be the administrator of this group in order to '
+                    'edit this section.')
+            raise forms.ValidationError(msg)
+        return self.cleaned_data
 
     class Meta:
         model = Group
@@ -247,7 +259,7 @@ class TermsReviewForm(forms.Form):
                                        ])
 
 
-class CreateGroupForm(forms.ModelForm):
+class GroupCreateForm(forms.ModelForm):
     class Meta:
         model = Group
         fields = ('name', 'accepting_new_members')
