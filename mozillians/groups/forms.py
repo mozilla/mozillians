@@ -164,7 +164,6 @@ class GroupCriteriaForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(GroupCriteriaForm, self).__init__(*args, **kwargs)
-        self.fields['accepting_new_members'].label = 'Select Group Type'
 
     def clean(self):
         cleaned_data = super(GroupCriteriaForm, self).clean()
@@ -187,6 +186,9 @@ class GroupCriteriaForm(happyforms.ModelForm):
         fields = ('accepting_new_members', 'new_member_criteria',)
         widgets = {
             'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }
+        labels = {
+            'accepting_new_members': _('Select Group Type')
         }
 
 
@@ -251,4 +253,7 @@ class CreateGroupForm(forms.ModelForm):
         fields = ('name', 'accepting_new_members')
         widgets = {
             'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }
+        labels = {
+            'accepting_new_members': _('Group type')
         }
