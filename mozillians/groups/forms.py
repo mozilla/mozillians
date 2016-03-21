@@ -204,40 +204,6 @@ class GroupCriteriaForm(happyforms.ModelForm):
         }
 
 
-class GroupForm(happyforms.ModelForm):
-
-    def clean(self):
-        cleaned_data = super(GroupForm, self).clean()
-        accepting_new = cleaned_data.get('accepting_new_members')
-        criteria = cleaned_data.get('new_member_criteria')
-        curators = cleaned_data.get('curators')
-
-        if not accepting_new == 'by_request':
-            cleaned_data['new_member_criteria'] = u''
-        else:
-            if not criteria:
-                msg = _(u'You must either specify the criteria or change the '
-                        'acceptance selection.')
-                self._errors['new_member_criteria'] = self.error_class([msg])
-                del cleaned_data['new_member_criteria']
-
-        # Check if group is a legacy group without curators.
-        # In this case we should allow curators relation to be empty.
-        group_has_curators = self.instance.pk and self.instance.curators.exists()
-
-        if not curators and group_has_curators:
-            msg = _(u'The group must have at least one curator.')
-            self._errors['curators'] = self.error_class([msg])
-
-        return cleaned_data
-
-    class Meta:
-        model = Group
-        fields = ('name', 'description', 'irc_channel', 'website', 'wiki',
-                  'accepting_new_members', 'new_member_criteria', 'terms', 'curators',
-                  'invalidation_days', 'invites',)
-
-
 class MembershipFilterForm(forms.Form):
     filtr = forms.ChoiceField(required=False,
                               label='',
@@ -262,7 +228,7 @@ class TermsReviewForm(forms.Form):
 class GroupCreateForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ('name', 'accepting_new_members')
+        fields = ('name', 'accepting_new_members',)
         widgets = {
             'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
         }
