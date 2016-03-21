@@ -1,6 +1,6 @@
 import factory
 
-from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
+from mozillians.groups.models import Group, GroupAlias, Invite, Skill, SkillAlias
 
 
 class GroupFactory(factory.DjangoModelFactory):
@@ -38,3 +38,10 @@ class SkillAliasFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = SkillAlias
+
+
+class InviteFactory(factory.DjangoModelFactory):
+    group = factory.SubFactory(GroupFactory)
+
+    class Meta:
+        model = Invite
