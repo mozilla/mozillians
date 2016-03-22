@@ -200,6 +200,7 @@ def show(request, url, alias_model, template):
         people = paginator.page(paginator.num_pages)
 
     show_pagination = paginator.count > settings.ITEMS_PER_PAGE
+    invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted__isnull=True)
 
     extra_data = dict(
         people=people,
@@ -212,6 +213,7 @@ def show(request, url, alias_model, template):
         show_join_button=group.user_can_join(request.user.userprofile),
         show_leave_button=group.user_can_leave(request.user.userprofile),
         members=group.member_count,
+        invitation=invitation
     )
 
     data.update(extra_data)
@@ -469,6 +471,22 @@ def group_edit(request, url=None):
     }
     context.update(group_forms)
     return render(request, 'groups/edit_group.html', context)
+
+
+@never_cache
+def accept_reject_invitation(request, invite_pk, accept):
+    """Accept or reject group invitation."""
+
+    redeemer = request.user.userprofile
+    invite = get_object_or_404(Invite, pk=invite_pk, redeemer=redeemer)
+    if accept:
+        invite.group.add_member(redeemer, GroupMembership.MEMBER)
+        invite.accepted = True
+    else:
+        invite.accepted = False
+
+    invite.save()
+    return redirect(reverse('groups:show_group', args=[invite.group.url]))
 
 
 class SkillsAutocomplete(autocomplete.Select2QuerySetView):
