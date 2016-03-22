@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane fade" id="access">
-  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+  <form class="edit-group" id="form-access" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Group Type') }}</div>
@@ -25,7 +25,7 @@
           </ul>
         {% endif %}
 
-        <fieldset id="access">
+        <fieldset id="group_type">
           <div class="sizing">
             {{ mozillians_field(criteria_form.accepting_new_members) }}
           </div>
@@ -38,9 +38,7 @@
               Group Curators can invite and/or remove people from the group if needed.
               When in doubt about which group type to choose, default to "Open".
             </p>
-          </div>
 
-          <div class="access-description">
             <h4>Reviewed</h4>
             <p>
               When a group is set to "Reviewed", Mozillians are presented with
@@ -48,9 +46,7 @@
               a pending request notification, prompting them to review and accept or deny the membership.
               Group Curators can invite and/or remove people from the group if needed.
             </p>
-          </div>
 
-          <div class="access-description">
             <h4>Closed</h4>
             <p>
              "Closed" groups provide more tight control over a group.
@@ -63,7 +59,7 @@
 
         <fieldset id="id_new_member_criteria_fieldset">
           <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-8">
               <div class="form-group">
                 {{ mozillians_field(criteria_form.new_member_criteria, required=True) }}
               </div>
@@ -125,9 +121,14 @@
 
           <fieldset id="id_group_terms">
             <div class="row">
-              <div class="col-md-8 col-sm-6">
+              <div class="col-sm-6">
                 <div class="form-group">
                   {{ mozillians_field(terms_form.terms) }}
+                  <span class="under-input-field">
+                    {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+                      Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+                    {% endtrans %}
+                  </span>
                 </div>
               </div>
             </div>
@@ -149,7 +150,7 @@
           <fieldset id="id_membership_can_expire">
             <div class="form-group">
               <label class="checkbox">
-                {{ _('Membership can expire:') }}
+                {{ _('Membership can expire') }}
                 <span>
                   <input type="checkbox" class="acknowledge"></input>
                 </span>

@@ -7,7 +7,8 @@ $(function() {
         }
     }
 
-    $id_accepting_new_members = $('#id_accepting_new_members');
+    $group_type_choice = $('#form-access input[type="radio"]');
+    $accepting_new_members = $('input[name=accepting_new_members]:checked');
     $id_new_member_criteria_fieldset = $('#id_new_member_criteria_fieldset');
     $id_invalidation_days = $('#id_group_invalidation_days');
     $id_membership_can_expire = $('#id_membership_can_expire :input');
@@ -42,8 +43,9 @@ $(function() {
     }
 
     // Hide/show field when moderation field changes
-    $id_accepting_new_members.change(function() {
-        checkCriteria($id_accepting_new_members.val());
+    $group_type_choice.on('change', function() {
+        $accepting_new_members = $($accepting_new_members.selector);
+        checkCriteria($accepting_new_members.val());
     });
     $id_membership_can_expire.change(function() {
         checkMembershipInvalidation();
@@ -63,7 +65,7 @@ $(function() {
     }
 
     // Hide/show field when document loads
-    checkCriteria($id_accepting_new_members.val());
+    checkCriteria($accepting_new_members.val());
     checkMembershipInvalidation();
     checkGroupTerms();
 
