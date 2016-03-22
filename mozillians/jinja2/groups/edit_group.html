@@ -19,7 +19,7 @@
         <ul class="nav nav-tabs settings-nav" role="tablist">
           <li role="presentation" class="active"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
           <li role="presentation"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
-          {% if user_is_curator or user_is_superuser %}
+          {% if user_is_curator or user_is_manager %}
             <li role="presentation"><a href="#invitation" aria-controls="invitation" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
           {% endif %}
           {% if user.userprofile.is_manager %}
@@ -40,7 +40,7 @@
           {% include 'groups/includes/group_edit_invitation.html' %}
         {% endif %}
         <!-- Admin Tab -->
-        {% if user.userprofile.is_manager %}
+        {% if user_is_manager %}
           {% include 'groups/includes/group_edit_admin.html' %}
         {% endif %}
       </div>

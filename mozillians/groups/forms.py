@@ -121,8 +121,9 @@ class GroupInviteForm(happyforms.ModelForm):
         """Custom clean method."""
         super(GroupInviteForm, self).clean()
         user = self.request.user
-        if (self.instance.curators.filter(id=user.userprofile.id).exists() or
-                not user.is_superuser):
+        is_manager = user.userprofile.is_manager
+        is_curator = self.instance.curators.filter(id=user.userprofile.id).exists()
+        if not is_curator and not is_manager:
             msg = _(u'You need to be the curator of this group before inviting someone to join.')
             self._errors['invites'] = self.error_class([msg])
             del self.cleaned_data['invites']
@@ -139,7 +140,7 @@ class GroupInviteForm(happyforms.ModelForm):
         model = Group
         fields = ('invites',)
         widgets = {
-            'invites': autocomplete.ModelSelect2Multiple(url='users:vouched-autocomplete')
+            'invites': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
         }
 
 
@@ -148,6 +149,17 @@ class GroupAdminForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(GroupAdminForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """Custom clean method."""
+        super(GroupAdminForm, self).clean()
+        profile = self.request.user.userprofile
+
+        if not profile.is_manager:
+            msg = _(u'You need to be the administrator of this group in order to '
+                    'edit this section.')
+            raise forms.ValidationError(msg)
+        return self.cleaned_data
 
     class Meta:
         model = Group
@@ -192,40 +204,6 @@ class GroupCriteriaForm(happyforms.ModelForm):
         }
 
 
-class GroupForm(happyforms.ModelForm):
-
-    def clean(self):
-        cleaned_data = super(GroupForm, self).clean()
-        accepting_new = cleaned_data.get('accepting_new_members')
-        criteria = cleaned_data.get('new_member_criteria')
-        curators = cleaned_data.get('curators')
-
-        if not accepting_new == 'by_request':
-            cleaned_data['new_member_criteria'] = u''
-        else:
-            if not criteria:
-                msg = _(u'You must either specify the criteria or change the '
-                        'acceptance selection.')
-                self._errors['new_member_criteria'] = self.error_class([msg])
-                del cleaned_data['new_member_criteria']
-
-        # Check if group is a legacy group without curators.
-        # In this case we should allow curators relation to be empty.
-        group_has_curators = self.instance.pk and self.instance.curators.exists()
-
-        if not curators and group_has_curators:
-            msg = _(u'The group must have at least one curator.')
-            self._errors['curators'] = self.error_class([msg])
-
-        return cleaned_data
-
-    class Meta:
-        model = Group
-        fields = ('name', 'description', 'irc_channel', 'website', 'wiki',
-                  'accepting_new_members', 'new_member_criteria', 'terms', 'curators',
-                  'invalidation_days', 'invites',)
-
-
 class MembershipFilterForm(forms.Form):
     filtr = forms.ChoiceField(required=False,
                               label='',
@@ -247,10 +225,10 @@ class TermsReviewForm(forms.Form):
                                        ])
 
 
-class CreateGroupForm(forms.ModelForm):
+class GroupCreateForm(forms.ModelForm):
     class Meta:
         model = Group
-        fields = ('name', 'accepting_new_members')
+        fields = ('name', 'accepting_new_members',)
         widgets = {
             'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
         }

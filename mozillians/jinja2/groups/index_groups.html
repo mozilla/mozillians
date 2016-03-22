@@ -22,7 +22,7 @@
 
   <!-- Modal -->
   <div class="modal fade" id="GroupModal" tabindex="-1" role="dialog" aria-labelledby="GroupModalLabel">
-    <form class="add-group" method="POST" action="{{ url('groups:index_groups') }}">
+    <form class="add-group" method="POST" action="{{ url('groups:group_add') }}">
       {% csrf_token %}
       <div class="modal-dialog" role="document">
         <div class="modal-content">

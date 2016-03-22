@@ -23,7 +23,7 @@ from mozillians.groups.models import Group, GroupMembership, Invite, Skill
 from mozillians.users.models import UserProfile
 
 
-def _list_groups(request, template, query, context=None):
+def _list_groups(request, template, query, context={}):
     """Lists groups from given query."""
 
     sort_form = forms.SortForm(request.GET)
@@ -65,7 +65,7 @@ def index_groups(request):
     no vouched members
     """
 
-    group_form = forms.CreateGroupForm(request.POST or None)
+    group_form = forms.GroupCreateForm(request.POST or None)
     if group_form.is_valid():
         group = group_form.save()
         group.curators.add(request.user.userprofile)
@@ -412,7 +412,7 @@ def group_edit(request, url=None):
     group = get_object_or_404(Group, url=url)
     # Only a group curator or an admin is allowed to edit a group
     is_curator = profile in group.curators.all()
-    is_superuser = request.user.is_superuser
+    is_manager = request.user.userprofile.is_manager
     if not (is_curator or is_manager):
         messages.error(request, _('You must be a curator or an admin to edit a group'))
         return redirect(reverse('groups:show_group', args=[group.url]))
@@ -436,10 +436,11 @@ def group_edit(request, url=None):
             'request': request
         }
         key = None
+
         if request.POST:
             form_args['data'] = request.POST
             key, form = next(((k, v(**form_args)) for k, v in group_forms.items()
-                              if k in request.POST), None)
+                              if k in request.POST), (None, None))
             if key and form:
                 group_forms[key] = form
 
@@ -464,7 +465,7 @@ def group_edit(request, url=None):
         'invites': invites if group else None,
         'forms_valid': forms_valid,
         'user_is_curator': is_curator,
-        'user_is_superuser': is_superuser,
+        'user_is_manager': is_manager,
         'show_delete_group_button': show_delete_group_button
     }
     context.update(group_forms)
@@ -515,7 +516,7 @@ def delete_invite(request, invite_pk):
     group = invite.group
 
     if (group.curators.filter(id=request.user.userprofile.id).exists() or
-            request.user.is_superuser):
+            request.user.userprofile.is_manager):
         redeemer = invite.redeemer
         invite.delete()
 
