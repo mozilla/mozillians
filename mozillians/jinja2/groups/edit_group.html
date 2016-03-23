@@ -15,7 +15,10 @@
   <div class="row">
     <div class="col-sm-3 hidden-xs" id="groups-nav">
       <div class="panel panel-default">
-        <div class="panel-heading">{{ _('Groups') }}</div>
+        <div class="panel-heading">
+          {{ _('Group') }}
+          <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
+        </div>
         <ul class="nav nav-tabs settings-nav" role="tablist">
           <li role="presentation" class="active"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
           <li role="presentation"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
