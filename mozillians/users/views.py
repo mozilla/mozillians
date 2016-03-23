@@ -54,10 +54,11 @@ class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
         """Augment base queryset by returning only vouched users."""
 
         # Allow only vouched users to perform this query.
-        if not self.request.user.userprofile.is_vouched:
+        profile = self.request.user.userprofile
+        if not profile.is_vouched:
             return UserProfile.objects.none()
 
-        qs = UserProfile.objects.vouched()
+        qs = UserProfile.objects.vouched().exclude(id=profile.id)
 
         if self.q:
             qs = qs.filter(Q(full_name__icontains=self.q) |
