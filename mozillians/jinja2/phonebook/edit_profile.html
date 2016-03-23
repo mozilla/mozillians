@@ -13,9 +13,9 @@
 
 {% block content %}
   {% if not forms_valid %}
-      <div class="alert alert-error">
-        {{ _('Please correct the errors below.') }}
-      </div>
+    <div class="alert alert-error">
+      {{ _('Please correct the errors below.') }}
+    </div>
   {% endif %}
 
   {% if not profile.is_complete %}
