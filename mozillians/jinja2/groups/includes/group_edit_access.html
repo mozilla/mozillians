@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane fade" id="access">
-  <form class="edit-group" id="form-access" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+  <form class="edit-group" id="grouptype-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Group Type') }}</div>
@@ -76,7 +76,7 @@
     </div>
   </form>
 
-  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+  <form class="edit-group" id="curators-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Curators') }}</div>
@@ -102,7 +102,7 @@
   </form>
 
   {% if waffle.flag('group-terms-invalidation') %}
-    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    <form class="edit-group" id="terms-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
       {% csrf_token %}
       <div class="panel panel-default">
         <div class="panel-heading">{{ _('Terms') }}</div>
@@ -141,7 +141,7 @@
       </div>
     </form>
 
-    <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    <form class="edit-group" id="expiration-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
       {% csrf_token %}
       <div class="panel panel-default">
         <div class="panel-heading">{{ _('Expiration') }}</div>

@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane fade" id="admin">
-  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=admin">
+  <form class="edit-group" id="administration-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=admin">
     {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Administration') }}</div>

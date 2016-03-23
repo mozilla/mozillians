@@ -20,13 +20,13 @@
           <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
         </div>
         <ul class="nav nav-tabs settings-nav" role="tablist">
-          <li role="presentation" class="active"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
-          <li role="presentation"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
+          <li role="presentation" class="active" id="description-tab"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
+          <li role="presentation" id="access-tab"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
           {% if user_is_curator or user_is_manager %}
-            <li role="presentation"><a href="#invitation" aria-controls="invitation" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
+            <li role="presentation" id="invitations-tab"><a href="#invitations" aria-controls="invitations" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
           {% endif %}
           {% if user.userprofile.is_manager %}
-            <li role="presentation"><a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">{{ _('Administration') }}</a></li>
+            <li role="presentation" id="admin-tab"><a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">{{ _('Administration') }}</a></li>
           {% endif %}
         </ul>
       </div>

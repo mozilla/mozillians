@@ -1,5 +1,5 @@
 <div role="tabpanel" class="tab-pane fade in active" id="description">
-  <form class="edit-group" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=description" enctype="multipart/form-data">
+  <form class="edit-group" id="description-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=description" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Description') }}</div>

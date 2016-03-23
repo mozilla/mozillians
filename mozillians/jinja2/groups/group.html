@@ -66,16 +66,24 @@
           <span>
             {{ _('IRC Channel') }}:
           </span>
-          {{ group.irc_channel }}
+          <span id="group-irc">
+            {{ group.irc_channel }}
+          </span>
         </li>
       {% endif %}
 
       {% if group.website %}
-        <li><span>{{ _('Website') }}:</span> {{ group.website|urlize }}</li>
+        <li>
+          <span>{{ _('Website') }}:</span>
+          <span id="group-website">{{ group.website|urlize }}</span>
+        </li>
       {% endif %}
 
       {% if group.wiki %}
-        <li><span>{{ _('Wiki') }}:</span> {{ group.wiki|urlize }} </li>
+        <li>
+          <span>{{ _('Wiki') }}:</span>
+          <span id="group-wiki">{{ group.wiki|urlize }}</span>
+        </li>
       {% endif %}
 
       <li><span>{{ _('Members') }}:</span> {{ members }}</li>

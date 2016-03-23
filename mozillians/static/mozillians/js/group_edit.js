@@ -7,7 +7,7 @@ $(function() {
         }
     }
 
-    $group_type_choice = $('#form-access input[type="radio"]');
+    $group_type_choice = $('#grouptype-form input[type="radio"]');
     $accepting_new_members = $('input[name=accepting_new_members]:checked');
     $id_new_member_criteria_fieldset = $('#id_new_member_criteria_fieldset');
     $id_invalidation_days = $('#id_group_invalidation_days');
