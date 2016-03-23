@@ -1,0 +1,19 @@
+{% trans %}
+Hello {{ redeemer_full_name }},
+{% endtrans %}
+
+
+{% trans %}
+You have been invited by {{ inviter_full_name }} to join
+group "{{ group_name }}" on Mozillians.org.
+{% endtrans %}
+
+{% trans %}
+Please visit the following link to either accept or reject invitation:
+{% endtrans %}
+
+
+{{ group_url }}
+
+
+{{ _('The Mozillians.org team') }}

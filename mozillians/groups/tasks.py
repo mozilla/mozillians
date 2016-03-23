@@ -4,21 +4,19 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Count, Max
-from django.db.models.loading import get_model
 from django.template.loader import get_template, render_to_string
 from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
 import waffle
-
 from celery.task import periodic_task, task
 
 
 @task(ignore_result=True)
 def remove_empty_groups():
     """Remove empty groups."""
-    Group = get_model('groups', 'Group')
-    Skill = get_model('groups', 'Skill')
+
+    from mozillians.groups.models import Group, Skill
 
     for model in [Group, Skill]:
         model.objects.annotate(mcount=Count('members')).filter(mcount=0).delete()
@@ -33,8 +31,8 @@ def send_pending_membership_emails():
     not yet been emailed about, send to all the curators an email with the count
     of all pending memberships and a link to view and manage the requests.
     """
-    Group = get_model('groups', 'Group')
-    GroupMembership = get_model('groups', 'GroupMembership')
+
+    from mozillians.groups.models import Group, GroupMembership
 
     # Curated groups that have pending membership requests
     groups = Group.objects.exclude(curators__isnull=True)
@@ -83,8 +81,8 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
 
     This is queued from Group.add_member() and Group.remove_member().
     """
-    Group = get_model('groups', 'Group')
-    GroupMembership = get_model('groups', 'GroupMembership')
+
+    from mozillians.groups.models import Group, GroupMembership
 
     group = Group.objects.get(pk=group_pk)
     user = User.objects.get(pk=user_pk)
@@ -122,7 +120,9 @@ def member_removed_email(group_pk, user_pk):
     """
     Email to member when he is removed from group
     """
-    Group = get_model('groups', 'Group')
+
+    from mozillians.groups.models import Group
+
     group = Group.objects.get(pk=group_pk)
     user = User.objects.get(pk=user_pk)
     activate('en-us')
@@ -164,3 +164,81 @@ def invalidate_group_membership():
         else:
             for member in memberships:
                 group.remove_member(member.userprofile)
+
+
+@task(ignore_result=True)
+def notify_redeemer_invitation(pk):
+
+    from mozillians.groups.models import Invite
+
+    invite = Invite.objects.get(pk=pk)
+    subject = _('[Mozillians] You have been invited to join group "{0}"'.format(invite.group.name))
+    template = get_template('groups/email/invite_email.txt')
+    ctx = {
+        'inviter_full_name': invite.inviter.full_name,
+        'redeemer_full_name': invite.redeemer.full_name,
+        'group_name': invite.group.name,
+        'group_url': invite.group.get_absolute_url()
+    }
+    message = template.render(ctx)
+    send_mail(subject, message, settings.FROM_NOREPLY, [invite.redeemer.email])
+
+
+@task(ignore_result=True)
+def notify_curators_invitation_accepted(pk):
+
+    from mozillians.groups.models import Invite
+
+    invite = Invite.objects.get(pk=pk)
+    subject_msg = '[Mozillians] {0} has accepted your invitation to join group "{1}"'
+    subject = _(subject_msg.format(invite.redeemer.full_name, invite.group.name))
+    template = get_template('groups/email/invite_accepted_email.txt')
+    ctx = {
+        'inviter_full_name': invite.inviter.full_name,
+        'redeemer_full_name': invite.redeemer.full_name,
+        'group_name': invite.group.name,
+        'group_url': invite.group.get_absolute_url()
+    }
+    message = template.render(ctx)
+    send_mail(subject, message, settings.FROM_NOREPLY, [invite.inviter.email])
+
+
+@task(ignore_result=True)
+def notify_curators_invitation_rejected(redeemer_pk, inviter_pk, group_pk):
+
+    from mozillians.groups.models import Group
+    from mozillians.users.models import UserProfile
+
+    inviter = UserProfile.objects.get(pk=inviter_pk)
+    redeemer = UserProfile.objects.get(pk=redeemer_pk)
+    group = Group.objects.get(pk=group_pk)
+
+    subject_msg = '[Mozillians] {0} has rejected your invitation to join group "{1}"'
+    subject = _(subject_msg.format(redeemer.full_name, group.name))
+    template = get_template('groups/email/invite_rejected_email.txt')
+    ctx = {
+        'redeemer_full_name': redeemer.full_name,
+        'inviter_full_name': inviter.full_name,
+        'group_name': group.name
+    }
+    message = template.render(ctx)
+    send_mail(subject, message, settings.FROM_NOREPLY, [inviter.email])
+
+
+@task(ignore_result=True)
+def notify_redeemer_invitation_invalid(redeemer_pk, group_pk):
+
+    from mozillians.groups.models import Group
+    from mozillians.users.models import UserProfile
+
+    group = Group.objects.get(pk=group_pk)
+    redeemer = UserProfile.objects.get(pk=redeemer_pk)
+    subject_msg = '[Mozillians] Invitation to group "{0}" is no longer valid'
+    subject = _(subject_msg.format(group.name))
+    template = get_template('groups/email/invite_invalid_email.txt')
+    ctx = {
+        'group_name': group.name,
+        'redeemer_full_name': redeemer.full_name
+    }
+    message = template.render(ctx)
+    send_mail(subject, message, settings.FROM_NOREPLY, [redeemer.email])

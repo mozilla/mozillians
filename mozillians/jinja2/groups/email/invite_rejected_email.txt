@@ -1,0 +1,12 @@
+{% trans %}
+Hello {{ inviter_full_name }},
+{% endtrans %}
+
+
+{% trans %}
+{{ redeemer_full_name }} has rejected your invitation to
+join group "{{ group_name }}" on Mozillians.org.
+{% endtrans %}
+
+
+{{ _('The Mozillians.org team') }}
