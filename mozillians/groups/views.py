@@ -523,5 +523,7 @@ def delete_invite(request, invite_pk):
         # TODO:Revoke any celery tasks if needed and shoot revokation emails.
         msg = _(u'The invitation to {0} has been successfully revoked. ').format(redeemer)
         messages.success(request, msg)
-        return redirect(reverse('groups:group_edit', args=[group.url]))
+        next_section = request.GET.get('next')
+        next_url = urlparams(reverse('groups:group_edit', args=[group.url]), next_section)
+        return HttpResponseRedirect(next_url)
     raise Http404()
