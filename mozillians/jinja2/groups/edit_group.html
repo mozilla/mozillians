@@ -36,7 +36,7 @@
         <!-- Access Tab -->
         {% include 'groups/includes/group_edit_access.html' %}
         <!-- Invitations Tab -->
-        {% if user_is_curator or user_is_superuser %}
+        {% if user_is_curator or user_is_manager %}
           {% include 'groups/includes/group_edit_invitation.html' %}
         {% endif %}
         <!-- Admin Tab -->
