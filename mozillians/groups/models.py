@@ -340,7 +340,7 @@ class Invite(models.Model):
     redeemer = models.ForeignKey('users.UserProfile', related_name='groups_invited',
                                  verbose_name=_lazy(u'Redeemer'))
     group = models.ForeignKey('Group')
-    accepted = models.NullBooleanField()
+    accepted = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
