@@ -128,6 +128,8 @@ class GroupInviteForm(happyforms.ModelForm):
         self.fields['invites'].required = False
         self.fields['invites'].help_text = _('Start typing the name/email/username '
                                              'of a vouched Mozillian.')
+        if self.instance.pk:
+            self.initial['invites'] = []
 
     def clean(self):
         """Custom clean method."""
