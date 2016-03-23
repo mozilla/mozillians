@@ -459,6 +459,8 @@ def group_edit(request, url=None):
         next_section = request.GET.get('next')
         next_url = urlparams(reverse('groups:group_edit', args=[group.url]), next_section)
         return HttpResponseRedirect(next_url)
+    else:
+        forms_valid = False
 
     context = {
         'group': group if url else None,
