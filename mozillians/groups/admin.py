@@ -332,7 +332,7 @@ class InviteAutocompleteForm(forms.ModelForm):
 class InviteAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ['inviter', 'redeemer', 'group']
     list_display = ['inviter', 'redeemer', 'group']
-    readonly_fields = ['accepted', 'created', 'updated']
+    readonly_fields = ['created', 'updated']
     list_filter = [RedeemedInviteFilter]
     form = InviteAutocompleteForm
 
