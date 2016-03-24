@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from django.test import override_settings
 from django.test.client import Client
 
 from mock import patch
@@ -23,14 +24,16 @@ class ToggleGroupSubscriptionTests(TestCase):
                                          'user_pk': self.user.userprofile.pk})
 
     @patch('mozillians.groups.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_group_subscription(self, basket_task_mock):
         with self.login(self.user) as client:
             client.post(self.join_url, follow=True)
         group = Group.objects.get(id=self.group.id)
         ok_(group.members.filter(id=self.user.userprofile.id).exists())
-        basket_task_mock.assert_called_with(self.user.userprofile.id)
+        basket_task_mock.assert_called_with(self.user.userprofile.id, ['foo'])
 
     @patch('mozillians.groups.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_group_subscription_terms(self, basket_task_mock):
         group = GroupFactory.create(terms='Example terms')
         join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
@@ -39,9 +42,10 @@ class ToggleGroupSubscriptionTests(TestCase):
 
         membership = group.groupmembership_set.get(userprofile=self.user.userprofile)
         eq_(membership.status, GroupMembership.PENDING_TERMS)
-        basket_task_mock.assert_called_with(self.user.userprofile.id)
+        basket_task_mock.assert_called_with(self.user.userprofile.id, ['foo'])
 
     @patch('mozillians.groups.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_group_subscription_terms_by_request(self, basket_task_mock):
         group = GroupFactory.create(accepting_new_members='by_request', terms='Example terms')
         join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
@@ -50,16 +54,17 @@ class ToggleGroupSubscriptionTests(TestCase):
 
         membership = group.groupmembership_set.get(userprofile=self.user.userprofile)
         eq_(membership.status, GroupMembership.PENDING)
-        basket_task_mock.assert_called_with(self.user.userprofile.id)
+        basket_task_mock.assert_called_with(self.user.userprofile.id, ['foo'])
 
     @patch('mozillians.groups.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_group_unsubscription(self, basket_task_mock):
         self.group.add_member(self.user.userprofile)
         with self.login(self.user) as client:
             client.post(self.leave_url, follow=True)
         group = Group.objects.get(id=self.group.id)
         ok_(not group.members.filter(id=self.user.userprofile.id).exists())
-        basket_task_mock.assert_called_with(self.user.userprofile.id)
+        basket_task_mock.assert_called_with(self.user.userprofile.id, ['foo'])
 
     def test_nonexistant_group(self):
         url = reverse('groups:join_group', prefix='/en-US/',
