@@ -30,10 +30,11 @@
                 </div>
                 <div class="col-sm-4">
                   <div class="invite-controls right">
-                    <a href="{{ url('groups:delete_invite', redeemer.groups_invited.get(group=group).pk) }}?next=invitation">
+                    {% set invite_pk = redeemer.groups_invited.get(group=group).pk %}
+                    <a href="{{ url('groups:delete_invite', invite_pk) }}?next=invitation">
                       <span class="glyphicon glyphicon-remove" title="{{ _('Delete') }}" aria-hidden="true"></span>
                     </a>
-                    <a href="#">
+                    <a href="{{ url('groups:send_invitation_email', invite_pk) }}?next=invitation">
                       <span class="glyphicon glyphicon-repeat"title="{{ _('Resend') }}" aria-hidden="true"></span>
                     </a>
                   </div>

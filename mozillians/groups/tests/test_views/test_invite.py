@@ -1,7 +1,9 @@
 from django.core.urlresolvers import reverse
 
+from mock import patch, ANY
 from nose.tools import eq_, ok_
 
+from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import GroupMembership, Invite
 from mozillians.groups.tests import InviteFactory
@@ -57,5 +59,53 @@ class InviteTest(TestCase):
 
         with self.login(user) as client:
             url = reverse('groups:accept_reject_invitation', args=[invite.pk, 'accept'])
+            response = client.get(url, follow=True)
+            eq_(response.status_code, 404)
+
+    @patch('mozillians.groups.views.notify_redeemer_invitation')
+    @patch('mozillians.groups.views.messages.success')
+    def test_send_invitation_email(self, mock_success, mock_notification):
+        curator = UserFactory.create()
+        redeemer = UserFactory.create(userprofile={'full_name': 'Foo Bar'})
+        invite = InviteFactory.create(inviter=curator.userprofile, redeemer=redeemer.userprofile)
+        invite.group.curators.add(curator.userprofile)
+
+        with self.login(curator) as client:
+            url = urlparams(reverse('groups:send_invitation_email',
+                                    args=[invite.pk]), 'invitation')
+            response = client.get(url, follow=True)
+            eq_(response.status_code, 200)
+
+        mock_notification.delay.assert_called_once_with(invite.pk)
+        msg = 'Invitation to Foo Bar has been sent successfully.'
+        mock_success.assert_called_once_with(ANY, msg)
+
+    @patch('mozillians.groups.views.notify_redeemer_invitation')
+    @patch('mozillians.groups.views.messages.success')
+    def test_send_invitation_email_different_curator(self, mock_success, mock_notification):
+        curator, inviter = UserFactory.create_batch(2)
+        redeemer = UserFactory.create(userprofile={'full_name': 'Foo Bar'})
+        invite = InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile)
+        invite.group.curators.add(curator.userprofile)
+        invite.group.curators.add(inviter.userprofile)
+
+        with self.login(curator) as client:
+            url = urlparams(reverse('groups:send_invitation_email',
+                                    args=[invite.pk]), 'invitation')
+            response = client.get(url, follow=True)
+            eq_(response.status_code, 200)
+
+        mock_notification.delay.assert_called_once_with(invite.pk)
+        msg = 'Invitation to Foo Bar has been sent successfully.'
+        mock_success.assert_called_once_with(ANY, msg)
+
+    def test_send_invitation_email_no_curator_manager(self):
+        inviter, redeemer = UserFactory.create_batch(2)
+        invite = InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile)
+        user = UserFactory.create()
+
+        with self.login(user) as client:
+            url = urlparams(reverse('groups:send_invitation_email',
+                                    args=[invite.pk]), 'invitation')
             response = client.get(url, follow=True)
             eq_(response.status_code, 404)

@@ -21,8 +21,9 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups import forms
 from mozillians.groups.models import Group, GroupMembership, Invite, Skill
 from mozillians.groups.tasks import (notify_curators_invitation_accepted,
-                                     notify_redeemer_invitation_invalid,
-                                     notify_curators_invitation_rejected)
+                                     notify_curators_invitation_rejected,
+                                     notify_redeemer_invitation,
+                                     notify_redeemer_invitation_invalid)
 from mozillians.users.models import UserProfile
 
 
@@ -554,3 +555,23 @@ def accept_reject_invitation(request, invite_pk, action):
         invite.delete()
 
     return redirect(reverse('groups:show_group', args=[invite.group.url]))
+
+
+@never_cache
+def send_invitation_email(request, invite_pk):
+    """Send group invitation email."""
+
+    invite = get_object_or_404(Invite, pk=invite_pk)
+    is_curator = invite.group.curators.filter(pk=request.user.userprofile.pk).exists()
+    is_manager = request.user.userprofile.is_manager
+
+    if not (is_curator or is_manager):
+        raise Http404
+
+    notify_redeemer_invitation.delay(invite.pk)
+    msg = _(u'Invitation to {0} has been sent successfully.'.format(invite.redeemer))
+    messages.success(request, msg)
+    next_section = request.GET.get('next')
+    next_url = urlparams(reverse('groups:group_edit', args=[invite.group.url]), next_section)
+
+    return HttpResponseRedirect(next_url)
