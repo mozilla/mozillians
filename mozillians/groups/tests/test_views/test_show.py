@@ -5,8 +5,8 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.models import GroupMembership
-from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
+from mozillians.groups.models import GroupMembership, Invite
+from mozillians.groups.tests import GroupFactory, GroupAliasFactory, InviteFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -379,9 +379,12 @@ class ShowTests(TestCase):
         self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
         self.group.save()
+        invite = InviteFactory(group=self.group, redeemer=self.user_2.userprofile,
+                               inviter=self.user_1.userprofile)
 
         group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
         next_url = "%s?filtr=members" % group_url
+        eq_(self.group.invites.all().count(), 1)
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
@@ -395,6 +398,7 @@ class ShowTests(TestCase):
         eq_(membership_filter_form.cleaned_data['filtr'], 'members')
         # Not a member anymore
         ok_(not self.group.has_member(self.user_2.userprofile))
+        ok_(not Invite.objects.filter(pk=invite.pk).exists())
 
     def test_confirm_user(self):
         """POST to confirm user view changes member from pending to member"""

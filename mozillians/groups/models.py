@@ -301,6 +301,9 @@ class Group(GroupBase):
             # Member removed
             member_removed_email.delay(self.pk, userprofile.user.pk)
 
+        # delete the invitation to the group if exists
+        Invite.objects.filter(group=self, redeemer=userprofile).delete()
+
     def has_member(self, userprofile):
         """
         Return True if this user is in this group with status MEMBER.
