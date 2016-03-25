@@ -167,7 +167,7 @@ def invalidate_group_membership():
 
 
 @task(ignore_result=True)
-def notify_redeemer_invitation(pk):
+def notify_redeemer_invitation(pk, custom_text=''):
 
     from mozillians.groups.models import Invite
 
@@ -178,7 +178,8 @@ def notify_redeemer_invitation(pk):
         'inviter_full_name': invite.inviter.full_name,
         'redeemer_full_name': invite.redeemer.full_name,
         'group_name': invite.group.name,
-        'group_url': invite.group.get_absolute_url()
+        'group_url': invite.group.get_absolute_url(),
+        'custom_text': custom_text
     }
     message = template.render(ctx)
     send_mail(subject, message, settings.FROM_NOREPLY, [invite.redeemer.email])

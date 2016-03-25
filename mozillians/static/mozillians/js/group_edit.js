@@ -14,6 +14,8 @@ $(function() {
     $id_membership_can_expire = $('#id_membership_can_expire :input');
     $id_group_terms = $('#id_group_terms');
     $id_group_has_terms = $('#id_group_has_terms :input');
+    $id_group_has_email_text = $('#id_group_has_email_text :input');
+    $id_group_email_text = $('#id_group_email_text');
 
     // Hide/show new member criteria field based on moderation
     function checkCriteria(modVal) {
@@ -42,6 +44,15 @@ $(function() {
         }
     }
 
+    function checkGroupEmailText() {
+        if($id_group_has_email_text.is(':checked')) {
+            $id_group_email_text.show();
+        } else {
+            $id_group_email_text.hide();
+            $id_group_email_text.find(':input').val('');
+        }
+    }
+
     // Hide/show field when moderation field changes
     $group_type_choice.on('change', function() {
         $accepting_new_members = $($accepting_new_members.selector);
@@ -53,6 +64,9 @@ $(function() {
     $id_group_has_terms.change(function() {
         checkGroupTerms();
     });
+    $id_group_has_email_text.change(function() {
+        checkGroupEmailText();
+    });
 
     // Initialize membership expiration checkbox
     if ($id_invalidation_days.find(':input').val()) {
@@ -63,11 +77,17 @@ $(function() {
     if ($id_group_terms.find('textarea').val()) {
         $id_group_has_terms.prop('checked', true);
     }
+    // Initialize email text checkbox
+    if ($id_group_email_text.find('textarea').val()) {
+        $id_group_has_email_text.prop('checked', true);
+    }
+
 
     // Hide/show field when document loads
     checkCriteria($accepting_new_members.val());
     checkMembershipInvalidation();
     checkGroupTerms();
+    checkGroupEmailText();
 
     $('#curators').on('DOMNodeInserted', 'li', function() {
         $('.select2-selection__choice').each(function(index, elem) {
