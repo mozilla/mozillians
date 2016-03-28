@@ -146,15 +146,20 @@ class GroupInviteForm(happyforms.ModelForm):
 
     def save(self, *args, **kwargs):
         """Custom save method to add data to the through model."""
+        custom_text = self.cleaned_data['invite_email_text']
+        self.instance.invite_email_text = custom_text
+        self.instance.save()
         for profile in self.cleaned_data['invites']:
             if not Invite.objects.filter(group=self.instance, redeemer=profile).exists():
+                # Create the Invite objects
                 invite, created = Invite.objects.get_or_create(
                     group=self.instance, redeemer=profile, inviter=self.request.user.userprofile)
-                notify_redeemer_invitation.delay(invite.pk)
+                # Shoot an email
+                notify_redeemer_invitation.delay(invite.pk, custom_text)
 
     class Meta:
         model = Group
-        fields = ('invites',)
+        fields = ('invites', 'invite_email_text',)
         widgets = {
             'invites': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
         }

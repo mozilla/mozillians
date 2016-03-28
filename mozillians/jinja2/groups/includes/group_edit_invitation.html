@@ -61,6 +61,28 @@
             {{ mozillians_field(invite_form.invites) }}
           </div>
         </fieldset>
+        <fieldset id="id_group_has_email_text">
+          <div class="form-group">
+            <label class="checkbox">
+              {{ _('Additional Email Text') }}
+              <span>
+                <input type="checkbox" class="acknowledge"></input>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset id="id_group_email_text">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                {{ mozillians_field(invite_form.invite_email_text) }}
+                <span class="under-input-field">
+                </span>
+              </div>
+            </div>
+          </div>
+        </fieldset>
       </div>
       <div class="panel-footer">
         <button class="btn btn-primary" id="form-submit-invite" type="submit" name="invite_form">

@@ -201,6 +201,9 @@ class Group(GroupBase):
                                                     verbose_name=_('Invalidation days'))
     invites = models.ManyToManyField('users.UserProfile', related_name='invites_received',
                                      through='Invite', through_fields=('group', 'redeemer'))
+    invite_email_text = models.TextField(max_length=2048, default='', blank=True,
+                                         help_text=_('Please enter any additional text for the '
+                                                     'invitation email'))
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod

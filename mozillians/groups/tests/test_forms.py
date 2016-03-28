@@ -1,5 +1,6 @@
 from django.test.client import RequestFactory
 
+from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -172,3 +173,18 @@ class GroupEditFormTests(BaseGroupEditTestCase):
                 'visible': True,
                 'members_can_leave': True}
         self.validate_group_edit_forms(forms.GroupAdminForm, group, data, request)
+
+    def test_email_invite_test(self):
+        invitee = UserFactory.create()
+        curator = UserFactory.create()
+        group = GroupFactory.create()
+        group.curators.add(curator.userprofile)
+        request = RequestFactory().request()
+        request.user = curator
+        data = {'invites': [invitee.userprofile.id],
+                'invite_email_text': u'Custom message in the email.'}
+
+        with patch('mozillians.groups.forms.notify_redeemer_invitation.delay') as mocked_task:
+            self.validate_group_edit_forms(forms.GroupInviteForm, group, data, request)
+        ok_(mocked_task.called)
+        eq_(mocked_task.call_args[0][1], data['invite_email_text'])
