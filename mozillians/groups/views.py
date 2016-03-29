@@ -567,7 +567,7 @@ def send_invitation_email(request, invite_pk):
     if not (is_curator or is_manager):
         raise Http404
 
-    notify_redeemer_invitation.delay(invite.pk)
+    notify_redeemer_invitation.delay(invite.pk, invite.group.invite_email_text)
     msg = _(u'Invitation to {0} has been sent successfully.'.format(invite.redeemer))
     messages.success(request, msg)
     next_section = request.GET.get('next')
