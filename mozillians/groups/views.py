@@ -22,8 +22,7 @@ from mozillians.groups import forms
 from mozillians.groups.models import Group, GroupMembership, Invite, Skill
 from mozillians.groups.tasks import (notify_curators_invitation_accepted,
                                      notify_curators_invitation_rejected,
-                                     notify_redeemer_invitation,
-                                     notify_redeemer_invitation_invalid)
+                                     notify_redeemer_invitation)
 from mozillians.users.models import UserProfile
 
 
@@ -526,7 +525,6 @@ def delete_invite(request, invite_pk):
             request.user.userprofile.is_manager):
         redeemer = invite.redeemer
         invite.delete()
-        notify_redeemer_invitation_invalid.delay(redeemer.pk, group.pk)
         msg = _(u'The invitation to {0} has been successfully revoked.').format(redeemer)
         messages.success(request, msg)
         next_section = request.GET.get('next')

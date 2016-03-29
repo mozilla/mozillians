@@ -324,24 +324,3 @@ class InvitationEmailTests(TestCase):
         ok_(mock_get_template.called)
         eq_(template_name, mock_get_template.call_args[0][0])
         mock_send_email.assert_called_once_with(*args)
-
-    @patch('mozillians.groups.tasks.send_mail')
-    @override_settings(FROM_NOREPLY='noreply@example.com')
-    def test_send_invitation_invalid_email(self, mock_send_email):
-        inviter, redeemer = UserFactory.create_batch(2)
-        group = GroupFactory.create(name='Foo')
-        template_name = 'groups/email/invite_invalid_email.txt'
-        InviteFactory.create(inviter=inviter.userprofile,
-                             redeemer=redeemer.userprofile,
-                             group=group)
-        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
-            tasks.notify_redeemer_invitation_invalid(redeemer.userprofile.pk, group.pk)
-        args = [
-            '[Mozillians] Invitation to group "foo" is no longer valid',
-            ANY,
-            'noreply@example.com',
-            [redeemer.userprofile.email]
-        ]
-        ok_(mock_get_template.called)
-        eq_(template_name, mock_get_template.call_args[0][0])
-        mock_send_email.assert_called_once_with(*args)
