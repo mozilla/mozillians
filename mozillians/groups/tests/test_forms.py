@@ -108,30 +108,31 @@ class GroupEditFormTests(BaseGroupEditTestCase):
     def test_edit_terms(self):
         group = GroupFactory.create()
         data = {'terms': 'foobar'}
-        self.validate_group_edit_forms(forms.GroupTermsForm, group, data)
+        self.validate_group_edit_forms(forms.GroupTermsExpirationForm, group, data)
 
     def test_edit_terms_without_data(self):
         group = GroupFactory.create()
         data = {}
-        self.validate_group_edit_forms(forms.GroupTermsForm, group, data)
+        self.validate_group_edit_forms(forms.GroupTermsExpirationForm, group, data)
 
     def test_edit_invalidation(self):
         group = GroupFactory.create()
         data = {'invalidation_days': 5}
-        self.validate_group_edit_forms(forms.GroupInvalidationForm, group, data)
-
-    def test_edit_invalidation_without_data(self):
-        group = GroupFactory.create()
-        data = {}
-        self.validate_group_edit_forms(forms.GroupInvalidationForm, group, data)
+        self.validate_group_edit_forms(forms.GroupTermsExpirationForm, group, data)
 
     def test_edit_invalidation_invalid_data(self):
         group = GroupFactory.create()
         data = {'invalidation_days': 1000}
-        form = self.validate_group_edit_forms(forms.GroupInvalidationForm, group,
+        form = self.validate_group_edit_forms(forms.GroupTermsExpirationForm, group,
                                               data, None, False)
         eq_(form.errors, {'invalidation_days': [u'The maximum expiration date for a group '
                                                 'cannot exceed two years.']})
+
+    def test_edit_terms_and_invalidation(self):
+        group = GroupFactory.create()
+        data = {'terms': 'foobar',
+                'invalidation_days': 40}
+        self.validate_group_edit_forms(forms.GroupTermsExpirationForm, group, data)
 
     def test_edit_invitation(self):
         invitee = UserFactory.create()

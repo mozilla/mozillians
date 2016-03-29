@@ -7,8 +7,7 @@
 
         {% if (criteria_form.non_field_errors() or
                curator_form.non_field_errors() or
-               terms_form.non_field_errors() or
-               invalidation_form.non_field_errors()) %}
+               terms_expiration_form.non_field_errors()) %}
           <ul class="unstyled">
             {% for error in criteria_form.non_field_errors() %}
               <li class="alert alert-error">{{ error }}</li>
@@ -16,10 +15,7 @@
             {% for error in curator_form.non_field_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
-            {% for error in terms_form.non_field_errors() %}
-              <li class="alert alert-error">{{ error }}</li>
-            {% endfor %}
-            {% for error in invalidation_form.non_field_errors() %}
+            {% for error in terms_expiration_form.non_field_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
           </ul>
@@ -105,7 +101,7 @@
     <form class="edit-group" id="terms-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
       {% csrf_token %}
       <div class="panel panel-default">
-        <div class="panel-heading">{{ _('Terms') }}</div>
+        <div class="panel-heading">{{ _('Terms & Expiration') }}</div>
         <div class="panel-body">
 
           <fieldset id="id_group_has_terms">
@@ -123,7 +119,7 @@
             <div class="row">
               <div class="col-sm-6">
                 <div class="form-group">
-                  {{ mozillians_field(terms_form.terms) }}
+                  {{ mozillians_field(terms_expiration_form.terms) }}
                   <span class="under-input-field">
                     {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
                       Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
@@ -133,19 +129,6 @@
               </div>
             </div>
           </fieldset>
-
-        </div>
-        <div class="panel-footer">
-          <button class="btn btn-primary" id="form-submit-terms" type="submit" name="terms_form">{{ _('Update Terms') }}</button>
-        </div>
-      </div>
-    </form>
-
-    <form class="edit-group" id="expiration-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
-      {% csrf_token %}
-      <div class="panel panel-default">
-        <div class="panel-heading">{{ _('Expiration') }}</div>
-        <div class="panel-body">
 
           <fieldset id="id_membership_can_expire">
             <div class="form-group">
@@ -162,7 +145,7 @@
             <div class="row">
               <div class="col-md-8 col-sm-6">
                 <div class="form-group">
-                  {{ mozillians_field(invalidation_form.invalidation_days) }}
+                  {{ mozillians_field(terms_expiration_form.invalidation_days) }}
                 </div>
               </div>
             </div>
@@ -170,8 +153,9 @@
 
         </div>
         <div class="panel-footer">
-          <button class="btn btn-primary" id="form-submit-invalidation" type="submit" name="invalidation_form">
-            {{ _('Update Expiration Settings') }}
+          <button class="btn btn-primary" id="form-submit-terms-expiration"
+                  type="submit" name="terms_expiration_form">
+            {{ _('Update Terms & Expiration') }}
           </button>
         </div>
       </div>
