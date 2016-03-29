@@ -217,22 +217,3 @@ def notify_curators_invitation_rejected(redeemer_pk, inviter_pk, group_pk):
     }
     message = template.render(ctx)
     send_mail(subject, message, settings.FROM_NOREPLY, [inviter.email])
-
-
-@task(ignore_result=True)
-def notify_redeemer_invitation_invalid(redeemer_pk, group_pk):
-
-    from mozillians.groups.models import Group
-    from mozillians.users.models import UserProfile
-
-    group = Group.objects.get(pk=group_pk)
-    redeemer = UserProfile.objects.get(pk=redeemer_pk)
-    subject_msg = '[Mozillians] Invitation to group "{0}" is no longer valid'
-    subject = _(subject_msg.format(group.name))
-    template = get_template('groups/email/invite_invalid_email.txt')
-    ctx = {
-        'group_name': group.name,
-        'redeemer_full_name': redeemer.full_name
-    }
-    message = template.render(ctx)
-    send_mail(subject, message, settings.FROM_NOREPLY, [redeemer.email])
