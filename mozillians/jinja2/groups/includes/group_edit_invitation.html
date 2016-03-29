@@ -19,10 +19,11 @@
                 <div class="col-sm-8">
 
                   <div class="avatar">
-                    <img class="profile-photo"
-                         src="{{ redeemer.get_photo_url('70x70') }}"
-                         alt="{{ _('Profile Photo') }}"
-                         title={{ redeemer.display_name }}>
+                    <a href="{{ url('phonebook:profile_view', redeemer.user.username) }}">
+                      <img class="profile-photo"
+                           src="{{ redeemer.get_photo_url('70x70') }}"
+                           alt="{{ _('Profile Photo') }}"
+                           title="{{ redeemer.display_name }}"></a>
                     <a href="{{ url('phonebook:profile_view', redeemer.user.username) }}">
                       {{ redeemer.display_name }}
                     </a>
