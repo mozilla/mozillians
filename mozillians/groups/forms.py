@@ -82,8 +82,8 @@ class GroupCuratorsForm(happyforms.ModelForm):
         }
 
 
-class GroupInvalidationForm(happyforms.ModelForm):
-    """Model Form for editing access related fields."""
+class GroupTermsExpirationForm(happyforms.ModelForm):
+    """Model Form for handling group terms and expiration period."""
     invalidation_days = forms.IntegerField(
         widget=forms.NumberInput(attrs={'placeholder': 'days'}),
         min_value=1,
@@ -93,10 +93,10 @@ class GroupInvalidationForm(happyforms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super(GroupInvalidationForm, self).__init__(*args, **kwargs)
+        super(GroupTermsExpirationForm, self).__init__(*args, **kwargs)
 
     def clean(self):
-        super(GroupInvalidationForm, self).clean()
+        super(GroupTermsExpirationForm, self).clean()
         # Max invalidation period is 2 years
         if self.cleaned_data['invalidation_days'] > MAX_INVALIDATION_DAYS:
             msg = _(u'The maximum expiration date for a group cannot exceed two years.')
@@ -106,18 +106,7 @@ class GroupInvalidationForm(happyforms.ModelForm):
 
     class Meta:
         model = Group
-        fields = ('invalidation_days',)
-
-
-class GroupTermsForm(happyforms.ModelForm):
-    """Model Form for handling group terms."""
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(GroupTermsForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = Group
-        fields = ('terms',)
+        fields = ('terms', 'invalidation_days',)
 
 
 class GroupInviteForm(happyforms.ModelForm):

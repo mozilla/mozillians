@@ -428,9 +428,8 @@ def group_edit(request, url=None):
 
     # Prepare the forms for rendering
     group_forms['basic_form'] = forms.GroupBasicForm
-    group_forms['invalidation_form'] = forms.GroupInvalidationForm
     group_forms['curator_form'] = forms.GroupCuratorsForm
-    group_forms['terms_form'] = forms.GroupTermsForm
+    group_forms['terms_expiration_form'] = forms.GroupTermsExpirationForm
     group_forms['invite_form'] = forms.GroupInviteForm
     group_forms['admin_form'] = forms.GroupAdminForm
     group_forms['criteria_form'] = forms.GroupCriteriaForm
