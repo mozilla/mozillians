@@ -299,6 +299,13 @@ body {
     .select2-container--default .select2-selection--multiple .select2-selection__clear {
         margin-right: 0;
     }
+
+    @media (max-width: @breakMobileLandscape) {
+        .select2-selection--multiple,
+        .select2-dropdown.select2-dropdown--below {
+            max-width: 230px !important;
+        }
+    }
 }
 
 #outer-wrapper {
@@ -2384,6 +2391,12 @@ form.add-group {
             padding-left: 0px;
         }
     }
+    #id_group_email_text,
+    #id_group_terms,
+    #id_group_invalidation_days {
+        margin-top: 0px;
+        padding-top: 0px;
+    }
     .text-muted {
         margin: 20px 0;
         text-align: center;
@@ -2401,6 +2414,14 @@ form.add-group {
                 left:auto;
                 width: 30px;
                 height: 30px;
+            }
+        }
+    }
+    @media (max-width: @breakMobileLandscape) {
+        fieldset#curators,
+        fieldset#invites {
+            .help-block {
+                max-width: 230px;
             }
         }
     }
@@ -2422,6 +2443,7 @@ form.add-group {
     .panel-heading {
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
