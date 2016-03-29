@@ -166,14 +166,14 @@ def show(request, url, alias_model, template):
 
             # Curators can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
-            invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted=False)
-            data.update(invitation=invitation)
 
         else:
             # only show full members, or this user
             memberships = group.groupmembership_set.filter(
                 Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
 
+        invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted=False)
+        data.update(invitation=invitation)
         # Order by UserProfile.Meta.ordering
         memberships = memberships.order_by('userprofile')
 
