@@ -170,13 +170,13 @@ class EmailMembershipChangeTests(TestCase):
 class MembershipInvalidationTests(TestCase):
     """ Test membership invalidation."""
 
-    @patch('mozillians.groups.tasks.waffle.switch_is_active')
-    def test_invalidate_group_with_terms(self, mocked_waffle_switch):
-        mocked_waffle_switch.return_value = False
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_invalidate_group_with_terms(self, mock_send_mail):
         member = UserFactory.create(vouched=True)
         curator = UserFactory.create(vouched=True)
 
-        group = GroupFactory.create(terms='Example terms.', invalidation_days=5)
+        group = GroupFactory.create(name='Foo', terms='Example terms.', invalidation_days=5)
         group.curators.add(curator.userprofile)
         group.add_member(member.userprofile)
         group.add_member(curator.userprofile)
@@ -191,44 +191,21 @@ class MembershipInvalidationTests(TestCase):
 
         invalidate_group_membership()
 
-        membership = group.groupmembership_set.get(userprofile=member.userprofile)
-        curator_membership = group.groupmembership_set.get(userprofile=curator.userprofile)
-        eq_(membership.status, GroupMembership.PENDING_TERMS)
-        eq_(curator_membership.status, GroupMembership.MEMBER)
+        ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
+        ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
 
-    @patch('mozillians.groups.tasks.waffle.switch_is_active')
-    def test_invalidate_group_by_request(self, mocked_waffle_switch):
-        mocked_waffle_switch.return_value = False
+        subject = 'Removed from Mozillians group "foo"'
+        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
+                                               [member.email], fail_silently=False)
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_invalidate_group_by_request(self, mock_send_mail):
         member = UserFactory.create(vouched=True)
         curator = UserFactory.create(vouched=True)
 
-        group = GroupFactory.create(invalidation_days=5, accepting_new_members='by_request')
-        group.curators.add(curator.userprofile)
-        group.add_member(curator.userprofile)
-        group.add_member(member.userprofile)
-
-        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
-        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
-        membership.update(updated_on=datetime.now() - timedelta(days=10))
-        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
-
-        eq_(membership[0].status, GroupMembership.MEMBER)
-        eq_(curator_membership[0].status, GroupMembership.MEMBER)
-
-        invalidate_group_membership()
-
-        membership = group.groupmembership_set.get(userprofile=member.userprofile)
-        curator_membership = group.groupmembership_set.get(userprofile=curator.userprofile)
-        eq_(membership.status, GroupMembership.PENDING)
-        eq_(curator_membership.status, GroupMembership.MEMBER)
-
-    @patch('mozillians.groups.tasks.waffle.switch_is_active')
-    def test_invalidate_group_accepts_all(self, mocked_waffle_switch):
-        mocked_waffle_switch.return_value = False
-        member = UserFactory.create(vouched=True)
-        curator = UserFactory.create(vouched=True)
-
-        group = GroupFactory.create(invalidation_days=5)
+        group = GroupFactory.create(name='Foo', invalidation_days=5,
+                                    accepting_new_members='by_request')
         group.curators.add(curator.userprofile)
         group.add_member(curator.userprofile)
         group.add_member(member.userprofile)
@@ -245,6 +222,38 @@ class MembershipInvalidationTests(TestCase):
 
         ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+
+        subject = 'Removed from Mozillians group "foo"'
+        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
+                                               [member.email], fail_silently=False)
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @override_settings(FROM_NOREPLY='noreply@example.com')
+    def test_invalidate_group_accepts_all(self, mock_send_mail):
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
+        group = GroupFactory.create(name='Foo', invalidation_days=5)
+        group.curators.add(curator.userprofile)
+        group.add_member(curator.userprofile)
+        group.add_member(member.userprofile)
+
+        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
+        invalidate_group_membership()
+
+        ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
+        ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+
+        subject = 'Removed from Mozillians group "foo"'
+        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
+                                               [member.email], fail_silently=False)
 
 
 class InvitationEmailTests(TestCase):
