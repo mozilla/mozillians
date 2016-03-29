@@ -19,11 +19,11 @@
                 <div class="col-sm-8">
 
                   <div class="avatar">
+                    <img class="profile-photo"
+                         src="{{ redeemer.get_photo_url('70x70') }}"
+                         alt="{{ _('Profile Photo') }}"
+                         title={{ redeemer.display_name }}>
                     <a href="{{ url('phonebook:profile_view', redeemer.user.username) }}">
-                      <img class="profile-photo"
-                          src="{{ redeemer.get_photo_url('70x70') }}"
-                          alt="{{ _('Profile Photo') }}"
-                          title={{ redeemer.display_name }}>
                       {{ redeemer.display_name }}
                     </a>
                   </div>
@@ -32,11 +32,9 @@
                   <div class="invite-controls right">
                     {% set invite_pk = redeemer.groups_invited.get(group=group).pk %}
                     <a href="{{ url('groups:delete_invite', invite_pk) }}?next=invitations">
-                      <span class="glyphicon glyphicon-remove" title="{{ _('Delete') }}" aria-hidden="true"></span>
-                    </a>
+                      <span class="glyphicon glyphicon-remove" title="{{ _('Delete') }}" aria-hidden="true"></span></a>
                     <a href="{{ url('groups:send_invitation_email', invite_pk) }}?next=invitations">
-                      <span class="glyphicon glyphicon-repeat"title="{{ _('Resend') }}" aria-hidden="true"></span>
-                    </a>
+                      <span class="glyphicon glyphicon-repeat"title="{{ _('Resend') }}" aria-hidden="true"></span></a>
                   </div>
                 </div>
               </div>
