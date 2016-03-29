@@ -8,7 +8,7 @@ You have been invited by {{ inviter_full_name }} to join
 group "{{ group_name }}" on Mozillians.org.
 {% endtrans %}
 
-{% if custom_text %}
+{%- if custom_text -%}
 {% trans %}
 The message from the curator is:
 {% endtrans %}

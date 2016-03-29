@@ -76,7 +76,27 @@ class InviteTest(TestCase):
             response = client.get(url, follow=True)
             eq_(response.status_code, 200)
 
-        mock_notification.delay.assert_called_once_with(invite.pk)
+        mock_notification.delay.assert_called_once_with(invite.pk, '')
+        msg = 'Invitation to Foo Bar has been sent successfully.'
+        mock_success.assert_called_once_with(ANY, msg)
+
+    @patch('mozillians.groups.views.notify_redeemer_invitation')
+    @patch('mozillians.groups.views.messages.success')
+    def test_send_invitation_email_custom_text(self, mock_success, mock_notification):
+        curator = UserFactory.create()
+        redeemer = UserFactory.create(userprofile={'full_name': 'Foo Bar'})
+        invite = InviteFactory.create(inviter=curator.userprofile, redeemer=redeemer.userprofile)
+        invite.group.invite_email_text = 'Foo bar'
+        invite.group.save()
+        invite.group.curators.add(curator.userprofile)
+
+        with self.login(curator) as client:
+            url = urlparams(reverse('groups:send_invitation_email',
+                                    args=[invite.pk]), 'invitation')
+            response = client.get(url, follow=True)
+            eq_(response.status_code, 200)
+
+        mock_notification.delay.assert_called_once_with(invite.pk, 'Foo bar')
         msg = 'Invitation to Foo Bar has been sent successfully.'
         mock_success.assert_called_once_with(ANY, msg)
 
@@ -95,7 +115,7 @@ class InviteTest(TestCase):
             response = client.get(url, follow=True)
             eq_(response.status_code, 200)
 
-        mock_notification.delay.assert_called_once_with(invite.pk)
+        mock_notification.delay.assert_called_once_with(invite.pk, '')
         msg = 'Invitation to Foo Bar has been sent successfully.'
         mock_success.assert_called_once_with(ANY, msg)
 
