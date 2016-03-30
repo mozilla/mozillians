@@ -34,7 +34,7 @@
     {% for group_slice in groups|slice(3) -%}
         {% for group in group_slice %}
           <li class="group-item">
-            <a href="{{ url('groups:show_group', group.url) }}"
+            <a href="{{ group.get_absolute_url() }}"
                class="group-name" title="{{ group.name }}">
               {% if is_group_instance(group) %}
                 {% if user.userprofile in group.curators.all() %}

@@ -25,6 +25,11 @@ class GroupBase(models.Model):
         abstract = True
         ordering = ['name']
 
+    def get_absolute_url(self):
+        cls_name = self.__class__.__name__
+        url_pattern = 'groups:show_{0}'.format(cls_name.lower())
+        return absolutify(reverse(url_pattern, args=[self.url]))
+
     def clean(self):
         """Verify that name is unique in ALIAS_MODEL."""
 
@@ -228,9 +233,6 @@ class Group(GroupBase):
     @classmethod
     def search(cls, query):
         return super(Group, cls).search(query).visible()
-
-    def get_absolute_url(self):
-        return absolutify(reverse('groups:show_group', args=[self.url]))
 
     def merge_groups(self, group_list):
         for membership in GroupMembership.objects.filter(group__in=group_list):
