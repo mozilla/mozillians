@@ -1,4 +1,4 @@
-<div id="profile-tab" class="settings-tab">
+<div role="tabpanel" class="tab-pane fade in active" id="profile">
   <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="panel panel-default">

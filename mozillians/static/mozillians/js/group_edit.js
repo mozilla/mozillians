@@ -106,7 +106,7 @@ $(function() {
     // Tabs
     var uri = URI(location.href);
     var next_section = uri.query(true).next;
-    var content = window.location.hash;
+    var content = uri.hash();
     if (next_section) {
       content = '#' + next_section;
     }

@@ -1,6 +1,6 @@
-<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mylocation">
-  {% csrf_token %}
-  <div id="mylocation-tab" class="settings-tab">
+<div role="tabpanel" class="tab-pane fade" id="mylocation">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mylocation">
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Location') }}</div>
       <div class="panel-body">
@@ -122,5 +122,5 @@
         </button>
       </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>

@@ -1,6 +1,6 @@
-<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=developer">
-  {% csrf_token %}
-  <div id="developer-tab" class="hidden-xs hidden-sm settings-tab">
+<div role="tabpanel" class="tab-pane fade" id="developer">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=developer">
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('API privacy') }}</div>
       <div class="panel-body">
@@ -52,5 +52,5 @@
         </div>
       </div>
     {% endif %}
-  </div>
-</form>
+  </form>
+</div>

@@ -1,6 +1,6 @@
-<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=extaccounts">
-  {% csrf_token %}
-  <div id="extaccounts-tab" class="hidden-xs hidden-sm settings-tab">
+<div role="tabpanel" class="tab-pane fade" id="extaccounts">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=extaccounts">
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('External Accounts') }}</div>
       <div class="panel-body">
@@ -67,5 +67,5 @@
         <button class="btn btn-primary" id="form-submit-irc" type="submit" name="irc_section">{{ _('Update IRC information') }}</button>
       </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>
