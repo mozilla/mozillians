@@ -93,7 +93,7 @@ PROD_DETAILS_DIR = path('lib/product_details_json')
 LANGUAGE_CODE = 'en-US'
 PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr',
-                  'sv-SE', 'zh-TW', 'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk',)
+                  'sv-SE', 'te', 'zh-TW', 'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk',)
 DEV_LANGUAGES = PROD_LANGUAGES
 CANONICAL_LOCALES = {
     'en': 'en-US',
