@@ -129,7 +129,7 @@ def redirect(to, *args, **kwargs):
 @library.filter
 def markdown(text, allowed_tags=None, allowed_attributes=None, allowed_styles=None):
     if not allowed_tags:
-        allowed_tags = ['p', 'em', 'li', 'ul', 'a', 'strong']
+        allowed_tags = ['p', 'em', 'li', 'ul', 'a', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
     if not allowed_attributes:
         allowed_attributes = ['href']
     if not allowed_styles:
