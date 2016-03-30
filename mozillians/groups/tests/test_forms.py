@@ -137,14 +137,17 @@ class GroupEditFormTests(BaseGroupEditTestCase):
     def test_edit_invitation(self):
         invitee = UserFactory.create()
         curator = UserFactory.create()
-        group = GroupFactory.create()
+        group = GroupFactory.create(invite_email_text='foobar')
         group.curators.add(curator.userprofile)
         request = RequestFactory().request()
         request.user = curator
         data = {'invites': [invitee.userprofile.id]}
 
-        form = self.validate_group_edit_forms(forms.GroupInviteForm, group, data, request)
+        with patch('mozillians.groups.forms.notify_redeemer_invitation.delay') as mocked_task:
+            form = self.validate_group_edit_forms(forms.GroupInviteForm, group, data, request)
         eq_(list(form.instance.invites.all().values_list('id', flat=True)), [invitee.id])
+        ok_(mocked_task.called)
+        eq_(mocked_task.call_args[0][1], u'foobar')
 
     def test_edit_invitation_without_curator(self):
         invitee = UserFactory.create()
@@ -175,17 +178,11 @@ class GroupEditFormTests(BaseGroupEditTestCase):
                 'members_can_leave': True}
         self.validate_group_edit_forms(forms.GroupAdminForm, group, data, request)
 
-    def test_email_invite_test(self):
-        invitee = UserFactory.create()
+    def test_email_invite(self):
         curator = UserFactory.create()
         group = GroupFactory.create()
         group.curators.add(curator.userprofile)
         request = RequestFactory().request()
         request.user = curator
-        data = {'invites': [invitee.userprofile.id],
-                'invite_email_text': u'Custom message in the email.'}
-
-        with patch('mozillians.groups.forms.notify_redeemer_invitation.delay') as mocked_task:
-            self.validate_group_edit_forms(forms.GroupInviteForm, group, data, request)
-        ok_(mocked_task.called)
-        eq_(mocked_task.call_args[0][1], data['invite_email_text'])
+        data = {'invite_email_text': u'Custom message in the email.'}
+        self.validate_group_edit_forms(forms.GroupCustomEmailForm, group, data, request)

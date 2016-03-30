@@ -49,6 +49,40 @@
     </div>
   </form>
 
+  <form class="edit-group" id="email-form" method="POST"
+        action="{{ url('groups:group_edit', group.url) }}?next=invitations">
+    {% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Additional Email Text') }}</div>
+      <div class="panel-body">
+
+        <fieldset id="id_group_has_email_text">
+          <div class="form-group">
+            <label class="checkbox">
+              <input type="checkbox" class="acknowledge"></input>
+              {{ _('Custom Invitation Text') }}
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset id="id_group_email_text">
+          <div class="row">
+            <div class="col-sm-8">
+              <div class="form-group">
+                {{ mozillians_field(email_form.invite_email_text) }}
+              </div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_form">
+          {{ _('Update Text') }}
+        </button>
+      </div>
+    </div>
+  </form>
+
   <form class="edit-group" id="invite-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=invitations">
     {% csrf_token %}
     <div class="panel panel-default">
@@ -60,24 +94,7 @@
             {{ mozillians_field(invite_form.invites) }}
           </div>
         </fieldset>
-        <fieldset id="id_group_has_email_text">
-          <div class="form-group">
-            <label class="checkbox">
-              <input type="checkbox" class="acknowledge"></input>
-              {{ _('Additional Email Text') }}
-            </label>
-          </div>
-        </fieldset>
 
-        <fieldset id="id_group_email_text">
-          <div class="row">
-            <div class="col-sm-6">
-              <div class="form-group">
-                {{ mozillians_field(invite_form.invite_email_text) }}
-              </div>
-            </div>
-          </div>
-        </fieldset>
       </div>
       <div class="panel-footer">
         <button class="btn btn-primary" id="form-submit-invite" type="submit" name="invite_form">
