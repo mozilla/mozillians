@@ -73,6 +73,15 @@ def unsubscribe_from_basket_action(newsletter):
     return unsubscribe_from_basket
 
 
+def update_basket_tokens(modeladmin, request, queryset):
+    ts = [(mozillians.users.tasks.update_basket_token_task.subtask(args=[userprofile.id]))
+          for userprofile in queryset]
+    TaskSet(ts).apply_async()
+    messages.success(request, 'Basket token update started.')
+
+update_basket_tokens.short_description = 'Update basket tokens'
+
+
 def update_vouch_flags_action():
     """Update can_vouch, is_vouched flag action."""
 
@@ -439,7 +448,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                subscribe_to_basket_action(settings.BASKET_NDA_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_NDA_NEWSLETTER),
-               update_vouch_flags_action()]
+               update_vouch_flags_action(),
+               update_basket_tokens]
 
     fieldsets = (
         ('Account', {
