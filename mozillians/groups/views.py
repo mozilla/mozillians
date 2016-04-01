@@ -433,6 +433,7 @@ def group_edit(request, url=None):
     group_forms['invite_form'] = forms.GroupInviteForm
     group_forms['admin_form'] = forms.GroupAdminForm
     group_forms['criteria_form'] = forms.GroupCriteriaForm
+    group_forms['email_form'] = forms.GroupCustomEmailForm
 
     def _init_group_forms(request, group_forms):
         form_args = {
