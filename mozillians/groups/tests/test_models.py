@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.test.utils import override_settings
 
 from nose.tools import eq_, ok_
 
@@ -192,6 +193,16 @@ class GroupBaseTests(TestCase):
         GroupAliasFactory.create(alias=group, name='bar')
         group_2 = GroupFactory.build(name='bar')
         self.assertRaises(ValidationError, group_2.clean)
+
+    @override_settings(SITE_URL='http://foo')
+    def test_group_get_absolute_url(self):
+        group = GroupFactory.create(url='bar')
+        ok_(group.get_absolute_url())
+
+    @override_settings(SITE_URL='http://foo')
+    def test_skill_get_absolute_url(self):
+        skill = SkillFactory.create(url='bar')
+        ok_(skill.get_absolute_url())
 
 
 class GroupTests(TestCase):
