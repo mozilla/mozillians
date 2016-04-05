@@ -239,3 +239,8 @@ django-babel==0.4.0
 rjsmin==1.0.12
 # sha256: yoe2ldPXhkFXdzphJj5au5YAbp_w4CHv-Qy-DhuhgnA
 rcssmin==1.0.6
+# sha256: Inx54SboqJBKgdFidQWB7T1JryOVoxAL5wZ7cpbTPUU
+contextlib2==0.5.1
+# sha256: Vmaj1uThgvg0lLoqRp4aVtZjyvurSpfOD0IFafz6Pck
+# sha256: RWRep_zoo3vVgbCmYc3AiJ9_Es6Dff9dkhHMrhvFYhA
+raven==5.12.0
