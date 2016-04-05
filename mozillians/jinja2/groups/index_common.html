@@ -29,30 +29,40 @@
   {% with items=groups %}
     {% include 'includes/pagination.html' %}
   {% endwith %}
-  <div class="groups-areas">
-    <ul class="group-list">
-    {% for group_slice in groups|slice(3) -%}
-        {% for group in group_slice %}
-          <li class="group-item">
-            <a href="{{ group.get_absolute_url() }}"
-               class="group-name" title="{{ group.name }}">
-              {% if is_group_instance(group) %}
-                {% if user.userprofile in group.curators.all() %}
-                  <i class="icon-crown"></i>
-                {% endif %}
-              {% endif %}
-              {{ group.name|truncate(20, True) }}<br>
-              <i class="icon-group"></i>
-              {% trans num=group.member_count %}
-                {{ num }} member
-              {% pluralize num %}
-                {{ num }} members
-              {% endtrans %}
-            </a>
-          </li>
-        {% endfor %}
+  <div class="row groups-areas">
+    {% for group in groups %}
+      <div class="col-md-4 col-sm-6 result">
+        <div class="card">
+          <div class="avatar">
+            <i class="icon-group"></i>
+          </div>
+          <div class="details">
+            <ul>
+              <li>
+                <h2>
+                  <a href="{{ group.get_absolute_url() }}"
+                     class="group-name" title="{{ group.name }}">
+                    {% if is_group_instance(group) %}
+                      {% if user.userprofile in group.curators.all() %}
+                        <i class="icon-crown"></i>
+                      {% endif %}
+                    {% endif %}
+                    {{ group.name|truncate(20, True) }}<br>
+                  </a>
+                </h2>
+              </li>
+              <li>
+                {% trans num=group.member_count %}
+                  {{ num }} member
+                {% pluralize num %}
+                  {{ num }} members
+                {% endtrans %}
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     {% endfor %}
-    </ul>
   </div>
   {% with items=groups %}
     {% include 'includes/pagination.html' %}

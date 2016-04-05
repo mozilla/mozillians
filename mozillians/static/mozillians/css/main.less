@@ -2000,7 +2000,6 @@ body.search-page {
     .result {
         position:relative;
         float: left;
-        margin-right: 20px;
         height: 130px;
         @media (max-width: @breakMobileLandscape) {
             width: 100%;
@@ -2051,7 +2050,7 @@ body.search-page {
                     width: 225px;
                 }
                 @media (max-width: @breakMobileLandscape) {
-                    width: 80%;
+                    width: 70%;
                 }
                 h2 {
                     font-size: 20px;
@@ -2089,33 +2088,14 @@ body.search-page {
     }
     .groups-areas {
         .clearfix;
-        ul.group-list {
-            list-style: none;
-            li {
+        .card {
+            height: auto;
+            .avatar {
                 float: left;
-                margin: 20px 0 0 0;
-                padding: 0;
-                width: 290px;
-                height: 75px;
-                @media (max-width: @breakTablet) {
-                    float: none;
-                    height: auto;
-                }
-                a {
-                    .button;
-                    .button-sand;
-                    color: @grayDark;
-                    font-weight: normal;
-                    width: 200px;
-                    padding: 10px !important;
-                    word-wrap: break-word;
-                    &:hover {
-                        color: @grayDark;
-                    }
-                    i {
-                        padding-top: 8px;
-                    }
-                }
+                font-size: 3em;
+            }
+            .details {
+                padding-left: 20px;
             }
         }
     }
@@ -2229,13 +2209,15 @@ body#group-show {
         }
         .group-description {
             clear: both;
-            padding-top: 10px;
+            padding-top: 20px;
+            margin-bottom: 10px;
         }
         .curated-group-details {
             .span(5);
             list-style: none;
             text-align: left;
             margin-bottom: 10px;
+            margin-top: 10px;
             margin-left:0;
             li {
                 margin: 0;
