@@ -58,6 +58,29 @@
       </a>
     {% endif %}
 
+    {% if show_join_button %}
+      <form action="{{ url('groups:join_group', group.url) }}" id="join-group" method="post">
+        {% csrf_token %}
+        <button class="button right">
+          {% if group.accepting_new_members == 'by_request' %}
+            {{ _('Request to Join Group') }}
+          {% else %}
+            {{ _('Join Group') }}
+          {% endif %}
+        </button>
+      </form>
+    {% endif %}
+
+    {% if show_leave_button %}
+      <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
+            id="leave-group" method="post">
+        {% csrf_token %}
+        <button class="button button-negative right">
+          {{ _('Leave Group') }}
+        </button>
+      </form>
+    {% endif %}
+
     {% if group.description %}
       <p class="group-description">{{ group.description }}</p>
     {% endif %}
@@ -156,29 +179,6 @@
     {% endif %}
 
   </article><!-- .group-meta -->
-
-  {% if show_join_button %}
-    <form action="{{ url('groups:join_group', group.url) }}" id="join-group" method="post">
-      {% csrf_token %}
-      <button class="button">
-        {% if group.accepting_new_members == 'by_request' %}
-          {{ _('Request to Join Group') }}
-        {% else %}
-          {{ _('Join Group') }}
-        {% endif %}
-      </button>
-    </form>
-  {% endif %}
-
-  {% if show_leave_button %}
-    <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
-          id="leave-group" method="post">
-      {% csrf_token %}
-      <button class="button button-negative">
-        {{ _('Leave Group') }}
-      </button>
-    </form>
-  {% endif %}
 
   {% if membership_filter_form %}
     <div class="filters right">

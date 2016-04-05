@@ -2013,6 +2013,7 @@ body.search-page {
             height: 100px;
             font-weight: normal;
             overflow: hidden;
+            margin: auto;
             @media (max-width: @breakDesktop) {
                 width: 328px;
             }
@@ -2185,7 +2186,6 @@ body#group-show {
     .button.delete{
       .button;
       .button-negative;
-      margin: 0 0 0 2px;
     }
     [class^="status"]{
         position: absolute;
@@ -2213,6 +2213,10 @@ body#group-show {
         .box-shadow(inset 0px 12px 24px 2px @blueLight);
     }
     .group-meta {
+        button,
+        .button {
+            margin: 2px 0 0 2px;
+        }
         .well;
         span:first-child {
             font-weight: 800;
