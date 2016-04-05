@@ -165,7 +165,8 @@ def notify_redeemer_invitation(pk, custom_text=''):
     from mozillians.groups.models import Invite
 
     invite = Invite.objects.get(pk=pk)
-    subject = _('[Mozillians] You have been invited to join group "{0}"'.format(invite.group.name))
+    subject_msg = unicode('[Mozillians] You have been invited to join group "{0}"')
+    subject = _(subject_msg.format(invite.group.name))
     template = get_template('groups/email/invite_email.txt')
     ctx = {
         'inviter_full_name': invite.inviter.full_name,
@@ -184,7 +185,7 @@ def notify_curators_invitation_accepted(pk):
     from mozillians.groups.models import Invite
 
     invite = Invite.objects.get(pk=pk)
-    subject_msg = '[Mozillians] {0} has accepted your invitation to join group "{1}"'
+    subject_msg = unicode('[Mozillians] {0} has accepted your invitation to join group "{1}"')
     subject = _(subject_msg.format(invite.redeemer.full_name, invite.group.name))
     template = get_template('groups/email/invite_accepted_email.txt')
     ctx = {
@@ -207,7 +208,7 @@ def notify_curators_invitation_rejected(redeemer_pk, inviter_pk, group_pk):
     redeemer = UserProfile.objects.get(pk=redeemer_pk)
     group = Group.objects.get(pk=group_pk)
 
-    subject_msg = '[Mozillians] {0} has rejected your invitation to join group "{1}"'
+    subject_msg = unicode('[Mozillians] {0} has rejected your invitation to join group "{1}"')
     subject = _(subject_msg.format(redeemer.full_name, group.name))
     template = get_template('groups/email/invite_rejected_email.txt')
     ctx = {

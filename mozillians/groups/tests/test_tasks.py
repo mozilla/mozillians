@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -284,7 +285,7 @@ class InvitationEmailTests(TestCase):
     @override_settings(FROM_NOREPLY='noreply@example.com')
     def test_send_invitation_accepted_email(self, mock_send_email):
         inviter = UserFactory.create()
-        redeemer = UserFactory.create(userprofile={'full_name': 'foo bar'})
+        redeemer = UserFactory.create(userprofile={'full_name': u'fôô bar'})
         group = GroupFactory.create(name='Foo')
         template_name = 'groups/email/invite_accepted_email.txt'
         invite = InviteFactory.create(inviter=inviter.userprofile,
@@ -293,12 +294,10 @@ class InvitationEmailTests(TestCase):
 
         with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
             tasks.notify_curators_invitation_accepted(invite.pk)
-        args = [
-            '[Mozillians] foo bar has accepted your invitation to join group "foo"',
-            ANY,
-            'noreply@example.com',
-            [inviter.userprofile.email]
-        ]
+        args = [u'[Mozillians] fôô bar has accepted your invitation to join group "foo"',
+                ANY,
+                'noreply@example.com',
+                [inviter.userprofile.email]]
         ok_(mock_get_template.called)
         eq_(template_name, mock_get_template.call_args[0][0])
         mock_send_email.assert_called_once_with(*args)
@@ -307,7 +306,7 @@ class InvitationEmailTests(TestCase):
     @override_settings(FROM_NOREPLY='noreply@example.com')
     def test_send_invitation_rejected_email(self, mock_send_email):
         inviter = UserFactory.create()
-        redeemer = UserFactory.create(userprofile={'full_name': 'foo bar'})
+        redeemer = UserFactory.create(userprofile={'full_name': u'fôô bar'})
         group = GroupFactory.create(name='Foo')
         template_name = 'groups/email/invite_rejected_email.txt'
         InviteFactory.create(inviter=inviter.userprofile, redeemer=redeemer.userprofile,
@@ -315,12 +314,10 @@ class InvitationEmailTests(TestCase):
         with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
             args = [redeemer.userprofile.pk, inviter.userprofile.pk, group.pk]
             tasks.notify_curators_invitation_rejected(*args)
-        args = [
-            '[Mozillians] foo bar has rejected your invitation to join group "foo"',
-            ANY,
-            'noreply@example.com',
-            [inviter.userprofile.email]
-        ]
+        args = [u'[Mozillians] fôô bar has rejected your invitation to join group "foo"',
+                ANY,
+                'noreply@example.com',
+                [inviter.userprofile.email]]
         ok_(mock_get_template.called)
         eq_(template_name, mock_get_template.call_args[0][0])
         mock_send_email.assert_called_once_with(*args)
