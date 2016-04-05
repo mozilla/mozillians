@@ -154,8 +154,9 @@ def update_info(ctx, tag):
         ctx.local('which python')
         ctx.local('python manage.py migrate --list')
         with ctx.lcd('locale'):
-            ctx.local('svn info')
-            ctx.local('svn status')
+            ctx.local('git remote -v')
+            ctx.local('git log -1')
+            ctx.local('git status')
 
 
 @task
