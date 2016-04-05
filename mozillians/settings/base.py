@@ -318,6 +318,7 @@ INSTALLED_APPS = (
     'import_export',
     'waffle',
     'rest_framework',
+    'raven.contrib.django.raven_compat',
 )
 
 # Auth
