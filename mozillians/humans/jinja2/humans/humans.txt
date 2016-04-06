@@ -21,7 +21,7 @@ Localizers
 {% endfor %}
 
 
-This file lists only contributors on GitHub and SVN. Many others have
+This file lists only contributors on Github. Many others have
 helped in numerous ways.
 
 Last updated: {{ last_update }}

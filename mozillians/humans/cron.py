@@ -1,4 +1,3 @@
-import subprocess
 from datetime import datetime
 
 from django.conf import settings
@@ -11,8 +10,8 @@ from cronjobs import register
 COMMAND = "svn log --quiet %s | grep '^r' | awk '{print $3}' | sort | uniq"
 
 
-def _get_githubbers():
-    data = requests.get(settings.HUMANSTXT_GITHUB_REPO)
+def _get_githubbers(url):
+    data = requests.get(url)
     humans = []
 
     for contributor in data.json():
@@ -20,22 +19,11 @@ def _get_githubbers():
     return humans
 
 
-def _get_localizers():
-    command = COMMAND % (settings.HUMANSTXT_LOCALE_REPO)
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    data = process.communicate()[0].rstrip().split('\n', -1)
-    humans = []
-
-    for contributor in data:
-        humans.append(contributor)
-    return humans
-
-
 @register
 def generate_humanstxt():
     data = {
-        'githubbers': _get_githubbers(),
-        'localizers': _get_localizers(),
+        'githubbers': _get_githubbers(settings.HUMANSTXT_GITHUB_REPO),
+        'localizers': _get_githubbers(settings.HUMANSTXT_LOCALE_REPO),
         'last_update': datetime.utcnow(),
     }
     humans_txt = render_to_string('humans/humans.txt', data)

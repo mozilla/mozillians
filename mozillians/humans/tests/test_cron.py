@@ -8,18 +8,16 @@ from mozillians.humans.cron import generate_humanstxt
 
 class TestCron(TestCase):
     @patch('mozillians.humans.cron._get_githubbers')
-    @patch('mozillians.humans.cron._get_localizers')
     @patch('mozillians.humans.cron.render_to_string')
-    def test_generate(self, render_to_string_mock, localizers_mock, githubbers_mock):
+    def test_generate(self, render_to_string_mock, githubbers_mock):
         render_to_string_mock.return_value = 'rendered'
         githubbers_mock.return_value = ['foo']
-        localizers_mock.return_value = ['bar']
         open_mock = mock_open()
         with patch('mozillians.humans.cron.open', open_mock, create=True):
             generate_humanstxt()
         data = {
             'githubbers': ['foo'],
-            'localizers': ['bar'],
+            'localizers': ['foo'],
             'last_update': ANY
         }
         render_to_string_mock.assert_called_with('humans/humans.txt', data)
