@@ -503,7 +503,7 @@ COMPRESS_OFFLINE = True
 COMPRESS_ENABLED = True
 
 HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
-HUMANSTXT_LOCALE_REPO = 'https://svn.mozilla.org/projects/l10n-misc/trunk/mozillians/locales'
+HUMANSTXT_LOCALE_REPO = 'https://api.github.com/repos/mozilla-l10n/mozillians-l10n/contributors'
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 
