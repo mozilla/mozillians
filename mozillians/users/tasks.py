@@ -4,7 +4,6 @@ import os
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import get_model
 
 import basket
 import requests
@@ -154,32 +153,6 @@ def update_basket_task(instance_id):
             # Don't call .save() on a userprofile from here, it would invoke us again
             # via the post-save signal, which would be pointless.
             UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
-
-    GroupMembership = get_model('groups', 'GroupMembership')
-    Group = get_model('groups', 'Group')
-    data = {}
-    # What groups is the user in?
-    user_group_pks = (instance.groups.filter(groupmembership__status=GroupMembership.MEMBER)
-                      .values_list('pk', flat=True))
-    for group in Group.objects.filter(functional_area=True):
-        name = group.name.upper().replace(' ', '_')
-        data[name] = 'Y' if group.id in user_group_pks else 'N'
-
-    # User location if known
-    if instance.geo_country:
-        data['country'] = instance.geo_country.code
-    if instance.geo_city:
-        data['city'] = instance.geo_city.name
-
-    # We have a token, proceed with the update
-    try:
-        basket.request('post', 'custom_update_phonebook', token=token, data=data)
-    except (requests.exceptions.RequestException,
-            basket.BasketException) as exception:
-        try:
-            update_basket_task.retry()
-        except (MaxRetriesExceededError, basket.BasketException):
-            _email_basket_managers('update_phonebook', email, exception.message)
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
