@@ -12,7 +12,9 @@ docs/_gh-pages
 docs/_build
 locale*
 /venv/
+/virtualenv/
 /static/
-/media/uploads/
+/media/*
 /elasticsearch*/
 mozillians/settings/local.py
+/vendor/
