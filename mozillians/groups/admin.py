@@ -193,7 +193,7 @@ class GroupAdmin(GroupBaseAdmin):
     """Group Admin."""
     form = GroupEditAdminForm
     add_form = GroupAddAdminForm
-    inlines = [GroupAliasInline, InviteInline]
+    inlines = [GroupAliasInline]
     list_display = ['name', 'get_curators', 'get_invites', 'functional_area',
                     'accepting_new_members', 'members_can_leave', 'visible', 'total_member_count',
                     'full_member_count', 'pending_member_count', 'pending_terms_member_count']
