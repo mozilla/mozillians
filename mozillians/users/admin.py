@@ -453,9 +453,9 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
         }),
     )
 
-    def queryset(self, request):
-        qs = super(UserProfileAdmin, self).queryset(request)
-        qs = qs.annotate(Count('vouches_made'))
+    def get_queryset(self, request):
+        qs = super(UserProfileAdmin, self).get_queryset(request)
+        qs = qs.annotate(vouches_made_count=Count('vouches_made'))
         return qs
 
     def email(self, obj):
@@ -481,8 +481,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     def number_of_vouchees(self, obj):
         """Return the number of vouchees for obj."""
-        return obj.vouches_made.count()
-    number_of_vouchees.admin_order_field = 'vouches_made__count'
+        return obj.vouches_made_count
+    number_of_vouchees.admin_order_field = 'vouches_made_count'
 
     def last_login(self, obj):
         return obj.user.last_login
