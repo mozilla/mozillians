@@ -1,12 +1,13 @@
 language: python
 python:
-  - "2.7"
+  - "2.7.11"
 sudo: false
 services:
   - elasticsearch
 before_script:
   - mysql -e 'SET @@GLOBAL.wait_timeout=28800'
 before_install:
+  - pip install -U pip==7
   - pip install flake8
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8;'
