@@ -24,4 +24,11 @@ $(document).ready(function() {
         $section.attr("title", msg_template.replace("%HOURS%", diff));
       }
     }
+
+    // Change icon on vouch information toggle
+    $('#vouch-toggle').on('click', function(e) {
+        e.preventDefault();
+        $(this).find('.glyphicon').toggleClass('glyphicon-chevron-down');
+        $(this).find('.glyphicon').toggleClass('glyphicon-chevron-up');
+    });
 });
