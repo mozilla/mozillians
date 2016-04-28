@@ -1429,9 +1429,13 @@ body#profile {
                 }
             }
 
+            #profile-vouch {
+                clear: both;
+                margin-top: 1em;
+            }
+
             #profile-contact {
                 width: 220px;
-                float: left;
                 margin-top:1em;
                 ul {
                     width:100%;
@@ -1515,30 +1519,6 @@ body#profile {
 
 .margins{
     margin:10px;
-}
-
-.vouch-box{
-    &:extend(.alert);
-    padding:0px;
-    text-align:left;
-    textarea{
-        margin: 0px;
-        height: 115px;
-        width:100%;
-        padding:0;
-        font-size: 11pt;
-    }
-    .character-countdown{
-        margin-right: 5px;
-        line-height: 24px;
-    }
-    .button{
-        margin:0 auto;
-    }
-    #vouch-submit{
-        text-align: right;
-        padding-bottom: 10px;
-    }
 }
 
 /* Fieldsets */
@@ -2454,15 +2434,11 @@ form.add-group {
 ================== */
 body#invite {
     min-height: 500px;
-    button[type=submit] {
-        margin: 20px 0;
-        .button;
-    }
+
     .invite-box textarea {
         width:100%;
         padding:0;
     }
-    input { margin-bottom: 25px; }
 
     .card {
         float: left;
@@ -2476,6 +2452,21 @@ body#invite {
 
     .card button {
         margin-top: 30px;
+    }
+}
+
+
+/* Vouch form
+================== */
+.vouch-box {
+    text-align: left;
+
+    .vouch-text {
+        margin-top: 20px;
+    }
+
+    textarea {
+        width: 100%;
     }
 }
 

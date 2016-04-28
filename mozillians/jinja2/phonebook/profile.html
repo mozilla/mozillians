@@ -129,6 +129,39 @@
         </div>
       </section>
 
+      {% if vouch_form %}
+        <section id="profile-vouch">
+          <button type="button" class="button" data-toggle="modal" data-target="#VouchModal">
+            {{ _('Vouch') }}
+          </button>
+        </section>
+
+        <!-- Modal -->
+        <div class="modal fade" id="VouchModal" tabindex="-1" role="dialog" aria-labelledby="VouchModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="VouchModalLabel">
+                  Vouch for {{ profile.display_name|default(shown_user.username, true) }}
+                </h4>
+              </div>
+              <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
+                    id="vouch-form">
+                <div class="modal-body">
+                  {% include 'phonebook/includes/profile_vouch.html' %}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Cancel') }}</button>
+                  <button type="button" class="btn btn-primary">{{ _('Vouch') }}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
 
     </article>
 
@@ -330,11 +363,6 @@
               </ul>
             </div>
           {% endif %}
-
-          <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
-                id="vouch-form">
-            {% include 'phonebook/includes/profile_vouch.html' %}
-          </form>
         </div>
 
       </section>
