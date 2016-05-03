@@ -9,7 +9,6 @@ from mock import MagicMock, Mock, call, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
@@ -122,38 +121,6 @@ class BasketTests(TestCase):
         _email_basket_managers('subscribe', 'bar', 'error')
         send_mail_mock.assert_called_with(
             subject, body, 'noreply', 'basket_managers', fail_silently=False)
-
-    @override_settings(BASKET_NEWSLETTER='newsletter')
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.basket')
-    def test_update_basket_task(self, mock_basket):
-        # When a user is created or added to a group, the appropriate
-        # calls to update basket are made
-        email = 'foo@example.com'
-        token = 'footoken'
-        mock_basket.lookup_user.return_value = {
-            'email': email,
-        }
-        mock_basket.subscribe.return_value = {
-            'token': token,
-        }
-        user = UserFactory.create(email=email)
-        mock_basket.subscribe.reset_mock()  # forget that subscribe was called
-        group = GroupFactory.create(name='Web Development',
-                                    functional_area=True)
-        GroupFactory.create(name='Marketing', functional_area=True)
-        data = {'country': 'gr',
-                'city': 'Athens',
-                'WEB_DEVELOPMENT': 'Y',
-                'MARKETING': 'N'}
-
-        group.add_member(user.userprofile)
-
-        # We just added a group, we should not need to subscribe anything
-        ok_(not mock_basket.subscribe.called)
-        # But we do need to update their phonebook record
-        mock_basket.request.assert_called_with(
-            'post', 'custom_update_phonebook', token=token, data=data)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
