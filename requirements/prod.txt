@@ -216,9 +216,9 @@ django-jinja==2.1.2
 # sha256: vF7oVSESdXfSNDCDLi-Cdobv23zpWyMvVPvrW5FmOXw
 # sha256: hPdpwOpgeCnHe9iz1tb7wWWJzXpdTlAj9xfNPV3lRHM
 puente==0.4.1
-# sha256: nGDErwL6_7bxwrx8egkWnFkjD6BsMKVSQUuBbuefDCo
-# sha256: to-nPVN_g2LXP-waoreh6FcjSbEpQqx1bsEEG2sOcRM
-django==1.8.12
+# sha256: 2tXaDNfzzKfaOsQqGau6MPXMEPrkl25HQFHnCFtOldE
+# sha256: Eo6L3BHGnqkPd4Q104EmRT078oPb0ozxWjOqjlIkXfQ
+django==1.8.13
 # sha256: wMvo1Fuo2CE61o75oYgQAqFRVpyUJNVRY0GVoYw6QWA
 # sha256: ggQduqYvf94UZNerRJl4YYo4skG0DA0x2vq7NkRmNdw
 # sha256: lY_J-P1cybk2ssudlvAqpew2E7oT7n8InHf_C8w2j6w
