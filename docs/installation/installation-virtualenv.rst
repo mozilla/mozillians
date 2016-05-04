@@ -16,8 +16,7 @@ Dependencies
 **Prerequisites:** You'll need python2.7, python2.7-dev, virtualenv, pip,
 a C compiler (for building some of the Python packages, like the DB interface),
 mysqlclient and mysql-dev (or the equivalent on your system), a MySQL server, `gettext`_,
-git, and lessc.  If you're working on translations, add subversion. Also,
-since we use elasticsearch, you will need a JAVA runtime environment.
+git, and lessc. Also, since we use elasticsearch, you will need a JAVA runtime environment.
 
 There are almost certainly other requirements that
 we're so used to having installed we've forgotten we have them, so don't be shy
@@ -29,7 +28,7 @@ to work.
 
 If you're on Ubuntu or Debian, you might start with::
 
-    $ sudo apt-get install build-essential git-core subversion \
+    $ sudo apt-get install build-essential git-core \
     python2.7 python2.7-dev python-virtualenv python-pip \
     gettext libjpeg-turbo8-dev \
     mysql-client mysql-server libmysqlclient-dev default-jre \
