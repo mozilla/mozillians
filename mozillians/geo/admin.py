@@ -6,7 +6,7 @@ from mozillians.geo.models import City, Country, Region
 class CountryAdmin(admin.ModelAdmin):
     list_display = ('name', 'code')
     readonly_fields = ('name', 'mapbox_id')
-    seach_fields = ('name', 'code')
+    search_fields = ('name', 'code')
 
 admin.site.register(Country, CountryAdmin)
 
