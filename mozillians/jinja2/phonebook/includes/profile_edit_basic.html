@@ -65,6 +65,17 @@
         <fieldset>
           <div class="row">
             <div class="col-md-8 col-sm-6">
+              {{ mozillians_field(basic_information_form.full_name_local) }}
+            </div>
+            <div class="col-md-4 col-sm-6 text-right">
+              {{ privacy_field(basic_information_form.privacy_full_name_local) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="row">
+            <div class="col-md-8 col-sm-6">
               {{ mozillians_field(basic_information_form.bio) }}
               <span class="under-input-field">
                 {% trans url='http://daringfireball.net/projects/markdown/syntax' %}

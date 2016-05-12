@@ -63,6 +63,7 @@ class UserProfilePrivacyModel(models.Model):
 
     privacy_photo = PrivacyField()
     privacy_full_name = PrivacyField()
+    privacy_full_name_local = PrivacyField()
     privacy_ircname = PrivacyField()
     privacy_email = PrivacyField()
     privacy_bio = PrivacyField()
@@ -140,6 +141,8 @@ class UserProfile(UserProfilePrivacyModel):
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
                                  verbose_name=_lazy(u'Full Name'))
+    full_name_local = models.CharField(max_length=255, blank=True, default='',
+                                       verbose_name=_lazy(u'Name in local language'))
     is_vouched = models.BooleanField(
         default=False,
         help_text='You can edit vouched status by editing invidual vouches')
