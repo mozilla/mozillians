@@ -57,26 +57,26 @@
 
   <div id="outer-wrapper">
     <div id="page">
-    {% block site_header %}
-      <div class="wrapper">
-        <header id="masthead">
+      {% block site_header %}
+        <div class="wrapper">
+          <header id="masthead">
 
-          <div id="tabzilla">
-            <a href="https://www.mozilla.org/">Mozilla</a>
-          </div>
+            <div id="tabzilla">
+              <a href="https://www.mozilla.org/">Mozilla</a>
+            </div>
 
-          <ul id="nav-access">
-            <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
-            <li><a href="#content">{{ _('Skip to main content') }}</a></li>
-          </ul>
-          {% block site_header_nav %}
-            <nav role="navigation">
+            <ul id="nav-access">
+              <li><a href="#language-switcher">{{ _('Select language') }}</a></li>
+              <li><a href="#content">{{ _('Skip to main content') }}</a></li>
+            </ul>
+            {% block site_header_nav %}
+              <nav role="navigation">
                 <a class="brand" href="{{ url('phonebook:home') }}">
-                    <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
+                  <img id="mozillians-logo" src="{{ static('mozillians/img/mozillians-logo.png') }}" alt="Mozillians">
                 </a>
                 {% block search %}
                   <form class="navbar-search"
-                      action="{{ url('phonebook:search') }}" method="GET">
+                        action="{{ url('phonebook:search') }}" method="GET">
                     <input type="text" name="q" class="search-query"
                            placeholder="{{ _('Search for people, groups and more') }}" maxlength="140">
                   </form>
@@ -147,78 +147,80 @@
                     <span class="signin">{{ _('Sign in') }}</span>
                   </a>
                 {% endif %}
-            </nav>
-          {% endblock %}
+              </nav>
+            {% endblock %}
 
-          {% block breadcrumbs %}{% endblock %}
+            {% block breadcrumbs %}{% endblock %}
 
-        </header>
-      </div>
-    {% endblock %}
-
-    {% block mosaic %}{% endblock %}
-
-    {% block content_wrapper %}
-      <div id="content-wrapper">
-        <div id="main" class="container">
-          {% block messages %}
-            {% for m in messages %}
-              {% with label = m.tags in ['error', 'success', 'info', 'warning'] %}
-                <div class="alert {% if label %}alert-{{ m.tags }}{% endif %}">
-                  {{ m.message }}
-                </div>
-              {% endwith %}
-            {% endfor %}
-          {% endblock messages %}
-          {% block content %}{% endblock %}
-          <a href="#" id="back-to-top">
-            <img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top">
-          </a>
+          </header>
         </div>
-      </div>
-    {% endblock %}
-  </div><!-- close #wrapper -->
+      {% endblock %}
+
+      {% block mosaic %}{% endblock %}
+
+      {% block content_wrapper %}
+        <div id="content-wrapper">
+          <div id="main" class="container">
+            {% block messages %}
+              {% for m in messages %}
+                {% with label = m.tags in ['error', 'success', 'info', 'warning'] %}
+                  <div class="alert {% if label %}alert-{{ m.tags }}{% endif %}">
+                    {{ m.message }}
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            {% endblock messages %}
+            {% block content %}{% endblock %}
+            <a href="#" id="back-to-top">
+              <img src="{{ static('mozillians/img/back-to-top-arrow.png') }}" alt="Back to top">
+            </a>
+          </div>
+        </div>
+      {% endblock %}
+    </div><!-- close #wrapper -->
+
+    {% block get_involved %}{% endblock %}
 
     {% block site_footer %}
       <footer id="colophon">
-          <div class="row">
+        <div class="row">
 
-            <h5>
-              {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook',
-                   git_url='https://github.com/mozilla/mozillians' %}
-                Help make Mozillians better.
-                <a href="{{ bug_url }}">File a bug</a> or
-                <a href="{{ git_url }}">make some changes</a>.
-              {% endtrans %}
-            </h5>
+          <h5>
+            {% trans bug_url='https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook',
+               git_url='https://github.com/mozilla/mozillians' %}
+              Help make Mozillians better.
+              <a href="{{ bug_url }}">File a bug</a> or
+              <a href="{{ git_url }}">make some changes</a>.
+            {% endtrans %}
+          </h5>
 
-            <div class="footer-language row">
+          <div class="footer-language row">
             {% include 'includes/lang_switcher.html' %}
-            </div>
+          </div>
 
-            <hr>
+          <hr>
 
-            <div class="footer-logo">
-              <a href="https://mozilla.org"><img src="{{ static('mozillians/img/footer-mozilla.png') }}" alt="mozilla"></a>
-            </div>
+          <div class="footer-logo">
+            <a href="https://mozilla.org"><img src="{{ static('mozillians/img/footer-mozilla.png') }}" alt="mozilla"></a>
+          </div>
 
-            <div class="footer-license">
-              <p>
-                {% trans license_link='https://www.mozilla.org/en-US/foundation/licensing/website-content/' %}
-                Portions of this content are &copy;1998–{{ current_year }} by individual mozilla.org
-                contributors. Content available under
-                a <a href="{{ license_link }}">Creative Commons license</a>.
-                {% endtrans %}
-              </p>
-            </div>
+          <div class="footer-license">
+            <p>
+              {% trans license_link='https://www.mozilla.org/en-US/foundation/licensing/website-content/' %}
+              Portions of this content are &copy;1998–{{ current_year }} by individual mozilla.org
+              contributors. Content available under
+              a <a href="{{ license_link }}">Creative Commons license</a>.
+              {% endtrans %}
+            </p>
+          </div>
 
-            <ul class="footer-nav details">
-              <li><a href="{{ url('phonebook:about') }}">{{_('About Mozillians')}}</a></li>
-              <li><a href="https://mozilla.org/contact/">{{_('Contact Us')}}</a></li>
-              <li><a href="https://mozilla.org/privacy/websites/">{{_('Privacy Policy')}}</a></li>
-              <li><a href="https://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
-              <li><a href="https://mozilla.org/legal/fraud-report/">{{_('Report Trademark Abuse')}}</a></li>
-            </ul>
+          <ul class="footer-nav details">
+            <li><a href="{{ url('phonebook:about') }}">{{_('About Mozillians')}}</a></li>
+            <li><a href="https://mozilla.org/contact/">{{_('Contact Us')}}</a></li>
+            <li><a href="https://mozilla.org/privacy/websites/">{{_('Privacy Policy')}}</a></li>
+            <li><a href="https://mozilla.org/about/legal.html">{{_('Legal Notices')}}</a></li>
+            <li><a href="https://mozilla.org/legal/fraud-report/">{{_('Report Trademark Abuse')}}</a></li>
+          </ul>
 
         </div>
       </footer>

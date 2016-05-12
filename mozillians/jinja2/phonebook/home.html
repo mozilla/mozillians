@@ -93,26 +93,6 @@
       </div>
     </article>
 
-    <article id="get-involved">
-      <div class="container">
-        <div class="content">
-          <h2>{{ _('How do I get involved?') }}</h2>
-          <p>
-            {% trans %}
-            Mozilla exists to promote openness, innovation and
-            opportunity on the Internet. The success of our mission
-            depends on participation from people like you. Find out
-            how you can get involved to help make a difference in the
-            lives of people everywhere.
-            {% endtrans %}
-          </p>
-          {% trans contribute_url='https://mozilla.org/contribute' %}
-            <a href="{{ contribute_url }}">Get involved</a>
-          {% endtrans %}
-        </div>
-      </div>
-    </article>
-
   {% else %}
 
     {# This is where the logged in homepage view starts. #}
@@ -273,6 +253,30 @@
   {% endif %}
 
 {% endblock content %}
+
+{% block get_involved %}
+  {% if not user.is_authenticated() %}
+    <article id="get-involved">
+      <div class="container">
+        <div class="content">
+          <h2>{{ _('How do I get involved?') }}</h2>
+          <p>
+            {% trans %}
+            Mozilla exists to promote openness, innovation and
+            opportunity on the Internet. The success of our mission
+            depends on participation from people like you. Find out
+            how you can get involved to help make a difference in the
+            lives of people everywhere.
+            {% endtrans %}
+          </p>
+          {% trans contribute_url='https://mozilla.org/contribute' %}
+            <a href="{{ contribute_url }}">Get involved</a>
+          {% endtrans %}
+        </div>
+      </div>
+    </article>
+  {% endif %}
+{% endblock get_involved %}
 
 {% block page_js %}
   {% compress js %}
