@@ -1,6 +1,6 @@
 # This is an example settings_local.py file.
 # Copy it and add your local settings here.
-
+from . import base
 from .base import DATABASES
 
 # For absolute urls
@@ -54,3 +54,27 @@ CACHES = {
     }
 }
 BROWSERID_AUDIENCES = None
+
+CSP_DEFAULT_SRC = base.CSP_DEFAULT_SRC + (
+    'http://*.mapbox.com',
+)
+CSP_FONT_SRC = base.CSP_FONT_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://mozorg.cdn.mozilla.net',
+)
+CSP_IMG_SRC = base.CSP_IMG_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*mapbox.com',
+)
+CSP_SCRIPT_SRC = base.CSP_SCRIPT_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*mapbox.com',
+)
+CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*mapbox.com',
+)
