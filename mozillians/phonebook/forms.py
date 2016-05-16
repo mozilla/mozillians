@@ -164,8 +164,8 @@ class BasicInformationForm(happyforms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('photo', 'privacy_photo', 'full_name',
-                  'privacy_full_name', 'bio', 'privacy_bio',)
+        fields = ('photo', 'privacy_photo', 'full_name', 'privacy_full_name',
+                  'full_name_local', 'privacy_full_name_local', 'bio', 'privacy_bio',)
         widgets = {'bio': forms.Textarea()}
 
     def clean_photo(self):

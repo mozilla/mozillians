@@ -159,6 +159,11 @@
         <h1 class="p-name">
           <span class="fn">{{ profile.display_name|default(shown_user.username, true) }}</span>
         </h1>
+        {% if profile.full_name_local %}
+          <h2>
+            <span class="fn">{{ profile.full_name_local }}</span>
+          </h2>
+        {% endif %}
         {% if profile.title %}
           <h2><span class="title">{{ profile.title }}</span></h2>
         {% endif %}

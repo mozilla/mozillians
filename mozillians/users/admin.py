@@ -414,7 +414,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     fieldsets = (
         ('Account', {
-            'fields': ('full_name', 'username', 'email', 'photo',)
+            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',)
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)
@@ -433,8 +433,8 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
             'fields': ('allows_community_sites', 'allows_mozilla_sites')
         }),
         ('Privacy Settings', {
-            'fields': ('privacy_photo', 'privacy_full_name', 'privacy_ircname',
-                       'privacy_email', 'privacy_bio',
+            'fields': ('privacy_photo', 'privacy_full_name', 'privacy_full_name_local',
+                       'privacy_ircname', 'privacy_email', 'privacy_bio',
                        'privacy_geo_city', 'privacy_geo_region', 'privacy_geo_country',
                        'privacy_groups', 'privacy_skills', 'privacy_languages',
                        'privacy_date_mozillian', 'privacy_timezone',
