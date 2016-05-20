@@ -150,7 +150,6 @@ def update_info(ctx, tag):
         ctx.local('git branch')
         ctx.local('git log -3')
         ctx.local('git status')
-        ctx.local('git submodule status')
         ctx.local('which python')
         ctx.local('python manage.py migrate --list')
         with ctx.lcd('locale'):
