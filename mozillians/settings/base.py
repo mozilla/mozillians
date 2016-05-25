@@ -221,6 +221,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
 
@@ -251,6 +252,10 @@ SESSION_COOKIE_SECURE = True
 
 # StrictTransport
 STS_SUBDOMAINS = True
+
+# Security middleware
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
 
 # Not all URLs need locale.
 SUPPORTED_NONLOCALES = [
