@@ -338,14 +338,13 @@ def search(request):
     show_pagination = False
     form = forms.SearchForm(request.GET)
     groups = None
-    functional_areas = None
+    functional_areas = Group.get_functional_areas()
 
     if form.is_valid():
         query = form.cleaned_data.get('q', u'')
         limit = form.cleaned_data['limit']
         include_non_vouched = form.cleaned_data['include_non_vouched']
         page = request.GET.get('page', 1)
-        functional_areas = Group.get_functional_areas()
         public = not (request.user.is_authenticated() and
                       request.user.userprofile.is_vouched)
 
