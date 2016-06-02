@@ -9,6 +9,8 @@ before_install:
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
   - cp mozillians/settings/local.py-travis mozillians/settings/local.py
+cache:
+  - pip
 install:
   - npm install -g less
   - pip install coverage
