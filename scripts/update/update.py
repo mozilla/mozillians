@@ -171,8 +171,10 @@ def setup_dependencies(ctx):
         activate_env = os.path.join(venv_bin_path, 'activate_this.py')
         execfile(activate_env, dict(__file__=activate_env))
 
+        # Make sure pip >= 8.x is installed
+        ctx.local('python scripts/pipstrap.py')
         ctx.local('pip --version')
-        ctx.local('./peep.sh install -r requirements/prod.txt')
+        ctx.local('pip install --require-hashes --no-deps -r requirements/prod.txt')
         # Make the venv relocatable
         ctx.local('virtualenv-2.7 --relocatable venv')
 
