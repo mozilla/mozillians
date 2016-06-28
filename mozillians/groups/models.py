@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
 
@@ -258,12 +259,13 @@ class Group(GroupBase):
         membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                                     group=self,
                                                                     defaults=defaults)
+        newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
         if created:
             if status == GroupMembership.MEMBER:
                 # Joined
                 # Group is functional area, we want to sent this update to Basket
                 if self.functional_area:
-                    update_basket_task.delay(userprofile.id)
+                    update_basket_task.delay(userprofile.id, newsletters)
         else:
             if membership.status != status:
                 # Status changed
@@ -283,7 +285,7 @@ class Group(GroupBase):
                     if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
                         if self.functional_area:
                             # Group is functional area, we want to sent this update to Basket.
-                            update_basket_task.delay(userprofile.id)
+                            update_basket_task.delay(userprofile.id, newsletters)
                         email_membership_change.delay(self.pk, userprofile.user.pk,
                                                       old_status, status)
 
@@ -296,7 +298,7 @@ class Group(GroupBase):
         membership.delete()
         # If group is functional area, we want to sent this update to Basket
         if self.functional_area:
-            update_basket_task.delay(userprofile.id)
+            update_basket_task.delay(userprofile.id, [settings.BASKET_VOUCHED_NEWSLETTER])
 
         if old_status == GroupMembership.PENDING and send_email:
             # Request denied

@@ -21,7 +21,8 @@ class Command(BaseCommand):
         # The tasks module looks these up at import time, and might get BASKET_API_KEY
         # from the environment rather than settings if it's there, so look directly at
         # what values the tasks module ended up with.
-        required_settings = ['BASKET_API_KEY', 'BASKET_NEWSLETTER', 'BASKET_URL']
+        required_settings = ['BASKET_API_KEY', 'BASKET_NDA_NEWSLETTER',
+                             'BASKET_URL', 'BASKET_VOUCHED_NEWSLETTER']
         if not all([getattr(tasks, setting, False) for setting in required_settings]):
             # At least one is missing. Show what's set and what's missing:
             for setting in required_settings:
