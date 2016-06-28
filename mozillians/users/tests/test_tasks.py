@@ -124,8 +124,9 @@ class BasketTests(TestCase):
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.basket')
-    def test_change_email(self, mock_basket):
+    def test_change_email(self, mock_basket, switch_is_active_mock):
         # When a user's email is changed, their old email is unsubscribed
         # from all newsletters and their new email is subscribed to them.
 
@@ -140,6 +141,7 @@ class BasketTests(TestCase):
         mock_basket.subscribe.return_value = {
             'token': token,
         }
+        switch_is_active_mock.return_value = True
         user = UserFactory.create(email=email)
         up = UserProfile.objects.get(pk=user.userprofile.pk)
         eq_(token, up.basket_token)
@@ -165,8 +167,10 @@ class BasketTests(TestCase):
         eq_(new_token, up.basket_token)
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.basket.unsubscribe')
-    def test_unsubscribe_from_basket_task(self, unsubscribe_mock):
+    def test_unsubscribe_from_basket_task(self, unsubscribe_mock, switch_is_active_mock):
+        switch_is_active_mock.return_value = True
         user = UserFactory.create(userprofile={'basket_token': 'foo'})
         with patch('mozillians.users.tasks.BASKET_ENABLED', True):
             unsubscribe_from_basket_task(user.email, user.userprofile.basket_token)
@@ -174,9 +178,12 @@ class BasketTests(TestCase):
             user.userprofile.basket_token, user.email, newsletters='newsletter')
 
     @override_settings(BASKET_NEWSLETTER='newsletter')
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.basket')
     @patch.object(UserProfile, 'lookup_basket_token')
-    def test_unsubscribe_from_basket_task_without_token(self, lookup_token_mock, basket_mock):
+    def test_unsubscribe_from_basket_task_without_token(self, lookup_token_mock, basket_mock,
+                                                        switch_is_active_mock):
+        switch_is_active_mock.return_value = True
         lookup_token_mock.return_value = 'basket_token'
         basket_mock.lookup_user.return_value = {'token': 'basket_token'}
         user = UserFactory.create(userprofile={'basket_token': ''})

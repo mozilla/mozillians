@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 
 import basket
 import requests
+import waffle
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
@@ -75,7 +76,8 @@ def update_basket_task(instance_id):
     except UserProfile.DoesNotExist:
         instance = None
 
-    if not BASKET_ENABLED or not instance or not instance.is_vouched:
+    if (not BASKET_ENABLED or not instance or not instance.is_vouched or
+            not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
         return
 
     email = instance.user.email
@@ -171,7 +173,7 @@ def unsubscribe_from_basket_task(email, basket_token):
     # look anything up about the user locally. It has to make do
     # with the email and token passed in.
 
-    if not BASKET_ENABLED:
+    if not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
         return
 
     try:
