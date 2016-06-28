@@ -100,11 +100,23 @@ class ElasticSearchIndexTests(TestCase):
 
 
 class BasketTests(TestCase):
-    @override_settings(BASKET_MANAGERS=False)
+    @override_settings(BASKET_MANAGERS=False, FROM_NOREPLY='noreply',
+                       ADMINS=(('foo', 'foo@example.com'), ('bar', 'bar@example.com')))
     @patch('mozillians.users.tasks.send_mail')
     def test_email_basket_managers_email_not_set(self, send_mail_mock):
         _email_basket_managers('foo', 'bar', 'error')
-        ok_(not send_mail_mock.called)
+        subject = '[Mozillians - ET] Failed to subscribe or update user bar'
+        body = """
+    Something terrible happened while trying to subscribe user bar from Basket.
+
+    Here is the error message:
+
+    error
+    """
+        _email_basket_managers('subscribe', 'bar', 'error')
+        send_mail_mock.assert_called_with(
+            subject, body, 'noreply', ['foo@example.com', 'bar@example.com'],
+            fail_silently=False)
 
     @override_settings(BASKET_MANAGERS='basket_managers',
                        FROM_NOREPLY='noreply')

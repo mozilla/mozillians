@@ -28,8 +28,9 @@ INCOMPLETE_ACC_MAX_DAYS = 7
 
 def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
-    if not getattr(settings, 'BASKET_MANAGERS', False):
-        return
+
+    # Fallback to ADMINS emails when BASKET_MANAGERS not defined
+    recipients_list = settings.BASKET_MANAGERS or [addr for (name, addr) in settings.ADMINS]
 
     subject = '[Mozillians - ET] '
     if action == 'subscribe':
@@ -49,8 +50,7 @@ def _email_basket_managers(action, email, error_message):
     %s
     """ % (action, email, error_message)
 
-    send_mail(subject, body, settings.FROM_NOREPLY,
-              settings.BASKET_MANAGERS, fail_silently=False)
+    send_mail(subject, body, settings.FROM_NOREPLY, recipients_list, fail_silently=False)
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
