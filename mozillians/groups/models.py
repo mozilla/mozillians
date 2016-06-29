@@ -11,7 +11,6 @@ from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
-from mozillians.users.tasks import update_basket_task
 
 
 class GroupBase(models.Model):
@@ -258,34 +257,23 @@ class Group(GroupBase):
         membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                                     group=self,
                                                                     defaults=defaults)
-        if created:
-            if status == GroupMembership.MEMBER:
-                # Joined
-                # Group is functional area, we want to sent this update to Basket
-                if self.functional_area:
-                    update_basket_task.delay(userprofile.id)
-        else:
-            if membership.status != status:
-                # Status changed
-                # The only valid status change states are:
-                # PENDING to MEMBER
-                # PENDING to PENDING_TERMS
-                # PENDING_TERMS to MEMBER
+        if membership.status != status:
+            # Status changed
+            # The only valid status change states are:
+            # PENDING to MEMBER
+            # PENDING to PENDING_TERMS
+            # PENDING_TERMS to MEMBER
 
-                old_status = membership.status
-                membership.status = status
-                statuses = [(GroupMembership.PENDING, GroupMembership.MEMBER),
-                            (GroupMembership.PENDING, GroupMembership.PENDING_TERMS),
-                            (GroupMembership.PENDING_TERMS, GroupMembership.MEMBER)]
-                if (old_status, status) in statuses:
-                    # Status changed
-                    membership.save()
-                    if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
-                        if self.functional_area:
-                            # Group is functional area, we want to sent this update to Basket.
-                            update_basket_task.delay(userprofile.id)
-                        email_membership_change.delay(self.pk, userprofile.user.pk,
-                                                      old_status, status)
+            old_status = membership.status
+            membership.status = status
+            statuses = [(GroupMembership.PENDING, GroupMembership.MEMBER),
+                        (GroupMembership.PENDING, GroupMembership.PENDING_TERMS),
+                        (GroupMembership.PENDING_TERMS, GroupMembership.MEMBER)]
+            if (old_status, status) in statuses:
+                # Status changed
+                membership.save()
+                if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
+                    email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
 
     def remove_member(self, userprofile, send_email=True):
         try:
@@ -294,9 +282,6 @@ class Group(GroupBase):
             return
         old_status = membership.status
         membership.delete()
-        # If group is functional area, we want to sent this update to Basket
-        if self.functional_area:
-            update_basket_task.delay(userprofile.id)
 
         if old_status == GroupMembership.PENDING and send_email:
             # Request denied
