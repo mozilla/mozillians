@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
-from django.test.utils import override_settings
+from django.test import override_settings
 from django.utils import unittest
 from django.utils.timezone import make_aware
 
@@ -31,9 +31,10 @@ class SignaledFunctionsTests(TestCase):
         ok_(user.userprofile)
 
     @patch('mozillians.users.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_update_basket_post_save(self, update_basket_mock):
         user = UserFactory.create()
-        update_basket_mock.assert_called_with(user.userprofile.id)
+        update_basket_mock.assert_called_with(user.userprofile.id, ['foo'])
 
     @patch('mozillians.users.models.index_objects.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
@@ -82,6 +83,7 @@ class SignaledFunctionsTests(TestCase):
         eq_(vouch.voucher, None)
 
     @patch('mozillians.users.models.update_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     @override_settings(CAN_VOUCH_THRESHOLD=1)
     def test_vouch_is_vouched_gets_updated(self, update_basket_mock):
         voucher = UserFactory.create()
@@ -93,9 +95,10 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.is_vouched, True)
-        ok_(update_basket_mock.called_with(unvouched.userprofile.id))
+        ok_(update_basket_mock.called_with(unvouched.userprofile.id, ['foo']))
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     def test_unvouch_is_vouched_gets_updated(self, unsubscribe_from_basket_mock):
         vouched = UserFactory.create()
 
@@ -106,7 +109,8 @@ class SignaledFunctionsTests(TestCase):
         vouched = User.objects.get(pk=vouched.id)
         eq_(vouched.userprofile.is_vouched, False)
         ok_(unsubscribe_from_basket_mock.called_with(vouched.userprofile.email,
-                                                     vouched.userprofile.basket_token))
+                                                     vouched.userprofile.basket_token,
+                                                     ['foo']))
 
     @override_settings(CAN_VOUCH_THRESHOLD=5)
     def test_vouch_can_vouch_gets_updated(self):

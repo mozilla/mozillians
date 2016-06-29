@@ -49,6 +49,7 @@ class DeleteTests(TestCase):
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter')
     def test_delete_unvouched(self, unindex_objects_mock,
                               unsubscribe_from_basket_task_mock):
         user = UserFactory.create(vouched=False, userprofile={'basket_token': 'token'})
@@ -60,7 +61,7 @@ class DeleteTests(TestCase):
         self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token)
+            user.email, user.userprofile.basket_token, ['newsletter'])
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
             call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
@@ -68,6 +69,7 @@ class DeleteTests(TestCase):
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter')
     def test_delete_vouched(self, unindex_objects_mock,
                             unsubscribe_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
@@ -79,7 +81,7 @@ class DeleteTests(TestCase):
         self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token)
+            user.email, user.userprofile.basket_token, ['newsletter'])
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
             call(UserProfileMappingType, [user.userprofile.id], public_index=True)])

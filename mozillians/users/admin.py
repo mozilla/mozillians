@@ -46,7 +46,7 @@ def subscribe_to_basket_action():
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
         ts = [(mozillians.users.tasks.update_basket_task
-               .subtask(args=[userprofile.id]))
+               .subtask(args=[userprofile.id, [settings.BASKET_VOUCHED_NEWSLETTER]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
@@ -60,7 +60,8 @@ def unsubscribe_from_basket_action():
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
         ts = [(mozillians.users.tasks.unsubscribe_from_basket_task
-               .subtask(args=[userprofile.user.email, userprofile.basket_token]))
+               .subtask(args=[userprofile.user.email, userprofile.basket_token,
+                              [settings.BASKET_VOUCHED_NEWSLETTER]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
