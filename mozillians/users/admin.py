@@ -230,6 +230,28 @@ class LegacyVouchFilter(SimpleListFilter):
         return queryset
 
 
+class NDAMemberFilter(SimpleListFilter):
+    """Admin filter for profiles member of the NDA group"""
+    title = "NDA member"
+    parameter_name = 'nda_member'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        from mozillians.groups.models import Group, GroupMembership
+        group = Group.objects.get(name=settings.NDA_GROUP)
+        memberships = GroupMembership.objects.filter(group=group, status=GroupMembership.MEMBER)
+        profile_ids = memberships.values_list('userprofile__id', flat=True)
+
+        if self.value() == 'False':
+            return queryset.exclude(id__in=profile_ids)
+        elif self.value() == 'True':
+            return queryset.filter(id__in=profile_ids)
+        return queryset
+
+
 class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
@@ -405,7 +427,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
-                   'externalaccount__type', 'referral_source']
+                   NDAMemberFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
