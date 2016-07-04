@@ -21,9 +21,16 @@ logger = logging.getLogger(__name__)
 BASKET_TASK_RETRY_DELAY = 120  # 2 minutes
 BASKET_TASK_MAX_RETRIES = 2  # Total 1+2 = 3 tries
 BASKET_URL = getattr(settings, 'BASKET_URL', False)
-BASKET_NEWSLETTER = getattr(settings, 'BASKET_NEWSLETTER', False)
 BASKET_API_KEY = os.environ.get('BASKET_API_KEY', getattr(settings, 'BASKET_API_KEY', False))
-BASKET_ENABLED = all([BASKET_URL, BASKET_NEWSLETTER, BASKET_API_KEY])
+BASKET_VOUCHED_NEWSLETTER = getattr(settings, 'BASKET_VOUCHED_NEWSLETTER', False)
+BASKET_NDA_NEWSLETTER = getattr(settings, 'BASKET_NDA_NEWSLETTER', False)
+BASKET_ENABLED = all([
+    BASKET_URL,
+    BASKET_API_KEY,
+    BASKET_VOUCHED_NEWSLETTER,
+    BASKET_NDA_NEWSLETTER
+])
+
 INCOMPLETE_ACC_MAX_DAYS = 7
 
 
@@ -55,7 +62,7 @@ def _email_basket_managers(action, email, error_message):
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def update_basket_task(instance_id):
+def update_basket_task(instance_id, newsletters=[]):
     """Update Basket Task.
 
     This task subscribes a user to Basket, if not already subscribed
@@ -77,7 +84,7 @@ def update_basket_task(instance_id):
         instance = None
 
     if (not BASKET_ENABLED or not instance or not instance.is_vouched or
-            not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
+            not waffle.switch_is_active('BASKET_SWITCH_ENABLED') or not newsletters):
         return
 
     email = instance.user.email
@@ -89,7 +96,7 @@ def update_basket_task(instance_id):
         try:
             retval = basket.subscribe(
                 email,
-                [settings.BASKET_NEWSLETTER],
+                newsletters,
                 sync='Y',
                 trigger_welcome='N'
             )
@@ -132,13 +139,12 @@ def update_basket_task(instance_id):
                 # Pass sync='Y' so we get back the new token right away
                 subscribe_result = basket.subscribe(
                     email,
-                    [settings.BASKET_NEWSLETTER],
+                    result['newsletters'],
                     sync='Y',
                     trigger_welcome='N',
                 )
                 # unsub all from the old token
-                basket.unsubscribe(token=token, email=old_email,
-                                   newsletters=[settings.BASKET_NEWSLETTER], optout='Y')
+                basket.unsubscribe(token=token, email=old_email, optout=True)
             except (requests.exceptions.RequestException,
                     basket.BasketException) as exception:
                 try:
@@ -158,7 +164,7 @@ def update_basket_task(instance_id):
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def unsubscribe_from_basket_task(email, basket_token):
+def unsubscribe_from_basket_task(email, basket_token, newsletters=[]):
     """Remove from Basket Task.
 
     This task unsubscribes a user from the Mozillians newsletter.
@@ -173,7 +179,8 @@ def unsubscribe_from_basket_task(email, basket_token):
     # look anything up about the user locally. It has to make do
     # with the email and token passed in.
 
-    if not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
+    if (not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED') or
+            not newsletters):
         return
 
     try:
@@ -182,8 +189,7 @@ def unsubscribe_from_basket_task(email, basket_token):
             # unsubscribe.  Ask basket for it
             basket_token = basket.lookup_user(email=email)['token']
 
-        basket.unsubscribe(basket_token, email,
-                           newsletters=settings.BASKET_NEWSLETTER)
+        basket.unsubscribe(basket_token, email, newsletters=newsletters)
     except (requests.exceptions.RequestException,
             basket.BasketException) as exception:
         try:

@@ -13,7 +13,6 @@ from mozillians.phonebook.management.commands.check_basket import Command
 
 # valid-looking settings to use
 @patch('mozillians.users.tasks.BASKET_API_KEY', new='foo')
-@patch('mozillians.users.tasks.BASKET_NEWSLETTER', new='mozillians')
 @patch('mozillians.users.tasks.BASKET_URL', new='https://basket.example.com')
 class CheckBasketTests(TestCase):
     def run_check(self, user_exists=True, http_error=False):
@@ -65,9 +64,14 @@ class CheckBasketTests(TestCase):
         with patch('mozillians.users.tasks.BASKET_URL', new=None):
             ok_(not self.run_check())
 
-    def test_no_newsletter(self):
-        # If BASKET_NEWSLETTER is not set, the check fails
-        with patch('mozillians.users.tasks.BASKET_NEWSLETTER', new=None):
+    def test_no_vouched_newsletter(self):
+        # If BASKET_VOUCHED_NEWSLETTER is not set, the check fails
+        with patch('mozillians.users.tasks.BASKET_VOUCHED_NEWSLETTER', new=None):
+            ok_(not self.run_check())
+
+    def test_no_nda_newsletter(self):
+        # If BASKET_NDA_NEWSLETTER is not set, the check fails
+        with patch('mozillians.users.tasks.BASKET_NDA_NEWSLETTER', new=None):
             ok_(not self.run_check())
 
     def test_no_api_key(self):
@@ -78,6 +82,5 @@ class CheckBasketTests(TestCase):
     def test_multiple_missing_settings(self):
         # If multiple things are missing, check still fails
         with patch('mozillians.users.tasks.BASKET_API_KEY', new=None):
-            with patch('mozillians.users.tasks.BASKET_NEWSLETTER', new=None):
-                with patch('mozillians.users.tasks.BASKET_URL', new=None):
-                    ok_(not self.run_check())
+            with patch('mozillians.users.tasks.BASKET_URL', new=None):
+                ok_(not self.run_check())

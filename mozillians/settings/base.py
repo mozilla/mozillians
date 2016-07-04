@@ -430,7 +430,9 @@ if 'test' in sys.argv:
 else:
     # Basket requires SSL now for some calls
     BASKET_URL = 'https://basket.mozilla.com'
-BASKET_NEWSLETTER = 'mozilla-phone'
+
+BASKET_VOUCHED_NEWSLETTER = 'mozilla-phone'
+BASKET_NDA_NEWSLETTER = 'nda-mozillians'
 
 USER_AVATAR_DIR = 'uploads/userprofile'
 MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
