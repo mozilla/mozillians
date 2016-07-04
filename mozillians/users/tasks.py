@@ -83,8 +83,8 @@ def update_basket_task(instance_id, newsletters=[]):
     except UserProfile.DoesNotExist:
         instance = None
 
-    if (not BASKET_ENABLED or not instance or not instance.is_vouched or
-            not waffle.switch_is_active('BASKET_SWITCH_ENABLED') or not newsletters):
+    if (not BASKET_ENABLED or not instance or not newsletters or
+            not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
         return
 
     email = instance.user.email
