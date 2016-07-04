@@ -40,33 +40,36 @@ for field in UserProfile.privacy_fields():
     Q_PUBLIC_PROFILES |= Q(**{key: PUBLIC})
 
 
-def subscribe_to_basket_action():
+def subscribe_to_basket_action(newsletter):
     """Subscribe to Basket action."""
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
         ts = [(mozillians.users.tasks.update_basket_task
-               .subtask(args=[userprofile.id, [settings.BASKET_VOUCHED_NEWSLETTER]]))
+               .subtask(args=[userprofile.id, [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
-    subscribe_to_basket.short_description = 'Subscribe to or Update Basket'
+
+    subscribe_to_basket.short_description = 'Subscribe to or Update {0}'.format(newsletter)
+    subscribe_to_basket.__name__ = 'subscribe_to_basket_{0}'.format(newsletter.replace('-', '_'))
     return subscribe_to_basket
 
 
-def unsubscribe_from_basket_action():
+def unsubscribe_from_basket_action(newsletter):
     """Unsubscribe from Basket action."""
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
         ts = [(mozillians.users.tasks.unsubscribe_from_basket_task
-               .subtask(args=[userprofile.user.email, userprofile.basket_token,
-                              [settings.BASKET_VOUCHED_NEWSLETTER]]))
+               .subtask(args=[userprofile.user.email, userprofile.basket_token, [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
-    unsubscribe_from_basket.short_description = 'Unsubscribe from Basket'
 
+    unsubscribe_from_basket.short_description = 'Unsubscribe from {0}'.format(newsletter)
+    func_name = 'unsubscribe_from_basket_{0}'.format(newsletter.replace('-', '_'))
+    unsubscribe_from_basket.__name__ = func_name
     return unsubscribe_from_basket
 
 
@@ -227,6 +230,28 @@ class LegacyVouchFilter(SimpleListFilter):
             return vouched.exclude(pk__in=newvouches)
         elif self.value() == 'new':
             return vouched.filter(pk__in=newvouches)
+        return queryset
+
+
+class NDAMemberFilter(SimpleListFilter):
+    """Admin filter for profiles member of the NDA group"""
+    title = "NDA member"
+    parameter_name = 'nda_member'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        from mozillians.groups.models import Group, GroupMembership
+        group = Group.objects.get(name=settings.NDA_GROUP)
+        memberships = GroupMembership.objects.filter(group=group, status=GroupMembership.MEMBER)
+        profile_ids = memberships.values_list('userprofile__id', flat=True)
+
+        if self.value() == 'False':
+            return queryset.exclude(id__in=profile_ids)
+        elif self.value() == 'True':
+            return queryset.filter(id__in=profile_ids)
         return queryset
 
 
@@ -405,12 +430,15 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
-                   'externalaccount__type', 'referral_source']
+                   NDAMemberFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
-    actions = [subscribe_to_basket_action(), unsubscribe_from_basket_action(),
+    actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
+               unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
+               subscribe_to_basket_action(settings.BASKET_NDA_NEWSLETTER),
+               unsubscribe_from_basket_action(settings.BASKET_NDA_NEWSLETTER),
                update_vouch_flags_action()]
 
     fieldsets = (

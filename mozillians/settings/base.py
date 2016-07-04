@@ -433,6 +433,7 @@ else:
 
 BASKET_VOUCHED_NEWSLETTER = 'mozilla-phone'
 BASKET_NDA_NEWSLETTER = 'nda-mozillians'
+NDA_GROUP = "nda"
 
 USER_AVATAR_DIR = 'uploads/userprofile'
 MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
