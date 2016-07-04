@@ -1,16 +1,18 @@
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
-
-from autoslug.fields import AutoSlugField
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy as _lazy
+
+from autoslug.fields import AutoSlugField
 
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
+from mozillians.users.tasks import unsubscribe_from_basket_task, update_basket_task
 
 
 class GroupBase(models.Model):
@@ -252,6 +254,8 @@ class Group(GroupBase):
 
         If user is already in the group with a different status, their status will
         be updated if the change is a promotion. Otherwise, their status will not change.
+
+        If the group in question is the NDA group, also add the user to the NDA newsletter.
         """
         defaults = dict(status=status, date_joined=now())
         membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
@@ -274,6 +278,10 @@ class Group(GroupBase):
                 membership.save()
                 if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
                     email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
+                # Since there is no demotion, we can check if the new status is MEMBER and
+                # subscribe the user to the NDA newsletter if the group is NDA
+                if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
+                    update_basket_task.delay(userprofile.id, [settings.BASKET_NDA_NEWSLETTER])
 
     def remove_member(self, userprofile, send_email=True):
         try:
@@ -285,11 +293,16 @@ class Group(GroupBase):
 
         if old_status == GroupMembership.PENDING and send_email:
             # Request denied
-            email_membership_change.delay(self.pk, userprofile.user.pk,
-                                          old_status, None)
-        elif old_status == GroupMembership.MEMBER and send_email:
-            # Member removed
-            member_removed_email.delay(self.pk, userprofile.user.pk)
+            email_membership_change.delay(self.pk, userprofile.user.pk, old_status, None)
+        elif old_status == GroupMembership.MEMBER:
+            # If group is the NDA group, unsubscribe user from the newsletter.
+            if self.name == settings.NDA_GROUP:
+                unsubscribe_from_basket_task.delay(userprofile.email, userprofile.basket_token,
+                                                   [settings.BASKET_NDA_NEWSLETTER])
+
+            if send_email:
+                # Member removed
+                member_removed_email.delay(self.pk, userprofile.user.pk)
 
         # delete the invitation to the group if exists
         Invite.objects.filter(group=self, redeemer=userprofile).delete()
