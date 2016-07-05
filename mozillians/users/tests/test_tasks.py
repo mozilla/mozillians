@@ -12,7 +12,7 @@ from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
                                     remove_incomplete_accounts, unindex_objects,
-                                    unsubscribe_from_basket_task)
+                                    unsubscribe_from_basket_task, update_basket_task)
 from mozillians.users.tests import UserFactory
 
 
@@ -201,3 +201,13 @@ class BasketTests(TestCase):
         user = User.objects.get(pk=user.pk)  # refresh data from DB
         basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters=['foo'])
+
+    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
+    @patch('mozillians.users.tasks.basket')
+    def test_subscribe_no_newsletters(self, basket_mock, switch_is_active_mock):
+        switch_is_active_mock.return_value = True
+        user = UserFactory.create(vouched=False)
+        update_basket_task(user.userprofile.pk)
+        eq_(basket_mock.subscribe.call_count, 0)
+        eq_(basket_mock.unsubscribe.call_count, 0)
