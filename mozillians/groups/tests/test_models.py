@@ -3,12 +3,12 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test.utils import override_settings
 
+from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, GroupAlias, GroupMembership
-from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
-                                     SkillFactory)
+from mozillians.groups.tests import GroupAliasFactory, GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -236,31 +236,74 @@ class GroupTests(TestCase):
         group = Group.objects.get(id=group.id)
         eq_(group.curators.all().count(), 0)
 
-    def test_remove_member(self):
+    @patch('mozillians.users.tasks.unsubscribe_from_basket_task')
+    def test_remove_member(self, unsubscribe_basket_mock):
         user = UserFactory.create()
-        group = GroupFactory.create()
+        group = GroupFactory.create(name='foo')
         GroupMembership.objects.create(userprofile=user.userprofile, group=group,
                                        status=GroupMembership.MEMBER)
         ok_(group.has_member(user.userprofile))
 
         group.remove_member(user.userprofile)
+        # The basket needs update only when the group is NDA.
+        ok_(not unsubscribe_basket_mock.called)
         ok_(not GroupMembership.objects.filter(userprofile=user.userprofile,
                                                group=group).exists())
         ok_(not group.has_member(user.userprofile))
 
-    def test_add_member(self):
+    @patch('mozillians.users.tasks.unsubscribe_from_basket_task')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
+    def test_remove_member_nda(self, unsubscribe_basket_mock):
+        user = UserFactory.create(userprofile__email='user@example.com',
+                                  userprofile__basket_token='basket_token')
+        group = GroupFactory.create(name='nda')
+        GroupMembership.objects.create(userprofile=user.userprofile, group=group,
+                                       status=GroupMembership.MEMBER)
+        ok_(group.has_member(user.userprofile))
+
+        group.remove_member(user.userprofile)
+        ok_(not group.has_member(user.userprofile))
+        ok_(unsubscribe_basket_mock.called_with('user@example.com', 'basket_token', ['nda']))
+
+    @patch('mozillians.users.tasks.unsubscribe_from_basket_task')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
+    def test_remove_member_nda_pending_status(self, unsubscribe_basket_mock):
+        user = UserFactory.create(userprofile__email='user@example.com',
+                                  userprofile__basket_token='basket_token')
+        group = GroupFactory.create(name='nda')
+        GroupMembership.objects.create(userprofile=user.userprofile, group=group,
+                                       status=GroupMembership.PENDING_TERMS)
+
+        group.remove_member(user.userprofile)
+        ok_(not group.has_member(user.userprofile))
+        ok_(not unsubscribe_basket_mock.called)
+
+    @patch('mozillians.users.tasks.update_basket_task')
+    def test_add_member(self, update_basket_mock):
         user = UserFactory.create()
-        group = GroupFactory.create()
+        group = GroupFactory.create(name='foo')
         ok_(not group.has_member(user.userprofile))
         group.add_member(user.userprofile)
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
                                            status=GroupMembership.MEMBER).exists())
         ok_(group.has_member(user.userprofile))
+        ok_(not update_basket_mock.called)
         group.add_member(user.userprofile, status=GroupMembership.PENDING)
         # never demotes anyone
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
                                            status=GroupMembership.MEMBER).exists())
         ok_(group.has_member(user.userprofile))
+
+    @patch('mozillians.users.tasks.update_basket_task')
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
+    def test_add_member_nda(self, update_basket_mock):
+        user = UserFactory.create()
+        group = GroupFactory.create(name='nda')
+        ok_(not group.has_member(user.userprofile))
+        group.add_member(user.userprofile)
+        ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
+                                           status=GroupMembership.MEMBER).exists())
+        ok_(update_basket_mock.called_with(user.userprofile.id, ['nda']))
 
     def test_has_member(self):
         user = UserFactory.create()
