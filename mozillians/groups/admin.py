@@ -201,6 +201,7 @@ class GroupAdmin(GroupBaseAdmin):
                    NoURLFilter, InvalidateGroupFilter]
     readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
                        'pending_terms_member_count', 'max_reminder']
+    search_fields = ('curators__user__username',)
 
     fieldsets = (
         ('Group', {
