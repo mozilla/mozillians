@@ -38,7 +38,8 @@ def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
 
     # Fallback to ADMINS emails when BASKET_MANAGERS not defined
-    recipients_list = settings.BASKET_MANAGERS or [addr for (name, addr) in settings.ADMINS]
+    BASKET_MANAGERS = getattr(settings, 'BASKET_MANAGERS', None)
+    recipients_list = BASKET_MANAGERS or [addr for (name, addr) in settings.ADMINS]
 
     subject = '[Mozillians - ET] '
     if action == 'subscribe':
