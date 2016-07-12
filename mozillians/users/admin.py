@@ -264,6 +264,23 @@ class NDAMemberFilter(SimpleListFilter):
         return queryset
 
 
+class BasketTokenFilter(SimpleListFilter):
+    """Admin filter for profiles with associated basket token"""
+    title = 'has basket token'
+    parameter_name = 'basket_token'
+
+    def lookups(self, request, model_admin):
+        return (('yes', 'Yes'),
+                ('no', 'No'))
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.exclude(basket_token='')
+        elif self.value() == 'no':
+            return queryset.filter(basket_token='')
+        return queryset
+
+
 class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
@@ -439,7 +456,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
-                   NDAMemberFilter, 'externalaccount__type', 'referral_source']
+                   NDAMemberFilter, BasketTokenFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
