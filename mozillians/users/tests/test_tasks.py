@@ -3,6 +3,8 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
+from basket.base import BasketException
+from basket.errors import BASKET_UNKNOWN_EMAIL
 from elasticsearch.exceptions import NotFoundError
 from mock import MagicMock, Mock, call, patch
 from nose.tools import eq_, ok_
@@ -12,7 +14,8 @@ from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
                                     remove_incomplete_accounts, unindex_objects,
-                                    unsubscribe_from_basket_task, update_basket_task)
+                                    unsubscribe_from_basket_task, update_basket_task,
+                                    update_basket_token_task)
 from mozillians.users.tests import UserFactory
 
 
@@ -211,3 +214,33 @@ class BasketTests(TestCase):
         update_basket_task(user.userprofile.pk)
         eq_(basket_mock.subscribe.call_count, 0)
         eq_(basket_mock.unsubscribe.call_count, 0)
+
+    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
+    @patch('mozillians.users.tasks.basket')
+    def test_update_basket_token_existing_email(self, basket_mock, switch_is_active_mock):
+        switch_is_active_mock.return_value = True
+        user = UserFactory.create(vouched=False)
+        basket_mock.lookup_user.return_value = {'token': 'example-token'}
+        update_basket_token_task(user.userprofile.id)
+        userprofile = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(userprofile.basket_token, 'example-token')
+
+    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
+    @patch('mozillians.users.tasks.basket.lookup_user')
+    def test_update_basket_token_unknown_email(self, lookup_mock, switch_is_active_mock):
+        switch_is_active_mock.return_value = True
+        user = UserFactory.create(vouched=False, userprofile={'basket_token': 'example-token'})
+        eq_(user.userprofile.basket_token, 'example-token')
+
+        def raise_basket_exception(*args, **kwargs):
+            raise BasketException(
+                'foobar',
+                code=BASKET_UNKNOWN_EMAIL,
+                status_code=404)
+
+        lookup_mock.side_effect = raise_basket_exception
+        update_basket_token_task(user.userprofile.id)
+        userprofile = UserProfile.objects.get(pk=user.userprofile.pk)
+        eq_(userprofile.basket_token, '')

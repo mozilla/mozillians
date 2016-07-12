@@ -199,6 +199,38 @@ def unsubscribe_from_basket_task(email, basket_token, newsletters=[]):
             _email_basket_managers('unsubscribe', email, exception.message)
 
 
+@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
+def update_basket_token_task(instance_id):
+    """Update basket token task
+
+    This task looks up user email in basket and deletes the current basket_token
+    if email doesn't exist in basket or updates it if it exists but it's not the same.
+
+    """
+    from models import UserProfile
+    try:
+        instance = UserProfile.objects.get(pk=instance_id)
+    except UserProfile.DoesNotExist:
+        instance = None
+
+    if not BASKET_ENABLED or not instance or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
+        return
+
+    try:
+        token = basket.lookup_user(email=instance.email)['token']
+        UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
+
+    except basket.BasketException as exception:
+        if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
+            UserProfile.objects.filter(pk=instance.pk).update(basket_token='')
+            return
+        update_basket_token_task.retry()
+    except MaxRetriesExceededError:
+        _email_basket_managers('update token', instance.email, exception.message)
+    except requests.exceptions.RequestException:
+        update_basket_token_task.retry()
+
+
 @task
 def index_objects(mapping_type, ids, chunk_size=100, public_index=False, **kwargs):
     if getattr(settings, 'ES_DISABLED', False):
