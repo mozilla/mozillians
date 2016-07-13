@@ -136,7 +136,6 @@ class BasketTests(TestCase):
         send_mail_mock.assert_called_with(
             subject, body, 'noreply', 'basket_managers', fail_silently=False)
 
-    @override_settings(BASKET_NEWSLETTER='newsletter')
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.basket')

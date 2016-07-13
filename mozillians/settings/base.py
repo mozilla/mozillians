@@ -432,7 +432,7 @@ else:
     BASKET_URL = 'https://basket.mozilla.com'
 
 BASKET_VOUCHED_NEWSLETTER = 'mozilla-phone'
-BASKET_NDA_NEWSLETTER = 'nda-mozillians'
+BASKET_NDA_NEWSLETTER = 'mozillians-nda'
 NDA_GROUP = "nda"
 
 USER_AVATAR_DIR = 'uploads/userprofile'
