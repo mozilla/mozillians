@@ -8,10 +8,11 @@ from django.core.mail import send_mail
 import basket
 import requests
 import waffle
-from celery.task import task
+from celery.task import periodic_task, task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
 from elasticutils.utils import chunked
+from waffle.decorators import waffle_switch
 
 from mozillians.users.managers import PUBLIC
 
@@ -263,7 +264,8 @@ def unindex_objects(mapping_type, ids, public_index, **kwargs):
         mapping_type.unindex(id_, es=es, public_index=public_index)
 
 
-@task
+@waffle_switch('switch_remove_incomplete_accounts')
+@periodic_task(run_every=timedelta(hours=24), ignore_result=True)
 def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     """Remove incomplete accounts older than INCOMPLETE_ACC_MAX_DAYS old."""
     # Avoid circular dependencies

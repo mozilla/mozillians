@@ -9,9 +9,11 @@ from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
 from celery.task import periodic_task, task
+from waffle.decorators import waffle_switch
 
 
-@task(ignore_result=True)
+@waffle_switch('switch_remove_empty_groups')
+@periodic_task(run_every=timedelta(hours=1), ignore_result=True)
 def remove_empty_groups():
     """Remove empty groups."""
 
@@ -21,9 +23,8 @@ def remove_empty_groups():
         model.objects.annotate(mcount=Count('members')).filter(mcount=0).delete()
 
 
-# TODO: Schedule this task nightly
-
-@task(ignore_result=True)
+@waffle_switch('switch_send_pending_membership_emails')
+@periodic_task(run_every=timedelta(hours=24), ignore_result=True)
 def send_pending_membership_emails():
     """
     For each curated group that has pending memberships that the curators have
@@ -137,6 +138,7 @@ def member_removed_email(group_pk, user_pk):
               [user.email], fail_silently=False)
 
 
+@waffle_switch('invalidate_group_membership')
 @periodic_task(run_every=timedelta(hours=24))
 def invalidate_group_membership():
     """
