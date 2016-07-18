@@ -157,6 +157,8 @@ class BasketTests(TestCase):
         switch_is_active_mock.return_value = True
         user = UserFactory.create(email=email)
         up = UserProfile.objects.get(pk=user.userprofile.pk)
+
+        # Ensure that for user without tokens initial token is assigned
         eq_(token, up.basket_token)
 
         new_email = 'bar@example.com'
@@ -164,18 +166,35 @@ class BasketTests(TestCase):
         mock_basket.subscribe.return_value = {
             'token': new_token,
         }
+
+        # Reset subscribe mock calls to only keep account of the
+        # calls related to email change functionality
+        mock_basket.subscribe.reset_mock()
+
         user.email = new_email
         user.save()
         mock_basket.lookup_user.assert_called_with(token=token)
         mock_basket.unsubscribe.assert_called_with(
             token=token, email=email, optout=True
         )
-        mock_basket.subscribe.assert_called_with(
-            new_email,
-            ['foo', 'bar'],
-            trigger_welcome='N',
-            sync='Y'
-        )
+
+        subscribe_calls = [
+            call(
+                new_email,
+                ['foo', 'bar'],
+                trigger_welcome='N',
+                sync='Y'
+            ),
+            call(
+                new_email,
+                ['mozilla-phone'],
+                trigger_welcome='N',
+                sync='Y'
+            ),
+        ]
+
+        mock_basket.subscribe.assert_has_calls(subscribe_calls)
+        eq_(mock_basket.subscribe.call_count, 2)
         up = UserProfile.objects.get(pk=user.userprofile.pk)
         eq_(new_token, up.basket_token)
 
