@@ -35,3 +35,13 @@ celery:
   command: celery -A mozillians worker -B -l INFO
   environment:
     - C_FORCE_ROOT=true
+flower:
+  build: .
+  volumes:
+    - .:/code
+  links:
+    - db
+    - broker
+  ports:
+    - "5555:5555"
+  command: flower -A mozillians --address=0.0.0.0 --port=5555
