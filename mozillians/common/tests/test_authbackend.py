@@ -1,6 +1,5 @@
 from json import loads
 
-from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpRequest
 
@@ -129,24 +128,6 @@ class MozilliansAuthBackendTests(TestCase):
             backend.create_user('foo@example.com')
 
         eq_(e.exception, error)
-
-    @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
-    def test_get_involved_source(self, authenticate_mock):
-        backend = MozilliansAuthBackend()
-        request_mock = Mock()
-        request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=contribute'}
-        backend.request = request_mock
-        backend.authenticate(request=request_mock)
-        eq_(backend.referral_source, 'contribute')
-
-    @patch('mozillians.common.authbackend.BrowserIDBackend.authenticate')
-    def test_random_source(self, authenticate_mock):
-        backend = MozilliansAuthBackend()
-        request_mock = Mock()
-        request_mock.META = {'HTTP_REFERER': settings.SITE_URL + '/?source=foobar'}
-        backend.request = request_mock
-        backend.authenticate(request=request_mock)
-        eq_(backend.referral_source, None)
 
     def test_filter_users_by_primary_email(self):
         backend = MozilliansAuthBackend()
