@@ -217,7 +217,6 @@ def update_basket_token_task(instance_id):
 
     try:
         token = basket.lookup_user(email=instance.email)['token']
-        UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
 
     except basket.BasketException as exception:
         if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
@@ -228,6 +227,10 @@ def update_basket_token_task(instance_id):
         _email_basket_managers('update token', instance.email, exception.message)
     except requests.exceptions.RequestException:
         update_basket_token_task.retry()
+
+    if not token:
+        token = ''
+    UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
 
 
 @task
