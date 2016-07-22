@@ -639,7 +639,8 @@ class VouchAutocompleteForm(forms.ModelForm):
 class VouchAdmin(admin.ModelAdmin):
     save_on_top = True
     search_fields = ['voucher__user__username', 'voucher__full_name',
-                     'vouchee__user__username', 'vouchee__full_name']
+                     'vouchee__user__username', 'vouchee__full_name',
+                     'voucher__user__email', 'vouchee__user__email']
     list_display = ['vouchee', 'voucher', 'date', 'autovouch']
     list_filter = ['autovouch']
     form = VouchAutocompleteForm
