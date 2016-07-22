@@ -3,10 +3,10 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 
 from dal import autocomplete
-from import_export.admin import ExportMixin
 from product_details import product_details
 from sorl.thumbnail.admin import AdminImageMixin
 
+from mozillians.common.mixins import MozilliansAdminExportMixin
 from models import Keyword, MozSpace, Photo
 
 
@@ -44,7 +44,7 @@ class MozSpaceAutocompleteForm(forms.ModelForm):
         }
 
 
-class MozSpaceAdmin(ExportMixin, admin.ModelAdmin):
+class MozSpaceAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     inlines = [PhotoAdmin, KeywordAdmin]
     search_fields = ['name']
     list_display = ['name', 'city', 'country', 'coordinator_link']

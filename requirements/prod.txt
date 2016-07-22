@@ -10,8 +10,8 @@ django-csp==2.0.2 \
 django-filter==0.9.2 \
     --hash=sha256:e5d90238600b6ea9f2158880441a47e5f3f0399cefb53ef84040eac57d725563 \
     --hash=sha256:ab75a8958097d76a64565ed102c4277415bf9880dd2747732b079a6b2aecf43e
-django-import-export==0.2.8 \
-    --hash=sha256:d2062a6305f4d738000dca1896e69aa87f2b9b0744a95cc25dad631a1c70285c
+django-import-export==0.4.5 \
+    --hash=sha256:0406f781a771c39e325474df09644a5cea5188dfac7ecace4f32d664920abd00
 django-mobility==0.1 \
     --hash=sha256:b925e1a4f40a93fd81841ef9a7222b7053da46245d2fc8764d53420dcffd014d
 django-mozilla-product-details==0.6 \
@@ -130,9 +130,9 @@ statsd==1.0.0 \
     --hash=sha256:deb4dccd363175a55465dc65699c001c31db05e509e8a41fccf3db61c1404ac6
 django-autocomplete-light==3.0.4 \
     --hash=sha256:425585c4e7b479969125031381c4cb4f871ac075c402822b83a8f55601531d0a
-tablib==0.10.0 \
-    --hash=sha256:b1f0d35c3d2b2c40d33a310ca99f37223264879f2e53c63c1ecbfaeefc26919d \
-    --hash=sha256:41c2dad7f491f5557e22783a9af81bed62f7b6fb0d7afd4c2ee301f3eb428c93
+tablib==0.11.2 \
+    --hash=sha256:b91d4313504742e3a63c0be30775a12f8fca91d686062604b1eb591c735c16f5 \
+    --hash=sha256:553dd5b58e8e6e039aaa61587ec2fab38c05f0e25f58ac65b81a7851db62a497
 tower==0.4.1 \
     --hash=sha256:b13b8c19d9c36143fd614e535c23fdbe7b146cb82b8d9a246ecacb368e14d2dd
 django-autoslug==1.6.1 \
@@ -249,3 +249,6 @@ django-nocaptcha-recaptcha==0.0.19 \
     --hash=sha256:d2512d5035d5f62aba5009082db28b28995a7e6f4a46713292e0f4f350f337da
 pycparser==2.14 \
     --hash=sha256:7959b4a74abdc27b312fed1c21e6caf9309ce0b29ea86b591fd2e99ecdf27f73
+boto==2.42.0 \
+    --hash=sha256:ef345a9c5f5961c481cf986d755d33470f43452192fbc0ca978f8abe2a31992a \
+    --hash=sha256:dcf140d4ce535bb8f5266d1750c16def4d50f6c46eff27fab38b55d0d74d5ac7

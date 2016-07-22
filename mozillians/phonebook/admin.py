@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 
-from import_export.admin import ExportMixin
+from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.phonebook.models import Invite
 
 
@@ -23,7 +23,7 @@ class RedeemedInviteFilter(SimpleListFilter):
         return queryset.filter(redeemer__isnull=True)
 
 
-class InviteAdmin(ExportMixin, admin.ModelAdmin):
+class InviteAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     search_fields = ['recipient', 'inviter', 'code']
     list_display = ['recipient', 'inviter', 'code', 'redeemer']
     readonly_fields = ['inviter', 'recipient', 'redeemer', 'code', 'redeemed', 'created']
