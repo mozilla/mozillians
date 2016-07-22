@@ -216,7 +216,8 @@ def update_basket_token_task(instance_id):
         return
 
     try:
-        token = basket.lookup_user(email=instance.email)['token']
+        response = basket.lookup_user(email=instance.email)
+        token = response['token']
 
     except basket.BasketException as exception:
         if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
