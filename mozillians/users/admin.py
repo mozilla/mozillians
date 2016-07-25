@@ -451,15 +451,15 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
-                       'is_vouched', 'can_vouch', 'referral_source']
+                       'is_vouched', 'can_vouch', 'referral_source', 'is_spam']
     form = UserProfileAdminForm
-    list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
+    list_filter = ['is_vouched', 'can_vouch', 'is_spam', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
                    NDAMemberFilter, BasketTokenFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
-                    'number_of_vouchees']
+                    'number_of_vouchees', 'is_spam']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
@@ -470,7 +470,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
 
     fieldsets = (
         ('Account', {
-            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',)
+            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo', 'is_spam',)
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)
