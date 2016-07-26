@@ -68,6 +68,7 @@ BASKET_URL = 'http://127.0.0.1'
 BASKET_MANAGERS = None  # or list of email addresses.
 
 GA_ACCOUNT_CODE = None
+AKISMET_API_KEY = 'akismet_api_key'
 
 COMPRESS_ENABLED = False
 
