@@ -203,6 +203,7 @@ class UserProfile(UserProfilePrivacyModel):
     referral_source = models.CharField(max_length=32,
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
+    is_spam = models.NullBooleanField(default=None, help_text=_lazy('Possible spam'))
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
