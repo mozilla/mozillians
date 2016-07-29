@@ -9,9 +9,11 @@ from mozillians.common.utils import akismet_spam_check
 
 class AkismetTests(TestCase):
     @patch('mozillians.common.utils.requests')
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @override_settings(AKISMET_API_KEY='akismet_api_key')
     @override_settings(SITE_URL='http://example.com')
-    def test_akismet_api_spam(self, mock_requests):
+    def test_akismet_api_spam(self, switch_is_active_mock, mock_requests):
+        switch_is_active_mock.return_value = True
         response = MagicMock()
         response.text = 'true'
         mock_requests.post.return_value = response
@@ -27,9 +29,11 @@ class AkismetTests(TestCase):
         mock_requests.post.assert_called_with(url, data=data)
 
     @patch('mozillians.common.utils.requests')
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @override_settings(AKISMET_API_KEY='akismet_api_key')
     @override_settings(SITE_URL='http://example.com')
-    def test_akismet_api_ham(self, mock_requests):
+    def test_akismet_api_ham(self, switch_is_active_mock, mock_requests):
+        switch_is_active_mock.return_value = True
         response = MagicMock()
         response.text = 'false'
         mock_requests.post.return_value = response
@@ -45,9 +49,11 @@ class AkismetTests(TestCase):
         mock_requests.post.assert_called_with(url, data=data)
 
     @patch('mozillians.common.utils.requests')
+    @patch('mozillians.users.tasks.waffle.switch_is_active')
     @override_settings(AKISMET_API_KEY='akismet_api_key')
     @override_settings(SITE_URL='http://example.com')
-    def test_akismet_api_error(self, mock_requests):
+    def test_akismet_api_error(self, switch_is_active_mock, mock_requests):
+        switch_is_active_mock.return_value = True
         response = MagicMock()
         response.text = 'invalid'
         response.headers = {

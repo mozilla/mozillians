@@ -442,6 +442,9 @@ ANNOUNCEMENTS_PHOTO_DIR = 'uploads/announcements'
 # Google Analytics
 GA_ACCOUNT_CODE = 'UA-35433268-19'
 
+# Akismet
+AKISMET_API_KEY = ''
+
 # Set ALLOWED_HOSTS based on SITE_URL.
 
 

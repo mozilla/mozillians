@@ -13,6 +13,7 @@ from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
 from elasticutils.utils import chunked
 
+from mozillians.common.utils import akismet_spam_check
 from mozillians.users.managers import PUBLIC
 
 
@@ -282,3 +283,13 @@ def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
 def check_celery():
     """Dummy celery task to check that everything runs smoothly."""
     pass
+
+
+@task
+def check_spam_account(instance_id, **kwargs):
+    """Task to check if profile is spam according to akismet"""
+    # Avoid circular dependencies
+    from mozillians.users.models import UserProfile
+
+    spam = akismet_spam_check(**kwargs)
+    UserProfile.objects.filter(pk=instance_id).update(is_spam=spam)
