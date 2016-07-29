@@ -659,7 +659,7 @@ def remove_from_search_index(sender, instance, **kwargs):
 @receiver(dbsignals.pre_delete, sender=UserProfile,
           dispatch_uid='unsubscribe_from_basket_sig')
 def unsubscribe_from_basket(sender, instance, **kwargs):
-    newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
+    newsletters = [settings.BASKET_VOUCHED_NEWSLETTER, settings.BASKET_NDA_NEWSLETTER]
     unsubscribe_from_basket_task.delay(instance.email, instance.basket_token, newsletters)
 
 
