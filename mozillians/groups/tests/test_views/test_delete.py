@@ -30,7 +30,7 @@ class ShowGroupDeleteTests(TestCase):
 
         with patch('mozillians.groups.views.render') as mock_render:
             with patch('django.views.decorators.cache.add_never_cache_headers'):
-                show(request, self.group.url, GroupAlias, 'groups/group.html')
+                show(request, self.group.url, GroupAlias, 'groups/group.jinja')
 
         ok_(mock_render.called)
         args, kwargs = mock_render.call_args

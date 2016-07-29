@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}{{ _('Invite a Mozillian') }}{% endblock %}
 {% block body_id %}invite{% endblock %}
@@ -42,7 +42,7 @@
           {{ mozillians_field(invite_form.recipient) }}
           {{ mozillians_field(invite_form.message) }}
         </div>
-        {% include "phonebook/includes/profile_vouch.html" %}
+        {% include "phonebook/includes/profile_vouch.jinja" %}
       </form>
     </div>
   {% endif %}

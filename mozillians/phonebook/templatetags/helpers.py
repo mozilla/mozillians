@@ -22,7 +22,7 @@ def paragraphize(value):
 
 @jinja2.contextfunction
 @library.global_function
-@library.render_with('includes/search_result.html')
+@library.render_with('includes/search_result.jinja')
 def search_result(context, profile):
     d = dict(context.items())
     d.update(profile=profile)

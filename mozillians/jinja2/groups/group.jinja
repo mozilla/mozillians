@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}{{ _('Group: {name}')|f(name=group.name) }}{% endblock %}
 
@@ -197,7 +197,7 @@
     </div>
   {% else %}
     {% with items=people %}
-      {% include 'includes/pagination.html' %}
+      {% include 'includes/pagination.jinja' %}
     {% endwith %}
 
     <h3 class="members-list-header">
@@ -223,7 +223,7 @@
       {% endfor %}
     </div>
     {% with items=people %}
-      {% include 'includes/pagination.html' %}
+      {% include 'includes/pagination.jinja' %}
     {% endwith %}
   {% endif %}
 

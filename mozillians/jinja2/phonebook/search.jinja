@@ -1,8 +1,8 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}{{ _('Search Results') }}{% endblock %}
 
-{% block body_id %}betasearch{% endblock %}
+{% block body_id %}search{% endblock %}
 
 {% block body_class %}
   {{ super() }}
@@ -26,8 +26,8 @@
       {% endif %}
     </p>
   {% endif %}
-  <h1>{{ _('Beta Search') }}</h1>
-  <form method="GET" id="search-form" action="{{ url('phonebook:betasearch') }}">
+  <h1>{{ _('Search') }}</h1>
+  <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
     {{ field_with_attrs(search_form.q,
                         placeholder=_('Search for people, groups and more')) }}
 
@@ -41,11 +41,10 @@
       {{ _('Advanced Options') }}
     </button>
     <div class="search-options">
-      {% for field in filtr.form %}
-        <div class="field">
-          {{ mozillians_field(field) }}
-        </div>
-      {% endfor %}
+      <div class="field">
+        {{ search_form.include_non_vouched }}
+        {{ search_form.include_non_vouched.label_tag() }}
+      </div>
     </div>
   </form>
   {% if not search_form.cleaned_data %}
@@ -98,7 +97,7 @@
         {% endif %}
       </p>
       {% with items=people %}
-        {% include 'includes/pagination.html' %}
+        {% include 'includes/pagination.jinja' %}
       {% endwith %}
       <div class="row">
       {% for person in people %}
@@ -106,7 +105,7 @@
       {% endfor %}
       </div>
       {% with items=people %}
-        {% include 'includes/pagination.html' %}
+        {% include 'includes/pagination.jinja' %}
       {% endwith %}
     {% endif %}
 

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 {% block page_title %}
   {{ profile.display_name|default(shown_user.username, true) }}
 {% endblock %}
@@ -94,7 +94,7 @@
         {% endif %}
         {% if profile.geo_country or profile.geo_region or profile.geo_city %}
           <section id="location" class="adr">
-            <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
+            <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.jinja' %}
           </section>
         {% endif %}
         {% if profile.timezone %}
@@ -360,7 +360,7 @@
         {% endif %}
           <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
                 id="vouch-form">
-            {% include 'phonebook/includes/profile_vouch.html' %}
+            {% include 'phonebook/includes/profile_vouch.jinja' %}
           </form>
       </section>
 

@@ -1,16 +1,16 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}{{ _('Mozilla Community Directory') }}{% endblock %}
 {% block body_id %}home{% endblock %}
 
 {% block mosaic %}
 {% if not user.is_authenticated() %}
-  {% include 'phonebook/includes/mosaic.html' %}
+  {% include 'phonebook/includes/mosaic.jinja' %}
 {% endif %}
 {% endblock mosaic %}
 
 {% block search %}
-  {# Don't display search in navbar on home.html #}
+  {# Don't display search in navbar on home.jinja #}
 {% endblock %}
 
 {% block content %}
@@ -122,7 +122,7 @@
             {% with profile = user.userprofile %}
             {% if profile.geo_country or profile.geo_region or profile.geo_city %}
               <section class="location">
-                {% include 'phonebook/includes/profile_location.html' %}
+                {% include 'phonebook/includes/profile_location.jinja' %}
               </section>
             {% endif %}
             {% endwith %}

@@ -48,7 +48,7 @@ def home(request):
     show_start = False
     if request.GET.get('source', ''):
         show_start = True
-    return render(request, 'phonebook/home.html',
+    return render(request, 'phonebook/home.jinja',
                   {'show_start': show_start})
 
 
@@ -174,7 +174,7 @@ def view_profile(request, username):
             (request.user.username == username or request.user.is_superuser)):
         data['groups'] = [grp for grp in data['groups'] if not grp.pending]
 
-    return render(request, 'phonebook/profile.html', data)
+    return render(request, 'phonebook/profile.jinja', data)
 
 
 @allow_unvouched
@@ -303,7 +303,7 @@ def edit_profile(request):
         'forms_valid': forms_valid
     })
 
-    return render(request, 'phonebook/edit_profile.html', ctx)
+    return render(request, 'phonebook/edit_profile.jinja', ctx)
 
 
 @allow_unvouched
@@ -359,7 +359,7 @@ def confirm_delete(request):
     leave.
 
     """
-    return render(request, 'phonebook/confirm_delete.html')
+    return render(request, 'phonebook/confirm_delete.jinja')
 
 
 @allow_unvouched
@@ -414,7 +414,7 @@ def search(request):
              groups=groups,
              functional_areas=functional_areas)
 
-    return render(request, 'phonebook/search.html', d)
+    return render(request, 'phonebook/search.jinja', d)
 
 
 @waffle_flag('betasearch')
@@ -466,7 +466,7 @@ def betasearch(request):
                 limit=limit,
                 show_pagination=show_pagination)
 
-    return render(request, 'phonebook/betasearch.html', data)
+    return render(request, 'phonebook/betasearch.jinja', data)
 
 
 @allow_public
@@ -496,7 +496,7 @@ def invite(request):
         messages.success(request, msg)
         return redirect('phonebook:invite')
 
-    return render(request, 'phonebook/invite.html',
+    return render(request, 'phonebook/invite.jinja',
                   {
                       'invite_form': invite_form,
                       'vouch_form': vouch_form,
@@ -536,7 +536,7 @@ def apikeys(request):
         'appsv2': profile.apps.filter(enabled=True),
         'apikey_request_form': apikey_request_form,
     }
-    return render(request, 'phonebook/apikeys.html', data)
+    return render(request, 'phonebook/apikeys.jinja', data)
 
 
 def delete_apikey(request, api_pk):
@@ -574,7 +574,7 @@ def list_mozillians_in_location(request, country, region=None, city=None):
             'region_name': region,
             'page': page,
             'show_pagination': show_pagination}
-    return render(request, 'phonebook/location_list.html', data)
+    return render(request, 'phonebook/location_list.jinja', data)
 
 
 @allow_unvouched
