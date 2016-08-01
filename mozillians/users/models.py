@@ -628,8 +628,7 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
             dbsignals.post_save.send(sender=UserProfile, instance=up, created=created, raw=raw)
 
 
-@receiver(dbsignals.post_save, sender=UserProfile,
-          dispatch_uid='update_basket_sig')
+@receiver(dbsignals.post_save, sender=UserProfile, dispatch_uid='update_basket_sig')
 def update_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
     if instance.is_vouched:
@@ -656,15 +655,13 @@ def remove_from_search_index(sender, instance, **kwargs):
     unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
 
 
-@receiver(dbsignals.pre_delete, sender=UserProfile,
-          dispatch_uid='unsubscribe_from_basket_sig')
+@receiver(dbsignals.pre_delete, sender=UserProfile, dispatch_uid='unsubscribe_from_basket_sig')
 def unsubscribe_from_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER, settings.BASKET_NDA_NEWSLETTER]
     unsubscribe_from_basket_task.delay(instance.email, instance.basket_token, newsletters)
 
 
-@receiver(dbsignals.post_delete, sender=UserProfile,
-          dispatch_uid='delete_user_obj_sig')
+@receiver(dbsignals.post_delete, sender=UserProfile, dispatch_uid='delete_user_obj_sig')
 def delete_user_obj_sig(sender, instance, **kwargs):
     if instance.user:
         instance.user.delete()

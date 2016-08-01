@@ -49,9 +49,9 @@ class DeleteTests(TestCase):
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
-    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter')
-    def test_delete_unvouched(self, unindex_objects_mock,
-                              unsubscribe_from_basket_task_mock):
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
+    @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
+    def test_delete_unvouched(self, unindex_objects_mock, unsubscribe_from_basket_task_mock):
         user = UserFactory.create(vouched=False, userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -61,17 +61,19 @@ class DeleteTests(TestCase):
         self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token, ['newsletter'])
+            user.email, user.userprofile.basket_token, ['newsletter1', 'newsletter2'])
+
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
             call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
+
         ok_(not User.objects.filter(username=user.username).exists())
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
-    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter')
-    def test_delete_vouched(self, unindex_objects_mock,
-                            unsubscribe_from_basket_task_mock):
+    @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
+    @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
+    def test_delete_vouched(self, unindex_objects_mock, unsubscribe_from_basket_task_mock):
         user = UserFactory.create(userprofile={'basket_token': 'token'})
         with self.login(user) as client:
             response = client.post(
@@ -80,11 +82,16 @@ class DeleteTests(TestCase):
         eq_(response.status_code, 200)
         self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
-        unsubscribe_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token, ['newsletter'])
+        # This mock call needs assert_called_any beacuse it's called twice,
+        # once from the pre_delete signal and once from the post_save signal
+        # from the User creation.
+        unsubscribe_from_basket_task_mock.assert_called_any(
+            user.email, user.userprofile.basket_token, ['newsletter1', 'newsletter2'])
+
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
             call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
+
         ok_(not User.objects.filter(username=user.username).exists())
 
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
