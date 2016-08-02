@@ -180,14 +180,14 @@ class BasketTests(TestCase):
 
         subscribe_calls = [
             call(
-                new_email,
-                ['foo', 'bar'],
+                email=new_email,
+                newsletters=['foo', 'bar'],
                 trigger_welcome='N',
                 sync='Y'
             ),
             call(
-                new_email,
-                ['mozilla-phone'],
+                email=new_email,
+                newsletters=['mozilla-phone'],
                 trigger_welcome='N',
                 sync='Y'
             ),
