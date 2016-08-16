@@ -78,3 +78,5 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+
+AKISMET_API_KEY = 'akismet_api_key'
