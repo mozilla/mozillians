@@ -179,13 +179,18 @@
             <label class="checkbox required">
               {{ registration_form.optin }}
             </label>
-            <label for="{{ registration_form.optin.id_for_label }}" {% if registration_form.optin.errors %}class="error"{% endif %}>
+            <label for="{{ registration_form.optin.id_for_label }}"
+                   {% if registration_form.optin.errors %}class="error"{% endif %}>
               {% trans privacy_url='https://mozilla.org/privacy/websites/' %}
                 I'm okay with you handling this info as you explain
                 in <a href="{{ privacy_url }}">Mozilla's privacy
                 policy</a>.
               {% endtrans %}
             </label>
+          </fieldset>
+          <fieldset id="recaptcha">
+            {{ registration_form.captcha }}
+            {{ registration_form.captcha.errors }}
           </fieldset>
         </div>
       </div>

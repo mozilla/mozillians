@@ -12,6 +12,7 @@ from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 import django_filters
 import happyforms
 from dal import autocomplete, fields as dal_fields
+from nocaptcha_recaptcha.fields import NoReCaptchaField
 from PIL import Image
 
 from mozillians.api.models import APIv2App
@@ -383,6 +384,7 @@ class RegisterForm(BasicInformationForm, LocationForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
+    captcha = NoReCaptchaField()
 
     class Meta:
         model = UserProfile
