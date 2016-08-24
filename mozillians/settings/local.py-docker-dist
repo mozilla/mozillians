@@ -116,5 +116,3 @@ CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
     'http://*.mozilla.org',
     'http://*.mapbox.com',
 )
-
-AKISMET_API_KEY = 'akismet_api_key'

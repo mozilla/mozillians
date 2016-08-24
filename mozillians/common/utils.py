@@ -1,9 +1,7 @@
 from django.conf import settings
 
 import requests
-
-
-AKISMET_URL = 'https://{0}.rest.akismet.com/1.1/comment-check'.format(settings.AKISMET_API_KEY)
+import waffle
 
 
 def absolutify(url):
@@ -25,6 +23,14 @@ def absolutify(url):
 
 def akismet_spam_check(user_ip, user_agent, **optional):
     """Checks for spam content against Akismet API."""
+
+    AKISMET_API_KEY = getattr(settings, 'AKISMET_API_KEY', '')
+    AKISMET_CHECK_ENABLED = waffle.switch_is_active('AKISMET_CHECK_ENABLED')
+
+    if not AKISMET_API_KEY or not AKISMET_CHECK_ENABLED:
+        return None
+
+    AKISMET_URL = 'https://{0}.rest.akismet.com/1.1/comment-check'.format(AKISMET_API_KEY)
 
     parameters = {
         'blog': settings.SITE_URL,

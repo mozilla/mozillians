@@ -26,6 +26,7 @@ from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import ExternalAccount, UserProfile, UserProfileMappingType
+from mozillians.users.tasks import check_spam_account
 
 
 @allow_unvouched
@@ -237,6 +238,19 @@ def edit_profile(request):
             old_username = request.user.username
             for f in curr_forms:
                 f.save()
+
+            # Spawn task to check for spam
+            params = {
+                'instance_id': profile.id,
+                'user_ip': request.META.get('REMOTE_ADDR'),
+                'user_agent': request.META.get('HTTP_USER_AGENT'),
+                'referrer': request.META.get('HTTP_REFERER'),
+                'comment_author': profile.full_name,
+                'comment_author_email': profile.email,
+                'comment_content': profile.bio
+            }
+
+            check_spam_account.delay(**params)
 
             next_section = request.GET.get('next')
             next_url = urlparams(reverse('phonebook:profile_edit'), next_section)
