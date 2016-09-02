@@ -400,6 +400,8 @@ CSP_SCRIPT_SRC = (
     'https://*.google-analytics.com',
     'https://login.persona.org',
     'https://*.mapbox.com',
+    'https://www.google.com/recaptcha/',
+    'https://www.gstatic.com/recaptcha/',
 )
 CSP_STYLE_SRC = (
     "'self'",
@@ -407,6 +409,9 @@ CSP_STYLE_SRC = (
     'https://www.mozilla.org',
     'https://*.mozilla.net',
     'https://*.mapbox.com',
+)
+CSP_FRAME_SRC = (
+    'https://www.google.com/recaptcha/',
 )
 
 # Elasticutils settings
@@ -560,3 +565,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # django-mobility
 MOBILE_COOKIE = 'mobile'
+
+# Recaptcha
+NORECAPTCHA_SITE_KEY = 'site_key'
+NORECAPTCHA_SECRET_KEY = 'secret_key'

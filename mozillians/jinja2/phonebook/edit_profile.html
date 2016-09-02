@@ -81,6 +81,7 @@
 {% endblock %}
 
 {% block page_js %}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
   {% compress js %}
     <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>

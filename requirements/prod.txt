@@ -245,3 +245,5 @@ contextlib2==0.5.1 \
 raven==5.12.0 \
     --hash=sha256:5666a3d6e4e182f83494ba2a469e1a56d663cafbab4a97ce0f420569fcfa3dc9 \
     --hash=sha256:45645ea7fce8a37bd581b0a661cdc0889f7f12ce837dff5d9211ccae1bc56210
+django-nocaptcha-recaptcha==0.0.19 \
+    --hash=sha256:d2512d5035d5f62aba5009082db28b28995a7e6f4a46713292e0f4f350f337da
