@@ -129,6 +129,39 @@
         </div>
       </section>
 
+      {% if vouch_form %}
+        <section id="profile-vouch">
+          <button type="button" class="button" data-toggle="modal" data-target="#VouchModal">
+            {{ _('Vouch') }}
+          </button>
+        </section>
+
+        <!-- Modal -->
+        <div class="modal fade" id="VouchModal" tabindex="-1" role="dialog" aria-labelledby="VouchModalLabel">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="VouchModalLabel">
+                  Vouch for {{ profile.display_name|default(shown_user.username, true) }}
+                </h4>
+              </div>
+              <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
+                    id="vouch-form">
+                <div class="modal-body">
+                  {% include 'phonebook/includes/profile_vouch.html' %}
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Cancel') }}</button>
+                  <button type="button" class="btn btn-primary">{{ _('Vouch') }}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
 
     </article>
 
@@ -284,51 +317,59 @@
           </div>
         {% endif %}
 
-        {% if profile.vouches_received.exists() %}
-          <div id="vouched_by" class="profile-entry">
-            <h3>{{ _('Vouched By') }}</h3>
-            <ul>
-              {% for vouch in profile.vouches_received.all() %}
-                <li>
-                  {% if vouch.voucher %}
-                    <a href="{{ url('phonebook:profile_view', vouch.voucher.user.username) }}">
-                      {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
-                    </a>
-                  {% elif vouch.autovouch %}
-                    <a href="{{ url('phonebook:about-dinomcvouch') }}">
-                      Dino McVouch
-                    </a>
-                  {% else %}
-                    {{ _('Unknown Voucher') }}
-                  {% endif %}
-                  {% if not vouch.description %}
-                    <p>{{ _('Legacy vouch.') }}</p>
-                  {% else %}
-                    {{ vouch.description|markdown }}
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+        {% if profile.is_vouched %}
+          <a href="#" id="vouch-toggle" data-toggle="collapse" data-target="#collapseVouch"
+             aria-expanded="false" aria-controls="collapseVouch">
+            <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+            {{ _('Vouch Information') }}
+          </a>
         {% endif %}
-        {% if profile.vouches_made.exists() %}
-          <div id="vouchees" class="profile-entry">
-            <h3>{{ _('Vouchees') }}</h3>
-            <ul>
-              {% for vouch in profile.vouches_made.all().order_by('vouchee__full_name') %}
-                <li>
-                  <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}">
-                    {{ vouch.vouchee.display_name|default(vouch.vouchee.user.username, true)}}
-                  </a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endif %}
-          <form action="{{ url('phonebook:profile_view', shown_user.username) }}" method="POST"
-                id="vouch-form">
-            {% include 'phonebook/includes/profile_vouch.html' %}
-          </form>
+
+        <div class="collapse" id="collapseVouch">
+          {% if profile.vouches_received.exists() %}
+            <div id="vouched_by" class="profile-entry">
+              <h3>{{ _('Vouched By') }}</h3>
+              <ul>
+                {% for vouch in profile.vouches_received.all() %}
+                  <li>
+                    {% if vouch.voucher %}
+                      <a href="{{ url('phonebook:profile_view', vouch.voucher.user.username) }}">
+                        {{ vouch.voucher.display_name|default(vouch.voucher.user.username, true)}}
+                      </a>
+                    {% elif vouch.autovouch %}
+                      <a href="{{ url('phonebook:about-dinomcvouch') }}">
+                        Dino McVouch
+                      </a>
+                    {% else %}
+                      {{ _('Unknown Voucher') }}
+                    {% endif %}
+                    {% if not vouch.description %}
+                      <p>{{ _('Legacy vouch.') }}</p>
+                    {% else %}
+                      {{ vouch.description|markdown }}
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if profile.vouches_made.exists() %}
+            <div id="vouchees" class="profile-entry">
+              <h3>{{ _('Vouchees') }}</h3>
+              <ul>
+                {% for vouch in profile.vouches_made.all().order_by('vouchee__full_name') %}
+                  <li>
+                    <a href="{{ url('phonebook:profile_view', vouch.vouchee.user.username) }}">
+                      {{ vouch.vouchee.display_name|default(vouch.vouchee.user.username, true)}}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+
       </section>
 
     </article>

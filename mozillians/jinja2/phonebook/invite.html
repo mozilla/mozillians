@@ -34,7 +34,6 @@
         {{ _('Please correct the errors below.') }}
       </div>
     {% endif %}
-
     <div class="invite-box">
       <form method="POST" action="{{ url('phonebook:invite') }}" autocomplete="off" novalidate>
         <div class="margins">
@@ -43,6 +42,9 @@
           {{ mozillians_field(invite_form.message) }}
         </div>
         {% include "phonebook/includes/profile_vouch.html" %}
+        <button class="btn btn-primary" type="submit">
+          {{ _('Send invite') }}
+        </button>
       </form>
     </div>
   {% endif %}
