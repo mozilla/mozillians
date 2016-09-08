@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 import basket
 import requests
 import waffle
+from celery.contrib.abortable import AbortableTask
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
@@ -63,8 +64,23 @@ def _email_basket_managers(action, email, error_message):
     send_mail(subject, body, settings.FROM_NOREPLY, recipients_list, fail_silently=False)
 
 
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def update_basket_task(instance_id, newsletters=[]):
+def basket_task_helper(basket_action, celery_task, userprofile, **kwargs):
+    """Helper method to simplify the basket subscription/unsubscription process."""
+
+    result = {}
+    try:
+        result = basket_action(**kwargs)
+    except MaxRetriesExceededError as exception:
+        _email_basket_managers('subscribe', userprofile.user.email, exception.message)
+        celery_task.abort()
+    except basket.BasketException:
+        celery_task.retry()
+    return result
+
+
+@task(bind=True, base=AbortableTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
+      max_retries=BASKET_TASK_MAX_RETRIES)
+def update_basket_task(self, instance_id, newsletters=[]):
     """Update Basket Task.
 
     This task subscribes a user to Basket, if not already subscribed
@@ -74,11 +90,14 @@ def update_basket_task(instance_id, newsletters=[]):
     settings.BASKET_MANAGERS with details.
 
     """
+    # The task is aborted, respect this please.
+    if self.is_aborted():
+        return
+
     # This task is triggered by a post-save signal on UserProfile, so
     # we can't save() on UserProfile again while in here - if we were
     # running with CELERY_EAGER, we'd enter an infinite recursion until
     # Python died.
-
     from models import UserProfile
     try:
         instance = UserProfile.objects.get(pk=instance_id)
@@ -100,69 +119,48 @@ def update_basket_task(instance_id, newsletters=[]):
         # and save the new token.
         # This'll also return their subscriptions, so we can transfer them
         # to the new address if we need to.
-        try:
-            result = basket.lookup_user(token=token)
-        except basket.BasketException as exception:
-            try:
-                update_basket_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                msg = exception.message
-                _email_basket_managers('update_phonebook', token, msg)
-            return
+        result = basket_task_helper(basket.lookup_user, self, instance, **{'token': token})
 
-        # Check if the users needs to be subscribed to additional newsletters.
-        newsletters_to_subscribe = [nl for nl in newsletters if nl not in result['newsletters']]
+        if result:
+            # Check if the users needs to be subscribed to additional newsletters.
+            newsletters_to_subscribe = [nl for nl in newsletters
+                                        if nl not in result['newsletters']]
+            old_email = result['email']
 
-        old_email = result['email']
-        if old_email != email:
-            try:
+            if old_email != email:
                 # We do the new subscribe first, then the unsubscribe, so we don't
                 # risk losing their subscriptions if the subscribe fails.
                 # Subscribe to all the same newsletters.
                 # Pass sync='Y' so we get back the new token right away
-                subscribe_result = basket.subscribe(
-                    email,
-                    result['newsletters'],
-                    sync='Y',
-                    trigger_welcome='N',
-                )
-                # unsubscribe all from the old token
-                basket.unsubscribe(token=token, email=old_email, optout=True)
-            except (requests.exceptions.RequestException,
-                    basket.BasketException) as exception:
-                try:
-                    update_basket_task.retry()
-                except (MaxRetriesExceededError, basket.BasketException):
-                    _email_basket_managers('subscribe', email, exception.message)
-                return
+                subscribe_result = basket_task_helper(basket.subscribe, self, instance,
+                                                      **{'email': email,
+                                                         'newsletters': result['newsletters'],
+                                                         'sync': 'Y',
+                                                         'trigger_welcome': 'N'})
+                basket_task_helper(basket.unsubscribe, self, instance,
+                                   **{'token': token,
+                                      'email': old_email,
+                                      'optout': True})
 
-            # That was all successful. Update the token.
-            token = subscribe_result['token']
-            # Don't call .save() on a userprofile from here, it would invoke us again
-            # via the post-save signal, which would be pointless.
-            UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
+                # That was all successful. Update the token.
+                token = subscribe_result['token']
+                # Don't call .save() on a userprofile from here, it would invoke us again
+                # via the post-save signal, which would be pointless.
+                UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
 
     if not token or newsletters_to_subscribe:
         # There is no token or the user is missing newsletters,
         # try to subscribe the user to basket.
         subscribe_to = newsletters_to_subscribe or newsletters
-        try:
-            retval = basket.subscribe(
-                email,
-                subscribe_to,
-                sync='Y',
-                trigger_welcome='N'
-            )
-        except (requests.exceptions.RequestException, basket.BasketException) as exception:
-            try:
-                update_basket_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                _email_basket_managers('subscribe', instance.user.email, exception.message)
-            return
-
+        result = basket_task_helper(basket.subscribe, self, instance,
+                                    **{'email': email,
+                                       'newsletters': subscribe_to,
+                                       'sync': 'Y',
+                                       'trigger_welcome': 'N'})
         # Don't call .save() on a userprofile from here, it would invoke us again
         # via the post-save signal, which would be pointless.
-        UserProfile.objects.filter(pk=instance.pk).update(basket_token=retval['token'])
+        if result:
+            UserProfile.objects.filter(pk=instance.pk).update(basket_token=result['token'])
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
