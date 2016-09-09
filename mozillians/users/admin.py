@@ -451,7 +451,7 @@ class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
                      'geo_country__name', 'geo_region__name', 'geo_city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
-                       'is_vouched', 'can_vouch', 'referral_source', 'is_spam']
+                       'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
     list_filter = ['is_vouched', 'can_vouch', 'is_spam', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
