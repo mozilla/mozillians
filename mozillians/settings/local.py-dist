@@ -50,6 +50,7 @@ ES_INDEXES = {'default': 'mozillians-dev',
               'public': 'mozillians-dev-public'}
 
 CELERY_ALWAYS_EAGER = True
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = False
 JAVA_BIN = '/usr/bin/java'
 SESSION_COOKIE_SECURE = False
 
