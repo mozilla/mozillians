@@ -16,12 +16,12 @@ from django.http import HttpResponseRedirect
 from dal import autocomplete
 from celery.task.sets import TaskSet
 from functools import update_wrapper
-from import_export.admin import ExportMixin
 from import_export.fields import Field
 from import_export.resources import ModelResource
 from sorl.thumbnail.admin import AdminImageMixin
 
 import mozillians.users.tasks
+from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
@@ -155,9 +155,9 @@ class DateJoinedFilter(SimpleListFilter):
     parameter_name = 'date_joined'
 
     def lookups(self, request, model_admin):
-
-        return map(lambda x: (str(x.year), x.year),
-                   User.objects.datetimes('date_joined', 'year'))
+        join_dates = User.objects.values_list('date_joined', flat=True)
+        join_years = [x.year for x in join_dates]
+        return [(str(x), x) for x in set(join_years)]
 
     def queryset(self, request, queryset):
         if self.value() is None:
@@ -281,7 +281,7 @@ class BasketTokenFilter(SimpleListFilter):
         return queryset
 
 
-class UsernameBlacklistAdmin(ExportMixin, admin.ModelAdmin):
+class UsernameBlacklistAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
     search_fields = ['value']
@@ -322,7 +322,7 @@ class LanguageResource(ModelResource):
         model = Language
 
 
-class LanguageAdmin(ExportMixin, admin.ModelAdmin):
+class LanguageAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = LanguageResource
     search_fields = ['userprofile__full_name', 'userprofile__user__email', 'code']
     list_display = ['get_code', 'get_language_name', 'userprofile']
@@ -444,7 +444,7 @@ class UserProfileResource(ModelResource):
         model = UserProfile
 
 
-class UserProfileAdmin(AdminImageMixin, ExportMixin, admin.ModelAdmin):
+class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = UserProfileResource
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline,
                AlternateEmailInline]
@@ -619,7 +619,7 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 
-class GroupAdmin(ExportMixin, GroupAdmin):
+class GroupAdmin(MozilliansAdminExportMixin, GroupAdmin):
     pass
 
 admin.site.register(Group, GroupAdmin)

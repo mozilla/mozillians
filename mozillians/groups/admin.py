@@ -8,10 +8,10 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from dal import autocomplete
-from import_export.admin import ExportMixin
 from import_export.fields import Field
 from import_export.resources import ModelResource
 
+from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Invite, Skill, SkillAlias)
 from mozillians.phonebook.admin import RedeemedInviteFilter
@@ -129,7 +129,7 @@ class GroupBaseEditAdminForm(forms.ModelForm):
         return super(GroupBaseEditAdminForm, self).save(*args, **kwargs)
 
 
-class GroupBaseAdmin(ExportMixin, admin.ModelAdmin):
+class GroupBaseAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     """GroupBase Admin."""
     save_on_top = True
     search_fields = ['name', 'aliases__name', 'url', 'aliases__url']
@@ -280,7 +280,7 @@ class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
         }
 
 
-class GroupMembershipAdmin(ExportMixin, admin.ModelAdmin):
+class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = GroupMembershipResource
     list_display = ['group', 'userprofile']
     search_fields = [
@@ -330,7 +330,7 @@ class InviteAutocompleteForm(forms.ModelForm):
         }
 
 
-class InviteAdmin(ExportMixin, admin.ModelAdmin):
+class InviteAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     search_fields = ['inviter', 'redeemer', 'group']
     list_display = ['inviter', 'redeemer', 'group']
     readonly_fields = ['created', 'updated']

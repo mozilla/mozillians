@@ -443,6 +443,7 @@ NDA_GROUP = "nda"
 USER_AVATAR_DIR = 'uploads/userprofile'
 MOZSPACE_PHOTO_DIR = 'uploads/mozspaces'
 ANNOUNCEMENTS_PHOTO_DIR = 'uploads/announcements'
+ADMIN_EXPORT_MIXIN = 'mozillians.common.mixins.S3ExportMixin'
 
 # Google Analytics
 GA_ACCOUNT_CODE = 'UA-35433268-19'

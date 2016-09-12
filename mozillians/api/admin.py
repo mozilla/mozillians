@@ -3,10 +3,10 @@ from django.contrib import admin
 
 from dal import autocomplete
 from import_export import fields
-from import_export.admin import ExportMixin
 from import_export.resources import ModelResource
 
 from mozillians.api.models import APIApp, APIv2App
+from mozillians.common.mixins import MozilliansAdminExportMixin
 
 
 class APIAppResource(ModelResource):
@@ -17,7 +17,7 @@ class APIAppResource(ModelResource):
         model = APIApp
 
 
-class APIAppAdmin(ExportMixin, admin.ModelAdmin):
+class APIAppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     """APIApp Admin."""
 
     list_display = ['name', 'key', 'owner', 'owner_email', 'is_mozilla_app', 'is_active']
@@ -52,7 +52,7 @@ class APIv2AppForm(forms.ModelForm):
         }
 
 
-class APIv2AppAdmin(ExportMixin, admin.ModelAdmin):
+class APIv2AppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     """APIv2App Admin."""
     list_display = ['name', 'owner', 'owner_email', 'privacy_level', 'enabled', 'last_used']
     list_filter = ['privacy_level', 'enabled']
