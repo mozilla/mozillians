@@ -2,8 +2,10 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import override_settings
 
-from mock import patch, MagicMock
-from nose.tools import eq_
+import boto
+
+from mock import patch, ANY, MagicMock
+from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.groups.tests import GroupFactory
@@ -45,6 +47,14 @@ class S3ExportMixinTests(TestCase):
 
                     client.post(export_url, data=data)
 
-                mock_boto.connect_s3.assert_called_with('foo', 'bar')
+                kwargs = {
+                    'calling_format': ANY,
+                    'aws_access_key_id': 'foo',
+                    'aws_secret_access_key': 'bar'
+                }
+                calling_format = mock_boto.connect_s3.call_args[1]['calling_format']
+
+                mock_boto.connect_s3.assert_called_with(**kwargs)
+                ok_(isinstance(calling_format, boto.s3.connection.OrdinaryCallingFormat))
                 mock_connection.get_bucket.assert_called_with('s3-bucket')
                 mock_bucket.new_key.assert_called_with('example_filename.format')

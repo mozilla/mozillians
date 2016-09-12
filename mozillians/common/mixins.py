@@ -6,6 +6,7 @@ from django.utils.module_loading import import_string
 
 import boto
 
+from boto.s3.connection import OrdinaryCallingFormat
 from celery.task import task
 from import_export.admin import ExportMixin
 from import_export.forms import ExportForm
@@ -28,7 +29,13 @@ def async_data_export(file_format, values_list, qs_model, filename):
     export_data = file_format.export_data(data)
 
     # Store file to AWS S3
-    conn = boto.connect_s3(settings.AWS_ACCESS_KEY_ID, settings.AWS_SECRET_ACCESS_KEY)
+    kwargs = {
+        'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
+        'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY,
+        # Required to avoid ssl issues when bucket contains dots
+        'calling_format': OrdinaryCallingFormat()
+    }
+    conn = boto.connect_s3(**kwargs)
     bucket = conn.get_bucket(settings.MOZILLIANS_ADMIN_BUCKET)
     key = bucket.new_key(filename)
     key.set_contents_from_string(export_data)
