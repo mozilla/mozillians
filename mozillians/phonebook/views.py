@@ -240,17 +240,18 @@ def edit_profile(request):
                 f.save()
 
             # Spawn task to check for spam
-            params = {
-                'instance_id': profile.id,
-                'user_ip': request.META.get('REMOTE_ADDR'),
-                'user_agent': request.META.get('HTTP_USER_AGENT'),
-                'referrer': request.META.get('HTTP_REFERER'),
-                'comment_author': profile.full_name,
-                'comment_author_email': profile.email,
-                'comment_content': profile.bio
-            }
+            if not profile.is_spam:
+                params = {
+                    'instance_id': profile.id,
+                    'user_ip': request.META.get('REMOTE_ADDR'),
+                    'user_agent': request.META.get('HTTP_USER_AGENT'),
+                    'referrer': request.META.get('HTTP_REFERER'),
+                    'comment_author': profile.full_name,
+                    'comment_author_email': profile.email,
+                    'comment_content': profile.bio
+                }
 
-            check_spam_account.delay(**params)
+                check_spam_account.delay(**params)
 
             next_section = request.GET.get('next')
             next_url = urlparams(reverse('phonebook:profile_edit'), next_section)
