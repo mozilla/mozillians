@@ -15,9 +15,15 @@ ADMIN_EXPORT_TIMEOUT = 10 * 60
 
 
 @task(soft_time_limit=ADMIN_EXPORT_TIMEOUT)
-def async_data_export(file_format, resource_class, values_list, model, filename):
+def async_data_export(file_format, values_list, qs_model, filename):
     """Task to export data from admin site and store it to S3."""
-    queryset = model.objects.filter(id__in=values_list)
+
+    from django.contrib import admin
+
+    admin_obj = admin.site._registry[qs_model]
+    queryset = qs_model.objects.filter(id__in=values_list)
+    resource_class = admin_obj.get_export_resource_class()
+
     data = resource_class().export(queryset)
     export_data = file_format.export_data(data)
 
@@ -34,9 +40,8 @@ class S3ExportMixin(ExportMixin):
 
         kwargs = {
             'file_format': file_format,
-            'resource_class': self.get_export_resource_class(),
             'values_list': list(queryset.values_list('id', flat=True)),
-            'model': queryset.model,
+            'qs_model': queryset.model,
             'filename': self.get_export_filename(file_format)
         }
 
