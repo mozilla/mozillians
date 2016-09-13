@@ -439,6 +439,12 @@ class UserProfileResource(ModelResource):
     """django-import-export UserProfile Resource."""
     username = Field(attribute='user__username')
     email = Field(attribute='user__email')
+    country_name = Field(attribute='geo_country__name')
+    country_code = Field(attribute='geo_country__code')
+    region_name = Field(attribute='geo_region__name')
+    region_code = Field(attribute='geo_region__code')
+    city_name = Field(attribute='geo_city__name')
+    city_code = Field(attribute='geo_city__code')
 
     class Meta:
         model = UserProfile
