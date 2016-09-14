@@ -11,7 +11,9 @@ es:
 memcached:
   image: memcached
 broker:
-  image: rabbitmq
+  image: rabbitmq:3-management
+  ports:
+    - "15672:15672"
 web:
   build: .
   ports:
