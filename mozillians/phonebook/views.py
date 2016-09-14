@@ -240,7 +240,7 @@ def edit_profile(request):
                 f.save()
 
             # Spawn task to check for spam
-            if not profile.is_spam:
+            if not profile.can_vouch:
                 params = {
                     'instance_id': profile.id,
                     'user_ip': request.META.get('REMOTE_ADDR'),
