@@ -27,8 +27,8 @@ from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.models import get_languages_for_locale
 from mozillians.users.cron import index_all_profiles
-from mozillians.users.models import (PUBLIC, Language, ExternalAccount, Vouch,
-                                     UserProfile, UsernameBlacklist)
+from mozillians.users.models import (AbuseReport, ExternalAccount, Language, PUBLIC,
+                                     UserProfile, UsernameBlacklist, Vouch)
 
 
 admin.site.unregister(Group)
@@ -652,3 +652,10 @@ class VouchAdmin(admin.ModelAdmin):
     form = VouchAutocompleteForm
 
 admin.site.register(Vouch, VouchAdmin)
+
+
+class AbuseReportAdmin(admin.ModelAdmin):
+    list_display = ['profile', 'reporter', 'type', 'created', 'updated']
+    list_filter = ['type', 'is_akismet']
+
+admin.site.register(AbuseReport, AbuseReportAdmin)

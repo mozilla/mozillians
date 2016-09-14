@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
+from django.forms.widgets import RadioSelect
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 import django_filters
@@ -21,7 +22,7 @@ from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
-from mozillians.users.models import ExternalAccount, Language, UserProfile
+from mozillians.users.models import AbuseReport, ExternalAccount, Language, UserProfile
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -428,3 +429,16 @@ class APIKeyRequestForm(happyforms.ModelForm):
     class Meta:
         model = APIv2App
         fields = ('name', 'description', 'url',)
+
+
+class AbuseReportForm(happyforms.ModelForm):
+
+    class Meta:
+        model = AbuseReport
+        fields = ('type',)
+        widgets = {
+            'type': RadioSelect
+        }
+        labels = {
+            'type': _(u'What would you like to report?')
+        }
