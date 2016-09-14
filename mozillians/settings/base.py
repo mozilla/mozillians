@@ -410,8 +410,9 @@ CSP_STYLE_SRC = (
     'https://*.mozilla.net',
     'https://*.mapbox.com',
 )
-CSP_FRAME_SRC = (
+CSP_CHILD_SRC = (
     'https://www.google.com/recaptcha/',
+    'https://login.persona.org/communication_iframe',
 )
 
 # Elasticutils settings
