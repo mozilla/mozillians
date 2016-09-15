@@ -459,13 +459,13 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
-    list_filter = ['is_vouched', 'can_vouch', 'is_spam', DateJoinedFilter,
+    list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
                    NDAMemberFilter, BasketTokenFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
-                    'number_of_vouchees', 'is_spam']
+                    'number_of_vouchees']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
@@ -476,7 +476,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
 
     fieldsets = (
         ('Account', {
-            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo', 'is_spam',)
+            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',)
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)

@@ -289,7 +289,17 @@ def check_celery():
 def check_spam_account(instance_id, **kwargs):
     """Task to check if profile is spam according to akismet"""
     # Avoid circular dependencies
-    from mozillians.users.models import UserProfile
+    from mozillians.users.models import AbuseReport, UserProfile
 
     spam = akismet_spam_check(**kwargs)
-    UserProfile.objects.filter(pk=instance_id).update(is_spam=spam)
+    profile = UserProfile.objects.filter(pk=instance_id)
+
+    if spam:
+        kwargs = {
+            'type': AbuseReport.TYPE_SPAM,
+            'profile': profile,
+            'reporter': None,
+            'is_akismet': True,
+        }
+
+        AbuseReport.objects.get_or_create(**kwargs)
