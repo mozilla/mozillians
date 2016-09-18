@@ -10,7 +10,7 @@ Dependencies
 
 #. You need to install docker in your system. The `installation guide <https://docs.docker.com/installation/#installation>`_ covers many operating systems but for now we only support Linux and Mac OS X. *Version required*: 1.3.1 or newer.
 
-#. We are using an orchestration tool for docker called `docker-compose <https://docs.docker.com/compose//>`_ that helps us automate the procedure of initiating our docker containers required for development. Installation instructions can be found `in Compose's documentation <https://docs.docker.com/compose/install/>`_. *Version required*: 1.0.1 or newer.
+#. We are using an orchestration tool for docker called `docker-compose <https://docs.docker.com/compose/>`_ that helps us automate the procedure of initiating our docker containers required for development. Installation instructions can be found `in Compose's documentation <https://docs.docker.com/compose/install/>`_. *Version required*: 1.0.1 or newer.
 
 Running Docker on Mac
 #####################
