@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -42,6 +44,17 @@ def async_data_export(file_format, values_list, qs_model, filename):
 
 
 class S3ExportMixin(ExportMixin):
+
+    def get_export_filename(self, file_format):
+        query_str = self.request.GET.urlencode().replace('=', '_')
+        if query_str == '':
+            query_str = 'All'
+        date_str = datetime.now().strftime('%Y-%m-%d-%H:%m:%s')
+        filename = '{model}-{filter}-{date}.{extension}'.format(
+            model=self.model.__name__, filter=query_str, date=date_str,
+            extension=file_format.get_extension())
+        return filename
+
     def get_export_data(self, file_format, queryset):
         """Returns the id from the celery task spawned to export data to S3."""
 
@@ -55,6 +68,7 @@ class S3ExportMixin(ExportMixin):
         return async_data_export.delay(**kwargs)
 
     def export_action(self, request, *args, **kwargs):
+        self.request = request
         formats = self.get_export_formats()
         form = ExportForm(formats, request.POST or None)
 
