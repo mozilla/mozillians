@@ -129,6 +129,39 @@
         </div>
       </section>
 
+      {% if abuse_form %}
+        <section id="profile-actions">
+          <div class="actions-details">
+            <button class="btn btn-default btn-xs" type="submit" data-toggle="modal" data-target="#ReportModal">Report</button>
+          </div>
+        </section>
+
+        <!-- Report Modal -->
+        <div class="modal fade" id="ReportModal" tabindex="-1" role="dialog" aria-labelledby="ReportModalLabel">
+          <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+              <form id="report-form" class="form-group" method="POST" action="{{ url('phonebook:profile_view', shown_user.username) }}">
+                {% csrf_token %}
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="ReportModalLabel">Report User</h4>
+                </div>
+                <div class="modal-body">
+                  <fieldset>
+                    <div class="report-option">
+                      {{ mozillians_field(abuse_form.type) }}
+                    </div>
+                  </fieldset>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Report</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
 
     </article>
 

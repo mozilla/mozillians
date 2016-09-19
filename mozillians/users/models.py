@@ -203,7 +203,6 @@ class UserProfile(UserProfilePrivacyModel):
     referral_source = models.CharField(max_length=32,
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
-    is_spam = models.NullBooleanField(default=None, help_text=_lazy('Possible spam'))
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -701,6 +700,23 @@ def update_vouch_flags(sender, instance, **kwargs):
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
     profile.save(**{'autovouch': False})
+
+
+class AbuseReport(models.Model):
+    TYPE_SPAM = 'spam'
+    TYPE_INAPPROPRIATE = 'inappropriate'
+
+    REPORT_TYPES = (
+        (TYPE_SPAM, 'Spam profile'),
+        (TYPE_INAPPROPRIATE, 'Inappropriate content')
+    )
+
+    reporter = models.ForeignKey(UserProfile, related_name='abuses_reported', null=True)
+    profile = models.ForeignKey(UserProfile, related_name='abuses')
+    type = models.CharField(choices=REPORT_TYPES, max_length=30, blank=False, default='')
+    is_akismet = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class UsernameBlacklist(models.Model):

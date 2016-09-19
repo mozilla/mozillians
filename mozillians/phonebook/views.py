@@ -18,14 +18,15 @@ from waffle.decorators import waffle_flag
 import mozillians.phonebook.forms as forms
 from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
-from mozillians.common.templatetags.helpers import redirect, urlparams
+from mozillians.common.templatetags.helpers import get_object_or_none, redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import ExternalAccount, UserProfile, UserProfileMappingType
+from mozillians.users.models import (AbuseReport, ExternalAccount, UserProfile,
+                                     UserProfileMappingType)
 from mozillians.users.tasks import check_spam_account
 
 
@@ -94,6 +95,7 @@ def view_profile(request, username):
     privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
                         'privileged': PRIVILEGED, 'myself': None}
     privacy_level = None
+    abuse_form = None
 
     if (request.user.is_authenticated() and request.user.username == username):
         # own profile
@@ -128,6 +130,21 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
+        if (request.user.is_authenticated() and request.user.userprofile.is_vouched and
+                not profile.can_vouch):
+            abuse_report = get_object_or_none(AbuseReport, reporter=request.user.userprofile,
+                                              profile=profile)
+
+            if not abuse_report:
+                abuse_report = AbuseReport(reporter=request.user.userprofile, profile=profile)
+
+            abuse_form = forms.AbuseReportForm(request.POST or None, instance=abuse_report)
+            if abuse_form.is_valid():
+                abuse_form.save()
+                msg = _(u'Thanks for helping us improve mozillians.org!')
+                messages.info(request, msg)
+                return redirect('phonebook:profile_view', profile.user.username)
+
         if (request.user.is_authenticated() and profile.is_vouchable(request.user.userprofile)):
 
             vouch_form = forms.VouchForm(request.POST or None)
@@ -144,6 +161,7 @@ def view_profile(request, username):
     data['shown_user'] = profile.user
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
+    data['abuse_form'] = abuse_form
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
@@ -240,7 +258,7 @@ def edit_profile(request):
                 f.save()
 
             # Spawn task to check for spam
-            if not profile.is_spam:
+            if not profile.can_vouch:
                 params = {
                     'instance_id': profile.id,
                     'user_ip': request.META.get('REMOTE_ADDR'),
