@@ -1,7 +1,6 @@
 import base64
 import hashlib
 import re
-from urlparse import parse_qs, urlparse
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -16,7 +15,7 @@ from django_browserid.http import JSONResponse
 from django_browserid.views import Verify
 from django.utils.translation import ugettext as _
 
-from mozillians.users.models import ExternalAccount, UserProfile
+from mozillians.users.models import ExternalAccount
 
 
 def calculate_username(email):
@@ -112,23 +111,7 @@ class MozilliansAuthBackend(BrowserIDBackend):
             except self.User.DoesNotExist:
                 raise err
 
-        if self.referral_source:
-            user.userprofile.referral_source = self.referral_source
-            user.userprofile.save()
         return user
-
-    def authenticate(self, *args, **kwargs):
-        self.referral_source = None
-        http_referer = kwargs['request'].META.get('HTTP_REFERER', '')
-        url_params = parse_qs(urlparse(http_referer).query)
-        source = url_params.get('source')
-        if source:
-            source = source[0].lower()
-            for csource, _ignore in UserProfile.REFERRAL_SOURCE_CHOICES:
-                if source == csource:
-                    self.referral_source = source
-                    break
-        return super(MozilliansAuthBackend, self).authenticate(*args, **kwargs)
 
     def filter_users_by_email(self, email):
         account_type = ExternalAccount.TYPE_EMAIL
