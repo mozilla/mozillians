@@ -506,6 +506,11 @@ ITEMS_PER_PAGE = 24
 COMPRESS_OFFLINE = True
 COMPRESS_ENABLED = True
 
+# Use custom CSS, JS compressors to enable SRI support
+COMPRESS_CSS_COMPRESSOR = 'mozillians.common.compress.SRICssCompressor'
+COMPRESS_JS_COMPRESSOR = 'mozillians.common.compress.SRIJsCompressor'
+
+
 HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contributors'
 HUMANSTXT_LOCALE_REPO = 'https://api.github.com/repos/mozilla-l10n/mozillians-l10n/contributors'
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
