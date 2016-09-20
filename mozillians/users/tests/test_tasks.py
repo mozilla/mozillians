@@ -13,9 +13,9 @@ from mozillians.common.tests import TestCase
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
-                                    remove_incomplete_accounts, unindex_objects,
-                                    unsubscribe_from_basket_task, update_basket_task,
-                                    update_basket_token_task)
+                                    remove_incomplete_accounts, subscribe_user_to_basket,
+                                    unindex_objects, unsubscribe_from_basket_task,
+                                    update_basket_token_task, update_email_in_basket)
 from mozillians.users.tests import UserFactory
 
 
@@ -136,67 +136,55 @@ class BasketTests(TestCase):
         send_mail_mock.assert_called_with(
             subject, body, 'noreply', 'basket_managers', fail_silently=False)
 
+    @override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')
+    @patch('mozillians.users.tasks.unsubscribe_user_task')
+    @patch('mozillians.users.tasks.subscribe_user_task')
+    @patch('mozillians.users.tasks.lookup_user_task')
     @patch('mozillians.users.tasks.basket')
-    def test_change_email(self, mock_basket, switch_is_active_mock):
-        # When a user's email is changed, their old email is unsubscribed
-        # from all newsletters and their new email is subscribed to them.
+    def test_change_email(self, basket_mock, lookup_mock, subscribe_mock, unsubscribe_mock,
+                          switch_is_active_mock):
 
         # Create a new user
-        email = 'foo@example.com'
-        token = 'first token'
-        mock_basket.lookup_user.return_value = {
-            'email': email,  # the old value
-            'token': token,
+        old_email = 'foo@example.com'
+        # We need vouched=False in order to avoid triggering a basket_update through signals.
+        user = UserFactory.create(email=old_email, vouched=False)
+        new_email = 'bar@example.com'
+
+        # Enable basket.
+        switch_is_active_mock.return_value = True
+
+        # Mock all the calls to basket.
+        basket_mock.lookup_user.return_value = {
+            'email': old_email,  # the old value
             'newsletters': ['foo', 'bar']
         }
-        mock_basket.subscribe.return_value = {
-            'token': token,
+        basket_mock.unsubscribe.return_value = {
+            'result': 'ok',
         }
-        switch_is_active_mock.return_value = True
-        user = UserFactory.create(email=email)
-        up = UserProfile.objects.get(pk=user.userprofile.pk)
-
-        # Ensure that for user without tokens initial token is assigned
-        eq_(token, up.basket_token)
-
-        new_email = 'bar@example.com'
-        new_token = 'NEW token'
-        mock_basket.subscribe.return_value = {
-            'token': new_token,
+        basket_mock.subscribe.return_value = {
+            'token': 'new token',
         }
 
-        # Reset subscribe mock calls to only keep account of the
-        # calls related to email change functionality
-        mock_basket.subscribe.reset_mock()
+        # When a user's email is changed, their old email is unsubscribed
+        # from all newsletters related to mozillians.org and their new email is subscribed to them.
+        update_email_in_basket(user.email, new_email)
 
-        user.email = new_email
-        user.save()
-        mock_basket.lookup_user.assert_called_with(token=token)
-        mock_basket.unsubscribe.assert_called_with(
-            token=token, email=email, optout=True
-        )
+        # Verify subtask calls and call count
+        ok_(lookup_mock.subtask.called)
+        eq_(lookup_mock.subtask.call_count, 1)
+        ok_(subscribe_mock.subtask.called)
+        eq_(subscribe_mock.subtask.call_count, 1)
+        ok_(unsubscribe_mock.subtask.called)
+        eq_(unsubscribe_mock.subtask.call_count, 1)
 
-        subscribe_calls = [
-            call(
-                new_email,
-                ['foo', 'bar'],
-                trigger_welcome='N',
-                sync='Y'
-            ),
-            call(
-                new_email,
-                ['mozilla-phone'],
-                trigger_welcome='N',
-                sync='Y'
-            ),
-        ]
-
-        mock_basket.subscribe.assert_has_calls(subscribe_calls)
-        eq_(mock_basket.subscribe.call_count, 2)
-        up = UserProfile.objects.get(pk=user.userprofile.pk)
-        eq_(new_token, up.basket_token)
+        # Verify call arguments
+        lookup_mock.subtask.assert_called_with((user.email,))
+        unsubscribe_mock.subtask.called_with(({'token': 'new token',
+                                               'email': 'foo@example.com',
+                                               'newsletters': ['foo', 'bar']},))
+        subscribe_mock.subtask.called_with(('bar@example.com',))
 
     @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.basket.unsubscribe')
@@ -223,15 +211,18 @@ class BasketTests(TestCase):
         basket_mock.unsubscribe.assert_called_with(
             'basket_token', user.email, newsletters=['foo'])
 
+    @override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')
-    @patch('mozillians.users.tasks.basket')
-    def test_subscribe_no_newsletters(self, basket_mock, switch_is_active_mock):
+    @patch('mozillians.users.tasks.subscribe_user_task.subtask')
+    @patch('mozillians.users.tasks.lookup_user_task.subtask')
+    def test_subscribe_no_newsletters(self, lookup_mock, subscribe_mock, switch_is_active_mock):
         switch_is_active_mock.return_value = True
         user = UserFactory.create(vouched=False)
-        update_basket_task(user.userprofile.pk)
-        eq_(basket_mock.subscribe.call_count, 0)
-        eq_(basket_mock.unsubscribe.call_count, 0)
+        result = subscribe_user_to_basket.delay(user.userprofile.pk)
+        ok_(not lookup_mock.called)
+        ok_(not subscribe_mock.called)
+        ok_(not result.get())
 
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')

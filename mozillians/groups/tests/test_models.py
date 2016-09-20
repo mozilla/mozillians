@@ -278,8 +278,8 @@ class GroupTests(TestCase):
         ok_(not group.has_member(user.userprofile))
         ok_(not unsubscribe_basket_mock.called)
 
-    @patch('mozillians.users.tasks.update_basket_task')
-    def test_add_member(self, update_basket_mock):
+    @patch('mozillians.users.tasks.subscribe_user_to_basket')
+    def test_add_member(self, subscribe_user_mock):
         user = UserFactory.create()
         group = GroupFactory.create(name='foo')
         ok_(not group.has_member(user.userprofile))
@@ -287,23 +287,23 @@ class GroupTests(TestCase):
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
                                            status=GroupMembership.MEMBER).exists())
         ok_(group.has_member(user.userprofile))
-        ok_(not update_basket_mock.called)
+        ok_(not subscribe_user_mock.called)
         group.add_member(user.userprofile, status=GroupMembership.PENDING)
         # never demotes anyone
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
                                            status=GroupMembership.MEMBER).exists())
         ok_(group.has_member(user.userprofile))
 
-    @patch('mozillians.users.tasks.update_basket_task')
+    @patch('mozillians.users.tasks.subscribe_user_to_basket')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
-    def test_add_member_nda(self, update_basket_mock):
+    def test_add_member_nda(self, subscribe_user_mock):
         user = UserFactory.create()
         group = GroupFactory.create(name='nda')
         ok_(not group.has_member(user.userprofile))
         group.add_member(user.userprofile)
         ok_(GroupMembership.objects.filter(userprofile=user.userprofile, group=group,
                                            status=GroupMembership.MEMBER).exists())
-        ok_(update_basket_mock.called_with(user.userprofile.id, ['nda']))
+        ok_(subscribe_user_mock.called_with(user.userprofile.id, ['nda']))
 
     def test_has_member(self):
         user = UserFactory.create()

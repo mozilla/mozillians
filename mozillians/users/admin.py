@@ -45,7 +45,7 @@ def subscribe_to_basket_action(newsletter):
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
-        ts = [(mozillians.users.tasks.update_basket_task
+        ts = [(mozillians.users.tasks.subscribe_user_to_basket
                .subtask(args=[userprofile.id, [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()

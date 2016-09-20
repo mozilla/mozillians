@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta
-import logging
 import os
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -8,6 +7,7 @@ from django.core.mail import send_mail
 import basket
 import requests
 import waffle
+from celery import chain, group, shared_task, Task
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from elasticutils.contrib.django import get_es
@@ -17,8 +17,6 @@ from mozillians.common.utils import akismet_spam_check
 from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.users.managers import PUBLIC
 
-
-logger = logging.getLogger(__name__)
 
 BASKET_TASK_RETRY_DELAY = 120  # 2 minutes
 BASKET_TASK_MAX_RETRIES = 2  # Total 1+2 = 3 tries
@@ -34,14 +32,15 @@ BASKET_ENABLED = all([
 ])
 
 INCOMPLETE_ACC_MAX_DAYS = 7
+MOZILLIANS_NEWSLETTERS = [BASKET_NDA_NEWSLETTER, BASKET_VOUCHED_NEWSLETTER]
 
 
 def _email_basket_managers(action, email, error_message):
     """Email Basket Managers."""
 
     # Fallback to ADMINS emails when BASKET_MANAGERS not defined
-    BASKET_MANAGERS = getattr(settings, 'BASKET_MANAGERS', None)
-    recipients_list = BASKET_MANAGERS or [addr for (name, addr) in settings.ADMINS]
+    basket_managers = getattr(settings, 'BASKET_MANAGERS', None)
+    recipients_list = basket_managers or [addr for (_, addr) in settings.ADMINS]
 
     subject = '[Mozillians - ET] '
     if action == 'subscribe':
@@ -64,23 +63,139 @@ def _email_basket_managers(action, email, error_message):
     send_mail(subject, body, settings.FROM_NOREPLY, recipients_list, fail_silently=False)
 
 
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def update_basket_task(instance_id, newsletters=[]):
-    """Update Basket Task.
+class DebugBasketTask(Task):
+    """Base Error Handing Abstract class for all the Basket Tasks."""
+    abstract = True
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        # Fallback to ADMINS emails when BASKET_MANAGERS not defined
+        basket_managers = getattr(settings, 'BASKET_MANAGERS', None)
+        recipients_list = basket_managers or [addr for (_, addr) in settings.ADMINS]
+
+        subject = '[Mozillians - ET] Traceback {0}'.format(einfo)
+
+        body = """
+        Something terrible happened for task {task_id}
+
+        Here is the error message:
+
+        exception: {exc}
+
+        args: {args}
+
+        kwargs: {kwargs}
+
+        exception info: {einfo}
+
+        """.format(task_id=task_id, exc=exc, args=args, kwargs=kwargs, einfo=einfo)
+
+        send_mail(subject, body, settings.FROM_NOREPLY, recipients_list, fail_silently=False)
+
+
+@shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
+             max_retries=BASKET_TASK_MAX_RETRIES)
+def lookup_user_task(self, email):
+    """Task responsible for getting information about a user in basket."""
+
+    # We need to return always a dictionary for the next task
+    result = {}
+
+    try:
+        result = basket.lookup_user(email=email)
+    except MaxRetriesExceededError as exc:
+        raise exc
+    except basket.BasketException as exc:
+        if not exc[0] == u'User not found':
+            raise self.retry(exc=exc)
+    return result
+
+
+@shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
+             max_retries=BASKET_TASK_MAX_RETRIES)
+def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigger_welcome='N'):
+    """Subscribes a user to basket newsletters.
+
+    The email to subscribe is provided either from the result of the lookup task
+    or from the profile of the user.
+    """
+
+    if not result and not email:
+        return None
+
+    newsletters_to_subscribe = []
+    if result.get('status') == 'ok':
+        # This is used when we want to subscribe a different email
+        # than the one in the lookup (eg when a user changes emails)
+        if not email:
+            email = result.get('email')
+
+        if newsletters:
+            newsletters_to_subscribe = list(set(newsletters) - set(result['newsletters']))
+        else:
+            newsletters_to_subscribe = list(set(MOZILLIANS_NEWSLETTERS)
+                                            .intersection(result['newsletters']))
+
+    subscription_list = newsletters_to_subscribe or newsletters
+    if subscription_list:
+        try:
+            subscribe_result = basket.subscribe(email,
+                                                subscription_list,
+                                                sync=sync,
+                                                trigger_welcome=trigger_welcome)
+        except MaxRetriesExceededError as exc:
+            raise exc
+        except basket.BasketException as exc:
+            self.retry(exc=exc)
+        return subscribe_result
+    return None
+
+
+@shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
+             max_retries=BASKET_TASK_MAX_RETRIES)
+def unsubscribe_user_task(self, result, newsletters=[], optout=False):
+    """Removes a user from the Basket subscription."""
+
+    if not result:
+        return None
+
+    newsletters_to_unsubscribe = []
+    if result.get('status') == 'ok':
+        email = result.get('email')
+        token = result.get('token')
+
+        # only unsubscribe from our newsletters
+        if newsletters:
+            newsletters_to_unsubscribe = list(set(newsletters).intersection(result['newsletters']))
+        else:
+            newsletters_to_unsubscribe = list(set(MOZILLIANS_NEWSLETTERS)
+                                              .intersection(result['newsletters']))
+
+        # Unsubscribe the calculated newsletters
+        try:
+            unsubscribe_result = basket.unsubscribe(token=token,
+                                                    email=email,
+                                                    newsletters=newsletters_to_unsubscribe,
+                                                    optout=optout)
+        except MaxRetriesExceededError as exc:
+            raise exc
+        except basket.BasketException as exc:
+            self.retry(exc=exc)
+        return unsubscribe_result
+    return None
+
+
+@shared_task()
+def subscribe_user_to_basket(instance_id, newsletters=[]):
+    """Subscribe a user to Basket.
 
     This task subscribes a user to Basket, if not already subscribed
     and then updates his data on the Phonebook DataExtension. The task
     retries on failure at most BASKET_TASK_MAX_RETRIES times and if it
     finally doesn't complete successfully, it emails the
     settings.BASKET_MANAGERS with details.
-
     """
-    # This task is triggered by a post-save signal on UserProfile, so
-    # we can't save() on UserProfile again while in here - if we were
-    # running with CELERY_EAGER, we'd enter an infinite recursion until
-    # Python died.
 
-    from models import UserProfile
+    from mozillians.users.models import UserProfile
     try:
         instance = UserProfile.objects.get(pk=instance_id)
     except UserProfile.DoesNotExist:
@@ -90,80 +205,29 @@ def update_basket_task(instance_id, newsletters=[]):
             not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
         return
 
-    email = instance.user.email
-    token = instance.basket_token
-    newsletters_to_subscribe = []
+    lookup_subtask = lookup_user_task.subtask((instance.user.email,))
+    subscribe_subtask = subscribe_user_task.subtask((instance.user.email, newsletters,))
+    chain(lookup_subtask | subscribe_subtask)()
 
-    if token:
-        # They were already subscribed. See what email address they
-        # have in exact target. If it has changed, we'll need to
-        # unsubscribe the old address and subscribe the new one,
-        # and save the new token.
-        # This'll also return their subscriptions, so we can transfer them
-        # to the new address if we need to.
-        try:
-            result = basket.lookup_user(token=token)
-        except basket.BasketException as exception:
-            try:
-                update_basket_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                msg = exception.message
-                _email_basket_managers('update_phonebook', token, msg)
-            return
 
-        # Check if the users needs to be subscribed to additional newsletters.
-        newsletters_to_subscribe = [nl for nl in newsletters if nl not in result['newsletters']]
+@shared_task()
+def update_email_in_basket(old_email, new_email):
+    """Update user emails in Basket.
 
-        old_email = result['email']
-        if old_email != email:
-            try:
-                # We do the new subscribe first, then the unsubscribe, so we don't
-                # risk losing their subscriptions if the subscribe fails.
-                # Subscribe to all the same newsletters.
-                # Pass sync='Y' so we get back the new token right away
-                subscribe_result = basket.subscribe(
-                    email,
-                    result['newsletters'],
-                    sync='Y',
-                    trigger_welcome='N',
-                )
-                # unsubscribe all from the old token
-                basket.unsubscribe(token=token, email=old_email, optout=True)
-            except (requests.exceptions.RequestException,
-                    basket.BasketException) as exception:
-                try:
-                    update_basket_task.retry()
-                except (MaxRetriesExceededError, basket.BasketException):
-                    _email_basket_managers('subscribe', email, exception.message)
-                return
+    This task is triggered when users change their email.
+    The task checks whether the user is already subscribed with the old email.
+    If there is a subscription we remove it and we register the new email.
+    """
+    if not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
+        return
 
-            # That was all successful. Update the token.
-            token = subscribe_result['token']
-            # Don't call .save() on a userprofile from here, it would invoke us again
-            # via the post-save signal, which would be pointless.
-            UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
-
-    if not token or newsletters_to_subscribe:
-        # There is no token or the user is missing newsletters,
-        # try to subscribe the user to basket.
-        subscribe_to = newsletters_to_subscribe or newsletters
-        try:
-            retval = basket.subscribe(
-                email,
-                subscribe_to,
-                sync='Y',
-                trigger_welcome='N'
-            )
-        except (requests.exceptions.RequestException, basket.BasketException) as exception:
-            try:
-                update_basket_task.retry()
-            except (MaxRetriesExceededError, basket.BasketException):
-                _email_basket_managers('subscribe', instance.user.email, exception.message)
-            return
-
-        # Don't call .save() on a userprofile from here, it would invoke us again
-        # via the post-save signal, which would be pointless.
-        UserProfile.objects.filter(pk=instance.pk).update(basket_token=retval['token'])
+    chain(
+        lookup_user_task.subtask((old_email,)) |
+        group(
+            subscribe_user_task.subtask((new_email,)),
+            unsubscribe_user_task.subtask()
+        )
+    ).delay()
 
 
 @task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
@@ -209,7 +273,7 @@ def update_basket_token_task(instance_id):
     if email doesn't exist in basket or updates it if it exists but it's not the same.
 
     """
-    from models import UserProfile
+    from mozillians.users.models import UserProfile
     try:
         instance = UserProfile.objects.get(pk=instance_id)
     except UserProfile.DoesNotExist:
@@ -276,8 +340,7 @@ def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     from mozillians.users.models import UserProfile
 
     now = datetime.now() - timedelta(days=days)
-    (UserProfile.objects.filter(full_name='')
-     .filter(user__date_joined__lt=now).delete())
+    UserProfile.objects.filter(full_name='').filter(user__date_joined__lt=now).delete()
 
 
 @task(ignore_result=False)

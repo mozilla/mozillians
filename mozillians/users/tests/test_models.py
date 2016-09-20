@@ -30,11 +30,11 @@ class SignaledFunctionsTests(TestCase):
         user = User.objects.create(email='foo@example.com', username='foobar')
         ok_(user.userprofile)
 
-    @patch('mozillians.users.models.update_basket_task.delay')
+    @patch('mozillians.users.models.subscribe_user_to_basket.delay')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
-    def test_update_basket_post_save(self, update_basket_mock):
+    def test_subscribe_to_basket_post_save(self, subscribe_user_mock):
         user = UserFactory.create()
-        update_basket_mock.assert_called_with(user.userprofile.id, ['foo'])
+        subscribe_user_mock.assert_called_with(user.userprofile.id, ['foo'])
 
     @patch('mozillians.users.models.index_objects.delay')
     @patch('mozillians.users.models.unindex_objects.delay')
@@ -82,10 +82,10 @@ class SignaledFunctionsTests(TestCase):
         vouch = Vouch.objects.get(vouchee=vouchee.userprofile)
         eq_(vouch.voucher, None)
 
-    @patch('mozillians.users.models.update_basket_task.delay')
+    @patch('mozillians.users.models.subscribe_user_to_basket.delay')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')
     @override_settings(CAN_VOUCH_THRESHOLD=1)
-    def test_vouch_is_vouched_gets_updated(self, update_basket_mock):
+    def test_vouch_is_vouched_gets_updated(self, subscribe_user_mock):
         voucher = UserFactory.create()
         unvouched = UserFactory.create(vouched=False)
 
@@ -95,7 +95,7 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.is_vouched, True)
-        ok_(update_basket_mock.called_with(unvouched.userprofile.id, ['foo']))
+        ok_(subscribe_user_mock.called_with(unvouched.userprofile.id, ['foo']))
 
     @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='foo')

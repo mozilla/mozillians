@@ -32,7 +32,7 @@ from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import (AbuseReport, ExternalAccount, UserProfile,
                                      UserProfileMappingType)
-from mozillians.users.tasks import check_spam_account
+from mozillians.users.tasks import check_spam_account, update_email_in_basket
 
 
 @allow_unvouched
@@ -346,6 +346,8 @@ def change_primary_email(request, email_pk):
     with transaction.atomic():
         user.save()
         alternate_email.save()
+    # Notify Basket about this change
+    update_email_in_basket.delay(primary_email, user.email)
 
     return redirect('phonebook:profile_edit')
 
