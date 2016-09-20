@@ -1,3 +1,6 @@
+import json
+import logging
+
 from django.conf import settings
 from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
@@ -5,14 +8,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_control, never_cache
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from django.utils.translation import ugettext as _
+from raven.contrib.django.models import client
 from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
@@ -595,3 +600,31 @@ def register(request):
                                      "Sign in and then you can create a profile."))
 
     return redirect('phonebook:home')
+
+
+@require_POST
+@csrf_exempt
+@allow_public
+def capture_csp_violation(request):
+    data = client.get_data_from_request(request)
+    data.update({
+        'level': logging.INFO,
+        'logger': 'CSP',
+    })
+    try:
+        csp_data = json.loads(request.body)
+    except ValueError:
+        # Cannot decode CSP violation data, ignore
+        return HttpResponseBadRequest('Invalid CSP Report')
+
+    try:
+        blocked_uri = csp_data['csp-report']['blocked-uri']
+    except KeyError:
+        # Incomplete CSP report
+        return HttpResponseBadRequest('Incomplete CSP Report')
+
+    client.captureMessage(
+        message='CSP Violation: {}'.format(blocked_uri),
+        data=data)
+
+    return HttpResponse('Captured CSP violation, thanks for reporting.')

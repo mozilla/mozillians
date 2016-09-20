@@ -49,4 +49,7 @@ urlpatterns = patterns(
     url(r'^about/dinomcvouch$',
         allow_public(TemplateView.as_view(template_name='phonebook/about-dinomcvouch.html')),
         name='about-dinomcvouch'),
+
+    # CSP violation URL
+    url(r'^capture-csp-violation$', 'views.capture_csp_violation', name='capture-csp-violation'),
 )
