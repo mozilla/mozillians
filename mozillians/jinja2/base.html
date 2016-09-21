@@ -237,7 +237,11 @@
     {% endcompress %}
 
     {% block browserid_form %}
-      {{ browserid_js() }}
+      {% compress js %}
+        <script src="{{ static('mozillians/js/libs/browserid_include.js') }}"></script>
+        <script src="{{ static('browserid/api.js') }}"></script>
+        <script src="{{ static('browserid/browserid.js') }}"></script>
+      {% endcompress %}
     {% endblock %}
     {% block page_js %}{% endblock %}
   {% endblock %}
