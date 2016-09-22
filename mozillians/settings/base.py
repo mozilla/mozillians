@@ -578,3 +578,7 @@ MOBILE_COOKIE = 'mobile'
 # Recaptcha
 NORECAPTCHA_SITE_KEY = 'site_key'
 NORECAPTCHA_SECRET_KEY = 'secret_key'
+NORECAPTCHA_EXEMPT_URLS = [
+    'https://mozillians.allizom.org',
+    'https://mozillians-dev.allizom.org'
+]
