@@ -381,11 +381,26 @@ class EmailForm(happyforms.Form):
         return self.cleaned_data['email'] != self.initial['email']
 
 
+class MozilliansNoReCaptchaField(NoReCaptchaField):
+    def clean(self, value):
+        if settings.SITE_URL in settings.NORECAPTCHA_EXEMPT_URLS:
+            return value
+
+        super(MozilliansNoReCaptchaField, self).clean(value)
+
+
+
 class RegisterForm(BasicInformationForm, LocationForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
-    captcha = NoReCaptchaField()
+    captcha = MozilliansNoReCaptchaField()
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+
+        if settings.SITE_URL in settings.NORECAPTCHA_EXEMPT_URLS:
+            self.fields['captcha'].required = False
 
     class Meta:
         model = UserProfile
