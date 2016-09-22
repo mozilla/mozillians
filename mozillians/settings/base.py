@@ -368,6 +368,9 @@ AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
 AUTO_VOUCH_REASON = 'An automatic vouch for being a Mozilla employee.'
 
 # Django-CSP
+CSP_REPORT_ONLY = False
+CSP_REPORT_ENABLE = True
+CSP_REPORT_URI = '/en-US/capture-csp-violation'
 CSP_DEFAULT_SRC = (
     "'self'",
     'https://*.mapbox.com',

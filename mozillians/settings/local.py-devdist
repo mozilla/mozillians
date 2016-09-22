@@ -79,3 +79,5 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+
+CSP_REPORT_ENABLE = False
