@@ -149,7 +149,8 @@ $(function() {
     });
 
     // Show tooltip on hover on desktops and on click on touch devices.
-    $(document).tooltip();
+    // Disable tooltip on recaptcha iframe
+    $(document).not('.g-recaptcha iframe').tooltip();
     $('#skills').on('DOMNodeInserted', 'li', function() {
         $('.select2-selection__choice').each(function(index, elem){
             $(this).attr('title', '');
