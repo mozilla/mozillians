@@ -46,13 +46,5 @@
 
         $('input, textarea').placeholder();
 
-        // Focus search when 's' key is pressed
-        $('body').keypress(function(event){
-            if (event.which==115 && !$('input, textarea, select').is(':focus')) {
-                $searchbox = $('.search-query, #search-form input[type=text]');
-                $searchbox.focus();
-                event.preventDefault();
-            }
-        });
     });
 })(jQuery);
