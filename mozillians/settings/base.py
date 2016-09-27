@@ -398,6 +398,7 @@ CSP_IMG_SRC = (
 )
 CSP_SCRIPT_SRC = (
     "'self'",
+    "'unsafe-inline'",
     'https://www.mozilla.org',
     'https://*.mozilla.net',
     'https://*.google-analytics.com',
