@@ -495,7 +495,7 @@ CELERY_SEND_TASK_ERROR_EMAILS = True
 
 # Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
 # The task can catch that and recover but should exit ASAP.
-CELERYD_TASK_SOFT_TIME_LIMIT = 60 * 2
+CELERYD_TASK_SOFT_TIME_LIMIT = 150
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
