@@ -654,7 +654,19 @@ class VouchAdmin(admin.ModelAdmin):
 admin.site.register(Vouch, VouchAdmin)
 
 
+class AbuseReportAutocompleteForm(forms.ModelForm):
+
+    class Meta:
+        model = AbuseReport
+        fields = '__all__'
+        widgets = {
+            'profile': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
+            'reporter': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
+        }
+
+
 class AbuseReportAdmin(admin.ModelAdmin):
+    form = AbuseReportAutocompleteForm
     list_display = ['profile', 'reporter', 'type', 'created', 'updated']
     list_filter = ['type', 'is_akismet']
 
