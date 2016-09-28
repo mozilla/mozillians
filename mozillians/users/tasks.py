@@ -14,6 +14,7 @@ from elasticutils.contrib.django import get_es
 from elasticutils.utils import chunked
 
 from mozillians.common.utils import akismet_spam_check
+from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.users.managers import PUBLIC
 
 
@@ -292,9 +293,9 @@ def check_spam_account(instance_id, **kwargs):
     from mozillians.users.models import AbuseReport, UserProfile
 
     spam = akismet_spam_check(**kwargs)
-    profile = UserProfile.objects.filter(pk=instance_id)
+    profile = get_object_or_none(UserProfile, id=instance_id)
 
-    if spam:
+    if spam and profile:
         kwargs = {
             'type': AbuseReport.TYPE_SPAM,
             'profile': profile,
