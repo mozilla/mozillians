@@ -13,7 +13,7 @@ if (_gaAccountCode) {
         var ga = document.createElement('script');
         ga.type = 'text/javascript';
         ga.async = true;
-        ga.src = 'static/mozillians/js/libs/ga.js';
+        ga.src = '/static/mozillians/js/libs/ga.js';
         ga.integrity = 'sha384-qlg7xB42NGK87oFd2d7ZRqeY0XYyrD4wrKw4VhhH8r13OtxJp2UzLymBSaRfN1gK';
         ga.crossorigin = 'anonymous';
 
@@ -23,7 +23,7 @@ if (_gaAccountCode) {
         var ga_inpage_linkid = document.createElement('script');
         ga_inpage_linkid.type = 'text/javascript';
         ga_inpage_linkid.async = true;
-        ga_inpage_linkid.src = 'static/mozillians/js/libs/inpage_linkid.js';
+        ga_inpage_linkid.src = '/static/mozillians/js/libs/inpage_linkid.js';
         ga_inpage_linkid.integrity = 'sha384-sO8ot6WvES5SlygqvT4HdbvgpOsfet1pGROTyNYdMicwjCjOXwU48ITHK8EkNzzp';
         ga_inpage_linkid.crossorigin = 'anonymous';
 
