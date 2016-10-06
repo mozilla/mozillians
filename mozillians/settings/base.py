@@ -375,6 +375,8 @@ CSP_DEFAULT_SRC = (
     "'self'",
     'https://*.mapbox.com',
     'https://*.persona.org',
+    'https://www.google.com/recaptcha/',
+    'https://www.gstatic.com/recaptcha/',
 )
 CSP_FONT_SRC = (
     "'self'",
@@ -416,6 +418,9 @@ CSP_STYLE_SRC = (
 CSP_CHILD_SRC = (
     'https://www.google.com/recaptcha/',
     'https://login.persona.org/communication_iframe',
+)
+CSP_FRAME_SRC = (
+    'https://www.google.com/recaptcha/',
 )
 
 # Elasticutils settings
