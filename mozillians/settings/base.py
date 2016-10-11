@@ -421,6 +421,7 @@ CSP_CHILD_SRC = (
 )
 CSP_FRAME_SRC = (
     'https://www.google.com/recaptcha/',
+    'https://login.persona.org/communication_iframe',
 )
 
 # Elasticutils settings
