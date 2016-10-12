@@ -9,12 +9,20 @@ from mozillians.api.models import APIApp, APIv2App
 from mozillians.common.mixins import MozilliansAdminExportMixin
 
 
-class APIAppResource(ModelResource):
-    """APIApp admin export resource."""
-    email = fields.Field(attribute='owner__email')
+class APIForm(forms.ModelForm):
+    """Override admin form to provide autocompletion."""
 
     class Meta:
         model = APIApp
+        fields = '__all__'
+        widgets = {
+            'owner': autocomplete.ModelSelect2(url='users:users-autocomplete')
+        }
+
+
+class APIAppResource(ModelResource):
+    """APIApp admin export resource."""
+    email = fields.Field(attribute='owner__email')
 
 
 class APIAppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
@@ -22,6 +30,7 @@ class APIAppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
 
     list_display = ['name', 'key', 'owner', 'owner_email', 'is_mozilla_app', 'is_active']
     list_filter = ['is_mozilla_app', 'is_active']
+    form = APIForm
 
     def owner_email(self, obj):
         return obj.owner.email
