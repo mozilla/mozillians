@@ -122,7 +122,10 @@ def member_removed_email(group_pk, user_pk):
 
     from mozillians.groups.models import Group
 
-    group = Group.objects.get(pk=group_pk)
+    try:
+        group = Group.objects.get(pk=group_pk)
+    except Group.DoesNotExist:
+        return
     user = User.objects.get(pk=user_pk)
     activate('en-us')
     template_name = 'groups/email/member_removed.txt'
@@ -133,8 +136,7 @@ def member_removed_email(group_pk, user_pk):
         'user': user,
     }
     body = template.render(context)
-    send_mail(subject, body, settings.FROM_NOREPLY,
-              [user.email], fail_silently=False)
+    send_mail(subject, body, settings.FROM_NOREPLY, [user.email], fail_silently=False)
 
 
 @periodic_task(run_every=timedelta(hours=24))
