@@ -5,6 +5,7 @@ from django.test.utils import override_settings
 
 from basket.base import BasketException
 from basket.errors import BASKET_UNKNOWN_EMAIL
+from celery.exceptions import Retry
 from elasticsearch.exceptions import NotFoundError
 from mock import MagicMock, Mock, call, patch
 from nose.tools import eq_, ok_
@@ -257,98 +258,99 @@ class BasketTests(TestCase):
         eq_(userprofile.basket_token, '')
 
     @patch('mozillians.users.tasks.basket.lookup_user')
-    def test_lookup_user_task_basket_error(self, lookup_mock):
-        def raise_basket_exception(*args, **kwargs):
-            raise BasketException(
-                'foobar',
-                code=BASKET_UNKNOWN_EMAIL,
-                status_code=404)
+    def test_lookup_task_user_not_found(self, lookup_mock):
 
-        lookup_mock.side_effect = raise_basket_exception
+        lookup_mock.side_effect = BasketException(u'User not found')
+        result = lookup_user_task(email='foo@example.com')
+        eq_(result, {})
 
-        with self.assertRaises(BasketException):
-            lookup_user_task('foo@example.com')
-
+    @patch('mozillians.users.tasks.lookup_user_task.retry')
     @patch('mozillians.users.tasks.basket.lookup_user')
-    def test_lookup_user_task_basket_success(self, lookup_mock):
-        basket_result = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
+    def test_lookup_task_basket_error(self, lookup_mock, retry_mock):
 
-        lookup_mock.return_value = basket_result
-
-        result = lookup_user_task('foo@example.com')
-        eq_(result, basket_result)
+        exc = BasketException(u'Error error error')
+        lookup_mock.side_effect = [exc, None]
+        retry_mock.side_effect = Retry
+        with self.assertRaises(Retry):
+            lookup_user_task(email='foo@example.com')
+        retry_mock.called_with(exc)
 
     def test_subscribe_user_task_no_result_no_email(self):
-        result = subscribe_user_task(result=None, email=None)
-        ok_(not result)
+        ok_(not subscribe_user_task(result={}, email=''))
 
     @patch('mozillians.users.tasks.basket.subscribe')
-    def test_subscribe_user_task_basket_success_no_email_no_newsletters(self, subscribe_mock):
+    def test_subscribe_user_task_no_email_no_newsletters(self, subscribe_mock):
         result = {
             'status': 'ok',
             'newsletters': ['foo', 'bar', 'mozilla-phone'],
             'email': 'result_email@example.com'
-
         }
 
-        subscribe_mock.return_value = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
-
-        subscribe_result = subscribe_user_task(result=result, email=None)
+        subscribe_user_task(result=result, email=None)
         subscribe_mock.assert_called_with('result_email@example.com', ['mozilla-phone'],
                                           sync='N', trigger_welcome='N')
-        eq_(subscribe_result, subscribe_mock.return_value)
 
     @patch('mozillians.users.tasks.basket.subscribe')
-    def test_subscribe_user_task_basket_success_no_newsletters(self, subscribe_mock):
+    def test_subscribe_user_task_no_newsletters(self, subscribe_mock):
         result = {
             'status': 'ok',
             'newsletters': ['foo', 'bar'],
             'email': 'result_email@example.com'
         }
 
-        subscribe_mock.return_value = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
-
-        subscribe_result = subscribe_user_task(result=result, email='foo@xample.com')
+        subscribe_user_task(result=result, email='foo@xample.com')
         subscribe_mock.assert_not_called()
-        eq_(subscribe_result, None)
 
     @patch('mozillians.users.tasks.basket.subscribe')
-    def test_subscribe_user_task_basket_success(self, subscribe_mock):
+    def test_subscribe_user_task(self, subscribe_mock):
         result = {
             'status': 'ok',
             'newsletters': ['foo', 'bar'],
             'email': 'result_email@example.com'
-
         }
-
-        subscribe_mock.return_value = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
-
         kwargs = {
             'result': result,
             'email': 'foo@example.com',
             'newsletters': ['foobar', 'foo']
         }
-        subscribe_result = subscribe_user_task(**kwargs)
+        subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['foobar'],
                                           sync='N', trigger_welcome='N')
 
-        eq_(subscribe_result, subscribe_mock.return_value)
+    @patch('mozillians.users.tasks.basket.subscribe')
+    def test_subscribe_user_task_no_result(self, subscribe_mock):
+        kwargs = {
+            'result': {},
+            'email': 'foo@example.com',
+            'newsletters': ['mozilla-phone']
+        }
+        subscribe_user_task(**kwargs)
+        subscribe_mock.assert_called_with('foo@example.com', ['mozilla-phone'],
+                                          sync='N', trigger_welcome='N')
 
-    def test_unsubscribe_user_task_no_result(self):
-        result = unsubscribe_user_task(result=None)
-        ok_(not result)
+    @patch('mozillians.users.tasks.subscribe_user_task.retry')
+    @patch('mozillians.users.tasks.basket.subscribe')
+    def test_subscribe_user_basket_error(self, subscribe_mock, retry_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar'],
+            'email': 'result_email@example.com'
+        }
+        kwargs = {
+            'result': result,
+            'email': 'foo@example.com',
+            'newsletters': ['foobar', 'foo']
+        }
+
+        exc = BasketException(u'Error error error')
+        subscribe_mock.side_effect = [exc, None]
+        retry_mock.side_effect = Retry
+        with self.assertRaises(Retry):
+            subscribe_user_task(**kwargs)
+        retry_mock.called_with(exc)
+
+    def test_unsubscribe_user_no_result(self):
+        ok_(not unsubscribe_user_task(result={}))
 
     @patch('mozillians.users.tasks.basket.unsubscribe')
     def test_unsubscribe_user_task_success_no_newsletters(self, unsubscribe_mock):
@@ -358,15 +360,10 @@ class BasketTests(TestCase):
             'email': 'result_email@example.com',
             'token': 'token'
         }
-        unsubscribe_mock.return_value = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
 
-        unsubscribe_result = unsubscribe_user_task(result)
+        unsubscribe_user_task(result)
         unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
                                             newsletters=['mozilla-phone'], optout=False)
-        eq_(unsubscribe_result, unsubscribe_mock.return_value)
 
     @patch('mozillians.users.tasks.basket.unsubscribe')
     def test_unsubscribe_user_task_success(self, unsubscribe_mock):
@@ -376,12 +373,24 @@ class BasketTests(TestCase):
             'email': 'result_email@example.com',
             'token': 'token'
         }
-        unsubscribe_mock.return_value = {
-            'status': 'ok',
-            'foo': 'bar'
-        }
 
-        unsubscribe_result = unsubscribe_user_task(result, newsletters=['foo', 'bar'])
+        unsubscribe_user_task(result, newsletters=['foo', 'bar'])
         unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
                                             newsletters=['foo', 'bar'], optout=False)
-        eq_(unsubscribe_result, unsubscribe_mock.return_value)
+
+    @patch('mozillians.users.tasks.unsubscribe_user_task.retry')
+    @patch('mozillians.users.tasks.basket.unsubscribe')
+    def test_unsubscribe_user_basket_error(self, unsubscribe_mock, retry_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar'],
+            'email': 'result_email@example.com',
+            'token': 'token'
+        }
+
+        exc = BasketException(u'Error error error')
+        unsubscribe_mock.side_effect = [exc, None]
+        retry_mock.side_effect = Retry
+        with self.assertRaises(Retry):
+            unsubscribe_user_task(result, newsletters=['foo', 'bar'])
+        retry_mock.called_with(exc)
