@@ -13,9 +13,11 @@ from mozillians.common.tests import TestCase
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import UserProfile
 from mozillians.users.tasks import (_email_basket_managers, index_objects,
-                                    remove_incomplete_accounts, subscribe_user_to_basket,
+                                    lookup_user_task, remove_incomplete_accounts,
+                                    subscribe_user_task, subscribe_user_to_basket,
                                     unindex_objects, unsubscribe_from_basket_task,
-                                    update_basket_token_task, update_email_in_basket)
+                                    unsubscribe_user_task, update_basket_token_task,
+                                    update_email_in_basket)
 from mozillians.users.tests import UserFactory
 
 
@@ -253,3 +255,133 @@ class BasketTests(TestCase):
         update_basket_token_task(user.userprofile.id)
         userprofile = UserProfile.objects.get(pk=user.userprofile.pk)
         eq_(userprofile.basket_token, '')
+
+    @patch('mozillians.users.tasks.basket.lookup_user')
+    def test_lookup_user_task_basket_error(self, lookup_mock):
+        def raise_basket_exception(*args, **kwargs):
+            raise BasketException(
+                'foobar',
+                code=BASKET_UNKNOWN_EMAIL,
+                status_code=404)
+
+        lookup_mock.side_effect = raise_basket_exception
+
+        with self.assertRaises(BasketException):
+            lookup_user_task('foo@example.com')
+
+    @patch('mozillians.users.tasks.basket.lookup_user')
+    def test_lookup_user_task_basket_success(self, lookup_mock):
+        basket_result = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        lookup_mock.return_value = basket_result
+
+        result = lookup_user_task('foo@example.com')
+        eq_(result, basket_result)
+
+    def test_subscribe_user_task_no_result_no_email(self):
+        result = subscribe_user_task(result=None, email=None)
+        ok_(not result)
+
+    @patch('mozillians.users.tasks.basket.subscribe')
+    def test_subscribe_user_task_basket_success_no_email_no_newsletters(self, subscribe_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar', 'mozilla-phone'],
+            'email': 'result_email@example.com'
+
+        }
+
+        subscribe_mock.return_value = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        subscribe_result = subscribe_user_task(result=result, email=None)
+        subscribe_mock.assert_called_with('result_email@example.com', ['mozilla-phone'],
+                                          sync='N', trigger_welcome='N')
+        eq_(subscribe_result, subscribe_mock.return_value)
+
+    @patch('mozillians.users.tasks.basket.subscribe')
+    def test_subscribe_user_task_basket_success_no_newsletters(self, subscribe_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar'],
+            'email': 'result_email@example.com'
+        }
+
+        subscribe_mock.return_value = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        subscribe_result = subscribe_user_task(result=result, email='foo@xample.com')
+        subscribe_mock.assert_not_called()
+        eq_(subscribe_result, None)
+
+    @patch('mozillians.users.tasks.basket.subscribe')
+    def test_subscribe_user_task_basket_success(self, subscribe_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar'],
+            'email': 'result_email@example.com'
+
+        }
+
+        subscribe_mock.return_value = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        kwargs = {
+            'result': result,
+            'email': 'foo@example.com',
+            'newsletters': ['foobar', 'foo']
+        }
+        subscribe_result = subscribe_user_task(**kwargs)
+        subscribe_mock.assert_called_with('foo@example.com', ['foobar'],
+                                          sync='N', trigger_welcome='N')
+
+        eq_(subscribe_result, subscribe_mock.return_value)
+
+    def test_unsubscribe_user_task_no_result(self):
+        result = unsubscribe_user_task(result=None)
+        ok_(not result)
+
+    @patch('mozillians.users.tasks.basket.unsubscribe')
+    def test_unsubscribe_user_task_success_no_newsletters(self, unsubscribe_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar', 'mozilla-phone'],
+            'email': 'result_email@example.com',
+            'token': 'token'
+        }
+        unsubscribe_mock.return_value = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        unsubscribe_result = unsubscribe_user_task(result)
+        unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
+                                            newsletters=['mozilla-phone'], optout=False)
+        eq_(unsubscribe_result, unsubscribe_mock.return_value)
+
+    @patch('mozillians.users.tasks.basket.unsubscribe')
+    def test_unsubscribe_user_task_success(self, unsubscribe_mock):
+        result = {
+            'status': 'ok',
+            'newsletters': ['foo', 'bar', 'foobar'],
+            'email': 'result_email@example.com',
+            'token': 'token'
+        }
+        unsubscribe_mock.return_value = {
+            'status': 'ok',
+            'foo': 'bar'
+        }
+
+        unsubscribe_result = unsubscribe_user_task(result, newsletters=['foo', 'bar'])
+        unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
+                                            newsletters=['foo', 'bar'], optout=False)
+        eq_(unsubscribe_result, unsubscribe_mock.return_value)
