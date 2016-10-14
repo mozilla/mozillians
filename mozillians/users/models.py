@@ -36,7 +36,7 @@ from mozillians.users.managers import (EMPLOYEES,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager, UserProfileQuerySet)
 from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
-                                    update_basket_task, unindex_objects)
+                                    subscribe_user_to_basket, unindex_objects)
 
 
 COUNTRIES = product_details.get_regions('en-US')
@@ -631,7 +631,7 @@ def create_user_profile(sender, instance, created, raw, **kwargs):
 def update_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
     if instance.is_vouched:
-        update_basket_task.delay(instance.id, newsletters)
+        subscribe_user_to_basket.delay(instance.id, newsletters)
     elif instance.basket_token:
         unsubscribe_from_basket_task.delay(instance.email, instance.basket_token, newsletters)
 

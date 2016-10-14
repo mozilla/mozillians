@@ -12,7 +12,7 @@ from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change, member_removed_email
-from mozillians.users.tasks import unsubscribe_from_basket_task, update_basket_task
+from mozillians.users.tasks import unsubscribe_from_basket_task, subscribe_user_to_basket
 
 
 class GroupBase(models.Model):
@@ -281,7 +281,8 @@ class Group(GroupBase):
                 # Since there is no demotion, we can check if the new status is MEMBER and
                 # subscribe the user to the NDA newsletter if the group is NDA
                 if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
-                    update_basket_task.delay(userprofile.id, [settings.BASKET_NDA_NEWSLETTER])
+                    subscribe_user_to_basket.delay(userprofile.id,
+                                                   [settings.BASKET_NDA_NEWSLETTER])
 
     def remove_member(self, userprofile, send_email=True):
         try:
