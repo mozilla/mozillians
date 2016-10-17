@@ -250,15 +250,30 @@ def unsubscribe_from_basket_task(email, basket_token, newsletters=[]):
             not newsletters):
         return
 
-    try:
-        if not basket_token:
-            # We don't have this user's token yet, and we need it to
-            # unsubscribe.  Ask basket for it
-            basket_token = basket.lookup_user(email=email)['token']
+    retry = False
+    result = None
+    lookup_args = {}
+    if not basket_token:
+        lookup_args = {'email': email}
+    else:
+        lookup_args = {'token': basket_token}
 
-        basket.unsubscribe(basket_token, email, newsletters=newsletters)
-    except (requests.exceptions.RequestException,
-            basket.BasketException) as exception:
+    try:
+        result = basket.lookup_user(**lookup_args)
+    except basket.BasketException as exception:
+        retry = True
+
+    # Check from which newsletters we need to unsubscribe our user.
+    # Ensure that we don't try to unsubscribe users from newsletters that are not subscribed.
+    newsletters_to_unsubscribe = [nl for nl in result['newsletters'] if nl in 'newsletters']
+
+    try:
+        basket.unsubscribe(basket_token, email, newsletters=newsletters_to_unsubscribe)
+    except (requests.exceptions.RequestException, basket.BasketException) as exception:
+        retry = True
+
+    # Something went wrong, let's start from the beginning.
+    if retry:
         try:
             unsubscribe_from_basket_task.retry()
         except (MaxRetriesExceededError, basket.BasketException):
