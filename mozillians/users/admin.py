@@ -20,7 +20,6 @@ from import_export.fields import Field
 from import_export.resources import ModelResource
 from sorl.thumbnail.admin import AdminImageMixin
 
-import mozillians.users.tasks
 from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
@@ -29,6 +28,8 @@ from mozillians.users.models import get_languages_for_locale
 from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (AbuseReport, ExternalAccount, Language, PUBLIC,
                                      UserProfile, UsernameBlacklist, Vouch)
+from mozillians.users.tasks import (check_celery, subscribe_user_to_basket,
+                                    unsubscribe_from_basket_task)
 
 
 admin.site.unregister(Group)
@@ -45,8 +46,7 @@ def subscribe_to_basket_action(newsletter):
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
-        ts = [(mozillians.users.tasks.subscribe_user_to_basket
-               .subtask(args=[userprofile.id, [newsletter]]))
+        ts = [(subscribe_user_to_basket.subtask(args=[userprofile.id, [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
@@ -61,8 +61,8 @@ def unsubscribe_from_basket_action(newsletter):
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
-        ts = [(mozillians.users.tasks.unsubscribe_from_basket_task
-               .subtask(args=[userprofile.user.email, userprofile.basket_token, [newsletter]]))
+        ts = [(unsubscribe_from_basket_task.subtask(args=[userprofile.user.email,
+                                                          [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')
@@ -71,15 +71,6 @@ def unsubscribe_from_basket_action(newsletter):
     func_name = 'unsubscribe_from_basket_{0}'.format(newsletter.replace('-', '_'))
     unsubscribe_from_basket.__name__ = func_name
     return unsubscribe_from_basket
-
-
-def update_basket_tokens(modeladmin, request, queryset):
-    ts = [(mozillians.users.tasks.update_basket_token_task.subtask(args=[userprofile.id]))
-          for userprofile in queryset]
-    TaskSet(ts).apply_async()
-    messages.success(request, 'Basket token update started.')
-
-update_basket_tokens.short_description = 'Update basket tokens'
 
 
 def update_vouch_flags_action():
@@ -471,8 +462,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                subscribe_to_basket_action(settings.BASKET_NDA_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_NDA_NEWSLETTER),
-               update_vouch_flags_action(),
-               update_basket_tokens]
+               update_vouch_flags_action()]
 
     fieldsets = (
         ('Account', {
@@ -566,7 +556,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
 
     def check_celery(self, request):
         try:
-            investigator = mozillians.users.tasks.check_celery.delay()
+            investigator = check_celery.delay()
         except socket_error as e:
             messages.error(request, 'Cannot connect to broker: %s' % e)
             return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))

@@ -52,7 +52,7 @@ class DeleteTests(TestCase):
     @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_unvouched(self, unindex_objects_mock, unsubscribe_from_basket_task_mock):
-        user = UserFactory.create(vouched=False, userprofile={'basket_token': 'token'})
+        user = UserFactory.create(vouched=False)
         with self.login(user) as client:
             response = client.post(
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
@@ -60,8 +60,8 @@ class DeleteTests(TestCase):
         eq_(response.status_code, 200)
         self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
 
-        unsubscribe_from_basket_task_mock.assert_called_with(
-            user.email, user.userprofile.basket_token, ['newsletter1', 'newsletter2'])
+        unsubscribe_from_basket_task_mock.assert_called_with(user.email,
+                                                             ['newsletter1', 'newsletter2'])
 
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),
@@ -74,7 +74,7 @@ class DeleteTests(TestCase):
     @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_vouched(self, unindex_objects_mock, unsubscribe_from_basket_task_mock):
-        user = UserFactory.create(userprofile={'basket_token': 'token'})
+        user = UserFactory.create()
         with self.login(user) as client:
             response = client.post(
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
@@ -85,8 +85,8 @@ class DeleteTests(TestCase):
         # This mock call needs assert_called_any beacuse it's called twice,
         # once from the pre_delete signal and once from the post_save signal
         # from the User creation.
-        unsubscribe_from_basket_task_mock.assert_called_any(
-            user.email, user.userprofile.basket_token, ['newsletter1', 'newsletter2'])
+        unsubscribe_from_basket_task_mock.assert_called_any(user.email,
+                                                            ['newsletter1', 'newsletter2'])
 
         unindex_objects_mock.assert_has_calls([
             call(UserProfileMappingType, [user.userprofile.id], public_index=False),

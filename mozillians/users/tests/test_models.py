@@ -10,7 +10,6 @@ from django.test import override_settings
 from django.utils import unittest
 from django.utils.timezone import make_aware
 
-import basket
 import pytz
 from mock import Mock, call, patch
 from nose.tools import eq_, ok_
@@ -108,9 +107,7 @@ class SignaledFunctionsTests(TestCase):
         # Reload from database
         vouched = User.objects.get(pk=vouched.id)
         eq_(vouched.userprofile.is_vouched, False)
-        ok_(unsubscribe_from_basket_mock.called_with(vouched.userprofile.email,
-                                                     vouched.userprofile.basket_token,
-                                                     ['foo']))
+        ok_(unsubscribe_from_basket_mock.called_with(vouched.userprofile.email, ['foo']))
 
     @override_settings(CAN_VOUCH_THRESHOLD=5)
     def test_vouch_can_vouch_gets_updated(self):
@@ -579,39 +576,6 @@ class UserProfileTests(TestCase):
     def test_get_absolute_url(self):
         user = UserFactory.create()
         ok_(user.userprofile.get_absolute_url())
-
-    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
-    def test_lookup_token_registered(self, mock_lookup_user):
-        # Lookup token for a user with registered email
-        # basket returns response with data, lookup_basket_token returns the token
-        user = User(email='fake@example.com')
-        profile = UserProfile(user=user)
-        mock_lookup_user.return_value = {'status': 'ok', 'token': 'FAKETOKEN'}
-        result = profile.lookup_basket_token()
-        eq_('FAKETOKEN', result)
-
-    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
-    def test_lookup_token_unregistered(self, mock_lookup_user):
-        # Lookup token for a user with no registered email
-        # Basket raises unknown user exception, then lookup-token returns None
-        user = User(email='fake@example.com')
-        profile = UserProfile(user=user)
-        mock_lookup_user.side_effect = basket.BasketException(
-            code=basket.errors.BASKET_UNKNOWN_EMAIL)
-        result = profile.lookup_basket_token()
-        ok_(result is None)
-
-    @patch.object(basket, 'lookup_user', autospec=basket.lookup_user)
-    def test_lookup_token_exceptions(self, mock_lookup_user):
-        # If basket raises any exception other than BASKET_UNKNOWN_EMAIL when
-        # we call lookup_basket_token, lookup_basket_token passes it up the chain
-        class SomeException(Exception):
-            pass
-        user = User(email='fake@example.com')
-        profile = UserProfile(user=user)
-        mock_lookup_user.side_effect = SomeException
-        with self.assertRaises(SomeException):
-            profile.lookup_basket_token()
 
     def test_language_privacy_public(self):
         """Test that instance with level PUBLIC cannot access languages."""

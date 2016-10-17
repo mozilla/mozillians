@@ -14,7 +14,6 @@ from django.utils.http import urlquote
 from django.template.loader import get_template
 
 
-import basket
 from product_details import product_details
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
@@ -526,24 +525,6 @@ class UserProfile(UserProfilePrivacyModel):
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.user.email])
 
-    def lookup_basket_token(self):
-        """
-        Query Basket for this user's token.  If Basket doesn't find the user,
-        returns None. If Basket does find the token, returns it. Otherwise,
-        there must have been some error from the network or basket, and this
-        method just lets that exception propagate so the caller can decide how
-        best to handle it.
-
-        (Does not update the token field on the UserProfile.)
-        """
-        try:
-            result = basket.lookup_user(email=self.user.email)
-        except basket.BasketException as exception:
-            if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
-                return None
-            raise
-        return result['token']
-
     def get_annotated_groups(self):
         """
         Return a list of all the visible groups the user is a member of or pending
@@ -633,7 +614,7 @@ def update_basket(sender, instance, **kwargs):
     if instance.is_vouched:
         subscribe_user_to_basket.delay(instance.id, newsletters)
     elif instance.basket_token:
-        unsubscribe_from_basket_task.delay(instance.email, instance.basket_token, newsletters)
+        unsubscribe_from_basket_task.delay(instance.email, newsletters)
 
 
 @receiver(dbsignals.post_save, sender=UserProfile,
@@ -657,7 +638,7 @@ def remove_from_search_index(sender, instance, **kwargs):
 @receiver(dbsignals.pre_delete, sender=UserProfile, dispatch_uid='unsubscribe_from_basket_sig')
 def unsubscribe_from_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER, settings.BASKET_NDA_NEWSLETTER]
-    unsubscribe_from_basket_task.delay(instance.email, instance.basket_token, newsletters)
+    unsubscribe_from_basket_task.delay(instance.email, newsletters)
 
 
 @receiver(dbsignals.post_delete, sender=UserProfile, dispatch_uid='delete_user_obj_sig')
