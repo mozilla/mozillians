@@ -103,20 +103,28 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
         if newsletters:
             newsletters_to_subscribe = list(set(newsletters) - set(result['newsletters']))
         else:
+            # This case is used when a user changes email.
+            # The lookup task will provide the newsletters that the user was registered.
+            # We need to find the common with the mozillians newsletters and
+            # subscribe the email provided as an argument.
             newsletters_to_subscribe = list(set(MOZILLIANS_NEWSLETTERS)
                                             .intersection(result['newsletters']))
 
-    subscription_list = newsletters_to_subscribe or newsletters
-    if subscription_list:
+    # The lookup failed because the user does not exist. We have a new user!
+    if (result.get('status') == 'error' and
+            result.get('desc') == u'User not found' and newsletters):
+        newsletters_to_subscribe = newsletters
+
+    if newsletters_to_subscribe:
         try:
             subscribe_result = basket.subscribe(email,
-                                                subscription_list,
+                                                newsletters_to_subscribe,
                                                 sync=sync,
                                                 trigger_welcome=trigger_welcome)
         except MaxRetriesExceededError as exc:
             raise exc
         except basket.BasketException as exc:
-            self.retry(exc=exc)
+            raise self.retry(exc=exc)
         return subscribe_result
     return None
 
@@ -151,7 +159,7 @@ def unsubscribe_user_task(self, result, newsletters=[], optout=False):
         except MaxRetriesExceededError as exc:
             raise exc
         except basket.BasketException as exc:
-            self.retry(exc=exc)
+            raise self.retry(exc=exc)
         return unsubscribe_result
     return None
 

@@ -249,7 +249,8 @@ class BasketTests(TestCase):
     @patch('mozillians.users.tasks.basket.subscribe')
     def test_subscribe_user_task_no_result(self, subscribe_mock):
         kwargs = {
-            'result': {},
+            'result': {'status': 'error',
+                       'desc': u'User not found'},
             'email': 'foo@example.com',
             'newsletters': ['mozilla-phone']
         }
