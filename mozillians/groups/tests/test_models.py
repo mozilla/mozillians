@@ -254,8 +254,7 @@ class GroupTests(TestCase):
     @patch('mozillians.users.tasks.unsubscribe_from_basket_task')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
     def test_remove_member_nda(self, unsubscribe_basket_mock):
-        user = UserFactory.create(userprofile__email='user@example.com',
-                                  userprofile__basket_token='basket_token')
+        user = UserFactory.create(userprofile__email='user@example.com')
         group = GroupFactory.create(name='nda')
         GroupMembership.objects.create(userprofile=user.userprofile, group=group,
                                        status=GroupMembership.MEMBER)
@@ -263,13 +262,12 @@ class GroupTests(TestCase):
 
         group.remove_member(user.userprofile)
         ok_(not group.has_member(user.userprofile))
-        ok_(unsubscribe_basket_mock.called_with('user@example.com', 'basket_token', ['nda']))
+        ok_(unsubscribe_basket_mock.called_with('user@example.com', ['nda']))
 
     @patch('mozillians.users.tasks.unsubscribe_from_basket_task')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='nda')
     def test_remove_member_nda_pending_status(self, unsubscribe_basket_mock):
-        user = UserFactory.create(userprofile__email='user@example.com',
-                                  userprofile__basket_token='basket_token')
+        user = UserFactory.create(userprofile__email='user@example.com')
         group = GroupFactory.create(name='nda')
         GroupMembership.objects.create(userprofile=user.userprofile, group=group,
                                        status=GroupMembership.PENDING_TERMS)

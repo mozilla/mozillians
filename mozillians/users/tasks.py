@@ -5,7 +5,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 import basket
-import requests
 import waffle
 from celery import chain, group, shared_task, Task
 from celery.task import task
@@ -33,34 +32,6 @@ BASKET_ENABLED = all([
 
 INCOMPLETE_ACC_MAX_DAYS = 7
 MOZILLIANS_NEWSLETTERS = [BASKET_NDA_NEWSLETTER, BASKET_VOUCHED_NEWSLETTER]
-
-
-def _email_basket_managers(action, email, error_message):
-    """Email Basket Managers."""
-
-    # Fallback to ADMINS emails when BASKET_MANAGERS not defined
-    basket_managers = getattr(settings, 'BASKET_MANAGERS', None)
-    recipients_list = basket_managers or [addr for (_, addr) in settings.ADMINS]
-
-    subject = '[Mozillians - ET] '
-    if action == 'subscribe':
-        subject += 'Failed to subscribe or update user %s' % email
-    elif action == 'unsubscribe':
-        subject += 'Failed to unsubscribe user %s' % email
-    elif action == 'update_phone_book':
-        subject += 'Failed to update phone book for user %s' % email
-    else:
-        subject += 'Failed to %s user %s' % (action, email)
-
-    body = """
-    Something terrible happened while trying to %s user %s from Basket.
-
-    Here is the error message:
-
-    %s
-    """ % (action, email, error_message)
-
-    send_mail(subject, body, settings.FROM_NOREPLY, recipients_list, fail_silently=False)
 
 
 class DebugBasketTask(Task):
@@ -230,75 +201,20 @@ def update_email_in_basket(old_email, new_email):
     ).delay()
 
 
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def unsubscribe_from_basket_task(email, basket_token, newsletters=[]):
-    """Remove from Basket Task.
+@shared_task()
+def unsubscribe_from_basket_task(email, newsletters=[]):
+    """Remove user from Basket Task.
 
     This task unsubscribes a user from the Mozillians newsletter.
-    The task retries on failure at most BASKET_TASK_MAX_RETRIES times
-    and if it finally doesn't complete successfully, it emails the
-    settings.BASKET_MANAGERS with details.
-
     """
-    # IMPLEMENTATION NOTE:
-    #
-    # This task might run AFTER the User has been deleted, so it can't
-    # look anything up about the user locally. It has to make do
-    # with the email and token passed in.
-
-    if (not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED') or
-            not newsletters):
+    if not BASKET_ENABLED or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
         return
 
-    try:
-        if not basket_token:
-            # We don't have this user's token yet, and we need it to
-            # unsubscribe.  Ask basket for it
-            basket_token = basket.lookup_user(email=email)['token']
-
-        basket.unsubscribe(basket_token, email, newsletters=newsletters)
-    except (requests.exceptions.RequestException,
-            basket.BasketException) as exception:
-        try:
-            unsubscribe_from_basket_task.retry()
-        except (MaxRetriesExceededError, basket.BasketException):
-            _email_basket_managers('unsubscribe', email, exception.message)
-
-
-@task(default_retry_delay=BASKET_TASK_RETRY_DELAY, max_retries=BASKET_TASK_MAX_RETRIES)
-def update_basket_token_task(instance_id):
-    """Update basket token task
-
-    This task looks up user email in basket and deletes the current basket_token
-    if email doesn't exist in basket or updates it if it exists but it's not the same.
-
-    """
-    from mozillians.users.models import UserProfile
-    try:
-        instance = UserProfile.objects.get(pk=instance_id)
-    except UserProfile.DoesNotExist:
-        instance = None
-
-    if not BASKET_ENABLED or not instance or not waffle.switch_is_active('BASKET_SWITCH_ENABLED'):
-        return
-
-    try:
-        response = basket.lookup_user(email=instance.email)
-        token = response['token']
-
-    except basket.BasketException as exception:
-        if exception.code == basket.errors.BASKET_UNKNOWN_EMAIL:
-            UserProfile.objects.filter(pk=instance.pk).update(basket_token='')
-            return
-        update_basket_token_task.retry()
-    except MaxRetriesExceededError:
-        _email_basket_managers('update token', instance.email, exception.message)
-    except requests.exceptions.RequestException:
-        update_basket_token_task.retry()
-
-    if not token:
-        token = ''
-    UserProfile.objects.filter(pk=instance.pk).update(basket_token=token)
+    # Lookup the email and then pass the result to the unsubscribe subtask
+    chain(
+        lookup_user_task.subtask((email,)) |
+        unsubscribe_user_task.subtask((newsletters,))
+    ).delay()
 
 
 @task

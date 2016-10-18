@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
 from basket.base import BasketException
-from basket.errors import BASKET_UNKNOWN_EMAIL
 from celery.exceptions import Retry
 from elasticsearch.exceptions import NotFoundError
 from mock import MagicMock, Mock, call, patch
@@ -12,13 +11,10 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import UserProfile
-from mozillians.users.tasks import (_email_basket_managers, index_objects,
-                                    lookup_user_task, remove_incomplete_accounts,
+from mozillians.users.tasks import (index_objects, lookup_user_task, remove_incomplete_accounts,
                                     subscribe_user_task, subscribe_user_to_basket,
                                     unindex_objects, unsubscribe_from_basket_task,
-                                    unsubscribe_user_task, update_basket_token_task,
-                                    update_email_in_basket)
+                                    unsubscribe_user_task, update_email_in_basket)
 from mozillians.users.tests import UserFactory
 
 
@@ -105,39 +101,6 @@ class ElasticSearchIndexTests(TestCase):
 
 
 class BasketTests(TestCase):
-    @override_settings(BASKET_MANAGERS=False, FROM_NOREPLY='noreply',
-                       ADMINS=(('foo', 'foo@example.com'), ('bar', 'bar@example.com')))
-    @patch('mozillians.users.tasks.send_mail')
-    def test_email_basket_managers_email_not_set(self, send_mail_mock):
-        _email_basket_managers('foo', 'bar', 'error')
-        subject = '[Mozillians - ET] Failed to subscribe or update user bar'
-        body = """
-    Something terrible happened while trying to subscribe user bar from Basket.
-
-    Here is the error message:
-
-    error
-    """
-        _email_basket_managers('subscribe', 'bar', 'error')
-        send_mail_mock.assert_called_with(
-            subject, body, 'noreply', ['foo@example.com', 'bar@example.com'],
-            fail_silently=False)
-
-    @override_settings(BASKET_MANAGERS='basket_managers',
-                       FROM_NOREPLY='noreply')
-    @patch('mozillians.users.tasks.send_mail')
-    def test_email_basket_managers(self, send_mail_mock):
-        subject = '[Mozillians - ET] Failed to subscribe or update user bar'
-        body = """
-    Something terrible happened while trying to subscribe user bar from Basket.
-
-    Here is the error message:
-
-    error
-    """
-        _email_basket_managers('subscribe', 'bar', 'error')
-        send_mail_mock.assert_called_with(
-            subject, body, 'noreply', 'basket_managers', fail_silently=False)
 
     @override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
@@ -190,29 +153,25 @@ class BasketTests(TestCase):
         subscribe_mock.subtask.called_with(('bar@example.com',))
 
     @patch('mozillians.users.tasks.waffle.switch_is_active')
-    @patch('mozillians.users.tasks.basket.unsubscribe')
-    def test_unsubscribe_from_basket_task(self, unsubscribe_mock, switch_is_active_mock):
-        switch_is_active_mock.return_value = True
-        user = UserFactory.create(userprofile={'basket_token': 'foo'})
-        with patch('mozillians.users.tasks.BASKET_ENABLED', True):
-            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token, ['foo'])
-        unsubscribe_mock.assert_called_with(
-            user.userprofile.basket_token, user.email, newsletters=['foo'])
-
-    @patch('mozillians.users.tasks.waffle.switch_is_active')
+    @patch('mozillians.users.tasks.unsubscribe_user_task')
+    @patch('mozillians.users.tasks.lookup_user_task')
     @patch('mozillians.users.tasks.basket')
-    @patch.object(UserProfile, 'lookup_basket_token')
-    def test_unsubscribe_from_basket_task_without_token(self, lookup_token_mock, basket_mock,
-                                                        switch_is_active_mock):
+    def test_unsubscribe_from_basket_task(self, basket_mock, lookup_mock, unsubscribe_mock,
+                                          switch_is_active_mock):
         switch_is_active_mock.return_value = True
-        lookup_token_mock.return_value = 'basket_token'
-        basket_mock.lookup_user.return_value = {'token': 'basket_token'}
-        user = UserFactory.create(userprofile={'basket_token': ''})
+        user = UserFactory.create(email='foo@example.com')
+        basket_mock.lookup_user.return_value = {
+            'email': user.email,  # the old value
+            'token': 'token',
+            'newsletters': ['foo', 'bar']
+        }
+
         with patch('mozillians.users.tasks.BASKET_ENABLED', True):
-            unsubscribe_from_basket_task(user.email, user.userprofile.basket_token, ['foo'])
-        user = User.objects.get(pk=user.pk)  # refresh data from DB
-        basket_mock.unsubscribe.assert_called_with(
-            'basket_token', user.email, newsletters=['foo'])
+            unsubscribe_from_basket_task(user.email, ['foo'])
+        eq_(lookup_mock.subtask.call_count, 1)
+        eq_(unsubscribe_mock.subtask.call_count, 1)
+        lookup_mock.subtask.assert_called_with((user.email,))
+        unsubscribe_mock.subtask.called_with((['foo'],))
 
     @override_settings(CELERY_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
@@ -226,36 +185,6 @@ class BasketTests(TestCase):
         ok_(not lookup_mock.called)
         ok_(not subscribe_mock.called)
         ok_(not result.get())
-
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.waffle.switch_is_active')
-    @patch('mozillians.users.tasks.basket')
-    def test_update_basket_token_existing_email(self, basket_mock, switch_is_active_mock):
-        switch_is_active_mock.return_value = True
-        user = UserFactory.create(vouched=False)
-        basket_mock.lookup_user.return_value = {'token': 'example-token'}
-        update_basket_token_task(user.userprofile.id)
-        userprofile = UserProfile.objects.get(pk=user.userprofile.pk)
-        eq_(userprofile.basket_token, 'example-token')
-
-    @patch('mozillians.users.tasks.BASKET_ENABLED', True)
-    @patch('mozillians.users.tasks.waffle.switch_is_active')
-    @patch('mozillians.users.tasks.basket.lookup_user')
-    def test_update_basket_token_unknown_email(self, lookup_mock, switch_is_active_mock):
-        switch_is_active_mock.return_value = True
-        user = UserFactory.create(vouched=False, userprofile={'basket_token': 'example-token'})
-        eq_(user.userprofile.basket_token, 'example-token')
-
-        def raise_basket_exception(*args, **kwargs):
-            raise BasketException(
-                'foobar',
-                code=BASKET_UNKNOWN_EMAIL,
-                status_code=404)
-
-        lookup_mock.side_effect = raise_basket_exception
-        update_basket_token_task(user.userprofile.id)
-        userprofile = UserProfile.objects.get(pk=user.userprofile.pk)
-        eq_(userprofile.basket_token, '')
 
     @patch('mozillians.users.tasks.basket.lookup_user')
     def test_lookup_task_user_not_found(self, lookup_mock):
