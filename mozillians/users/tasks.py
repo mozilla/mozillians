@@ -123,7 +123,7 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
 
 @shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
              max_retries=BASKET_TASK_MAX_RETRIES)
-def unsubscribe_user_task(self, result, newsletters=[], optout='N'):
+def unsubscribe_user_task(self, result, newsletters=[], optout=False):
     """Removes a user from the Basket subscription."""
 
     if not result:
