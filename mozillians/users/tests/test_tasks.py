@@ -133,6 +133,10 @@ class BasketTests(TestCase):
             'token': 'new token',
         }
 
+        lookup_mock.reset_mock()
+        subscribe_mock.reset_mock()
+        unsubscribe_mock.reset_mock()
+
         # When a user's email is changed, their old email is unsubscribed
         # from all newsletters related to mozillians.org and their new email is subscribed to them.
         update_email_in_basket(user.email, new_email)
@@ -182,7 +186,7 @@ class BasketTests(TestCase):
         switch_is_active_mock.return_value = True
         user = UserFactory.create(vouched=False)
         result = subscribe_user_to_basket.delay(user.userprofile.pk)
-        ok_(not lookup_mock.called)
+        ok_(lookup_mock.called)
         ok_(not subscribe_mock.called)
         ok_(not result.get())
 

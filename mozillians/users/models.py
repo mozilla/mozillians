@@ -613,7 +613,7 @@ def update_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
     if instance.is_vouched:
         subscribe_user_to_basket.delay(instance.id, newsletters)
-    elif instance.basket_token:
+    else:
         unsubscribe_from_basket_task.delay(instance.email, newsletters)
 
 
