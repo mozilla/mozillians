@@ -123,7 +123,7 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
 
 @shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
              max_retries=BASKET_TASK_MAX_RETRIES)
-def unsubscribe_user_task(self, result, newsletters=[], optout=False):
+def unsubscribe_user_task(self, result, newsletters=[], optout='N'):
     """Removes a user from the Basket subscription."""
 
     if not result:
@@ -141,7 +141,8 @@ def unsubscribe_user_task(self, result, newsletters=[], optout=False):
             newsletters_to_unsubscribe = list(set(MOZILLIANS_NEWSLETTERS)
                                               .intersection(result['newsletters']))
 
-        # Unsubscribe the calculated newsletters
+    # Unsubscribe the calculated newsletters
+    if newsletters_to_unsubscribe:
         try:
             unsubscribe_result = basket.unsubscribe(token=token,
                                                     email=email,

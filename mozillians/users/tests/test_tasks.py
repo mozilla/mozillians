@@ -292,7 +292,7 @@ class BasketTests(TestCase):
 
         unsubscribe_user_task(result)
         unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
-                                            newsletters=['mozilla-phone'], optout=False)
+                                            newsletters=['mozilla-phone'], optout='N')
 
     @patch('mozillians.users.tasks.basket.unsubscribe')
     def test_unsubscribe_user_task_success(self, unsubscribe_mock):
@@ -305,7 +305,7 @@ class BasketTests(TestCase):
 
         unsubscribe_user_task(result, newsletters=['foo', 'bar'])
         unsubscribe_mock.assert_called_with(token='token', email='result_email@example.com',
-                                            newsletters=['foo', 'bar'], optout=False)
+                                            newsletters=['foo', 'bar'], optout='N')
 
     @patch('mozillians.users.tasks.unsubscribe_user_task.retry')
     @patch('mozillians.users.tasks.basket.unsubscribe')
