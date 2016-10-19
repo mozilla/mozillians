@@ -121,7 +121,8 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
             subscribe_result = basket.subscribe(email,
                                                 newsletters_to_subscribe,
                                                 sync=sync,
-                                                trigger_welcome=trigger_welcome)
+                                                trigger_welcome=trigger_welcome,
+                                                api_key=BASKET_API_KEY)
         except MaxRetriesExceededError as exc:
             raise exc
         except basket.BasketException as exc:
