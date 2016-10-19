@@ -78,6 +78,7 @@ def lookup_user_task(self, email):
     except basket.BasketException as exc:
         if not exc[0] == u'User not found':
             raise self.retry(exc=exc)
+        result = exc.result
     return result
 
 
