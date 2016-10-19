@@ -104,8 +104,9 @@ python-memcached==1.53 \
 python-mimeparse==0.1.4 \
     --hash=sha256:a4baeab6061428239d87c9b619f814bc6bd66b9c4c71c023301a50ddc519eeb4 \
     --hash=sha256:3c69a21e37e77f754e6fc09ebda70acd92c90d8a58f29a41cc0248351378ddc3
-basket-client==0.3.10 \
-    --hash=sha256:6bd16834e96582fcc8a304dc93b037a2f7747ca6edd92bb0d877b5852f41fc4d
+basket-client==0.3.12 \
+    --hash=sha256:d7aa5e6208eeeabb8f1387a7cbb2d0f2b35dfa889c1f034c86a88b4968db3bfe \
+    --hash=sha256:2dd953cd03b3068d0e596aa32224488c486b1170e46387c5bc14f20737d6a2d8
 bleach==1.2.2 \
     --hash=sha256:1a2a6580783c8179ea2c818a3f2206dc7eeac1aa3dfdce63d32e2f480c56d972
 requests==2.9.1 \
