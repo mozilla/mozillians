@@ -75,6 +75,7 @@ STATSD_CLIENT = 'django_statsd.clients.log'
 
 # Basket
 BASKET_URL = None
+BASKET_API_KEY = 'basket_api_key'
 BASKET_MANAGERS = None # or list of email addresses.
 
 GA_ACCOUNT_CODE = None

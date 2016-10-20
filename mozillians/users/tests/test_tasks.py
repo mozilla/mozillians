@@ -170,6 +170,9 @@ class BasketTests(TestCase):
             'newsletters': ['foo', 'bar']
         }
 
+        lookup_mock.reset_mock()
+        unsubscribe_mock.reset_mock()
+
         with patch('mozillians.users.tasks.BASKET_ENABLED', True):
             unsubscribe_from_basket_task(user.email, ['foo'])
         eq_(lookup_mock.subtask.call_count, 1)
@@ -221,7 +224,8 @@ class BasketTests(TestCase):
 
         subscribe_user_task(result=result, email=None)
         subscribe_mock.assert_called_with('result_email@example.com', ['mozilla-phone'],
-                                          sync='N', trigger_welcome='N')
+                                          sync='N', trigger_welcome='N',
+                                          api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.basket.subscribe')
     def test_subscribe_user_task_no_newsletters(self, subscribe_mock):
@@ -248,7 +252,8 @@ class BasketTests(TestCase):
         }
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['foobar'],
-                                          sync='N', trigger_welcome='N')
+                                          sync='N', trigger_welcome='N',
+                                          api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.basket.subscribe')
     def test_subscribe_user_task_no_result(self, subscribe_mock):
@@ -260,7 +265,8 @@ class BasketTests(TestCase):
         }
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['mozilla-phone'],
-                                          sync='N', trigger_welcome='N')
+                                          sync='N', trigger_welcome='N',
+                                          api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.subscribe_user_task.retry')
     @patch('mozillians.users.tasks.basket.subscribe')
