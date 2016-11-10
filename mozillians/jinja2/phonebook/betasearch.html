@@ -16,11 +16,7 @@
     <p class="alert">
       {{ _('You are currently searching public profiles.') }}
       {% if not user.is_authenticated() %}
-        {% trans next=request.get_full_path(), title=_('Sign In') %}
-          View more results by
-          <a href="#" class="browserid-login" title="{{ title }}" data-next="{{ next }}">
-            logging in</a>.
-        {% endtrans %}
+          View more results by logging in.
       {% else %}
         {{ _('View more results when vouched.') }}
       {% endif %}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo -n "Enter your BrowserID email: "
+echo -n "Enter your email: "
 read USEREMAIL
 U=$(cat << _EOF_
 from mozillians.users.models import User, UserProfile, Vouch

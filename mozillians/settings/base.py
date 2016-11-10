@@ -161,12 +161,6 @@ TEMPLATES = [
                 'waffle.jinja.WaffleExtension',
                 'puente.ext.i18n',
             ],
-            'globals': {
-                'browserid_info': 'django_browserid.helpers.browserid_info',
-                'browserid_login': 'django_browserid.helpers.browserid_login',
-                'browserid_logout': 'django_browserid.helpers.browserid_logout',
-                'browserid_js': 'django_browserid.helpers.browserid_js'
-            },
             'context_processors': COMMON_CONTEXT_PROCESSORS
         }
     },
@@ -264,7 +258,6 @@ SUPPORTED_NONLOCALES = [
     'admin',
     'csp',
     'api',
-    'browserid',
     'contribute.json',
     'admin',
     'autocomplete',
@@ -274,7 +267,6 @@ SUPPORTED_NONLOCALES = [
 # Authentication settings
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'mozillians.common.authbackend.MozilliansAuthBackend'
 )
 
 USERNAME_MAX_LENGTH = 30
@@ -301,7 +293,6 @@ INSTALLED_APPS = (
     'puente',
     'compressor',
     'cronjobs',
-    'django_browserid',
     'commonware.response.cookies',
     'django_nose',
     'session_csrf',
@@ -374,7 +365,6 @@ CSP_REPORT_URI = '/en-US/capture-csp-violation'
 CSP_DEFAULT_SRC = (
     "'self'",
     'https://*.mapbox.com',
-    'https://*.persona.org',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
 )
@@ -386,7 +376,6 @@ CSP_FONT_SRC = (
 )
 CSP_CHILD_SRC = (
     "'self'",
-    'https://login.persona.org',
 )
 CSP_IMG_SRC = (
     "'self'",
@@ -403,7 +392,6 @@ CSP_SCRIPT_SRC = (
     'https://www.mozilla.org',
     'https://*.mozilla.net',
     'https://*.google-analytics.com',
-    'https://login.persona.org',
     'https://*.mapbox.com',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
@@ -417,11 +405,9 @@ CSP_STYLE_SRC = (
 )
 CSP_CHILD_SRC = (
     'https://www.google.com/recaptcha/',
-    'https://login.persona.org/communication_iframe',
 )
 CSP_FRAME_SRC = (
     'https://www.google.com/recaptcha/',
-    'https://login.persona.org/communication_iframe',
 )
 
 # Elasticutils settings
@@ -476,7 +462,6 @@ ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
-                         '^/browserid/',
                          '^/api/']
 
 # Set default avatar for user profiles
@@ -528,31 +513,6 @@ HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
 MAPBOX_MAP_ID = 'examples.map-zr0njcqy'
 # This is the token for the edit profile page alone.
 MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
-
-
-def _browserid_request_args():
-    from django.conf import settings
-    from django.utils.translation import ugettext_lazy as _lazy
-
-    args = {
-        'siteName': _lazy('Mozillians'),
-    }
-
-    if settings.SITE_URL.startswith('https'):
-        args['siteLogo'] = urljoin(STATIC_URL, "mozillians/img/apple-touch-icon-144.png")
-
-    return args
-
-
-def _browserid_audiences():
-    from django.conf import settings
-    return [settings.SITE_URL]
-
-# BrowserID creates a user if one doesn't exist.
-BROWSERID_CREATE_USER = True
-BROWSERID_VERIFY_CLASS = 'mozillians.common.authbackend.BrowserIDVerify'
-BROWSERID_REQUEST_ARGS = lazy(_browserid_request_args, dict)()
-BROWSERID_AUDIENCES = lazy(_browserid_audiences, list)()
 
 # All accounts limited in 6 vouches total. Bug 997400.
 VOUCH_COUNT_LIMIT = 6

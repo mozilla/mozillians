@@ -53,8 +53,6 @@
       class="html-{{ DIR }} {% if user.is_authenticated() %}loggedin{% else %}loggedout{% endif %} {% block body_class %}{% endblock %}"
       data-locale="{{ LANG }}" {% block body_attrs %}{% endblock %}>
 
-  {{ browserid_info() }}
-
   <div id="outer-wrapper">
     <div id="page">
       {% block site_header %}
@@ -84,10 +82,6 @@
                 {% if user.is_authenticated() %}
                   {% if user.userprofile.is_complete %}
                     <div id="nav-main">
-                      <span class="icon">
-                        <img src="{{ static('mozillians/img/persona-person-white.png') }}"
-                             alt="persona icon">
-                      </span>
                       <a href="#" class="dropdown-toggle">
                         <span class="username">
                           {% if user.userprofile.full_name %}
@@ -126,7 +120,7 @@
                           </li>
                         {% endif %}
                         <li>
-                          <a id="nav-logout" class="browserid-logout" href="{{ url('phonebook:logout') }}">
+                          <a id="nav-logout" href="{{ url('phonebook:logout') }}">
                             <i class="icon-mail-reply"></i>
                             {{ _('Log Out') }}
                           </a>
@@ -134,16 +128,13 @@
                       </ul>
                     </div>
                   {% else %}
-                    <a id="nav-logout" class="browserid-logout no-profile" href="{{ url('phonebook:logout') }}">
+                    <a id="nav-logout" class="no-profile" href="{{ url('phonebook:logout') }}">
                       <i class="icon-mail-reply"></i>
                       {{ _('Log Out') }}
                     </a>
                   {% endif %}
                 {% elif not show_start %}
-                  <a href="#" id="nav-login" class="persona-button browserid-login"
-                     title="{{_('Sign in')}}"
-                     data-next="{{ request.REQUEST.next|default(url('phonebook:login')) }}">
-                    <span class="icon"><img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon"></span>
+                  <a href="#" id="nav-login" title="{{_('Sign in')}}"
                     <span class="signin">{{ _('Sign in') }}</span>
                   </a>
                 {% endif %}
@@ -236,13 +227,6 @@
       <script src="{{ static('mozillians/js/main.js') }}" rel="stylesheet"></script>
     {% endcompress %}
 
-    {% block browserid_form %}
-      {% compress js %}
-        <script src="{{ static('mozillians/js/libs/browserid_include.js') }}"></script>
-        <script src="{{ static('browserid/api.js') }}"></script>
-        <script src="{{ static('browserid/browserid.js') }}"></script>
-      {% endcompress %}
-    {% endblock %}
     {% block page_js %}{% endblock %}
   {% endblock %}
 

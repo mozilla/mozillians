@@ -113,41 +113,33 @@
           </div>
         </fieldset>
 
-        <fieldset id="alternate-email">
-          <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
-          {{ alternate_email_formset.management_form }}
+        {% if alternate_email_formset.get_queryset() %}
+          <fieldset id="alternate-email">
+            <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
+            {{ alternate_email_formset.management_form }}
 
-          {% for form in alternate_email_formset %}
-            <div class="row alternate-email-fieldrow">
-              <div class="col-sm-8">
-                <span class="email">{{ form.instance.identifier }}</span>
-                {{ form.id }}
-                <div class="email-controls">
-                  <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
-                    Delete
-                  </a>
-                  <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
-                    Make Primary
-                  </a>
+            {% for form in alternate_email_formset %}
+              <div class="row alternate-email-fieldrow">
+                <div class="col-sm-8">
+                  <span class="email">{{ form.instance.identifier }}</span>
+                  {{ form.id }}
+                  <div class="email-controls">
+                    <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
+                      Delete
+                    </a>
+                    <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
+                      Make Primary
+                    </a>
+                  </div>
                 </div>
-              </div>
-              <div class="col-sm-4">
-                {{ privacy_field(form.privacy) }}
-              </div>
+                <div class="col-sm-4">
+                  {{ privacy_field(form.privacy) }}
+                </div>
 
-            </div>
-          {% endfor %}
-
-          <!-- Add e-mails -->
-          <div id="add-email">
-            <a href="#" id="nav-login" class="persona-button browserid-login">
-              <span class="icon">
-                <img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon">
-              </span>
-              <span class="signin">{{ _('Add e-mail using Persona') }}</span>
-            </a>
-          </div>
-        </fieldset>
+              </div>
+            {% endfor %}
+          </fieldset>
+        {% endif %}
       </div>
       <div class="panel-footer">
         <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Emails') }}</button>
