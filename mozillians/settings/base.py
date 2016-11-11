@@ -71,6 +71,10 @@ TEXT_DOMAIN = 'django'
 STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = 'en-US'
 LOCALE_PATHS = [path('locale')]
+EXEMPT_L10N_URLS = [
+    '/oidc/authenticate/',
+    '/oidc/callback/'
+]
 
 # Tells the extract script what files to parse for strings and what functions to use.
 PUENTE = {
@@ -267,6 +271,7 @@ SUPPORTED_NONLOCALES = [
 # Authentication settings
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
+    'mozillians.common.authbackend.MozilliansAuthBackend',
 )
 
 USERNAME_MAX_LENGTH = 30
@@ -298,6 +303,8 @@ INSTALLED_APPS = (
     'session_csrf',
     'product_details',
     'csp',
+    'mozilla_django_oidc',
+
     'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
@@ -462,7 +469,9 @@ ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
                          '^/admin/',
-                         '^/api/']
+                         '^/api/',
+                         '^/oidc/authenticate/',
+                         '^/oidc/callback/']
 
 # Set default avatar for user profiles
 DEFAULT_AVATAR = 'img/default_avatar.png'
@@ -543,3 +552,13 @@ MOBILE_COOKIE = 'mobile'
 # Recaptcha
 NORECAPTCHA_SITE_KEY = 'site_key'
 NORECAPTCHA_SECRET_KEY = 'secret_key'
+
+
+# Django OIDC
+
+def _username_algo(email):
+    from mozillians.common.authbackend import calculate_username
+    return calculate_username(email)
+
+OIDC_USERNAME_ALGO = _username_algo
+OIDC_RP_CLIENT_SECRET_ENCODED = True

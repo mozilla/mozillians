@@ -134,8 +134,9 @@
                     </a>
                   {% endif %}
                 {% elif not show_start %}
-                  <a href="#" id="nav-login" title="{{_('Sign in')}}"
-                    <span class="signin">{{ _('Sign in') }}</span>
+                  <a id="nav-login" title="{{_('Sign in')}}"
+                     href="{{ nonprefixed_url('oidc_authentication_init') }}">
+                    <span class="signin button">{{ _('Sign in') }}</span>
                   </a>
                 {% endif %}
               </nav>

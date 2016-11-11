@@ -4,6 +4,11 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Q
+
+from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+
+from mozillians.users.models import ExternalAccount
 
 
 def calculate_username(email):
@@ -25,3 +30,16 @@ def calculate_username(email):
             return base64.urlsafe_b64encode(hashlib.sha1(email).digest()).rstrip('=')
 
     return suggested_username
+
+
+class MozilliansAuthBackend(OIDCAuthenticationBackend):
+    def filter_users_by_claims(self, claims):
+        email = claims.get('email')
+        if not email:
+            return self.UserModel.objects.none()
+
+        account_type = ExternalAccount.TYPE_EMAIL
+        alternate_emails = ExternalAccount.objects.filter(type=account_type, identifier=email)
+        primary_email_qs = Q(email=email)
+        alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
+        return self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()

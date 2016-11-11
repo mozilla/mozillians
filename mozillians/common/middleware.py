@@ -84,7 +84,7 @@ class LocaleURLMiddleware(object):
                  "loaded. Consider removing funfactory.middleware."
                  "LocaleURLMiddleware from your MIDDLEWARE_CLASSES setting.")
 
-        self.exempt_urls = getattr(settings, 'FF_EXEMPT_LANG_PARAM_URLS', ())
+        self.exempt_urls = getattr(settings, 'EXEMPT_L10N_URLS', ())
 
     def _is_lang_change(self, request):
         """Return True if the lang param is present and URL isn't exempt."""
@@ -94,6 +94,11 @@ class LocaleURLMiddleware(object):
         return not any(request.path.endswith(url) for url in self.exempt_urls)
 
     def process_request(self, request):
+        # Don't apply middleware to requests matching exempt URLs
+        for view_url in self.exempt_urls:
+            if view_url in request.path:
+                return None
+
         prefixer = urlresolvers.Prefixer(request)
         urlresolvers.set_url_prefix(prefixer)
         full_path = prefixer.fix(prefixer.shortened_path)

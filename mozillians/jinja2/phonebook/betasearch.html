@@ -16,7 +16,11 @@
     <p class="alert">
       {{ _('You are currently searching public profiles.') }}
       {% if not user.is_authenticated() %}
-          View more results by logging in.
+        {% trans title=_('Sign In'), login_url=nonprefixed_url('oidc_authentication_init') %}
+          View more results by
+          <a href="{{ login_url }}" title="{{ title }}">
+            logging in</a>.
+        {% endtrans %}
       {% else %}
         {{ _('View more results when vouched.') }}
       {% endif %}

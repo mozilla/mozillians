@@ -113,33 +113,33 @@
           </div>
         </fieldset>
 
-        {% if alternate_email_formset.get_queryset() %}
-          <fieldset id="alternate-email">
+        <fieldset id="alternate-email">
+          {% if alternate_email_formset.get_queryset() %}
             <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
-            {{ alternate_email_formset.management_form }}
+          {% endif %}
+          {{ alternate_email_formset.management_form }}
 
-            {% for form in alternate_email_formset %}
-              <div class="row alternate-email-fieldrow">
-                <div class="col-sm-8">
-                  <span class="email">{{ form.instance.identifier }}</span>
-                  {{ form.id }}
-                  <div class="email-controls">
-                    <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
-                      Delete
-                    </a>
-                    <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
-                      Make Primary
-                    </a>
-                  </div>
+          {% for form in alternate_email_formset %}
+            <div class="row alternate-email-fieldrow">
+              <div class="col-sm-8">
+                <span class="email">{{ form.instance.identifier }}</span>
+                {{ form.id }}
+                <div class="email-controls">
+                  <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
+                    Delete
+                  </a>
+                  <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
+                    Make Primary
+                  </a>
                 </div>
-                <div class="col-sm-4">
-                  {{ privacy_field(form.privacy) }}
-                </div>
-
               </div>
-            {% endfor %}
-          </fieldset>
-        {% endif %}
+              <div class="col-sm-4">
+                {{ privacy_field(form.privacy) }}
+              </div>
+
+            </div>
+          {% endfor %}
+        </fieldset>
       </div>
       <div class="panel-footer">
         <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Emails') }}</button>
