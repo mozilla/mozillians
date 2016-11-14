@@ -15,4 +15,5 @@ class FunFactAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     def result(self, obj):
         return obj.execute()
 
+
 admin.site.register(FunFact, FunFactAdmin)

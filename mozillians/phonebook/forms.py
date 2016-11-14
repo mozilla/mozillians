@@ -58,6 +58,7 @@ class ExternalAccountForm(happyforms.ModelForm):
 
         return cleaned_data
 
+
 AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                         form=ExternalAccountForm, extra=1)
 
@@ -66,6 +67,7 @@ class AlternateEmailForm(happyforms.ModelForm):
     class Meta:
         model = ExternalAccount
         fields = ['privacy']
+
 
 AlternateEmailFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                               form=AlternateEmailForm, extra=0)

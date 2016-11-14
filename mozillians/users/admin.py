@@ -327,6 +327,7 @@ class LanguageAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
         return obj.get_code_display()
     get_language_name.short_description = 'Name'
 
+
 admin.site.register(Language, LanguageAdmin)
 
 
@@ -589,6 +590,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         )
         return my_urls + urls
 
+
 admin.site.register(UserProfile, UserProfileAdmin)
 
 
@@ -611,12 +613,14 @@ class NullProfileFilter(SimpleListFilter):
 class UserAdmin(UserAdmin):
     list_filter = [NullProfileFilter]
 
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 
 class GroupAdmin(MozilliansAdminExportMixin, GroupAdmin):
     pass
+
 
 admin.site.register(Group, GroupAdmin)
 
@@ -641,6 +645,7 @@ class VouchAdmin(admin.ModelAdmin):
     list_filter = ['autovouch']
     form = VouchAutocompleteForm
 
+
 admin.site.register(Vouch, VouchAdmin)
 
 
@@ -659,5 +664,6 @@ class AbuseReportAdmin(admin.ModelAdmin):
     form = AbuseReportAutocompleteForm
     list_display = ['profile', 'reporter', 'type', 'created', 'updated']
     list_filter = ['type', 'is_akismet']
+
 
 admin.site.register(AbuseReport, AbuseReportAdmin)

@@ -40,6 +40,7 @@ class APIAppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
 
     resource_class = APIAppResource
 
+
 admin.site.register(APIApp, APIAppAdmin)
 
 
@@ -92,5 +93,6 @@ class APIv2AppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
 
 admin.site.register(APIv2App, APIv2AppAdmin)

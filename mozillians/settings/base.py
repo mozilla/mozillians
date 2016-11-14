@@ -110,6 +110,7 @@ RTL_LANGUAGES = ()  # ('ar', 'fa', 'fa-IR', 'he')
 def get_langs():
     return DEV_LANGUAGES if DEV else PROD_LANGUAGES
 
+
 LANGUAGE_URL_MAP = dict([(i.lower(), i) for i in get_langs()])
 
 
@@ -118,6 +119,7 @@ def lazy_langs():
 
     return dict([(lang.lower(), product_details.languages[lang]['native'])
                  for lang in get_langs() if lang in product_details.languages])
+
 
 LANGUAGES = lazy(lazy_langs, dict)()
 
@@ -183,6 +185,7 @@ TEMPLATES = [
 def COMPRESS_JINJA2_GET_ENVIRONMENT():
     from django.template import engines
     return engines['jinja2'].env
+
 
 # Absolute path to the directory that holds media.
 MEDIA_ROOT = path('media')
@@ -464,6 +467,8 @@ def _allowed_hosts():
     host = urlparse(settings.SITE_URL).netloc  # Remove protocol and path
     host = host.rsplit(':', 1)[0]  # Remove port
     return [host]
+
+
 ALLOWED_HOSTS = lazy(_allowed_hosts, list)()
 
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
@@ -559,6 +564,7 @@ NORECAPTCHA_SECRET_KEY = 'secret_key'
 def _username_algo(email):
     from mozillians.common.authbackend import calculate_username
     return calculate_username(email)
+
 
 OIDC_USERNAME_ALGO = _username_algo
 OIDC_RP_CLIENT_SECRET_ENCODED = True
