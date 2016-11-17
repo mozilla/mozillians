@@ -60,7 +60,6 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
-BROWSERID_AUDIENCES = None
 
 CSP_REPORT_ENABLE = False
 CSP_DEFAULT_SRC = base.CSP_DEFAULT_SRC + (

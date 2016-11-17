@@ -136,9 +136,6 @@ tower==0.4.1 \
     --hash=sha256:b13b8c19d9c36143fd614e535c23fdbe7b146cb82b8d9a246ecacb368e14d2dd
 django-autoslug==1.6.1 \
     --hash=sha256:092a61291b76eefb0417fc40bafd0711db90489b5139aaa6a1eb52793f17ee18
-django-browserid==1.0.0 \
-    --hash=sha256:fa33eb42172a19b715adba7a64970911fb5d8fd1b69cf8da7a95f2bc7f0f303b \
-    --hash=sha256:e7a3314ed46dd24393918670b7a1156e4baf383189f644b3e6121ba1cbfbc2f9
 urllib3==1.9.1 \
     --hash=sha256:410bea96df2479fa33986c40c3eefa9c1e7ba95a7f70711c315860bbe2d66c7f \
     --hash=sha256:d858379ef5988d4534bb8909432d697422100aaff272299d661339836b6dae9b
@@ -272,3 +269,8 @@ boto==2.42.0 \
 django_csp==3.0 \
     --hash=sha256:e6e627955651235852508f98238f3f04c7ab9a77b625a6bd101cd0cf1a1e3419 \
     --hash=sha256:e44479be426ffd5371b7522f43f8c32f8597a5003c236f31bb98ff4497a20a21
+PyJWT==1.4.2 \
+    --hash=sha256:99fe612dbe5f41e07124d9002c118c14f3ee703574ffa9779fee78135b8b94b6 \
+    --hash=sha256:87a831b7a3bfa8351511961469ed0462a769724d4da48a501cb8c96d1e17f570
+https://github.com/mozilla/mozilla-django-oidc/archive/0.1.1.zip#egg=mozilla_django_oidc \
+    --hash=sha256:a256c05de9a1b84eff743c97ff83a0e7e6304cc83efb1e27ae38969d448af085

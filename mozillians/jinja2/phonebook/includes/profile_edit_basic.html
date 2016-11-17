@@ -114,7 +114,9 @@
         </fieldset>
 
         <fieldset id="alternate-email">
-          <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
+          {% if alternate_email_formset.get_queryset() %}
+            <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
+          {% endif %}
           {{ alternate_email_formset.management_form }}
 
           {% for form in alternate_email_formset %}
@@ -137,16 +139,6 @@
 
             </div>
           {% endfor %}
-
-          <!-- Add e-mails -->
-          <div id="add-email">
-            <a href="#" id="nav-login" class="persona-button browserid-login">
-              <span class="icon">
-                <img src="{{ static('mozillians/img/persona-person-white.png') }}" alt="persona icon">
-              </span>
-              <span class="signin">{{ _('Add e-mail using Persona') }}</span>
-            </a>
-          </div>
         </fieldset>
       </div>
       <div class="panel-footer">

@@ -16,9 +16,9 @@
     <p class="alert">
       {{ _('You are currently searching public profiles.') }}
       {% if not user.is_authenticated() %}
-        {% trans next=request.get_full_path(), title=_('Sign In') %}
+        {% trans title=_('Sign In'), login_url=nonprefixed_url('oidc_authentication_init') %}
           View more results by
-          <a href="#" class="browserid-login" title="{{ title }}" data-next="{{ next }}">
+          <a href="{{ login_url }}" title="{{ title }}">
             logging in</a>.
         {% endtrans %}
       {% else %}

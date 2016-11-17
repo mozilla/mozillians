@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from hashlib import md5
 
 from django.conf import settings
+from django.core.urlresolvers import reverse as django_reverse
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.http import HttpResponseRedirect
 from django.template.loader import get_template
@@ -284,7 +285,13 @@ def url(viewname, *args, **kwargs):
     return reverse(viewname, args=args, kwargs=kwargs)
 
 
+@library.global_function
+def nonprefixed_url(viewname, *args, **kwargs):
+    """Helper for Django's ``reverse`` in templates that doesn't prepend L10n prefix."""
+    return django_reverse(viewname, *args, **kwargs)
+
 # Port from jingo.helpers
+
 
 @library.filter
 def ifeq(a, b, text):

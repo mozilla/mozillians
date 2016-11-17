@@ -17,4 +17,5 @@ class AnnouncementAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.Model
         return obj.published
     is_published.boolean = True
 
+
 admin.site.register(Announcement, AnnouncementAdmin)
