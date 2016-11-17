@@ -141,9 +141,11 @@
           {% endfor %}
         </fieldset>
       </div>
-      <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Emails') }}</button>
-      </div>
+      {% if alternate_email_formset.get_queryset() %}
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Emails') }}</button>
+        </div>
+      {% endif %}
     </div>
   </form>
 
