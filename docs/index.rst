@@ -25,6 +25,7 @@ Contents:
    api/api
    mysql-anonymize
    internationalization
+   basket
 
 Indices and tables
 ------------------
