@@ -348,7 +348,6 @@ HMAC_KEYS = {
 PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 
 SESSION_COOKIE_HTTPONLY = True
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_NAME = 'mozillians_sessionid'
 ANON_ALWAYS = True
 
