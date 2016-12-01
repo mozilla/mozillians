@@ -331,7 +331,7 @@ class InviteAutocompleteForm(forms.ModelForm):
 
 
 class InviteAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
-    search_fields = ['inviter', 'redeemer', 'group']
+    search_fields = ['inviter__full_name', 'redeemer__full_name', 'group__name']
     list_display = ['inviter', 'redeemer', 'group']
     readonly_fields = ['created', 'updated']
     list_filter = [RedeemedInviteFilter]
