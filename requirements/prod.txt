@@ -278,5 +278,6 @@ ecdsa==0.13 \
     --hash=sha256:64cf1ee26d1cde3c73c6d7d107f835fed7c6a2904aef9eac223d57ad800c43fa
 future==0.16.0 \
     --hash=sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb
-mozilla-django-oidc==0.1.5 \
-    --hash=sha256:e7daf1f06153caeb396a58881fe0873a08c2d79c836c902475dcf270f6e6b677
+mozilla-django-oidc==0.1.6 \
+    --hash=sha256:8397d22350964c14470f8681a9cc2a9853123a05ea58691c8d7b6e62490d77ee \
+    --hash=sha256:55bea2d81bef3f7d6e8fde9059eed43db8a72966468fae21c0a7436460862b4e
