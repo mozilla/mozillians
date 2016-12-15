@@ -96,7 +96,7 @@ class LocaleURLMiddleware(object):
     def process_request(self, request):
         # Don't apply middleware to requests matching exempt URLs
         for view_url in self.exempt_urls:
-            if view_url in request.path:
+            if re.match(view_url, request.path):
                 return None
 
         prefixer = urlresolvers.Prefixer(request)

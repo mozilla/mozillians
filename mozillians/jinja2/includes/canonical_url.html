@@ -1,5 +1,5 @@
 <link rel="canonical" hreflang="{{ LANG }}" href="{{ settings.SITE_URL + '/' + LANG + canonical_path }}">
 <link rel="alternate" hreflang="x-default" href="{{ settings.SITE_URL + canonical_path }}">
-{% for code, name in LANGUAGES|dictsort -%}
+{% for code, name in LANGUAGES|sort -%}
   <link rel="alternate" hreflang="{{ code }}" href="{{ settings.SITE_URL + '/' + code + canonical_path }}" title="{{ name|safe }}">
 {% endfor -%}

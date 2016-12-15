@@ -72,8 +72,11 @@ STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = 'en-US'
 LOCALE_PATHS = [path('locale')]
 EXEMPT_L10N_URLS = [
-    '/oidc/authenticate/',
-    '/oidc/callback/'
+    '^/oidc/authenticate/',
+    '^/oidc/callback/',
+    '^/api/v1/',
+    '^/api/v2/',
+    '^/admin/'
 ]
 
 # Tells the extract script what files to parse for strings and what functions to use.
@@ -118,11 +121,11 @@ LANGUAGE_URL_MAP = dict([(i.lower(), i) for i in get_langs()])
 def lazy_langs():
     from product_details import product_details
 
-    return dict([(lang.lower(), product_details.languages[lang]['native'])
-                 for lang in get_langs() if lang in product_details.languages])
+    return [(lang.lower(), product_details.languages[lang]['native'])
+            for lang in get_langs() if lang in product_details.languages]
 
 
-LANGUAGES = lazy(lazy_langs, dict)()
+LANGUAGES = lazy(lazy_langs, list)()
 
 # For absolute urls
 try:
