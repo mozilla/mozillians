@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 {% block page_title %}{{ _('Group Listing') }}{% endblock %}
 
 {% block body_id %}group-index{% endblock %}
@@ -27,7 +27,7 @@
   {% endblock %}
   </p>
   {% with items=groups %}
-    {% include 'includes/pagination.html' %}
+    {% include 'includes/pagination.jinja' %}
   {% endwith %}
   <div class="groups-areas">
     <ul class="group-list">
@@ -55,7 +55,7 @@
     </ul>
   </div>
   {% with items=groups %}
-    {% include 'includes/pagination.html' %}
+    {% include 'includes/pagination.jinja' %}
   {% endwith %}
 {% endblock content %}
 

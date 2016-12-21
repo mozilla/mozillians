@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}
   {% for name in [region_name, city_name] %}
@@ -21,7 +21,7 @@
   </h2>
   {% if people.paginator.count %}
     {% with items=people %}
-      {% include 'includes/pagination.html' %}
+      {% include 'includes/pagination.jinja' %}
     {% endwith %}
     <div class="row">
       {% for people_slice in people|slice(3) -%}
@@ -31,7 +31,7 @@
       {% endfor %}
     </div>
     {% with items=people %}
-      {% include 'includes/pagination.html' %}
+      {% include 'includes/pagination.jinja' %}
     {% endwith %}
   {% else %}
     <div class="well">

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}
   {{ _('Group settings') }}
@@ -35,16 +35,16 @@
     <div class="col-sm-9">
       <div class="tab-content">
         <!-- Description Tab -->
-        {% include 'groups/includes/group_edit_description.html' %}
+        {% include 'groups/includes/group_edit_description.jinja' %}
         <!-- Access Tab -->
-        {% include 'groups/includes/group_edit_access.html' %}
+        {% include 'groups/includes/group_edit_access.jinja' %}
         <!-- Invitations Tab -->
         {% if user_is_curator or user_is_manager %}
-          {% include 'groups/includes/group_edit_invitation.html' %}
+          {% include 'groups/includes/group_edit_invitation.jinja' %}
         {% endif %}
         <!-- Admin Tab -->
         {% if user_is_manager %}
-          {% include 'groups/includes/group_edit_admin.html' %}
+          {% include 'groups/includes/group_edit_admin.jinja' %}
         {% endif %}
       </div>
     </div>

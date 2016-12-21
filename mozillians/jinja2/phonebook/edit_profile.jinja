@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.jinja" %}
 
 {% block page_title %}
   {{ _('Settings') }}
@@ -46,22 +46,22 @@
       <div class="col-md-{% if profile.is_complete %}9{% else %}12{% endif %}">
         <div class="settings-content">
           <!-- Profle Tab -->
-          {% include 'phonebook/includes/profile_edit_basic.html' %}
+          {% include 'phonebook/includes/profile_edit_basic.jinja' %}
 
           <!-- Location Tab -->
-          {% include 'phonebook/includes/profile_edit_location.html' %}
+          {% include 'phonebook/includes/profile_edit_location.jinja' %}
 
           <!-- You &amp; Mozilla -->
-          {% include 'phonebook/includes/profile_edit_you.html' %}
+          {% include 'phonebook/includes/profile_edit_you.jinja' %}
 
           <!-- Groups -->
-          {% include 'phonebook/includes/profile_edit_groups.html' %}
+          {% include 'phonebook/includes/profile_edit_groups.jinja' %}
 
           <!-- External Accounts -->
-          {% include 'phonebook/includes/profile_edit_accounts.html' %}
+          {% include 'phonebook/includes/profile_edit_accounts.jinja' %}
 
           <!-- Developer -->
-          {% include 'phonebook/includes/profile_edit_developer.html' %}
+          {% include 'phonebook/includes/profile_edit_developer.jinja' %}
 
           <div class="panel panel-info settings-all hidden-md hidden-lg">
             <div class="panel-heading">
@@ -76,7 +76,7 @@
 
   {% else %}
     {# This is the required-only profile form for new registrations. #}
-    {% include 'phonebook/includes/profile_edit_registration.html' %}
+    {% include 'phonebook/includes/profile_edit_registration.jinja' %}
   {% endif %}
 {% endblock %}
 

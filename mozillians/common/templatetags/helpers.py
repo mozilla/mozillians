@@ -87,7 +87,7 @@ def mozillians_field(element, required=False):
 
     Takes a field and renders the appropriate elements.
     """
-    template = get_template('includes/field.html')
+    template = get_template('includes/field.jinja')
     context = {'field': element, 'flag_required': required}
 
     return mark_safe(template.render(context))
@@ -98,7 +98,7 @@ def privacy_field(element):
     element = field_with_attrs(element, **{'class': 'privacy-choice',
                                            'data-privacy-original': element.value(),
                                            'label': _('Visible to:')})
-    template = get_template('includes/field.html')
+    template = get_template('includes/field.jinja')
     context = {'field': element, 'privacy': True}
     return mark_safe(template.render(context))
 
@@ -109,7 +109,7 @@ def mozillians_form(element):
 
     Takes a form and renders the appropriate elements.
     """
-    template = get_template('includes/form.html')
+    template = get_template('includes/form.jinja')
     context = {'form': element}
 
     return mark_safe(template.render(context))

@@ -77,7 +77,7 @@ def index_groups(request):
         return redirect(reverse('groups:group_edit', args=[group.url]))
 
     query = Group.get_non_functional_areas()
-    template = 'groups/index_groups.html'
+    template = 'groups/index_groups.jinja'
     context = {
         'group_form': group_form
     }
@@ -87,14 +87,14 @@ def index_groups(request):
 def index_skills(request):
     """Lists all public skills (in use) on Mozillians."""
     query = Skill.objects.filter(members__is_vouched=True)
-    template = 'groups/index_skills.html'
+    template = 'groups/index_skills.jinja'
     return _list_groups(request, template, query)
 
 
 def index_functional_areas(request):
     """Lists all functional areas."""
     query = Group.get_functional_areas()
-    template = 'groups/index_areas.html'
+    template = 'groups/index_areas.jinja'
     return _list_groups(request, template, query)
 
 
@@ -270,7 +270,7 @@ def remove_member(request, url, user_pk):
         'profile': profile_to_remove,
         'next_url': next_url
     }
-    return render(request, 'groups/confirm_remove_member.html', context)
+    return render(request, 'groups/confirm_remove_member.jinja', context)
 
 
 @require_POST
@@ -330,7 +330,7 @@ def review_terms(request, url):
         'membership_form': membership_form
     }
 
-    return render(request, 'groups/terms.html', ctx)
+    return render(request, 'groups/terms.jinja', ctx)
 
 
 @require_POST
@@ -477,7 +477,7 @@ def group_edit(request, url=None):
         'show_delete_group_button': show_delete_group_button
     }
     context.update(group_forms)
-    return render(request, 'groups/edit_group.html', context)
+    return render(request, 'groups/edit_group.jinja', context)
 
 
 class SkillsAutocomplete(autocomplete.Select2QuerySetView):

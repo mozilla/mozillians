@@ -44,10 +44,10 @@ urlpatterns = patterns(
 
     # Static pages need csrf for post to work
     url(r'^about/$',
-        allow_public(TemplateView.as_view(template_name='phonebook/about.html')),
+        allow_public(TemplateView.as_view(template_name='phonebook/about.jinja')),
         name='about'),
     url(r'^about/dinomcvouch$',
-        allow_public(TemplateView.as_view(template_name='phonebook/about-dinomcvouch.html')),
+        allow_public(TemplateView.as_view(template_name='phonebook/about-dinomcvouch.jinja')),
         name='about-dinomcvouch'),
 
     # CSP violation URL

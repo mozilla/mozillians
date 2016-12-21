@@ -19,7 +19,7 @@ urlpatterns = patterns(
     url('^group/(?P<url>[-\w]+)/delete/$', 'views.group_delete', name='group_delete'),
     url('^group/(?P<url>[-\w]+)/terms/$', 'views.review_terms', name='review_terms'),
     url('^group/(?P<url>[-\w]+)/$', 'views.show',
-        {'alias_model': GroupAlias, 'template': 'groups/group.html'},
+        {'alias_model': GroupAlias, 'template': 'groups/group.jinja'},
         name='show_group'),
     url('^group/(?P<url>[-\w]+)/join/$',
         'views.join_group', name='join_group'),
@@ -30,7 +30,7 @@ urlpatterns = patterns(
 
     url('^skills/$', 'views.index_skills', name='index_skills'),
     url('^skill/(?P<url>[-\w]+)/$', 'views.show',
-        {'alias_model': SkillAlias, 'template': 'groups/skill.html'},
+        {'alias_model': SkillAlias, 'template': 'groups/skill.jinja'},
         name='show_skill'),
     url('^skill/(?P<url>[-\w]+)/toggle/$', 'views.toggle_skill_subscription',
         name='toggle_skill_subscription'),

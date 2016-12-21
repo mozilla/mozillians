@@ -19,7 +19,7 @@ class ListTests(TestCase):
         self.group_2 = GroupFactory.create(name='def')
         self.group_2.add_member(self.user.userprofile)
         self.query = Group.objects.filter(pk__in=[self.group_1.pk, self.group_2.pk])
-        self.template = 'groups/index.html'
+        self.template = 'groups/index.jinja'
         self.request = RequestFactory()
         self.request.GET = {}
         self.request.user = self.user
