@@ -76,7 +76,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/terms.html')
+        self.assertTemplateUsed(response, 'groups/terms.html')
 
     def test_show_review_terms_accepted(self):
         group = GroupFactory.create(terms='Example terms')
@@ -89,7 +89,7 @@ class ShowTests(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/group.html')
+        self.assertTemplateUsed(response, 'groups/group.html')
 
     def test_show_group_members_sorted(self):
         """
@@ -367,7 +367,7 @@ class ShowTests(TestCase):
                       kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.get(url, data={'next_url': next_url}, follow=True)
-        self.assertJinja2TemplateUsed(response, 'groups/confirm_remove_member.html')
+        self.assertTemplateUsed(response, 'groups/confirm_remove_member.html')
         # make sure context variable next_url was populated properly
         eq_(response.context['next_url'], next_url)
         # Still a member
@@ -526,7 +526,7 @@ class TermsTests(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/terms.html')
+        self.assertTemplateUsed(response, 'groups/terms.html')
 
     def test_accept_review_terms(self):
         group = GroupFactory.create(terms='Example terms')
@@ -545,7 +545,7 @@ class TermsTests(TestCase):
             response = client.post(url, data=data, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/group.html')
+        self.assertTemplateUsed(response, 'groups/group.html')
 
         membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
         eq_(membership.status, GroupMembership.MEMBER)
@@ -567,7 +567,7 @@ class TermsTests(TestCase):
             response = client.post(url, data=data, follow=True)
 
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/group.html')
+        self.assertTemplateUsed(response, 'groups/group.html')
 
         membership = GroupMembership.objects.filter(group=group, userprofile=user.userprofile)
         ok_(not membership.exists())

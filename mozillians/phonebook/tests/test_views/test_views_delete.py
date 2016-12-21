@@ -24,7 +24,7 @@ class DeleteTests(TestCase):
             response = client.get(reverse('phonebook:profile_confirm_delete'),
                                   follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/confirm_delete.html')
+        self.assertTemplateUsed(response, 'phonebook/confirm_delete.html')
 
     def test_confirm_delete_vouched(self):
         user = UserFactory.create()
@@ -32,7 +32,7 @@ class DeleteTests(TestCase):
             response = client.get(reverse('phonebook:profile_confirm_delete'),
                                   follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/confirm_delete.html')
+        self.assertTemplateUsed(response, 'phonebook/confirm_delete.html')
 
     def test_delete_get_method(self):
         user = UserFactory.create()
@@ -58,7 +58,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
 
         unsubscribe_from_basket_task_mock.assert_called_with(user.email,
                                                              ['newsletter1', 'newsletter2'])
@@ -80,7 +80,7 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
 
         # This mock call needs assert_called_any beacuse it's called twice,
         # once from the pre_delete signal and once from the post_save signal
@@ -107,4 +107,4 @@ class DeleteTests(TestCase):
                 reverse('phonebook:profile_delete', prefix='/en-US/'),
                 follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')

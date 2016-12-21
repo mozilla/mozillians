@@ -28,7 +28,7 @@ class IndexTests(TestCase):
         with self.login(user_1) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/index_groups.html')
+        self.assertTemplateUsed(response, 'groups/index_groups.html')
         eq_(set(response.context['groups'].paginator.object_list), set([group_1, group_2]))
 
         # Member counts
@@ -63,7 +63,7 @@ class IndexFunctionalAreasTests(TestCase):
         with self.login(user) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/index_areas.html')
+        self.assertTemplateUsed(response, 'groups/index_areas.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([group_1]))
 
@@ -94,7 +94,7 @@ class IndexSkillsTests(TestCase):
         with self.login(user) as client:
             response = client.get(self.url, follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'groups/index_skills.html')
+        self.assertTemplateUsed(response, 'groups/index_skills.html')
         eq_(set(response.context['groups'].paginator.object_list),
             set([skill_1, skill_2]))
 

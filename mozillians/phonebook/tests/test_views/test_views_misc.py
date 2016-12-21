@@ -62,7 +62,7 @@ class InviteTests(TestCase):
         user = UserFactory.create()
         with self.login(user) as client:
             response = client.get(reverse('phonebook:invite'), follow=True)
-        self.assertJinja2TemplateUsed(response, 'phonebook/invite.html')
+        self.assertTemplateUsed(response, 'phonebook/invite.html')
 
     @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.phonebook.views.messages.success')
@@ -76,7 +76,7 @@ class InviteTests(TestCase):
         }
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
-        self.assertJinja2TemplateUsed(response, 'phonebook/invite.html')
+        self.assertTemplateUsed(response, 'phonebook/invite.html')
         ok_(Invite.objects
             .filter(recipient='foo@example.com', inviter=user.userprofile)
             .exists())
@@ -90,7 +90,7 @@ class InviteTests(TestCase):
         data = {'recipient': vouched_user.email}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
-        self.assertJinja2TemplateUsed(response, 'phonebook/invite.html')
+        self.assertTemplateUsed(response, 'phonebook/invite.html')
         ok_('recipient' in response.context['invite_form'].errors)
         eq_(Invite.objects.all().count(), 0)
 
@@ -170,7 +170,7 @@ class VouchFormTests(TestCase):
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
         unvouched_user = User.objects.get(id=unvouched_user.id)
-        self.assertJinja2TemplateUsed(response, 'phonebook/profile.html')
+        self.assertTemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['profile'], unvouched_user.userprofile)
         ok_(unvouched_user.userprofile.is_vouched)
         ok_(info_mock.called)
@@ -189,7 +189,7 @@ class LogoutTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
         ok_(logout_mock.called)
 
     @patch('mozillians.phonebook.views.auth_logout', wraps=logout_view)
@@ -198,7 +198,7 @@ class LogoutTests(TestCase):
         with self.login(user) as client:
             response = client.get(reverse('phonebook:logout'), follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/home.html')
+        self.assertTemplateUsed(response, 'phonebook/home.html')
         ok_(logout_mock.called)
 
 
@@ -335,7 +335,7 @@ class AboutTests(TestCase):
         client = Client()
         response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/about.html')
+        self.assertTemplateUsed(response, 'phonebook/about.html')
 
 
 class AboutDinoMcVouchTests(TestCase):
@@ -344,7 +344,7 @@ class AboutDinoMcVouchTests(TestCase):
         client = Client()
         response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        self.assertJinja2TemplateUsed(response, 'phonebook/about-dinomcvouch.html')
+        self.assertTemplateUsed(response, 'phonebook/about-dinomcvouch.html')
 
 
 class VouchTests(TestCase):
