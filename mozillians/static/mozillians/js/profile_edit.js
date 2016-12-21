@@ -13,7 +13,6 @@ $(function() {
     $('head').append(favicon);
 
     // Tabs
-    $('.settings-tab').hide();
     var uri = URI(location.href);
     var next_section = uri.query(true).next;
     var content = uri.hash();
@@ -21,33 +20,18 @@ $(function() {
       content = '#' + next_section;
     }
     if (content) {
-        $(content + '-tab').show();
-        $(content + '-li').addClass('active');
-    } else {
-        $('#profile-tab').show();
-        $('.settings-nav').children('li').first().addClass('active');
-        location.hash = '#profile';
+        $('ul.nav a[href="' + content + '"]').tab('show');
     }
-    $('.settings-nav > li > a').on('click', function(e) {
-        e.preventDefault();
-        $('.settings-tab').hide();
-        $('.settings-nav > li').removeClass('active');
-        $(this).parent('li').addClass('active');
-        var content = $(this).attr('href');
-        $(content + '-tab').show();
-        location.hash = content;
-    });
     if (screen.width < mobile_breakdown) {
-        $('.settings-tab').show();
         $('.settings-nav > li').removeClass('active');
+        $('#profile').show();
+        $('#mylocation').show();
+        $('#mylocation').addClass('in');
     }
     $('.settings-all').on('click', function() {
         $(this).hide();
-        $('.settings-tab').removeClass('hidden-sm');
-        $('.settings-tab').removeClass('hidden-xs');
-        $('.settings-tab').addClass('visible-sm');
-        $('.settings-tab').addClass('visible-xs');
-
+        $('.tab-pane').show();
+        $('.tab-pane').addClass('in');
     });
 
     // Privacy toggle buttons

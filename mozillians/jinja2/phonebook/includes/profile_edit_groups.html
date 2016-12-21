@@ -1,6 +1,6 @@
-<form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mygroups">
-  {% csrf_token %}
-  <div id="mygroups-tab" class="hidden-xs hidden-sm settings-tab">
+<div role="tabpanel" class="tab-pane fade" id="mygroups">
+  <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=mygroups">
+    {% csrf_token %}
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Groups') }}</div>
       <div class="panel-body">
@@ -51,5 +51,5 @@
         <button class="btn btn-primary" id="form-submit-groups" type="submit" name="groups_section">{{ _('Update Groups') }}</button>
       </div>
     </div>
-  </div>
-</form>
+  </form>
+</div>
