@@ -388,9 +388,6 @@ CSP_FONT_SRC = (
     'https://*.mozilla.org',
     'https://mozorg.cdn.mozilla.net',
 )
-CSP_CHILD_SRC = (
-    "'self'",
-)
 CSP_IMG_SRC = (
     "'self'",
     'data:',
@@ -418,9 +415,7 @@ CSP_STYLE_SRC = (
     'https://*.mapbox.com',
 )
 CSP_CHILD_SRC = (
-    'https://www.google.com/recaptcha/',
-)
-CSP_FRAME_SRC = (
+    "'self'",
     'https://www.google.com/recaptcha/',
 )
 
