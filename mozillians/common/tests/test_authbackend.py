@@ -1,7 +1,7 @@
 from django.http import HttpRequest
 from django.test import override_settings
 
-from mock import Mock
+from mock import Mock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -47,7 +47,8 @@ class MozilliansAuthBackendTests(TestCase):
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user)
 
-    def test_alternate_email_already_exists(self):
+    @patch('mozillians.common.authbackend.messages.error')
+    def test_alternate_email_already_exists(self, mocked_message):
         """Test to add an email that already exists."""
 
         user = UserFactory.create(email='foo@example.com')
@@ -69,8 +70,11 @@ class MozilliansAuthBackendTests(TestCase):
         ok_(email_q.exists())
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user)
+        mocked_message.assert_called_once_with(request_mock, u'Email bar@example.com already '
+                                                             'exists in the database.')
 
-    def test_add_primary_email_as_alternate(self):
+    @patch('mozillians.common.authbackend.messages.error')
+    def test_add_primary_email_as_alternate(self, mocked_message):
         """Test to add the primary email as alternate."""
 
         user = UserFactory.create(email='foo@example.com')
@@ -86,9 +90,12 @@ class MozilliansAuthBackendTests(TestCase):
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
                                                  user=user.userprofile,
                                                  identifier='foo@example.com')
+        mocked_message.assert_called_once_with(request_mock, u'Email foo@example.com already '
+                                                             'exists in the database.')
         ok_(not email_q.exists())
 
-    def test_add_email_belonging_to_other_user(self):
+    @patch('mozillians.common.authbackend.messages.error')
+    def test_add_email_belonging_to_other_user(self, mocked_message):
         """Test to add an email belonging to another user."""
 
         user1 = UserFactory.create(email='foo@example.com')
@@ -105,6 +112,8 @@ class MozilliansAuthBackendTests(TestCase):
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
                                                  user=user1.userprofile,
                                                  identifier='bar@example.com')
+        mocked_message.assert_called_once_with(request_mock, u'Email bar@example.com already '
+                                                             'exists in the database.')
         ok_(not email_q.exists())
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user1)
