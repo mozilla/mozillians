@@ -12,8 +12,9 @@ django-import-export==0.4.5 \
     --hash=sha256:0406f781a771c39e325474df09644a5cea5188dfac7ecace4f32d664920abd00
 django-mobility==0.1 \
     --hash=sha256:b925e1a4f40a93fd81841ef9a7222b7053da46245d2fc8764d53420dcffd014d
-django-mozilla-product-details==0.6 \
-    --hash=sha256:d491f6c50ad1ed0e1b3e0de06f22cafa9f15563f11af2abb29c206780feee11a
+django-mozilla-product-details==0.12.1 \
+    --hash=sha256:a31a51102e8c2f047f8aa62b8bdc552f7a31d9c69f2cb16393225c3ee0db72b5 \
+    --hash=sha256:25ac11bd4544fef3236f32439f6b1de3bcf931f8b34c7786ab40f0ec85626eeb
 django-multidb-router==0.5 \
     --hash=sha256:6ed0b597edcc24042bd60d7903f5e83f9211aade815acc4c4aff6eddf19845a0
 nose==1.3.7 \
