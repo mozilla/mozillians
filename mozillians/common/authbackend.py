@@ -51,9 +51,10 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         user_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()
 
         # In this case we have a registered user who is adding a secondary email
-        if request_user.is_authenticated() and not user_q:
-            ExternalAccount.objects.create(type=account_type,
-                                           user=request_user.userprofile,
-                                           identifier=email)
+        if request_user.is_authenticated():
+            if not user_q:
+                ExternalAccount.objects.create(type=account_type,
+                                               user=request_user.userprofile,
+                                               identifier=email)
             return [request_user]
         return user_q

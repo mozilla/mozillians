@@ -87,3 +87,24 @@ class MozilliansAuthBackendTests(TestCase):
                                                  user=user.userprofile,
                                                  identifier='foo@example.com')
         ok_(not email_q.exists())
+
+    def test_add_email_belonging_to_other_user(self):
+        """Test to add an email belonging to another user."""
+
+        user1 = UserFactory.create(email='foo@example.com')
+        UserFactory.create(email='bar@example.com')
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user1
+        request_mock.user.is_authenticated = Mock()
+        request_mock.user.is_authenticated.return_value = True
+        self.backend.request = request_mock
+        claims = {
+            'email': 'bar@example.com'
+        }
+        returned_user = self.backend.filter_users_by_claims(claims)
+        email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
+                                                 user=user1.userprofile,
+                                                 identifier='bar@example.com')
+        ok_(not email_q.exists())
+        eq_(len(returned_user), 1)
+        eq_(returned_user[0], user1)
