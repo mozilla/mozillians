@@ -56,6 +56,10 @@ def database(ctx):
     with ctx.lcd(settings.SRC_DIR):
         ctx.local('python manage.py migrate --noinput')
 
+        # Debug migrations issue
+        print 'Dry-run makemigrations for debugging purposes'
+        ctx.local('python manage.py makemigrations --dry-run')
+
 
 @task
 def update_revision_files(ctx):
