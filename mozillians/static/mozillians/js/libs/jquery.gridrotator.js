@@ -78,7 +78,7 @@
 			var _self = this;
 			this.$el.addClass( 'ri-grid-loading' );
 
-			$( '<img/>' ).load( function() {
+			$( '<img/>' ).on('load', function() {
 
 				_self._init( options );
 
@@ -186,7 +186,7 @@
 				var $img	= $( this ),
 					src		= $img.attr( 'src' );
 
-				$( '<img/>' ).load( function() {
+				$( '<img/>' ).on('load', function() {
 
 					++loaded;
 					$img.parent().css( 'background-image', 'url(' + src + ')' );
