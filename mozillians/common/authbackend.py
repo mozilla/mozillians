@@ -33,8 +33,14 @@ def calculate_username(email):
 
 
 class MozilliansAuthBackend(OIDCAuthenticationBackend):
+    """Override OIDCAuthenticationBackend to provide custom functionality."""
+
     def filter_users_by_claims(self, claims):
+        """Override default method to add multiple emails in an account."""
+
         email = claims.get('email')
+        request_user = self.request.user
+
         if not email:
             return self.UserModel.objects.none()
 
@@ -42,4 +48,12 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         alternate_emails = ExternalAccount.objects.filter(type=account_type, identifier=email)
         primary_email_qs = Q(email=email)
         alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
-        return self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()
+        user_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()
+
+        # In this case we have a registered user who is adding a secondary email
+        if request_user.is_authenticated() and not user_q:
+            ExternalAccount.objects.create(type=account_type,
+                                           user=request_user.userprofile,
+                                           identifier=email)
+            return [request_user]
+        return user_q
