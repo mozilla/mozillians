@@ -58,7 +58,7 @@ def database(ctx):
 
         # Debug migrations issue
         print 'Dry-run makemigrations for debugging purposes'
-        ctx.local('python manage.py makemigrations --dry-run')
+        ctx.local('python manage.py makemigrations --dry-run --verbosity 3')
 
 
 @task
