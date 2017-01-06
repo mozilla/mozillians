@@ -3,6 +3,7 @@ import hashlib
 import re
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db.models import Q
 
@@ -56,5 +57,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
                 ExternalAccount.objects.create(type=account_type,
                                                user=request_user.userprofile,
                                                identifier=email)
+            else:
+                msg = u'Email {0} already exists in the database.'.format(email)
+                messages.error(self.request, msg)
             return [request_user]
         return user_q
