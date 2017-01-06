@@ -55,8 +55,7 @@ $(function() {
 
     // Hide/show field when moderation field changes
     $group_type_choice.on('change', function() {
-        $accepting_new_members = $($accepting_new_members.selector);
-        checkCriteria($accepting_new_members.val());
+        checkCriteria($(this).val());
     });
     $id_membership_can_expire.change(function() {
         checkMembershipInvalidation();
