@@ -1,12 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
 from mozillians.users.views import (BaseProfileAdminAutocomplete, UsersAdminAutocomplete,
                                     VouchedAutocomplete, VoucherAutocomplete)
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     # Admin urls for django-autocomplete-light.
     url('users-autocomplete/$', login_required(UsersAdminAutocomplete.as_view()),
         name='users-autocomplete'),
@@ -16,4 +15,4 @@ urlpatterns = patterns(
         name='voucher-autocomplete'),
     url('vouched-autocomplete/$', login_required(VouchedAutocomplete.as_view()),
         name='vouched-autocomplete'),
-)
+]
