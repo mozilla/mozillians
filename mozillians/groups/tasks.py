@@ -155,8 +155,9 @@ def invalidate_group_membership():
         last_update = datetime.now() - timedelta(days=group.invalidation_days)
         memberships = memberships.filter(updated_on__lte=last_update)
 
-        for member in memberships:
-            group.remove_member(member.userprofile)
+        for membership in memberships:
+            membership.status = GroupMembership.PENDING
+            membership.save()
 
 
 @task(ignore_result=True)
