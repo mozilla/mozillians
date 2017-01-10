@@ -314,6 +314,11 @@
         selectSearchResult(this.datum);
     });
 
+    // hack to fix the broken map from bootstrap
+    $('#mylocation-tab').on('shown.bs.tab', function() {
+        map.invalidateSize(true);
+    });
+
     search_el.on('keydown changed', function(event){
         clearTimeout(keystrokeTimer);
         if(event.keyCode === 13){ // enter
