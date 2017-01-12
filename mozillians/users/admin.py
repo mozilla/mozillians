@@ -454,7 +454,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
-                   NDAMemberFilter, BasketTokenFilter, 'externalaccount__type', 'referral_source']
+                   NDAMemberFilter, BasketTokenFilter, 'externalaccount__type']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees']
@@ -500,9 +500,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         }),
         ('Skills', {
             'fields': ('skills',)
-        }),
-        ('Referral Source', {
-            'fields': ('referral_source',)
         }),
     )
 
