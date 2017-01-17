@@ -281,3 +281,6 @@ future==0.16.0 \
 mozilla-django-oidc==0.1.7 \
     --hash=sha256:bdcf175cb010c0954f2e366f8377f60585baacfc30cd6a28bc6b671acc3a7067 \
     --hash=sha256:5ba5d7991680bb25ffb59a98f7240f4b2cefc0cef3af219eb5cc2ac2535b66d1
+django-haystack==2.6.0 \
+    --hash=sha256:a5ff5f20954d22be57b4daa4b93bc4b809705fa57016dc6756080b1a9865c2d7 \
+    --hash=sha256:277d82589491f71b2ba158a0afcf94e917e78cf8b84fbd06f4157116074b16d1

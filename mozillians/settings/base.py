@@ -301,6 +301,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Third-party apps, patches, fixes
+    'haystack',
     'django_jinja',
     'djcelery',
     'puente',
@@ -577,3 +578,12 @@ OIDC_USERNAME_ALGO = _username_algo
 OIDC_RP_CLIENT_SECRET_ENCODED = True
 OIDC_OP_DOMAIN = lazy(lazy_oidc_op_domain, str)()
 OIDC_STORE_ACCESS_TOKEN = True
+
+# Django Haystack
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'public_user_index'
+    }
+}
