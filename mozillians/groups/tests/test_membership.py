@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import GroupMembership
+from mozillians.groups.models import Group, GroupMembership
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.tests import UserFactory
 
@@ -154,12 +154,68 @@ class TestGroupRemoveMember(TestCase):
         self.group.add_member(user.userprofile)
         url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
                       prefix='/fr/',)
-        with patch('mozillians.groups.models.member_removed_email', autospec=True) as mock_email:
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
             with self.login(curator) as client:
                 response = client.post(url, follow=False)
         eq_(302, response.status_code)
         # email sent for curated group
+        group_pk, user_pk, old_status, new_status = mock_email.delay.call_args[0]
+
         ok_(mock_email.delay.called)
-        group_pk, user_pk = mock_email.delay.call_args[0]
         eq_(self.group.pk, group_pk)
         eq_(user.pk, user_pk)
+        eq_(old_status, GroupMembership.MEMBER)
+        eq_(new_status, None)
+
+    def test_remove_from_reviewed_group(self):
+        """Test to remove a member from a reviewed group."""
+        self.group.accepting_new_members = Group.REVIEWED
+        self.group.save()
+        curator = UserFactory()
+        user = UserFactory()
+        self.group.add_member(user.userprofile)
+        self.group.curators.add(curator.userprofile)
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk,
+                                                    GroupMembership.PENDING],
+                      prefix='/fr/',)
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
+            with self.login(curator) as client:
+                response = client.post(url, follow=False)
+        eq_(302, response.status_code)
+        membership = GroupMembership.objects.get(group=self.group, userprofile=user.userprofile)
+        group_pk, user_pk, old_status, new_status = mock_email.delay.call_args[0]
+
+        ok_(mock_email.delay.called)
+        eq_(membership.status, GroupMembership.PENDING)
+        eq_(self.group.pk, group_pk)
+        eq_(user.pk, user_pk)
+        eq_(old_status, GroupMembership.MEMBER)
+        eq_(new_status, GroupMembership.PENDING)
+
+    def test_remove_from_closed_group(self):
+        """Test to remove a member from a closed group."""
+        self.group.accepting_new_members = Group.CLOSED
+        self.group.save()
+        curator = UserFactory()
+        user = UserFactory()
+        self.group.add_member(user.userprofile)
+        self.group.curators.add(curator.userprofile)
+        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk,
+                                                    GroupMembership.PENDING],
+                      prefix='/fr/',)
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
+            with self.login(curator) as client:
+                response = client.post(url, follow=False)
+        eq_(302, response.status_code)
+        membership = GroupMembership.objects.get(group=self.group, userprofile=user.userprofile)
+        group_pk, user_pk, old_status, new_status = mock_email.delay.call_args[0]
+
+        ok_(mock_email.delay.called)
+        eq_(membership.status, GroupMembership.PENDING)
+        eq_(self.group.pk, group_pk)
+        eq_(user.pk, user_pk)
+        eq_(old_status, GroupMembership.MEMBER)
+        eq_(new_status, GroupMembership.PENDING)

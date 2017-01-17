@@ -167,17 +167,51 @@ class EmailMembershipChangeTests(TestCase):
         eq_('Not accepted to Mozillians group "%s"' % self.group.name, subject)
         ok_('You have not been accepted' in body)
 
+    def test_membership_changed(self):
+        template_name = 'groups/email/membership_status_changed.txt'
+        template = get_template(template_name)
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            mock_get_template.return_value = template
+            with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
+                email_membership_change(self.group.pk, self.user.pk,
+                                        GroupMembership.MEMBER, GroupMembership.PENDING)
+        ok_(mock_send_mail.called)
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        subject, body, from_addr, to_list = mock_send_mail.call_args[0]
+        eq_(settings.FROM_NOREPLY, from_addr)
+        eq_([self.user.email], to_list)
+        eq_('Status changed for Mozillians group "%s"' % self.group.name, subject)
+        ok_('Your membership status has changed' in body)
+
+    def test_member_removed(self):
+        template_name = 'groups/email/member_removed.txt'
+        template = get_template(template_name)
+        with patch('mozillians.groups.tasks.get_template', autospec=True) as mock_get_template:
+            mock_get_template.return_value = template
+            with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
+                email_membership_change(self.group.pk, self.user.pk, GroupMembership.MEMBER, None)
+        ok_(mock_send_mail.called)
+        ok_(mock_get_template.called)
+        eq_(template_name, mock_get_template.call_args[0][0])
+        subject, body, from_addr, to_list = mock_send_mail.call_args[0]
+        eq_(settings.FROM_NOREPLY, from_addr)
+        eq_([self.user.email], to_list)
+        eq_('Removed from Mozillians group "%s"' % self.group.name, subject)
+        ok_('You have been removed' in body)
+
 
 class MembershipInvalidationTests(TestCase):
     """ Test membership invalidation."""
 
-    @patch('mozillians.groups.tasks.send_mail')
-    @override_settings(FROM_NOREPLY='noreply@example.com')
-    def test_invalidate_group_with_terms(self, mock_send_mail):
+    @patch('mozillians.groups.models.email_membership_change')
+    def test_invalidate_open_group(self, mail_task):
         member = UserFactory.create(vouched=True)
         curator = UserFactory.create(vouched=True)
 
-        group = GroupFactory.create(name='Foo', terms='Example terms.', invalidation_days=5)
+        # Group of type Group.OPEN
+        group = GroupFactory.create(name='Foo', terms='Example terms.', invalidation_days=5,
+                                    accepting_new_members=Group.OPEN)
         group.curators.add(curator.userprofile)
         group.add_member(member.userprofile)
         group.add_member(curator.userprofile)
@@ -195,18 +229,15 @@ class MembershipInvalidationTests(TestCase):
         ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
 
-        subject = 'Removed from Mozillians group "foo"'
-        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
-                                               [member.email], fail_silently=False)
+        mail_task.delay.assert_called_once_with(group.id, member.id, GroupMembership.MEMBER, None)
 
-    @patch('mozillians.groups.tasks.send_mail')
-    @override_settings(FROM_NOREPLY='noreply@example.com')
-    def test_invalidate_group_by_request(self, mock_send_mail):
+    @patch('mozillians.groups.models.email_membership_change')
+    def test_invalidate_group_by_request(self, mail_task):
         member = UserFactory.create(vouched=True)
         curator = UserFactory.create(vouched=True)
 
         group = GroupFactory.create(name='Foo', invalidation_days=5,
-                                    accepting_new_members='by_request')
+                                    accepting_new_members=Group.REVIEWED)
         group.curators.add(curator.userprofile)
         group.add_member(curator.userprofile)
         group.add_member(member.userprofile)
@@ -221,40 +252,96 @@ class MembershipInvalidationTests(TestCase):
 
         invalidate_group_membership()
 
-        ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
+        ok_(group.groupmembership_set.filter(userprofile=member.userprofile,
+                                             status=GroupMembership.PENDING).exists())
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
 
-        subject = 'Removed from Mozillians group "foo"'
-        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
-                                               [member.email], fail_silently=False)
+        mail_task.delay.assert_called_once_with(group.id, member.id, GroupMembership.MEMBER,
+                                                GroupMembership.PENDING)
 
-    @patch('mozillians.groups.tasks.send_mail')
-    @override_settings(FROM_NOREPLY='noreply@example.com')
-    def test_invalidate_group_accepts_all(self, mock_send_mail):
+    @patch('mozillians.groups.models.email_membership_change')
+    def invalidate_closed_group(self, mail_task):
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
+        group = GroupFactory.create(name='Foo', invalidation_days=5,
+                                    accepting_new_members=Group.CLOSED)
+        group.curators.add(curator.userprofile)
+        group.add_member(curator.userprofile)
+        group.add_member(member.userprofile)
+
+        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
+        membership.update(updated_on=datetime.now() - timedelta(days=10))
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
+        eq_(membership[0].status, GroupMembership.MEMBER)
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
+        invalidate_group_membership()
+
+        ok_(group.groupmembership_set.filter(userprofile=member.userprofile,
+                                             status=GroupMembership.PENDING).exists())
+        ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+
+        mail_task.delay.assert_called_once_with(group.id, member.id, GroupMembership.MEMBER,
+                                                GroupMembership.PENDING)
+
+    @patch('mozillians.groups.models.email_membership_change')
+    def test_invalidate_group_pending_membership(self, mail_task):
+        """Invalidate a group where a user has not yet been accepted by a curator.
+
+        Type is indifferent for this test.
+        """
         member = UserFactory.create(vouched=True)
         curator = UserFactory.create(vouched=True)
 
         group = GroupFactory.create(name='Foo', invalidation_days=5)
         group.curators.add(curator.userprofile)
         group.add_member(curator.userprofile)
-        group.add_member(member.userprofile)
+        GroupMembership.objects.create(userprofile=member.userprofile, group=group,
+                                       status=GroupMembership.PENDING,
+                                       updated_on=datetime.now() - timedelta(days=10))
 
-        membership = group.groupmembership_set.filter(userprofile=member.userprofile)
         curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
-        membership.update(updated_on=datetime.now() - timedelta(days=10))
         curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
 
-        eq_(membership[0].status, GroupMembership.MEMBER)
         eq_(curator_membership[0].status, GroupMembership.MEMBER)
 
         invalidate_group_membership()
 
-        ok_(not group.groupmembership_set.filter(userprofile=member.userprofile).exists())
+        ok_(group.groupmembership_set.filter(userprofile=member.userprofile,
+                                             status=GroupMembership.PENDING).exists())
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+        ok_(not mail_task.called)
 
-        subject = 'Removed from Mozillians group "foo"'
-        mock_send_mail.assert_called_once_with(subject, ANY, 'noreply@example.com',
-                                               [member.email], fail_silently=False)
+    @patch('mozillians.groups.models.email_membership_change')
+    def invalidate_group_pending_terms(self, mail_task):
+        """Invalidate a group where a user has not yet accepted the terms.
+
+        Type is indifferent for this test.
+        """
+        member = UserFactory.create(vouched=True)
+        curator = UserFactory.create(vouched=True)
+
+        group = GroupFactory.create(name='Foo', invalidation_days=5)
+        group.curators.add(curator.userprofile)
+        group.add_member(curator.userprofile)
+        GroupMembership.objects.create(userprofile=member.userprofile, group=group,
+                                       status=GroupMembership.PENDING_TERMS,
+                                       updated_on=datetime.now() - timedelta(days=10))
+
+        curator_membership = group.groupmembership_set.filter(userprofile=curator.userprofile)
+        curator_membership.update(updated_on=datetime.now() - timedelta(days=10))
+
+        eq_(curator_membership[0].status, GroupMembership.MEMBER)
+
+        invalidate_group_membership()
+
+        ok_(group.groupmembership_set.filter(userprofile=member.userprofile,
+                                             status=GroupMembership.PENDING_TERMS).exists())
+        ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
+        ok_(not mail_task.called)
 
 
 class InvitationEmailTests(TestCase):

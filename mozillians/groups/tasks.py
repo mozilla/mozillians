@@ -101,8 +101,13 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
             # Odd things happen in some of our tests. Don't worry about it.
             raise ValueError('BAD ARGS TO email_membership_change')
     else:
-        # Odd things happen in some of our tests. Don't worry about it.
-        raise ValueError('BAD ARGS TO email_membership_change')
+        if new_status in [GroupMembership.PENDING_TERMS, GroupMembership.PENDING]:
+            subject = _('Status changed for Mozillians group "%s"') % group.name
+            template_name = 'groups/email/membership_status_changed.txt'
+        else:
+            # The user is a member that was removed from the group.
+            subject = _('Removed from Mozillians group "%s"') % group.name
+            template_name = 'groups/email/member_removed.txt'
 
     context = {
         'group': group,
@@ -110,31 +115,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     }
     template = get_template(template_name)
     body = template.render(context)
-    send_mail(subject, body, settings.FROM_NOREPLY,
-              [user.email], fail_silently=False)
-
-
-@task(ignore_result=True)
-def member_removed_email(group_pk, user_pk):
-    """
-    Email to member when he is removed from group
-    """
-
-    from mozillians.groups.models import Group
-
-    group = Group.objects.get(pk=group_pk)
-    user = User.objects.get(pk=user_pk)
-    activate('en-us')
-    template_name = 'groups/email/member_removed.txt'
-    subject = _('Removed from Mozillians group "%s"') % group.name
-    template = get_template(template_name)
-    context = {
-        'group': group,
-        'user': user,
-    }
-    body = template.render(context)
-    send_mail(subject, body, settings.FROM_NOREPLY,
-              [user.email], fail_silently=False)
+    send_mail(subject, body, settings.FROM_NOREPLY, [user.email], fail_silently=False)
 
 
 @periodic_task(run_every=timedelta(hours=24))
@@ -149,14 +130,16 @@ def invalidate_group_membership():
 
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)
+        last_update = datetime.now() - timedelta(days=group.invalidation_days)
         memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
+                                                .filter(updated_on__lte=last_update)
                                                 .exclude(userprofile__id__in=curator_ids))
 
-        last_update = datetime.now() - timedelta(days=group.invalidation_days)
-        memberships = memberships.filter(updated_on__lte=last_update)
-
         for member in memberships:
-            group.remove_member(member.userprofile)
+            status = None
+            if group.accepting_new_members != Group.OPEN:
+                status = GroupMembership.PENDING
+            group.remove_member(member.userprofile, status=status)
 
 
 @task(ignore_result=True)
