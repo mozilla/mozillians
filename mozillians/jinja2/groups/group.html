@@ -185,14 +185,20 @@
 
   {% if not people.paginator.count %}
     <div class="clear">
-      {% if membership_filter_form and membership_filter_form.filtr.value() == 'pending_members' %}
-        {% trans group_name=group.name %}
-          There are no open membership requests for {{ group_name }}.
-        {% endtrans %}
-      {% else %}
-        {% trans group_name=group.name %}
-          Sorry, we can not find any mozillians in {{ group_name }}.
-        {% endtrans %}
+      {% if membership_filter_form %}
+        {% if membership_filter_form.filtr.value() == 'pending_members' %}
+          {% trans group_name=group.name %}
+            There are no open membership requests for {{ group_name }}.
+          {% endtrans %}
+        {% elif membership_filter_form.filtr.value() == 'pending_terms' %}
+          {% trans group_name=group.name %}
+            There are no users who haven't accepted {{ group_name }}'s terms.
+          {% endtrans %}
+        {% else %}
+          {% trans group_name=group.name %}
+            Sorry, we can not find any mozillians in {{ group_name }}.
+          {% endtrans %}
+        {% endif %}
       {% endif %}
     </div>
   {% else %}

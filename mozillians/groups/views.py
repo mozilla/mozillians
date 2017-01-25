@@ -155,13 +155,16 @@ def show(request, url, alias_model, template):
             membership_filter_form = None
 
         if is_curator:
-            statuses = [GroupMembership.MEMBER, GroupMembership.PENDING]
+            statuses = [GroupMembership.MEMBER, GroupMembership.PENDING,
+                        GroupMembership.PENDING_TERMS]
             if membership_filter_form and membership_filter_form.is_valid():
                 filtr = membership_filter_form.cleaned_data['filtr']
                 if filtr == 'members':
                     statuses = [GroupMembership.MEMBER]
                 elif filtr == 'pending_members':
                     statuses = [GroupMembership.PENDING]
+                elif filtr == 'pending_terms':
+                    statuses = [GroupMembership.PENDING_TERMS]
 
             memberships = group.groupmembership_set.filter(status__in=statuses)
 
