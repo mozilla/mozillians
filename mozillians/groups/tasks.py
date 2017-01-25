@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db.models import Count, Max
 from django.template.loader import get_template, render_to_string
+from django.utils.timezone import now
 from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
@@ -130,7 +131,7 @@ def invalidate_group_membership():
 
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)
-        last_update = datetime.now() - timedelta(days=group.invalidation_days)
+        last_update = now() - timedelta(days=group.invalidation_days)
         memberships = (group.groupmembership_set.filter(updated_on__lte=last_update)
                                                 .exclude(userprofile__id__in=curator_ids))
 
@@ -139,6 +140,50 @@ def invalidate_group_membership():
             if group.accepting_new_members != Group.OPEN:
                 status = GroupMembership.PENDING
             group.remove_member(member.userprofile, status=status)
+
+
+@periodic_task(run_every=timedelta(hours=24))
+def notify_membership_renewal():
+    """
+    For groups with defined `invalidation_days` we need to notify users
+    2 weeks prior invalidation that the membership is expiring.
+    """
+
+    from mozillians.groups.models import Group, GroupMembership
+
+    days_prior_invalidation = 2 * 7  # 2 weeks
+    groups = Group.objects.filter(
+        invalidation_days__isnull=False, invalidation_days__gte=days_prior_invalidation)
+
+    for group in groups:
+        curator_ids = group.curators.all().values_list('id', flat=True)
+        memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
+                       .exclude(userprofile__id__in=curator_ids))
+
+        # Filter memberships to be notified
+        last_update_days = group.invalidation_days - days_prior_invalidation
+        last_update = now() - timedelta(days=last_update_days)
+
+        query_start = datetime.combine(last_update.date(), datetime.min.time())
+        query_end = datetime.combine(last_update.date(), datetime.max.time())
+
+        query = {
+            'updated_on__range': [query_start, query_end],
+        }
+        memberships = memberships.filter(**query)
+
+        template = get_template('groups/email/notify_member_renewal.txt')
+        for membership in memberships:
+            ctx = {
+                'member_full_name': membership.userprofile.full_name,
+                'group_name': membership.group.name,
+                'group_url': membership.group.get_absolute_url()
+            }
+
+            subject_msg = unicode('[Mozillians] Your membership to group "{0}" is about to expire')
+            subject = _(subject_msg.format(membership.group.name))
+            message = template.render(ctx)
+            send_mail(subject, message, settings.FROM_NOREPLY, [membership.userprofile.email])
 
 
 @task(ignore_result=True)
