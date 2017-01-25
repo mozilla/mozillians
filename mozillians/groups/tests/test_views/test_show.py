@@ -331,7 +331,7 @@ class ShowTests(TestCase):
         with self.login(self.user_1) as client:
             response = client.get(self.url, follow=True)
         ok_('membership_filter_form' in response.context)
-        eq_(response.context['membership_filter_form'], None)
+        ok_(response.context['membership_filter_form'])
 
     def test_show_filter_accepting_new_members_yes(self):
         self.group.curators.add(self.user_1.userprofile)
