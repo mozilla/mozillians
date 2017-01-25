@@ -225,7 +225,7 @@ def show(request, url, alias_model, template):
     return render(request, template, data)
 
 
-def remove_member(request, url, user_pk):
+def remove_member(request, url, user_pk, status=None):
     group = get_object_or_404(Group, url=url)
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
@@ -254,7 +254,7 @@ def remove_member(request, url, user_pk):
         return redirect(next_url)
 
     if request.method == 'POST':
-        group.remove_member(profile_to_remove,
+        group.remove_member(profile_to_remove, status=status,
                             send_email=(profile_to_remove != this_userprofile))
         if profile_to_remove in curators:
             group.curators.remove(profile_to_remove)

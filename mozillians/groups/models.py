@@ -11,11 +11,12 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
-from mozillians.groups.tasks import email_membership_change, member_removed_email
+from mozillians.groups.tasks import email_membership_change
 from mozillians.users.tasks import unsubscribe_from_basket_task, subscribe_user_to_basket
 
 
 class GroupBase(models.Model):
+    """Base class for groups in Mozillians."""
     name = models.CharField(db_index=True, max_length=50,
                             unique=True, verbose_name=_lazy(u'Name'))
     url = models.SlugField(blank=True)
@@ -50,6 +51,8 @@ class GroupBase(models.Model):
         return results
 
     def save(self, *args, **kwargs):
+        """Override save method."""
+
         self.name = self.name.lower()
         super(GroupBase, self).save()
         if not self.url:
@@ -61,13 +64,15 @@ class GroupBase(models.Model):
         return self.name
 
     def merge_groups(self, group_list):
+        """Merge two groups."""
         for group in group_list:
-            map(lambda x: self.add_member(x),
-                group.members.all())
+            map(lambda x: self.add_member(x), group.members.all())
             group.aliases.update(alias=self)
             group.delete()
 
     def user_can_leave(self, userprofile):
+        """Checks if a member of a group can leave."""
+
         curators = self.curators.all()
         return (
             # some groups don't allow leaving
@@ -76,10 +81,11 @@ class GroupBase(models.Model):
             (curators.count() > 1 or userprofile not in curators) and
             # only makes sense to leave a group they belong to (at least pending)
             (self.has_member(userprofile=userprofile) or
-                self.has_pending_member(userprofile=userprofile))
+             self.has_pending_member(userprofile=userprofile))
         )
 
     def user_can_join(self, userprofile):
+        """Checks if a user can join a group."""
         return (
             # Must be vouched
             userprofile.is_vouched and
@@ -93,23 +99,31 @@ class GroupBase(models.Model):
     # Read-only properties so clients don't care which subclasses have some fields
     @property
     def is_visible(self):
+        """Checks if a group is visible."""
         return getattr(self, 'visible', True)
 
     def add_member(self, userprofile):
+        """Adds a method to a group."""
         self.members.add(userprofile)
 
     def remove_member(self, userprofile):
+        """Removes a member from a group."""
         self.members.remove(userprofile)
 
     def has_member(self, userprofile):
+        """Checks membership status."""
         return self.members.filter(user=userprofile.user).exists()
 
     def has_pending_member(self, userprofile):
-        # skills have no pending members, just members
+        """Checks if a membership is pending.
+
+        Skills have no pending members, just members
+        """
         return False
 
 
 class GroupAliasBase(models.Model):
+    """Group Alias abstract base class."""
     name = models.CharField(max_length=50, unique=True)
     url = AutoSlugField(populate_from='name', unique=True,
                         editable=False, blank=True,
@@ -120,6 +134,7 @@ class GroupAliasBase(models.Model):
 
 
 class GroupAlias(GroupAliasBase):
+    """Group Alias class."""
     alias = models.ForeignKey('Group', related_name='aliases')
 
 
@@ -152,36 +167,45 @@ class GroupMembership(models.Model):
 
 
 class Group(GroupBase):
+    """Group class."""
     ALIAS_MODEL = GroupAlias
+
+    # Possible group types
+    OPEN = u'yes'
+    REVIEWED = u'by_request'
+    CLOSED = u'no'
+
+    GROUP_TYPES = (
+        (OPEN, _lazy(u'Open')),
+        (REVIEWED, _lazy(u'Reviewed')),
+        (CLOSED, _lazy(u'Closed')),
+    )
 
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=1024,
                                    verbose_name=_lazy(u'Description'),
                                    default='', blank=True)
-    curators = models.ManyToManyField('users.UserProfile',
-                                      related_name='groups_curated')
+    curators = models.ManyToManyField('users.UserProfile', related_name='groups_curated')
     irc_channel = models.CharField(
         max_length=63,
         verbose_name=_lazy(u'IRC Channel'),
         help_text=_lazy(u'An IRC channel where this group is discussed (optional).'),
         default='', blank=True)
     website = models.URLField(
-        max_length=200, verbose_name=_lazy(u'Website'),
+        max_length=200,
+        verbose_name=_lazy(u'Website'),
         help_text=_lazy(u'A URL of a web site with more information about this group (optional).'),
         default='', blank=True)
     wiki = models.URLField(
-        max_length=200, verbose_name=_lazy(u'Wiki'),
+        max_length=200,
+        verbose_name=_lazy(u'Wiki'),
         help_text=_lazy(u'A URL of a wiki with more information about this group (optional).'),
         default='', blank=True)
     members_can_leave = models.BooleanField(default=True)
-    accepting_new_members = models.CharField(
-        verbose_name=_lazy(u'Accepting new members'),
-        choices=(('yes', _lazy(u'Open')),
-                 ('by_request', _lazy(u'Reviewed')),
-                 ('no', _lazy(u'Closed')),),
-        default='yes',
-        max_length=10
-    )
+    accepting_new_members = models.CharField(verbose_name=_lazy(u'Accepting new members'),
+                                             choices=GROUP_TYPES,
+                                             default=OPEN,
+                                             max_length=10)
     new_member_criteria = models.TextField(
         max_length=1024,
         default='',
@@ -203,11 +227,17 @@ class Group(GroupBase):
     )
 
     terms = models.TextField(default='', verbose_name=_('Terms'), blank=True)
-    invalidation_days = models.PositiveIntegerField(null=True, default=None, blank=True,
+    invalidation_days = models.PositiveIntegerField(null=True,
+                                                    default=None,
+                                                    blank=True,
                                                     verbose_name=_('Invalidation days'))
-    invites = models.ManyToManyField('users.UserProfile', related_name='invites_received',
-                                     through='Invite', through_fields=('group', 'redeemer'))
-    invite_email_text = models.TextField(max_length=2048, default='', blank=True,
+    invites = models.ManyToManyField('users.UserProfile',
+                                     related_name='invites_received',
+                                     through='Invite',
+                                     through_fields=('group', 'redeemer'))
+    invite_email_text = models.TextField(max_length=2048,
+                                         default='',
+                                         blank=True,
                                          help_text=_('Please enter any additional text for the '
                                                      'invitation email'))
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
@@ -258,9 +288,9 @@ class Group(GroupBase):
         If the group in question is the NDA group, also add the user to the NDA newsletter.
         """
         defaults = dict(status=status, date_joined=now())
-        membership, created = GroupMembership.objects.get_or_create(userprofile=userprofile,
-                                                                    group=self,
-                                                                    defaults=defaults)
+        membership, _ = GroupMembership.objects.get_or_create(userprofile=userprofile,
+                                                              group=self,
+                                                              defaults=defaults)
         if membership.status != status:
             # Status changed
             # The only valid status change states are:
@@ -284,29 +314,44 @@ class Group(GroupBase):
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
-    def remove_member(self, userprofile, send_email=True):
+    def remove_member(self, userprofile, status=None, send_email=True):
+        """Change membership status for a group.
+
+        If user is a member of an open group, then the user is removed.
+
+        If a user is a member of a reviewed or closed group,
+        then the membership is in a pending state.
+        """
         try:
             membership = GroupMembership.objects.get(group=self, userprofile=userprofile)
         except GroupMembership.DoesNotExist:
             return
         old_status = membership.status
-        membership.delete()
 
-        if old_status == GroupMembership.PENDING and send_email:
-            # Request denied
-            email_membership_change.delay(self.pk, userprofile.user.pk, old_status, None)
-        elif old_status == GroupMembership.MEMBER:
+        # If the group is of type Group.OPEN, delete membership
+        # If no status is given, delete membership,
+        # If the current membership is PENDING*, delete membership
+        if (not status or self.accepting_new_members == Group.OPEN or
+                old_status != GroupMembership.MEMBER):
+            # We have either an open group or the request to join a reviewed group is denied
+            # or the curator manually declined a user in a pending state.
+            membership.delete()
+            # delete the invitation to the group if exists
+            Invite.objects.filter(group=self, redeemer=userprofile).delete()
+
+        # Group is either of Group.REVIEWED or Group.CLOSED, change membership to `status`
+        else:
+            # if we are here, there is a new status for our user
+            membership.status = status
+            membership.save()
+
             # If group is the NDA group, unsubscribe user from the newsletter.
             if self.name == settings.NDA_GROUP:
                 unsubscribe_from_basket_task.delay(userprofile.email,
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
-            if send_email:
-                # Member removed
-                member_removed_email.delay(self.pk, userprofile.user.pk)
-
-        # delete the invitation to the group if exists
-        Invite.objects.filter(group=self, redeemer=userprofile).delete()
+        if send_email:
+            email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
 
     def has_member(self, userprofile):
         """
@@ -324,6 +369,7 @@ class Group(GroupBase):
 
 
 class SkillAlias(GroupAliasBase):
+    """Skill alias class."""
     alias = models.ForeignKey('Skill', related_name='aliases')
 
     class Meta:
@@ -331,6 +377,7 @@ class SkillAlias(GroupAliasBase):
 
 
 class Skill(GroupBase):
+    """Skill class."""
     ALIAS_MODEL = SkillAlias
 
     def user_can_leave(self, userprofile):
@@ -342,6 +389,10 @@ class Skill(GroupBase):
 
 
 class Invite(models.Model):
+    """Invite class.
+
+    Invites a user to a protected group.
+    """
     inviter = models.ForeignKey('users.UserProfile', null=True, on_delete=models.SET_NULL,
                                 related_name='invite_sent', verbose_name=_lazy(u'Inviter'))
     redeemer = models.ForeignKey('users.UserProfile', related_name='groups_invited',

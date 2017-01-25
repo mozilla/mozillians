@@ -5,8 +5,8 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.models import GroupMembership, Invite
-from mozillians.groups.tests import GroupFactory, GroupAliasFactory, InviteFactory, SkillFactory
+from mozillians.groups.models import Group, GroupMembership
+from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
 
@@ -377,28 +377,26 @@ class ShowTests(TestCase):
         """POST to remove_member view removes member"""
         # Make user 1 the group curator so they can remove users
         self.group.curators.add(self.user_1.userprofile)
-        self.group.accepting_new_members = 'by_request'
+        self.group.accepting_new_members = Group.REVIEWED
         self.group.save()
-        invite = InviteFactory(group=self.group, redeemer=self.user_2.userprofile,
-                               inviter=self.user_1.userprofile)
 
         group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
         next_url = "%s?filtr=members" % group_url
-        eq_(self.group.invites.all().count(), 1)
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
         url = reverse('groups:remove_member', prefix='/en-US/',
-                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
+                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk,
+                                  status=GroupMembership.PENDING))
         with self.login(self.user_1) as client:
             response = client.post(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
         # make sure filter members is active
         membership_filter_form = response.context['membership_filter_form']
         eq_(membership_filter_form.cleaned_data['filtr'], 'members')
-        # Not a member anymore
-        ok_(not self.group.has_member(self.user_2.userprofile))
-        ok_(not Invite.objects.filter(pk=invite.pk).exists())
+        # Status PENDING
+        ok_(GroupMembership.objects.filter(group=self.group, userprofile=self.user_2.userprofile,
+                                           status=GroupMembership.PENDING))
 
     def test_confirm_user(self):
         """POST to confirm user view changes member from pending to member"""
