@@ -36,6 +36,8 @@ ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
+AUTHENTICATION_BACKENDS = ( 'django.contrib.auth.backends.ModelBackend', )
+
 MANAGERS = ADMINS
 
 DEBUG = True
@@ -90,3 +92,7 @@ CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
 BASKET_URL = 'http://127.0.0.1'
 BASKET_API_KEY = 'basket_api_key'
 BASKET_MANAGERS = None  # or list of email addresses.
+
+# Demo keys for ReCaptcha, no for prodution
+NORECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+NORECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'

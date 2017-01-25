@@ -50,6 +50,8 @@ ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
+AUTHENTICATION_BACKENDS = ( 'django.contrib.auth.backends.ModelBackend', )
+
 MANAGERS = ADMINS
 
 DEBUG = True
@@ -116,3 +118,7 @@ CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
     'http://*.mozilla.org',
     'http://*.mapbox.com',
 )
+
+# Demo keys for ReCaptcha, no for prodution
+NORECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+NORECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'

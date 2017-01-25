@@ -73,22 +73,26 @@ Building mozillians
      $ docker-compose run db /bin/bash
      shell> mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot -h db_1 mysql
 
-#. Create user
+#. Create a superuser::
 
-   #. Run mozillians::
+    $ docker-compose run web python manage.py createsuperuser
+
+#. Give permissions to the user::
+
+    $ docker-compose run web ./scripts/su.sh
+
+#. Run mozillians::
 
         docker-compose up
 
    #. Load http://127.0.0.1:8000 or (for Mac users only) ``<IP>:8000`` where ``<IP>`` is the one returned by ``boot2docker ip`` command.
    #. Sign in with persona to create your profile.
    #. Stop the server with ``Ctrl^C``.
-   #. Vouch your account and convert it to superuser::
-
-        docker-compose run web ./scripts/su.sh
 
       .. note::
 
          In case this command doesn't work, you can run ``./scripts/su.sh`` inside the container. In order to get shell access please run ``docker-compose run web /bin/bash``.
+         To login to mozillians.org for dev purposes please visit http://127.0.0.1:8000/admin and login with the credentials issued in the previous step. The signin button doesn't work locally.
 
 ******************
 Running mozillians

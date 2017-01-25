@@ -42,6 +42,8 @@ ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
+AUTHENTICATION_BACKENDS = ( 'django.contrib.auth.backends.ModelBackend', )
+
 MANAGERS = ADMINS
 
 DEBUG = TEMPLATE_DEBUG = True
