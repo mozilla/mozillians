@@ -434,24 +434,26 @@ class InvitationEmailTests(TestCase):
 
 
 class MembershipRenewalNotificationTests(TestCase):
+
+    def setUp(self):
+        self.group = GroupFactory.create(name='foo', invalidation_days=365,
+                                         accepting_new_members=Group.OPEN)
+        self.curator = UserFactory.create()
+        self.member = UserFactory.create()
+        self.group.add_member(self.member.userprofile)
+        self.group.curators.add(self.curator.userprofile)
+
     @patch('mozillians.groups.tasks.send_mail')
     @patch('mozillians.groups.tasks.now')
     def test_send_renewal_notification_email(self, mock_now, mock_send_mail):
-        curator = UserFactory.create()
-        member = UserFactory.create()
-        group = GroupFactory.create(name='foobar')
-        group.invalidation_days = 365
-        group.save()
-        group.curators.add(curator.userprofile)
-        group.add_member(member.userprofile)
+        group = self.group
 
-        membership = GroupMembership.objects.filter(group=group, userprofile=member.userprofile)
+        membership = GroupMembership.objects.filter(group=group,
+                                                    userprofile=self.member.userprofile)
 
-        datetime_now = now()
+        last_update = membership[0].updated_on
+        datetime_now = last_update + timedelta(days=14)
         mock_now.return_value = datetime_now
-
-        last_update = datetime_now - timedelta(days=351)
-        membership.update(updated_on=last_update)
 
         # Debugging code
 
@@ -470,16 +472,6 @@ class MembershipRenewalNotificationTests(TestCase):
 
         ok_(memberships.exists())
 
-        last_update_days = group.invalidation_days - (2 * 7)
-        last_update = datetime_now - timedelta(days=last_update_days)
-        query = {
-            'updated_on__year': last_update.year,
-            'updated_on__month': last_update.month,
-            'updated_on__day': last_update.day
-        }
-
-        ok_(memberships.filter(**query).exists())
-
         notify_membership_renewal()
 
         ok_(mock_send_mail.called)
@@ -487,7 +479,7 @@ class MembershipRenewalNotificationTests(TestCase):
         subject, body, from_addr, to_list = mock_send_mail.call_args[0]
         eq_(subject, '[Mozillians] Your membership to group "foobar" is about to expire')
         eq_(from_addr, settings.FROM_NOREPLY)
-        eq_(to_list, [member.userprofile.email])
+        eq_(to_list, [self.member.userprofile.email])
 
     def test_invalidation_days_less_than_2_weeks(self):
         curator = UserFactory.create()
