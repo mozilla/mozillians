@@ -131,8 +131,7 @@ def invalidate_group_membership():
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)
         last_update = datetime.now() - timedelta(days=group.invalidation_days)
-        memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
-                                                .filter(updated_on__lte=last_update)
+        memberships = (group.groupmembership_set.filter(updated_on__lte=last_update)
                                                 .exclude(userprofile__id__in=curator_ids))
 
         for member in memberships:
