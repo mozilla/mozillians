@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 from django.utils.translation import ugettext as _
 
 from dal import autocomplete
+from waffle.decorators import waffle_flag
 
 from mozillians.common.decorators import allow_unvouched
 from mozillians.common.templatetags.helpers import get_object_or_none, urlparams
@@ -135,6 +136,7 @@ def show(request, url, alias_model, template):
     data = {}
 
     if isinstance(group, Group):
+
         # Has the user accepted the group terms
         if group.terms:
             membership = get_object_or_none(GroupMembership, group=group, userprofile=profile,
@@ -576,3 +578,30 @@ def send_invitation_email(request, invite_pk):
     next_url = urlparams(reverse('groups:group_edit', args=[invite.group.url]), next_section)
 
     return HttpResponseRedirect(next_url)
+
+
+@never_cache
+@waffle_flag('force_group_invalidation', '404')
+def force_group_invalidation(request, url, alias_model, template=''):
+    """View to help test different scenarios.
+
+    Forces an immediate invalidation in the case that a group is
+    set to expire its memberships.
+    """
+    group_alias = get_object_or_404(alias_model, url=url)
+    group = group_alias.alias
+    is_curator = group.curators.filter(id=request.user.userprofile.pk).exists()
+    if group.invalidation_days and is_curator:
+
+        curator_ids = group.curators.all().values_list('id', flat=True)
+        memberships = group.groupmembership_set.exclude(userprofile__id__in=curator_ids)
+
+        for member in memberships:
+            status = None
+            if group.accepting_new_members != Group.OPEN:
+                status = GroupMembership.PENDING
+            group.remove_member(member.userprofile, status=status)
+    else:
+        raise Http404
+
+    return redirect(reverse('groups:show_group', args=[group.url]))
