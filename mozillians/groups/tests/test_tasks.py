@@ -434,71 +434,40 @@ class InvitationEmailTests(TestCase):
 
 
 class MembershipRenewalNotificationTests(TestCase):
+
     @patch('mozillians.groups.tasks.send_mail')
     @patch('mozillians.groups.tasks.now')
     def test_send_renewal_notification_email(self, mock_now, mock_send_mail):
+        """Test that two weeks before a membership expires, notifications are sent."""
+
+        # Pretend that we are in the future, two weeks before the invalidation
+        mocked_date = now() + timedelta(days=6)
+        today = now()
+        mock_now.return_value = mocked_date
+
         curator = UserFactory.create()
         member = UserFactory.create()
-        group = GroupFactory.create(name='foobar')
-        group.invalidation_days = 365
-        group.save()
+        group = GroupFactory.create(name='foobar',
+                                    invalidation_days=20)
         group.curators.add(curator.userprofile)
-        group.add_member(member.userprofile)
+        GroupMembership.objects.create(userprofile=member.userprofile,
+                                       group=group,
+                                       status=GroupMembership.MEMBER,
+                                       date_joined=today)
 
-        membership = GroupMembership.objects.filter(group=group, userprofile=member.userprofile)
-
-        datetime_now = now()
-        mock_now.return_value = datetime_now
-
-        last_update = datetime_now - timedelta(days=351)
-        membership.update(updated_on=last_update)
-
-        # Debugging code
-
-        ok_(Group.objects.filter(invalidation_days__isnull=False).exists())
-        ok_(group.invalidation_days > 2 * 7)
-
-        curator_ids = group.curators.all().values_list('id', flat=True)
-
-        ok_(group.groupmembership_set.all().exists())
-
-        memberships = group.groupmembership_set.filter(status=GroupMembership.MEMBER)
-
-        ok_(memberships.exists())
-
-        memberships = memberships.exclude(userprofile__id__in=curator_ids)
-
-        ok_(memberships.exists())
-
-        last_update_days = group.invalidation_days - (2 * 7)
-        last_update = datetime_now - timedelta(days=last_update_days)
-
-        eq_(memberships.count(), 1)
-        m = memberships[0]
-        eq_(m.userprofile.id, member.userprofile.id)
-
-        eq_(m.updated_on.year, last_update.year)
-        eq_(m.updated_on.month, last_update.month)
-        eq_(m.updated_on.day, last_update.day)
-
-        query = {
-            'updated_on__year': last_update.year,
-            'updated_on__month': last_update.month,
-            'updated_on__day': last_update.day
-        }
-
-        ok_(memberships.filter(**query).exists())
-
+        ok_(GroupMembership.objects.filter(userprofile=member.userprofile, group=group).exists())
         notify_membership_renewal()
 
         ok_(mock_send_mail.called)
         eq_(1, len(mock_send_mail.call_args_list))
-        subject, body, from_addr, to_list = mock_send_mail.call_args[0]
+        subject, _, from_addr, to_list = mock_send_mail.call_args[0]
         eq_(subject, '[Mozillians] Your membership to group "foobar" is about to expire')
         eq_(from_addr, settings.FROM_NOREPLY)
-        eq_(to_list, [member.userprofile.email])
+        eq_(to_list, [member.email])
 
     def test_invalidation_days_less_than_2_weeks(self):
+        """Test that no notification is sent if 'invalidation_days' is less than 2 weeks."""
+
         curator = UserFactory.create()
         member = UserFactory.create()
         group = GroupFactory.create(name='foobar')

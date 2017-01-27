@@ -152,28 +152,28 @@ def notify_membership_renewal():
     from mozillians.groups.models import Group, GroupMembership
 
     groups = Group.objects.filter(invalidation_days__isnull=False)
-    days_prior_invalidation = 2 * 7  # 2 weeks
+    days_prior_to_invalidation = 2 * 7  # 2 weeks
 
     for group in groups:
-        # If invalidation days is less than 2 weeks drop the task
-        if group.invalidation_days < days_prior_invalidation:
+        # If invalidation days is less than 2 weeks, skip the notification
+        if group.invalidation_days < days_prior_to_invalidation:
             continue
 
         curator_ids = group.curators.all().values_list('id', flat=True)
         memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
                        .exclude(userprofile__id__in=curator_ids))
 
-        # Filter memberships to be notified
-        last_update_days = group.invalidation_days - days_prior_invalidation
-        last_update = now() - timedelta(days=last_update_days)
+        # Filter memberships to be notified that were updated on 'last_update_date'
+        last_update_date = now() - timedelta(days=group.invalidation_days -
+                                             days_prior_to_invalidation)
         query = {
-            'updated_on__year': last_update.year,
-            'updated_on__month': last_update.month,
-            'updated_on__day': last_update.day
+            'updated_on__year': last_update_date.year,
+            'updated_on__month': last_update_date.month,
+            'updated_on__day': last_update_date.day
         }
         memberships = memberships.filter(**query)
-
         template = get_template('groups/email/notify_member_renewal.txt')
+
         for membership in memberships:
             ctx = {
                 'member_full_name': membership.userprofile.full_name,
@@ -184,7 +184,7 @@ def notify_membership_renewal():
             subject_msg = unicode('[Mozillians] Your membership to group "{0}" is about to expire')
             subject = _(subject_msg.format(membership.group.name))
             message = template.render(ctx)
-            send_mail(subject, message, settings.FROM_NOREPLY, [membership.userprofile.email])
+            send_mail(subject, message, settings.FROM_NOREPLY, [membership.userprofile.user.email])
 
 
 @task(ignore_result=True)
