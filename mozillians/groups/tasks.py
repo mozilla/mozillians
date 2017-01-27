@@ -70,7 +70,7 @@ def send_pending_membership_emails():
 
 
 @task(ignore_result=True)
-def email_membership_change(group_pk, user_pk, old_status, new_status):
+def email_membership_change(group_pk, user_pk, old_status, new_status, group_expired=False):
     """
     Email user that their group membership status has changed.
 
@@ -112,6 +112,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     context = {
         'group': group,
         'user': user,
+        'group_expired': group_expired,
     }
     template = get_template(template_name)
     body = template.render(context)
@@ -138,7 +139,7 @@ def invalidate_group_membership():
             status = None
             if group.accepting_new_members != Group.OPEN:
                 status = GroupMembership.PENDING
-            group.remove_member(member.userprofile, status=status)
+            group.remove_member(member.userprofile, status=status, group_expired=True)
 
 
 @task(ignore_result=True)

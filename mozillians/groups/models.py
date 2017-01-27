@@ -314,7 +314,7 @@ class Group(GroupBase):
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
-    def remove_member(self, userprofile, status=None, send_email=True):
+    def remove_member(self, userprofile, status=None, group_expired=False, send_email=True):
         """Change membership status for a group.
 
         If user is a member of an open group, then the user is removed.
@@ -351,7 +351,11 @@ class Group(GroupBase):
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
         if send_email:
-            email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
+            email_membership_change.delay(self.pk,
+                                          userprofile.user.pk,
+                                          old_status,
+                                          status,
+                                          group_expired=group_expired)
 
     def has_member(self, userprofile):
         """

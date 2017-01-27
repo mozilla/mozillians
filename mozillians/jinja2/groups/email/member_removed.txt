@@ -4,7 +4,12 @@ Hi {{ name }},
 
 
 {% trans name=group.name %}
-You have been removed from the Mozillians group "{{ name }}".
+{% if group_expired %}
+Your membership expired and you
+{% else %}
+You
+{% endif %}
+have been removed from the Mozillians group "{{ name }}".
 {% endtrans %}
 
 {% trans link=group.get_absolute_url() %}

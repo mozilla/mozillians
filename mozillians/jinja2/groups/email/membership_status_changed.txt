@@ -4,7 +4,7 @@ Hi {{ name }},
 
 
 {% trans name=group.name %}
-Your membership status has changed for Mozillians group "{{ name }}".
+Your membership status {% if group_expired %} expired{% else %}has changed{% endif %} for Mozillians group "{{ name }}".
 {% endtrans %}
 
 
