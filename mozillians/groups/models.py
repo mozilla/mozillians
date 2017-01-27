@@ -314,7 +314,7 @@ class Group(GroupBase):
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
-    def remove_member(self, userprofile, status=None, send_email=True):
+    def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.
 
         If user is a member of an open group, then the user is removed.
@@ -338,12 +338,14 @@ class Group(GroupBase):
             membership.delete()
             # delete the invitation to the group if exists
             Invite.objects.filter(group=self, redeemer=userprofile).delete()
+            send_email = True
 
         # Group is either of Group.REVIEWED or Group.CLOSED, change membership to `status`
         else:
             # if we are here, there is a new status for our user
             membership.status = status
             membership.save()
+            send_email = True
 
             # If group is the NDA group, unsubscribe user from the newsletter.
             if self.name == settings.NDA_GROUP:
