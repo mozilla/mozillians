@@ -52,6 +52,12 @@
       </a>
     {% endif %}
 
+    {% if waffle.flag('force_group_invalidation') %}
+      <a class="button right" href="{{ url('groups:force_group_invalidation', group.url) }}">
+        Invalidate Group
+      </a>
+    {% endif %}
+
     {% if group.description %}
       <p class="group-description">{{ group.description }}</p>
     {% endif %}
