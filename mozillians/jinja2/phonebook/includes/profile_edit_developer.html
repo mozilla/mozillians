@@ -29,9 +29,11 @@
             {{ developer_form.allows_mozilla_sites }}
           </p>
           <p>
+            {% trans %}
             API Version 2, currently under testing, respects the defined
             per field privacy levels. These fields will become obsolete
             and eventually dropped along with the API Version 1.
+            {% endtrans %}
           </p>
         </fieldset>
       </div>
@@ -46,8 +48,8 @@
         <div class="panel-heading">{{ _('Developer') }}</div>
         <div class="panel-body">
           <fieldset id="api" class="edit-controls">
-            <p>Developers can request API keys and manage existing ones using our dedicated API page.</p>
-            <a class="cancel" href="{{ url('phonebook:apikeys') }}">Manage API keys</a>
+            <p>{{ _('Developers can request API keys and manage existing ones using our dedicated API page.') }}</p>
+            <a class="cancel" href="{{ url('phonebook:apikeys') }}">{{ _('Manage API keys.') }}</a>
           </fieldset>
         </div>
       </div>
