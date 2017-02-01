@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.template.loader import get_template
 from django.test import override_settings
+from django.utils.timezone import now
 
 from mock import patch, ANY
 from nose.tools import eq_, ok_
@@ -11,7 +12,8 @@ from nose.tools import eq_, ok_
 from mozillians.common.tests import TestCase
 from mozillians.groups import tasks
 from mozillians.groups.models import Group, GroupMembership, Skill
-from mozillians.groups.tasks import invalidate_group_membership, email_membership_change
+from mozillians.groups.tasks import (invalidate_group_membership, email_membership_change,
+                                     notify_membership_renewal)
 from mozillians.groups.tests import GroupFactory, InviteFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
@@ -429,3 +431,56 @@ class InvitationEmailTests(TestCase):
         ok_(mock_get_template.called)
         eq_(template_name, mock_get_template.call_args[0][0])
         mock_send_email.assert_called_once_with(*args)
+
+
+class MembershipRenewalNotificationTests(TestCase):
+
+    @patch('mozillians.groups.tasks.send_mail')
+    @patch('mozillians.groups.tasks.now')
+    def test_send_renewal_notification_email(self, mock_now, mock_send_mail):
+        """Test that two weeks before a membership expires, notifications are sent."""
+
+        # Pretend that we are in the future, two weeks before the invalidation
+        mocked_date = now() + timedelta(days=6)
+        today = now()
+        mock_now.return_value = mocked_date
+
+        curator = UserFactory.create()
+        member = UserFactory.create()
+        group = GroupFactory.create(name='foobar',
+                                    invalidation_days=20)
+        group.curators.add(curator.userprofile)
+        GroupMembership.objects.create(userprofile=member.userprofile,
+                                       group=group,
+                                       status=GroupMembership.MEMBER,
+                                       date_joined=today)
+
+        ok_(GroupMembership.objects.filter(userprofile=member.userprofile, group=group).exists())
+        notify_membership_renewal()
+
+        ok_(mock_send_mail.called)
+        eq_(1, len(mock_send_mail.call_args_list))
+        subject, _, from_addr, to_list = mock_send_mail.call_args[0]
+        eq_(subject, '[Mozillians] Your membership to group "foobar" is about to expire')
+        eq_(from_addr, settings.FROM_NOREPLY)
+        eq_(to_list, [member.email])
+
+    def test_invalidation_days_less_than_2_weeks(self):
+        """Test that no notification is sent if 'invalidation_days' is less than 2 weeks."""
+
+        curator = UserFactory.create()
+        member = UserFactory.create()
+        group = GroupFactory.create(name='foobar')
+        group.invalidation_days = 10
+        group.curators.add(curator.userprofile)
+        group.save()
+        group.add_member(member.userprofile)
+
+        membership = GroupMembership.objects.filter(group=group, userprofile=member.userprofile)
+        last_update = now() - timedelta(days=351)
+        membership.update(updated_on=last_update)
+
+        with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
+            notify_membership_renewal()
+
+        ok_(not mock_send_mail.called)
