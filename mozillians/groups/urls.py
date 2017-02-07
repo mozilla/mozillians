@@ -8,6 +8,9 @@ from mozillians.groups.views import SkillsAutocomplete
 from mozillians.users.views import CuratorsAutocomplete
 
 
+OPTIONAL_MEMBERSHIP_STATUS = '(?:/(?P<status>[-\w]+))?'
+
+
 urlpatterns = patterns(
     'mozillians.groups',
     url('^functional-areas/$', 'views.index_functional_areas',
@@ -23,7 +26,7 @@ urlpatterns = patterns(
         name='show_group'),
     url('^group/(?P<url>[-\w]+)/join/$',
         'views.join_group', name='join_group'),
-    url('^group/(?P<url>[-\w]+)/remove/(?P<user_pk>\d+)/$',
+    url('^group/(?P<url>[-\w]+)/remove/(?P<user_pk>\d+){0}/$'.format(OPTIONAL_MEMBERSHIP_STATUS),
         'views.remove_member', name='remove_member'),
     url('^group/(?P<url>[-\w]+)/confirm/(?P<user_pk>\d+)/$',
         'views.confirm_member', name='confirm_member'),

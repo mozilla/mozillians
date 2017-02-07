@@ -148,7 +148,8 @@ def show(request, url, alias_model, template):
         is_curator = is_manager or (request.user.userprofile in group.curators.all())
 
         # initialize the form only when the group is moderated and user is curator of the group
-        if is_curator and group.accepting_new_members == 'by_request':
+        if (is_curator and (group.accepting_new_members == Group.REVIEWED or
+                            group.accepting_new_members == Group.CLOSED)):
             membership_filter_form = forms.MembershipFilterForm(request.GET)
         else:
             membership_filter_form = None
@@ -185,7 +186,7 @@ def show(request, url, alias_model, template):
         count_skills = defaultdict(int)
         for skill_id in shared_skill_ids:
             count_skills[skill_id] += 1
-        common_skills_ids = [k for k, v in sorted(count_skills.items(),
+        common_skills_ids = [k for k, _ in sorted(count_skills.items(),
                                                   key=lambda x: x[1],
                                                   reverse=True)
                              if count_skills[k] > 1]
@@ -225,7 +226,7 @@ def show(request, url, alias_model, template):
     return render(request, template, data)
 
 
-def remove_member(request, url, user_pk):
+def remove_member(request, url, user_pk, status=None):
     group = get_object_or_404(Group, url=url)
     profile_to_remove = get_object_or_404(UserProfile, pk=user_pk)
     this_userprofile = request.user.userprofile
@@ -254,7 +255,7 @@ def remove_member(request, url, user_pk):
         return redirect(next_url)
 
     if request.method == 'POST':
-        group.remove_member(profile_to_remove,
+        group.remove_member(profile_to_remove, status=status,
                             send_email=(profile_to_remove != this_userprofile))
         if profile_to_remove in curators:
             group.curators.remove(profile_to_remove)
@@ -347,15 +348,15 @@ def join_group(request, url):
         messages.error(request, _('You are already in this group.'))
     elif group.has_pending_member(profile_to_add):
         messages.error(request, _('Your request to join this group is still pending.'))
-    elif group.accepting_new_members == 'no':
+    elif group.accepting_new_members == Group.CLOSED:
         messages.error(request, _('This group is not accepting requests to join.'))
     else:
-        if group.accepting_new_members == 'yes':
+        if group.accepting_new_members == Group.OPEN:
             status = GroupMembership.MEMBER
             messages.info(request, _('You have been added to this group.'))
             if group.terms:
                 status = GroupMembership.PENDING_TERMS
-        elif group.accepting_new_members == 'by_request':
+        elif group.accepting_new_members == Group.REVIEWED:
             status = GroupMembership.PENDING
             messages.info(request, _('Your membership request has been sent '
                                      'to the group curator(s).'))
