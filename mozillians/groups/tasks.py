@@ -172,18 +172,30 @@ def notify_membership_renewal():
         }
         memberships = memberships.filter(**query)
 
-        template = get_template('groups/email/notify_member_renewal.txt')
+        member_template = get_template('groups/email/notify_member_renewal.txt')
+        curator_template = get_template('groups/email/notify_curator_renewal.txt')
+
         for membership in memberships:
             ctx = {
                 'member_full_name': membership.userprofile.full_name,
                 'group_name': membership.group.name,
-                'group_url': membership.group.get_absolute_url()
+                'group_url': membership.group.get_absolute_url(),
+                'member_profile_url': membership.userprofile.get_absolute_url()
             }
 
             subject_msg = unicode('[Mozillians] Your membership to group "{0}" is about to expire')
             subject = _(subject_msg.format(membership.group.name))
-            message = template.render(ctx)
+            message = member_template.render(ctx)
             send_mail(subject, message, settings.FROM_NOREPLY, [membership.userprofile.email])
+
+            subject_msg = unicode('[Mozillians][{0}] Membership of "{1}" is about to expire')
+            format_args = [membership.group.name, membership.userprofile.full_name]
+            subject = _(subject_msg.format(*format_args))
+
+            for curator in group.curators.all():
+                ctx['curator_full_name'] = curator.full_name
+                message = curator_template.render(ctx)
+                send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
 
 
 @task(ignore_result=True)
