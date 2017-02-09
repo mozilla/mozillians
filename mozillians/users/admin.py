@@ -457,7 +457,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
                    NDAMemberFilter, BasketTokenFilter, 'externalaccount__type', 'referral_source']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
-                    'number_of_vouchees']
+                    'number_of_vouchees', 'date_joined']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
