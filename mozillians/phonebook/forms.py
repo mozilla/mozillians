@@ -383,7 +383,7 @@ class EmailForm(happyforms.Form):
         return self.cleaned_data['email'] != self.initial['email']
 
 
-class RegisterForm(BasicInformationForm, LocationForm):
+class RegisterForm(BasicInformationForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
@@ -392,8 +392,7 @@ class RegisterForm(BasicInformationForm, LocationForm):
     class Meta:
         model = UserProfile
         fields = ('photo', 'full_name', 'timezone', 'privacy_photo', 'privacy_full_name', 'optin',
-                  'privacy_timezone', 'privacy_geo_city', 'privacy_geo_region',
-                  'privacy_geo_country',)
+                  'privacy_timezone',)
 
 
 class VouchForm(happyforms.Form):
