@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import include, patterns, url
 from django.views.generic import TemplateView
 
 from mozillians.common.decorators import allow_public
@@ -26,7 +26,7 @@ urlpatterns = patterns(
     url(r'^delete/$', 'views.delete', name='profile_delete'),
     url(r'^opensearch.xml$', 'views.search_plugin', name='search_plugin'),
     url(r'^search/$', 'views.search', name='search'),
-    url(r'^betasearch/$', 'views.betasearch', name='betasearch'),
+    url(r'^betasearch/', include('haystack.urls')),
     url(r'^invite/$', 'views.invite', name='invite'),
     url(r'^invite/(?P<invite_pk>\d+)/delete/$', 'views.delete_invite', name='delete_invite'),
     url(r'^country/(?P<country>[A-Za-z0-9 \.]+)/$',

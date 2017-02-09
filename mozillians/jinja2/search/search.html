@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ _('Search Results') }}{% endblock %}
+
+{% block body_id %}betasearch{% endblock %}
+
+{% block body_class %}
+  {{ super() }}
+  search-page
+{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block content %}
+  <h1>{{ _('Beta Search') }}</h1>
+  <form method="GET" id="search-form" action=".">
+    <table>
+      {{ form.as_table() }}
+        <tr>
+          <td>&nbsp;</td>
+          <td>
+            <input type="submit" value="Search">
+          </td>
+      </tr>
+    </table>
+    {% if query %}
+      <h3>Results</h3>
+
+      {% for result in page.object_list %}
+        <p> {{ result.object }} </p>
+      {% endfor %}
+
+    {% endif %}
+  </form>
+{% endblock %}
+
+{% block page_js %}
+{% endblock %}

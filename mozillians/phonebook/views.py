@@ -417,58 +417,6 @@ def search(request):
     return render(request, 'phonebook/search.html', d)
 
 
-@waffle_flag('betasearch')
-def betasearch(request):
-    """This view is for researching new search and data filtering
-    options. It will eventually replace the 'search' view.
-
-    Filtering using SearchFilter does not respect privacy levels
-    because it directly hits the db. This should be further
-    investigated before the feature is released to the
-    public. Meanwhile we limit searches only to vouched users.
-
-    This view is behind the 'betasearch' waffle flag.
-
-    """
-    limit = None
-    people = []
-    show_pagination = False
-    form = forms.SearchForm(request.GET)
-    filtr = forms.SearchFilter(request.GET)
-
-    if form.is_valid():
-        query = form.cleaned_data.get('q', u'')
-        limit = form.cleaned_data['limit']
-        page = request.GET.get('page', 1)
-        public = not (request.user.is_authenticated() and
-                      request.user.userprofile.is_vouched)
-
-        profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
-        profiles = UserProfileMappingType.search(query,
-                                                 include_non_vouched=True,
-                                                 public=public)
-        profiles = profiles.filter(id__in=profiles_matching_filter)
-
-        paginator = Paginator(profiles, limit)
-
-        try:
-            people = paginator.page(page)
-        except PageNotAnInteger:
-            people = paginator.page(1)
-        except EmptyPage:
-            people = paginator.page(paginator.num_pages)
-
-        show_pagination = paginator.count > settings.ITEMS_PER_PAGE
-
-    data = dict(people=people,
-                search_form=form,
-                filtr=filtr,
-                limit=limit,
-                show_pagination=show_pagination)
-
-    return render(request, 'phonebook/betasearch.html', data)
-
-
 @allow_public
 @cache_control(public=True, must_revalidate=True, max_age=3600 * 24 * 7)  # 1 week.
 def search_plugin(request):
