@@ -1,0 +1,22 @@
+{% trans %}
+Hello {{ curator_full_name }},
+{% endtrans %}
+
+{% trans %}
+The membership of {{ member_full_name}} to group
+"{{ group_name }}" is about to expire in two weeks.
+Please take the appropriate action to ensure that user
+remains subscribed to this group.
+{% endtrans %}
+
+{% trans %}
+You can view the group membership here:
+{% endtrans %}
+{{ group_url }}
+
+{% trans %}
+You can view the profile page here:
+{% endtrans %}
+{{ absolutify(member_profile_url) }}
+
+{{ _('The Mozillians.org team') }}
