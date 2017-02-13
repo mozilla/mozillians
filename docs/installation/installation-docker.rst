@@ -17,7 +17,7 @@ Running Docker on Mac
 
 Here are some notes regarding running Docker on Mac.
 
-* Docker cannot run natively on Mac because it is based in a Linux kernel specific featured called LXC.
+* Docker cannot run natively on Mac because it is based on a Linux kernel specific feature called LXC.
 * When running docker in Mac via **boot2docker** you are running a lightweight Linux VM in Virtualbox that hosts the docker daemon and the LXC containers.
 * We are running docker client in our host system that connects to the docker daemon inside boot2docker VM.
 * We are using docker's *volume sharing* feature in order to share the source code with the Mozillians container. This is not directly supported in Mac. As a workaround boot2docker implements this feature by sharing the folder with Virtualbox first.

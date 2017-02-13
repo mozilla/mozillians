@@ -1,0 +1,18 @@
+{% trans %}
+Hello {{ member_full_name }},
+{% endtrans %}
+
+{% trans %}
+Your membership to group "{{ group_name }}" is
+about to expire in two weeks. Please contact the group
+curator for further info.
+{% endtrans %}
+
+{% trans %}
+You can view the group membership here:
+{% endtrans %}
+
+{{ group_url }}
+
+
+{{ _('The Mozillians.org team') }}

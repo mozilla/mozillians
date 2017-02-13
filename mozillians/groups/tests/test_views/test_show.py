@@ -445,7 +445,7 @@ class ShowTests(TestCase):
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
-        ok_(member_membership in people, people)
+        ok_(member_membership in people)
         ok_(pending_membership not in people)
 
     def test_filter_pending_only(self):
@@ -467,11 +467,33 @@ class ShowTests(TestCase):
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
-        ok_(member_membership not in people, people)
+        ok_(member_membership not in people)
         ok_(pending_membership in people)
 
-    def test_filter_both(self):
-        """If they specify both filters, they get all the members"""
+    def test_filter_pending_terms_only(self):
+        """Filter users who haven't accept group's terms."""
+        # Make user 1 the group curator so they can see requests
+        self.group.curators.add(self.user_1.userprofile)
+        self.group.accepting_new_members = 'by_request'
+        self.group.save()
+        # Make user 2 a full member
+        self.group.add_member(self.user_2.userprofile, GroupMembership.MEMBER)
+        member_membership = self.group.groupmembership_set.get(userprofile__user=self.user_2)
+
+        # Make user 3 a pending member
+        self.user_3 = UserFactory.create()
+        self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING_TERMS)
+        pending_membership = self.group.groupmembership_set.get(userprofile__user=self.user_3)
+
+        url = urlparams(self.url, filtr='pending_terms')
+        with self.login(self.user_1) as client:
+            response = client.get(url, follow=True)
+        people = response.context['people'].object_list
+        ok_(member_membership not in people)
+        ok_(pending_membership in people)
+
+    def test_filter_all(self):
+        """If they specify no filters, they get all the members"""
         # Make user 1 the group curator so they can see requests
         self.group.curators.add(self.user_1.userprofile)
         self.group.accepting_new_members = 'by_request'
@@ -485,12 +507,19 @@ class ShowTests(TestCase):
         self.group.add_member(self.user_3.userprofile, GroupMembership.PENDING)
         pending_membership = self.group.groupmembership_set.get(userprofile__user=self.user_3)
 
+        # Make user 4 a pending_terms member
+        self.user_4 = UserFactory.create()
+        self.group.add_member(self.user_4.userprofile, GroupMembership.PENDING_TERMS)
+        pending_terms_membership = self.group.groupmembership_set.get(
+            userprofile__user=self.user_4)
+
         url = urlparams(self.url, filtr='all')
         with self.login(self.user_1) as client:
             response = client.get(url, follow=True)
         people = response.context['people'].object_list
-        ok_(member_membership in people, people)
+        ok_(member_membership in people)
         ok_(pending_membership in people)
+        ok_(pending_terms_membership in people)
 
     def test_filter_pending_ignored_when_accepting_new_members_yes(self):
         """

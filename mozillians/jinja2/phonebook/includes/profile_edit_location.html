@@ -20,7 +20,7 @@
             <div id="location_gps_button"><i class="icon-target"></i></div>
             <img id="location_gps_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
             <input id="location_search" type="search"/>
-            <input id="location_search_button" class="button" type="button" value="Search location"/>
+            <input id="location_search_button" class="button" type="button" value="{{ _('Search location') }}"/>
             <img id="location_search_loading" src="{{ static('mozillians/img/loader_blue.gif') }}">
             <ol id="location_search_results" class="scroll-shadows"></ol>
           </div>
@@ -30,8 +30,8 @@
           <div id="location_wrong" >
             <a id="improve_this_map" target="_blank"
                href="https://www.openstreetmap.org/note/new#map=13/{{profile.lat}}/{{profile.lng}}&layers=N">
-              Improve this map</a>
-            <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[learn more]</a>
+              {{ _('Improve this map') }}]</a>
+            <a href="https://wiki.mozilla.org/Mozillians/Locations" target="_blank" class="small">[{{ _('learn more') }}]</a>
           </div>
         </fieldset>
 
