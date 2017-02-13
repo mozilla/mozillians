@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import unittest
 from datetime import datetime
 from uuid import uuid4
 
@@ -7,7 +8,6 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
 from django.test import override_settings
-from django.utils import unittest
 from django.utils.timezone import make_aware
 
 import pytz

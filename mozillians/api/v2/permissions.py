@@ -15,7 +15,7 @@ class MozilliansPermission(BasePermission):
             if api_query.exists():
                 api_key = api_query.order_by('privacy_level')[0].key
 
-        api_key = (request.REQUEST.get('api-key') or request.META.get('HTTP_X_API_KEY') or api_key)
+        api_key = (request.GET.get('api-key') or request.META.get('HTTP_X_API_KEY') or api_key)
 
         if api_key:
             try:
