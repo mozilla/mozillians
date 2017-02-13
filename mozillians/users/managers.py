@@ -1,4 +1,5 @@
-from django.db.models import Q, Manager, get_model
+from django.apps import apps
+from django.db.models import Q, Manager
 from django.db.models.query import QuerySet, ValuesQuerySet
 
 from django.utils.translation import ugettext_lazy as _lazy
@@ -56,7 +57,7 @@ class UserProfileQuerySet(QuerySet):
     def __init__(self, *args, **kwargs):
         # TODO update public_q with external accounts
         self.public_q = Q()
-        UserProfile = get_model('users', 'UserProfile')
+        UserProfile = apps.get_model('users', 'UserProfile')
         for field in UserProfile.privacy_fields():
             key = 'privacy_%s' % field
             self.public_q |= Q(**{key: PUBLIC})
