@@ -10,6 +10,7 @@ from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
 from celery.task import periodic_task, task
+from waffle import switch_is_active
 
 
 @task(ignore_result=True)
@@ -161,16 +162,19 @@ def notify_membership_renewal():
                        .exclude(userprofile__id__in=curator_ids))
 
         # Filter memberships to be notified
-        last_update_days = group.invalidation_days - days_prior_invalidation
-        last_update = now() - timedelta(days=last_update_days)
+        # Switch is being used only for testing mail notifications
+        # It disables membership filtering based on date
+        if not switch_is_active('test_membership_renewal_notification'):
+            last_update_days = group.invalidation_days - days_prior_invalidation
+            last_update = now() - timedelta(days=last_update_days)
 
-        query_start = datetime.combine(last_update.date(), datetime.min.time())
-        query_end = datetime.combine(last_update.date(), datetime.max.time())
+            query_start = datetime.combine(last_update.date(), datetime.min.time())
+            query_end = datetime.combine(last_update.date(), datetime.max.time())
 
-        query = {
-            'updated_on__range': [query_start, query_end],
-        }
-        memberships = memberships.filter(**query)
+            query = {
+                'updated_on__range': [query_start, query_end],
+            }
+            memberships = memberships.filter(**query)
 
         member_template = get_template('groups/email/notify_member_renewal.txt')
         curator_template = get_template('groups/email/notify_curator_renewal.txt')

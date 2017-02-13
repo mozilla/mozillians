@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from django.utils.translation import ugettext as _
 
 from dal import autocomplete
-from waffle.decorators import waffle_flag
+from waffle.decorators import waffle_flag, waffle_switch
 
 from mozillians.common.decorators import allow_unvouched
 from mozillians.common.templatetags.helpers import get_object_or_none, urlparams
@@ -24,7 +24,8 @@ from mozillians.groups.models import Group, GroupMembership, Invite, Skill
 from mozillians.groups.tasks import (notify_curators_invitation_accepted,
                                      notify_curators_invitation_rejected,
                                      notify_redeemer_invitation,
-                                     notify_redeemer_invitation_invalid)
+                                     notify_redeemer_invitation_invalid,
+                                     notify_membership_renewal)
 from mozillians.users.models import UserProfile
 
 
@@ -608,3 +609,14 @@ def force_group_invalidation(request, url, alias_model, template=''):
         raise Http404
 
     return redirect(reverse('groups:show_group', args=[group.url]))
+
+
+@never_cache
+@waffle_switch('test_membership_renewal_notification')
+def membership_renewal_notification(request):
+    """View to help test membership renewal notification
+
+    Manually spawn a task to send membership renewal notifications to the users.
+    """
+    notify_membership_renewal.apply_async()
+    return redirect(reverse('groups:index_groups'))
