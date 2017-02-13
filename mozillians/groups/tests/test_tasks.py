@@ -317,6 +317,7 @@ class MembershipInvalidationTests(TestCase):
         ok_(group.groupmembership_set.filter(userprofile=curator.userprofile).exists())
         ok_(not mail_task.called)
 
+
     @patch('mozillians.groups.models.email_membership_change')
     def invalidate_group_pending_terms(self, mail_task):
         """Invalidate a group where a user has not yet accepted the terms.

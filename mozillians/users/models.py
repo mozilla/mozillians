@@ -27,7 +27,7 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
-                                             validate_phone_number)
+                                             validate_phone_number, validate_linkedin)
 from mozillians.users.es import UserProfileMappingType
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
@@ -805,8 +805,8 @@ class ExternalAccount(models.Model):
         TYPE_REMO: {'name': 'Mozilla Reps', 'url': 'https://reps.mozilla.org/u/{identifier}/',
                     'validator': validate_username_not_url},
         TYPE_LINKEDIN: {'name': 'LinkedIn',
-                        'url': '',
-                        'validator': validate_website},
+                        'url': 'https://www.linkedin.com/in/{identifier}/',
+                        'validator': validate_linkedin},
         TYPE_JABBER: {'name': 'XMPP/Jabber',
                       'url': '',
                       'validator': validate_email},
@@ -853,6 +853,9 @@ class ExternalAccount(models.Model):
 
     def get_identifier_url(self):
         url = self.ACCOUNT_TYPES[self.type]['url'].format(identifier=urlquote(self.identifier))
+        if self.type == 'LINKEDIN' and '://' in self.identifier:
+            return self.identifier
+
         return iri_to_uri(url)
 
     def unique_error_message(self, model_class, unique_check):

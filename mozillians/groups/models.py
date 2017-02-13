@@ -314,6 +314,7 @@ class Group(GroupBase):
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
 
+
     def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.
 

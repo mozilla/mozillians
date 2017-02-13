@@ -157,8 +157,9 @@ def notify_membership_renewal():
 
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)
-        memberships = (group.groupmembership_set.filter(status=GroupMembership.MEMBER)
-                       .exclude(userprofile__id__in=curator_ids))
+        last_update = datetime.now() - timedelta(days=group.invalidation_days)
+        memberships = (group.groupmembership_set.filter(updated_on__lte=last_update)
+                                                .exclude(userprofile__id__in=curator_ids))
 
         # Filter memberships to be notified
         last_update_days = group.invalidation_days - days_prior_invalidation
