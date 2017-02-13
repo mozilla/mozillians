@@ -56,4 +56,7 @@ urlpatterns = patterns(
         name='send_invitation_email'),
     url('^groups/(?P<invite_pk>\d+)/(?P<action>accept|reject)/$',
         'views.accept_reject_invitation', name='accept_reject_invitation'),
+    # Testing
+    url('^groups/membership_renewal_notification', 'views.membership_renewal_notification',
+        name='membership_renewal_notification')
 )
