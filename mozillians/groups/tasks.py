@@ -13,6 +13,9 @@ from celery.task import periodic_task, task
 from waffle import switch_is_active
 
 
+DAYS_BEFORE_INVALIDATION = 2 * 7  # 14 days
+
+
 @task(ignore_result=True)
 def remove_empty_groups():
     """Remove empty groups."""
@@ -152,9 +155,8 @@ def notify_membership_renewal():
 
     from mozillians.groups.models import Group, GroupMembership
 
-    days_prior_invalidation = 2 * 7  # 2 weeks
     groups = Group.objects.filter(
-        invalidation_days__isnull=False, invalidation_days__gte=days_prior_invalidation)
+        invalidation_days__isnull=False, invalidation_days__gte=DAYS_BEFORE_INVALIDATION)
 
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)
@@ -165,7 +167,7 @@ def notify_membership_renewal():
         # Switch is being used only for testing mail notifications
         # It disables membership filtering based on date
         if not switch_is_active('test_membership_renewal_notification'):
-            last_update_days = group.invalidation_days - days_prior_invalidation
+            last_update_days = group.invalidation_days - DAYS_BEFORE_INVALIDATION
             last_update = now() - timedelta(days=last_update_days)
 
             query_start = datetime.combine(last_update.date(), datetime.min.time())
@@ -173,6 +175,7 @@ def notify_membership_renewal():
 
             query = {
                 'updated_on__range': [query_start, query_end],
+                'needs_renewal': False,
             }
             memberships = memberships.filter(**query)
 
@@ -200,6 +203,9 @@ def notify_membership_renewal():
                 ctx['curator_full_name'] = curator.full_name
                 message = curator_template.render(ctx)
                 send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
+
+        # Mark these memberships ready for an early renewal
+        memberships.update(needs_renewal=True)
 
 
 @task(ignore_result=True)
