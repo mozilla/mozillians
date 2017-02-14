@@ -160,6 +160,7 @@ def show(request, url, alias_model, template):
         if is_curator:
             statuses = [GroupMembership.MEMBER, GroupMembership.PENDING,
                         GroupMembership.PENDING_TERMS]
+            needs_renewal = False
             if membership_filter_form and membership_filter_form.is_valid():
                 filtr = membership_filter_form.cleaned_data['filtr']
                 if filtr == 'members':
@@ -168,16 +169,19 @@ def show(request, url, alias_model, template):
                     statuses = [GroupMembership.PENDING]
                 elif filtr == 'pending_terms':
                     statuses = [GroupMembership.PENDING_TERMS]
+                elif filtr == 'needs_renewal':
+                    needs_renewal = True
 
-            memberships = group.groupmembership_set.filter(status__in=statuses)
+            memberships = group.groupmembership_set.filter(status__in=statuses,
+                                                           needs_renewal=needs_renewal)
 
             # Curators can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
 
         else:
             # only show full members, or this user
-            memberships = group.groupmembership_set.filter(
-                Q(status=GroupMembership.MEMBER) | Q(userprofile=profile))
+            memberships = group.groupmembership_set.filter(Q(status=GroupMembership.MEMBER) |
+                                                           Q(userprofile=profile))
 
         invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted=False)
         data.update(invitation=invitation)
@@ -299,14 +303,17 @@ def confirm_member(request, url, user_pk):
     except GroupMembership.DoesNotExist:
         messages.error(request, _('This user has not requested membership in this group.'))
     else:
-        if membership.status == GroupMembership.MEMBER:
+        if membership.status == GroupMembership.MEMBER and not membership.needs_renewal:
             messages.error(request, _('This user is already a member of this group.'))
         else:
             status = GroupMembership.MEMBER
             if group.terms:
                 status = GroupMembership.PENDING_TERMS
             group.add_member(profile, status=status)
-            messages.info(request, _('This user has been added as a member of this group.'))
+            if membership.needs_renewal:
+                messages.info(request, _('The membership of the user has been renewed.'))
+            else:
+                messages.info(request, _('This user has been added as a member of this group.'))
     return redirect(next_url)
 
 

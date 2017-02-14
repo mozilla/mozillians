@@ -230,7 +230,8 @@ class MembershipFilterForm(forms.Form):
                               choices=(('all', _lazy(u'All')),
                                        ('members', _lazy(u'Members')),
                                        ('pending_members', _lazy(u'Pending Members')),
-                                       ('pending_terms', _lazy(u'Pending Terms'))))
+                                       ('pending_terms', _lazy(u'Pending Terms')),
+                                       ('needs_renewal', _lazy(u'Renewals'))))
 
     def clean_filtr(self):
         if self.cleaned_data['filtr'] == '':

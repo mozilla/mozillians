@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy as _lazy
@@ -158,6 +159,7 @@ class GroupMembership(models.Model):
     status = models.CharField(choices=MEMBERSHIP_STATUS_CHOICES, max_length=15)
     date_joined = models.DateTimeField(null=True, blank=True)
     updated_on = models.DateTimeField(auto_now=True, null=True)
+    needs_renewal = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('userprofile', 'group')
@@ -291,6 +293,9 @@ class Group(GroupBase):
         membership, _ = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                               group=self,
                                                               defaults=defaults)
+        # Remove the need_removal flag in any case
+        membership.needs_renewal = False
+
         if membership.status != status:
             # Status changed
             # The only valid status change states are:
@@ -313,6 +318,9 @@ class Group(GroupBase):
                 if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
+        else:
+            # We have a renewal, let's save the object.
+            membership.save()
 
     def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.
@@ -344,6 +352,7 @@ class Group(GroupBase):
         else:
             # if we are here, there is a new status for our user
             membership.status = status
+            membership.needs_renewal = False
             membership.save()
             send_email = True
 
@@ -364,10 +373,12 @@ class Group(GroupBase):
 
     def has_pending_member(self, userprofile):
         """
-        Return True if this user is in this group with status PENDING.
+        Return True if this user is in this group with status PENDING or
+        there is a flag marking the profile ready for a renewal
         """
-        return self.groupmembership_set.filter(userprofile=userprofile,
-                                               status=GroupMembership.PENDING).exists()
+        return (self.groupmembership_set.filter(userprofile=userprofile)
+                                        .filter(Q(status=GroupMembership.PENDING) |
+                                                Q(needs_renewal=True))).exists()
 
 
 class SkillAlias(GroupAliasBase):
