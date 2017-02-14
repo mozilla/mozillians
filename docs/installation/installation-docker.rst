@@ -92,7 +92,7 @@ Building mozillians
       .. note::
 
          In case this command doesn't work, you can run ``./scripts/su.sh`` inside the container. In order to get shell access please run ``docker-compose run web /bin/bash``.
-         To access in the site: http://127.0.0.1:8000/admin, the button signin cannot work.
+         To login to mozillians.org for dev purposes please visit http://127.0.0.1:8000/admin and login with the credentials issues in the previous step. The signin button doesn't work locally.
 
 ******************
 Running mozillians
