@@ -160,6 +160,7 @@ def show(request, url, alias_model, template):
         if is_curator:
             statuses = [GroupMembership.MEMBER, GroupMembership.PENDING,
                         GroupMembership.PENDING_TERMS]
+            needs_renewal = False
             if membership_filter_form and membership_filter_form.is_valid():
                 filtr = membership_filter_form.cleaned_data['filtr']
                 if filtr == 'members':
@@ -168,8 +169,11 @@ def show(request, url, alias_model, template):
                     statuses = [GroupMembership.PENDING]
                 elif filtr == 'pending_terms':
                     statuses = [GroupMembership.PENDING_TERMS]
+                elif filtr == 'needs_renewal':
+                    needs_renewal = True
 
-            memberships = group.groupmembership_set.filter(status__in=statuses)
+            memberships = group.groupmembership_set.filter(status__in=statuses,
+                                                           needs_renewal=needs_renewal)
 
             # Curators can delete their group if there are no other members.
             show_delete_group_button = is_curator and group.members.all().count() == 1
