@@ -294,7 +294,10 @@ class Group(GroupBase):
                                                               group=self,
                                                               defaults=defaults)
         # Remove the need_removal flag in any case
-        membership.needs_renewal = False
+        # We have a renewal, let's save the object.
+        if membership.needs_renewal:
+            membership.needs_renewal = False
+            membership.save()
 
         if membership.status != status:
             # Status changed
@@ -308,6 +311,7 @@ class Group(GroupBase):
             statuses = [(GroupMembership.PENDING, GroupMembership.MEMBER),
                         (GroupMembership.PENDING, GroupMembership.PENDING_TERMS),
                         (GroupMembership.PENDING_TERMS, GroupMembership.MEMBER)]
+
             if (old_status, status) in statuses:
                 # Status changed
                 membership.save()
@@ -318,9 +322,6 @@ class Group(GroupBase):
                 if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
-        else:
-            # We have a renewal, let's save the object.
-            membership.save()
 
     def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.
