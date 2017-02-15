@@ -200,6 +200,10 @@
           {% trans group_name=group.name %}
             There are no users who haven't accepted {{ group_name }}'s terms.
           {% endtrans %}
+        {% elif membership_filter_form.filtr.value() == 'needs_renewal' %}
+          {% trans group_name=group.name %}
+            There are no pending renewals for {{ group_name }}.
+          {% endtrans %}
         {% else %}
           {% trans group_name=group.name %}
             Sorry, we can not find any mozillians in {{ group_name }}.
