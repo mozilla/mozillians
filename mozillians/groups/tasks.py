@@ -190,7 +190,8 @@ def notify_membership_renewal():
                 'member_profile_url': membership.userprofile.get_absolute_url()
             }
 
-            subject_msg = unicode('[Mozillians] Your membership to group "{0}" is about to expire')
+            subject_msg = unicode('[Mozillians] Your membership to Mozilla group "{0}" '
+                                  'is about to expire')
             subject = _(subject_msg.format(membership.group.name))
             message = member_template.render(ctx)
             send_mail(subject, message, settings.FROM_NOREPLY, [membership.userprofile.email])
