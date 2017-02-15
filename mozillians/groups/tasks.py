@@ -155,8 +155,9 @@ def notify_membership_renewal():
 
     from mozillians.groups.models import Group, GroupMembership
 
-    groups = Group.objects.filter(
-        invalidation_days__isnull=False, invalidation_days__gte=DAYS_BEFORE_INVALIDATION)
+    groups = (Group.objects.filter(invalidation_days__isnull=False,
+                                   invalidation_days__gte=DAYS_BEFORE_INVALIDATION)
+                           .exclude(accepting_new_members=Group.OPEN).distinct())
 
     for group in groups:
         curator_ids = group.curators.all().values_list('id', flat=True)

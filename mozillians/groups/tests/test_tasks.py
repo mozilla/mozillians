@@ -440,7 +440,8 @@ class MembershipRenewalNotificationTests(TestCase):
         """Test renewal notification functionality"""
         curator = UserFactory.create()
         member = UserFactory.create()
-        group = GroupFactory.create(name='foobar', invalidation_days=365)
+        group = GroupFactory.create(name='foobar', invalidation_days=365,
+                                    accepting_new_members=Group.REVIEWED)
         group.curators.add(curator.userprofile)
         group.add_member(member.userprofile)
 
@@ -464,7 +465,8 @@ class MembershipRenewalNotificationTests(TestCase):
         curator1 = UserFactory.create(email='foo@example.com')
         curator2 = UserFactory.create(email='foobar@example.com')
         member = UserFactory.create(userprofile={'full_name': 'Example Name'})
-        group = GroupFactory.create(name='foobar', invalidation_days=365)
+        group = GroupFactory.create(name='foobar', invalidation_days=365,
+                                    accepting_new_members=Group.REVIEWED)
 
         group.curators.add(curator1.userprofile)
         group.curators.add(curator2.userprofile)
@@ -497,7 +499,8 @@ class MembershipRenewalNotificationTests(TestCase):
         """Test renewal notification for groups with invalidation_days less than 2 weeks"""
         curator = UserFactory.create()
         member = UserFactory.create()
-        group = GroupFactory.create(name='foobar', invalidation_days=10)
+        group = GroupFactory.create(name='foobar', invalidation_days=10,
+                                    accepting_new_members=Group.REVIEWED)
         group.curators.add(curator.userprofile)
         group.add_member(member.userprofile)
 
