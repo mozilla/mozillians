@@ -4,9 +4,9 @@ Hello {{ curator_full_name }},
 
 {% trans %}
 The membership of {{ member_full_name}} to group
-"{{ group_name }}" is about to expire in two weeks.
-Please take the appropriate action to ensure that user
-remains subscribed to this group.
+"{{ group_name }}" will expire in two weeks. Please visit
+the group page and confirm the renewal request to ensure
+that {{ member_full_name }} remains a part of your group.
 {% endtrans %}
 
 {% trans %}

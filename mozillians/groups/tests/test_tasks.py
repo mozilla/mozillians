@@ -453,7 +453,7 @@ class MembershipRenewalNotificationTests(TestCase):
         eq_(2, len(mock_send_mail.call_args_list))
         name, args, kwargs = mock_send_mail.mock_calls[0]
         subject, body, from_addr, to_list = args
-        eq_(subject, '[Mozillians] Your membership to group "foobar" is about to expire')
+        eq_(subject, '[Mozillians] Your membership to Mozilla group "foobar" is about to expire')
         eq_(from_addr, settings.FROM_NOREPLY)
         eq_(to_list, [member.userprofile.email])
 
