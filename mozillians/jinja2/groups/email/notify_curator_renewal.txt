@@ -9,6 +9,15 @@ the group page and confirm the renewal request to ensure
 that {{ member_full_name }} remains a part of your group.
 {% endtrans %}
 
+{%- if inviter %}
+
+{% trans inviter_full_name=inviter.full_name %}
+{{ member_full_name }} was invited to the group by {{ inviter_full_name }}.
+You can find the inviter's profile page here:
+{% endtrans %}
+{{ absolutify(inviter.get_absolute_url()) }}
+{%- endif %}
+
 {% trans %}
 You can view the group membership here:
 {% endtrans %}

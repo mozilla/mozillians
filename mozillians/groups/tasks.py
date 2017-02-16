@@ -12,6 +12,8 @@ from django.utils.translation import ugettext as _
 from celery.task import periodic_task, task
 from waffle import switch_is_active
 
+from mozillians.common.templatetags.helpers import get_object_or_none
+
 
 DAYS_BEFORE_INVALIDATION = 2 * 7  # 14 days
 
@@ -153,7 +155,7 @@ def notify_membership_renewal():
     2 weeks prior invalidation that the membership is expiring.
     """
 
-    from mozillians.groups.models import Group, GroupMembership
+    from mozillians.groups.models import Group, GroupMembership, Invite
 
     groups = (Group.objects.filter(invalidation_days__isnull=False,
                                    invalidation_days__gte=DAYS_BEFORE_INVALIDATION)
@@ -188,8 +190,13 @@ def notify_membership_renewal():
                 'member_full_name': membership.userprofile.full_name,
                 'group_name': membership.group.name,
                 'group_url': membership.group.get_absolute_url(),
-                'member_profile_url': membership.userprofile.get_absolute_url()
+                'member_profile_url': membership.userprofile.get_absolute_url(),
+                'inviter': None
             }
+
+            invite = get_object_or_none(Invite, group=group, redeemer=membership.userprofile)
+            if invite:
+                ctx['inviter'] = invite.inviter
 
             subject_msg = unicode('[Mozillians] Your membership to Mozilla group "{0}" '
                                   'is about to expire')
