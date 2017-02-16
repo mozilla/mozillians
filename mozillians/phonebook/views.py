@@ -30,6 +30,7 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
+from mozillians.phonebook.templatetags.helpers import langcode_to_name
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
 from mozillians.users.models import AbuseReport, ExternalAccount, UserProfile
 from mozillians.users.tasks import check_spam_account, update_email_in_basket
@@ -531,4 +532,5 @@ class PhonebookSearchView(SearchView):
         context_data['country'] = self.kwargs.get('country')
         context_data['region'] = self.kwargs.get('region')
         context_data['city'] = self.kwargs.get('city')
+        context_data['language'] = langcode_to_name(self.kwargs.get('language'))
         return context_data

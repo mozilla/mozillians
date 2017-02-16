@@ -42,6 +42,8 @@ urlpatterns = patterns(
         PhonebookSearchView.as_view(), name='list_region_city'),
     url(r'^country/(?P<country>[A-Za-z0-9 \.]+)/region/(?P<region>.+)/$',
         PhonebookSearchView.as_view(), name='list_region'),
+    url(r'^language/(?P<language>[A-Za-z]+)/$',
+        PhonebookSearchView.as_view(), name='list_language'),
     # Static pages need csrf for post to work
     url(r'^about/$',
         allow_public(TemplateView.as_view(template_name='phonebook/about.html')),
