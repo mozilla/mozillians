@@ -13,18 +13,16 @@ that {{ member_full_name }} remains a part of your group.
 
 {% trans inviter_full_name=inviter.full_name %}
 {{ member_full_name }} was invited to the group by {{ inviter_full_name }}.
-You can find the inviter's profile page here:
 {% endtrans %}
-{{ absolutify(inviter.get_absolute_url()) }}
 {%- endif %}
 
 {% trans %}
-You can view the group membership here:
+You can view the "{{ group_name }}" group page here:
 {% endtrans %}
 {{ group_url }}
 
 {% trans %}
-You can view the profile page here:
+You can view the profile page of {{ member_full_name }} here:
 {% endtrans %}
 {{ absolutify(member_profile_url) }}
 
