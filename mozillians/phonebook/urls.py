@@ -40,6 +40,8 @@ urlpatterns = patterns(
         'views.list_mozillians_in_location', name='list_region'),
     url(r'^apikeys/$', 'views.apikeys', name='apikeys'),
     url(r'^apikey/(?P<api_pk>\d+)/delete/$', 'views.delete_apikey', name='apikey_delete'),
+    url(r'^language/(?P<language>[A-Za-z-]+)/',
+        'views.list_mozillians_by_language', name='list_language'),
 
 
     # Static pages need csrf for post to work
