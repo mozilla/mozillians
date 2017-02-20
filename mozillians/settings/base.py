@@ -312,6 +312,7 @@ INSTALLED_APPS = (
     'product_details',
     'csp',
     'mozilla_django_oidc',
+    'cities_light',
 
     'mozillians',
     'mozillians.users',

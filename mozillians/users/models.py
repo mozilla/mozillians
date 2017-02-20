@@ -69,6 +69,9 @@ class UserProfilePrivacyModel(models.Model):
     privacy_geo_city = PrivacyField()
     privacy_geo_region = PrivacyField()
     privacy_geo_country = PrivacyField()
+    privacy_city = PrivacyField()
+    privacy_region = PrivacyField()
+    privacy_country = PrivacyField()
     privacy_groups = PrivacyField()
     privacy_skills = PrivacyField()
     privacy_languages = PrivacyField()
@@ -165,6 +168,14 @@ class UserProfile(UserProfilePrivacyModel):
     geo_city = models.ForeignKey('geo.City', blank=True, null=True, on_delete=models.SET_NULL)
     lat = models.FloatField(_lazy(u'Latitude'), blank=True, null=True)
     lng = models.FloatField(_lazy(u'Longitude'), blank=True, null=True)
+
+    # django-cities-light fields
+    city = models.ForeignKey('cities_light.City', blank=True, null=True,
+                             on_delete=models.SET_NULL)
+    region = models.ForeignKey('cities_light.Region', blank=True, null=True,
+                               on_delete=models.SET_NULL)
+    country = models.ForeignKey('cities_light.Country', blank=True, null=True,
+                                on_delete=models.SET_NULL)
 
     allows_community_sites = models.BooleanField(
         default=True,
