@@ -565,15 +565,7 @@ def _username_algo(email):
     return calculate_username(email)
 
 
-def lazy_oidc_op_domain():
-    from django.conf import settings
-
-    if settings.SITE_URL == 'https://mozillians-dev.allizom.org':
-        return 'auth-dev.mozilla.auth0.com'
-    return 'auth.mozilla.auth0.com'
-
-
 OIDC_USERNAME_ALGO = _username_algo
 OIDC_RP_CLIENT_SECRET_ENCODED = True
-OIDC_OP_DOMAIN = lazy(lazy_oidc_op_domain, str)()
 OIDC_STORE_ACCESS_TOKEN = True
+OIDC_OP_DOMAIN = 'auth.mozilla.auth0.com'
