@@ -300,3 +300,11 @@ mozilla-django-oidc==0.1.7 \
     --hash=sha256:5ba5d7991680bb25ffb59a98f7240f4b2cefc0cef3af219eb5cc2ac2535b66d1
 olefile==0.44 \
     --hash=sha256:61f2ca0cd0aa77279eb943c07f607438edf374096b66332fae1ee64a6f0f73ad
+django-cities-light==3.3.0 \
+    --hash=sha256:39c91c2756fdbecdf758b6e5f262108f7a693a6689368e52f635f6f0363da877
+progressbar2==3.12.0 \
+    --hash=sha256:10996ba13a61210eb97bb09b7973a356f9c1a9c3c36de45a31967b1a963a869e \
+    --hash=sha256:5300c821258fdf381317969019828fe724d3e1f1f7555f89bb1aec2d2f0b229b
+python-utils==2.0.1 \
+    --hash=sha256:985f44edf24918d87531c339f8b126ce2d303cbbc9a4c7fc4dc81ac0726079ff \
+    --hash=sha256:670f9b992ebfc005329fd9740408f2a704e595d64c8f8da83f7977618dba4acc
