@@ -144,8 +144,8 @@ django-appconf==1.0.1 \
     --hash=sha256:3d9bc963d8008ae151d6c664f9fd55442705ea9b9e6d7ce77cdd40bf92d91f3a
 statsd==1.0.0 \
     --hash=sha256:deb4dccd363175a55465dc65699c001c31db05e509e8a41fccf3db61c1404ac6
-django-autocomplete-light==3.0.4 \
-    --hash=sha256:425585c4e7b479969125031381c4cb4f871ac075c402822b83a8f55601531d0a
+django-autocomplete-light==3.2.1 \
+    --hash=sha256:b93112e064320acc0cc162a35e8d1fa5af703742126cc1f8f9d3fc4e9768d6b6
 tablib==0.11.2 \
     --hash=sha256:b91d4313504742e3a63c0be30775a12f8fca91d686062604b1eb591c735c16f5 \
     --hash=sha256:553dd5b58e8e6e039aaa61587ec2fab38c05f0e25f58ac65b81a7851db62a497
