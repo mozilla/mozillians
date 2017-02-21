@@ -24,6 +24,16 @@ def validate_twitter(username):
     return username
 
 
+def validate_linkedin(url):
+    """Return the linkedin username from the url or the link"""
+
+    if 'view?id' not in url:
+        nick = url.rsplit('/', 1)[-1]
+        return nick
+
+    return url
+
+
 def validate_username(username):
     """Validate username.
 

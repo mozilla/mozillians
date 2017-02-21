@@ -4,6 +4,7 @@ from nose.tools import assert_raises, eq_
 
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
+                                             validate_linkedin,
                                              validate_username_not_url,
                                              validate_phone_number)
 
@@ -18,6 +19,14 @@ class ValidatorTests(TestCase):
         eq_('validusername', validate_twitter(username))
         username = '@ValidName'
         eq_('ValidName', validate_twitter(username))
+
+    def test_linkedin_with_old_url(self):
+        url = 'https://www.linkedin.com/profile/view?id=409777777'
+        eq_(url, validate_linkedin(url))
+
+    def test_linkedin_with_nick(self):
+        username = 'username'
+        eq_(username, validate_linkedin(username))
 
     def test_username_not_url_with_username(self):
         username = 'someusername'
