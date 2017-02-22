@@ -208,7 +208,13 @@ def notify_membership_renewal():
             format_args = [membership.group.name, membership.userprofile.full_name]
             subject = _(subject_msg.format(*format_args))
 
-            for curator in group.curators.all():
+            # In case the membership was created after an invitation we notify inviters only
+            # Else we fallback to all group curators
+            curators = group.curators.all()
+            if ctx['inviter']:
+                curators = [ctx['inviter']]
+
+            for curator in curators:
                 ctx['curator_full_name'] = curator.full_name
                 message = curator_template.render(ctx)
                 send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
