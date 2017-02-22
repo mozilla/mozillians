@@ -208,10 +208,14 @@ def notify_membership_renewal():
             format_args = [membership.group.name, membership.userprofile.full_name]
             subject = _(subject_msg.format(*format_args))
 
-            for curator in group.curators.all():
-                ctx['curator_full_name'] = curator.full_name
-                message = curator_template.render(ctx)
-                send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
+            invites = Invite.objects.filter(group=group, redeemer=membership.userprofile)
+
+            if invites.exists():
+                curator = invites.latest('updated').inviter
+                if curator and group.curators.filter(pk=curator.id).exists():
+                    ctx['curator_full_name'] = curator.full_name
+                    message = curator_template.render(ctx)
+                    send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
 
         # Mark these memberships ready for an early renewal
         memberships.update(needs_renewal=True)
