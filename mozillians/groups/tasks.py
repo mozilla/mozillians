@@ -211,8 +211,9 @@ def notify_membership_renewal():
             # In case the membership was created after an invitation we notify inviters only
             # Else we fallback to all group curators
             curators = group.curators.all()
-            if ctx['inviter']:
-                curators = [ctx['inviter']]
+            inviter = ctx['inviter']
+            if inviter and curators.filter(pk=inviter.id).exists():
+                curators = [inviter]
 
             for curator in curators:
                 ctx['curator_full_name'] = curator.full_name

@@ -528,6 +528,53 @@ class MembershipRenewalNotificationTests(TestCase):
         eq_(from_addr, settings.FROM_NOREPLY)
         eq_(list(to_list), [u'bar@example.com'])
 
+    @patch('mozillians.groups.tasks.send_mail')
+    @patch('mozillians.groups.tasks.now')
+    def test_send_renewal_notification_inviter_not_curator(self, mock_now, mock_send_mail):
+        """Test renewal notification functionality for curators"""
+        curator1 = UserFactory.create(email='foo@example.com')
+        curator2 = UserFactory.create(email='foobar@example.com')
+        inviter = UserFactory.create(email='bar@example.com')
+        member = UserFactory.create(userprofile={'full_name': 'Example Name'})
+        group = GroupFactory.create(name='foobar', invalidation_days=365,
+                                    accepting_new_members=Group.CLOSED)
+
+        group.curators.add(curator1.userprofile)
+        group.curators.add(curator2.userprofile)
+        group.add_member(member.userprofile)
+
+        InviteFactory.create(inviter=inviter.userprofile, redeemer=member.userprofile,
+                             group=group)
+
+        datetime_now = now() + timedelta(days=351)
+        mock_now.return_value = datetime_now
+
+        notify_membership_renewal()
+
+        ok_(mock_send_mail.called)
+        eq_(3, len(mock_send_mail.mock_calls))
+
+        # Check email to mozillians
+        name, args, kwargs = mock_send_mail.mock_calls[0]
+        subject, body, from_addr, to_list = args
+        eq_(subject, '[Mozillians] Your membership to Mozilla group "foobar" is about to expire')
+        eq_(from_addr, settings.FROM_NOREPLY)
+        eq_(to_list, [member.userprofile.email])
+
+        # Check email for curator1
+        name, args, kwargs = mock_send_mail.mock_calls[1]
+        subject, body, from_addr, to_list = args
+        eq_(subject, '[Mozillians][foobar] Membership of "Example Name" is about to expire')
+        eq_(from_addr, settings.FROM_NOREPLY)
+        eq_(list(to_list), [u'foo@example.com'])
+
+        # Check email for curator2
+        name, args, kwargs = mock_send_mail.mock_calls[2]
+        subject, body, from_addr, to_list = args
+        eq_(subject, '[Mozillians][foobar] Membership of "Example Name" is about to expire')
+        eq_(from_addr, settings.FROM_NOREPLY)
+        eq_(list(to_list), [u'foobar@example.com'])
+
     @patch('mozillians.groups.tasks.now')
     def test_invalidation_days_less_than_2_weeks(self, mock_now):
         """Test renewal notification for groups with invalidation_days less than 2 weeks"""
