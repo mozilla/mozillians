@@ -95,9 +95,7 @@ CACHES = {
 }
 
 CSP_REPORT_ENABLE = False
-CSP_DEFAULT_SRC = base.CSP_DEFAULT_SRC + (
-    'http://*.mapbox.com',
-)
+
 CSP_FONT_SRC = base.CSP_FONT_SRC + (
     'http://*.mozilla.net',
     'http://*.mozilla.org',
@@ -106,17 +104,14 @@ CSP_FONT_SRC = base.CSP_FONT_SRC + (
 CSP_IMG_SRC = base.CSP_IMG_SRC + (
     'http://*.mozilla.net',
     'http://*.mozilla.org',
-    'http://*.mapbox.com',
 )
 CSP_SCRIPT_SRC = base.CSP_SCRIPT_SRC + (
     'http://*.mozilla.net',
     'http://*.mozilla.org',
-    'http://*.mapbox.com',
 )
 CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
     'http://*.mozilla.net',
     'http://*.mozilla.org',
-    'http://*.mapbox.com',
 )
 
 # Demo keys for ReCaptcha, no for prodution

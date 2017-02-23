@@ -379,7 +379,6 @@ CSP_REPORT_ENABLE = True
 CSP_REPORT_URI = '/en-US/capture-csp-violation'
 CSP_DEFAULT_SRC = (
     "'self'",
-    'https://*.mapbox.com',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
 )
@@ -397,14 +396,12 @@ CSP_IMG_SRC = (
     '*.google-analytics.com',
     '*.gravatar.com',
     '*.wp.com',
-    'https://*.mapbox.com',
 )
 CSP_SCRIPT_SRC = (
     "'self'",
     'https://www.mozilla.org',
     'https://*.mozilla.net',
     'https://*.google-analytics.com',
-    'https://*.mapbox.com',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
 )
@@ -413,7 +410,6 @@ CSP_STYLE_SRC = (
     "'unsafe-inline'",
     'https://www.mozilla.org',
     'https://*.mozilla.net',
-    'https://*.mapbox.com',
 )
 CSP_CHILD_SRC = (
     "'self'",
@@ -522,11 +518,6 @@ HUMANSTXT_GITHUB_REPO = 'https://api.github.com/repos/mozilla/mozillians/contrib
 HUMANSTXT_LOCALE_REPO = 'https://api.github.com/repos/mozilla-l10n/mozillians-l10n/contributors'
 HUMANSTXT_FILE = os.path.join(STATIC_ROOT, 'humans.txt')
 HUMANSTXT_URL = urljoin(STATIC_URL, 'humans.txt')
-
-# These must both be set to a working mapbox token for the maps to work.
-MAPBOX_MAP_ID = 'examples.map-zr0njcqy'
-# This is the token for the edit profile page alone.
-MAPBOX_PROFILE_ID = MAPBOX_MAP_ID
 
 # All accounts limited in 6 vouches total. Bug 997400.
 VOUCH_COUNT_LIMIT = 6
