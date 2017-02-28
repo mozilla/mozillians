@@ -6,8 +6,6 @@
 {% block body_id %}edit-profile{% endblock %}
 
 {% block extrahead %}
-  <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.6/mapbox.css"
-        type="text/css" rel="stylesheet" media="screen" />
   {{ registration_form.media.css }}
 {% endblock extrahead %}
 
@@ -98,12 +96,10 @@
 
 {% block page_js %}
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.6/mapbox.js"></script>
   {% compress js %}
     <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
     <script src="{{ static('mozillians/js/libs/tag-it/js/tag-it.js') }}"></script>
     <script src="{{ static('mozillians/js/profile_edit.js') }}"></script>
-    <script src="{{ static('mozillians/js/profile_edit_mapbox.js') }}"></script>
   {% endcompress %}
   {{ registration_form.media.js }}
   {{ skills_form.media }}
