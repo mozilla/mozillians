@@ -3,16 +3,21 @@ Hello {{ member_full_name }},
 {% endtrans %}
 
 {% trans %}
-Your membership to group "{{ group_name }}" will expire
-in two weeks. Please contact a group
-curator for further information.
+As per the terms of your membership to group "{{ group_name }}" your membership
+will expire in two weeks unless you are renewed by your group’s curators.
 {% endtrans %}
 
 {% trans %}
-You can access the group page including a list of curators here:
+Your inviter has also been sent a notice for your renewal and will approve or
+reject your membership renewal in the next two weeks.
 {% endtrans %}
 
-{{ group_url }}
+{%- if inviter %}
 
+{% trans inviter_full_name=inviter.full_name %}
+If you have any questions or concerns about your renewal please reach out to
+your inviter, {{ inviter_full_name }}.
+{% endtrans %}
+{%- endif %}
 
 {{ _('The Mozillians.org team') }}
