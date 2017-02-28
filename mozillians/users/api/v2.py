@@ -108,8 +108,14 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
         # If we don't define a custom transform method and if the
         # field has a privacy setting, set the transform privacy
         # wrapper.
+
         for field in self.fields.keys():
             method_name = 'transform_{0}'.format(field)
+
+            # Exclude `country`, `region`, `city` because they collide with the
+            # field aliases for `geo_country`, `geo_city`, `geo_region`
+            if field in ['country', 'region', 'city']:
+                return None
 
             if ((not getattr(self, method_name, None) and
                  getattr(UserProfile, 'get_privacy_{0}_display'.format(field), None))):
