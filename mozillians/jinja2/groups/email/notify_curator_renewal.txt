@@ -3,10 +3,34 @@ Hello {{ curator_full_name }},
 {% endtrans %}
 
 {% trans %}
-The membership of {{ member_full_name}} to group
-"{{ group_name }}" will expire in two weeks. Please visit
-the group page and confirm the renewal request to ensure
-that {{ member_full_name }} remains a part of your group.
+The membership of {{ member_full_name}} in "{{ group_name }}"
+will expire in two weeks. Please take a moment to review the
+membership terms of this group (if applicable) and consider
+carefully whether this individual still actively meets the
+requirements for membership.
+{% endtrans %}
+
+{% trans %}
+If you would like to renew this contributor's invitation please
+visit the group page and confirm the renewal request to ensure
+that {{ member_full_name }} remains a part of your group. If you do not
+want to renew them please visit the group page and delete the
+renewal request.
+{% endtrans %}
+
+{% trans %}
+To renew/remove a contributor:
+{% endtrans %}
+
+{% trans %}
+1. View the {{ group_name }} group page here: {{ group_url }}
+{% endtrans %}
+{% trans %}
+2. Select “Renewals” from the drop-down category below the group description
+{% endtrans %}
+{% trans %}
+3. Find the person you want and click the check-mark or “x” next to their
+name to renew or remove them
 {% endtrans %}
 
 {%- if inviter %}
