@@ -97,64 +97,62 @@
     </div>
   </form>
 
-  {% if waffle.flag('group-terms-invalidation') %}
-    <form class="edit-group" id="terms-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
-      {% csrf_token %}
-      <div class="panel panel-default">
-        <div class="panel-heading">{{ _('Terms & Expiration') }}</div>
-        <div class="panel-body">
+  <form class="edit-group" id="terms-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+    {% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ _('Terms & Expiration') }}</div>
+      <div class="panel-body">
 
-          <fieldset id="id_group_has_terms">
-            <div class="form-group">
-              <label class="checkbox">
-                <input type="checkbox" class="acknowledge">
-                {{ _('New members should accept terms') }}
-              </label>
-            </div>
-          </fieldset>
+        <fieldset id="id_group_has_terms">
+          <div class="form-group">
+            <label class="checkbox">
+              <input type="checkbox" class="acknowledge">
+              {{ _('New members should accept terms') }}
+            </label>
+          </div>
+        </fieldset>
 
-          <fieldset id="id_group_terms">
-            <div class="row">
-              <div class="col-sm-7">
-                <div class="form-group">
-                  {{ mozillians_field(terms_expiration_form.terms) }}
-                  <span class="under-input-field">
-                    {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
-                      Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
-                    {% endtrans %}
-                  </span>
-                </div>
+        <fieldset id="id_group_terms">
+          <div class="row">
+            <div class="col-sm-7">
+              <div class="form-group">
+                {{ mozillians_field(terms_expiration_form.terms) }}
+                <span class="under-input-field">
+                  {% trans url='http://daringfireball.net/projects/markdown/syntax' %}
+                    Use <a href="{{ url }}">Markdown</a> for bold, italic, lists and links.
+                  {% endtrans %}
+                </span>
               </div>
             </div>
-          </fieldset>
+          </div>
+        </fieldset>
 
-          <fieldset id="id_membership_can_expire">
-            <div class="form-group">
-              <label class="checkbox">
-                <input type="checkbox" class="acknowledge"></input>
-                {{ _('Membership can expire') }}
-              </label>
-            </div>
-          </fieldset>
+        <fieldset id="id_membership_can_expire">
+          <div class="form-group">
+            <label class="checkbox">
+              <input type="checkbox" class="acknowledge"></input>
+              {{ _('Membership can expire') }}
+            </label>
+          </div>
+        </fieldset>
 
-          <fieldset id="id_group_invalidation_days">
-            <div class="row">
-              <div class="col-md-8 col-sm-6">
-                <div class="form-group">
-                  {{ mozillians_field(terms_expiration_form.invalidation_days) }}
-                </div>
+        <fieldset id="id_group_invalidation_days">
+          <div class="row">
+            <div class="col-md-8 col-sm-6">
+              <div class="form-group">
+                {{ mozillians_field(terms_expiration_form.invalidation_days) }}
               </div>
             </div>
-          </fieldset>
+          </div>
+        </fieldset>
 
-        </div>
-        <div class="panel-footer">
-          <button class="btn btn-primary" id="form-submit-terms-expiration"
-                  type="submit" name="terms_expiration_form">
-            {{ _('Update Terms & Expiration') }}
-          </button>
-        </div>
       </div>
-    </form>
-  {% endif %}
+      <div class="panel-footer">
+        <button class="btn btn-primary" id="form-submit-terms-expiration"
+                type="submit" name="terms_expiration_form">
+          {{ _('Update Terms & Expiration') }}
+        </button>
+      </div>
+    </div>
+  </form>
 </div>
