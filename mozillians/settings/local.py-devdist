@@ -1,5 +1,7 @@
 # This is an example settings_local.py file.
 # Copy it and add your local settings here.
+from . import base
+from .base import DATABASES
 
 # For absolute urls
 DOMAIN = "127.0.0.1"
@@ -42,9 +44,14 @@ ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
 
+AUTHENTICATION_BACKENDS = ( 'django.contrib.auth.backends.ModelBackend', )
+
 MANAGERS = ADMINS
 
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = True
+from .base import TEMPLATES
+for backend in TEMPLATES:
+    backend['OPTIONS']['debug'] = DEBUG
 
 # ElasticSearch
 ES_DISABLED = False
@@ -58,8 +65,6 @@ CELERY_ALWAYS_EAGER = True
 JAVA_BIN = '/usr/bin/java'
 
 SESSION_COOKIE_SECURE = False
-
-CACHES = {}
 
 STATSD_CLIENT = 'django_statsd.clients.log'
 
@@ -82,3 +87,35 @@ CACHES = {
 }
 
 CSP_REPORT_ENABLE = False
+CSP_DEFAULT_SRC = base.CSP_DEFAULT_SRC + (
+    'http://*.mapbox.com',
+)
+CSP_FONT_SRC = base.CSP_FONT_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://mozorg.cdn.mozilla.net',
+)
+CSP_IMG_SRC = base.CSP_IMG_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*.mapbox.com',
+)
+CSP_SCRIPT_SRC = base.CSP_SCRIPT_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*.mapbox.com',
+)
+CSP_STYLE_SRC = base.CSP_STYLE_SRC + (
+    'http://*.mozilla.net',
+    'http://*.mozilla.org',
+    'http://*.mapbox.com',
+)
+
+# Basket
+BASKET_URL = 'http://127.0.0.1'
+BASKET_API_KEY = 'basket_api_key'
+BASKET_MANAGERS = None  # or list of email addresses.
+
+# Demo keys for ReCaptcha, no for prodution
+NORECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+NORECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
