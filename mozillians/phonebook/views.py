@@ -172,7 +172,7 @@ def view_profile(request, username):
     # or current user is a superuser
     if not (request.user.is_authenticated() and
             (request.user.username == username or request.user.is_superuser)):
-        data['groups'] = [grp for grp in data['groups'] if not grp.pending]
+        data['groups'] = [grp for grp in data['groups'] if not (grp.pending or grp.pending_terms)]
 
     return render(request, 'phonebook/profile.html', data)
 
