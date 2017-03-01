@@ -90,7 +90,14 @@ class LocaleURLMiddleware(object):
             return False
 
     def process_request(self, request):
+
         # Don't apply middleware to requests matching exempt URLs
+        # Use default LANGUAGE_CODE locale
+        for view_url in settings.EXEMPT_L10N_URLS:
+            if re.match(view_url, request.path):
+                request.locale = settings.LANGUAGE_CODE
+                activate(settings.LANGUAGE_CODE)
+                return None
 
         prefixer = urlresolvers.Prefixer(request)
         urlresolvers.set_url_prefix(prefixer)
