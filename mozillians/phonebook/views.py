@@ -196,8 +196,8 @@ def edit_profile(request):
         'email_section': ['email_privacy_form', 'alternate_email_formset'],
         'languages_section': ['language_privacy_form', 'language_formset'],
         'accounts_section': ['accounts_formset'],
-        'irc_section': ['irc_form'],
         'location_section': ['location_form'],
+        'irc_section': ['irc_form'],
         'contribution_section': ['contribution_form'],
         'tshirt_section': ['tshirt_form'],
         'developer_section': ['developer_form']
@@ -222,6 +222,7 @@ def edit_profile(request):
     ctx['accounts_formset'] = forms.AccountsFormset(get_request_data('accounts_formset'),
                                                     instance=profile,
                                                     queryset=accounts_qs)
+    ctx['location_form'] = forms.LocationForm(get_request_data('location_form'), instance=profile)
     ctx['language_formset'] = forms.LanguagesFormset(get_request_data('language_formset'),
                                                      instance=profile,
                                                      locale=request.locale)
@@ -229,14 +230,6 @@ def edit_profile(request):
     ctx['language_privacy_form'] = forms.LanguagesPrivacyForm(language_privacy_data,
                                                               instance=profile)
     ctx['skills_form'] = forms.SkillsForm(get_request_data('skills_form'), instance=profile)
-    location_initial = {
-        'saveregion': True if profile.geo_region else False,
-        'savecity': True if profile.geo_city else False,
-        'lat': profile.lat,
-        'lng': profile.lng
-    }
-    ctx['location_form'] = forms.LocationForm(get_request_data('location_form'), instance=profile,
-                                              initial=location_initial)
     ctx['contribution_form'] = forms.ContributionForm(get_request_data('contribution_form'),
                                                       instance=profile)
     ctx['tshirt_form'] = forms.TshirtForm(get_request_data('tshirt_form'), instance=profile)
@@ -297,7 +290,6 @@ def edit_profile(request):
         'user_groups': user_groups,
         'profile': request.user.userprofile,
         'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
-        'mapbox_id': settings.MAPBOX_PROFILE_ID,
         'apps': user.apiapp_set.filter(is_active=True),
         'appsv2': profile.apps.filter(enabled=True),
         'forms_valid': forms_valid

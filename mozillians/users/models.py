@@ -579,36 +579,6 @@ class UserProfile(UserProfilePrivacyModel):
         if autovouch:
             self.auto_vouch()
 
-    def reverse_geocode(self):
-        """
-        Use the user's lat and lng to set their city, region, and country.
-        Does not save the profile.
-        """
-        if self.lat is None or self.lng is None:
-            return
-
-        from mozillians.geo.models import Country
-        from mozillians.geo.lookup import reverse_geocode, GeoLookupException
-        try:
-            result = reverse_geocode(self.lat, self.lng)
-        except GeoLookupException:
-            if self.geo_country:
-                # If self.geo_country is already set, just give up.
-                pass
-            else:
-                # No country set, we need to at least set the placeholder one.
-                self.geo_country = Country.objects.get(mapbox_id='geo_error')
-                self.geo_region = None
-                self.geo_city = None
-        else:
-            if result:
-                country, region, city = result
-                self.geo_country = country
-                self.geo_region = region
-                self.geo_city = city
-            else:
-                logger.error('Got back NONE from reverse_geocode on %s, %s' % (self.lng, self.lat))
-
 
 @receiver(dbsignals.post_save, sender=User,
           dispatch_uid='create_user_profile_sig')

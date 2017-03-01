@@ -34,11 +34,13 @@
             <li role="presentation" class="active" id="profile-tab">
               <a href="#profile" aria-controls="description" role="tab" data-toggle="tab">{{ _('Profile') }}</a>
             </li>
+
             {% if waffle.flag('location_is_active') %}
               <li role="presentation" id="mylocation-tab">
                 <a href="#mylocation" aria-controls="mylocation" role="tab" data-toggle="tab">{{ _('Location') }}</a>
               </li>
             {% endif %}
+
             <li role="presentation" id="youandmozilla-tab">
               <a href="#youandmozilla" aria-controls="youandmozilla" role="tab" data-toggle="tab">{{ _('You &amp; Mozilla') }}</a>
             </li>
@@ -57,11 +59,11 @@
 
       <div class="col-md-{% if profile.is_complete %}9{% else %}12{% endif %}">
         <div class="tab-content">
-          <!-- Profle Tab -->
+          <!-- Profile Tab -->
           {% include 'phonebook/includes/profile_edit_basic.html' %}
 
-          {% if waffle.flag('location_is_active') %}
           <!-- Location Tab -->
+          {% if waffle.flag('location_is_active') %}
             {% include 'phonebook/includes/profile_edit_location.html' %}
           {% endif %}
 

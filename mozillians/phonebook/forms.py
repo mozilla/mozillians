@@ -267,48 +267,9 @@ class LanguagesPrivacyForm(happyforms.ModelForm):
 
 
 class LocationForm(happyforms.ModelForm):
-    lat = forms.FloatField(widget=forms.HiddenInput)
-    lng = forms.FloatField(widget=forms.HiddenInput)
-    savecountry = forms.BooleanField(label=_lazy(u'Required'),
-                                     initial=True, required=False,
-                                     widget=forms.CheckboxInput(attrs={'disabled': 'disabled'}))
-    saveregion = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
-    savecity = forms.BooleanField(label=_lazy(u'Save'), required=False, show_hidden_initial=True)
-
     class Meta:
         model = UserProfile
-        fields = ('timezone', 'privacy_timezone', 'privacy_geo_city', 'privacy_geo_region',
-                  'privacy_geo_country',)
-
-    def clean(self):
-        # If lng/lat were provided, make sure they point at a country somewhere...
-        if self.cleaned_data.get('lat') is not None and self.cleaned_data.get('lng') is not None:
-            # We only want to call reverse_geocode if some location data changed.
-            if ('lat' in self.changed_data or 'lng' in self.changed_data or
-                    'saveregion' in self.changed_data or 'savecity' in self.changed_data):
-                self.instance.lat = self.cleaned_data['lat']
-                self.instance.lng = self.cleaned_data['lng']
-                self.instance.reverse_geocode()
-                if not self.instance.geo_country:
-                    error_msg = _('Location must be inside a country.')
-                    self.errors['savecountry'] = self.error_class([error_msg])
-                    del self.cleaned_data['savecountry']
-                # If the user doesn't want their region/city saved, respect it.
-                if not self.cleaned_data.get('saveregion'):
-                    if not self.cleaned_data.get('savecity'):
-                        self.instance.geo_region = None
-                    else:
-                        error_msg = _('Region must also be saved if city is saved.')
-                        self.errors['saveregion'] = self.error_class([error_msg])
-
-                if not self.cleaned_data.get('savecity'):
-                    self.instance.geo_city = None
-        else:
-            self.errors['location'] = self.error_class([_('Search for your country on the map.')])
-            self.errors['savecountry'] = self.error_class([_('Country cannot be empty.')])
-            del self.cleaned_data['savecountry']
-
-        return self.cleaned_data
+        fields = ('timezone', 'privacy_timezone',)
 
 
 class ContributionForm(happyforms.ModelForm):
