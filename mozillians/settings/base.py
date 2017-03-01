@@ -72,6 +72,15 @@ STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = 'en-US'
 LOCALE_PATHS = [path('locale')]
 
+EXEMPT_L10N_URLS = [
+    '^/oidc/authenticate/',
+    '^/oidc/callback/',
+    '^/api/v1/',
+    '^/api/v2/',
+    '^/admin/'
+]
+
+
 # Tells the extract script what files to parse for strings and what functions to use.
 PUENTE = {
     'BASE_DIR': ROOT,
