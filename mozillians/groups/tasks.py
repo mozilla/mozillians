@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
-from celery.task import periodic_task, task
+from celery.task import task
 from waffle import switch_is_active
 
 from mozillians.common.templatetags.helpers import get_object_or_none
@@ -125,7 +125,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     send_mail(subject, body, settings.FROM_NOREPLY, [user.email], fail_silently=False)
 
 
-@periodic_task(run_every=timedelta(hours=24))
+@task(ignore_result=True)
 def invalidate_group_membership():
     """
     For groups with defined `invalidation_days` we need to invalidate
@@ -148,7 +148,7 @@ def invalidate_group_membership():
             group.remove_member(member.userprofile, status=status)
 
 
-@periodic_task(run_every=timedelta(hours=24))
+@task(ignore_result=True)
 def notify_membership_renewal():
     """
     For groups with defined `invalidation_days` we need to notify users
