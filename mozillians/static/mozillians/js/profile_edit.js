@@ -140,4 +140,38 @@ $(function() {
             $(this).attr('title', '');
         });
     });
+
+    // Intercept all the ajax calls
+    $(document).ajaxSend(function(event, xhr, settings) {
+        // Hijack the ajax calls and set the X-CSRFToken Header for
+        // the skills/autocomplete/ url.
+        // This is needed because we don't have a csrf cookie due to
+        // django-session-csrf
+        if (settings.url.indexOf('/skills/autocomplete/') != -1) {
+            // remove form errors if any
+            $('#skill-ajax-error').remove();
+
+            if (settings.type === 'POST') {
+                var csrf_token = $('input[name="csrfmiddlewaretoken"]')[0].value;
+                xhr.setRequestHeader('X-CSRFToken', csrf_token);
+            }
+        }
+    });
+
+    // Handle ajax errors
+    $(document).ajaxError(function(event, xhr, settings, thrownError) {
+        if ((settings.url.indexOf('/skills/autocomplete/') != -1) &&
+            (settings.type === 'POST')) {
+            // remove the user selection that failed the validation
+            $('li.select2-results__option').remove();
+            $('li.select2-search').children().val = '';
+
+            // Display an error message
+            var error_element = ('<span id="skill-ajax-error" class="error-message"> ' +
+                                 xhr.responseJSON['message'] +
+                                 '</span>');
+            $('#skills').find('.form-group').after(error_element);
+        }
+    });
+
 });

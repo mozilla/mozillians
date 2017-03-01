@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from dal import autocomplete
 
-from mozillians.groups.models import Group, GroupAlias, SkillAlias
+from mozillians.groups.models import Group, GroupAlias, Skill, SkillAlias
 from mozillians.groups.views import SkillsAutocomplete
 from mozillians.users.views import CuratorsAutocomplete
 
@@ -46,7 +46,8 @@ urlpatterns = patterns(
         name='group-autocomplete'),
     url('^groups/search/$', 'views.search',
         dict(searched_object=Group), name='search_groups'),
-    url('^skills/autocomplete/$', login_required(SkillsAutocomplete.as_view()),
+    url('^skills/autocomplete/$',
+        login_required(SkillsAutocomplete.as_view(model=Skill, create_field='name')),
         name='skills-autocomplete'),
     url('^curators/autocomplete/$', CuratorsAutocomplete.as_view(),
         name='curators-autocomplete'),

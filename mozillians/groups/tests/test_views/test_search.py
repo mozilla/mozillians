@@ -176,7 +176,6 @@ class SearchTests(TestCase):
         eq_(response.get('content-type'), 'application/json')
 
         data = json.loads(response.content)
-        eq_(len(data['results']), 1, 'Non autocomplete skills are included in search')
         eq_(data['results'][0]['id'], skill_1.id)
 
     def test_search_no_ajax(self):

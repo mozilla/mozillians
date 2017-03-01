@@ -1,16 +1,18 @@
 import json
+import re
 
 from collections import defaultdict
 
-from django.http import JsonResponse
+from django import http
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_POST
+from django.utils import six
 from django.utils.translation import ugettext as _
 
 from dal import autocomplete
@@ -111,10 +113,9 @@ def search(request, searched_object=Group):
     term = request.GET.get('term', None)
     if request.is_ajax() and term:
         groups = searched_object.search(term).values_list('name', flat=True)
-        return HttpResponse(json.dumps(list(groups)),
-                            content_type='application/json')
+        return http.HttpResponse(json.dumps(list(groups)), content_type='application/json')
 
-    return HttpResponseBadRequest()
+    return http.HttpResponseBadRequest()
 
 
 @never_cache
@@ -257,7 +258,7 @@ def remove_member(request, url, user_pk, status=None):
             messages.error(request, _('This group does not allow members to remove themselves.'))
             return redirect(next_url)
         if profile_to_remove != this_userprofile:
-            raise Http404()
+            raise http.Http404()
 
     # Curators cannot be removed, only by themselves and if there is another curator.
     curators = group.curators.all()
@@ -299,7 +300,7 @@ def confirm_member(request, url, user_pk):
     next_url = request.REQUEST.get('next_url', group_url)
 
     if not (is_curator or is_manager):
-        raise Http404()
+        raise http.Http404()
     try:
         membership = GroupMembership.objects.get(group=group, userprofile=profile)
     except GroupMembership.DoesNotExist:
@@ -480,7 +481,7 @@ def group_edit(request, url=None):
         form.save()
         next_section = request.GET.get('next')
         next_url = urlparams(reverse('groups:group_edit', args=[group.url]), next_section)
-        return HttpResponseRedirect(next_url)
+        return http.HttpResponseRedirect(next_url)
     elif request.POST:
         forms_valid = False
 
@@ -498,38 +499,45 @@ def group_edit(request, url=None):
 
 class SkillsAutocomplete(autocomplete.Select2QuerySetView):
 
-    def __init__(self, *args, **kwargs):
-        super(SkillsAutocomplete, self).__init__(*args, **kwargs)
-        self.cached_skills = list(Skill.objects.all().values_list('name', flat=True))
+    def has_add_permission(self, request):
+        """Return True if the user has the permission to add a model."""
+        if not request.user.is_authenticated():
+            return False
+        return True
 
-    def get_queryset(self):
+    def create_object(self, text):
+        """Override create object method."""
 
-        qs = Skill.objects.all()
-        if self.q:
-            qs = qs.filter(name__istartswith=self.q)
-        return qs
+        # Basic validation before creating a new field.
+        if re.match(r'^[a-zA-Z0-9 +.:,-]*$', text):
+            return super(SkillsAutocomplete, self).create_object(text)
+        return None
 
-    def render_to_response(self, context):
-        """Override base render_to_response.
+    def post(self, request):
+        """Create an object given a text after checking permissions."""
+        if not self.has_add_permission(request):
+            return http.HttpResponseForbidden()
 
-        Return a JSON response in Select2 format."""
-        create_option = []
+        if not self.create_field:
+            raise ImproperlyConfigured('Missing "create_field"')
 
-        q = self.request.GET.get('q', None)
+        text = request.POST.get('text')
 
-        if (self.request.GET.get('create', None) == 'true' and q and
-                q.lower() not in self.cached_skills):
-            create_option = [{
-                'id': q,
-                'text': 'Create "%s"' % q
-            }]
+        if text is None:
+            return http.HttpResponseBadRequest()
 
-        data = {
-            'results': self.get_results(context) + create_option,
-            'more': self.has_more(context)
-        }
+        result = self.create_object(text)
 
-        return JsonResponse(data)
+        if result:
+            return http.JsonResponse({
+                'id': result.pk,
+                'text': six.text_type(result),
+            })
+        # Return an unofficial error code - retry with
+        return http.JsonResponse({
+            'status': 'false',
+            'message': 'Skills can only contain latin characters and +.:-.',
+        }, status=449)
 
 
 # Invite views
@@ -548,8 +556,8 @@ def delete_invite(request, invite_pk):
         messages.success(request, msg)
         next_section = request.GET.get('next')
         next_url = urlparams(reverse('groups:group_edit', args=[group.url]), next_section)
-        return HttpResponseRedirect(next_url)
-    raise Http404()
+        return http.HttpResponseRedirect(next_url)
+    raise http.Http404()
 
 
 @never_cache
@@ -582,7 +590,7 @@ def send_invitation_email(request, invite_pk):
     is_manager = request.user.userprofile.is_manager
 
     if not (is_curator or is_manager):
-        raise Http404
+        raise http.Http404
 
     notify_redeemer_invitation.delay(invite.pk, invite.group.invite_email_text)
     msg = _(u'Invitation to {0} has been sent successfully.'.format(invite.redeemer))
@@ -590,7 +598,7 @@ def send_invitation_email(request, invite_pk):
     next_section = request.GET.get('next')
     next_url = urlparams(reverse('groups:group_edit', args=[invite.group.url]), next_section)
 
-    return HttpResponseRedirect(next_url)
+    return http.HttpResponseRedirect(next_url)
 
 
 @never_cache
@@ -615,7 +623,7 @@ def force_group_invalidation(request, url, alias_model, template=''):
                 status = GroupMembership.PENDING
             group.remove_member(member.userprofile, status=status)
     else:
-        raise Http404
+        raise http.Http404
 
     return redirect(reverse('groups:show_group', args=[group.url]))
 

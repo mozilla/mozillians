@@ -148,7 +148,9 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-email" type="submit" name="email_section">{{ _('Update Emails') }}</button>
+        <button class="btn btn-primary" id="form-submit-email" type="submit"
+                name="email_section">{{ _('Update Emails') }}
+        </button>
       </div>
     </div>
   </form>
@@ -185,7 +187,9 @@
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-skills" type="submit" name="skills_section">{{ _('Update Skills') }}</button>
+        <button class="btn btn-primary" id="form-submit-skills" type="submit"
+                name="skills_section">{{ _('Update Skills') }}
+        </button>
       </div>
     </div>
   </form>
@@ -207,8 +211,7 @@
               </p>
               {{ language_formset.management_form }}
               {% for language_form in language_formset %}
-                <div class="language-fieldrow
-                            {% if language_form.errors %} error{% endif %}">
+                <div class="language-fieldrow {% if language_form.errors %} error{% endif %}">
                   {{ language_form.non_field_errors() }}
                   {% for field in language_form %}
                     {{ field }}
