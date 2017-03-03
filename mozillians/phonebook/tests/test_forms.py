@@ -5,9 +5,8 @@ from mock import MagicMock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Skill
 from mozillians.phonebook.forms import (ContributionForm, EmailForm, ExternalAccountForm,
-                                        SearchForm, SkillsForm, filter_vouched)
+                                        SearchForm, filter_vouched)
 from mozillians.users.models import UserProfile
 from mozillians.users.tests import UserFactory
 
@@ -62,25 +61,6 @@ class EmailFormTests(TestCase):
 
 
 class ProfileFormsTests(TestCase):
-    def test_skill_name_validation(self):
-        # skill names can contain A-Za-z0-9 +.:-
-        user = UserFactory.create(email='foo@bar.com')
-        data = model_to_dict(user.userprofile)
-
-        # valid names
-        data['skills'] = ['lO ngN,am3+.:-']
-        form = SkillsForm(data=data, instance=user.userprofile)
-        ok_(form.is_valid(), msg=dict(form.errors))
-
-        # Save the form
-        form.save()
-        ok_(Skill.objects.filter(name='lo ngn,am3+.:-').exists())
-
-        # an invalid name - ';' is not a valid character
-        data['skills'] = ['lOngName+.:-;']
-        form = SkillsForm(data=data, instance=user.userprofile)
-        ok_(not form.is_valid())
-        ok_('skills' in form.errors)
 
     def test_story_link(self):
         user = UserFactory.create()
