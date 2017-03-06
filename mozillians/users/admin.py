@@ -244,7 +244,12 @@ class NDAMemberFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         from mozillians.groups.models import Group, GroupMembership
-        group = Group.objects.get(name=settings.NDA_GROUP)
+
+        try:
+            group = Group.objects.get(name=settings.NDA_GROUP)
+        except Group.DoesNotExist:
+            return queryset
+
         memberships = GroupMembership.objects.filter(group=group, status=GroupMembership.MEMBER)
         profile_ids = memberships.values_list('userprofile__id', flat=True)
 
