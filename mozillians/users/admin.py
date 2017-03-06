@@ -272,6 +272,69 @@ class BasketTokenFilter(SimpleListFilter):
         return queryset
 
 
+class MissingCountry(SimpleListFilter):
+    """Admin filter for profiles missing country information"""
+    title = 'Missing country'
+    parameter_name = 'missing_country'
+
+    def lookups(self, request, model_admin):
+        return (('both', 'Both geo_country/country'),
+                ('geo_country', 'Only geo_country'),
+                ('country', 'Only country'))
+
+    def queryset(self, request, queryset):
+
+        if self.value() == 'both':
+            return queryset.filter(country__isnull=True, geo_country__isnull=True)
+        elif self.value() == 'geo_country':
+            return queryset.filter(geo_country__isnull=True)
+        elif self.value() == 'country':
+            return queryset.filter(country__isnull=True)
+        return queryset
+
+
+class MissingRegion(SimpleListFilter):
+    """Admin filter for profiles missing region information"""
+    title = 'Missing region'
+    parameter_name = 'missing_region'
+
+    def lookups(self, request, model_admin):
+        return (('both', 'Both geo_region/region'),
+                ('geo_region', 'Only geo_region'),
+                ('region', 'Only region'))
+
+    def queryset(self, request, queryset):
+
+        if self.value() == 'both':
+            return queryset.filter(region__isnull=True, geo_region__isnull=True)
+        elif self.value() == 'geo_region':
+            return queryset.filter(geo_region__isnull=True)
+        elif self.value() == 'region':
+            return queryset.filter(region__isnull=True)
+        return queryset
+
+
+class MissingCity(SimpleListFilter):
+    """Admin filter for profiles missing city information"""
+    title = 'Missing city'
+    parameter_name = 'missing_city'
+
+    def lookups(self, request, model_admin):
+        return (('both', 'Both geo_city/city'),
+                ('geo_city', 'Only geo_city'),
+                ('city', 'Only city'))
+
+    def queryset(self, request, queryset):
+
+        if self.value() == 'both':
+            return queryset.filter(city__isnull=True, geo_city__isnull=True)
+        elif self.value() == 'geo_city':
+            return queryset.filter(geo_city__isnull=True)
+        elif self.value() == 'city':
+            return queryset.filter(city__isnull=True)
+        return queryset
+
+
 class UsernameBlacklistAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     """UsernameBlacklist Admin."""
     save_on_top = True
@@ -454,7 +517,8 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     list_filter = ['is_vouched', 'can_vouch', DateJoinedFilter,
                    LastLoginFilter, LegacyVouchFilter, SuperUserFilter,
                    CompleteProfileFilter, PublicProfileFilter, AlternateEmailFilter,
-                   NDAMemberFilter, BasketTokenFilter, 'externalaccount__type']
+                   NDAMemberFilter, BasketTokenFilter, MissingCountry, MissingRegion,
+                   MissingCity, 'externalaccount__type']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees', 'date_joined']
