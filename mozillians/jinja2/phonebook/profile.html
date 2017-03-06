@@ -230,8 +230,9 @@
                       <i class="icon-crown"></i>
                     {%- endif -%}
                     {{ group.name }}
-                    {%- if group.pending -%} {{ _('(membership requested)') }}{%- endif -%}</a>
-                    {%- if group.pending_terms -%} {{ _('(pending terms review)') }}{%- endif -%}</a>
+                    {%- if group.pending %} {{ _('(membership requested)') }}{%- endif -%}
+                    {%- if group.pending_terms %} {{ _('(pending terms review)') }}{%- endif -%}
+                  </a>
                 {%- else -%}
                   {%- if profile in curators -%}
                     <i class="icon-crown"></i>
