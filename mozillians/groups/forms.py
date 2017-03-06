@@ -40,6 +40,7 @@ class GroupBasicForm(happyforms.ModelForm):
 
 class GroupCuratorsForm(happyforms.ModelForm):
     """Model Form for adding group curators."""
+    name = forms.CharField()
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -51,6 +52,9 @@ class GroupCuratorsForm(happyforms.ModelForm):
             self.fields['curators'].required = True
         self.fields['curators'].help_text = _('Start typing the name/email/username of '
                                               'a vouched Mozillian.')
+        # Make the name field hidden and readonly
+        self.fields['name'].widget = forms.HiddenInput()
+        self.fields['name'].widget.attrs['readonly'] = True
 
     def clean(self):
         cleaned_data = super(GroupCuratorsForm, self).clean()
@@ -78,7 +82,13 @@ class GroupCuratorsForm(happyforms.ModelForm):
         model = Group
         fields = ('curators',)
         widgets = {
-            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
+            'curators': autocomplete.ModelSelect2Multiple(
+                url='groups:curators-autocomplete',
+                forward=['name'],
+                attrs={
+                    'data-minimum-input-length': 3
+                }
+            )
         }
 
 
@@ -111,6 +121,7 @@ class GroupTermsExpirationForm(happyforms.ModelForm):
 
 class GroupInviteForm(happyforms.ModelForm):
     """Model form to handle the invites to a group."""
+    name = forms.CharField()
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -120,6 +131,9 @@ class GroupInviteForm(happyforms.ModelForm):
                                              'of a vouched Mozillian.')
         if self.instance.pk:
             self.initial['invites'] = []
+        # Make the group field hidden and readonly
+        self.fields['name'].widget = forms.HiddenInput()
+        self.fields['name'].widget.attrs['readonly'] = True
 
     def clean(self):
         """Custom clean method."""
@@ -146,9 +160,15 @@ class GroupInviteForm(happyforms.ModelForm):
 
     class Meta:
         model = Group
-        fields = ('invites',)
+        fields = ('invites', 'name',)
         widgets = {
-            'invites': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
+            'invites': autocomplete.ModelSelect2Multiple(
+                url='groups:invites-autocomplete',
+                forward=['name'],
+                attrs={
+                    'data-minimum-input-length': 3
+                }
+            )
         }
 
 
