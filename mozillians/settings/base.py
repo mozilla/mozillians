@@ -304,7 +304,6 @@ INSTALLED_APPS = (
 
     # Third-party apps, patches, fixes
     'django_jinja',
-    'djcelery',
     'puente',
     'compressor',
     'cronjobs',
@@ -482,9 +481,6 @@ DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 # Celery configuration
-import djcelery  # noqa
-djcelery.setup_loader()
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
