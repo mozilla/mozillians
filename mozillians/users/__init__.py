@@ -30,7 +30,7 @@ def get_languages_for_locale(locale):
     locale = locale.replace('-', '_')
     if locale not in AVAILABLE_LANGUAGES:
         try:
-            local_lang = babel.Locale(locale).languages
+            local_lang = babel.Locale.parse(locale).languages
         except babel.UnknownLocaleError:
             return AVAILABLE_LANGUAGES['en']
 
