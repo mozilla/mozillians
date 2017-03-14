@@ -261,7 +261,7 @@
           <div id="languages" class="profile-entry">
             <h3><i class="icon-comments-o"></i> {{ _('Languages') }}</h3>
               {% for language in profile.languages -%}
-                {{ langcode_to_name(language.code) }}
+                <a href="{{ url('phonebook:list_language', language=language.code) }}">{{ langcode_to_name(language.code) }}</a>
                 {%- if not loop.last %},{% endif %}
               {% endfor %}
           </div>

@@ -13,9 +13,7 @@
 {% endblock %}
 
 {% block content %}
-  <h2>{{ _('Mozillians speaking') }}
-      {{language}}
-  </h2>
+  <h1>{{ _('Language:') }} {{ language }}</h1>
   {% if people.paginator.count %}
     {% with items=people %}
       {% include 'includes/pagination.html' %}
@@ -32,10 +30,10 @@
     {% endwith %}
   {% else %}
     <div class="well">
-        <p id="not-found">
-          {{ _("Sorry we cannot find any mozillians speaking") }}
-          {{ language }}
-        </p>
+      <p id="not-found">
+        {{ _("Sorry we cannot find any mozillians speaking") }}
+        {{ language }}
+      </p>
     </div>
   {% endif %}
 {% endblock %}
