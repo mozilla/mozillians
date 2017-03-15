@@ -2,9 +2,10 @@ from django.contrib.auth.models import Group, User
 from django.utils import timezone
 
 import factory
+
+from cities_light.models import City, Country, Region
 from factory import fuzzy
 
-from mozillians.geo.models import City, Country, Region
 from mozillians.users.models import Language
 
 
@@ -22,19 +23,15 @@ class UserFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def userprofile(self, create, extracted, **kwargs):
         self.userprofile.full_name = ' '.join([self.first_name, self.last_name])
-        self.userprofile.geo_country = Country.objects.get_or_create(
-            name='Greece', code='gr',
-            mapbox_id='country.1188277719'
+        self.userprofile.country = Country.objects.get_or_create(
+            name='Greece', code2='gr'
         )[0]
-        self.userprofile.geo_region = Region.objects.get_or_create(
-            name='Attika', country=self.userprofile.geo_country,
-            mapbox_id='province.539510334'
+        self.userprofile.region = Region.objects.get_or_create(
+            name='Attika', country=self.userprofile.country
         )[0]
-        self.userprofile.geo_city = City.objects.get_or_create(
-            name='Athens', region=self.userprofile.geo_region,
-            country=self.userprofile.geo_country,
-            lat=39.727924, lng=21.592328,
-            mapbox_id='mapbox-places.10946738'
+        self.userprofile.city = City.objects.get_or_create(
+            name='Athens', region=self.userprofile.region,
+            country=self.userprofile.country
         )[0]
         self.userprofile.lat = 39.727924
         self.userprofile.lng = 21.592328
@@ -64,3 +61,28 @@ class LanguageFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Language
+
+
+class CountryFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: 'Country Name {0}'.format(n))
+    code2 = factory.Sequence(lambda n: '{0}'.format(str(n)[-2:]))
+
+    class Meta:
+        model = Country
+
+
+class RegionFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: 'Region Name {0}'.format(n))
+    country = factory.SubFactory(CountryFactory)
+
+    class Meta:
+        model = Region
+
+
+class CityFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: 'City Name {0}'.format(n))
+    region = factory.SubFactory(RegionFactory)
+    country = factory.SelfAttribute('region.country')
+
+    class Meta:
+        model = City

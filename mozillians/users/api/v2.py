@@ -160,34 +160,34 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
         }
 
     def get_country(self, obj):
-        country = obj.geo_country
+        country = obj.country
         return {
-            'code': country.code if country else '',
+            'code': country.code2 if country else '',
             'value': country.name if country else '',
-            'privacy': obj.get_privacy_geo_country_display(),
+            'privacy': obj.get_privacy_country_display(),
         }
 
     def get_region(self, obj):
-        region = obj.geo_region
+        region = obj.region
         return {
             'value': region.name if region else '',
-            'privacy': obj.get_privacy_geo_region_display(),
+            'privacy': obj.get_privacy_region_display(),
         }
 
     def get_city(self, obj):
-        city = obj.geo_city
+        city = obj.city
         return {
             'value': city.name if city else '',
-            'privacy': obj.get_privacy_geo_city_display(),
+            'privacy': obj.get_privacy_city_display(),
         }
 
 
 # Filters
 class UserProfileFilter(django_filters.FilterSet):
-    city = django_filters.CharFilter(name='geo_city__name')
-    region = django_filters.CharFilter(name='geo_region__name')
-    country = django_filters.CharFilter(name='geo_country__name')
-    country_code = django_filters.CharFilter(name='geo_country__code')
+    city = django_filters.CharFilter(name='city__name')
+    region = django_filters.CharFilter(name='region__name')
+    country = django_filters.CharFilter(name='country__name')
+    country_code = django_filters.CharFilter(name='country__code2')
     username = django_filters.CharFilter(name='user__username')
     email = django_filters.MethodFilter(action='filter_emails')
     language = django_filters.CharFilter(name='language__code')
