@@ -481,19 +481,17 @@ DEFAULT_AVATAR_URL = urljoin(MEDIA_URL, DEFAULT_AVATAR)
 DEFAULT_AVATAR_PATH = os.path.join(MEDIA_ROOT, DEFAULT_AVATAR)
 
 # Celery configuration
-
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
-CELERY_ALWAYS_EAGER = True
-BROKER_CONNECTION_TIMEOUT = 0.1
-CELERY_RESULT_BACKEND = 'amqp'
-CELERY_ACCEPT_CONTENT = ['pickle']
-CELERY_TASK_RESULT_EXPIRES = 3600
-CELERY_SEND_TASK_ERROR_EMAILS = True
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_BROKER_CONNECTION_TIMEOUT = 0.1
+CELERY_RESULT_BACKEND = 'rpc'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_EXPIRES = 3600
 
 # Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
 # The task can catch that and recover but should exit ASAP.
-CELERYD_TASK_SOFT_TIME_LIMIT = 150
+CELERY_TASK_SOFT_TIME_LIMIT = 150
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 

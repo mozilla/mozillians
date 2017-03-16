@@ -189,7 +189,7 @@ def subscribe_user_to_basket(instance_id, newsletters=[]):
 
     lookup_subtask = lookup_user_task.subtask((instance.user.email,))
     subscribe_subtask = subscribe_user_task.subtask((instance.user.email, newsletters,))
-    chain(lookup_subtask | subscribe_subtask)()
+    chain(lookup_subtask, subscribe_subtask)()
 
 
 @shared_task()
@@ -204,7 +204,7 @@ def update_email_in_basket(old_email, new_email):
         return
 
     chain(
-        lookup_user_task.subtask((old_email,)) |
+        lookup_user_task.subtask((old_email,)),
         group(
             subscribe_user_task.subtask((new_email,)),
             unsubscribe_user_task.subtask()
@@ -223,7 +223,7 @@ def unsubscribe_from_basket_task(email, newsletters=[]):
 
     # Lookup the email and then pass the result to the unsubscribe subtask
     chain(
-        lookup_user_task.subtask((email,)) |
+        lookup_user_task.subtask((email,)),
         unsubscribe_user_task.subtask((newsletters,))
     ).delay()
 
