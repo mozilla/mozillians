@@ -2,12 +2,11 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 
 from mock import patch
-from mozillians.geo.tests import CountryFactory, RegionFactory, CityFactory
 from nose.tools import eq_
 
 from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.users.tests import UserFactory
+from mozillians.users.tests import CountryFactory, RegionFactory, CityFactory, UserFactory
 
 
 # FIXME: These tests are particularly slow. See if there's any way to improve that.
@@ -29,11 +28,11 @@ class ListTests(TestCase):
     def test_list_mozillians_in_location_country_vouched(self):
         country = CountryFactory.create()
         country2 = CountryFactory.create()
-        user_listed_1 = UserFactory.create(userprofile={'geo_country': country})
-        UserFactory.create(userprofile={'geo_country': country})
+        user_listed_1 = UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country})
         UserFactory.create()
         UserFactory.create(vouched=False)
-        UserFactory.create(vouched=False, userprofile={'geo_country': country2})
+        UserFactory.create(vouched=False, userprofile={'country': country2})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': country.name})
@@ -52,8 +51,8 @@ class ListTests(TestCase):
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_second_page(self):
         country = CountryFactory.create()
-        UserFactory.create(userprofile={'geo_country': country})
-        user_listed_2 = (UserFactory.create(userprofile={'geo_country': country}))
+        UserFactory.create(userprofile={'country': country})
+        user_listed_2 = (UserFactory.create(userprofile={'country': country}))
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': country.name})
@@ -69,8 +68,8 @@ class ListTests(TestCase):
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_empty_page(self):
         country = CountryFactory.create()
-        UserFactory.create(userprofile={'geo_country': country})
-        UserFactory.create(userprofile={'geo_country': country})
+        UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': country.name})
@@ -82,8 +81,8 @@ class ListTests(TestCase):
     @patch('mozillians.groups.views.settings.ITEMS_PER_PAGE', 1)
     def test_list_mozillians_in_location_country_invalid_page(self):
         country = CountryFactory.create()
-        UserFactory.create(userprofile={'geo_country': country})
-        UserFactory.create(userprofile={'geo_country': country})
+        UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_country', kwargs={'country': country.name})
@@ -98,14 +97,14 @@ class ListTests(TestCase):
         region = RegionFactory.create(country=country)
         region2 = RegionFactory.create(country=country)
         user_listed = UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_region': region})
+            userprofile={'country': country,
+                         'region': region})
         UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_region': region2})
+            userprofile={'country': country,
+                         'region': region2})
         UserFactory.create()
         UserFactory.create(vouched=False)
-        UserFactory.create(vouched=False, userprofile={'geo_country': country2})
+        UserFactory.create(vouched=False, userprofile={'country': country2})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse(
@@ -126,14 +125,14 @@ class ListTests(TestCase):
         city = CityFactory(country=country)
         city2 = CityFactory(country=country)
         user_listed = UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_city': city})
+            userprofile={'country': country,
+                         'city': city})
         UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_city': city2})
+            userprofile={'country': country,
+                         'city': city2})
         UserFactory.create()
         UserFactory.create(vouched=False)
-        UserFactory.create(vouched=False, userprofile={'geo_country': country2})
+        UserFactory.create(vouched=False, userprofile={'country': country2})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_city',
@@ -158,18 +157,18 @@ class ListTests(TestCase):
         city = CityFactory(country=country, region=region)
         city2 = CityFactory(country=country)
         user_listed = UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_region': region,
-                         'geo_city': city})
+            userprofile={'country': country,
+                         'region': region,
+                         'city': city})
         UserFactory.create(
-            userprofile={'geo_country': country,
-                         'geo_region': region,
-                         'geo_city': city2})
+            userprofile={'country': country,
+                         'region': region,
+                         'city': city2})
         UserFactory.create()
         UserFactory.create(vouched=False)
-        UserFactory.create(vouched=False, userprofile={'geo_country': country2})
-        UserFactory.create(userprofile={'geo_country': country})
-        UserFactory.create(userprofile={'geo_country': country, 'geo_region': region})
+        UserFactory.create(vouched=False, userprofile={'country': country2})
+        UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country, 'region': region})
         user = UserFactory.create()
         with self.login(user) as client:
             url = reverse('phonebook:list_region_city',

@@ -6,12 +6,11 @@ from mock import ANY, Mock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import MOZILLIANS, PUBLIC
 from mozillians.users.models import GroupMembership, ExternalAccount, Language, UserProfile
-from mozillians.users.tests import UserFactory
+from mozillians.users.tests import CityFactory, CountryFactory, RegionFactory, UserFactory
 from mozillians.users.api.v2 import (ExternalAccountSerializer,
                                      LanguageSerializer,
                                      UserProfileDetailedSerializer,
@@ -116,8 +115,8 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_get_country(self):
         context = {'request': self.factory.get('/')}
-        country = CountryFactory.create(name='LA', code='IO')
-        user = UserFactory.create(userprofile={'geo_country': country})
+        country = CountryFactory.create(name='LA', code2='IO')
+        user = UserFactory.create(userprofile={'country': country})
         user.userprofile._groups = Group.objects.none()
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         country = {'code': 'IO',
@@ -127,7 +126,7 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_transform_region(self):
         region = RegionFactory.create(name='LA')
-        user = UserFactory.create(userprofile={'geo_region': region})
+        user = UserFactory.create(userprofile={'region': region})
         user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
@@ -137,7 +136,7 @@ class UserProfileDetailedSerializerTests(TestCase):
 
     def test_transform_city(self):
         city = CityFactory.create(name='LA')
-        user = UserFactory.create(userprofile={'geo_city': city})
+        user = UserFactory.create(userprofile={'city': city})
         user.userprofile._groups = Group.objects.none()
         context = {'request': self.factory.get('/')}
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)

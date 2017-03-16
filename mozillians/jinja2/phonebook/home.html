@@ -120,7 +120,7 @@
             <h2>{{ user.username }}</h2>
             {{ user.email }}
             {% with profile = user.userprofile %}
-            {% if profile.geo_country or profile.geo_region or profile.geo_city %}
+            {% if profile.country or profile.region or profile.city %}
               <section class="location">
                 {% include 'phonebook/includes/profile_location.html' %}
               </section>

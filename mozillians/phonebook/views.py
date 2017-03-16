@@ -539,13 +539,13 @@ def delete_apikey(request, api_pk):
 
 
 def list_mozillians_in_location(request, country, region=None, city=None):
-    queryset = UserProfile.objects.vouched().filter(geo_country__name__iexact=country)
+    queryset = UserProfile.objects.vouched().filter(country__name__iexact=country)
     show_pagination = False
 
     if city:
-        queryset = queryset.filter(geo_city__name__iexact=city)
+        queryset = queryset.filter(city__name__iexact=city)
     if region:
-        queryset = queryset.filter(geo_region__name__iexact=region)
+        queryset = queryset.filter(region__name__iexact=region)
 
     paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
     page = request.GET.get('page', 1)

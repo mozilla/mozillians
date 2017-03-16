@@ -11,11 +11,10 @@ from mozillians.api.tests import APIAppFactory
 from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase
 from mozillians.common.utils import absolutify
-from mozillians.geo.tests import CityFactory, CountryFactory, RegionFactory
 from mozillians.groups.models import GroupMembership
 from mozillians.groups.tests import GroupFactory, SkillFactory
 from mozillians.users.models import ExternalAccount
-from mozillians.users.tests import UserFactory
+from mozillians.users.tests import CityFactory, CountryFactory, RegionFactory, UserFactory
 
 
 @override_settings(CAN_VOUCH_THRESHOLD=1)
@@ -27,9 +26,9 @@ class UserResourceTests(TestCase):
         city = CityFactory()
         self.user = UserFactory.create(
             userprofile={'vouched': False,
-                         'geo_country': country,
-                         'geo_region': region,
-                         'geo_city': city})
+                         'country': country,
+                         'region': region,
+                         'city': city})
         self.user.userprofile.vouch(voucher.userprofile)
         group = GroupFactory.create()
         group.add_member(self.user.userprofile)
@@ -88,9 +87,9 @@ class UserResourceTests(TestCase):
         eq_(data['photo'], profile.photo)
         eq_(data['photo_thumbnail'], profile.get_photo_url())
         eq_(data['ircname'], profile.ircname)
-        eq_(data['country'], profile.geo_country.code)
-        eq_(data['region'], profile.geo_region.name)
-        eq_(data['city'], profile.geo_city.name)
+        eq_(data['country'], profile.country.code2)
+        eq_(data['region'], profile.region.name)
+        eq_(data['city'], profile.city.name)
         eq_(data['date_mozillian'], profile.date_mozillian)
         eq_(data['timezone'], profile.timezone)
         eq_(data['email'], profile.email)
@@ -239,14 +238,14 @@ class UserResourceTests(TestCase):
         eq_(len(data['objects']), 0)
 
     def test_search_combined_skills_country(self):
-        country = CountryFactory.create(code='fr')
-        user_1 = UserFactory.create(userprofile={'geo_country': country})
-        UserFactory.create(userprofile={'geo_country': country})
+        country = CountryFactory.create(code2='fr')
+        user_1 = UserFactory.create(userprofile={'country': country})
+        UserFactory.create(userprofile={'country': country})
         skill = SkillFactory.create()
         user_1.userprofile.skills.add(skill)
         client = Client()
         url = urlparams(self.mozilla_resource_url,
-                        skills=skill.name, country=country.code)
+                        skills=skill.name, country=country.code2)
         response = client.get(url, follow=True)
         data = json.loads(response.content)
         eq_(len(data['objects']), 1)
@@ -254,7 +253,7 @@ class UserResourceTests(TestCase):
 
     def test_query_with_space(self):
         city = CityFactory.create(name='Mountain View')
-        user = UserFactory.create(userprofile={'geo_city': city})
+        user = UserFactory.create(userprofile={'city': city})
         client = Client()
         url = urlparams(self.mozilla_resource_url, city='mountain view')
         request = client.get(url, follow=True)
@@ -282,10 +281,10 @@ class UserResourceTests(TestCase):
         eq_(data['objects'][0]['id'], user.userprofile.id)
 
     def test_search_country(self):
-        country = CountryFactory.create(code='fr')
-        user = UserFactory.create(userprofile={'geo_country': country})
+        country = CountryFactory.create(code2='fr')
+        user = UserFactory.create(userprofile={'country': country})
         url = urlparams(self.mozilla_resource_url,
-                        country=user.userprofile.geo_country.code)
+                        country=user.userprofile.country.code2)
         client = Client()
         response = client.get(url, follow=True)
         data = json.loads(response.content)
@@ -294,9 +293,9 @@ class UserResourceTests(TestCase):
 
     def test_search_region(self):
         region = RegionFactory.create(name='la lo')
-        user = UserFactory.create(userprofile={'geo_region': region})
+        user = UserFactory.create(userprofile={'region': region})
         url = urlparams(self.mozilla_resource_url,
-                        region=user.userprofile.geo_region.name)
+                        region=user.userprofile.region.name)
         client = Client()
         response = client.get(url, follow=True)
         data = json.loads(response.content)
@@ -305,9 +304,9 @@ class UserResourceTests(TestCase):
 
     def test_search_city(self):
         city = CityFactory.create(name=u'αθήνα')
-        user = UserFactory.create(userprofile={'geo_city': city})
+        user = UserFactory.create(userprofile={'city': city})
         url = urlparams(self.mozilla_resource_url,
-                        city=user.userprofile.geo_city.name)
+                        city=user.userprofile.city.name)
         client = Client()
         response = client.get(url, follow=True)
         data = json.loads(response.content)

@@ -34,9 +34,9 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
     languages = fields.CharField()
     url = fields.CharField()
     accounts = fields.CharField()
-    city = fields.CharField(attribute='geo_city__name', null=True, readonly=True, default='')
-    region = fields.CharField(attribute='geo_region__name', null=True, readonly=True, default='')
-    country = fields.CharField(attribute='geo_country__code', null=True, readonly=True, default='')
+    city = fields.CharField(attribute='city__name', null=True, readonly=True, default='')
+    region = fields.CharField(attribute='region__name', null=True, readonly=True, default='')
+    country = fields.CharField(attribute='country__code2', null=True, readonly=True, default='')
     photo_thumbnail = fields.CharField()
 
     class Meta:
@@ -88,13 +88,13 @@ class UserResource(ClientCacheResourceMixIn, GraphiteMixIn, ModelResource):
                 database_filters['is_vouched'] = Q(is_vouched=False)
 
         if 'country' in valid_filters:
-            database_filters['country'] = Q(geo_country__code=getvalue('country'))
+            database_filters['country'] = Q(country__code2=getvalue('country'))
 
         if 'region' in valid_filters:
-            database_filters['region'] = Q(geo_region__name=getvalue('region'))
+            database_filters['region'] = Q(region__name=getvalue('region'))
 
         if 'city' in valid_filters:
-            database_filters['city'] = Q(geo_city__name=getvalue('city'))
+            database_filters['city'] = Q(city__name=getvalue('city'))
 
         if 'ircname' in valid_filters:
             database_filters['ircname'] = Q(
