@@ -114,6 +114,20 @@ class InvalidateGroupFilter(SimpleListFilter):
         return queryset.filter(invalidation_days__isnull=True)
 
 
+class NeedsRenewalFilter(SimpleListFilter):
+    title = 'Needs Renewal'
+    parameter_name = 'needs_renewal'
+
+    def lookups(self, request, model_admin):
+        return (('True', 'Needs Renewal'),
+                ('False', 'Does not need renewal'),)
+
+    def queryset(self, request, queryset):
+        if self.value() == 'True':
+            return queryset.filter(needs_renewal=True)
+        return queryset
+
+
 class GroupBaseEditAdminForm(forms.ModelForm):
     merge_with = forms.ModelMultipleChoiceField(
         required=False, queryset=None,
@@ -282,7 +296,7 @@ class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
 
 class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = GroupMembershipResource
-    list_display = ['group', 'userprofile']
+    list_display = ['group', 'userprofile', 'date_joined', 'status']
     search_fields = [
         'group__name', 'group__url', 'group__description',
         'group__aliases__name', 'group__aliases__url',
@@ -291,6 +305,7 @@ class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
         'userprofile__geo_country__name', 'userprofile__user__username',
         'userprofile__user__email'
     ]
+    list_filter = [NeedsRenewalFilter]
     form = BaseGroupMembershipAutocompleteForm
 
 
