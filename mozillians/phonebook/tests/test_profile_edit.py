@@ -4,6 +4,8 @@ from django.core.urlresolvers import reverse
 from mock import patch
 from nose.tools import eq_, ok_
 
+from cities_light.models import Country
+
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.tests import _get_privacy_fields
 from mozillians.users.managers import MOZILLIANS
@@ -132,14 +134,14 @@ class ProfileEditTests(TestCase):
     def test_succesful_registration(self, info_mock):
         user = UserFactory.create(first_name='', last_name='')
         ok_(not UserProfile.objects.filter(full_name='foo bar').exists())
+        country = Country.objects.get(name='Greece')
 
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         data = {
             'full_name': 'foo bar',
             'email': 'foo@example.com',
             'username': 'foobar',
-            'lat': 40.005814,
-            'lng': -3.42071,
+            'country': country.id,
             'optin': True,
             'registration_section': '',
             'g-recaptcha-response': 'PASSED'

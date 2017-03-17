@@ -19,6 +19,10 @@ class RegisterMiddleware():
             r'^/[\w-]+{0}'.format(reverse('phonebook:login')),
             r'^/[\w-]+{0}'.format(reverse('phonebook:profile_edit')),
             r'^/[\w-]+{0}'.format(reverse('groups:skills-autocomplete')),
+            r'^/[\w-]+{0}'.format(reverse('users:country-autocomplete')),
+            r'^/[\w-]+{0}'.format(reverse('users:region-autocomplete')),
+            r'^/[\w-]+{0}'.format(reverse('users:city-autocomplete')),
+            r'^/[\w-]+{0}'.format(reverse('users:timezone-autocomplete')),
         ]
 
     def process_request(self, request):

@@ -14,6 +14,7 @@ import django_filters
 import happyforms
 from dal import autocomplete
 from nocaptcha_recaptcha.fields import NoReCaptchaField
+from pytz import common_timezones
 from PIL import Image
 
 from mozillians.api.models import APIv2App
@@ -219,15 +220,88 @@ class SkillsForm(happyforms.ModelForm):
 
 
 class LanguagesPrivacyForm(happyforms.ModelForm):
+
     class Meta:
         model = UserProfile
         fields = ('privacy_languages',)
 
 
+def get_timezones_list():
+    return common_timezones
+
+
 class LocationForm(happyforms.ModelForm):
+    """Form to provide location data."""
+
+    timezone = autocomplete.Select2ListChoiceField(
+        choice_list=get_timezones_list,
+        required=False,
+        widget=autocomplete.ListSelect2(url='users:timezone-autocomplete')
+    )
+
+    def __init__(self, *args, **kwargs):
+        """Override init method.
+
+        Make country a required field.
+        """
+        super(LocationForm, self).__init__(*args, **kwargs)
+        self.fields['country'].required = True
+
+    def clean(self):
+        """Override clean method.
+
+        We need at least the country of the user.
+        If a user supplies a city or a region, we can extract
+        the data from there.
+        """
+        super(LocationForm, self).clean()
+        country = self.cleaned_data.get('country')
+        region = self.cleaned_data.get('region')
+        city = self.cleaned_data.get('city')
+
+        if not city and not country and not region:
+            msg = _(u'Please supply your location data.')
+            raise forms.ValidationError(msg)
+
+        if city:
+            self.cleaned_data['country'] = city.country
+            self.cleaned_data['region'] = city.region
+            return self.cleaned_data
+
+        if region:
+            self.cleaned_data['country'] = region.country
+
+        return self.cleaned_data
+
     class Meta:
         model = UserProfile
-        fields = ('timezone', 'privacy_timezone',)
+        fields = ('timezone', 'privacy_timezone', 'city', 'privacy_city', 'region',
+                  'privacy_region', 'country', 'privacy_country',)
+        widgets = {
+            'country': autocomplete.ModelSelect2(
+                url='users:country-autocomplete',
+                attrs={
+                    'data-placeholder': u'Start typing to select a country.',
+                    'data-minimum-input-length': 2
+                }
+            ),
+            'region': autocomplete.ModelSelect2(
+                url='users:region-autocomplete',
+                forward=['country'],
+                attrs={
+                    'data-placeholder': u'Start typing to select a region.',
+                    'data-minimum-input-length': 3
+                }
+            ),
+            'city': autocomplete.ModelSelect2(
+                url='users:city-autocomplete',
+                forward=['country', 'region'],
+                attrs={
+                    'data-placeholder': u'Start typing to select a city.',
+                    'data-minimum-input-length': 3
+                }
+            )
+        }
 
 
 class ContributionForm(happyforms.ModelForm):
@@ -239,8 +313,7 @@ class ContributionForm(happyforms.ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('title', 'privacy_title',
-                  'date_mozillian', 'privacy_date_mozillian',
+        fields = ('title', 'privacy_title', 'date_mozillian', 'privacy_date_mozillian',
                   'story_link', 'privacy_story_link',)
 
 
@@ -286,7 +359,8 @@ class BaseLanguageFormSet(BaseInlineFormSet):
 
 LanguagesFormset = inlineformset_factory(UserProfile, Language,
                                          formset=BaseLanguageFormSet,
-                                         extra=1, fields='__all__')
+                                         extra=1,
+                                         fields='__all__')
 
 
 class EmailForm(happyforms.Form):
@@ -302,7 +376,7 @@ class EmailForm(happyforms.Form):
         return self.cleaned_data['email'] != self.initial['email']
 
 
-class RegisterForm(BasicInformationForm):
+class RegisterForm(BasicInformationForm, LocationForm):
     optin = forms.BooleanField(
         widget=forms.CheckboxInput(attrs={'class': 'checkbox'}),
         required=True)
@@ -311,7 +385,8 @@ class RegisterForm(BasicInformationForm):
     class Meta:
         model = UserProfile
         fields = ('photo', 'full_name', 'timezone', 'privacy_photo', 'privacy_full_name', 'optin',
-                  'privacy_timezone',)
+                  'privacy_timezone', 'privacy_city', 'privacy_region', 'privacy_country',
+                  'country', 'region', 'city',)
 
 
 class VouchForm(happyforms.Form):

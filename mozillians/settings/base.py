@@ -473,7 +473,12 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/admin/',
                          '^/api/',
                          '^/oidc/authenticate/',
-                         '^/oidc/callback/']
+                         '^/oidc/callback/',
+                         # Allow autocomplete urls for profile registration
+                         '^/[\w-]+/country-autocomplete/',
+                         '^/[\w-]+/city-autocomplete/',
+                         '^/[\w-]+/region-autocomplete/',
+                         '^/[\w-]+/timezone-autocomplete/']
 
 # Set default avatar for user profiles
 DEFAULT_AVATAR = 'img/default_avatar.png'

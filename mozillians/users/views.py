@@ -1,8 +1,10 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 
+from cities_light.models import City, Country, Region
 from dal import autocomplete
 
+from mozillians.phonebook.forms import get_timezones_list
 from mozillians.users.models import UserProfile
 
 
@@ -86,3 +88,65 @@ class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
                            Q(user__email__icontains=self.q) |
                            Q(user__username__icontains=self.q))
         return qs
+
+
+class CountryAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        """Country queryset from cities_light."""
+
+        if not self.request.user.is_authenticated():
+            return Country.objects.none()
+        qs = Country.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
+
+
+class RegionAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        """Region queryset from cities_light."""
+
+        country_id = self.forwarded.get('country')
+        if not self.request.user.is_authenticated():
+            return Region.objects.none()
+
+        qs = Region.objects.all()
+        if country_id:
+            country = Country.objects.get(id=country_id)
+            qs = qs.filter(country=country)
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
+
+
+class CityAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_queryset(self):
+        """City queryset from cities_light."""
+
+        region_id = self.forwarded.get('region')
+        if not self.request.user.is_authenticated():
+            return City.objects.none()
+
+        qs = City.objects.all()
+        if region_id:
+            region = Region.objects.get(id=region_id)
+            qs = City.objects.filter(region=region, country=region.country)
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
+
+
+class TimeZoneAutocomplete(autocomplete.Select2ListView):
+
+    def get_list(self):
+        """Timezone list provided from pytz."""
+
+        if not self.request.user.is_authenticated():
+            return []
+        return get_timezones_list()
