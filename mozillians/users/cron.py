@@ -2,7 +2,7 @@ from django.conf import settings
 
 import cronjobs
 
-from celery import group
+from celery.task.sets import TaskSet
 from celeryutils import chunked
 from elasticutils.contrib.django import get_es
 
@@ -33,4 +33,4 @@ def index_all_profiles():
     ts += [index_objects.subtask(args=[UserProfileMappingType, chunk, 150, True])
            for chunk in chunked(sorted(list(ids)), 150)]
 
-    group(ts)()
+    TaskSet(ts).apply_async()
