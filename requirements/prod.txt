@@ -184,6 +184,8 @@ sorl-thumbnail==11.12.1b \
     --hash=sha256:fe6e832952365c5cd98dfb84f44fce5a34db66eebb053ac4ba6502cc2ab694d0
 anyjson==0.3.3 \
     --hash=sha256:37812d863c9ad3e35c0734c42e0bf0320ce8c3bed82cd20ad54cb34d158157ba
+pycparser==2.17 \
+    --hash=sha256:0aac31e917c24cb3357f5a4d5566f2cc91a19ca41862f6c3c22dc60a629673b6
 bcrypt==3.1.3 \
     --hash=sha256:4eb357ab2cd27f4c6151d33130c667e9245beb9d1e6779ccf7e196d4cc20ffa8 \
     --hash=sha256:9c3b27bcc772958a4a051ae333de802423ebe0a5dd4e58e642e6e9d641cd7f3c \
@@ -303,8 +305,6 @@ raven==6.0.0 \
     --hash=sha256:cee2d745c762230383fc89365770552c93c71205ee92c6e6bbbd85fe4dbb2803
 django-nocaptcha-recaptcha==0.0.19 \
     --hash=sha256:d2512d5035d5f62aba5009082db28b28995a7e6f4a46713292e0f4f350f337da
-pycparser==2.17 \
-    --hash=sha256:0aac31e917c24cb3357f5a4d5566f2cc91a19ca41862f6c3c22dc60a629673b6
 boto==2.46.1 \
     --hash=sha256:d6c7046a1a199fad87ae95edeecb8e5a900b70c854199d3949d1dbb9f3385fcb \
     --hash=sha256:d24a68d97276445d1b5baee6537bc565ab7070afcd449a72f2541b1da1328ed4
