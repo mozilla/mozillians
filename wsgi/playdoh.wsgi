@@ -14,6 +14,7 @@ if newrelic:
         newrelic = False
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mozillians.settings')
+os.unsetenv('CELERY_LOADER')
 
 # Add `mozillians` to the python path
 wsgidir = os.path.dirname(__file__)
