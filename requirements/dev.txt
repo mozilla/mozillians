@@ -139,11 +139,12 @@ backports.ssl_match_hostname==3.5.0.1 \
 certifi==2016.2.28 \
     --hash=sha256:75c33d546e0a732a4606749cbadcd81929f30d8b814061ca93cde49933dbb860 \
     --hash=sha256:5e8eccf95924658c97b990b50552addb64f55e1e3dfe4880456ac1f287dc79d0
-django-debug-toolbar==1.5 \
-    --hash=sha256:1dbb0f07a7ccd94d1df376dec95e7dc6a85219f86eecf8d59c15a5829dd4026f \
-    --hash=sha256:1416a64ca6035170513588efceddee591562ffac4e9ab2d1eeb72ccb335e04e7
-sqlparse==0.1.19 \
-    --hash=sha256:d896be1a1c7f24bffe08d7a64e6f0176b260e281c5f3685afe7826f8bada4ee8
+django-debug-toolbar==1.7 \
+    --hash=sha256:89831c775d5317d47825c03426a04404a9042e23385039fbc14549ace8781107 \
+    --hash=sha256:bd929113ae22d7553c3ae6a6cb6762e8453784972eca06fa396aca47d0b66874
+sqlparse==0.2.3 \
+    --hash=sha256:740a023ef38ce11bbb99a9d143856f56ef4ec5b0d7a853f58c02c65b035114c4 \
+    --hash=sha256:becd7cc7cebbdf311de8ceedfcf2bd2403297024418801947f8c953025beeff8
 configparser==3.5.0 \
     --hash=sha256:5308b47021bc2340965c371f0f058cc6971a04502638d4244225c49d80db273a
 pycodestyle==2.0.0 \

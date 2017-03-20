@@ -52,6 +52,7 @@ admin.site.site_title = 'Mozillians'
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
+    import debug_toolbar
     urlpatterns += patterns(
         '',
         # Add the 404, 500, and csrf pages for testing
@@ -59,4 +60,5 @@ if settings.DEBUG:
         url(r'^500/$', handler500),
         url(r'^csrf/$', handler_csrf),
         url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': settings.MEDIA_ROOT}))
+            {'document_root': settings.MEDIA_ROOT}),
+        url(r'^__debug__/', include(debug_toolbar.urls)))
