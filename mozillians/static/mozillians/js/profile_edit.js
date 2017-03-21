@@ -141,6 +141,18 @@ $(function() {
         });
     });
 
+    // Django autcomplete light - django cities light
+    $(':input[name$=country]').on('change', function() {
+        // reset city and region on country change
+        $(':input[name=city]').val(null).trigger('change');
+        $(':input[name=region]').val(null).trigger('change');
+    });
+
+    $(':input[name$=region]').on('change', function() {
+        // reset city on region change
+        $(':input[name=city]').val(null).trigger('change');
+    });
+
     // Intercept all the ajax calls
     $(document).ajaxSend(function(event, xhr, settings) {
         // Hijack the ajax calls and set the X-CSRFToken Header for

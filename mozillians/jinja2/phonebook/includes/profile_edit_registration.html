@@ -57,6 +57,40 @@
     <div class="panel-body">
       <div class="row">
         <div class="col-md-12">
+
+          <fieldset id="country">
+            <div class="row">
+              <div class="col-md-9 col-sm-8">
+                {{ mozillians_field(location_form.country) }}
+              </div>
+              <div class="col-md-3">
+                {{ privacy_field(location_form.privacy_country) }}
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset id="region">
+            <div class="row">
+              <div class="col-md-9 col-sm-8">
+                {{ mozillians_field(location_form.region) }}
+              </div>
+              <div class="col-md-3">
+                {{ privacy_field(location_form.privacy_region) }}
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset id="city">
+            <div class="row">
+              <div class="col-md-9 col-sm-8">
+                {{ mozillians_field(location_form.city) }}
+              </div>
+              <div class="col-md-3">
+                {{ privacy_field(location_form.privacy_city) }}
+              </div>
+            </div>
+          </fieldset>
+
           <fieldset>
             <div class="row">
               <div class="col-md-9 col-sm-8">
@@ -67,6 +101,7 @@
               </div>
             </div>
           </fieldset>
+
         </div>
       </div>
     </div>

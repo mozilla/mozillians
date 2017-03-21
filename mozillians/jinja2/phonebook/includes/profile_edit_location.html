@@ -4,6 +4,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">{{ _('Location') }}</div>
       <div class="panel-body">
+
         {% if location_form.non_field_errors() %}
           <ul class="unstyled">
             {% for error in location_form.non_field_errors() %}
@@ -13,6 +14,45 @@
         {% endif %}
 
         <fieldset>
+          {% for error in location_form.errors['location'] %}
+            <span class="error-message">{{ error }}</span>
+          {% endfor %}
+        </fieldset>
+
+        <fieldset id="country">
+          <div class="row">
+            <div class="col-sm-8">
+              {{ mozillians_field(location_form.country) }}
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_country) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset id="region">
+          <div class="row">
+            <div class="col-sm-8">
+              {{ mozillians_field(location_form.region) }}
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_region) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset id="city">
+          <div class="row">
+            <div class="col-sm-8">
+              {{ mozillians_field(location_form.city) }}
+            </div>
+            <div class="col-sm-4">
+              {{ privacy_field(location_form.privacy_city) }}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset id="timezone">
           <div class="row">
             <div class="col-sm-8">
               {{ mozillians_field(location_form.timezone) }}
@@ -23,11 +63,13 @@
           </div>
         </fieldset>
       </div>
+
       <div class="panel-footer">
         <button class="btn btn-primary" id="form-submit-location" type="submit"
                 name="location_section">{{ _('Update Location') }}
         </button>
       </div>
+
     </div>
   </form>
 </div>
