@@ -245,7 +245,8 @@ class LocationForm(happyforms.ModelForm):
         Make country a required field.
         """
         super(LocationForm, self).__init__(*args, **kwargs)
-        self.fields['country'].required = True
+        if not self.instance.country:
+            self.fields['country'].required = True
 
     def clean(self):
         """Override clean method.
