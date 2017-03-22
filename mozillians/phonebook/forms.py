@@ -236,8 +236,8 @@ class LocationForm(happyforms.ModelForm):
     timezone = autocomplete.Select2ListChoiceField(
         choice_list=get_timezones_list,
         required=False,
-        widget=autocomplete.ListSelect2(url='users:timezone-autocomplete')
-    )
+        widget=autocomplete.ListSelect2(url='users:timezone-autocomplete',
+                                        forward=['country', 'city', 'region']))
 
     def __init__(self, *args, **kwargs):
         """Override init method.

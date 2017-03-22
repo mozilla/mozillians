@@ -1,8 +1,10 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 from cities_light.models import City, Country, Region
 from dal import autocomplete
+from pytz import country_timezones
 
 from mozillians.phonebook.forms import get_timezones_list
 from mozillians.users.models import UserProfile
@@ -162,4 +164,36 @@ class TimeZoneAutocomplete(autocomplete.Select2ListView):
 
         if not self.request.user.is_authenticated():
             return []
+
         return get_timezones_list()
+
+    def get(self, request, *args, **kwargs):
+        """Override get method to tune the search."""
+        results = self.get_list()
+
+        country_id = self.forwarded.get('country')
+        region_id = self.forwarded.get('region')
+        city_id = self.forwarded.get('city')
+        country_code = None
+
+        # Try to get the timezone from the city, region, country
+        # forwarded values
+        if city_id:
+            city = City.objects.get(id=city_id)
+            country_code = city.country.code2
+        elif region_id:
+            region = Region.objects.get(id=region_id)
+            country_code = region.country.code2
+        elif country_id:
+            country = Country.objects.get(id=country_id)
+            country_code = country.code2
+
+        if country_code:
+            results = country_timezones(country_code)
+
+        if self.q:
+            results = [item for item in results if self.q.lower() in item.lower()]
+
+        return JsonResponse({
+            'results': [dict(id=x, text=x) for x in results]
+        })
