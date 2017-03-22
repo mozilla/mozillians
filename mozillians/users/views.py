@@ -137,13 +137,18 @@ class CityAutocomplete(autocomplete.Select2QuerySetView):
         """City queryset from cities_light."""
 
         region_id = self.forwarded.get('region')
+        country_id = self.forwarded.get('country')
         if not self.request.user.is_authenticated():
             return City.objects.none()
 
         qs = City.objects.all()
+        if country_id:
+            country = Country.objects.get(id=country_id)
+            qs = qs.filter(country=country)
+
         if region_id:
             region = Region.objects.get(id=region_id)
-            qs = City.objects.filter(region=region, country=region.country)
+            qs = qs.filter(region=region, country=region.country)
 
         if self.q:
             return get_autocomplete_location_query(qs, self.q)
