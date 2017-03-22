@@ -514,6 +514,12 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
     def create_object(self, text):
         """Override create object method."""
 
+        try:
+            skill = Skill.objects.get(name=text)
+        except Skill.DoesNotExist:
+            pass
+        else:
+            return skill
         # Basic validation before creating a new field.
         if re.match(r'^[a-zA-Z0-9 +.:,-]*$', text):
             return super(SkillsAutocomplete, self).create_object(text)

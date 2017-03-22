@@ -18,7 +18,7 @@ from mozillians.users.tasks import unsubscribe_from_basket_task, subscribe_user_
 
 class GroupBase(models.Model):
     """Base class for groups in Mozillians."""
-    name = models.CharField(db_index=True, max_length=50,
+    name = models.CharField(db_index=True, max_length=100,
                             unique=True, verbose_name=_lazy(u'Name'))
     url = models.SlugField(blank=True)
 
