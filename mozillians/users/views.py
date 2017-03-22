@@ -90,6 +90,14 @@ class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
+def get_autocomplete_location_query(qs, q):
+    """Return qs if ``istartswith`` filter exists, else allback to ``icontains``."""
+    startswith_qs = qs.filter(name__istartswith=q)
+    if startswith_qs.exists():
+        return startswith_qs
+    return qs.filter(name__icontains=q)
+
+
 class CountryAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):
@@ -100,7 +108,7 @@ class CountryAutocomplete(autocomplete.Select2QuerySetView):
         qs = Country.objects.all()
 
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            return get_autocomplete_location_query(qs, self.q)
         return qs
 
 
@@ -119,7 +127,7 @@ class RegionAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(country=country)
 
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            return get_autocomplete_location_query(qs, self.q)
         return qs
 
 
@@ -138,7 +146,7 @@ class CityAutocomplete(autocomplete.Select2QuerySetView):
             qs = City.objects.filter(region=region, country=region.country)
 
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            return get_autocomplete_location_query(qs, self.q)
         return qs
 
 
