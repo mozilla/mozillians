@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 from cities_light.models import City, Country, Region
 from dal import autocomplete
@@ -149,4 +150,14 @@ class TimeZoneAutocomplete(autocomplete.Select2ListView):
 
         if not self.request.user.is_authenticated():
             return []
+
         return get_timezones_list()
+
+    def get(self, request, *args, **kwargs):
+        """Override get method to tune the search."""
+        results = self.get_list()
+        if self.q:
+            results = [item for item in results if self.q.lower() in item.lower()]
+        return JsonResponse({
+            'results': [dict(id=x, text=x) for x in results]
+        })
