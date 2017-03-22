@@ -13,11 +13,13 @@
           </ul>
         {% endif %}
 
-        <fieldset>
-          {% for error in location_form.errors['location'] %}
-            <span class="error-message">{{ error }}</span>
-          {% endfor %}
-        </fieldset>
+        {% if location_form.errors %}
+          <fieldset>
+            {% for error in location_form.errors['location'] %}
+              <span class="error-message">{{ error }}</span>
+            {% endfor %}
+          </fieldset>
+        {% endif %}
 
         <fieldset id="country">
           <div class="row">
