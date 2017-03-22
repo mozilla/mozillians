@@ -1,8 +1,8 @@
 {
-  "nightly_version": "54.0a1",
-  "alpha_version": "53.0a2",
-  "beta_version": "52.0b11",
-  "version": "51.0.3",
+  "nightly_version": "53.0a1",
+  "alpha_version": "52.0a2",
+  "beta_version": "51.0b7",
+  "version": "50.1.0",
   "ios_beta_version": "6.0",
   "ios_version": "5.0",
   "builds": [
