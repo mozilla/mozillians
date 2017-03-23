@@ -60,8 +60,8 @@ def database(ctx):
         print 'Dry-run makemigrations for debugging purposes'
         ctx.local('python manage.py makemigrations --dry-run --verbosity 3')
 
-        # Update DB for django-cities-light
-        ctx.local('LANG=en_US.UTF-8 python manage.py cities_light_fixtures load --base-url=lib/django_cities_light/fixtures/')  # noqa
+        # # Update DB for django-cities-light
+        # ctx.local('LANG=en_US.UTF-8 python manage.py cities_light_fixtures load --base-url=lib/django_cities_light/fixtures/')  # noqa
 
 
 @task
