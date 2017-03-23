@@ -213,7 +213,7 @@ class SkillsForm(happyforms.ModelForm):
                 attrs={
                     'data-placeholder': (u'Start typing to add a skill (example: Python, '
                                          u'javascript, Graphic Design, User Research)'),
-                    'data-minimum-input-length': 3
+                    'data-minimum-input-length': 2
                 }
             )
         }

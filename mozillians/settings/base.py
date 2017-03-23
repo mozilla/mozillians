@@ -476,6 +476,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/oidc/authenticate/',
                          '^/oidc/callback/',
                          # Allow autocomplete urls for profile registration
+                         '^/[\w-]+/skills/autocomplete/',
                          '^/[\w-]+/country-autocomplete/',
                          '^/[\w-]+/city-autocomplete/',
                          '^/[\w-]+/region-autocomplete/',
