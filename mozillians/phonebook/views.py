@@ -244,6 +244,8 @@ def edit_profile(request):
     ctx['alternate_email_formset'] = forms.AlternateEmailFormset(alternate_email_formset_data,
                                                                  instance=profile,
                                                                  queryset=emails)
+
+    ctx['autocomplete_form_media'] = ctx['registration_form'].media + ctx['skills_form'].media
     forms_valid = True
     if request.POST:
         if not curr_sect:
