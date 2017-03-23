@@ -15,6 +15,7 @@
    <div id="registration-basic-panel" class="panel panel-default">
      <div class="panel-heading">{{ _('Basic Information') }}</div>
      <div class="panel-body">
+
        <div class="row">
          <div class="col-md-4">
            {% include 'phonebook/includes/photo_form.html' %}
@@ -57,6 +58,14 @@
     <div class="panel-body">
       <div class="row">
         <div class="col-md-12">
+
+        {% if location_form.errors %}
+          <fieldset>
+            {% for error in location_form.errors %}
+              <span class="error-message">{{ error }}</span>
+            {% endfor %}
+          </fieldset>
+        {% endif %}
 
           <fieldset id="country">
             <div class="row">
