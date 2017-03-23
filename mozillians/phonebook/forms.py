@@ -245,8 +245,9 @@ class LocationForm(happyforms.ModelForm):
         Make country a required field.
         """
         super(LocationForm, self).__init__(*args, **kwargs)
-        if not self.instance.country:
-            self.fields['country'].required = True
+        self.fields['country'].required = True
+        if self.data and (self.data.get('city') or self.data.get('country')):
+            self.fields['country'].required = False
 
     def clean(self):
         """Override clean method.
@@ -256,6 +257,7 @@ class LocationForm(happyforms.ModelForm):
         the data from there.
         """
         super(LocationForm, self).clean()
+
         country = self.cleaned_data.get('country')
         region = self.cleaned_data.get('region')
         city = self.cleaned_data.get('city')
@@ -264,13 +266,12 @@ class LocationForm(happyforms.ModelForm):
             msg = _(u'Please supply your location data.')
             raise forms.ValidationError(msg)
 
+        if region:
+            self.cleaned_data['country'] = region.country
+
         if city:
             self.cleaned_data['country'] = city.country
             self.cleaned_data['region'] = city.region
-            return self.cleaned_data
-
-        if region:
-            self.cleaned_data['country'] = region.country
 
         return self.cleaned_data
 
@@ -388,6 +389,31 @@ class RegisterForm(BasicInformationForm, LocationForm):
         fields = ('photo', 'full_name', 'timezone', 'privacy_photo', 'privacy_full_name', 'optin',
                   'privacy_timezone', 'privacy_city', 'privacy_region', 'privacy_country',
                   'country', 'region', 'city',)
+        widgets = {
+            'country': autocomplete.ModelSelect2(
+                url='users:country-autocomplete',
+                attrs={
+                    'data-placeholder': u'Start typing to select a country.',
+                    'data-minimum-input-length': 2
+                }
+            ),
+            'region': autocomplete.ModelSelect2(
+                url='users:region-autocomplete',
+                forward=['country'],
+                attrs={
+                    'data-placeholder': u'Start typing to select a region.',
+                    'data-minimum-input-length': 3
+                }
+            ),
+            'city': autocomplete.ModelSelect2(
+                url='users:city-autocomplete',
+                forward=['country', 'region'],
+                attrs={
+                    'data-placeholder': u'Start typing to select a city.',
+                    'data-minimum-input-length': 3
+                }
+            )
+        }
 
 
 class VouchForm(happyforms.Form):
