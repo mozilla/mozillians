@@ -156,10 +156,10 @@ $(function() {
     // Intercept all the ajax calls
     $(document).ajaxSend(function(event, xhr, settings) {
         // Hijack the ajax calls and set the X-CSRFToken Header for
-        // the skills/autocomplete/ url.
+        // the skills-autocomplete/ url.
         // This is needed because we don't have a csrf cookie due to
         // django-session-csrf
-        if (settings.url.indexOf('/skills/autocomplete/') != -1) {
+        if (settings.url.indexOf('/skills-autocomplete/') != -1) {
             // remove form errors if any
             $('#skill-ajax-error').remove();
 
@@ -172,7 +172,7 @@ $(function() {
 
     // Handle ajax errors
     $(document).ajaxError(function(event, xhr, settings, thrownError) {
-        if ((settings.url.indexOf('/skills/autocomplete/') != -1) &&
+        if ((settings.url.indexOf('/skills-autocomplete/') != -1) &&
             (settings.type === 'POST')) {
             // remove the user selection that failed the validation
             $('li.select2-results__option').remove();

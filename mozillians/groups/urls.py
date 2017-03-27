@@ -46,7 +46,7 @@ urlpatterns = patterns(
         name='group-autocomplete'),
     url('^groups/search/$', 'views.search',
         dict(searched_object=Group), name='search_groups'),
-    url('^skills/autocomplete/$',
+    url('^skills-autocomplete/$',
         login_required(SkillsAutocomplete.as_view(model=Skill, create_field='name')),
         name='skills-autocomplete'),
     url('^curators/autocomplete/$', CuratorsAutocomplete.as_view(),
