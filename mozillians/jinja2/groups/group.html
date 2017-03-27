@@ -247,6 +247,7 @@
 
 {% block page_js %}
   {% compress js %}
+    <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
     <script src="{{ static('mozillians/js/pagination.js') }}"></script>
     <script src="{{ static('mozillians/js/group_view.js') }}"></script>
   {% endcompress %}
