@@ -506,17 +506,17 @@ class SkillsAutocomplete(autocomplete.Select2QuerySetView):
         return True
 
     def get_create_option(self, context, q):
-        """Disable create_object if skill exists"""
-        if q and Skill.objects.filter(name=self.q).exists():
+        """Disable create_object if skill exists."""
+        search_q = q.strip()
+        if not search_q or Skill.objects.filter(name=search_q).exists():
             return []
-        return super(SkillsAutocomplete, self).get_create_option(context, q)
+        return super(SkillsAutocomplete, self).get_create_option(context, search_q)
 
     def create_object(self, text):
         """Override create object method."""
 
         # Basic validation before creating a new field.
-        if (re.match(r'^[a-zA-Z0-9 +.:,-]*$', text) and not
-                Skill.objects.filter(name=text).exists()):
+        if re.match(r'^[a-zA-Z0-9 +.:,-]*$', text):
             return super(SkillsAutocomplete, self).create_object(text)
         return None
 
