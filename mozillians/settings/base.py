@@ -75,7 +75,6 @@ LOCALE_PATHS = [path('locale')]
 EXEMPT_L10N_URLS = [
     '^/oidc/authenticate/',
     '^/oidc/callback/',
-    '^/api/v1/',
     '^/api/v2/',
     '^/admin/'
 ]

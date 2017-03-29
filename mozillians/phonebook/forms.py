@@ -337,12 +337,6 @@ class IRCForm(happyforms.ModelForm):
         fields = ('ircname', 'privacy_ircname',)
 
 
-class DeveloperForm(happyforms.ModelForm):
-    class Meta:
-        model = UserProfile
-        fields = ('allows_community_sites', 'allows_mozilla_sites',)
-
-
 class BaseLanguageFormSet(BaseInlineFormSet):
 
     def __init__(self, *args, **kwargs):

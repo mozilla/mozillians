@@ -177,15 +177,6 @@ class UserProfile(UserProfilePrivacyModel):
     country = models.ForeignKey('cities_light.Country', blank=True, null=True,
                                 on_delete=models.SET_NULL)
 
-    allows_community_sites = models.BooleanField(
-        default=True,
-        verbose_name=_lazy(u'Sites that can determine my vouched status'),
-        choices=((True, _lazy(u'All Community Sites')),
-                 (False, _lazy(u'Only Mozilla Properties'))))
-    allows_mozilla_sites = models.BooleanField(
-        default=True,
-        verbose_name=_lazy(u'Allow Mozilla sites to access my profile data?'),
-        choices=((True, _lazy(u'Yes')), (False, _lazy(u'No'))))
     basket_token = models.CharField(max_length=1024, default='', blank=True)
     date_mozillian = models.DateField('When was involved with Mozilla',
                                       null=True, blank=True, default=None)

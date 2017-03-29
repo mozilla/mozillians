@@ -29,9 +29,6 @@ django-sha2==0.4 \
     --hash=sha256:b06a86451a99d6c26bfa65082999dbf658e087e596e9292cce688b53eabaaada
 django-statsd-mozilla==0.3.8.2 \
     --hash=sha256:d305466c95eb580f82f8d1db14bcb90b42648671c274a8f4032ba24dbc7bb00e
-django-tastypie==0.12.2 \
-    --hash=sha256:21625ce191ccb734f47b90ef92b603d04366bb67d0eb52bd060a8d76e6706018 \
-    --hash=sha256:7feccf811a8c2c60bc227e0d956015f0ea6097c804660e8f4a4ada0e74817c24
 Babel==2.3.4 \
     --hash=sha256:3318ed2960240d61cbc6558858ee00c10eed77a6508c4d1ed8e6f7f48399c975 \
     --hash=sha256:c535c4403802f6eb38173cd4863e419e2274921a01a8aad8a5b497c131c62875
@@ -110,15 +107,10 @@ Pillow==4.0.0 \
     --hash=sha256:6df6b68b00ff0e5bd13ef7b45147056dc4493261495efd3f3cb41a49c94d5ee7 \
     --hash=sha256:3eb056415b5a98a9d6a387ed224fa5cf1df34ca4e94d6f04772709af9f0aba73 \
     --hash=sha256:6df335aff243d9bc5e3b68855ef64bc1f16817f4d5dd71ae41563facb3cefdd6
-python-dateutil==1.5 \
-    --hash=sha256:6f197348b46fb8cdf9f3fcfc2a7d5a97da95db3e2e8667cf657216274fe1b009
 amqplib==1.0.2 \
     --hash=sha256:843d69b681a60afd21fbf50f310404ec67fcdf9d13dfcf6e9d41f3b456217e5b
 python-memcached==1.53 \
     --hash=sha256:bcf71371d997bb46a3168a7b63aae66b56cccacc025af9310db4315681ef8868
-python-mimeparse==0.1.4 \
-    --hash=sha256:a4baeab6061428239d87c9b619f814bc6bd66b9c4c71c023301a50ddc519eeb4 \
-    --hash=sha256:3c69a21e37e77f754e6fc09ebda70acd92c90d8a58f29a41cc0248351378ddc3
 basket-client==0.3.12 \
     --hash=sha256:d7aa5e6208eeeabb8f1387a7cbb2d0f2b35dfa889c1f034c86a88b4968db3bfe \
     --hash=sha256:2dd953cd03b3068d0e596aa32224488c486b1170e46387c5bc14f20737d6a2d8

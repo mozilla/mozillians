@@ -5,47 +5,12 @@ from dal import autocomplete
 from import_export import fields
 from import_export.resources import ModelResource
 
-from mozillians.api.models import APIApp, APIv2App
+from mozillians.api.models import APIv2App
 from mozillians.common.mixins import MozilliansAdminExportMixin
 
 
-class APIForm(forms.ModelForm):
-    """Override admin form to provide autocompletion."""
-
-    class Meta:
-        model = APIApp
-        fields = '__all__'
-        widgets = {
-            'owner': autocomplete.ModelSelect2(url='users:users-autocomplete')
-        }
-
-
-class APIAppResource(ModelResource):
-    """APIApp admin export resource."""
-    email = fields.Field(attribute='owner__email')
-
-
-class APIAppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
-    """APIApp Admin."""
-
-    list_display = ['name', 'key', 'owner', 'owner_email', 'is_mozilla_app', 'is_active']
-    list_filter = ['is_mozilla_app', 'is_active']
-    form = APIForm
-
-    def owner_email(self, obj):
-        return obj.owner.email
-
-    owner_email.admin_order_field = 'owner__email'
-    owner_email.short_description = 'Email'
-
-    resource_class = APIAppResource
-
-
-admin.site.register(APIApp, APIAppAdmin)
-
-
 class APIv2AppResource(ModelResource):
-    """APIApp admin export resource."""
+    """APIv2App admin export resource."""
     email = fields.Field(attribute='owner__email')
 
     class Meta:
