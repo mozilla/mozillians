@@ -226,18 +226,18 @@ MIDDLEWARE_CLASSES = (
     'multidb.middleware.PinningRouterMiddleware',
 
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'mozillians.common.middleware.HSTSPreloadMiddleware',  # Must be before security middleware
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
-    'commonware.middleware.FrameOptionsHeader',
     'mobility.middleware.DetectMobileMiddleware',
     'mobility.middleware.XMobileMiddleware',
-    'commonware.response.middleware.StrictTransportMiddleware',
     'csp.middleware.CSPMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
@@ -251,6 +251,8 @@ MIDDLEWARE_CLASSES = (
     'waffle.middleware.WaffleMiddleware',
 )
 
+X_FRAME_OPTIONS = 'DENY'
+
 # Path to Java. Used for compress_assets.
 JAVA_BIN = '/usr/bin/java'
 
@@ -258,10 +260,10 @@ JAVA_BIN = '/usr/bin/java'
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 
-# StrictTransport
-STS_SUBDOMAINS = True
-
 # Security middleware
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_SECONDS = 31536000
+ENABLE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
@@ -308,7 +310,6 @@ INSTALLED_APPS = (
     'puente',
     'compressor',
     'cronjobs',
-    'commonware.response.cookies',
     'django_nose',
     'session_csrf',
     'product_details',

@@ -133,3 +133,17 @@ class LocaleURLMiddleware(object):
         request.path_info = '/' + prefixer.shortened_path
         request.locale = prefixer.locale or settings.LANGUAGE_CODE
         activate(prefixer.locale or settings.LANGUAGE_CODE)
+
+
+class HSTSPreloadMiddleware(object):
+    """Add header to enable HSTS preload."""
+
+    def process_response(self, request, response):
+        sts_header_name = 'strict-transport-security'
+        sts_header = response.get(sts_header_name)
+
+        # Check if HSTS header exists and append preload directive
+        if sts_header and settings.ENABLE_HSTS_PRELOAD:
+            response[sts_header_name] = sts_header + '; preload'
+
+        return response
