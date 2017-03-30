@@ -229,6 +229,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'mozillians.common.middleware.HSTSPreloadMiddleware',  # Must be before security middleware
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
@@ -262,6 +263,7 @@ SESSION_COOKIE_SECURE = True
 # Security middleware
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_SECONDS = 31536000
+ENABLE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
