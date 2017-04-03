@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test.utils import override_settings
 
@@ -225,6 +226,7 @@ class BasketTests(TestCase):
         subscribe_user_task(result=result, email=None)
         subscribe_mock.assert_called_with('result_email@example.com', ['mozilla-phone'],
                                           sync='N', trigger_welcome='N',
+                                          source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.basket.subscribe')
@@ -253,6 +255,7 @@ class BasketTests(TestCase):
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['foobar'],
                                           sync='N', trigger_welcome='N',
+                                          source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.basket.subscribe')
@@ -266,6 +269,7 @@ class BasketTests(TestCase):
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['mozilla-phone'],
                                           sync='N', trigger_welcome='N',
+                                          source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
     @patch('mozillians.users.tasks.subscribe_user_task.retry')
