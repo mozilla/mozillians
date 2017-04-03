@@ -32,6 +32,7 @@ BASKET_ENABLED = all([
 
 INCOMPLETE_ACC_MAX_DAYS = 7
 MOZILLIANS_NEWSLETTERS = [BASKET_NDA_NEWSLETTER, BASKET_VOUCHED_NEWSLETTER]
+MOZILLIANS_URL = getattr(settings, 'SITE_URL', 'https://mozillians.org')
 
 
 class DebugBasketTask(Task):
@@ -121,6 +122,7 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
             subscribe_result = basket.subscribe(email,
                                                 newsletters_to_subscribe,
                                                 sync=sync,
+                                                source_url=MOZILLIANS_URL,
                                                 trigger_welcome=trigger_welcome,
                                                 api_key=BASKET_API_KEY)
         except MaxRetriesExceededError as exc:
