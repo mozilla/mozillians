@@ -373,7 +373,12 @@ CACHES = {
 
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
-AUTO_VOUCH_DOMAINS = ('mozilla.com', 'mozilla.org', 'mozillafoundation.org')
+AUTO_VOUCH_DOMAINS = (
+    'mozilla.com',
+    'mozilla.org',
+    'mozillafoundation.org',
+    'getpocket.com',
+)
 AUTO_VOUCH_REASON = 'An automatic vouch for being a Mozilla employee.'
 
 # Django-CSP
