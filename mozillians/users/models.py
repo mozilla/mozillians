@@ -14,6 +14,7 @@ from django.utils.http import urlquote
 from django.template.loader import get_template
 
 
+from multidb.pinning import use_master
 from product_details import product_details
 from pytz import common_timezones
 from raven.contrib.django.raven_compat.models import client
@@ -661,7 +662,11 @@ def update_vouch_flags(sender, instance, **kwargs):
         # In this case we delete not only the vouches but the
         # UserProfile as well. Do nothing.
         return
-    vouches = Vouch.objects.filter(vouchee=profile).count()
+
+    with use_master:
+        vouches_qs = Vouch.objects.filter(vouchee=profile)
+        vouches = vouches_qs.count()
+
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
     client.captureMessage('Vouch flags updated', **{'stack': True})
