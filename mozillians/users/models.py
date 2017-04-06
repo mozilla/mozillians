@@ -16,6 +16,7 @@ from django.template.loader import get_template
 
 from product_details import product_details
 from pytz import common_timezones
+from raven.contrib.django.raven_compat.models import client
 from sorl.thumbnail import ImageField, get_thumbnail
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
@@ -576,6 +577,7 @@ class UserProfile(UserProfilePrivacyModel):
         super(UserProfile, self).save(*args, **kwargs)
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
+        client.captureMessage('Autovouch save triggered', **{'stack': True})
         if autovouch:
             self.auto_vouch()
 
@@ -650,6 +652,7 @@ class Vouch(models.Model):
 @receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
 @receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
 def update_vouch_flags(sender, instance, **kwargs):
+    client.captureMessage('Update vouch signal triggered', **{'stack': True})
     if kwargs.get('raw'):
         return
     try:
@@ -661,6 +664,7 @@ def update_vouch_flags(sender, instance, **kwargs):
     vouches = Vouch.objects.filter(vouchee=profile).count()
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
+    client.captureMessage('Vouch flags updated', **{'stack': True})
     profile.save(**{'autovouch': False})
 
 
