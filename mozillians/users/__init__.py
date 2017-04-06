@@ -9,6 +9,9 @@ default_app_config = 'mozillians.users.UserConfig'
 class UserConfig(AppConfig):
     name = 'mozillians.users'
 
+    def ready(self):
+        import mozillians.users.signals # noqa
+
 
 AVAILABLE_LANGUAGES = {}
 REMOVE_LANGS = ['art', 'cpe', 'cpf', 'cpp', 'de_AT', 'de_CH',
