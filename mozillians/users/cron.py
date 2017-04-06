@@ -7,7 +7,8 @@ from celeryutils import chunked
 from elasticutils.contrib.django import get_es
 
 from mozillians.users.tasks import index_objects
-from mozillians.users.models import UserProfile, UserProfileMappingType
+from mozillians.users.models import UserProfile
+from mozillians.users.signals import UserProfileMappingType
 
 
 @cronjobs.register

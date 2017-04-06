@@ -30,8 +30,8 @@ from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import (AbuseReport, ExternalAccount, UserProfile,
-                                     UserProfileMappingType)
+from mozillians.users.models import AbuseReport, ExternalAccount, UserProfile
+from mozillians.users.signals import UserProfileMappingType
 from mozillians.users.tasks import check_spam_account, update_email_in_basket
 
 

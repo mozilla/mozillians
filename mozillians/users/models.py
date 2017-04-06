@@ -7,8 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import signals as dbsignals, ManyToManyField
-from django.dispatch import receiver
+from django.db.models import ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 from django.template.loader import get_template
@@ -28,14 +27,11 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
                                              validate_phone_number, validate_linkedin)
-from mozillians.users.es import UserProfileMappingType
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager, UserProfileQuerySet)
-from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
-                                    subscribe_user_to_basket, unindex_objects)
 
 
 COUNTRIES = product_details.get_regions('en-US')
@@ -580,54 +576,6 @@ class UserProfile(UserProfilePrivacyModel):
             self.auto_vouch()
 
 
-@receiver(dbsignals.post_save, sender=User,
-          dispatch_uid='create_user_profile_sig')
-def create_user_profile(sender, instance, created, raw, **kwargs):
-    if not raw:
-        up, created = UserProfile.objects.get_or_create(user=instance)
-        if not created:
-            dbsignals.post_save.send(sender=UserProfile, instance=up, created=created, raw=raw)
-
-
-@receiver(dbsignals.post_save, sender=UserProfile, dispatch_uid='update_basket_sig')
-def update_basket(sender, instance, **kwargs):
-    newsletters = [settings.BASKET_VOUCHED_NEWSLETTER]
-    if instance.is_vouched:
-        subscribe_user_to_basket.delay(instance.id, newsletters)
-    else:
-        unsubscribe_from_basket_task.delay(instance.email, newsletters)
-
-
-@receiver(dbsignals.post_save, sender=UserProfile,
-          dispatch_uid='update_search_index_sig')
-def update_search_index(sender, instance, **kwargs):
-    if instance.is_complete:
-        index_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
-        if instance.is_public_indexable:
-            index_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
-        else:
-            unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
-
-
-@receiver(dbsignals.pre_delete, sender=UserProfile,
-          dispatch_uid='remove_from_search_index_sig')
-def remove_from_search_index(sender, instance, **kwargs):
-    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
-    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
-
-
-@receiver(dbsignals.pre_delete, sender=UserProfile, dispatch_uid='unsubscribe_from_basket_sig')
-def unsubscribe_from_basket(sender, instance, **kwargs):
-    newsletters = [settings.BASKET_VOUCHED_NEWSLETTER, settings.BASKET_NDA_NEWSLETTER]
-    unsubscribe_from_basket_task.delay(instance.email, newsletters)
-
-
-@receiver(dbsignals.post_delete, sender=UserProfile, dispatch_uid='delete_user_obj_sig')
-def delete_user_obj_sig(sender, instance, **kwargs):
-    if instance.user:
-        instance.user.delete()
-
-
 class Vouch(models.Model):
     vouchee = models.ForeignKey(UserProfile, related_name='vouches_received')
     voucher = models.ForeignKey(UserProfile, related_name='vouches_made',
@@ -645,23 +593,6 @@ class Vouch(models.Model):
 
     def __unicode__(self):
         return u'{0} vouched by {1}'.format(self.vouchee, self.voucher)
-
-
-@receiver(dbsignals.post_delete, sender=Vouch, dispatch_uid='update_vouch_flags_delete_sig')
-@receiver(dbsignals.post_save, sender=Vouch, dispatch_uid='update_vouch_flags_save_sig')
-def update_vouch_flags(sender, instance, **kwargs):
-    if kwargs.get('raw'):
-        return
-    try:
-        profile = instance.vouchee
-    except UserProfile.DoesNotExist:
-        # In this case we delete not only the vouches but the
-        # UserProfile as well. Do nothing.
-        return
-    vouches = Vouch.objects.filter(vouchee=profile).count()
-    profile.is_vouched = vouches > 0
-    profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
-    profile.save(**{'autovouch': False})
 
 
 class AbuseReport(models.Model):
@@ -847,15 +778,6 @@ class ExternalAccount(models.Model):
 
     def __unicode__(self):
         return self.type
-
-
-@receiver(dbsignals.post_save, sender=ExternalAccount, dispatch_uid='add_employee_vouch_sig')
-def add_employee_vouch(sender, instance, **kwargs):
-    """Add a vouch if an alternate email address is a mozilla* address."""
-
-    if kwargs.get('raw') or not instance.type == ExternalAccount.TYPE_EMAIL:
-        return
-    instance.user.auto_vouch()
 
 
 class Language(models.Model):
