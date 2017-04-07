@@ -298,14 +298,15 @@ class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = GroupMembershipResource
     list_display = ['group', 'userprofile', 'status', 'date_joined', 'updated_on']
     search_fields = [
-        'group__name', 'group__url', 'group__description',
-        'group__aliases__name', 'group__aliases__url',
-        'userprofile__full_name', 'userprofile__ircname',
-        'userprofile__geo_region__name', 'userprofile__geo_city__name',
-        'userprofile__geo_country__name', 'userprofile__user__username',
-        'userprofile__user__email'
+        'group__name', 'group__url', 'group__description', 'group__aliases__name',
+        'group__aliases__url', 'userprofile__full_name', 'userprofile__ircname',
+        'userprofile__user__username', 'userprofile__user__email'
     ]
-    list_filter = [NeedsRenewalFilter]
+    list_filter = (
+        NeedsRenewalFilter,
+        ('updated_on', admin.DateFieldListFilter,),
+        'status',
+    )
     form = BaseGroupMembershipAutocompleteForm
 
 
