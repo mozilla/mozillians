@@ -121,7 +121,7 @@ class SendPendingMembershipEmailsTests(TestCase):
 
     def test_sending_pending_email_non_curated(self):
         # If a non-curated group has a pending membership,  do not send anyone an email
-        group = GroupFactory.create()
+        group = GroupFactory.create(accepting_new_members=Group.REVIEWED)
         user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING)
         with patch('mozillians.groups.tasks.send_mail', autospec=True) as mock_send_mail:
