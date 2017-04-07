@@ -41,15 +41,16 @@ def send_pending_membership_emails():
     from mozillians.groups.models import Group, GroupMembership
 
     # Curated groups that have pending membership requests
-    groups = Group.objects.exclude(curators__isnull=True)
+    groups = Group.objects.exclude(curators__isnull=True, accepting_new_members=Group.CLOSED)
     groups = groups.filter(groupmembership__status=GroupMembership.PENDING).distinct()
 
     for group in groups:
         # what's the max pk of pending memberships?
         pending_memberships = group.groupmembership_set.filter(status=GroupMembership.PENDING)
         max_pk = pending_memberships.aggregate(max_pk=Max('pk'))['max_pk']
+        curators = group.curators.all()
         # Only send reminder if there are newer requests than we'd previously reminded about
-        if max_pk > group.max_reminder:
+        if max_pk > group.max_reminder and curators:
             # TODO: Switch locale to curator's preferred language so translation will occur
             # Using English for now
             activate('en-us')
@@ -69,7 +70,7 @@ def send_pending_membership_emails():
             })
 
             send_mail(subject, body, settings.FROM_NOREPLY,
-                      [profile.user.email for profile in group.curators.all()],
+                      [profile.user.email for profile in curators],
                       fail_silently=False)
 
             group.max_reminder = max_pk
