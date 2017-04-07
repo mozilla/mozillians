@@ -296,7 +296,7 @@ class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
 
 class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = GroupMembershipResource
-    list_display = ['group', 'userprofile', 'date_joined', 'status']
+    list_display = ['group', 'userprofile', 'status', 'date_joined', 'updated_on']
     search_fields = [
         'group__name', 'group__url', 'group__description',
         'group__aliases__name', 'group__aliases__url',
@@ -347,7 +347,7 @@ class InviteAutocompleteForm(forms.ModelForm):
 
 class InviteAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     search_fields = ['inviter__full_name', 'redeemer__full_name', 'group__name']
-    list_display = ['inviter', 'redeemer', 'group']
+    list_display = ['inviter', 'redeemer', 'group', 'created', 'updated']
     readonly_fields = ['created', 'updated']
     list_filter = [RedeemedInviteFilter]
     form = InviteAutocompleteForm
