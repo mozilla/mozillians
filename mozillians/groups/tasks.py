@@ -41,7 +41,8 @@ def send_pending_membership_emails():
     from mozillians.groups.models import Group, GroupMembership
 
     # Curated groups that have pending membership requests
-    groups = Group.objects.exclude(curators__isnull=True, accepting_new_members=Group.CLOSED)
+    groups = (Group.objects.exclude(curators__isnull=True)
+                           .exclude(accepting_new_members=Group.CLOSED))
     groups = groups.filter(groupmembership__status=GroupMembership.PENDING).distinct()
 
     for group in groups:
