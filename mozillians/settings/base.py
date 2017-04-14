@@ -230,6 +230,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'mozillians.common.middleware.HSTSPreloadMiddleware',  # Must be before security middleware
+    'mozillians.common.middleware.ReferrerPolicyMiddleware',  # Must be before security middleware
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
@@ -266,6 +267,7 @@ SECURE_HSTS_SECONDS = 31536000
 ENABLE_HSTS_PRELOAD = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
+ENABLE_REFERRER_HEADER = True
 
 # Not all URLs need locale.
 SUPPORTED_NONLOCALES = [
