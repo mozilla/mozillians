@@ -147,3 +147,17 @@ class HSTSPreloadMiddleware(object):
             response[sts_header_name] = sts_header + '; preload'
 
         return response
+
+
+class ReferrerPolicyMiddleware(object):
+    """Add header to enable Referrer-Policy Header."""
+
+    def process_response(self, request, response):
+        referrer_header_name = 'Referrer-Policy'
+        referrer_header = response.get(referrer_header_name)
+
+        # Check if Referrer header exists, remove referrer
+        if referrer_header and settings.ENABLE_REFERRER_HEADER:
+            response[referrer_header_name] = referrer_header + '; no-referrer'
+
+        return response
