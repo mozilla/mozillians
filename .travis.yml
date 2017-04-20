@@ -4,19 +4,18 @@ python:
   - "2.7.11"
 services:
   - elasticsearch
-before_install:
-  - pip install flake8
-  - flake8 mozillians
+before_script:
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
   - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 cache:
   - pip
 install:
   - npm install -g less
-  - pip install coverage
-  - pip install --require-hashes --no-deps -r requirements/dev.txt
+  - pip install coverage tox
+env:
+  - TOX_ENV=flake8
+  - TOX_ENV=tests
 script:
-  - coverage run --source=mozillians manage.py test
+  - tox -e $TOX_ENV
 after_success:
-  - pip install coveralls
   - coveralls
