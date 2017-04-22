@@ -410,7 +410,7 @@ class Invite(models.Model):
     inviter = models.ForeignKey('users.UserProfile', null=True, on_delete=models.SET_NULL,
                                 related_name='invite_sent', verbose_name=_lazy(u'Inviter'))
     redeemer = models.ForeignKey('users.UserProfile', related_name='groups_invited',
-                                 verbose_name=_lazy(u'Redeemer'))
+                                 verbose_name=_lazy(u'Redeemer'), on_delete=models.CASCADE)
     group = models.ForeignKey('Group')
     accepted = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
