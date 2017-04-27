@@ -1,0 +1,14 @@
+FROM python:2.7-slim
+
+EXPOSE 8000
+WORKDIR /code
+CMD ["./bin/run-dev.sh"]
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential libxml2-dev libxslt-dev \
+    mysql-client libmysqlclient-dev node-less gettext node-less && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements /code/requirements/
+RUN pip install --require-hashes --no-deps -r requirements/dev.txt

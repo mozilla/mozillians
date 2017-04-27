@@ -20,7 +20,7 @@ os.environ.setdefault('CELERY_LOADER', 'django')
 wsgidir = os.path.dirname(__file__)
 site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import get_wsgi_application  # noqa
 application = get_wsgi_application()
 
 if newrelic:
