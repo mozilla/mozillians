@@ -1,50 +1,57 @@
-db:
-  image: mysql:5.5
-  command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --max_allowed_packet=3M
-  environment:
-    - MYSQL_DATABASE=mozillians
-    - MYSQL_USER=mozillians
-    - MYSQL_PASSWORD=mozillians
-    - MYSQL_ROOT_PASSWORD=root
-es:
-  image: barnybug/elasticsearch:1.2.1
-memcached:
-  image: memcached
-broker:
-  image: rabbitmq:3-management
-  ports:
-    - "15672:15672"
-web:
-  build: .
-  ports:
-    - "8000:8000"
-  volumes:
-    - .:/code
-  links:
-    - db
-    - es
-    - memcached
-    - broker
-  command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
-celery:
-  build: .
-  volumes:
-    - .:/code
-  links:
-    - db
-    - es
-    - broker
-    - memcached
-  command: celery -A mozillians worker -B -l INFO
-  environment:
-    - C_FORCE_ROOT=true
-flower:
-  build: .
-  volumes:
-    - .:/code
-  links:
-    - db
-    - broker
-  ports:
-    - "5555:5555"
-  command: flower -A mozillians --address=0.0.0.0 --port=5555
+version: '2'
+services:
+  db:
+    image: mysql:5.5
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci --max_allowed_packet=3M
+    environment:
+      - MYSQL_DATABASE=mozillians
+      - MYSQL_USER=mozillians
+      - MYSQL_PASSWORD=mozillians
+      - MYSQL_ROOT_PASSWORD=root
+  es:
+    image: elasticsearch:1.7
+  memcached:
+    image: memcached
+  broker:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+  web:
+    build:
+      context: .
+      dockerfile: docker/dev
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    links:
+      - db
+      - es
+      - memcached
+      - broker
+  celery:
+    build:
+      context: .
+      dockerfile: docker/dev
+    volumes:
+      - .:/code
+    links:
+      - db
+      - es
+      - broker
+      - memcached
+    command: celery -A mozillians worker -B -l INFO
+    environment:
+      - C_FORCE_ROOT=true
+  flower:
+    build:
+      context: .
+      dockerfile: docker/dev
+    volumes:
+      - .:/code
+    links:
+      - db
+      - broker
+    ports:
+      - "5555:5555"
+    command: flower -A mozillians --address=0.0.0.0 --port=5555
