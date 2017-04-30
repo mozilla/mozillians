@@ -15,7 +15,7 @@
 
         {% if location_form.errors %}
           <fieldset>
-            {% for error in location_form.errors['location'] %}
+            {% for error in location_form.errors %}
               <span class="error-message">{{ error }}</span>
             {% endfor %}
           </fieldset>
