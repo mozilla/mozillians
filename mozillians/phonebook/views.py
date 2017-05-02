@@ -200,7 +200,6 @@ def edit_profile(request):
         'irc_section': ['irc_form'],
         'contribution_section': ['contribution_form'],
         'tshirt_section': ['tshirt_form'],
-        'developer_section': ['developer_form']
     }
 
     curr_sect = next((s for s in sections.keys() if s in request.POST), None)
@@ -236,8 +235,6 @@ def edit_profile(request):
     ctx['groups_privacy_form'] = forms.GroupsPrivacyForm(get_request_data('groups_privacy_form'),
                                                          instance=profile)
     ctx['irc_form'] = forms.IRCForm(get_request_data('irc_form'), instance=profile)
-    ctx['developer_form'] = forms.DeveloperForm(get_request_data('developer_form'),
-                                                instance=profile)
     ctx['email_privacy_form'] = forms.EmailPrivacyForm(get_request_data('email_privacy_form'),
                                                        instance=profile)
     alternate_email_formset_data = get_request_data('alternate_email_formset')
@@ -292,7 +289,6 @@ def edit_profile(request):
         'user_groups': user_groups,
         'profile': request.user.userprofile,
         'vouch_threshold': settings.CAN_VOUCH_THRESHOLD,
-        'apps': user.apiapp_set.filter(is_active=True),
         'appsv2': profile.apps.filter(enabled=True),
         'forms_valid': forms_valid
     })
@@ -526,7 +522,6 @@ def apikeys(request):
         return redirect('phonebook:apikeys')
 
     data = {
-        'apps': request.user.apiapp_set.filter(is_active=True),
         'appsv2': profile.apps.filter(enabled=True),
         'apikey_request_form': apikey_request_form,
     }

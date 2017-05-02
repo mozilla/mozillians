@@ -202,9 +202,7 @@ class UserProfileTests(TestCase):
         eq_(profile.full_name, 'foobar')
 
     def test_extract_document(self):
-        user = UserFactory.create(userprofile={'allows_community_sites': False,
-                                               'allows_mozilla_sites': False,
-                                               'full_name': 'Nikos Koukos',
+        user = UserFactory.create(userprofile={'full_name': 'Nikos Koukos',
                                                'bio': 'This is my bio'})
         profile = user.userprofile
         group_1 = GroupFactory.create()
@@ -224,8 +222,6 @@ class UserProfileTests(TestCase):
         eq_(result['is_vouched'], profile.is_vouched)
         eq_(result['region'], 'attika')
         eq_(result['city'], 'athens')
-        eq_(result['allows_community_sites'], profile.allows_community_sites)
-        eq_(result['allows_mozilla_sites'], profile.allows_mozilla_sites)
         eq_(set(result['country']), set(['gr', 'greece']))
         eq_(result['fullname'], profile.full_name.lower())
         eq_(result['name'], profile.full_name.lower())

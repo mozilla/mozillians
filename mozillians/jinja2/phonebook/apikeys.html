@@ -12,39 +12,6 @@
 </header>
 
 <p>
-  <h2>{{ _('API Version 1') }}</h2>
-</p>
-
-<p class="field_description">
-  {% trans api_schema_url='https://mozillians.readthedocs.org/en/latest/api/api.html',
-           bugzilla_request_url=('https://bugzilla.mozilla.org/enter_bug.cgi?'
-                                 'product=Participation Infrastructure&component=Phonebook') %}
-    API v1 is phasing out, please consider using API v2. For any support requests for API v1
-    file a bug <a href="{{ bugzilla_request_url }}">here</a>.
-  {% endtrans %}
-</p>
-
-<p>
-  <h3>{{ _('Your approved apps:') }}</h3>
-</p>
-
-{% for app in apps %}
-  <div class="api-key">
-    <strong>{{ app.name }}</strong>
-    {% if app.url %}
-      <em>({{ app.url|urlize }})</em>
-    {% endif %}
-    <ul>
-      <li>
-        {{ _('Key') }}: {{ app.key }}
-      </li>
-    </ul>
-  </div>
-{% else %}
-  {{ _('You have no active apps.') }}
-{% endfor %}
-
-<p>
   <h2>{{ _('API Version 2') }}</h2>
 </p>
 

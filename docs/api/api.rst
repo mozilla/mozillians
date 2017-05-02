@@ -29,5 +29,4 @@ If you believe an application is misusing Mozillians.org API data, please `file 
 .. toctree::
    :maxdepth: 2
 
-   apiv1/index
    apiv2/index

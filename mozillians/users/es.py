@@ -74,8 +74,6 @@ class UserProfileMappingType(MappingType, Indexable):
                 'languages': {'type': 'string', 'index': 'not_analyzed'},
                 'bio': {'type': 'string', 'analyzer': 'snowball'},
                 'is_vouched': {'type': 'boolean'},
-                'allows_mozilla_sites': {'type': 'boolean'},
-                'allows_community_sites': {'type': 'boolean'},
                 'photo': {'type': 'boolean'},
                 'last_updated': {'type': 'date'},
                 'date_joined': {'type': 'date'}
@@ -124,8 +122,7 @@ class UserProfileMappingType(MappingType, Indexable):
             obj = cls.get_model().objects.get(pk=obj_id)
         doc = {}
 
-        attrs = ('id', 'is_vouched', 'ircname',
-                 'allows_mozilla_sites', 'allows_community_sites')
+        attrs = ('id', 'is_vouched', 'ircname', )
         for a in attrs:
             data = getattr(obj, a)
             if isinstance(data, basestring):

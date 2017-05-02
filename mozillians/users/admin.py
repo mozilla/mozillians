@@ -551,9 +551,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
             'fields': ('geo_country', 'geo_region', 'geo_city',
                        'lng', 'lat', 'timezone')
         }),
-        ('Services', {
-            'fields': ('allows_community_sites', 'allows_mozilla_sites')
-        }),
         ('Privacy Settings', {
             'fields': ('privacy_photo', 'privacy_full_name', 'privacy_full_name_local',
                        'privacy_ircname', 'privacy_email', 'privacy_bio',
