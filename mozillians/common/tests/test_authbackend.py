@@ -70,8 +70,7 @@ class MozilliansAuthBackendTests(TestCase):
         ok_(email_q.exists())
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user)
-        mocked_message.assert_called_once_with(request_mock, u'Email bar@example.com already '
-                                                             'exists in the database.')
+        ok_(not mocked_message.called)
 
     @patch('mozillians.common.authbackend.messages.error')
     def test_add_primary_email_as_alternate(self, mocked_message):
@@ -90,8 +89,7 @@ class MozilliansAuthBackendTests(TestCase):
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
                                                  user=user.userprofile,
                                                  identifier='foo@example.com')
-        mocked_message.assert_called_once_with(request_mock, u'Email foo@example.com already '
-                                                             'exists in the database.')
+        ok_(not mocked_message.called)
         ok_(not email_q.exists())
 
     @patch('mozillians.common.authbackend.messages.error')

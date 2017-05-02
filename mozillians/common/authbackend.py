@@ -58,7 +58,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
                                                user=request_user.userprofile,
                                                identifier=email)
             else:
-                msg = u'Email {0} already exists in the database.'.format(email)
-                messages.error(self.request, msg)
+                if not user_q.filter(pk=request_user.id).exists():
+                    msg = u'Email {0} already exists in the database.'.format(email)
+                    messages.error(self.request, msg)
             return [request_user]
         return user_q
