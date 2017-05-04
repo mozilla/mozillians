@@ -9,7 +9,7 @@ services:
       - MYSQL_PASSWORD=mozillians
       - MYSQL_ROOT_PASSWORD=root
   es:
-    image: elasticsearch:1.7
+    image: elasticsearch:2.4.5
   memcached:
     image: memcached
   broker:
