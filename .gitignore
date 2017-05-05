@@ -16,3 +16,4 @@ locale*
 /media/uploads/
 /elasticsearch*/
 mozillians/settings/local.py
+.env
