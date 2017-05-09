@@ -3,7 +3,6 @@ from cStringIO import StringIO
 from datetime import datetime
 
 from django import forms
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
@@ -78,19 +77,6 @@ class EmailPrivacyForm(happyforms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['privacy_email']
-
-
-class SearchForm(happyforms.Form):
-    q = forms.CharField(required=False, max_length=140)
-    limit = forms.IntegerField(
-        widget=forms.HiddenInput, required=False, min_value=1,
-        max_value=settings.ITEMS_PER_PAGE)
-    include_non_vouched = forms.BooleanField(
-        label=_lazy(u'Include non-vouched'), required=False)
-
-    def clean_limit(self):
-        limit = self.cleaned_data['limit'] or settings.ITEMS_PER_PAGE
-        return limit
 
 
 def filter_vouched(qs, choice):

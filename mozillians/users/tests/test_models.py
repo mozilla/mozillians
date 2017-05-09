@@ -11,7 +11,7 @@ from django.test import override_settings
 from django.utils.timezone import make_aware
 
 import pytz
-from mock import Mock, call, patch
+from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
@@ -20,8 +20,7 @@ from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
-from mozillians.users.es import PrivacyAwareS, UserProfileMappingType
-from mozillians.users.tests import LanguageFactory, UserFactory
+from mozillians.users.tests import UserFactory
 
 
 class SignaledFunctionsTests(TestCase):
@@ -34,36 +33,6 @@ class SignaledFunctionsTests(TestCase):
     def test_subscribe_to_basket_post_save(self, subscribe_user_mock):
         user = UserFactory.create()
         subscribe_user_mock.assert_called_with(user.userprofile.id, ['foo'])
-
-    @patch('mozillians.users.models.index_objects.delay')
-    @patch('mozillians.users.models.unindex_objects.delay')
-    def test_update_index_post_save(self, unindex_objects_mock,
-                                    index_objects_mock):
-        user = UserFactory.create()
-        index_objects_mock.assert_called_with(
-            UserProfileMappingType, [user.userprofile.id], public_index=False)
-        unindex_objects_mock.assert_called_with(
-            UserProfileMappingType, [user.userprofile.id], public_index=True)
-
-    @patch('mozillians.users.models.index_objects.delay')
-    @patch('mozillians.users.models.unindex_objects.delay')
-    def test_update_index_post_save_incomplete_profile(self,
-                                                       unindex_objects_mock,
-                                                       index_objects_mock):
-        UserFactory.create(userprofile={'full_name': ''})
-        ok_(not index_objects_mock.called)
-        ok_(not unindex_objects_mock.called)
-
-    def test_remove_from_index_post_delete(self):
-        user = UserFactory.create()
-
-        with patch('mozillians.users.models.unindex_objects.delay') as (
-                unindex_objects_mock):
-            user.delete()
-
-        unindex_objects_mock.assert_has_calls([
-            call(UserProfileMappingType, [user.userprofile.id], public_index=False),
-            call(UserProfileMappingType, [user.userprofile.id], public_index=True)])
 
     def test_delete_user_obj_on_profile_delete(self):
         user = UserFactory.create()
@@ -201,99 +170,6 @@ class UserProfileTests(TestCase):
         profile.set_instance_privacy_level(EMPLOYEES)
         eq_(profile.full_name, 'foobar')
 
-    def test_extract_document(self):
-        user = UserFactory.create(userprofile={'full_name': 'Nikos Koukos',
-                                               'bio': 'This is my bio'})
-        profile = user.userprofile
-        group_1 = GroupFactory.create()
-        group_2 = GroupFactory.create()
-        skill_1 = SkillFactory.create()
-        skill_2 = SkillFactory.create()
-        LanguageFactory.create(code='fr', userprofile=profile)
-        LanguageFactory.create(code='en', userprofile=profile)
-        group_1.add_member(profile)
-        group_2.add_member(profile)
-        profile.skills.add(skill_1)
-        profile.skills.add(skill_2)
-
-        result = UserProfileMappingType.extract_document(profile.id)
-        ok_(isinstance(result, dict))
-        eq_(result['id'], profile.id)
-        eq_(result['is_vouched'], profile.is_vouched)
-        eq_(result['region'], 'attika')
-        eq_(result['city'], 'athens')
-        eq_(set(result['country']), set(['gr', 'greece']))
-        eq_(result['fullname'], profile.full_name.lower())
-        eq_(result['name'], profile.full_name.lower())
-        eq_(result['bio'], profile.bio)
-        eq_(result['has_photo'], False)
-        eq_(result['groups'], [group_1.name, group_2.name])
-        eq_(result['skills'], [skill_1.name, skill_2.name])
-        eq_(set(result['languages']),
-            set([u'en', u'fr', u'english', u'french', u'français']))
-
-    def test_get_mapping(self):
-        ok_(UserProfileMappingType.get_mapping())
-
-    def test_privacy_aware_iterator(self):
-        UserFactory.create(userprofile={'ircname': 'foo'})
-        s = PrivacyAwareS(UserProfileMappingType)
-
-        # Manually set privacy level in UserProfileMappingType instance
-        s.privacy_level(PUBLIC)
-        q = s.query(ircname='foo')
-        eq_(len(q), 1)
-        eq_(q[0]._privacy_level, PUBLIC)
-
-    @override_settings(ES_INDEXES={'default': 'index'})
-    @patch('mozillians.users.es.PrivacyAwareS')
-    def test_search_no_public_only_vouched(self, PrivacyAwareSMock):
-        result = UserProfileMappingType.search('foo')
-        ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
-        PrivacyAwareSMock().indexes.assert_any_call('index')
-        (PrivacyAwareSMock().indexes().boost()
-         .query().order_by().filter.assert_any_call(is_vouched=True))
-        ok_(call().privacy_level(PUBLIC) not in PrivacyAwareSMock.mock_calls)
-
-    @override_settings(ES_INDEXES={'default': 'index'})
-    @patch('mozillians.users.es.PrivacyAwareS')
-    def test_search_no_public_with_unvouched(self, PrivacyAwareSMock):
-        result = UserProfileMappingType.search('foo', include_non_vouched=True)
-        ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
-        PrivacyAwareSMock().indexes.assert_any_call('index')
-        ok_(call().indexes().boost()
-            .query().order_by().filter(is_vouched=True)
-            not in PrivacyAwareSMock.mock_calls)
-        ok_(call().privacy_level(PUBLIC) not in PrivacyAwareSMock.mock_calls)
-
-    @override_settings(ES_INDEXES={'public': 'public_index'})
-    @patch('mozillians.users.es.PrivacyAwareS')
-    def test_search_public_only_vouched(self, PrivacyAwareSMock):
-        result = UserProfileMappingType.search('foo', public=True)
-        ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
-        PrivacyAwareSMock().privacy_level.assert_any_call(PUBLIC)
-        (PrivacyAwareSMock().privacy_level()
-         .indexes.assert_any_call('public_index'))
-        (PrivacyAwareSMock().privacy_level().indexes().boost()
-         .query().order_by().filter.assert_any_call(is_vouched=True))
-
-    @override_settings(ES_INDEXES={'public': 'public_index'})
-    @patch('mozillians.users.es.PrivacyAwareS')
-    def test_search_public_with_unvouched(self, PrivacyAwareSMock):
-        result = UserProfileMappingType.search(
-            'foo', public=True, include_non_vouched=True)
-        ok_(isinstance(result, Mock))
-        PrivacyAwareSMock.assert_any_call(UserProfileMappingType)
-        PrivacyAwareSMock().privacy_level.assert_any_call(PUBLIC)
-        (PrivacyAwareSMock().privacy_level()
-         .indexes.assert_any_call('public_index'))
-        ok_(call().privacy_level().indexes().boost()
-            .query().order_by().filter(is_vouched=True)
-            not in PrivacyAwareSMock.mock_calls)
-
     def test_accounts_access(self):
         user = UserFactory.create()
         user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_SUMO,
@@ -405,14 +281,6 @@ class UserProfileTests(TestCase):
         Vouch.objects.create(voucher=None, vouchee=user.userprofile, date=datetime.now())
         user.userprofile._email_now_vouched(None)
         eq_(get_template_mock().render.call_args_list[1][0][0]['can_vouch_threshold'], True)
-
-    @override_settings(ES_INDEXES={'public': 'foo'})
-    def test_get_index_public(self):
-        ok_(UserProfileMappingType.get_index(public_index=True), 'foo')
-
-    @override_settings(ES_INDEXES={'default': 'bar'})
-    def test_get_index(self):
-        ok_(UserProfileMappingType.get_index(public_index=False), 'bar')
 
     def test_set_privacy_level_with_save(self):
         user = UserFactory.create()
