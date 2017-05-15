@@ -148,7 +148,7 @@ TEMPLATES = [
         'OPTIONS': {
             'debug': DEBUG,
             'app_dirname': 'jinja2',
-            'match_extension': None,
+            'match_extension': '.html',
             'newstyle_gettext': True,
             'undefined': 'jinja2.Undefined',
             'extensions': DEFAULT_EXTENSIONS + [
