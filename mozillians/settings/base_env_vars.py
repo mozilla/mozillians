@@ -205,6 +205,7 @@ STATICFILES_FINDERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'mozillians.common.middleware.LocaleURLMiddleware',
     'multidb.middleware.PinningRouterMiddleware',
 
