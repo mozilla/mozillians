@@ -148,7 +148,7 @@ TEMPLATES = [
         'OPTIONS': {
             'debug': DEBUG,
             'app_dirname': 'jinja2',
-            'match_extension': None,
+            'match_extension': '.html',
             'newstyle_gettext': True,
             'undefined': 'jinja2.Undefined',
             'extensions': DEFAULT_EXTENSIONS + [
@@ -205,6 +205,7 @@ STATICFILES_FINDERS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'mozillians.common.middleware.LocaleURLMiddleware',
     'multidb.middleware.PinningRouterMiddleware',
 
