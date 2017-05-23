@@ -611,12 +611,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         actions.pop('delete_selected', None)
         return actions
 
-    # def index_profiles(self, request):
-    #     """Fire an Elastic Search Index Profiles task."""
-    #     index_all_profiles()
-    #     messages.success(request, 'Profile indexing started.')
-    #     return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
-
     def check_celery(self, request):
         try:
             investigator = check_celery.delay()
@@ -647,7 +641,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         urls = super(UserProfileAdmin, self).get_urls()
         my_urls = patterns(
             '',
-            # url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
             url(r'check_celery', wrap(self.check_celery), name='users_check_celery')
         )
         return my_urls + urls

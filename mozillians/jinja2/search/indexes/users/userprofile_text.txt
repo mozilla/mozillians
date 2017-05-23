@@ -1,0 +1,4 @@
+{{ object.full_name }}
+{{ object.email }}
+{{ object.user.username }}
+{{ object.ircname }}

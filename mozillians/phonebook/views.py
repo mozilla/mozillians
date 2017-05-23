@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from django.utils.translation import ugettext as _
+from haystack.generic_views import SearchView
 from raven.contrib.django.models import client
 from waffle.decorators import waffle_flag
 
@@ -26,7 +27,6 @@ from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.templatetags.helpers import get_object_or_none, redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
-from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
@@ -520,3 +520,20 @@ def capture_csp_violation(request):
         data=data)
 
     return HttpResponse('Captured CSP violation, thanks for reporting.')
+
+
+# Django haystack
+@allow_public
+class PhonebookSearchView(SearchView):
+    form_class = forms.PhonebookSearchForm
+    template_name = 'phonebook/search.html'
+
+    def get_queryset(self):
+        sqs = super(PhonebookSearchView, self).get_queryset()
+        return sqs
+
+    def get_form_kwargs(self):
+        """Pass the request.user to the form's kwargs."""
+        kwargs = super(PhonebookSearchView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs

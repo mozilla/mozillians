@@ -27,11 +27,10 @@
     </p>
   {% endif %}
   <h1>{{ _('Search') }}</h1>
-  <form method="GET" id="search-form" action="{{ url('phonebook:search') }}">
-    {{ field_with_attrs(search_form.q,
-                        placeholder=_('Search for people, groups and more')) }}
+  <form method="GET" id="search-form" action="{{ url('phonebook:haystack_search') }}">
+    {{ field_with_attrs(form.q, placeholder=_('Search for people, groups and more')) }}
 
-    {{ search_form.limit }}
+    {{ form.limit }}
     <button type="submit">
       <span class="icon-search"></span>
       {{ _('Search') }}
@@ -42,12 +41,11 @@
     </button>
     <div class="search-options">
       <div class="field">
-        {{ search_form.include_non_vouched }}
-        {{ search_form.include_non_vouched.label_tag() }}
+        {{ form.models }}
       </div>
     </div>
   </form>
-  {% if not search_form.cleaned_data %}
+  {% if not form.cleaned_data %}
     <div class="well">
       {% trans %}
         <h2>Search For a Mozillian</h2>
@@ -59,52 +57,27 @@
       {% endtrans %}
     </div>
   {% else %}
-    {% if groups %}
-      <div id="search_group">
-        <h2>{{ _('Groups') }}</h2>
-        <p>
-          {% trans count=groups.count() %}
-            {{ count }} group matching
-            {% pluralize %}
-            {{ count }} groups matching
-          {% endtrans %}
-          {% if search_form.cleaned_data.q %}
-            "{{ search_form.cleaned_data.q }}"
-          {% endif %}
-        </p>
-        <ul id="groups" class="tagit ui-widget ui-widget-content ui-corner-all">
-          {% for group in groups %}
-            <li class="tagit-choice ui-widget-content ui-state-default
-                       ui-corner-all">
-                <a href="{{ url('groups:show_group', group.url) }}">
-                  {{ group.name }}
-                </a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
-    {% if people %}
+    {% if page_obj.object_list %}
       <h2>{{ _('Mozillians') }}</h2>
       <p>
-        {% trans count=people.paginator.count %}
+        {% trans count=page_obj.paginator.count %}
           {{ count }} Mozillian matching
           {% pluralize %}
           {{ count }} Mozillians matching
         {% endtrans %}
-        {% if search_form.cleaned_data.q %}
-            "{{ search_form.cleaned_data.q }}"
+        {% if form.cleaned_data.q %}
+            "{{ form.cleaned_data.q }}"
         {% endif %}
       </p>
-      {% with items=people %}
+      {% with items=page_obj.object_list %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
       <div class="row">
-      {% for person in people %}
-        {{ search_result(person) }}
+      {% for result in page_obj.object_list %}
+        {{ search_result(result.object) }}
       {% endfor %}
       </div>
-      {% with items=people %}
+      {% with items=page_obj.object_list %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
     {% endif %}
@@ -112,7 +85,7 @@
     {% if not people and not groups %}
       <div class="well">
         <p id="not-found">
-          {% trans query=search_form.cleaned_data.q %}
+          {% trans query=form.cleaned_data.q %}
             Sorry, we cannot find a group or person related to "{{ query }}".
           {% endtrans %}
         </p>

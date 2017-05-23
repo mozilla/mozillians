@@ -12,6 +12,8 @@ from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 import django_filters
 import happyforms
 from dal import autocomplete
+from haystack.forms import ModelSearchForm as HaystackSearchForm
+from haystack.query import SQ
 from nocaptcha_recaptcha.fields import NoReCaptchaField
 from pytz import common_timezones
 from PIL import Image
@@ -23,6 +25,7 @@ from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
 from mozillians.users.models import AbuseReport, ExternalAccount, Language, UserProfile
+from mozillians.users.search_indexes import UserProfileIndex
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -444,3 +447,47 @@ class AbuseReportForm(happyforms.ModelForm):
         labels = {
             'type': _(u'What would you like to report?')
         }
+
+
+class PhonebookSearchForm(HaystackSearchForm):
+    """Django Haystack's search form."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize search form.
+
+        Get the user object passed from the CBV.
+        """
+        self.request = kwargs.pop('request', None)
+        super(PhonebookSearchForm, self).__init__(*args, **kwargs)
+
+    def search(self):
+        """Search on the ES index the query sting provided by the user."""
+
+        search_term = self.cleaned_data['q']
+
+        sqs = super(PhonebookSearchForm, self).search()
+
+        if sqs:
+            profile = self.request.user.userprofile
+            all_indexed_fields = UserProfileIndex.fields.keys()
+            privacy_indexed_fields = [field for field in all_indexed_fields
+                                      if field.startswith('privacy_')]
+
+            # Every profile object in mozillians.org has privacy settings.
+            # Let's take advantage of this and compare the indexed fields
+            # with the ones listed in a profile in order to build the query to ES.
+            query = SQ()
+            for p_field in privacy_indexed_fields:
+                # this is the field that we are going to query
+                q_field = p_field.split('_', 1)[1]
+                if hasattr(profile, q_field):
+                    # The user needs to have less or equal permission number with the queried field
+                    # (lower number, means greater permission level)
+                    q_args = {
+                        q_field: search_term,
+                        '{0}__gte'.format(p_field): profile.privacy_level
+                    }
+                    query.add(SQ(**q_args), SQ.OR)
+
+            sqs = sqs.filter(query)
+        return sqs
