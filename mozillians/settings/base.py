@@ -319,7 +319,6 @@ INSTALLED_APPS = (
     'cities_light',
     'haystack',
 
-    'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
     'mozillians.groups',
