@@ -317,6 +317,7 @@ INSTALLED_APPS = (
     'csp',
     'mozilla_django_oidc',
     'cities_light',
+    'haystack',
 
     'mozillians',
     'mozillians.users',
@@ -576,3 +577,13 @@ OIDC_USERNAME_ALGO = _username_algo
 OIDC_RP_CLIENT_SECRET_ENCODED = True
 OIDC_STORE_ACCESS_TOKEN = True
 OIDC_OP_DOMAIN = 'auth.mozilla.auth0.com'
+
+
+# Django Haystack
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://127.0.0.1:9200/',
+        'INDEX_NAME': 'mozillians'
+    }
+}

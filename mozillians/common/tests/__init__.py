@@ -26,16 +26,8 @@ ES_INDEXES = {
 
 
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
-                   PASSWORD_HASHERS=PASSWORD_HASHERS,
-                   ES_INDEXES=ES_INDEXES)
+                   PASSWORD_HASHERS=PASSWORD_HASHERS)
 class TestCase(BaseTestCase):
-    def __init__(self, *args, **kwargs):
-        from elasticutils.contrib.django import get_es
-        es = get_es()
-
-        es.indices.create(index=ES_INDEXES['default'], ignore=400)
-        es.indices.create(index=ES_INDEXES['public'], ignore=400)
-        super(TestCase, self).__init__(*args, **kwargs)
 
     @contextmanager
     def login(self, user):

@@ -25,7 +25,6 @@ from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.models import get_languages_for_locale
-from mozillians.users.cron import index_all_profiles
 from mozillians.users.models import (AbuseReport, ExternalAccount, Language, PUBLIC,
                                      UserProfile, UsernameBlacklist, Vouch)
 from mozillians.users.tasks import (check_celery, subscribe_user_to_basket,
@@ -612,12 +611,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         actions.pop('delete_selected', None)
         return actions
 
-    def index_profiles(self, request):
-        """Fire an Elastic Search Index Profiles task."""
-        index_all_profiles()
-        messages.success(request, 'Profile indexing started.')
-        return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
-
     def check_celery(self, request):
         try:
             investigator = check_celery.delay()
@@ -648,7 +641,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         urls = super(UserProfileAdmin, self).get_urls()
         my_urls = patterns(
             '',
-            url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
             url(r'check_celery', wrap(self.check_celery), name='users_check_celery')
         )
         return my_urls + urls

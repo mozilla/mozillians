@@ -9,8 +9,8 @@
     <Url type="application/opensearchdescription+xml" rel="self"
          template="{{ absolutify(url('phonebook:search_plugin')) }}"/>
     <Url type="text/html"
-         template="{{ absolutify(url('phonebook:search')) }}?q={searchTerms}"/>
+         template="{{ absolutify(url('phonebook:haystack_search')) }}?q={searchTerms}"/>
     <Tags>mozillians mozilla {{ _('mozillians') }}</Tags>
     <Query role="example" searchTerms="python" />
-    <moz:SearchForm>{{ absolutify(url('phonebook:search')) }}</moz:SearchForm>
+    <moz:SearchForm>{{ absolutify(url('phonebook:haystack_search')) }}</moz:SearchForm>
 </OpenSearchDescription>

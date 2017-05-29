@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from django.utils.translation import ugettext as _
+from haystack.generic_views import SearchView
 from raven.contrib.django.models import client
 from waffle.decorators import waffle_flag
 
@@ -26,12 +27,10 @@ from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.templatetags.helpers import get_object_or_none, redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
-from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import (AbuseReport, ExternalAccount, UserProfile,
-                                     UserProfileMappingType)
+from mozillians.users.models import AbuseReport, ExternalAccount, UserProfile
 from mozillians.users.tasks import check_spam_account, update_email_in_basket
 
 
@@ -362,104 +361,6 @@ def delete(request):
 
 
 @allow_public
-def search(request):
-    limit = None
-    people = []
-    show_pagination = False
-    form = forms.SearchForm(request.GET)
-    groups = None
-    functional_areas = Group.get_functional_areas()
-
-    if form.is_valid():
-        query = form.cleaned_data.get('q', u'')
-        limit = form.cleaned_data['limit']
-        include_non_vouched = form.cleaned_data['include_non_vouched']
-        page = request.GET.get('page', 1)
-        public = not (request.user.is_authenticated() and
-                      request.user.userprofile.is_vouched)
-
-        profiles = UserProfileMappingType.search(
-            query, public=public, include_non_vouched=include_non_vouched)
-        if not public:
-            groups = Group.search(query)
-
-        paginator = Paginator(profiles, limit)
-
-        try:
-            people = paginator.page(page)
-        except PageNotAnInteger:
-            people = paginator.page(1)
-        except EmptyPage:
-            people = paginator.page(paginator.num_pages)
-
-        if profiles.count() == 1 and not groups:
-            return redirect('phonebook:profile_view', people[0].user.username)
-
-        show_pagination = paginator.count > settings.ITEMS_PER_PAGE
-
-    d = dict(people=people,
-             search_form=form,
-             limit=limit,
-             show_pagination=show_pagination,
-             groups=groups,
-             functional_areas=functional_areas)
-
-    return render(request, 'phonebook/search.html', d)
-
-
-@waffle_flag('betasearch')
-def betasearch(request):
-    """This view is for researching new search and data filtering
-    options. It will eventually replace the 'search' view.
-
-    Filtering using SearchFilter does not respect privacy levels
-    because it directly hits the db. This should be further
-    investigated before the feature is released to the
-    public. Meanwhile we limit searches only to vouched users.
-
-    This view is behind the 'betasearch' waffle flag.
-
-    """
-    limit = None
-    people = []
-    show_pagination = False
-    form = forms.SearchForm(request.GET)
-    filtr = forms.SearchFilter(request.GET)
-
-    if form.is_valid():
-        query = form.cleaned_data.get('q', u'')
-        limit = form.cleaned_data['limit']
-        page = request.GET.get('page', 1)
-        public = not (request.user.is_authenticated() and
-                      request.user.userprofile.is_vouched)
-
-        profiles_matching_filter = list(filtr.qs.values_list('id', flat=True))
-        profiles = UserProfileMappingType.search(query,
-                                                 include_non_vouched=True,
-                                                 public=public)
-        profiles = profiles.filter(id__in=profiles_matching_filter)
-
-        paginator = Paginator(profiles, limit)
-
-        try:
-            people = paginator.page(page)
-        except PageNotAnInteger:
-            people = paginator.page(1)
-        except EmptyPage:
-            people = paginator.page(paginator.num_pages)
-
-        show_pagination = paginator.count > settings.ITEMS_PER_PAGE
-
-    data = dict(people=people,
-                search_form=form,
-                filtr=filtr,
-                limit=limit,
-                show_pagination=show_pagination)
-
-    return render(request, 'phonebook/betasearch.html', data)
-
-
-@allow_public
 @cache_control(public=True, must_revalidate=True, max_age=3600 * 24 * 7)  # 1 week.
 def search_plugin(request):
     """Render an OpenSearch Plugin."""
@@ -619,3 +520,20 @@ def capture_csp_violation(request):
         data=data)
 
     return HttpResponse('Captured CSP violation, thanks for reporting.')
+
+
+# Django haystack
+@allow_public
+class PhonebookSearchView(SearchView):
+    form_class = forms.PhonebookSearchForm
+    template_name = 'phonebook/search.html'
+
+    def get_queryset(self):
+        sqs = super(PhonebookSearchView, self).get_queryset()
+        return sqs
+
+    def get_form_kwargs(self):
+        """Pass the request.user to the form's kwargs."""
+        kwargs = super(PhonebookSearchView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs

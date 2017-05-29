@@ -29,14 +29,12 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
                                              validate_phone_number, validate_linkedin)
-from mozillians.users.es import UserProfileMappingType
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager, UserProfileQuerySet)
-from mozillians.users.tasks import (index_objects, unsubscribe_from_basket_task,
-                                    subscribe_user_to_basket, unindex_objects)
+from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_basket_task
 
 
 COUNTRIES = product_details.get_regions('en-US')
@@ -588,24 +586,6 @@ def update_basket(sender, instance, **kwargs):
         subscribe_user_to_basket.delay(instance.id, newsletters)
     else:
         unsubscribe_from_basket_task.delay(instance.email, newsletters)
-
-
-@receiver(dbsignals.post_save, sender=UserProfile,
-          dispatch_uid='update_search_index_sig')
-def update_search_index(sender, instance, **kwargs):
-    if instance.is_complete:
-        index_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
-        if instance.is_public_indexable:
-            index_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
-        else:
-            unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
-
-
-@receiver(dbsignals.pre_delete, sender=UserProfile,
-          dispatch_uid='remove_from_search_index_sig')
-def remove_from_search_index(sender, instance, **kwargs):
-    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=False)
-    unindex_objects.delay(UserProfileMappingType, [instance.id], public_index=True)
 
 
 @receiver(dbsignals.pre_delete, sender=UserProfile, dispatch_uid='unsubscribe_from_basket_sig')

@@ -74,7 +74,7 @@
                 </a>
                 {% block search %}
                   <form class="navbar-search"
-                        action="{{ url('phonebook:search') }}" method="GET">
+                        action="{{ url('phonebook:haystack_search') }}" method="GET">
                     <input type="text" name="q" class="search-query"
                            placeholder="{{ _('Search for people, groups and more') }}" maxlength="140" required="required">
                   </form>

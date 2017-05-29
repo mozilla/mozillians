@@ -1,33 +1,13 @@
 from django.forms import model_to_dict
-from django.test.utils import override_settings
 
 from mock import MagicMock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
 from mozillians.phonebook.forms import (ContributionForm, EmailForm, ExternalAccountForm,
-                                        SearchForm, filter_vouched)
+                                        filter_vouched)
 from mozillians.users.models import UserProfile
 from mozillians.users.tests import UserFactory
-
-
-class SearchFormTests(TestCase):
-    @override_settings(ITEMS_PER_PAGE=20)
-    def test_clean_limit(self):
-        data = {'q': 'foobar',
-                'limit': 5,
-                'include_non_vouched': False}
-        form = SearchForm(data)
-        form.full_clean()
-        eq_(form.cleaned_data['limit'], 5)
-
-    @override_settings(ITEMS_PER_PAGE=20)
-    def test_clean_default_limit(self):
-        data = {'q': 'foobar',
-                'include_non_vouched': False}
-        form = SearchForm(data)
-        form.full_clean()
-        eq_(form.cleaned_data['limit'], 20)
 
 
 class TestFilterVouched(TestCase):

@@ -9,12 +9,9 @@ import waffle
 from celery import chain, group, shared_task, Task
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
-from elasticutils.contrib.django import get_es
-from elasticutils.utils import chunked
 
 from mozillians.common.utils import akismet_spam_check
 from mozillians.common.templatetags.helpers import get_object_or_none
-from mozillians.users.managers import PUBLIC
 
 
 BASKET_TASK_RETRY_DELAY = 120  # 2 minutes
@@ -228,38 +225,6 @@ def unsubscribe_from_basket_task(email, newsletters=[]):
         lookup_user_task.subtask((email,)) |
         unsubscribe_user_task.subtask((newsletters,))
     ).delay()
-
-
-@task
-def index_objects(mapping_type, ids, chunk_size=100, public_index=False, **kwargs):
-    if getattr(settings, 'ES_DISABLED', False):
-        return
-
-    es = get_es()
-    model = mapping_type.get_model()
-
-    for id_list in chunked(ids, chunk_size):
-        documents = []
-        qs = model.objects.filter(id__in=id_list)
-        index = mapping_type.get_index(public_index)
-        if public_index:
-            qs = qs.public_indexable().privacy_level(PUBLIC)
-
-        for item in qs:
-            documents.append(mapping_type.extract_document(item.id, item))
-
-        mapping_type.bulk_index(documents, id_field='id', es=es, index=index)
-        mapping_type.refresh_index(es)
-
-
-@task
-def unindex_objects(mapping_type, ids, public_index, **kwargs):
-    if getattr(settings, 'ES_DISABLED', False):
-        return
-
-    es = get_es()
-    for id_ in ids:
-        mapping_type.unindex(id_, es=es, public_index=public_index)
 
 
 @task
