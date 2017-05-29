@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
 
+from haystack.signals import BaseSignalProcessor
 from multidb.pinning import use_master
 
 from mozillians.users.models import ExternalAccount, UserProfile, Vouch
@@ -10,8 +11,7 @@ from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_ba
 
 
 # Signal to create a UserProfile.
-@receiver(signals.post_save, sender=User,
-          dispatch_uid='create_user_profile_sig')
+@receiver(signals.post_save, sender=User, dispatch_uid='create_user_profile_sig')
 def create_user_profile(sender, instance, created, raw, **kwargs):
     if not raw:
         up, created = UserProfile.objects.get_or_create(user=instance)
@@ -71,3 +71,20 @@ def add_employee_vouch(sender, instance, **kwargs):
     if kwargs.get('raw') or not instance.type == ExternalAccount.TYPE_EMAIL:
         return
     instance.user.auto_vouch()
+
+
+# Django Haystack signals
+class ProfileSignalProcessor(BaseSignalProcessor):
+
+    def setup(self):
+        signals.post_save.connect(self.handle_save, sender=UserProfile)
+        signals.post_delete.connect(self.handle_delete, sender=UserProfile)
+
+    def handle_save(self, sender, instance, **kwargs):
+        # Do not index incomplete profiles.
+        if instance.is_complete:
+            super(ProfileSignalProcessor, self).handle_save(sender, instance, **kwargs)
+
+    def teardown(self):
+        signals.post_save.disconnect(self.handle_save, sender=UserProfile)
+        signals.post_delete.disconnect(self.handle_delete, sender=UserProfile)

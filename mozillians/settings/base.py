@@ -319,6 +319,7 @@ INSTALLED_APPS = (
     'cities_light',
     'haystack',
 
+    'mozillians',
     'mozillians.users',
     'mozillians.phonebook',
     'mozillians.groups',
@@ -586,3 +587,5 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'mozillians'
     }
 }
+
+HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.users.signals.ProfileSignalProcessor'
