@@ -465,29 +465,38 @@ class PhonebookSearchForm(HaystackSearchForm):
 
         search_term = self.cleaned_data['q']
 
+        # Calling super will handle with form validation and
+        # will also search in fields that are not explicit queried through `text`
         sqs = super(PhonebookSearchForm, self).search()
 
-        if sqs:
-            profile = self.request.user.userprofile
-            all_indexed_fields = UserProfileIndex.fields.keys()
-            privacy_indexed_fields = [field for field in all_indexed_fields
-                                      if field.startswith('privacy_')]
+        if not sqs:
+            return self.no_query_found()
 
-            # Every profile object in mozillians.org has privacy settings.
-            # Let's take advantage of this and compare the indexed fields
-            # with the ones listed in a profile in order to build the query to ES.
-            query = SQ()
-            for p_field in privacy_indexed_fields:
-                # this is the field that we are going to query
-                q_field = p_field.split('_', 1)[1]
-                if hasattr(profile, q_field):
-                    # The user needs to have less or equal permission number with the queried field
-                    # (lower number, means greater permission level)
-                    q_args = {
-                        q_field: search_term,
-                        '{0}__gte'.format(p_field): profile.privacy_level
-                    }
-                    query.add(SQ(**q_args), SQ.OR)
+        # Profiles Search
+        profile = self.request.user.userprofile
+        all_indexed_fields = UserProfileIndex.fields.keys()
+        privacy_indexed_fields = [field for field in all_indexed_fields
+                                  if field.startswith('privacy_')]
+        query = SQ()
+        q_args = {}
+        # Every profile object in mozillians.org has privacy settings.
+        # Let's take advantage of this and compare the indexed fields
+        # with the ones listed in a profile in order to build the query to ES.
+        for p_field in privacy_indexed_fields:
+            # this is the field that we are going to query
+            q_field = p_field.split('_', 1)[1]
+            if hasattr(profile, q_field):
+                # The user needs to have less or equal permission number with the queried field
+                # (lower number, means greater permission level)
+                q_args = {
+                    q_field: search_term,
+                    '{0}__gte'.format(p_field): profile.privacy_level
+                }
+                query.add(SQ(**q_args), SQ.OR)
 
-            sqs = sqs.filter(query)
+        # Group Search
+        # We need to exclude non visible groups.
+        query.add(SQ(**{'visible': True}), SQ.OR)
+
+        sqs = sqs.filter(query)
         return sqs

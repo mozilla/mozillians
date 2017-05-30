@@ -1,5 +1,7 @@
 <div class="result">
   {% if group %}
+    {# Result is a profile instance in this case. #}
+    {% set profile=result %}
     {% if is_curator %}
       {% if user != profile.user and not user_is_curator(group, profile) %}
         <form action="{{ url('groups:remove_member', url=group.url, user_pk=profile.pk) }}"
@@ -21,42 +23,68 @@
       <div class="status-pending">{{ _('Requested') }}</div>
     {% endif %}
   {% endif %}
-  <div class="card">
-    <div class="avatar">
-      <span>
-        <a title="{{ profile.display_name }}"
-           href="{{ url('phonebook:profile_view', profile.user.username) }}">
-          <img class="profile-photo"
-               src="{{ profile.get_photo_url('70x70') }}"
-               alt="{{ _('Profile Photo') }}">
-        </a>
-      </span>
+
+  {% if result.model_name == 'userprofile' %}
+    {% set profile=result.object %}
+  {% else %}
+    {% set group=result.object %}
+  {% endif %}
+
+  {% if profile %}
+    <div class="card">
+      <div class="avatar">
+        <span>
+          <a title="{{ profile.display_name }}"
+            href="{{ url('phonebook:profile_view', profile.user.username) }}">
+            <img class="profile-photo"
+                src="{{ profile.get_photo_url('70x70') }}"
+                alt="{{ _('Profile Photo') }}">
+          </a>
+        </span>
+      </div>
+
+      <div class="details">
+        <ul>
+          <li>
+            <h2>
+              <a title="{{ profile.display_name }}"
+                href="{{ url('phonebook:profile_view', profile.user.username) }}">
+                {{ profile.display_name|truncate(20, True) }}
+              </a>
+            </h2>
+          </li>
+          {% if profile.email %}
+            <li>
+              <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
+              <i class="icon-envelope-o"></i> {{ profile.email|truncate(20, True) }}
+              </a>
+            </li>
+          {% endif %}
+          {% if profile.ircname %}
+            <li>
+              <span title="{{ profile.ircname }}">
+                <i class="icon-comments-o"></i> IRC: {{ profile.ircname|truncate(20, True) }}
+              </span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-    <div class="details">
-      <ul>
-        <li>
-          <h2>
-            <a title="{{ profile.display_name }}"
-               href="{{ url('phonebook:profile_view', profile.user.username) }}">
-              {{ profile.display_name|truncate(20, True) }}
-            </a>
-          </h2>
+  {% elif group %}
+    <div class="groups-areas">
+      <ul class="group-list">
+        <li class="group-item">
+          <a href="{{ group.get_absolute_url() }}" class="group-name" title="{{ group.name }}">
+            {{ group.name|truncate(20, True) }}<br>
+            <i class="icon-group"></i>
+            {% trans num=group.member_count %}
+              {{ num }} member
+            {% pluralize num %}
+              {{ num }} members
+            {% endtrans %}
+          </a>
         </li>
-        {% if profile.email %}
-          <li>
-            <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
-            <i class="icon-envelope-o"></i> {{ profile.email|truncate(20, True) }}
-            </a>
-          </li>
-        {% endif %}
-        {% if profile.ircname %}
-          <li>
-            <span title="{{ profile.ircname }}">
-              <i class="icon-comments-o"></i> IRC: {{ profile.ircname|truncate(20, True) }}
-            </span>
-          </li>
-        {% endif %}
       </ul>
     </div>
-  </div>
+  {% endif %}
 </div>

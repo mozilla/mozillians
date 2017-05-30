@@ -48,22 +48,21 @@
   {% if not form.cleaned_data %}
     <div class="well">
       {% trans %}
-        <h2>Search For a Mozillian</h2>
-
+        <h2>Search for a Mozillian or a group</h2>
         <p>
-          You can search for another Mozillian using their name, email, or
-          nickname.
+          You can search for another Mozillian using their name, email, username and bio keywords
+          or you can search for groups by name and group membership status.
         </p>
       {% endtrans %}
     </div>
   {% else %}
     {% if page_obj.object_list %}
-      <h2>{{ _('Mozillians') }}</h2>
+      <h2>{{ _('Results') }}</h2>
       <p>
         {% trans count=page_obj.paginator.count %}
-          {{ count }} Mozillian matching
+          {{ count }} entry matching
           {% pluralize %}
-          {{ count }} Mozillians matching
+          {{ count }} entries matching
         {% endtrans %}
         {% if form.cleaned_data.q %}
             "{{ form.cleaned_data.q }}"
@@ -74,15 +73,13 @@
       {% endwith %}
       <div class="row">
       {% for result in page_obj.object_list %}
-        {{ search_result(result.object) }}
+        {{ search_result(result) }}
       {% endfor %}
       </div>
       {% with items=page_obj.object_list %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
-    {% endif %}
-
-    {% if not people and not groups %}
+    {% else %}
       <div class="well">
         <p id="not-found">
           {% trans query=form.cleaned_data.q %}
@@ -113,6 +110,7 @@
         {% endif %}
       </div>
     {% endif %}
+
   {% endif %}
 {% endblock %}
 

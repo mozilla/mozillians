@@ -23,9 +23,9 @@ def paragraphize(value):
 @jinja2.contextfunction
 @library.global_function
 @library.render_with('includes/search_result.html')
-def search_result(context, profile):
+def search_result(context, result):
     d = dict(context.items())
-    d.update(profile=profile)
+    d.update(result=result)
     return d
 
 
