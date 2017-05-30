@@ -57,7 +57,7 @@ def database(ctx):
         ctx.local('python manage.py migrate --noinput')
 
         # Debug migrations issue
-        print 'Dry-run makemigrations for debugging purposes'
+        print('Dry-run makemigrations for debugging purposes')
         ctx.local('python manage.py makemigrations --dry-run --verbosity 3')
 
         # # Update DB for django-cities-light
@@ -81,7 +81,7 @@ def ping_newrelic(ctx):
             log_cmd = 'git log --oneline {0}..{1}'.format(OLDREV, NEWREV)
             changelog = ctx.local(log_cmd).out.strip()
 
-        print 'Post deployment to New Relic'
+        print('Post deployment to New Relic')
         desc = generate_desc(OLDREV, NEWREV, changelog)
         if changelog:
             github_url = GITHUB_URL.format(oldrev=OLDREV, newrev=NEWREV)
@@ -97,13 +97,13 @@ def ping_newrelic(ctx):
             request = urllib2.Request(NEW_RELIC_URL, data, headers)
             urllib2.urlopen(request)
         except urllib.URLError as exp:
-            print 'Error notifying New Relic: {0}'.format(exp)
+            print('Error notifying New Relic: {0}'.format(exp))
 
 
 @task
 def update_es_indexes(ctx):
     with ctx.lcd(settings.SRC_DIR):
-        ctx.local('python manage.py cron index_all_profiles &')
+        ctx.local('python manage.py rebuild_index --noinput')
 
 
 @task
@@ -176,7 +176,7 @@ def setup_dependencies(ctx):
 
         # Activate venv to append to the correct path to $PATH.
         activate_env = os.path.join(venv_bin_path, 'activate_this.py')
-        execfile(activate_env, dict(__file__=activate_env))
+        execfile(activate_env, dict(__file__=activate_env)) # noqa
 
         # Make sure pip >= 8.x is installed
         ctx.local('python scripts/pipstrap.py')
