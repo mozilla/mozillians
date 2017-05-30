@@ -588,4 +588,4 @@ HAYSTACK_CONNECTIONS = {
     }
 }
 
-HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.users.signals.ProfileSignalProcessor'
+HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
