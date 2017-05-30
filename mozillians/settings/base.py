@@ -587,3 +587,5 @@ HAYSTACK_CONNECTIONS = {
         'INDEX_NAME': 'mozillians'
     }
 }
+
+HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.users.signals.ProfileSignalProcessor'

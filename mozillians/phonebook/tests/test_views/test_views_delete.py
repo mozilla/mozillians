@@ -46,7 +46,7 @@ class DeleteTests(TestCase):
         client = Client()
         client.post(reverse('phonebook:profile_delete'), follow=True)
 
-    @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
+    @patch('mozillians.users.signals.unsubscribe_from_basket_task.delay')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_unvouched(self, unsubscribe_from_basket_task_mock):
@@ -63,7 +63,7 @@ class DeleteTests(TestCase):
 
         ok_(not User.objects.filter(username=user.username).exists())
 
-    @patch('mozillians.users.models.unsubscribe_from_basket_task.delay')
+    @patch('mozillians.users.signals.unsubscribe_from_basket_task.delay')
     @override_settings(BASKET_VOUCHED_NEWSLETTER='newsletter1')
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_vouched(self, unsubscribe_from_basket_task_mock):
