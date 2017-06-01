@@ -11,6 +11,7 @@ class GroupIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name')
     wiki = indexes.CharField(model_attr='wiki')
     description = indexes.CharField(model_attr='description')
+    visible = indexes.CharField(model_attr='visible')
 
     def get_model(self):
         return Group
