@@ -580,12 +580,20 @@ OIDC_OP_DOMAIN = 'auth.mozilla.auth0.com'
 
 
 # Django Haystack
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://127.0.0.1:9200/',
-        'INDEX_NAME': 'mozillians_haystack'
-    }
-}
+def _lazy_haystack_setup():
+    from django.conf import settings
 
+    es_url = settings.ES_URLS[0]
+    haystack_connections = {
+        'default': {
+            'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+            'URL': es_url,
+            'INDEX_NAME': 'mozillians_haystack'
+        }
+    }
+
+    return haystack_connections
+
+
+HAYSTACK_CONNECTIONS = lazy(_lazy_haystack_setup, dict)()
 HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
