@@ -25,6 +25,7 @@ from mozillians.phonebook.models import Invite
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
+from mozillians.users.managers import PUBLIC
 from mozillians.users.models import AbuseReport, ExternalAccount, Language, UserProfile
 from mozillians.users.search_indexes import UserProfileIndex
 
@@ -483,28 +484,35 @@ class PhonebookSearchForm(HaystackSearchForm):
         if not sqs:
             return self.no_query_found()
 
+        # Profiles Search
+        try:
+            profile = self.request.user.userprofile
+        except AttributeError:
+            # This is an AnonymousUser
+            privacy_level = PUBLIC
+        else:
+            privacy_level = profile.privacy_level
+
+        all_indexed_fields = UserProfileIndex.fields.keys()
+        privacy_indexed_fields = [field for field in all_indexed_fields
+                                  if field.startswith('privacy_')]
         query = SQ()
+        q_args = {}
         # Profiles Search
         if search_all or search_in_profiles:
-            profile = self.request.user.userprofile
-            all_indexed_fields = UserProfileIndex.fields.keys()
-            privacy_indexed_fields = [field for field in all_indexed_fields
-                                      if field.startswith('privacy_')]
-            q_args = {}
             # Every profile object in mozillians.org has privacy settings.
             # Let's take advantage of this and compare the indexed fields
             # with the ones listed in a profile in order to build the query to ES.
             for p_field in privacy_indexed_fields:
                 # this is the field that we are going to query
                 q_field = p_field.split('_', 1)[1]
-                if hasattr(profile, q_field):
-                    # The user needs to have less or equal permission number with the queried field
-                    # (lower number, means greater permission level)
-                    q_args = {
-                        q_field: search_term,
-                        '{0}__gte'.format(p_field): profile.privacy_level
-                    }
-                    query.add(SQ(**q_args), SQ.OR)
+                # The user needs to have less or equal permission number with the queried field
+                # (lower number, means greater permission level)
+                q_args = {
+                    q_field: search_term,
+                    '{0}__gte'.format(p_field): privacy_level
+                }
+                query.add(SQ(**q_args), SQ.OR)
 
         # Group Search
         # We need to exclude non visible groups.
