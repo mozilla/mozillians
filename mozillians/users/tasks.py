@@ -9,6 +9,7 @@ import waffle
 from celery import chain, group, shared_task, Task
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
+from haystack.management.commands import rebuild_index
 
 from mozillians.common.utils import akismet_spam_check
 from mozillians.common.templatetags.helpers import get_object_or_none
@@ -261,3 +262,9 @@ def check_spam_account(instance_id, **kwargs):
         }
 
         AbuseReport.objects.get_or_create(**kwargs)
+
+
+@shared_task()
+def index_all_profiles():
+    """Task to index all profiles through the admin interface."""
+    rebuild_index.Command().handle(interactive=False)
