@@ -2,7 +2,7 @@ from socket import error as socket_error
 
 from django import forms
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
@@ -28,7 +28,7 @@ from mozillians.users.models import get_languages_for_locale
 from mozillians.users.models import (AbuseReport, ExternalAccount, Language, PUBLIC,
                                      UserProfile, UsernameBlacklist, Vouch)
 from mozillians.users.tasks import (check_celery, subscribe_user_to_basket,
-                                    unsubscribe_from_basket_task)
+                                    unsubscribe_from_basket_task, index_all_profiles)
 
 
 admin.site.unregister(Group)
@@ -611,6 +611,12 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         actions.pop('delete_selected', None)
         return actions
 
+    def index_profiles(self, request):
+        # Rebuild the search index.
+        index_all_profiles()
+        messages.success(request, 'Rebuilding index.')
+        return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
+
     def check_celery(self, request):
         try:
             investigator = check_celery.delay()
@@ -639,11 +645,11 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
             return update_wrapper(wrapper, view)
 
         urls = super(UserProfileAdmin, self).get_urls()
-        my_urls = patterns(
-            '',
+        urls += [
+            url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
             url(r'check_celery', wrap(self.check_celery), name='users_check_celery')
-        )
-        return my_urls + urls
+        ]
+        return urls
 
 
 admin.site.register(UserProfile, UserProfileAdmin)
