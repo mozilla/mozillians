@@ -346,7 +346,18 @@ class InviteAutocompleteForm(forms.ModelForm):
         }
 
 
+class InviteResource(ModelResource):
+    inviter = Field(attribute='inviter__full_name')
+    redeemer = Field(attribute='redeemer__full_name')
+    group = Field(attribute='group__name')
+
+    class Meta:
+        fields = ['inviter', 'redeemer', 'group', 'accepted', 'created', 'updated']
+        model = Invite
+
+
 class InviteAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
+    resource_class = InviteResource
     search_fields = ['inviter__full_name', 'redeemer__full_name', 'group__name']
     list_display = ['inviter', 'redeemer', 'group', 'created', 'updated']
     readonly_fields = ['created', 'updated']
