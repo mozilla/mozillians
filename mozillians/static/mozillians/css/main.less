@@ -2000,18 +2000,15 @@ body.search-page {
     .result {
         position:relative;
         float: left;
-        margin-left: 20px;
+        margin-right: 20px;
         height: 130px;
-        @media (max-width: @breakTablet) {
-            margin: 0 20px 0 0;
-        }
         @media (max-width: @breakMobileLandscape) {
             width: 100%;
         }
         .card {
             margin-bottom: 15px;
             .well;
-            padding: 8px 10px 5px;
+            padding: 5px 10px;
             width: 278px;
             height: 100px;
             font-weight: normal;
@@ -2025,6 +2022,9 @@ body.search-page {
             .avatar {
                 float: left;
                 position: relative;
+                width: 70px;
+                height: 70px;
+                font-size: 60px;
                 span {
                     width: 70px;
                     height: 70px;
@@ -2044,7 +2044,7 @@ body.search-page {
             }
             .details {
                 float: left;
-                padding-left: 90px;
+                padding-left: 10px;
                 h2 {
                     font-size: 20px;
                     margin: 0;
@@ -2137,12 +2137,18 @@ body#search {
         }
         .search-options {
             display: none;
+            li {
+                list-style-type: none;
+                margin-left: 0;
+                margin-right: 20px;
+                display: inline-block;
+            }
             input, span {
                 display: block;
                 float: left;
             }
             input {
-                margin-right: 10px;
+                margin-right: 5px;
             }
         }
     }

@@ -71,20 +71,28 @@
       </div>
     </div>
   {% elif group %}
-    <div class="groups-areas">
-      <ul class="group-list">
-        <li class="group-item">
-          <a href="{{ group.get_absolute_url() }}" class="group-name" title="{{ group.name }}">
-            {{ group.name|truncate(20, True) }}<br>
-            <i class="icon-group"></i>
+    <div class="card">
+      <div class="avatar">
+        <i class="icon-group"></i>
+      </div>
+      <div class="details">
+        <ul>
+          <li>
+            <h2>
+              <a href="{{ group.get_absolute_url() }}" class="group-name" title="{{ group.name }}">
+                {{ group.name|truncate(20, True) }}<br>
+              </a>
+            </h2>
+          </li>
+          <li>
             {% trans num=group.member_count %}
               {{ num }} member
             {% pluralize num %}
               {{ num }} members
             {% endtrans %}
-          </a>
-        </li>
-      </ul>
+          </li>
+        </ul>
+      </div>
     </div>
   {% endif %}
 </div>
