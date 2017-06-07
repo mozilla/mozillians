@@ -357,10 +357,9 @@ class Group(GroupBase):
             membership.save()
             send_email = True
 
-            # If group is the NDA group, unsubscribe user from the newsletter.
-            if self.name == settings.NDA_GROUP:
-                unsubscribe_from_basket_task.delay(userprofile.email,
-                                                   [settings.BASKET_NDA_NEWSLETTER])
+        # If group is the NDA group, unsubscribe user from the newsletter.
+        if self.name == settings.NDA_GROUP:
+            unsubscribe_from_basket_task.delay(userprofile.email, [settings.BASKET_NDA_NEWSLETTER])
 
         if send_email:
             email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)

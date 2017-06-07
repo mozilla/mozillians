@@ -194,7 +194,8 @@ class TestGroupRemoveMember(TestCase):
         eq_(old_status, GroupMembership.MEMBER)
         eq_(new_status, GroupMembership.PENDING)
 
-    def test_remove_from_closed_group(self):
+    @patch('mozillians.groups.models.unsubscribe_from_basket_task')
+    def test_remove_from_closed_group(self, unsubscribe_mock):
         """Test to remove a member from a closed group."""
         self.group.accepting_new_members = Group.CLOSED
         self.group.save()
@@ -202,8 +203,11 @@ class TestGroupRemoveMember(TestCase):
         user = UserFactory()
         self.group.add_member(user.userprofile)
         self.group.curators.add(curator.userprofile)
-        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk,
-                                                    GroupMembership.PENDING],
+        url = reverse('groups:remove_member',
+                      args=[
+                          self.group.url, user.userprofile.pk,
+                          GroupMembership.PENDING
+                      ],
                       prefix='/fr/',)
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
@@ -219,3 +223,37 @@ class TestGroupRemoveMember(TestCase):
         eq_(user.pk, user_pk)
         eq_(old_status, GroupMembership.MEMBER)
         eq_(new_status, GroupMembership.PENDING)
+        ok_(not unsubscribe_mock.delay.called)
+
+    @patch('mozillians.groups.models.unsubscribe_from_basket_task')
+    def test_remove_from_nda_group(self, unsubscribe_mock):
+        """Test to remove a member from a closed group."""
+        self.group.accepting_new_members = Group.CLOSED
+        self.group.url = 'nda'
+        self.group.name = 'nda'
+        self.group.save()
+        curator = UserFactory()
+        user = UserFactory()
+        self.group.add_member(user.userprofile)
+        self.group.curators.add(curator.userprofile)
+        url = reverse('groups:remove_member',
+                      args=[
+                          self.group.url, user.userprofile.pk,
+                          GroupMembership.PENDING
+                      ],
+                      prefix='/fr/',)
+        with patch('mozillians.groups.models.email_membership_change',
+                   autospec=True) as mock_email:
+            with self.login(curator) as client:
+                response = client.post(url, follow=False)
+        eq_(302, response.status_code)
+        membership = GroupMembership.objects.get(group=self.group, userprofile=user.userprofile)
+        group_pk, user_pk, old_status, new_status = mock_email.delay.call_args[0]
+
+        ok_(mock_email.delay.called)
+        eq_(membership.status, GroupMembership.PENDING)
+        eq_(self.group.pk, group_pk)
+        eq_(user.pk, user_pk)
+        eq_(old_status, GroupMembership.MEMBER)
+        eq_(new_status, GroupMembership.PENDING)
+        ok_(unsubscribe_mock.delay.called)
