@@ -466,25 +466,8 @@ class PhonebookSearchForm(HaystackSearchForm):
         """Search on the ES index the query sting provided by the user."""
 
         search_term = self.cleaned_data['q']
-        search_in_groups = False
-        search_in_profiles = False
-        search_all = True
+        profile = None
 
-        for model in self.get_models():
-            search_all = False
-            if model == Group:
-                search_in_groups = True
-            if model == UserProfile:
-                search_in_profiles = True
-
-        # Calling super will handle with form validation and
-        # will also search in fields that are not explicit queried through `text`
-        sqs = super(PhonebookSearchForm, self).search()
-
-        if not sqs:
-            return self.no_query_found()
-
-        # Profiles Search
         try:
             profile = self.request.user.userprofile
         except AttributeError:
@@ -493,30 +476,42 @@ class PhonebookSearchForm(HaystackSearchForm):
         else:
             privacy_level = profile.privacy_level
 
-        all_indexed_fields = UserProfileIndex.fields.keys()
-        privacy_indexed_fields = [field for field in all_indexed_fields
-                                  if field.startswith('privacy_')]
+        if profile and profile.is_vouched:
+            # If this is empty, it will default to all models.
+            search_models = self.get_models()
+        else:
+            # Anonymous and un-vouched users cannot search groups
+            search_models = [UserProfile]
+
+        # Calling super will handle with form validation and
+        # will also search in fields that are not explicit queried through `text`
+        sqs = super(PhonebookSearchForm, self).search().models(*search_models)
+
+        if not sqs:
+            return self.no_query_found()
+
         query = SQ()
         q_args = {}
         # Profiles Search
-        if search_all or search_in_profiles:
-            # Every profile object in mozillians.org has privacy settings.
-            # Let's take advantage of this and compare the indexed fields
-            # with the ones listed in a profile in order to build the query to ES.
-            for p_field in privacy_indexed_fields:
-                # this is the field that we are going to query
-                q_field = p_field.split('_', 1)[1]
-                # The user needs to have less or equal permission number with the queried field
-                # (lower number, means greater permission level)
-                q_args = {
-                    q_field: search_term,
-                    '{0}__gte'.format(p_field): privacy_level
-                }
-                query.add(SQ(**q_args), SQ.OR)
+        all_indexed_fields = UserProfileIndex.fields.keys()
+        privacy_indexed_fields = [field for field in all_indexed_fields
+                                  if field.startswith('privacy_')]
+        # Every profile object in mozillians.org has privacy settings.
+        # Let's take advantage of this and compare the indexed fields
+        # with the ones listed in a profile in order to build the query to ES.
+        for p_field in privacy_indexed_fields:
+            # this is the field that we are going to query
+            q_field = p_field.split('_', 1)[1]
+            # The user needs to have less or equal permission number with the queried field
+            # (lower number, means greater permission level)
+            q_args = {
+                q_field: search_term,
+                '{0}__gte'.format(p_field): privacy_level
+            }
+            query.add(SQ(**q_args), SQ.OR)
 
         # Group Search
-        # We need to exclude non visible groups.
-        if search_all or search_in_groups:
+        if not search_models or Group in search_models:
             query.add(SQ(**{'visible': True}), SQ.OR)
 
         sqs = sqs.filter(query)
