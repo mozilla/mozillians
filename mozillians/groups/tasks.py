@@ -222,8 +222,9 @@ def notify_membership_renewal():
                 message = curator_template.render(ctx)
                 send_mail(subject, message, settings.FROM_NOREPLY, [curator.email])
 
-        # Mark these memberships ready for an early renewal
-        memberships.update(needs_renewal=True)
+            # Mark these memberships ready for an early renewal
+            membership.needs_renewal = True
+            membership.save()
 
 
 @task(ignore_result=True)
