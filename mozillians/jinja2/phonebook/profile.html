@@ -9,15 +9,6 @@
 {% endblock %}
 
 {% block content %}
-  <div class="alert">
-    {% if user.username == shown_user.username %}
-      {{ _('Your Profile') }}
-    {% elif profile.is_vouched %}
-      {{ _('Mozillian Profile') }}
-    {% else %}
-      {{ _('Pending Profile') }}
-    {% endif %}
-  </div>
   {% if user.is_authenticated() and not profile.is_vouched %}
     {% if user == shown_user %}
       <div id="pending-approval">
@@ -55,6 +46,16 @@
       </div>
     {% endif %}
   {% endif %}
+
+   <div class="alert">
+    {% if user.username == shown_user.username %}
+      {{ _('Your Profile') }}
+    {% elif profile.is_vouched %}
+      {{ _('Mozillian Profile') }}
+    {% else %}
+      {{ _('Pending Profile') }}
+    {% endif %}
+  </div>
 
   {% if privacy_mode == 'anonymous' and not profile.is_public %}
     <div id="anonymous">
