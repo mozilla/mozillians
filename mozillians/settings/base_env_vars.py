@@ -636,3 +636,6 @@ AKISMET_API_KEY = config('AKISMET_API_KEY', default='')
 
 # Proxy configuration
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# CIS
+CIS_FUNCTION_ARN = config('CIS_FUNCTION_ARN', default='')

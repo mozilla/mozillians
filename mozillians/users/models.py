@@ -553,6 +553,55 @@ class UserProfile(UserProfilePrivacyModel):
             groups.append(group)
         return groups
 
+    def get_cis_emails(self):
+        """Prepares the entry for emails in the CIS format."""
+        emails = [
+            {
+                'value': self.email,
+                'verified': True,
+                'primary': True,
+                'name': 'mozillians-primary'
+            }
+        ]
+
+        # Alternate emails
+        for email in self.alternate_emails:
+            entry = {
+                'value': email.identifier,
+                'verified': True,
+                'primary': False,
+                'name': 'mozillians-alternate-{}'.format(email.pk)
+            }
+            emails.append(entry)
+
+        return emails
+
+    def get_cis_uris(self):
+        """Prepares the entry for URIs in the CIS format."""
+        accounts = []
+        for account in self.externalaccount_set.exclude(type=ExternalAccount.TYPE_EMAIL):
+            value = account.get_identifier_url()
+            account_type = ExternalAccount.ACCOUNT_TYPES[account.type]
+            if value:
+                entry = {
+                    'value': value,
+                    'primary': False,
+                    'verified': False,
+                    'name': 'mozillians-{}-{}'.format(account_type['name'], account.pk)
+                }
+                accounts.append(entry)
+
+        return accounts
+
+    def get_cis_groups(self):
+        """Prepares the entry for profile groups in the CIS format."""
+        memberships = GroupMembership.objects.filter(
+            userprofile=self,
+            status=GroupMembership.MEMBER
+        )
+        groups = [m.group.name for m in memberships]
+        return groups
+
     def timezone_offset(self):
         """
         Return minutes the user's timezone is offset from UTC.  E.g. if user is
