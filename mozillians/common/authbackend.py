@@ -9,7 +9,7 @@ from django.db.models import Q
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
-from mozillians.users.models import ExternalAccount
+from mozillians.users.models import UserProfile, ExternalAccount
 
 
 def calculate_username(email):
@@ -50,6 +50,13 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         primary_email_qs = Q(email=email)
         alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
         user_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()
+
+        # Store auth0 user_id in UserProfile
+        if user_q:
+            if user_q.count() == 1:
+                profile_id = user_q[0].userprofile.id
+                profile_qs = UserProfile.objects.filter(pk=profile_id)
+                profile_qs.update(auth0_user_id=claims.get('user_id'))
 
         # In this case we have a registered user who is adding a secondary email
         if request_user.is_authenticated():

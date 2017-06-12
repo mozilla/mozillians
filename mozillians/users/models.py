@@ -200,6 +200,9 @@ class UserProfile(UserProfilePrivacyModel):
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
 
+    # Auth0 required data
+    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
