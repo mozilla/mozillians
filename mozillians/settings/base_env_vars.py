@@ -562,3 +562,49 @@ OIDC_OP_DOMAIN = config('OIDC_OP_DOMAIN', default='auth.mozilla.auth0.com')
 OIDC_OP_AUTHORIZATION_ENDPOINT = config('OIDC_OP_AUTHORIZATION_ENDPOINT', default='')
 OIDC_OP_TOKEN_ENDPOINT = config('OIDC_OP_TOKEN_ENDPOINT', default='')
 OIDC_OP_USER_ENDPOINT = config('OIDC_OP_USER_ENDPOINT', default='')
+
+
+# Django Haystack
+AWS_ES_SIGN_REQUESTS = config('AWS_ES_SIGN_REQUESTS', default=False, cast=bool)
+
+
+def _lazy_haystack_setup():
+    from django.conf import settings
+
+    es_url = settings.ES_URLS[0]
+
+    if settings.AWS_ES_SIGN_REQUESTS:
+        from aws_requests_auth import boto_utils
+        from aws_requests_auth.aws_auth import AWSRequestsAuth
+        from elasticsearch import RequestsHttpConnection
+
+        auth = AWSRequestsAuth(
+            aws_region=config('AWS_ES_REGION', default=''),
+            aws_service='es',
+            **boto_utils.get_credentials()
+        )
+
+        haystack_connections = {
+            'default': {
+                'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+                'URL': es_url,
+                'INDEX_NAME': config('ES_INDEX_URL', default='mozillians_haystack'),
+                'KWARGS': {
+                    'http_auth': auth,
+                    'connection_class': RequestsHttpConnection,
+                }
+            }
+        }
+    else:
+        haystack_connections = {
+            'default': {
+                'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+                'URL': es_url,
+                'INDEX_NAME': config('ES_INDEX_URL', default='mozillians_haystack')
+            }
+        }
+    return haystack_connections
+
+
+HAYSTACK_CONNECTIONS = lazy(_lazy_haystack_setup, dict)()
+HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
