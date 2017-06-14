@@ -175,7 +175,6 @@ class GroupBaseAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
 
 class GroupAliasInline(admin.StackedInline):
     model = GroupAlias
-    readonly_fields = ['name', 'url']
 
 
 class GroupAddAdminForm(forms.ModelForm):
