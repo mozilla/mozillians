@@ -2,3 +2,15 @@
 {{ object.email }}
 {{ object.user.username }}
 {{ object.ircname }}
+{{ object.country.name }}
+{{ object.region.name }}
+{{ object.city.name }}
+{% for skill in object.skills.all() %}
+{{ skill.name }}
+{% endfor %}
+{% for language in object.languages.all() %}
+{{ language.get_code_display() }}
+{% endfor %}
+{% for group in object.groups.all() %}
+{{ group.name }}
+{% endfor %}
