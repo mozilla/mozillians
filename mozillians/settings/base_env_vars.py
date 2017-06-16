@@ -304,6 +304,7 @@ INSTALLED_APPS = (
     'csp',
     'mozilla_django_oidc',
     'cities_light',
+    'axes',
 
     'mozillians',
     'mozillians.users',
@@ -608,3 +609,6 @@ def _lazy_haystack_setup():
 
 HAYSTACK_CONNECTIONS = lazy(_lazy_haystack_setup, dict)()
 HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
+
+# Setup django-axes
+AXES_BEHIND_REVERSE_PROXY = True
