@@ -510,6 +510,9 @@ class PhonebookSearchForm(HaystackSearchForm):
             }
             query.add(SQ(**q_args), SQ.OR)
 
+        # Username is always public
+        query.add(SQ(**{'username': search_term}), SQ.OR)
+
         # Group Search
         if not search_models or Group in search_models:
             # Filter only visible groups.
