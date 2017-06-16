@@ -35,15 +35,17 @@
       <span class="icon-search"></span>
       {{ _('Search') }}
     </button>
-    <button type="button" id="advanced">
-      <span class="icon-chevron-down"></span>
-      {{ _('Advanced Options') }}
-    </button>
-    <div class="search-options">
-      <div class="field">
-        {{ form.models }}
+    {% if user.is_authenticated() %}
+      <button type="button" id="advanced">
+        <span class="icon-chevron-down"></span>
+        {{ _('Advanced Options') }}
+      </button>
+      <div class="search-options">
+        <div class="field">
+          {{ form.models }}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </form>
   {% if not form.cleaned_data %}
     <div class="well">
