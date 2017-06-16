@@ -306,6 +306,7 @@ INSTALLED_APPS = (
     'mozilla_django_oidc',
     'cities_light',
     'axes',
+    'haystack',
 
     'mozillians',
     'mozillians.users',
@@ -409,15 +410,6 @@ CSP_CHILD_SRC = (
     "'self'",
     'https://www.google.com/recaptcha/',
 )
-
-# Elasticutils settings
-ES_DISABLED = config('ES_DISABLED', default=True)
-ES_URLS = config('ES_URLS',
-                 default='http://127.0.0.1:9200',
-                 cast=lambda v: [s.strip() for s in v.split(',')])
-ES_INDEXES = {'default': 'mozillians',
-              'public': 'mozillians-public'}
-ES_INDEXING_TIMEOUT = config('ES_INDEXING_TIMEOUT', default=10, cast=int)
 
 # Sorl settings
 THUMBNAIL_DUMMY = config('THUMBNAIL_DUMMY', default=True, cast=bool)
@@ -567,20 +559,23 @@ OIDC_OP_USER_ENDPOINT = config('OIDC_OP_USER_ENDPOINT', default='')
 
 
 # Django Haystack
+ES_DISABLED = config('ES_DISABLED', default=True)
+ES_HOST = config('ES_HOST', default='127.0.0.1:9200')
+ES_PROTOCOL = config('ES_PROTOCOL', default='http://')
 AWS_ES_SIGN_REQUESTS = config('AWS_ES_SIGN_REQUESTS', default=False, cast=bool)
 
 
 def _lazy_haystack_setup():
     from django.conf import settings
 
-    es_url = settings.ES_URLS[0]
-
+    es_url = '%s%s' % (settings.ES_PROTOCOL, settings.ES_HOST)
     if settings.AWS_ES_SIGN_REQUESTS:
         from aws_requests_auth import boto_utils
         from aws_requests_auth.aws_auth import AWSRequestsAuth
         from elasticsearch import RequestsHttpConnection
 
         auth = AWSRequestsAuth(
+            aws_host=settings.ES_HOST,
             aws_region=config('AWS_ES_REGION', default=''),
             aws_service='es',
             **boto_utils.get_credentials()
@@ -590,7 +585,7 @@ def _lazy_haystack_setup():
             'default': {
                 'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
                 'URL': es_url,
-                'INDEX_NAME': config('ES_INDEX_URL', default='mozillians_haystack'),
+                'INDEX_NAME': config('ES_INDEX_NAME', default='mozillians_haystack'),
                 'KWARGS': {
                     'http_auth': auth,
                     'connection_class': RequestsHttpConnection,
@@ -602,7 +597,7 @@ def _lazy_haystack_setup():
             'default': {
                 'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
                 'URL': es_url,
-                'INDEX_NAME': config('ES_INDEX_URL', default='mozillians_haystack')
+                'INDEX_NAME': config('ES_INDEX_NAME', default='mozillians_haystack')
             }
         }
     return haystack_connections
