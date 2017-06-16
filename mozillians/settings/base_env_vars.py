@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Django settings for the mozillians project.
+import json
 import logging
 import os.path
 import sys
@@ -612,3 +613,6 @@ HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
 
 # Setup django-axes
 AXES_BEHIND_REVERSE_PROXY = True
+
+# Setup sentry
+RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
