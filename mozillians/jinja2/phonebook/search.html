@@ -91,9 +91,17 @@
     {% else %}
       <div class="well">
         <p id="not-found">
-          {% trans query=form.cleaned_data.q %}
-            Sorry, we cannot find a group or person related to "{{ query }}".
-          {% endtrans %}
+          {{ _('Sorry we cannot find a') }}
+          {% if form.cleaned_data.is_group_query %}
+            {{ _('group') }}
+          {% endif %}
+          {% if form.cleaned_data.is_group_query and form.cleaned_data.is_profile_query %}
+            {{ _('or') }}
+          {% endif %}
+          {% if form.cleaned_data.is_profile_query %}
+            {{ _('profile') }}
+          {% endif %}
+          related to "{{ query }}".
         </p>
         {% if user.is_authenticated() %}
           <p>
