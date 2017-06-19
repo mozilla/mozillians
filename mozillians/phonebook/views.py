@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 
 from django.utils.translation import ugettext as _
 from haystack.generic_views import SearchView
+from haystack.query import EmptySearchQuerySet
 from raven.contrib.django.models import client
 from waffle.decorators import waffle_flag
 
@@ -500,6 +501,13 @@ class PhonebookSearchView(SearchView):
     def get_queryset(self):
         sqs = super(PhonebookSearchView, self).get_queryset()
         return sqs
+
+    def form_invalid(self, form):
+        context = self.get_context_data(**{
+            self.form_name: form,
+            'object_list': EmptySearchQuerySet()
+        })
+        return self.render_to_response(context)
 
     def get_form_kwargs(self):
         """Pass the request.user to the form's kwargs."""
