@@ -6,7 +6,6 @@ from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
@@ -436,37 +435,6 @@ def delete_apikey(request, api_pk):
     return redirect('phonebook:apikeys')
 
 
-def list_mozillians_in_location(request, country, region=None, city=None):
-    queryset = UserProfile.objects.vouched().filter(country__name__iexact=country)
-    show_pagination = False
-
-    if city:
-        queryset = queryset.filter(city__name__iexact=city)
-    if region:
-        queryset = queryset.filter(region__name__iexact=region)
-
-    paginator = Paginator(queryset, settings.ITEMS_PER_PAGE)
-    page = request.GET.get('page', 1)
-
-    try:
-        people = paginator.page(page)
-    except PageNotAnInteger:
-        people = paginator.page(1)
-    except EmptyPage:
-        people = paginator.page(paginator.num_pages)
-
-    if paginator.count > settings.ITEMS_PER_PAGE:
-        show_pagination = True
-
-    data = {'people': people,
-            'country_name': country,
-            'city_name': city,
-            'region_name': region,
-            'page': page,
-            'show_pagination': show_pagination}
-    return render(request, 'phonebook/location_list.html', data)
-
-
 @allow_unvouched
 def logout(request):
     """View that logs out the user and redirects to home page."""
@@ -534,6 +502,13 @@ class PhonebookSearchView(SearchView):
 
     def get_form_kwargs(self):
         """Pass the request.user to the form's kwargs."""
-        kwargs = super(PhonebookSearchView, self).get_form_kwargs()
+        kwargs = {'initial': self.get_initial()}
+        if self.request.method == 'GET':
+            kwargs.update({
+                'data': self.request.GET
+            })
+        kwargs.update({'searchqueryset': self.get_queryset()})
         kwargs['request'] = self.request
+        # pass the parameters from the url
+        kwargs.update(self.kwargs)
         return kwargs

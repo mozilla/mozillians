@@ -2,9 +2,9 @@
 {{ object.email }}
 {{ object.user.username }}
 {{ object.ircname }}
-{{ object.country.name }}
-{{ object.region.name }}
-{{ object.city.name }}
+{{ object.country }}
+{{ object.region }}
+{{ object.city }}
 {% for skill in object.skills.all() %}
 {{ skill.name }}
 {% endfor %}
