@@ -470,6 +470,10 @@ class PhonebookSearchForm(HaystackSearchForm):
         cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
         if not (self.country or self.city or self.region) and not cdata.get('q', '').strip():
             self.errors['q'] = self.error_class([u'This field is required.'])
+        if 'users.userprofile' in cdata['models'] or not cdata['models']:
+            cdata['is_profile_query'] = True
+        if 'groups.group' in cdata['models'] or not cdata['models']:
+            cdata['is_group_query'] = True
         return cdata
 
     def search(self):
