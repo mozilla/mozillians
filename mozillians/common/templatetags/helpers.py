@@ -23,6 +23,7 @@ from django.utils.translation import ugettext as _
 
 from mozillians.common.urlresolvers import reverse
 from mozillians.common import utils
+from mozillians.users.managers import PUBLIC
 
 GRAVATAR_URL = 'https://secure.gravatar.com/avatar/{emaildigest}'
 
@@ -289,6 +290,30 @@ def url(viewname, *args, **kwargs):
 def nonprefixed_url(viewname, *args, **kwargs):
     """Helper for Django's ``reverse`` in templates that doesn't prepend L10n prefix."""
     return django_reverse(viewname, *args, **kwargs)
+
+
+@library.global_function
+def get_privacy_level(request):
+    """Helper to get the privacy level of the request.user"""
+    try:
+        profile = request.user.userprofile
+    except AttributeError:
+        # This is an AnonymousUser
+        privacy_level = PUBLIC
+    else:
+        privacy_level = profile.privacy_level
+
+    return privacy_level
+
+
+@library.global_function
+def get_privacy_aware_photo_url(profile, privacy_level, geometry, **kwargs):
+    """Returns privacy aware profile photo url."""
+
+    if (not profile.photo and profile.privacy_photo >= privacy_level):
+        return gravatar(profile.user.email, size=geometry)
+    return absolutify(profile.get_photo_thumbnail(geometry, **kwargs).url)
+
 
 # Port from jingo.helpers
 

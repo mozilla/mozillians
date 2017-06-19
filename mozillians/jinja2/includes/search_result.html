@@ -29,6 +29,7 @@
   {% else %}
     {% set group=result.object %}
   {% endif %}
+  {% set privacy_level=get_privacy_level(request) %}
 
   {% if profile %}
     <div class="card">
@@ -37,7 +38,7 @@
           <a title="{{ profile.display_name }}"
             href="{{ url('phonebook:profile_view', profile.user.username) }}">
             <img class="profile-photo"
-                src="{{ profile.get_photo_url('70x70') }}"
+                src="{{ get_privacy_aware_photo_url(profile, privacy_level, '70x70') }}"
                 alt="{{ _('Profile Photo') }}">
           </a>
         </span>
@@ -45,22 +46,24 @@
 
       <div class="details">
         <ul>
-          <li>
-            <h2>
-              <a title="{{ profile.display_name }}"
-                href="{{ url('phonebook:profile_view', profile.user.username) }}">
-                {{ profile.display_name|truncate(20, True) }}
-              </a>
-            </h2>
-          </li>
-          {% if profile.email %}
+          {% if profile.full_name and privacy_level <= profile.privacy_full_name %}
+            <li>
+              <h2>
+                <a title="{{ profile.display_name }}"
+                  href="{{ url('phonebook:profile_view', profile.user.username) }}">
+                  {{ profile.display_name|truncate(20, True) }}
+                </a>
+              </h2>
+            </li>
+          {% endif %}
+          {% if profile.email and privacy_level <= profile.privacy_email %}
             <li>
               <a title="{{ profile.display_name }}" href="mailto:{{ profile.email }}">
               <i class="icon-envelope-o"></i> {{ profile.email|truncate(20, True) }}
               </a>
             </li>
           {% endif %}
-          {% if profile.ircname %}
+          {% if profile.ircname and privacy_level <= profile.privacy_ircname %}
             <li>
               <span title="{{ profile.ircname }}">
                 <i class="icon-comments-o"></i> IRC: {{ profile.ircname|truncate(20, True) }}
