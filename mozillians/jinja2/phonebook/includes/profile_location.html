@@ -1,5 +1,5 @@
 {% if profile.city %}
-  {% if profile.country and user.is_authenticated() %}
+  {% if profile.country and user.is_authenticated() and profile.is_vouched %}
     <a href="{{ url('phonebook:list_city', country=profile.country.name, city=profile.city.name) }}">
       <span class="locality">{{ profile.city.name }}</span></a>
   {%- else -%}
@@ -7,7 +7,7 @@
   {%- endif -%},
 {% endif %}
 {% if profile.region %}
-  {% if profile.country and user.is_authenticated() %}
+  {% if profile.country and user.is_authenticated() and profile.is_vouched %}
     <a href="{{ url('phonebook:list_region', country=profile.country.name, region=profile.region.name) }}">
       <span class="region">{{ profile.region.name }}</span></a>
   {%- else -%}
@@ -15,7 +15,7 @@
   {%- endif -%},
 {% endif %}
 {% if profile.country %}
-  {% if user.is_authenticated() %}
+  {% if user.is_authenticated() and profile.is_vouched %}
     <a href="{{ url('phonebook:list_country', country=profile.country.name) }}">
     <span class="country-name">{{ profile.country.name }}</span></a>
   {%- else -%}

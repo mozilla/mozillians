@@ -13,7 +13,7 @@ import django_filters
 import happyforms
 from dal import autocomplete
 from haystack.forms import ModelSearchForm as HaystackSearchForm
-from haystack.query import SQ
+from haystack.query import SQ, SearchQuerySet
 from nocaptcha_recaptcha.fields import NoReCaptchaField
 from pytz import common_timezones
 from PIL import Image
@@ -460,13 +460,27 @@ class PhonebookSearchForm(HaystackSearchForm):
         Get the user object passed from the CBV.
         """
         self.request = kwargs.pop('request', None)
+        self.country = kwargs.pop('country', '')
+        self.region = kwargs.pop('region', '')
+        self.city = kwargs.pop('city', '')
         super(PhonebookSearchForm, self).__init__(*args, **kwargs)
 
     def search(self):
         """Search on the ES index the query sting provided by the user."""
 
-        search_term = self.cleaned_data['q']
+        search_term = self.cleaned_data.get('q')
         profile = None
+        location_query = {}
+
+        if self.country:
+            location_query['country'] = self.country
+            location_query['privacy_country__gte'] = None
+        if self.region:
+            location_query['region'] = self.region
+            location_query['privacy_region__gte'] = None
+        if self.city:
+            location_query['city'] = self.city
+            location_query['privacy_city__gte'] = None
 
         try:
             profile = self.request.user.userprofile
@@ -482,6 +496,12 @@ class PhonebookSearchForm(HaystackSearchForm):
         else:
             # Anonymous and un-vouched users cannot search groups
             search_models = [UserProfile]
+
+        if location_query:
+            for k in location_query.keys():
+                if k.startswith('privacy_'):
+                    location_query[k] = privacy_level
+            return SearchQuerySet().filter(**location_query) or self.no_query_found()
 
         # Calling super will handle with form validation and
         # will also search in fields that are not explicit queried through `text`
