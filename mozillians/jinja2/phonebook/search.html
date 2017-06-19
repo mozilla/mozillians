@@ -96,19 +96,21 @@
             {% endtrans %}
           </p>
           <hr/>
-          <h3>{{ _('Need help? Contact a steward in a functional area!') }}</h3>
-          <div class="popular-groups">
-            <ul id="groups" class="tagit ui-widget ui-corner-all">
-              {% for group in functional_areas %}
-                <li class="tagit-choice ui-widget-content ui-state-default
-                           ui-corner-all p-category category">
-                  <a href="{{ url('groups:show_group', group.url) }}">
-                    {{ group.name }}
-                  </a>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+          {% if user.userprofile.is_vouched %}
+            <h3>{{ _('Need help? Contact a steward in a functional area!') }}</h3>
+            <div class="popular-groups">
+              <ul id="groups" class="tagit ui-widget ui-corner-all">
+                {% for group in functional_areas %}
+                  <li class="tagit-choice ui-widget-content ui-state-default
+                             ui-corner-all p-category category">
+                    <a href="{{ url('groups:show_group', group.url) }}">
+                      {{ group.name }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
         {% endif %}
       </div>
     {% endif %}

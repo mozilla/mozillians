@@ -27,6 +27,7 @@ from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.templatetags.helpers import get_object_or_none, redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.urlresolvers import reverse
+from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
@@ -537,3 +538,9 @@ class PhonebookSearchView(SearchView):
         kwargs = super(PhonebookSearchView, self).get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        """Override method to pass more context data in the template."""
+        context_data = super(PhonebookSearchView, self).get_context_data(**kwargs)
+        context_data['functional_areas'] = Group.get_functional_areas()
+        return context_data
