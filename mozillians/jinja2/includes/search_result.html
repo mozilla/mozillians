@@ -55,6 +55,15 @@
                 </a>
               </h2>
             </li>
+          {% else %}
+            <li>
+              <h2>
+                <a title="{{ profile.user.username }}"
+                  href="{{ url('phonebook:profile_view', profile.user.username) }}">
+                  {{ profile.user.username|truncate(20, True) }}
+                </a>
+              </h2>
+            </li>
           {% endif %}
           {% if profile.email and privacy_level <= profile.privacy_email %}
             <li>
