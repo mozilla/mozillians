@@ -464,6 +464,13 @@ class PhonebookSearchForm(HaystackSearchForm):
         self.region = kwargs.pop('region', '')
         self.city = kwargs.pop('city', '')
         super(PhonebookSearchForm, self).__init__(*args, **kwargs)
+        self.fields['q'].required = True
+
+    def clean(self, *args, **kwargs):
+        cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
+        if not (self.country or self.city or self.region) and not cdata.get('q', '').strip():
+            self.errors['q'] = self.error_class([u'This field is required.'])
+        return cdata
 
     def search(self):
         """Search on the ES index the query sting provided by the user."""

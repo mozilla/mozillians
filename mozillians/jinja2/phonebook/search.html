@@ -46,8 +46,15 @@
         </div>
       </div>
     {% endif %}
+    {% if form.errors %}
+      {% for error in form.errors['q'] %}
+        <div class="error-message">
+          {{ error }}
+        </div>
+      {% endfor %}
+    {% endif %}
   </form>
-  {% if not form.cleaned_data %}
+  {% if not form.cleaned_data.q or form.errors%}
     <div class="well">
       {% trans %}
         <h2>Search for a Mozillian or a group</h2>
