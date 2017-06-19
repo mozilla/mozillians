@@ -239,8 +239,6 @@ MIDDLEWARE_CLASSES = (
     'mobility.middleware.DetectMobileMiddleware',
     'mobility.middleware.XMobileMiddleware',
     'csp.middleware.CSPMiddleware',
-    'django_statsd.middleware.GraphiteMiddleware',
-    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'mozilla_django_oidc.contrib.auth0.middleware.RefreshIDToken',
 
     'mozillians.common.middleware.StrongholdMiddleware',
@@ -436,9 +434,6 @@ ES_INDEXING_TIMEOUT = 10
 # Sorl settings
 THUMBNAIL_DUMMY = True
 THUMBNAIL_PREFIX = 'uploads/sorl-cache/'
-
-# Statsd Graphite
-STATSD_CLIENT = 'django_statsd.clients.normal'
 
 # Basket
 # If we're running tests, don't hit the real basket server.

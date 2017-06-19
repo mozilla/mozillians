@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test.client import RequestFactory
 from django.utils.timezone import now
 
-from mock import call, patch
+from mock import patch
 from nose.tools import ok_
 
 from mozillians.api.models import APIv2App
@@ -29,15 +29,8 @@ class MozilliansPermissionTests(TestCase):
 
         with patch('mozillians.api.v2.permissions.now') as now_mock:
             now_mock.return_value = timestamp
-            with patch('mozillians.api.v2.permissions.statsd.incr') as incr_mock:
-                ok_(mozillians_permission.has_permission(request, view))
+            ok_(mozillians_permission.has_permission(request, view))
 
-        incr_mock.assert_has_calls([
-            call('apiv2.auth.success'),
-            call('apiv2.requests.app.{0}'.format(app.id)),
-            call('apiv2.requests.total'),
-            call('apiv2.resources.DummyClass')
-        ])
         ok_(APIv2App.objects.filter(id=app.id, last_used=timestamp).exists())
 
     def test_has_permission_no_key(self):
@@ -51,9 +44,7 @@ class MozilliansPermissionTests(TestCase):
         request = request_factory.get('/', data={'api-key': 'foo'})
         request.user = AnonymousUser()
         mozillians_permission = MozilliansPermission()
-        with patch('mozillians.api.v2.permissions.statsd.incr') as incr_mock:
-            ok_(not mozillians_permission.has_permission(request, '/'))
-        incr_mock.assert_called_once_with('apiv2.auth.failed')
+        ok_(not mozillians_permission.has_permission(request, '/'))
 
     def test_has_permission_assigned_key(self):
         class DummyClass(object):
@@ -69,13 +60,5 @@ class MozilliansPermissionTests(TestCase):
 
         with patch('mozillians.api.v2.permissions.now') as now_mock:
             now_mock.return_value = timestamp
-            with patch('mozillians.api.v2.permissions.statsd.incr') as incr_mock:
-                ok_(mozillians_permission.has_permission(request, view))
-
-        incr_mock.assert_has_calls([
-            call('apiv2.auth.success'),
-            call('apiv2.requests.app.{0}'.format(app.id)),
-            call('apiv2.requests.total'),
-            call('apiv2.resources.DummyClass')
-        ])
+            ok_(mozillians_permission.has_permission(request, view))
         ok_(APIv2App.objects.filter(id=app.id, last_used=timestamp).exists())
