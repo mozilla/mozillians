@@ -70,7 +70,7 @@
             "{{ form.cleaned_data.q }}"
         {% endif %}
       </p>
-      {% with items=page_obj.object_list %}
+      {% with items=page_obj %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
       <div>
@@ -78,7 +78,7 @@
           {{ search_result(result) }}
         {% endfor %}
       </div>
-      {% with items=page_obj.object_list %}
+      {% with items=page_obj %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
     {% else %}

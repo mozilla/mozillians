@@ -5,15 +5,7 @@
         <a class="prev" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
                                     page=items.previous_page_number()) }}">
       {% elif search_form %}
-          {% if search_form.cleaned_data['include_non_vouched'] %}
-            <a class="prev" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
-                                                   include_non_vouched='on',
-                                                   page=items.previous_page_number()) }}">
-          {% else %}
-            <a class="prev" href="{{ '#'|urlparams(
-            q=search_form.cleaned_data.q,
-            page=items.previous_page_number()) }}">
-          {% endif %}
+        <a class="prev" href="{{ '#'|urlparams(q=search_form.cleaned_data.q, page=items.previous_page_number()) }}">
       {% else %}
         <a class="prev" href="?page={{ items.previous_page_number() }}">
       {% endif %}
@@ -32,18 +24,9 @@
               sort=sort_form.data['sort'],
               page=page) }}">
             {% elif search_form %}
-              {% if search_form.cleaned_data['include_non_vouched'] %}
-                value="{{ '#'|urlparams(
-                q=search_form.cleaned_data.q,
-                include_non_vouched='on',
-                page=page) }}">
-              {% else %}
-                value="{{ '#'|urlparams(
-                page=page,
-                q=search_form.cleaned_data.q) }}">
-              {% endif %}
+              value="{{ '#'|urlparams(page=page, q=search_form.cleaned_data.q) }}">
             {% else %}
-                value="?page={{ page }}">
+              value="?page={{ page }}">
             {% endif %}
             {{  page }}
           </option>
@@ -56,14 +39,8 @@
           <a class="next" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
                                                  page=items.next_page_number()) }}">
         {% elif search_form %}
-          {% if search_form.cleaned_data['include_non_vouched'] %}
-            <a class="next" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
-                                                   include_non_vouched='on',
-                                                   page=items.next_page_number()) }}">
-          {% else %}
-            <a class="next" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
-                                                   page=items.next_page_number()) }}">
-          {% endif %}
+          <a class="next" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
+                                                 page=items.next_page_number()) }}">
         {% else %}
           <a class="next" href="?page={{ items.next_page_number() }}">
         {% endif %}
