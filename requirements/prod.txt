@@ -27,8 +27,6 @@ django-session-csrf==0.5 \
     --hash=sha256:44e4639ec057a6b6a9dddb869d4e3a4818fc9278ec490cce39aef08440592a93
 django-sha2==0.4 \
     --hash=sha256:b06a86451a99d6c26bfa65082999dbf658e087e596e9292cce688b53eabaaada
-django-statsd-mozilla==0.3.8.2 \
-    --hash=sha256:d305466c95eb580f82f8d1db14bcb90b42648671c274a8f4032ba24dbc7bb00e
 Babel==2.3.4 \
     --hash=sha256:3318ed2960240d61cbc6558858ee00c10eed77a6508c4d1ed8e6f7f48399c975 \
     --hash=sha256:c535c4403802f6eb38173cd4863e419e2274921a01a8aad8a5b497c131c62875
@@ -130,8 +128,6 @@ diff-match-patch==20121119 \
 django-appconf==1.0.1 \
     --hash=sha256:ba1375fb1024e8e91547504d4392321795c989fde500b96ebc7c93884f786e60 \
     --hash=sha256:3d9bc963d8008ae151d6c664f9fd55442705ea9b9e6d7ce77cdd40bf92d91f3a
-statsd==1.0.0 \
-    --hash=sha256:deb4dccd363175a55465dc65699c001c31db05e509e8a41fccf3db61c1404ac6
 django-autocomplete-light==3.2.1 \
     --hash=sha256:b93112e064320acc0cc162a35e8d1fa5af703742126cc1f8f9d3fc4e9768d6b6
 tablib==0.11.2 \

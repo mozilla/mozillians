@@ -31,11 +31,6 @@ DATABASES = {
 # Serve Profile Photos from django
 UPLOAD_URL = '/media/uploads'
 
-# Statsd Defaults -- adjust as needed
-STATSD_HOST = 'localhost'
-STATSD_PORT = 8125
-STATSD_PREFIX = 'mozillians'
-
 # Email
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -65,8 +60,6 @@ CELERY_ALWAYS_EAGER = True
 JAVA_BIN = '/usr/bin/java'
 
 SESSION_COOKIE_SECURE = False
-
-STATSD_CLIENT = 'django_statsd.clients.log'
 
 # Basket
 BASKET_URL = 'http://127.0.0.1'
