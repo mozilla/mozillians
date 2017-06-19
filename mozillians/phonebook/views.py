@@ -518,4 +518,6 @@ class PhonebookSearchView(SearchView):
         """Override method to pass more context data in the template."""
         context_data = super(PhonebookSearchView, self).get_context_data(**kwargs)
         context_data['functional_areas'] = Group.get_functional_areas()
+        context_data['show_pagination'] = context_data['is_paginated']
+        context_data['search_form'] = context_data['form']
         return context_data
