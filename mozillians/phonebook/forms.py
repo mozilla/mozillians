@@ -472,7 +472,8 @@ class PhonebookSearchForm(HaystackSearchForm):
             self.errors['q'] = self.error_class([u'This field is required.'])
         if 'users.userprofile' in cdata['models'] or not cdata['models']:
             cdata['is_profile_query'] = True
-        if 'groups.group' in cdata['models'] or not cdata['models']:
+        if ('groups.group' in cdata['models'] or not cdata['models'] and not
+                self.request.user.is_anonymous()):
             cdata['is_group_query'] = True
         return cdata
 
