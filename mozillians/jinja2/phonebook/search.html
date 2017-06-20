@@ -80,7 +80,7 @@
       {% with items=page_obj %}
         {% include 'includes/pagination.html' %}
       {% endwith %}
-      <div>
+      <div class="row">
         {% for result in page_obj.object_list %}
           {{ search_result(result) }}
         {% endfor %}
