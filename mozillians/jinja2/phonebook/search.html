@@ -54,7 +54,7 @@
       {% endfor %}
     {% endif %}
   </form>
-  {% if not form.cleaned_data.q or form.errors%}
+  {% if not form.cleaned_data or form.errors%}
     <div class="well">
       {% trans %}
         <h2>Search for a Mozillian or a group</h2>

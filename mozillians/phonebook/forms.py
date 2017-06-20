@@ -464,7 +464,6 @@ class PhonebookSearchForm(HaystackSearchForm):
         self.region = kwargs.pop('region', '')
         self.city = kwargs.pop('city', '')
         super(PhonebookSearchForm, self).__init__(*args, **kwargs)
-        self.fields['q'].required = True
 
     def clean(self, *args, **kwargs):
         cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
@@ -512,7 +511,7 @@ class PhonebookSearchForm(HaystackSearchForm):
             for k in location_query.keys():
                 if k.startswith('privacy_'):
                     location_query[k] = privacy_level
-            return SearchQuerySet().filter(**location_query) or self.no_query_found()
+            return SearchQuerySet().filter(**location_query).load_all() or self.no_query_found()
 
         # Calling super will handle with form validation and
         # will also search in fields that are not explicit queried through `text`
