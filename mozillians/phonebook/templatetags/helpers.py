@@ -70,3 +70,12 @@ def simple_urlize(value):
         return value
 
     return jinja2.Markup('<a href="%s">%s</a>' % (value, value))
+
+
+@library.global_function
+def get_search_models(models):
+    """Generates GET params to specify models."""
+    params = ''
+    for model in models:
+        params += '&models={}'.format(model)
+    return params

@@ -5,7 +5,9 @@
         <a class="prev" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
                                     page=items.previous_page_number()) }}">
       {% elif search_form %}
-        <a class="prev" href="{{ '#'|urlparams(q=search_form.cleaned_data.q, page=items.previous_page_number()) }}">
+        {% set model_params = get_search_models(search_form.cleaned_data.models) %}
+        <a class="prev" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
+                                               page=items.previous_page_number()) }}{{ model_params }}">
       {% else %}
         <a class="prev" href="?page={{ items.previous_page_number() }}">
       {% endif %}
@@ -24,7 +26,8 @@
               sort=sort_form.data['sort'],
               page=page) }}">
             {% elif search_form %}
-              value="{{ '#'|urlparams(page=page, q=search_form.cleaned_data.q) }}">
+              {% set model_params = get_search_models(search_form.cleaned_data.models) %}
+              value="{{ '#'|urlparams(page=page, q=search_form.cleaned_data.q) }}{{ model_params }}">
             {% else %}
               value="?page={{ page }}">
             {% endif %}
@@ -39,8 +42,9 @@
           <a class="next" href="{{ '#'|urlparams(sort=sort_form.data['sort'],
                                                  page=items.next_page_number()) }}">
         {% elif search_form %}
+          {% set model_params = get_search_models(search_form.cleaned_data.models) %}
           <a class="next" href="{{ '#'|urlparams(q=search_form.cleaned_data.q,
-                                                 page=items.next_page_number()) }}">
+                                                 page=items.next_page_number()) }}{{ model_params }}">
         {% else %}
           <a class="next" href="?page={{ items.next_page_number() }}">
         {% endif %}
