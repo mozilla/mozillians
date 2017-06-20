@@ -445,6 +445,7 @@ else:
 
 BASKET_VOUCHED_NEWSLETTER = config('BASKET_VOUCHED_NEWSLETTER', default='mozilla-phone')
 BASKET_NDA_NEWSLETTER = config('BASKET_NDA_NEWSLETTER', default='mozillians-nda')
+BASKET_API_KEY = config('BASKET_API_KEY')
 NDA_GROUP = config('NDA_GROUP', default='nda')
 
 USER_AVATAR_DIR = config('USER_AVATAR_DIR', default='uploads/userprofile')
@@ -629,3 +630,9 @@ AXES_BEHIND_REVERSE_PROXY = True
 
 # Setup sentry
 RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
+
+# Mozillians Exports bucket
+MOZILLIANS_ADMIN_BUCKET = config('MOZILLIANS_ADMIN_BUCKET', default='')
+
+# Akismet
+AKISMET_API_KEY = config('AKISMET_API_KEY', default='')
