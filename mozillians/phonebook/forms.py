@@ -549,5 +549,4 @@ class PhonebookSearchForm(HaystackSearchForm):
             # Filter only visible groups.
             query.add(SQ(**{'visible': True}), SQ.OR)
 
-        sqs = sqs.filter(query)
-        return sqs
+        return sqs.filter(query).load_all()
