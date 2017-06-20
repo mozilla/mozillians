@@ -346,8 +346,9 @@ PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 
 # Email
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-FROM_NOREPLY = u'Mozillians.org <no-reply@mozillians.org>'
-FROM_NOREPLY_VIA = '%s via Mozillians.org <noreply@mozillians.org>'
+FROM_NOREPLY = config('FROM_NOREPLY', default='Mozillians.org <no-reply@mozillians.org>')
+FROM_NOREPLY_VIA = config('FROM_NOREPLY_VIA',
+                          default='%s via Mozillians.org <noreply@mozillians.org>')
 
 if EMAIL_BACKEND == 'django_ses.SESBackend':
     # Get AWS credentials from boto
