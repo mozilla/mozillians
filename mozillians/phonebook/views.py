@@ -528,4 +528,7 @@ class PhonebookSearchView(SearchView):
         context_data['functional_areas'] = Group.get_functional_areas()
         context_data['show_pagination'] = context_data['is_paginated']
         context_data['search_form'] = context_data['form']
+        context_data['country'] = self.kwargs.get('country')
+        context_data['region'] = self.kwargs.get('region')
+        context_data['city'] = self.kwargs.get('city')
         return context_data
