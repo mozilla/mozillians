@@ -411,6 +411,8 @@ CSP_IMG_SRC = (
     '*.google-analytics.com',
     '*.gravatar.com',
     '*.wp.com',
+    'media-mozillians-staging.production.paas.mozilla.community',
+    'media-mozillians.production.paas.mozilla.community',
 )
 CSP_SCRIPT_SRC = (
     "'self'",
