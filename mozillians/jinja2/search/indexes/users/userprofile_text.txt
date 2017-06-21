@@ -5,6 +5,7 @@
 {{ object.country }}
 {{ object.region }}
 {{ object.city }}
+{{ object.timezone }}
 {% for skill in object.skills.all() %}
 {{ skill.name }}
 {% endfor %}

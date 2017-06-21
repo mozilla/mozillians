@@ -17,6 +17,8 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     privacy_ircname = indexes.IntegerField(model_attr='privacy_ircname')
     bio = indexes.CharField(model_attr='bio')
     privacy_bio = indexes.IntegerField(model_attr='privacy_bio')
+    timezone = indexes.CharField(model_attr='timezone')
+    privacy_timezone = indexes.IntegerField(model_attr='privacy_timezone')
     # location information - related fields
     country = indexes.CharField(model_attr='country__name', null=True)
     privacy_country = indexes.IntegerField(model_attr='privacy_country')
