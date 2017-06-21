@@ -18,7 +18,7 @@ from sorl.thumbnail import ImageField, get_thumbnail
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common import utils
-from mozillians.common.templatetags.helpers import absolutify, gravatar
+from mozillians.common.templatetags.helpers import gravatar
 from mozillians.common.templatetags.helpers import offset_of_timezone
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
@@ -451,7 +451,7 @@ class UserProfile(UserProfilePrivacyModel):
         privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
         if (not self.photo and self.privacy_photo >= privacy_level):
             return gravatar(self.user.email, size=geometry)
-        return absolutify(self.get_photo_thumbnail(geometry, **kwargs).url)
+        return self.get_photo_thumbnail(geometry, **kwargs).url
 
     def is_vouchable(self, voucher):
         """Check whether self can receive a vouch from voucher."""
