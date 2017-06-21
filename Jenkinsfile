@@ -1,5 +1,3 @@
-@Library('partinfra-libs') _
-
 node('master'){
     switch(env.BRANCH_NAME) {
         case "master":
@@ -36,7 +34,6 @@ node('mesos') {
     }
 
     stage('Build') {
-        ircNotify("Starting build for ${app_id} ${env.BRANCH_NAME}")
         image = docker.build(app_id + ":" + gitCommit, "-f docker/prod .")
     }
 
