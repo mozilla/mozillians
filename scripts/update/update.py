@@ -218,7 +218,7 @@ def deploy(ctx):
         # On dev, this script runs every 15 minutes. If we're pushing the same
         # revision we don't need to churn the index, ping new relic, or any of this.
         ping_newrelic()
-        update_es_indexes()
+        # update_es_indexes()
         validate_fun_facts()
         generate_humanstxt()
 
