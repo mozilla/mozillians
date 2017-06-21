@@ -22,6 +22,7 @@ node('master'){
 node('mesos') {
     def image
     def params
+    def app_id = "mozillians"
     def dockerRegistry = "docker-registry.ops.mozilla.community:443"
 
     stage('Prep') {
