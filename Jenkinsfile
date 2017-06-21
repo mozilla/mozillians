@@ -1,4 +1,5 @@
 node('master'){
+    def params
     switch(env.BRANCH_NAME) {
         case "master":
             environment = "staging"
@@ -19,7 +20,6 @@ node('master'){
 
 node('mesos') {
     def image
-    def params
     def app_id = "mozillians"
     def dockerRegistry = "docker-registry.ops.mozilla.community:443"
 
