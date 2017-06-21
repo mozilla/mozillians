@@ -47,3 +47,7 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_groups(self, obj):
         return [group.name for group in obj.groups.filter(
             groupmembership__status=GroupMembership.MEMBER)]
+
+    def index_queryset(self, using=None):
+        """Exclude incomplete profiles from indexing."""
+        return self.get_model().objects.complete()
