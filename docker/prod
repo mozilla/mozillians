@@ -20,3 +20,5 @@ RUN git clone -b production --depth 1 https://github.com/mozilla-l10n/mozillians
 
 RUN chown webdev.webdev -R .
 USER webdev
+RUN python manage.py collectstatic --noinput && \
+    python manage.py compress --engine jinja2 --extension=.html
