@@ -579,6 +579,9 @@ OIDC_OP_AUTHORIZATION_ENDPOINT = config('OIDC_OP_AUTHORIZATION_ENDPOINT', defaul
 OIDC_OP_TOKEN_ENDPOINT = config('OIDC_OP_TOKEN_ENDPOINT', default='')
 OIDC_OP_USER_ENDPOINT = config('OIDC_OP_USER_ENDPOINT', default='')
 
+# AWS credentials
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
 
 # Django Haystack
 ES_DISABLED = config('ES_DISABLED', default=True)
