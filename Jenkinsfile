@@ -20,6 +20,7 @@ node('master'){
 
 node('mesos') {
     def image
+    def flower_image
     def app_id = "mozillians"
     def dockerRegistry = "docker-registry.ops.mozilla.community:443"
 
@@ -35,11 +36,20 @@ node('mesos') {
 
     stage('Build') {
         image = docker.build(app_id + ":" + gitCommit, "-f docker/prod .")
+        flower_image = docker.build(app_id + "-flower:" + gitCommit, "-f docker/flower .")
     }
 
     stage('Push') {
-        sh "docker tag ${image.imageName()} " + dockerRegistry + "/${image.imageName()}"
-        sh "docker push " + dockerRegistry + "/${image.imageName()}"
+      parallel (
+        push-mozillians: {
+          sh "docker tag ${image.imageName()} " + dockerRegistry + "/${image.imageName()}"
+          sh "docker push " + dockerRegistry + "/${image.imageName()}"
+        },
+        push-flower: {
+          sh "docker tag ${flower-image.imageName()} " + dockerRegistry + "/${flower-image.imageName()}"
+          sh "docker push " + dockerRegistry + "/${flower-image.imageName()}"
+        }
+      )
     }
 }
 

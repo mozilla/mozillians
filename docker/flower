@@ -1,0 +1,23 @@
+FROM python:2.7-slim
+
+EXPOSE 8000
+WORKDIR /code
+CMD ["./bin/run-flower.sh"]
+
+RUN adduser --uid 431 --disabled-password --disabled-login --gecos 'webdev' --no-create-home webdev
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git build-essential libxml2-dev libxslt-dev \
+    mysql-client libmysqlclient-dev node-less gettext node-less && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements /code/requirements/
+RUN pip install --require-hashes --no-deps -r requirements/prod.txt
+COPY . /code
+
+RUN git clone -b production --depth 1 https://github.com/mozilla-l10n/mozillians-l10n.git /code/locale && \
+    cd /code/locale && ./compile.sh
+
+RUN chown webdev.webdev -R .
+RUN pip install flower
+USER webdev
