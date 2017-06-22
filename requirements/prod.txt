@@ -366,3 +366,5 @@ vine==1.1.3 \
 django-ses==0.8.2 \
     --hash=sha256:399893f315d04ef0175f5cf8baac0509031052b6d45b3d905ae381a5643666c8 \
     --hash=sha256:6e4a6157cadcb72e9c6f0346baf861b49b29a0c01f628afa3a3747c3dc15cf3a
+flower==0.9.1 \
+    --hash=sha256:bdd926b731e8024779a5373fa33bff4a30e2a2ae6cf3a591beb83fbde3dc352f
