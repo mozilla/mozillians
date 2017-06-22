@@ -65,7 +65,7 @@ def urlparams(url_, hash=None, **query):
 def gravatar(email, default_avatar_url=settings.DEFAULT_AVATAR_URL, size=175, rating='pg'):
     """Return the Gravatar URL for an email address."""
     url = GRAVATAR_URL.format(emaildigest=md5(email).hexdigest())
-    url = urlparams(url, d=utils.absolutify(default_avatar_url), s=size, r=rating)
+    url = urlparams(url, d=default_avatar_url, s=size, r=rating)
     return url
 
 

@@ -17,13 +17,11 @@ class HelperTests(TestCase):
     def setUp(self):
         self.env = engines['jinja2']
 
-    @override_settings(SITE_URL='http://foobar')
-    @patch('mozillians.common.templatetags.helpers.settings.DEFAULT_AVATAR_URL', '/foo.jpg')
     def test_gravatar(self):
         avatar_url = helpers.gravatar('fo', size=80, rating='bar')
         eq_(avatar_url, ('https://secure.gravatar.com/avatar/eed8070249'
-                         '39b808083f0031a56e9872?s=80&r=bar&d=http%3A%2F%'
-                         '2Ffoobar%2Fmedia%2Fimg%2Fdefault_avatar.png'))
+                         '39b808083f0031a56e9872?s=80&r=bar&d='
+                         '%2Fmedia%2Fimg%2Fdefault_avatar.png'))
 
     @patch('mozillians.common.templatetags.helpers.markdown_module.markdown', wraps=markdown)
     @patch('mozillians.common.templatetags.helpers.bleach.clean', wraps=clean)
