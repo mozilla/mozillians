@@ -2045,6 +2045,13 @@ body.search-page {
             .details {
                 float: left;
                 padding-left: 10px;
+                max-width: 175px;
+                @media (max-width: @breakDesktop) {
+                    width: 225px;
+                }
+                @media (max-width: @breakMobileLandscape) {
+                    width: 80%;
+                }
                 h2 {
                     font-size: 20px;
                     margin: 0;
