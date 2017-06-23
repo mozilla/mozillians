@@ -110,7 +110,9 @@
           {% if form.cleaned_data.is_profile_query %}
             {{ _('profile') }}
           {% endif %}
-          related to "{{ query }}".
+          {% trans %}
+            related to "{{ query }}".
+          {% endtrans %}
         </p>
         {% if user.is_authenticated() %}
           <p>
