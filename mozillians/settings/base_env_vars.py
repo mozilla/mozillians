@@ -640,3 +640,6 @@ MOZILLIANS_ADMIN_BUCKET = config('MOZILLIANS_ADMIN_BUCKET', default='')
 
 # Akismet
 AKISMET_API_KEY = config('AKISMET_API_KEY', default='')
+
+# Proxy configuration
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
