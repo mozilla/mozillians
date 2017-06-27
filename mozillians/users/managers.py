@@ -11,7 +11,6 @@ MOZILLIANS = 3
 PUBLIC = 4
 PRIVACY_CHOICES = ((MOZILLIANS, _lazy(u'Mozillians')),
                    (PUBLIC, _lazy(u'Public')))
-PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 
 
 class UserProfileValuesQuerySet(ValuesQuerySet):
@@ -62,13 +61,6 @@ class UserProfileQuerySet(QuerySet):
             key = 'privacy_%s' % field
             self.public_q |= Q(**{key: PUBLIC})
 
-        self.public_index_q = Q()
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            key = 'privacy_%s' % field
-            if field == 'email':
-                field = 'user__email'
-            self.public_index_q |= (Q(**{key: PUBLIC}) & ~Q(**{field: ''}))
-
         super(UserProfileQuerySet, self).__init__(*args, **kwargs)
 
     def privacy_level(self, level=MOZILLIANS):
@@ -87,13 +79,6 @@ class UserProfileQuerySet(QuerySet):
     def complete(self):
         """Return complete profiles."""
         return self.exclude(full_name='')
-
-    def public_indexable(self):
-        """Return public indexable profiles."""
-        return self.complete().filter(self.public_index_q)
-
-    def not_public_indexable(self):
-        return self.complete().exclude(self.public_index_q)
 
     def _clone(self, *args, **kwargs):
         """Custom _clone with privacy level propagation."""

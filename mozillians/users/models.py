@@ -28,8 +28,7 @@ from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_phone_number, validate_linkedin)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
-                                       MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
-                                       PUBLIC, PUBLIC_INDEXABLE_FIELDS,
+                                       MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED, PUBLIC,
                                        UserProfileManager, UserProfileQuerySet)
 
 
@@ -232,7 +231,6 @@ class UserProfile(UserProfilePrivacyModel):
             'accounts': '_accounts',
             'alternate_emails': '_alternate_emails',
             'email': '_primary_email',
-            'is_public_indexable': '_is_public_indexable',
             'languages': '_languages',
             'vouches_made': '_vouches_made',
             'vouches_received': '_vouches_received',
@@ -269,13 +267,6 @@ class UserProfile(UserProfilePrivacyModel):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_EMAIL)
         return self._filter_accounts_privacy(accounts)
-
-    @property
-    def _is_public_indexable(self):
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            if getattr(self, field, None) and getattr(self, 'privacy_%s' % field, None) == PUBLIC:
-                return True
-        return False
 
     @property
     def _languages(self):

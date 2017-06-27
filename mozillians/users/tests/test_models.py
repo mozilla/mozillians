@@ -18,7 +18,7 @@ from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
-from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
+from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC
 from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
 from mozillians.users.tests import UserFactory
 
@@ -363,14 +363,6 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         ok_(not user.userprofile.is_public)
 
-    def test_is_public_indexable(self):
-        for field in PUBLIC_INDEXABLE_FIELDS:
-            user = UserFactory.create(
-                userprofile={'privacy_{0}'.format(field): PUBLIC,
-                             'ircname': 'bar'})
-            ok_(user.userprofile.is_public_indexable,
-                'Field {0} did not set profile to public index'.format(field))
-
     def test_set_membership_group_matches_alias(self):
         group_1 = GroupFactory.create(name='foo')
         group_2 = GroupFactory.create(name='lo')
@@ -432,10 +424,6 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         user.userprofile.get_photo_url('80x80', firefox='rocks')
         gravatar_mock.assert_called_with(user.email, size='80x80')
-
-    def test_is_not_public_indexable(self):
-        user = UserFactory.create()
-        ok_(not user.userprofile.is_public_indexable)
 
     def test_get_absolute_url(self):
         user = UserFactory.create()
