@@ -69,7 +69,7 @@
       {% if country or region or city  %}
         <h2>{{ _('Mozillians in') }}
           {% for name in [region, city] %}
-            {% if name %}{{ name }} ,{% endif %}
+            {% if name %}{{ name }},{% endif %}
           {% endfor %}
           {{ country }}
         </h2>
