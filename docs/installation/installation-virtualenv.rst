@@ -106,12 +106,12 @@ When you want to start contributing...
 
 #. Download ElasticSearch::
 
-     (venv)$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.tar.gz
-     (venv)$ tar zxf elasticsearch-1.2.4.tar.gz
+     (venv)$ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-2.4.5.tar.gz
+     (venv)$ tar zxf elasticsearch-2.4.5.tar.gz
 
    and run::
 
-     (venv)$ ./elasticsearch-1.2.4/bin/elasticsearch -d
+     (venv)$ ./elasticsearch-2.4.5/bin/elasticsearch -d
 
   This will run the elasticsearch instance in the background.
 
@@ -199,7 +199,7 @@ Running Mozillians
 
    and start `elasticsearch` server again::
 
-     (venv)$ ./elasticsearch-1.2.4/bin/elasticsearch -d
+     (venv)$ ./elasticsearch-2.4.5/bin/elasticsearch -d
 
 Have fun!
 
