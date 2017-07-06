@@ -226,7 +226,6 @@ MIDDLEWARE_CLASSES = (
     'mobility.middleware.DetectMobileMiddleware',
     'mobility.middleware.XMobileMiddleware',
     'csp.middleware.CSPMiddleware',
-    'mozilla_django_oidc.contrib.auth0.middleware.RefreshIDToken',
 
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
