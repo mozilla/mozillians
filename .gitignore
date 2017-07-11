@@ -17,3 +17,4 @@ locale*
 /elasticsearch*/
 mozillians/settings/local.py
 .env
+celerybeat*
