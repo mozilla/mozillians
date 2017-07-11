@@ -154,10 +154,8 @@ class ReferrerPolicyMiddleware(object):
 
     def process_response(self, request, response):
         referrer_header_name = 'Referrer-Policy'
-        referrer_header = response.get(referrer_header_name)
 
-        # Check if Referrer header exists, remove referrer
-        if referrer_header and settings.ENABLE_REFERRER_HEADER:
-            response[referrer_header_name] = referrer_header + '; no-referrer'
+        if settings.ENABLE_REFERRER_HEADER:
+            response[referrer_header_name] = 'no-referrer'
 
         return response
