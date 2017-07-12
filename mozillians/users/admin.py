@@ -721,10 +721,38 @@ class AbuseReportAutocompleteForm(forms.ModelForm):
         }
 
 
+class SkillsFilter(SimpleListFilter):
+    """Filter abuse reports based on reported profile skills."""
+    title = 'profile has skills'
+    parameter_name = 'profile_skills'
+
+    def lookups(self, request, model_admin):
+        return (('False', 'No'),
+                ('True', 'Yes'))
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'True':
+            return queryset.filter(profile__skills__isnull=False)
+        if value == 'False':
+            return queryset.filter(profile__skills__isnull=True)
+
+
 class AbuseReportAdmin(admin.ModelAdmin):
     form = AbuseReportAutocompleteForm
-    list_display = ['profile', 'reporter', 'type', 'created', 'updated']
-    list_filter = ['type', 'is_akismet']
+    list_display = ['profile', 'reporter', 'type', 'created', 'updated',
+                    'profile_last_updated', 'profile_date_joined']
+    list_filter = ['type', 'is_akismet', SkillsFilter]
+    view_on_site = True
+
+    def view_on_site(self, obj):
+        return obj.profile.get_absolute_url()
+
+    def profile_last_updated(self, obj):
+        return obj.profile.last_updated
+
+    def profile_date_joined(self, obj):
+        return obj.profile.user.date_joined
 
 
 admin.site.register(AbuseReport, AbuseReportAdmin)
