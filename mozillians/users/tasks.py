@@ -2,7 +2,9 @@ import os
 from datetime import datetime, timedelta
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import mail_admins, send_mail
+from django.db.models import Q
+from django.template.loader import render_to_string
 
 import basket
 import waffle
@@ -262,6 +264,57 @@ def check_spam_account(instance_id, **kwargs):
         }
 
         AbuseReport.objects.get_or_create(**kwargs)
+
+
+@task
+def delete_spam_account():
+    """Task to automatically delete spam accounts"""
+
+    from mozillians.users.models import AbuseReport
+
+    reports = AbuseReport.objects.all()
+
+    # Manual reports deletion heuristic:
+    # Delete all unvouched profiles
+
+    query = {
+        'profile__is_vouched': False,
+        'is_akismet': False
+    }
+    reports.filter(**query).delete()
+
+    # Automatic akismet deletion heuristic:
+    # AbuseReport is created using akismet
+    # AbuseReport.profile is unvouched
+    # AbuseReport.profile has no skills associated
+
+    query = {
+        'is_akismet': True,
+        'profile__is_vouched': False,
+        'profile__skills__isnull': True,
+    }
+    reports.filter(**query).delete()
+
+    # Email admins on manual reports for vouched profiles
+
+    unvouched_not_akismet = Q(
+        is_akismet=False,
+        profile__is_vouched=True
+    )
+
+    akismet_has_skills = Q(
+        is_akismet=True,
+        profile__skills__isnull=False
+    )
+
+    reports = reports.filter(unvouched_not_akismet | akismet_has_skills).distinct()
+
+    if reports.exists():
+        subject = 'Spam profile report {}'.format(datetime.now().strftime('%x'))
+        message = render_to_string('phonebook/emails/admin_spam.txt', {
+            'reports': reports
+        })
+        mail_admins(subject, message)
 
 
 @shared_task()

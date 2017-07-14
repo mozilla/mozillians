@@ -1,0 +1,7 @@
+Hello Mozillians.org admins,
+
+Here is the list of the spam profiles not marked to be automatically removed:
+
+{% for report in reports %}
+{{ absolutify(report.profile.get_absolute_url()) }}
+{% endfor %}

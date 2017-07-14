@@ -10,7 +10,10 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.users.tasks import (lookup_user_task, remove_incomplete_accounts,
+from mozillians.groups.models import Skill
+from mozillians.users.models import AbuseReport
+from mozillians.users.tasks import (delete_spam_account,
+                                    lookup_user_task, remove_incomplete_accounts,
                                     subscribe_user_task, subscribe_user_to_basket,
                                     unsubscribe_from_basket_task,
                                     unsubscribe_user_task, update_email_in_basket)
@@ -277,3 +280,69 @@ class BasketTests(TestCase):
         with self.assertRaises(Retry):
             unsubscribe_user_task(result, newsletters=['foo', 'bar'])
         retry_mock.called_with(exc)
+
+
+class SpamTasksTests(TestCase):
+    def test_manual_spam_reports_unvouched_delete(self):
+        spam_user = UserFactory.create(vouched=False)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=False,
+        )
+
+        eq_(AbuseReport.objects.all().count(), 1)
+        delete_spam_account()
+        eq_(AbuseReport.objects.all().count(), 0)
+
+    def test_manual_spam_reports_vouched_skip(self):
+        spam_user = UserFactory.create(vouched=True)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=False,
+        )
+
+        eq_(AbuseReport.objects.all().count(), 1)
+        delete_spam_account()
+        eq_(AbuseReport.objects.all().count(), 1)
+
+    def test_automated_spam_reports_delete(self):
+        spam_user = UserFactory.create(vouched=False)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=True,
+        )
+
+        ok_(not spam_user.userprofile.skills.all().exists())
+        eq_(AbuseReport.objects.all().count(), 1)
+        delete_spam_account()
+        eq_(AbuseReport.objects.all().count(), 0)
+
+    def test_automated_spam_reports_skip(self):
+        spam_user = UserFactory.create(vouched=False)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=True,
+        )
+        skill = Skill.objects.create(name='foobar')
+        spam_user.userprofile.skills.add(skill)
+
+        ok_(spam_user.userprofile.skills.all().exists())
+        eq_(AbuseReport.objects.all().count(), 1)
+        delete_spam_account()
+        eq_(AbuseReport.objects.all().count(), 1)
+
+    @patch('mozillians.users.tasks.mail_admins')
+    def test_spam_report_email(self, mock_mail_admins):
+        spam_user = UserFactory.create(vouched=True)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=False
+        )
+        spam_user = UserFactory.create(vouched=True)
+        AbuseReport.objects.create(
+            profile=spam_user.userprofile,
+            is_akismet=False
+        )
+
+        delete_spam_account()
+        mock_mail_admins.assert_called_once()
