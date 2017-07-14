@@ -23,7 +23,8 @@ ROOT_URLCONF = '%s.urls' % PROJECT_MODULE
 DEV = config('DEV', default=False, cast=bool)
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ADMINS = ()
+ADMIN_ALIAS = config('ADMIN_ALIAS', default='mozillians-admins@mozilla.com')
+ADMINS = [('Mozillians.org Admins', ADMIN_ALIAS)],
 MANAGERS = ADMINS
 
 # Site ID is used by Django's Sites framework.
@@ -344,6 +345,7 @@ HMAC_KEYS = {
 PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
 
 # Email
+SERVER_EMAIL = config('SERVER_EMAIL', default='prod@mozillians.org')
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 FROM_NOREPLY = config('FROM_NOREPLY', default='Mozillians.org <no-reply@mozillians.org>')
 FROM_NOREPLY_VIA = config('FROM_NOREPLY_VIA',
