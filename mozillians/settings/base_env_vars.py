@@ -587,43 +587,26 @@ AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
 ES_DISABLED = config('ES_DISABLED', default=True)
 ES_HOST = config('ES_HOST', default='127.0.0.1:9200')
 ES_PROTOCOL = config('ES_PROTOCOL', default='http://')
-AWS_ES_SIGN_REQUESTS = config('AWS_ES_SIGN_REQUESTS', default=False, cast=bool)
 
 
 def _lazy_haystack_setup():
     from django.conf import settings
 
     es_url = '%s%s' % (settings.ES_PROTOCOL, settings.ES_HOST)
-    if settings.AWS_ES_SIGN_REQUESTS:
-        from aws_requests_auth.aws_auth import AWSRequestsAuth
-        from elasticsearch import RequestsHttpConnection
+    es_index_name = config('ES_INDEX_NAME', default='mozillians_haystack')
+    haystack_connections = {
+        'default': {
+            'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+            'URL': es_url,
+            'INDEX_NAME': es_index_name
+        },
+        'helper': {
+            'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+            'URL': es_url,
+            'INDEX_NAME': 'helper_{}'.format(es_index_name)
+        },
+    }
 
-        auth = AWSRequestsAuth(
-            aws_host=settings.ES_HOST,
-            aws_region=config('AWS_ES_REGION', default=''),
-            aws_service='es',
-            **boto_utils.get_credentials()
-        )
-
-        haystack_connections = {
-            'default': {
-                'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-                'URL': es_url,
-                'INDEX_NAME': config('ES_INDEX_NAME', default='mozillians_haystack'),
-                'KWARGS': {
-                    'http_auth': auth,
-                    'connection_class': RequestsHttpConnection,
-                }
-            }
-        }
-    else:
-        haystack_connections = {
-            'default': {
-                'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-                'URL': es_url,
-                'INDEX_NAME': config('ES_INDEX_NAME', default='mozillians_haystack')
-            }
-        }
     return haystack_connections
 
 
