@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.mail import mail_admins, send_mail
+from django.core.management import call_command
 from django.db.models import Q
 from django.template.loader import render_to_string
 
@@ -11,7 +12,7 @@ import waffle
 from celery import chain, group, shared_task, Task
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
-from haystack.management.commands import rebuild_index
+from haystack import connections
 
 from mozillians.common.utils import akismet_spam_check
 from mozillians.common.templatetags.helpers import get_object_or_none
@@ -319,5 +320,75 @@ def delete_spam_account():
 
 @shared_task()
 def index_all_profiles():
-    """Task to index all profiles through the admin interface."""
-    rebuild_index.Command().handle(interactive=False)
+    """Task to rebuild ES index without downtime."""
+
+    ES_CONN_DEFAULT = 'default'
+    ES_CONN_TMP = 'tmp'
+    ES_INDEX_DEFAULT = connections[ES_CONN_DEFAULT].options['INDEX_NAME']
+    ES_INDEX_TMP = connections[ES_CONN_TMP].options['INDEX_NAME']
+    ES_INDEX_CURRENT = 'current_{}_{}'.format(ES_INDEX_DEFAULT, datetime.now().strftime('%s'))
+
+    rebuild_options = {
+        'using': [ES_CONN_TMP],
+        'workers': settings.ES_REINDEX_WORKERS_NUM,
+        'batchsize': settings.ES_REINDEX_BATCHSIZE,
+        'interactive': False,
+    }
+
+    # Rebuild index in ES_INDEX_TMP
+    call_command('rebuild_index', **rebuild_options)
+
+    # Get `default` ES connection
+    es_conn = connections[ES_CONN_DEFAULT].get_backend().conn
+
+    # Create a replica of `tmp` index to be used as an alias
+    tmp_index = es_conn.indices.get(ES_INDEX_TMP)
+    current_index_configuration = {
+        'settings': tmp_index[ES_INDEX_TMP]['settings'],
+        'mappings': tmp_index[ES_INDEX_TMP]['mappings']
+    }
+    es_conn.indices.create(
+        ES_INDEX_CURRENT,
+        current_index_configuration
+    )
+
+    # Copy documents from `tmp` to alias
+    reindex_query = {
+        'source': {
+            'index': ES_INDEX_TMP,
+        },
+        'dest': {
+            'index': ES_INDEX_CURRENT
+        }
+    }
+
+    es_conn.reindex(reindex_query)
+
+    # Link `default` index to current
+    update_aliases_query = {
+        "actions": [
+            {
+                "add": {
+                    "index": ES_INDEX_CURRENT,
+                    "alias": ES_INDEX_DEFAULT
+                },
+            }
+        ]
+    }
+    es_conn.indices.update_aliases(
+        update_aliases_query
+    )
+
+    # Delete old aliases
+    current_pattern = 'current_{}*'.format(ES_INDEX_DEFAULT)
+    aliases = es_conn.indices.get(current_pattern).keys()
+    old_aliases = [a for a in aliases if not a == ES_INDEX_CURRENT]
+    if old_aliases:
+        es_conn.indices.delete(old_aliases)
+
+    # Cleanup `tmp` index
+    options = {
+        'using': [ES_CONN_TMP],
+        'interactive': False
+    }
+    call_command('clear_index', **options)
