@@ -492,7 +492,7 @@ CELERYBEAT_SCHEDULER = config('CELERYBEAT_SCHEDULER',
 CELERY_ALWAYS_EAGER = config('CELERY_ALWAYS_EAGER', default='True', cast=bool)
 BROKER_CONNECTION_TIMEOUT = config('BROKER_CONNECTION_TIMEOUT', default=0.1, cast=float)
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='amqp')
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='amqp://guest:guest@broker:5672//')
+BROKER_URL = config('BROKER_URL', default='amqp://guest:guest@broker:5672//')
 CELERY_ACCEPT_CONTENT = config('CELERY_ACCEPT_CONTENT', default='pickle', cast=Csv())
 CELERY_TASK_RESULT_EXPIRES = config('CELERY_TASK_RESULT_EXPIRES', default=3600, cast=int)
 CELERY_SEND_TASK_ERROR_EMAILS = config('CELERY_SEND_TASK_ERROR_EMAILS', default=True, cast=bool)
