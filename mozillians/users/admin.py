@@ -613,7 +613,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
 
     def index_profiles(self, request):
         # Rebuild the search index.
-        index_all_profiles()
+        index_all_profiles.apply_async()
         messages.success(request, 'Rebuilding index.')
         return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
 

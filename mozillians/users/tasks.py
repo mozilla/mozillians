@@ -318,7 +318,7 @@ def delete_spam_account():
         mail_admins(subject, message)
 
 
-@shared_task()
+@shared_task(time_limit=10 * 60)
 def index_all_profiles():
     """Task to rebuild ES index without downtime."""
 
