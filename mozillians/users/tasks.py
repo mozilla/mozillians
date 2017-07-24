@@ -318,15 +318,16 @@ def delete_spam_account():
         mail_admins(subject, message)
 
 
-@shared_task(time_limit=10 * 60)
+@shared_task(time_limit=20 * 60)
 def index_all_profiles():
     """Task to rebuild ES index without downtime."""
 
     ES_CONN_DEFAULT = 'default'
     ES_CONN_TMP = 'tmp'
+    ES_CONN_CURR = 'current'
     ES_INDEX_DEFAULT = connections[ES_CONN_DEFAULT].options['INDEX_NAME']
     ES_INDEX_TMP = connections[ES_CONN_TMP].options['INDEX_NAME']
-    ES_INDEX_CURRENT = 'current_{}_{}'.format(ES_INDEX_DEFAULT, datetime.now().strftime('%s'))
+    ES_INDEX_CURR = connections[ES_CONN_CURR].options['INDEX_NAME']
 
     rebuild_options = {
         'using': [ES_CONN_TMP],
@@ -341,50 +342,50 @@ def index_all_profiles():
     # Get `default` ES connection
     es_conn = connections[ES_CONN_DEFAULT].get_backend().conn
 
-    # Create a replica of `tmp` index to be used as an alias
-    tmp_index = es_conn.indices.get(ES_INDEX_TMP)
-    current_index_configuration = {
-        'settings': tmp_index[ES_INDEX_TMP]['settings'],
-        'mappings': tmp_index[ES_INDEX_TMP]['mappings']
+    # Link `default` index to tmp
+    update_aliases_query = {
+        "actions": [
+            {
+                "remove": {
+                    "index": ES_INDEX_CURR,
+                    "alias": ES_INDEX_DEFAULT
+                },
+                "add": {
+                    "index": ES_INDEX_TMP,
+                    "alias": ES_INDEX_DEFAULT
+                },
+            }
+        ]
     }
-    es_conn.indices.create(
-        ES_INDEX_CURRENT,
-        current_index_configuration
+
+    es_conn.indices.update_aliases(
+        update_aliases_query
     )
 
-    # Copy documents from `tmp` to alias
-    reindex_query = {
-        'source': {
-            'index': ES_INDEX_TMP,
-        },
-        'dest': {
-            'index': ES_INDEX_CURRENT
-        }
-    }
+    rebuild_options['using'] = [ES_CONN_CURR]
 
-    es_conn.reindex(reindex_query)
+    # Rebuild index in ES_INDEX_TMP
+    call_command('rebuild_index', **rebuild_options)
 
     # Link `default` index to current
     update_aliases_query = {
         "actions": [
             {
                 "add": {
-                    "index": ES_INDEX_CURRENT,
+                    "index": ES_INDEX_CURR,
+                    "alias": ES_INDEX_DEFAULT
+                },
+                "remove": {
+                    "index": ES_INDEX_TMP,
                     "alias": ES_INDEX_DEFAULT
                 },
             }
         ]
     }
+
     es_conn.indices.update_aliases(
         update_aliases_query
     )
-
-    # Delete old aliases
-    current_pattern = 'current_{}*'.format(ES_INDEX_DEFAULT)
-    aliases = es_conn.indices.get(current_pattern).keys()
-    old_aliases = [a for a in aliases if not a == ES_INDEX_CURRENT]
-    if old_aliases:
-        es_conn.indices.delete(old_aliases)
 
     # Cleanup `tmp` index
     options = {
