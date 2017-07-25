@@ -612,8 +612,8 @@ def _lazy_haystack_setup():
 
 HAYSTACK_CONNECTIONS = lazy(_lazy_haystack_setup, dict)()
 HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
-ES_REINDEX_WORKERS_NUM = config('ES_REINDEX_WORKERS_NUM', default=10)
-ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100)
+ES_REINDEX_WORKERS_NUM = config('ES_REINDEX_WORKERS_NUM', default=10, cast=int)
+ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100, cast=int)
 
 # Setup django-axes
 AXES_BEHIND_REVERSE_PROXY = True
