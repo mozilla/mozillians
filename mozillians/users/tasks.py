@@ -83,7 +83,7 @@ def lookup_user_task(self, email):
 
 @shared_task(bind=True, base=DebugBasketTask, default_retry_delay=BASKET_TASK_RETRY_DELAY,
              max_retries=BASKET_TASK_MAX_RETRIES)
-def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigger_welcome='N'):
+def subscribe_user_task(self, result, email='', newsletters=[], sync='N', optin='Y'):
     """Subscribes a user to basket newsletters.
 
     The email to subscribe is provided either from the result of the lookup task
@@ -121,7 +121,7 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', trigge
                                                 newsletters_to_subscribe,
                                                 sync=sync,
                                                 source_url=MOZILLIANS_URL,
-                                                trigger_welcome=trigger_welcome,
+                                                optin=optin,
                                                 api_key=BASKET_API_KEY)
         except MaxRetriesExceededError as exc:
             raise exc

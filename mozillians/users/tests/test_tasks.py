@@ -164,7 +164,7 @@ class BasketTests(TestCase):
 
         subscribe_user_task(result=result, email=None)
         subscribe_mock.assert_called_with('result_email@example.com', ['mozilla-phone'],
-                                          sync='N', trigger_welcome='N',
+                                          sync='N', optin='Y',
                                           source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
@@ -193,7 +193,7 @@ class BasketTests(TestCase):
         }
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['foobar'],
-                                          sync='N', trigger_welcome='N',
+                                          sync='N', optin='Y',
                                           source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
@@ -207,7 +207,7 @@ class BasketTests(TestCase):
         }
         subscribe_user_task(**kwargs)
         subscribe_mock.assert_called_with('foo@example.com', ['mozilla-phone'],
-                                          sync='N', trigger_welcome='N',
+                                          sync='N', optin='Y',
                                           source_url=settings.SITE_URL,
                                           api_key='basket_api_key')
 
