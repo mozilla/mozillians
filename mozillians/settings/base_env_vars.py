@@ -605,6 +605,11 @@ def _lazy_haystack_setup():
             'URL': es_url,
             'INDEX_NAME': 'tmp_{}'.format(es_index_name)
         },
+        'current': {
+            'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+            'URL': es_url,
+            'INDEX_NAME': 'current_{}'.format(es_index_name)
+        }
     }
 
     return haystack_connections
@@ -612,8 +617,9 @@ def _lazy_haystack_setup():
 
 HAYSTACK_CONNECTIONS = lazy(_lazy_haystack_setup, dict)()
 HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
-ES_REINDEX_WORKERS_NUM = config('ES_REINDEX_WORKERS_NUM', default=10)
-ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100)
+# Defaults to the number of the nodes in prod ES cluster
+ES_REINDEX_WORKERS_NUM = config('ES_REINDEX_WORKERS_NUM', default=3, cast=int)
+ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100, cast=int)
 
 # Setup django-axes
 AXES_BEHIND_REVERSE_PROXY = True
