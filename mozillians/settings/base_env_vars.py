@@ -620,6 +620,7 @@ HAYSTACK_SIGNAL_PROCESSOR = 'mozillians.common.signals.SearchSignalProcessor'
 # Defaults to the number of the nodes in prod ES cluster
 ES_REINDEX_WORKERS_NUM = config('ES_REINDEX_WORKERS_NUM', default=3, cast=int)
 ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100, cast=int)
+ES_REINDEX_TIMEOUT = config('ES_REINDEX_TIMEOUT', default=1800, cast=int)
 
 # Setup django-axes
 AXES_BEHIND_REVERSE_PROXY = True
