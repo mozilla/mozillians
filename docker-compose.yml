@@ -40,7 +40,7 @@ services:
       - es
       - broker
       - memcached
-    command: celery -A mozillians worker -B -l INFO
+    command: ./bin/run-celery.sh
     environment:
       - C_FORCE_ROOT=true
   flower:
