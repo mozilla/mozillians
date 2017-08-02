@@ -9,16 +9,16 @@ from django.utils.timezone import now
 from django.utils.translation import activate, ungettext
 from django.utils.translation import ugettext as _
 
-from celery.task import periodic_task, task
 from waffle import switch_is_active
 
+from mozillians.celery import app
 from mozillians.common.templatetags.helpers import get_object_or_none
 
 
 DAYS_BEFORE_INVALIDATION = 2 * 7  # 14 days
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def remove_empty_groups():
     """Remove empty groups."""
 
@@ -30,7 +30,7 @@ def remove_empty_groups():
 
 # TODO: Schedule this task nightly
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def send_pending_membership_emails():
     """
     For each curated group that has pending memberships that the curators have
@@ -78,7 +78,7 @@ def send_pending_membership_emails():
             group.save()
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def email_membership_change(group_pk, user_pk, old_status, new_status):
     """
     Email user that their group membership status has changed.
@@ -127,7 +127,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     send_mail(subject, body, settings.FROM_NOREPLY, [user.userprofile.email], fail_silently=False)
 
 
-@periodic_task(run_every=timedelta(hours=24))
+@app.task
 def invalidate_group_membership():
     """
     For groups with defined `invalidation_days` we need to invalidate
@@ -150,7 +150,7 @@ def invalidate_group_membership():
             group.remove_member(member.userprofile, status=status)
 
 
-@periodic_task(run_every=timedelta(hours=24))
+@app.task
 def notify_membership_renewal():
     """
     For groups with defined `invalidation_days` we need to notify users
@@ -226,7 +226,7 @@ def notify_membership_renewal():
         memberships.update(needs_renewal=True)
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def notify_redeemer_invitation(pk, custom_text=''):
 
     from mozillians.groups.models import Invite
@@ -246,7 +246,7 @@ def notify_redeemer_invitation(pk, custom_text=''):
     send_mail(subject, message, settings.FROM_NOREPLY, [invite.redeemer.email])
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def notify_curators_invitation_accepted(pk):
 
     from mozillians.groups.models import Invite
@@ -265,7 +265,7 @@ def notify_curators_invitation_accepted(pk):
     send_mail(subject, message, settings.FROM_NOREPLY, [invite.inviter.email])
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def notify_curators_invitation_rejected(redeemer_pk, inviter_pk, group_pk):
 
     from mozillians.groups.models import Group
@@ -287,7 +287,7 @@ def notify_curators_invitation_rejected(redeemer_pk, inviter_pk, group_pk):
     send_mail(subject, message, settings.FROM_NOREPLY, [inviter.email])
 
 
-@task(ignore_result=True)
+@app.task(ignore_result=True)
 def notify_redeemer_invitation_invalid(redeemer_pk, group_pk):
 
     from mozillians.groups.models import Group

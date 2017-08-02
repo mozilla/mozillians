@@ -9,15 +9,16 @@ from django.utils.module_loading import import_string
 import boto
 
 from boto.s3.connection import OrdinaryCallingFormat
-from celery.task import task
 from import_export.admin import ExportMixin
 from import_export.forms import ExportForm
+
+from mozillians.celery import app
 
 
 ADMIN_EXPORT_TIMEOUT = 10 * 60
 
 
-@task(soft_time_limit=ADMIN_EXPORT_TIMEOUT)
+@app.task(soft_time_limit=ADMIN_EXPORT_TIMEOUT)
 def async_data_export(file_format, values_list, qs_model, filename):
     """Task to export data from admin site and store it to S3."""
 

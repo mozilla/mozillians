@@ -319,18 +319,13 @@ AKISMET_API_KEY = config('AKISMET_API_KEY', default='')
 # Celery configuration
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
-CELERY_ALWAYS_EAGER = config('CELERY_ALWAYS_EAGER', default='True', cast=bool)
-BROKER_CONNECTION_TIMEOUT = config('BROKER_CONNECTION_TIMEOUT', default=0.1, cast=float)
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='amqp')
-BROKER_URL = config('BROKER_URL', default='amqp://guest:guest@broker:5672//')
-CELERY_ACCEPT_CONTENT = config('CELERY_ACCEPT_CONTENT', default='pickle', cast=Csv())
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default='False', cast=bool)
+CELERY_BROKER_URL = config('BROKER_URL', default='redis://broker:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://broker:6379/1')
+CELERY_ACCEPT_CONTENT = ['pickle', 'json']
+CELERY_TASK_SERIALIZER = config('CELERY_TASK_SERIALIZER', default='pickle')
 CELERY_TASK_RESULT_EXPIRES = config('CELERY_TASK_RESULT_EXPIRES', default=3600, cast=int)
 CELERY_SEND_TASK_ERROR_EMAILS = config('CELERY_SEND_TASK_ERROR_EMAILS', default=True, cast=bool)
-REDIS_CONNECT_RETRY = config('REDIS_CONNECT_RETRY',
-                             default=CELERY_RESULT_BACKEND == 'redis', cast=bool)
-# Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
-# The task can catch that and recover but should exit ASAP.
-CELERYD_TASK_SOFT_TIME_LIMIT = config('CELERYD_TASK_SOFT_TIME_LIMIT', default=150, cast=int)
 
 MESSAGE_STORAGE = config('MESSAGE_STORAGE',
                          default='django.contrib.messages.storage.session.SessionStorage')

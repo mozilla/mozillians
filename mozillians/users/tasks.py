@@ -9,11 +9,11 @@ from django.utils.timezone import now
 import basket
 import waffle
 from celery import chain, group, shared_task, Task
-from celery.task import periodic_task, task
 from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
+from mozillians.celery import app
 from mozillians.common.utils import akismet_spam_check, bundle_profile_data, is_test_environment
 from mozillians.common.templatetags.helpers import get_object_or_none
 
@@ -207,7 +207,7 @@ def update_email_in_basket(old_email, new_email):
         return
 
     chain(
-        lookup_user_task.subtask((old_email,)) |
+        lookup_user_task.subtask((old_email,)),
         group(
             subscribe_user_task.subtask((new_email,)),
             unsubscribe_user_task.subtask()
@@ -226,12 +226,12 @@ def unsubscribe_from_basket_task(email, newsletters=[]):
 
     # Lookup the email and then pass the result to the unsubscribe subtask
     chain(
-        lookup_user_task.subtask((email,)) |
+        lookup_user_task.subtask((email,)),
         unsubscribe_user_task.subtask((newsletters,))
     ).delay()
 
 
-@periodic_task(run_every=timedelta(hours=1))
+@app.task
 def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     """Remove incomplete accounts older than INCOMPLETE_ACC_MAX_DAYS old."""
     # Avoid circular dependencies
@@ -241,13 +241,13 @@ def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     UserProfile.objects.filter(full_name='').filter(user__date_joined__lt=time_diff).delete()
 
 
-@task(ignore_result=False)
+@app.task(ignore_result=False)
 def check_celery():
     """Dummy celery task to check that everything runs smoothly."""
     pass
 
 
-@task
+@app.task
 def check_spam_account(instance_id, **kwargs):
     """Task to check if profile is spam according to akismet"""
     # Avoid circular dependencies
@@ -267,7 +267,7 @@ def check_spam_account(instance_id, **kwargs):
         AbuseReport.objects.get_or_create(**kwargs)
 
 
-@periodic_task(run_every=timedelta(hours=24))
+@app.task
 def delete_reported_spam_accounts():
     """Task to automatically delete spam accounts"""
 
@@ -359,7 +359,7 @@ def index_all_profiles():
     call_command('clear_index', **options)
 
 
-@task
+@app.task
 def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     import boto3
 
@@ -404,7 +404,7 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     return results
 
 
-@periodic_task(run_every=timedelta(hours=6))
+@app.task
 def periodically_send_cis_data():
     """Periodically send all mozillians.org IdpProfiles to CIS."""
 

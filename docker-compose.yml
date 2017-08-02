@@ -13,9 +13,7 @@ services:
   memcached:
     image: memcached
   broker:
-    image: rabbitmq:3-management
-    ports:
-      - "15672:15672"
+    image: redis:3
   web:
     build:
       context: .

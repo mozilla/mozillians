@@ -14,7 +14,7 @@ from django.forms import ValidationError
 from django.http import HttpResponseRedirect
 
 from dal import autocomplete
-from celery.task.sets import TaskSet
+from celery.task import group
 from functools import update_wrapper
 from import_export.fields import Field
 from import_export.resources import ModelResource
@@ -46,9 +46,9 @@ def subscribe_to_basket_action(newsletter):
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
-        ts = [(subscribe_user_to_basket.subtask(args=[userprofile.id, [newsletter]]))
+        ts = [(subscribe_user_to_basket.s(args=[userprofile.id, [newsletter]]))
               for userprofile in queryset]
-        TaskSet(ts).apply_async()
+        group(ts)()
         messages.success(request, 'Basket update started.')
 
     subscribe_to_basket.short_description = 'Subscribe to or Update {0}'.format(newsletter)
@@ -61,9 +61,9 @@ def unsubscribe_from_basket_action(newsletter):
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
-        ts = [(unsubscribe_from_basket_task.subtask(args=[userprofile.email, [newsletter]]))
+        ts = [(unsubscribe_from_basket_task.s(args=[userprofile.email, [newsletter]]))
               for userprofile in queryset]
-        TaskSet(ts).apply_async()
+        group(ts)()
         messages.success(request, 'Basket update started.')
 
     unsubscribe_from_basket.short_description = 'Unsubscribe from {0}'.format(newsletter)
