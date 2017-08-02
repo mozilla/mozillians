@@ -200,6 +200,9 @@ class UserProfile(UserProfilePrivacyModel):
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
 
+    # Auth0 required data
+    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
@@ -548,6 +551,55 @@ class UserProfile(UserProfilePrivacyModel):
             group.pending = (membership.status == GroupMembership.PENDING)
             group.pending_terms = (membership.status == GroupMembership.PENDING_TERMS)
             groups.append(group)
+        return groups
+
+    def get_cis_emails(self):
+        """Prepares the entry for emails in the CIS format."""
+        emails = [
+            {
+                'value': self.email,
+                'verified': True,
+                'primary': True,
+                'name': 'mozillians-primary'
+            }
+        ]
+
+        # Alternate emails
+        for email in self.alternate_emails:
+            entry = {
+                'value': email.identifier,
+                'verified': True,
+                'primary': False,
+                'name': 'mozillians-alternate-{}'.format(email.pk)
+            }
+            emails.append(entry)
+
+        return emails
+
+    def get_cis_uris(self):
+        """Prepares the entry for URIs in the CIS format."""
+        accounts = []
+        for account in self.externalaccount_set.exclude(type=ExternalAccount.TYPE_EMAIL):
+            value = account.get_identifier_url()
+            account_type = ExternalAccount.ACCOUNT_TYPES[account.type]
+            if value:
+                entry = {
+                    'value': value,
+                    'primary': False,
+                    'verified': False,
+                    'name': 'mozillians-{}-{}'.format(account_type['name'], account.pk)
+                }
+                accounts.append(entry)
+
+        return accounts
+
+    def get_cis_groups(self):
+        """Prepares the entry for profile groups in the CIS format."""
+        memberships = GroupMembership.objects.filter(
+            userprofile=self,
+            status=GroupMembership.MEMBER
+        )
+        groups = [m.group.name for m in memberships]
         return groups
 
     def timezone_offset(self):

@@ -1,3 +1,5 @@
+import base64
+import json
 import os
 from datetime import datetime, timedelta
 
@@ -13,6 +15,7 @@ from celery import chain, group, shared_task, Task
 from celery.task import task
 from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
+from nameparser import HumanName
 
 from mozillians.common.utils import akismet_spam_check
 from mozillians.common.templatetags.helpers import get_object_or_none
@@ -393,3 +396,62 @@ def index_all_profiles():
         'interactive': False
     }
     call_command('clear_index', **options)
+
+
+@task
+def send_userprofile_to_cis(instance_id, **kwargs):
+    import boto3
+
+    from cis.encryption import encrypt_payload
+    from mozillians.users.models import UserProfile
+
+    profile = UserProfile.objects.get(pk=instance_id)
+    human_name = HumanName(profile.full_name)
+
+    data = {
+        'user_id': profile.auth0_user_id,
+        'timezone': profile.timezone,
+        'active': profile.user.is_active,
+        'lastModified': profile.last_updated.isoformat(),
+        'created': profile.user.date_joined.isoformat(),
+        'userName': profile.user.username,
+        'displayName': profile.display_name,
+        'primaryEmail': profile.email,
+        'emails': profile.get_cis_emails(),
+        'uris': profile.get_cis_uris(),
+        'picture': profile.get_photo_url(),
+        'shirtSize': profile.get_tshirt_display(),
+        'groups': profile.get_cis_groups(),
+
+        # Derived fields
+        'firstName': human_name.first,
+        'lastName': human_name.last,
+
+        # Hardcoded fields
+        'preferredLanguage': 'en_US',
+        'phoneNumbers': [],
+        'nicknames': [],
+        'SSHFingerprints': [],
+        'PGPFingerprints': [],
+        'authoritativeGroups': []
+    }
+
+    # Invoke lambda
+    profile = json.dumps(data)
+    encrypted_profile = encrypt_payload(profile)
+
+    base64_payload = dict()
+    for key in ['ciphertext', 'ciphertext_key', 'iv', 'tag']:
+        base64_payload[key] = base64.b64encode(encrypted_profile[key]).decode('utf-8')
+
+    base64_payload['publisher'] = base64.b64encode('mozillians.org')
+    json_payload = json.dumps(base64_payload)
+
+    lambda_client = boto3.client('lambda')
+    response = lambda_client.invoke(
+        FunctionName=settings.CIS_FUNCTION_ARN,
+        InvocationType='RequestResponse',
+        Payload=json_payload
+    )
+
+    return response

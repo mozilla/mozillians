@@ -634,3 +634,56 @@ class PrivacyModelTests(unittest.TestCase):
         with patch.object(UserProfile._meta, 'get_all_field_names') as mock_get_all_field_names:
             UserProfile.privacy_fields()
         ok_(not mock_get_all_field_names.called)
+
+
+class CISHelperMethodsTests(unittest.TestCase):
+    def test_cis_emails(self):
+        user = UserFactory.create(email='foo@bar.com')
+        alternate_email = user.userprofile.externalaccount_set.create(
+            type=ExternalAccount.TYPE_EMAIL,
+            identifier='test@mozilla.com'
+        )
+
+        expected_result = [
+            {
+                'value': 'foo@bar.com',
+                'verified': True,
+                'primary': True,
+                'name': 'mozillians-primary'
+            },
+            {
+                'value': 'test@mozilla.com',
+                'verified': True,
+                'primary': False,
+                'name': 'mozillians-alternate-{}'.format(alternate_email.pk)
+            }
+        ]
+        eq_(user.userprofile.get_cis_emails(), expected_result)
+
+    def test_cis_groups(self):
+        user = UserFactory.create()
+        group1 = GroupFactory.create(name='group1')
+        group2 = GroupFactory.create(name='group2')
+        group3 = GroupFactory.create(name='group3')
+        group1.add_member(user.userprofile)
+        group2.add_member(user.userprofile)
+        group3.add_member(user.userprofile, status='PENDING')
+        eq_(user.userprofile.get_cis_groups(), ['group1', 'group2'])
+
+    def test_cis_uris(self):
+        user = UserFactory.create()
+        sumo_uri = user.userprofile.externalaccount_set.create(
+            type=ExternalAccount.TYPE_SUMO,
+            identifier='test'
+        )
+
+        expected_result = [
+            {
+                'value': 'https://support.mozilla.org/user/test',
+                'primary': False,
+                'verified': False,
+                'name': 'mozillians-Mozilla Support-{}'.format(sumo_uri.pk)
+            }
+        ]
+
+        eq_(user.userprofile.get_cis_uris(), expected_result)
