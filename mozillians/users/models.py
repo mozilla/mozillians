@@ -599,7 +599,7 @@ class UserProfile(UserProfilePrivacyModel):
             userprofile=self,
             status=GroupMembership.MEMBER
         )
-        groups = [m.group.name for m in memberships]
+        groups = ['mozilliansorg_{}'.format(m.group.name) for m in memberships]
         return groups
 
     def timezone_offset(self):
