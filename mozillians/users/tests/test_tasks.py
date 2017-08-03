@@ -288,7 +288,6 @@ class SpamTasksTests(TestCase):
         reporter = UserFactory.create()
         AbuseReport.objects.create(
             profile=spam_user.userprofile,
-            is_akismet=False,
             reporter=reporter.userprofile,
         )
 
@@ -303,7 +302,6 @@ class SpamTasksTests(TestCase):
         reporter = UserFactory.create()
         AbuseReport.objects.create(
             profile=spam_user.userprofile,
-            is_akismet=False,
             reporter=reporter.userprofile,
         )
 
