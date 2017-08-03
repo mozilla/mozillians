@@ -668,7 +668,7 @@ class CISHelperMethodsTests(unittest.TestCase):
         group1.add_member(user.userprofile)
         group2.add_member(user.userprofile)
         group3.add_member(user.userprofile, status='PENDING')
-        eq_(user.userprofile.get_cis_groups(), ['group1', 'group2'])
+        eq_(user.userprofile.get_cis_groups(), ['mozilliansorg_group1', 'mozilliansorg_group2'])
 
     def test_cis_uris(self):
         user = UserFactory.create()
