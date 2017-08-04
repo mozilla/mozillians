@@ -277,7 +277,6 @@ def delete_reported_spam_accounts():
     # Manual reports deletion heuristic:
     # Delete all unvouched profiles reported as spam by a user
     reports = AbuseReport.objects.filter(profile__is_vouched=False,
-                                         is_akismet=False,
                                          reporter__isnull=False)
     for report in reports:
         report.profile.delete()
