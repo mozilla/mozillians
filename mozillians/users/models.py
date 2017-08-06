@@ -769,7 +769,7 @@ class ExternalAccount(models.Model):
                       'url': '',
                       'validator': validate_email},
         TYPE_DISCOURSE: {'name': 'Mozilla Discourse',
-                         'url': 'https://discourse.mozilla-community.org/users/{identifier}',
+                         'url': 'https://discourse.mozilla.org/users/{identifier}',
                          'validator': validate_username_not_url},
         TYPE_LANYRD: {'name': 'Lanyrd',
                       'url': 'http://lanyrd.com/profile/{identifier}/',
