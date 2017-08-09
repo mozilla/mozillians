@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 
 import requests
-from celery import periodic_task
+from celery.task import periodic_task
 
 
 @periodic_task(run_every=timedelta(hours=1))
