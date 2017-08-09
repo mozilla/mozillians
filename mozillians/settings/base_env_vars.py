@@ -43,6 +43,8 @@ LOGGING = {
     },
 }
 
+HEALTHCHECKS_IO_URL = config('HEALTHCHECKS_IO_URL', default='')
+
 # Repository directory
 ROOT = Path(__file__).parent.parent
 
