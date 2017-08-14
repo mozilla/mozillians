@@ -417,5 +417,10 @@ configobj==5.0.6 \
 everett==0.9 \
     --hash=sha256:05b0d0bae138a3b1a7c365bdd991c0a5b06f20c2e01d6721896098ac93cf7ee9 \
     --hash=sha256:02a43a2b4194e6ed40757851b37f5acf3c086f37e7e8109a385a7198cfbbc51b
-https://github.com/mozilla-iam/cis/archive/f63e5f86a42aa031090dfe25fcb7ee99d49f00ec.zip#egg=cis \
-    --hash=sha256:a48730bfdcdb82cb6d1f6286f35f63da221297e1851f748f2b22443abe2d272a
+https://github.com/mozilla-iam/cis/archive/c3225397335b222d04cde313a1709b41828838b6.zip#egg=cis \
+    --hash=sha256:1ad5001a72641d487e14fd0c955f70e052f29749a4b97e41afb80cd965fb9b3a
+pluginbase==0.5 \
+    --hash=sha256:b4f830242a078a4f44c978a84f3365bba4d008fdd71a591c71447f4df35354dd
+jsonschema==2.6.0 \
+    --hash=sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08 \
+    --hash=sha256:6ff5f3180870836cae40f06fa10419f557208175f13ad7bc26caa77beb1f6e02

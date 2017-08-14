@@ -1,5 +1,3 @@
-import base64
-import json
 import os
 from datetime import datetime, timedelta
 
@@ -364,7 +362,7 @@ def index_all_profiles():
 def send_userprofile_to_cis(instance_id, **kwargs):
     import boto3
 
-    from cis.encryption import encrypt_payload
+    from cis.publisher import ChangeDelegate
     from mozillians.users.models import UserProfile
 
     profile = UserProfile.objects.get(pk=instance_id)
@@ -398,22 +396,25 @@ def send_userprofile_to_cis(instance_id, **kwargs):
         'authoritativeGroups': []
     }
 
-    # Invoke lambda
-    profile = json.dumps(data)
-    encrypted_profile = encrypt_payload(profile)
-
-    base64_payload = dict()
-    for key in ['ciphertext', 'ciphertext_key', 'iv', 'tag']:
-        base64_payload[key] = base64.b64encode(encrypted_profile[key]).decode('utf-8')
-
-    base64_payload['publisher'] = base64.b64encode('mozillians.org')
-    json_payload = json.dumps(base64_payload)
-
-    lambda_client = boto3.client('lambda')
-    response = lambda_client.invoke(
-        FunctionName=settings.CIS_FUNCTION_ARN,
-        InvocationType='RequestResponse',
-        Payload=json_payload
+    sts = boto3.client('sts')
+    sts_response = sts.assume_role(
+        RoleArn=settings.CIS_IAM_ROLE_ARN,
+        RoleSessionName=settings.CIS_IAM_ROLE_SESSION_NAME
     )
 
-    return response
+    session = boto3.session.Session(
+        aws_access_key_id=sts_response['Credentials']['AccessKeyId'],
+        aws_secret_access_key=sts_response['Credentials']['SecretAccessKey'],
+        aws_session_token=sts_response['Credentials']['SessionToken'],
+        region_name=settings.CIS_AWS_REGION
+    )
+
+    publisher = {
+        'id': settings.CIS_PUBLISHER_NAME
+    }
+
+    cis_change = ChangeDelegate(publisher, {}, data)
+    cis_change.boto_session = session
+    result = cis_change.send()
+
+    return result
