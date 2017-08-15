@@ -397,6 +397,7 @@ CSP_REPORT_ENABLE = config('CSP_REPORT_ENABLE', default=True, cast=bool)
 CSP_REPORT_URI = config('CSP_REPORT_URI', default='/en-US/capture-csp-violation')
 CSP_DEFAULT_SRC = (
     "'self'",
+    'https://cdn.mozillians.org',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
 )
@@ -404,6 +405,8 @@ CSP_FONT_SRC = (
     "'self'",
     'https://*.mozilla.net',
     'https://*.mozilla.org',
+    'https://cdn.mozillians.org',
+    'https://cdn-staging.mozillians.org',
     'https://mozorg.cdn.mozilla.net',
 )
 CSP_IMG_SRC = (
@@ -418,6 +421,8 @@ CSP_IMG_SRC = (
 )
 CSP_SCRIPT_SRC = (
     "'self'",
+    'https://cdn.mozillians.org',
+    'https://cdn-staging.mozillians.org',
     'https://www.mozilla.org',
     'https://*.mozilla.net',
     'https://*.google-analytics.com',
@@ -427,6 +432,8 @@ CSP_SCRIPT_SRC = (
 CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
+    'https://cdn.mozillians.org',
+    'https://cdn-staging.mozillians.org',
     'https://www.mozilla.org',
     'https://*.mozilla.net',
 )
