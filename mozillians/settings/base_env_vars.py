@@ -193,6 +193,9 @@ STATIC_ROOT = Path('static').resolve()
 # URL prefix for static files.
 STATIC_URL = config('STATIC_URL', default='/static/')
 
+# URL prefix for static files served via whitenoise
+STATIC_HOST = config('STATIC_HOST', default='')
+
 # Storage of static files
 COMPRESS_ROOT = STATIC_ROOT
 COMPRESS_CSS_FILTERS = (
