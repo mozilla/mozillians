@@ -1,14 +1,25 @@
 language: python
-sudo: false
+sudo: required
+# See issue https://github.com/travis-ci/packer-templates/issues/470
+dist: precise
 python:
-  - "2.7.11"
+  - "2.7.13"
+env:
+  DATABASE_URL=mysql://travis@127.0.0.1/mozillians
+  BASKET_URL=http://127.0.0.1
+  BASKET_API_KEY=basket_api_key
+  COMPRESS_ENABLED=False
+  COMPRESS_OFFLINE=False
+  SECRET_KEY='supersecretkey'
+  ALLOWED_HOSTS=localhost
+  DEBUG=True
 services:
   - elasticsearch
+  - mysql
 before_install:
   - pip install flake8
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
-  - cp mozillians/settings/local.py-travis mozillians/settings/local.py
 cache:
   - pip
 install:
@@ -16,7 +27,7 @@ install:
   - pip install coverage
   - pip install --require-hashes --no-deps -r requirements/dev.txt
 script:
-  - coverage run --source=mozillians manage.py test
+  - coverage run --source=mozillians manage.py test --noinput
 after_success:
   - pip install coveralls
   - coveralls
