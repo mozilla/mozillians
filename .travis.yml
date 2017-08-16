@@ -1,5 +1,7 @@
 language: python
 sudo: required
+# See issue https://github.com/travis-ci/packer-templates/issues/470
+dist: precise
 python:
   - "2.7.13"
 env:
