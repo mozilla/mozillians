@@ -190,11 +190,10 @@ MEDIA_URL = config('MEDIA_URL', default='/media/')
 # Absolute path to the directory static files should be collected to.
 STATIC_ROOT = Path('static').resolve()
 
-# URL prefix for static files.
-STATIC_URL = config('STATIC_URL', default='/static/')
-
 # URL prefix for static files served via whitenoise
 STATIC_HOST = config('STATIC_HOST', default='')
+# URL prefix for static files.
+STATIC_URL = STATIC_HOST + '/static/'
 
 # Storage of static files
 COMPRESS_ROOT = STATIC_ROOT
