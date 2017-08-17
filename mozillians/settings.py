@@ -18,7 +18,7 @@ from aws_requests_auth import boto_utils
 
 PROJECT_MODULE = 'mozillians'
 # Root path of the project
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).parent
 # Defines the views served for root URLs.
 ROOT_URLCONF = '%s.urls' % PROJECT_MODULE
 # Absolute path to the directory that holds media.
