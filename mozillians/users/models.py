@@ -31,6 +31,7 @@ from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
                                        PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager, UserProfileQuerySet)
+from mozillians.users.tasks import send_userprofile_to_cis
 
 
 COUNTRIES = product_details.get_regions('en-US')
@@ -618,6 +619,10 @@ class UserProfile(UserProfilePrivacyModel):
         super(UserProfile, self).save(*args, **kwargs)
         # Auto_vouch follows the first save, because you can't
         # create foreign keys without a database id.
+
+        if self.is_complete:
+            send_userprofile_to_cis.delay(self.pk)
+
         if autovouch:
             self.auto_vouch()
 

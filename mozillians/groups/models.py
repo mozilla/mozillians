@@ -13,7 +13,8 @@ from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change
-from mozillians.users.tasks import unsubscribe_from_basket_task, subscribe_user_to_basket
+from mozillians.users.tasks import (unsubscribe_from_basket_task, subscribe_user_to_basket,
+                                    send_userprofile_to_cis)
 
 
 class GroupBase(models.Model):
@@ -293,6 +294,9 @@ class Group(GroupBase):
         membership, _ = GroupMembership.objects.get_or_create(userprofile=userprofile,
                                                               group=self,
                                                               defaults=defaults)
+
+        send_userprofile_to_cis.delay(membership.userprofile.pk)
+
         # Remove the need_removal flag in any case
         # We have a renewal, let's save the object.
         if membership.needs_renewal:
@@ -345,6 +349,7 @@ class Group(GroupBase):
             # We have either an open group or the request to join a reviewed group is denied
             # or the curator manually declined a user in a pending state.
             membership.delete()
+            send_userprofile_to_cis.delay(membership.userprofile.pk)
             # delete the invitation to the group if exists
             Invite.objects.filter(group=self, redeemer=userprofile).delete()
             send_email = True

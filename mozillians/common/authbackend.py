@@ -10,6 +10,7 @@ from django.db.models import Q
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
 from mozillians.users.models import UserProfile, ExternalAccount
+from mozillians.users.tasks import send_userprofile_to_cis
 
 
 def calculate_username(email):
@@ -63,6 +64,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
                 ExternalAccount.objects.create(type=account_type,
                                                user=request_user.userprofile,
                                                identifier=email)
+                send_userprofile_to_cis.delay(request_user.userprofile)
             else:
                 if not user_q.filter(pk=request_user.id).exists():
                     msg = u'Email {0} already exists in the database.'.format(email)
