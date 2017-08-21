@@ -16,6 +16,7 @@ node('master'){
         break
     }
     type = 'group'
+    slackSend color: 'good', message: "Starting build ${BUILD_NUMBER} for ${JOB_NAME} ${environment} | <${BUILD_URL}changes | Changes>"
 }
 
 node('mesos') {
@@ -34,12 +35,26 @@ node('mesos') {
     }
 
     stage('Build') {
-        image = docker.build(app_id + ":" + gitCommit, "-f docker/prod .")
+        try {
+            image = docker.build(app_id + ":" + gitCommit, "-f docker/prod .")
+        }
+        catch(e) {
+            currentBuild.result = "FAILURE"
+            slackSend color: 'bad', message: "Error building ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
+            throw e
+        }
     }
 
     stage('Push') {
-        sh "docker tag ${image.imageName()} " + dockerRegistry + "/${image.imageName()}"
-        sh "docker push " + dockerRegistry + "/${image.imageName()}"
+        try {
+            sh "docker tag ${image.imageName()} " + dockerRegistry + "/${image.imageName()}"
+            sh "docker push " + dockerRegistry + "/${image.imageName()}"
+        }
+        catch(e) {
+            currentBuild.result = "FAILURE"
+            slackSend color: 'bad', message: "Error pushing ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
+            throw e
+        }
     }
 }
 
