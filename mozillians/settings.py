@@ -48,7 +48,6 @@ INSTALLED_APPS = (
 
     # Third-party apps, patches, fixes
     'django_jinja',
-    'djcelery',
     'puente',
     'compressor',
     'cronjobs',
@@ -323,11 +322,6 @@ MOZILLIANS_ADMIN_BUCKET = config('MOZILLIANS_ADMIN_BUCKET', default='')
 AKISMET_API_KEY = config('AKISMET_API_KEY', default='')
 
 # Celery configuration
-import djcelery  # noqa
-djcelery.setup_loader()
-CELERYBEAT_SCHEDULER = config('CELERYBEAT_SCHEDULER',
-                              default='djcelery.schedulers.DatabaseScheduler')
-
 # True says to simulate background tasks without actually using celeryd.
 # Good for local development in case celeryd is not running.
 CELERY_ALWAYS_EAGER = config('CELERY_ALWAYS_EAGER', default='True', cast=bool)
