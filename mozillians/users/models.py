@@ -201,9 +201,6 @@ class UserProfile(UserProfilePrivacyModel):
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
 
-    # Auth0 required data
-    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
-
     def __unicode__(self):
         """Return this user's name when their profile is called."""
         return self.display_name
@@ -625,6 +622,29 @@ class UserProfile(UserProfilePrivacyModel):
 
         if autovouch:
             self.auto_vouch()
+
+
+class IdpProfile(models.Model):
+    """Basic Identity Provider information for Profiles."""
+    PROVIDER_GITHUB = 'github'
+    PROVIDER_LDAP = 'ldap'
+    PROVIDER_PASSWORDLESS = 'passwordless'
+    PROVIDER_GOOGLE = 'google'
+
+    PROVIDER_TYPES = (
+        (PROVIDER_GITHUB, 'Github Provider',),
+        (PROVIDER_LDAP, 'LDAP Provider',),
+        (PROVIDER_PASSWORDLESS, 'Passwordless Provider',),
+        (PROVIDER_GOOGLE, 'Google Provider',),
+
+    )
+    profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
+    type = models.CharField(choices=PROVIDER_TYPES,
+                            default=PROVIDER_PASSWORDLESS,
+                            max_length=50,
+                            blank=False)
+    # Auth0 required data
+    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
 
 
 class Vouch(models.Model):
