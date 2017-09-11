@@ -14,7 +14,6 @@ from dj_database_url import parse as db_url
 from django_jinja.builtins import DEFAULT_EXTENSIONS
 from django_sha2 import get_password_hashers
 from urlparse import urljoin
-from aws_requests_auth import boto_utils
 
 PROJECT_MODULE = 'mozillians'
 # Root path of the project
@@ -252,17 +251,13 @@ FROM_NOREPLY_VIA = config('FROM_NOREPLY_VIA',
                           default='%s via Mozillians.org <noreply@mozillians.org>')
 
 if EMAIL_BACKEND == 'django_ses.SESBackend':
-    # Get AWS credentials from boto
-    _aws_credentials = boto_utils.get_credentials()
-
+    if config('AWS_SES_OVERRIDE_BOTO', default=False, cast=bool):
+        AWS_SES_ACCESS_KEY_ID = config('AWS_SES_ACCESS_KEY_ID')
+        AWS_SES_SECRET_ACCESS_KEY = config('AWS_SES_SECRET_ACCESS_KEY')
     AWS_SES_REGION_NAME = config('AWS_SES_REGION_NAME',
                                  default='us-east-1')
     AWS_SES_REGION_ENDPOINT = config('AWS_SES_REGION_ENDPOINT',
                                      default='email.us-east-1.amazonaws.com')
-    AWS_SES_ACCESS_KEY_ID = config('AWS_SES_ACCESS_KEY_ID',
-                                   default=_aws_credentials['aws_access_key'])
-    AWS_SES_SECRET_ACCESS_KEY = config('AWS_SES_SECRET_ACCESS_KEY',
-                                       default=_aws_credentials['aws_secret_access_key'])
 else:
     EMAIL_HOST = config('SMTP_EMAIL_HOST', default='localhost')
     EMAIL_PORT = config('SMTP_EMAIL_PORT', default='1025')
