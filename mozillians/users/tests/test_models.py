@@ -19,7 +19,8 @@ from mozillians.groups.models import Group, Skill
 from mozillians.groups.tests import (GroupAliasFactory, GroupFactory,
                                      SkillAliasFactory, SkillFactory)
 from mozillians.users.managers import (EMPLOYEES, MOZILLIANS, PUBLIC, PUBLIC_INDEXABLE_FIELDS)
-from mozillians.users.models import ExternalAccount, UserProfile, _calculate_photo_filename, Vouch
+from mozillians.users.models import (ExternalAccount, IdpProfile, UserProfile,
+                                     _calculate_photo_filename, Vouch)
 from mozillians.users.tests import UserFactory
 
 
@@ -637,6 +638,9 @@ class PrivacyModelTests(unittest.TestCase):
 
 
 class CISHelperMethodsTests(unittest.TestCase):
+    def tearDown(self):
+        Group.objects.all().delete()
+
     def test_cis_emails(self):
         user = UserFactory.create(email='foo@bar.com')
         alternate_email = user.userprofile.externalaccount_set.create(
@@ -660,15 +664,65 @@ class CISHelperMethodsTests(unittest.TestCase):
         ]
         eq_(user.userprofile.get_cis_emails(), expected_result)
 
-    def test_cis_groups(self):
+    def test_cis_groups_highest(self):
         user = UserFactory.create()
-        group1 = GroupFactory.create(name='group1')
-        group2 = GroupFactory.create(name='group2')
+        group1 = GroupFactory.create(name='nda')
+        group2 = GroupFactory.create(name='cis_whitelist')
         group3 = GroupFactory.create(name='group3')
         group1.add_member(user.userprofile)
         group2.add_member(user.userprofile)
         group3.add_member(user.userprofile, status='PENDING')
-        eq_(user.userprofile.get_cis_groups(), ['mozilliansorg_group1', 'mozilliansorg_group2'])
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|foo@bar.com',
+            primary=False,
+        )
+        idp = IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@bar.com',
+            primary=True,
+        )
+
+        eq_(set(user.userprofile.get_cis_groups(idp)),
+            set(['mozilliansorg_nda', 'mozilliansorg_cis_whitelist']))
+
+    def test_cis_groups_not_highest(self):
+        user = UserFactory.create()
+        group1 = GroupFactory.create(name='nda')
+        group2 = GroupFactory.create(name='cis_whitelist')
+        group3 = GroupFactory.create(name='group3')
+        group1.add_member(user.userprofile)
+        group2.add_member(user.userprofile)
+        group3.add_member(user.userprofile, status='PENDING')
+        idp = IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|foo@bar.com',
+            primary=False,
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@bar.com',
+            primary=True,
+        )
+
+        eq_(user.userprofile.get_cis_groups(idp), [])
+
+    def test_cis_tags(self):
+        user = UserFactory.create()
+        group1 = GroupFactory.create(name='foo')
+        group2 = GroupFactory.create(name='bar')
+        group3 = GroupFactory.create(name='baz')
+        group1.add_member(user.userprofile)
+        group2.add_member(user.userprofile)
+        group3.add_member(user.userprofile, status='PENDING')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@bar.com',
+            primary=True,
+        )
+
+        eq_(set(user.userprofile.get_cis_tags()),
+            set(['foo', 'bar']))
 
     def test_cis_uris(self):
         user = UserFactory.create()
