@@ -645,6 +645,9 @@ class IdpProfile(models.Model):
                             blank=False)
     # Auth0 required data
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+    primary = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 class Vouch(models.Model):
