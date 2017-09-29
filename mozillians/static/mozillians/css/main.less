@@ -1268,7 +1268,6 @@ body#home {
                 .functional-areas, .groups {
                     position: relative;
                     margin-bottom: 20px;
-                    max-width: 300px;
                     h2 {
                         margin: 0;
                         padding: 0 0 0 50px;
@@ -1277,7 +1276,6 @@ body#home {
                         word-wrap: break-word;
                         @media (max-width: @breakMobileLandscape) {
                             padding: 0;
-                            margin-top: 60px;
                         }
                     }
                     span.icon {
@@ -1291,8 +1289,8 @@ body#home {
                             .border-radius(100%);
                         }
                         @media (max-width: @breakMobileLandscape) {
-                            top: -70px;
-                            left: 40%;
+                            position: relative;
+                            display: inline-block;
                             width: 60px;
                             height: 60px;
                         }
