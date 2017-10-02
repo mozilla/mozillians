@@ -5,7 +5,7 @@
 A community directory for **Mozillians** to connect with each other.
 
 ## Install, docs, API and more
-For documentation, see [mozillians.rtfd.org](http://mozillians.readthedocs.org/) or build the docs/
+For documentation, see [mozillians.rtfd.org](https://mozillians.readthedocs.org/) or build the docs/
 
 ## Contribute
 
@@ -16,7 +16,7 @@ For documentation, see [mozillians.rtfd.org](http://mozillians.readthedocs.org/)
 ```
 
 ### Write code
-Get started with our [How to Contribute](http://mozillians.readthedocs.org/en/latest/contribute.html) documentation.
+Get started with our [How to Contribute](https://mozillians.readthedocs.org/en/latest/contribute.html) documentation.
 
 ### Chat with the team
 You can talk with the team in the `#commtools` IRC channel on [irc.mozilla.org](http://irc.mozilla.org/). We're a friendly group!
