@@ -66,8 +66,12 @@ node('mesos') {
 node('master') {
     stage('Deploy') {
         parallel (
-            'staging deploy': { build job: 'deploy-test', parameters: params }
-            'cis testing deploy': { build job: 'deploy-test', parameters: params_cistest }
+            "deploy": { build job: 'deploy-test', parameters: params },
+            "cis testing deploy": {
+                if (environment == 'production') {
+                    build job: 'deploy-test', parameters: params_cistest
+                }
+            }
         )
     }
 }
