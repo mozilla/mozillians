@@ -37,6 +37,13 @@ def calculate_username(email):
 class MozilliansAuthBackend(OIDCAuthenticationBackend):
     """Override OIDCAuthenticationBackend to provide custom functionality."""
 
+    def create_user(self, claims):
+        user = super(MozilliansAuthBackend, self).create_user(claims)
+
+        profile_qs = UserProfile.objects.filter(pk=user.userprofile.id)
+        profile_qs.update(auth0_user_id=claims.get('user_id'))
+        return user
+
     def filter_users_by_claims(self, claims):
         """Override default method to add multiple emails in an account."""
 
