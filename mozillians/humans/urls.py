@@ -1,7 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-urlpatterns = patterns(
-    'mozillians.humans',
-    url(r'^humans.txt$', 'views.humans', name='humans'),
-    url(r'^contribute.json$', 'views.contribute_view', name='contribute-view')
-)
+from mozillians.humans import views
+
+app_name = 'humans'
+urlpatterns = [
+    url(r'^humans.txt$', views.humans, name='humans'),
+    url(r'^contribute.json$', views.contribute_view, name='contribute-view')
+]
