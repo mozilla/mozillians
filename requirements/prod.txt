@@ -286,9 +286,9 @@ ecdsa==0.13 \
     --hash=sha256:64cf1ee26d1cde3c73c6d7d107f835fed7c6a2904aef9eac223d57ad800c43fa
 future==0.16.0 \
     --hash=sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb
-mozilla-django-oidc==0.3.1 \
-    --hash=sha256:59abd3941ba3471a7baef18a0f704868821cc48ccedd6469fa9e1d08fdc737f3 \
-    --hash=sha256:f906d4ea1879ee588da4a4369013ade19101624516b977fc96b271144123b446
+mozilla-django-oidc==0.3.2 \
+    --hash=sha256:fce4f29c99ae638a21c6958bba1dd5f2839aacabc817204a7ee14f04e78ca399 \
+    --hash=sha256:b83364e516b97a0afe3c8eee31b515a1850a84b4a8884d985a1050f99f87fc3e
 olefile==0.44 \
     --hash=sha256:61f2ca0cd0aa77279eb943c07f607438edf374096b66332fae1ee64a6f0f73ad
 django-cities-light==3.3.0 \
