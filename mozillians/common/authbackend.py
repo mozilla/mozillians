@@ -9,8 +9,28 @@ from django.db.models import Q
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
-from mozillians.users.models import UserProfile, ExternalAccount
+from mozillians.common.templatetags.helpers import get_object_or_none
+from mozillians.users.models import ExternalAccount, IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
+
+
+# Only allow the following login flows
+# Passwordless > Google > Github > LDAP
+# There is no way to downgrade
+ALLOWED_IDP_FLOWS = {
+    IdpProfile.PROVIDER_PASSWORDLESS: [
+        IdpProfile.PROVIDER_PASSWORDLESS,
+        IdpProfile.PROVIDER_GITHUB,
+        IdpProfile.PROVIDER_LDAP
+    ],
+    IdpProfile.PROVIDER_GITHUB: [
+        IdpProfile.PROVIDER_GITHUB,
+        IdpProfile.PROVIDER_LDAP,
+    ],
+    IdpProfile.PROVIDER_LDAP: [
+        IdpProfile.PROVIDER_LDAP
+    ]
+}
 
 
 def calculate_username(email):
@@ -37,6 +57,17 @@ def calculate_username(email):
 class MozilliansAuthBackend(OIDCAuthenticationBackend):
     """Override OIDCAuthenticationBackend to provide custom functionality."""
 
+    def create_user(self, claims):
+        user = super(MozilliansAuthBackend, self).create_user(claims)
+
+        IdpProfile.objects.create(
+            profile=self.request.user.userprofile,
+            auth0_user_id=claims.get('user_id'),
+            primary=True
+        )
+
+        return user
+
     def filter_users_by_claims(self, claims):
         """Override default method to add multiple emails in an account."""
 
@@ -50,24 +81,54 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         alternate_emails = ExternalAccount.objects.filter(type=account_type, identifier=email)
         primary_email_qs = Q(email=email)
         alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
-        user_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs).distinct()
 
-        # Store auth0 user_id in UserProfile
-        if user_q.exists() and user_q.count() == 1:
-            profile_id = user_q[0].userprofile.id
-            profile_qs = UserProfile.objects.filter(pk=profile_id)
-            profile_qs.update(auth0_user_id=claims.get('user_id'))
+        # Allow logins only using primary email
+        user_q = self.UserModel.objects.filter(email=email)
 
-        # In this case we have a registered user who is adding a secondary email
+        if user_q.exists():
+            # Get or create an IdpProfile for this user
+            profile = user_q[0].userprofile
+            auth0_user_id = claims.get('user_id')
+
+            # Get current_idp
+            current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
+
+            # Get or create new `user_id`
+            obj, _ = IdpProfile.objects.get_or_create(
+                profile=profile,
+                auth0_user_id=auth0_user_id)
+
+            if current_idp:
+
+                if obj.type not in ALLOWED_IDP_FLOWS[current_idp.type]:
+                    msg = u'Please use one of the following authentication methods: {}'
+                    methods = ', '.join(ALLOWED_IDP_FLOWS[current_idp.type])
+                    messages.error(self.request, msg.format(methods))
+                    return self.UserModel.objects.none()
+
+            # Mark other `user_id` as `primary=False`
+            idp_q = IdpProfile.objects.filter(profile=profile)
+            idp_q.exclude(auth0_user_id=auth0_user_id).update(primary=False)
+
+            # Mark current `user_id` as `primary=True`
+            idp_q.filter(auth0_user_id=auth0_user_id).update(primary=True)
+
+            # Update CIS
+            send_userprofile_to_cis.delay(profile.pk)
+
+        # Add alternate email
         if request_user.is_authenticated():
-            if not user_q:
+            email_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs)
+
+            if not email_q:
+                # In this case we have a registered user who is adding a secondary email
                 ExternalAccount.objects.create(type=account_type,
                                                user=request_user.userprofile,
                                                identifier=email)
-                send_userprofile_to_cis.delay(request_user.userprofile.pk)
             else:
                 if not user_q.filter(pk=request_user.id).exists():
                     msg = u'Email {0} already exists in the database.'.format(email)
                     messages.error(self.request, msg)
             return [request_user]
+
         return user_q

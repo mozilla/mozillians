@@ -528,7 +528,7 @@ COMPRESS_CSS_FILTERS = (
     'compressor.filters.cssmin.CSSMinFilter'
 )
 COMPRESS_PRECOMPILERS = (
-    ('text/less', 'lessc {infile} {outfile}'),
+    ('text/less', 'lessc "{infile}" "{outfile}"'),
 )
 
 STATICFILES_FINDERS = (

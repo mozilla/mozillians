@@ -5,7 +5,7 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.users.models import ExternalAccount
+from mozillians.users.models import ExternalAccount, IdpProfile
 from mozillians.users.tests import UserFactory
 
 
@@ -33,7 +33,8 @@ class MozilliansAuthBackendTests(TestCase):
         request_mock.user.is_authenticated.return_value = True
         self.backend.request = request_mock
         claims = {
-            'email': 'bar@example.com'
+            'email': 'bar@example.com',
+            'user_id': 'foobar'
         }
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
                                                  user=user.userprofile,
@@ -47,7 +48,7 @@ class MozilliansAuthBackendTests(TestCase):
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user)
 
-    @patch('mozillians.common.authbackend.messages.error')
+    @patch('mozillians.common.authbackend.messages')
     def test_alternate_email_already_exists(self, mocked_message):
         """Test to add an email that already exists."""
 
@@ -61,7 +62,8 @@ class MozilliansAuthBackendTests(TestCase):
         request_mock.user.is_authenticated.return_value = True
         self.backend.request = request_mock
         claims = {
-            'email': 'bar@example.com'
+            'email': 'bar@example.com',
+            'user_id': 'foobar'
         }
         returned_user = self.backend.filter_users_by_claims(claims)
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
@@ -72,7 +74,7 @@ class MozilliansAuthBackendTests(TestCase):
         eq_(returned_user[0], user)
         ok_(not mocked_message.called)
 
-    @patch('mozillians.common.authbackend.messages.error')
+    @patch('mozillians.common.authbackend.messages')
     def test_add_primary_email_as_alternate(self, mocked_message):
         """Test to add the primary email as alternate."""
 
@@ -83,7 +85,8 @@ class MozilliansAuthBackendTests(TestCase):
         request_mock.user.is_authenticated.return_value = True
         self.backend.request = request_mock
         claims = {
-            'email': 'foo@example.com'
+            'email': 'foo@example.com',
+            'user_id': 'foobar'
         }
         self.backend.filter_users_by_claims(claims)
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
@@ -92,7 +95,7 @@ class MozilliansAuthBackendTests(TestCase):
         ok_(not mocked_message.called)
         ok_(not email_q.exists())
 
-    @patch('mozillians.common.authbackend.messages.error')
+    @patch('mozillians.common.authbackend.messages')
     def test_add_email_belonging_to_other_user(self, mocked_message):
         """Test to add an email belonging to another user."""
 
@@ -104,14 +107,43 @@ class MozilliansAuthBackendTests(TestCase):
         request_mock.user.is_authenticated.return_value = True
         self.backend.request = request_mock
         claims = {
-            'email': 'bar@example.com'
+            'email': 'bar@example.com',
+            'user_id': 'foobar'
         }
+
         returned_user = self.backend.filter_users_by_claims(claims)
         email_q = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL,
                                                  user=user1.userprofile,
                                                  identifier='bar@example.com')
-        mocked_message.assert_called_once_with(request_mock, u'Email bar@example.com already '
-                                                             'exists in the database.')
+        mocked_message.error.assert_called_once_with(request_mock,
+                                                     u'Email bar@example.com already '
+                                                     'exists in the database.')
         ok_(not email_q.exists())
         eq_(len(returned_user), 1)
         eq_(returned_user[0], user1)
+
+    @patch('mozillians.common.authbackend.messages')
+    def test_add_idp_wrong_flow(self, mocked_message):
+        """Test logging in with a provider lesser compared to the current one"""
+
+        user = UserFactory.create(email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foobar',
+            primary=True
+        )
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        request_mock.user.is_authenticated = Mock()
+        request_mock.user.is_authenticated.return_value = True
+        self.backend.request = request_mock
+        claims = {
+            'email': 'foo@example.com',
+            'user_id': 'github|foobar'
+        }
+
+        returned_user = self.backend.filter_users_by_claims(claims)
+        msg = 'Please use one of the following authentication methods: ldap'
+        mocked_message.error.assert_called_once_with(request_mock, msg)
+
+        eq_(len(returned_user), 0)

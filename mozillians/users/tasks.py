@@ -368,34 +368,6 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     profile = UserProfile.objects.get(pk=instance_id)
     human_name = HumanName(profile.full_name)
 
-    data = {
-        'user_id': profile.auth0_user_id,
-        'timezone': profile.timezone,
-        'active': profile.user.is_active,
-        'lastModified': profile.last_updated.isoformat(),
-        'created': profile.user.date_joined.isoformat(),
-        'userName': profile.user.username,
-        'displayName': profile.display_name,
-        'primaryEmail': profile.email,
-        'emails': profile.get_cis_emails(),
-        'uris': profile.get_cis_uris(),
-        'picture': profile.get_photo_url(),
-        'shirtSize': profile.get_tshirt_display(),
-        'groups': profile.get_cis_groups(),
-
-        # Derived fields
-        'firstName': human_name.first,
-        'lastName': human_name.last,
-
-        # Hardcoded fields
-        'preferredLanguage': 'en_US',
-        'phoneNumbers': [],
-        'nicknames': [],
-        'SSHFingerprints': [],
-        'PGPFingerprints': [],
-        'authoritativeGroups': []
-    }
-
     sts = boto3.client('sts')
     sts_response = sts.assume_role(
         RoleArn=settings.CIS_IAM_ROLE_ARN,
@@ -413,8 +385,40 @@ def send_userprofile_to_cis(instance_id, **kwargs):
         'id': settings.CIS_PUBLISHER_NAME
     }
 
-    cis_change = ChangeDelegate(publisher, {}, data)
-    cis_change.boto_session = session
-    result = cis_change.send()
+    results = []
+    for idp in profile.idp_profiles.all():
+        data = {
+            'user_id': idp.auth0_user_id,
+            'timezone': profile.timezone,
+            'active': profile.user.is_active,
+            'lastModified': profile.last_updated.isoformat(),
+            'created': profile.user.date_joined.isoformat(),
+            'userName': profile.user.username,
+            'displayName': profile.display_name,
+            'primaryEmail': profile.email,
+            'emails': profile.get_cis_emails(),
+            'uris': profile.get_cis_uris(),
+            'picture': profile.get_photo_url(),
+            'shirtSize': profile.get_tshirt_display(),
+            'groups': profile.get_cis_groups(idp),
+            'tags': profile.get_cis_tags(),
 
-    return result
+            # Derived fields
+            'firstName': human_name.first,
+            'lastName': human_name.last,
+
+            # Hardcoded fields
+            'preferredLanguage': 'en_US',
+            'phoneNumbers': [],
+            'nicknames': [],
+            'SSHFingerprints': [],
+            'PGPFingerprints': [],
+            'authoritativeGroups': []
+        }
+
+        cis_change = ChangeDelegate(publisher, {}, data)
+        cis_change.boto_session = session
+        result = cis_change.send()
+        results.append(result)
+
+    return results

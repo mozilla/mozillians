@@ -21,6 +21,7 @@ from mozillians.common import utils
 from mozillians.common.templatetags.helpers import absolutify, gravatar
 from mozillians.common.templatetags.helpers import offset_of_timezone
 from mozillians.common.urlresolvers import reverse
+from mozillians.groups import CIS_GROUPS
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
@@ -200,9 +201,6 @@ class UserProfile(UserProfilePrivacyModel):
     referral_source = models.CharField(max_length=32,
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
-
-    # Auth0 required data
-    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -594,14 +592,45 @@ class UserProfile(UserProfilePrivacyModel):
 
         return accounts
 
-    def get_cis_groups(self):
+    def get_cis_groups(self, idp):
         """Prepares the entry for profile groups in the CIS format."""
+
+        # Update strategy: send groups for higher MFA idp
+        # Wipe groups from the rest
+        idps = list(IdpProfile.objects.filter(profile=self).values_list('type', flat=True))
+        ordering = [
+            IdpProfile.PROVIDER_PASSWORDLESS,
+            IdpProfile.PROVIDER_GOOGLE,
+            IdpProfile.PROVIDER_GITHUB,
+            IdpProfile.PROVIDER_LDAP
+        ]
+
+        idps.sort(key=ordering.index)
+
+        # idps are sorted hierarchically
+        # if current idp is not the highest wipe groups
+        if idp.type != idps[-1]:
+            return []
+
         memberships = GroupMembership.objects.filter(
             userprofile=self,
-            status=GroupMembership.MEMBER
+            status=GroupMembership.MEMBER,
+            group__name__in=CIS_GROUPS
         )
         groups = ['mozilliansorg_{}'.format(m.group.name) for m in memberships]
         return groups
+
+    def get_cis_tags(self):
+        """Prepares the entry for profile tags in the CIS format."""
+        memberships = GroupMembership.objects.filter(
+            userprofile=self,
+            status=GroupMembership.MEMBER
+        ).exclude(
+            group__name__in=CIS_GROUPS
+        )
+
+        tags = [m.group.name for m in memberships]
+        return tags
 
     def timezone_offset(self):
         """
@@ -625,6 +654,52 @@ class UserProfile(UserProfilePrivacyModel):
 
         if autovouch:
             self.auto_vouch()
+
+
+class IdpProfile(models.Model):
+    """Basic Identity Provider information for Profiles."""
+    PROVIDER_GITHUB = 'github'
+    PROVIDER_LDAP = 'ldap'
+    PROVIDER_PASSWORDLESS = 'passwordless'
+    PROVIDER_GOOGLE = 'google'
+
+    PROVIDER_TYPES = (
+        (PROVIDER_GITHUB, 'Github Provider',),
+        (PROVIDER_LDAP, 'LDAP Provider',),
+        (PROVIDER_PASSWORDLESS, 'Passwordless Provider',),
+        (PROVIDER_GOOGLE, 'Google Provider',),
+
+    )
+    profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
+    type = models.CharField(choices=PROVIDER_TYPES,
+                            default=PROVIDER_PASSWORDLESS,
+                            max_length=50,
+                            blank=False)
+    # Auth0 required data
+    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+    primary = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def get_provider_type(self):
+        """Helper method to autopopulate the model type given the user_id."""
+        if 'ad|' in self.auth0_user_id:
+            return self.PROVIDER_LDAP
+
+        if 'github|' in self.auth0_user_id:
+            return self.PROVIDER_GITHUB
+
+        if 'google-oauth2|' in self.auth0_user_id:
+            return self.PROVIDER_GOOGLE
+
+        if 'email|' in self.auth0_user_id:
+            return self.PROVIDER_PASSWORDLESS
+
+        return ''
+
+    def save(self, *args, **kwargs):
+        self.type = self.get_provider_type()
+        super(IdpProfile, self).save(*args, **kwargs)
 
 
 class Vouch(models.Model):
