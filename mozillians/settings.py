@@ -450,7 +450,7 @@ ES_REINDEX_BATCHSIZE = config('ES_REINDEX_BATCHSIZE', default=100, cast=int)
 ES_REINDEX_TIMEOUT = config('ES_REINDEX_TIMEOUT', default=1800, cast=int)
 
 # Setup django-axes
-AXES_BEHIND_REVERSE_PROXY = True
+AXES_BEHIND_REVERSE_PROXY = config('AXES_BEHIND_REVERSE_PROXY', default=True)
 
 # Setup sentry
 RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
@@ -505,9 +505,6 @@ TEMPLATES = [
         }
     }
 ]
-
-# Proxy configuration
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # CIS
 CIS_IAM_ROLE_ARN = config('CIS_IAM_ROLE_ARN', default='')
