@@ -42,29 +42,6 @@ class UserProfileQuerySetTests(TestCase):
         eq_(set(queryset.all()), set([complete_user_1.userprofile,
                                       complete_user_2.userprofile]))
 
-    @patch('mozillians.users.managers.PUBLIC_INDEXABLE_FIELDS',
-           {'full_name': '', 'email': ''})
-    def test_public_indexable(self):
-        public_indexable_user_1 = UserFactory.create(
-            userprofile={'privacy_full_name': PUBLIC})
-        public_indexable_user_2 = UserFactory.create(
-            userprofile={'privacy_email': PUBLIC})
-        UserFactory.create(userprofile={'privacy_email': PUBLIC, 'full_name': ''})
-        UserFactory.create()
-        queryset = UserProfile.objects.public_indexable()
-        eq_(queryset.count(), 2)
-        eq_(set(queryset.all()), set([public_indexable_user_1.userprofile,
-                                      public_indexable_user_2.userprofile]))
-
-    def test_not_public_indexable(self):
-        UserFactory.create(userprofile={'privacy_full_name': PUBLIC})
-        UserFactory.create(userprofile={'privacy_email': PUBLIC})
-        UserFactory.create(userprofile={'privacy_email': PUBLIC, 'full_name': ''})
-        notpublic_user_1 = UserFactory.create()
-        queryset = UserProfile.objects.not_public_indexable()
-        eq_(queryset.count(), 1)
-        eq_(queryset[0], notpublic_user_1.userprofile)
-
     def test_clone(self):
         queryset = UserProfile.objects.all()
         queryset.privacy_level(99)
