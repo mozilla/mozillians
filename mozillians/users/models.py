@@ -754,13 +754,11 @@ class ExternalAccount(models.Model):
     TYPE_AMO = 'AMO'
     TYPE_BMO = 'BMO'
     TYPE_EMAIL = 'EMAIL'
-    TYPE_GITHUB = 'GITHUB'
     TYPE_MDN = 'MDN'
     TYPE_SUMO = 'SUMO'
     TYPE_FACEBOOK = 'FACEBOOK'
     TYPE_TWITTER = 'TWITTER'
     TYPE_AIM = 'AIM'
-    TYPE_GTALK = 'GTALK'
     TYPE_SKYPE = 'SKYPE'
     TYPE_YAHOO = 'YAHOO'
     TYPE_WEBSITE = 'WEBSITE'
@@ -775,8 +773,6 @@ class ExternalAccount(models.Model):
     TYPE_LANYRD = 'LANYRD'
     TYPE_LANDLINE = 'Phone (Landline)'
     TYPE_MOBILE = 'Phone (Mobile)'
-    TYPE_MOVERBATIM = 'MOZILLAVERBATIM'
-    TYPE_MOLOCAMOTION = 'MOZILLALOCAMOTION'
     TYPE_MOLOCATION = 'MOZILLALOCATION'
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
@@ -802,9 +798,6 @@ class ExternalAccount(models.Model):
         TYPE_EMAIL: {'name': 'Alternate email address',
                      'url': '',
                      'validator': validate_email},
-        TYPE_GITHUB: {'name': 'GitHub',
-                      'url': 'https://github.com/{identifier}',
-                      'validator': validate_username_not_url},
         TYPE_BITBUCKET: {'name': 'Bitbucket',
                          'url': 'https://bitbucket.org/{identifier}',
                          'validator': validate_username_not_url},
@@ -824,9 +817,6 @@ class ExternalAccount(models.Model):
                        'url': 'https://twitter.com/{identifier}',
                        'validator': validate_twitter},
         TYPE_AIM: {'name': 'AIM', 'url': ''},
-        TYPE_GTALK: {'name': 'Google+ Hangouts',
-                     'url': '',
-                     'validator': validate_email},
         TYPE_SKYPE: {'name': 'Skype', 'url': ''},
         TYPE_SLIDESHARE: {'name': 'SlideShare',
                           'url': 'http://www.slideshare.net/{identifier}',
@@ -860,12 +850,6 @@ class ExternalAccount(models.Model):
         TYPE_MOBILE: {'name': 'Phone (Mobile)',
                       'url': '',
                       'validator': validate_phone_number},
-        TYPE_MOVERBATIM: {'name': 'Mozilla Verbatim',
-                          'url': 'https://localize.mozilla.org/accounts/{identifier}/',
-                          'validator': validate_username_not_url},
-        TYPE_MOLOCAMOTION: {'name': 'Mozilla Locamotion',
-                            'url': 'http://mozilla.locamotion.org/user/{identifier}/',
-                            'validator': validate_username_not_url},
         TYPE_MOPONTOON: {'name': 'Mozilla Pontoon',
                          'url': 'https://pontoon.mozilla.org/contributor/{identifier}/',
                          'validator': validate_email},
