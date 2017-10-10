@@ -176,7 +176,7 @@ class SearchTests(TestCase):
         eq_(response.get('content-type'), 'application/json')
 
         data = json.loads(response.content)
-        eq_(data['results'][0]['id'], skill_1.id)
+        eq_(data['results'][0]['id'], str(skill_1.id))
 
     def test_search_no_ajax(self):
         user = UserFactory.create()

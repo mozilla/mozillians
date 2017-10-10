@@ -189,10 +189,10 @@ class UserProfileFilter(django_filters.FilterSet):
     country = django_filters.CharFilter(name='country__name')
     country_code = django_filters.CharFilter(name='country__code2')
     username = django_filters.CharFilter(name='user__username')
-    email = django_filters.MethodFilter(action='filter_emails')
+    email = django_filters.CharFilter(method='filter_emails')
     language = django_filters.CharFilter(name='language__code')
     account = django_filters.CharFilter(name='externalaccount__identifier', distinct=True)
-    group = django_filters.MethodFilter(action='filter_group')
+    group = django_filters.CharFilter(method='filter_group')
     skill = django_filters.CharFilter(name='skills__name')
 
     class Meta:
@@ -201,14 +201,14 @@ class UserProfileFilter(django_filters.FilterSet):
                   'username', 'email', 'ircname', 'full_name',
                   'account', 'group', 'skill')
 
-    def filter_emails(self, queryset, value):
+    def filter_emails(self, queryset, name, value):
         """Return users with email matching either primary or alternate email address"""
         qs = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL, identifier=value)
         users = qs.values_list('user__id', flat=True)
         query = Q(id__in=users) | Q(user__email=value)
         return queryset.filter(query).distinct()
 
-    def filter_group(self, queryset, value):
+    def filter_group(self, queryset, name, value):
         membership = GroupMembership.MEMBER
         return queryset.filter(groups__name=value, groupmembership__status=membership)
 

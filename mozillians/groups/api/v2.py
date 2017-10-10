@@ -70,7 +70,7 @@ class SkillDetailedSerializer(SkillSerializer):
 
 
 class GroupFilter(django_filters.FilterSet):
-    curator = django_filters.MethodFilter(action='filter_curator')
+    curator = django_filters.CharFilter(method='filter_curator')
 
     class Meta:
         model = Group
