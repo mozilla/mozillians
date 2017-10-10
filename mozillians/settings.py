@@ -325,12 +325,13 @@ CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='amqp')
 BROKER_URL = config('BROKER_URL', default='amqp://guest:guest@broker:5672//')
 CELERY_ACCEPT_CONTENT = config('CELERY_ACCEPT_CONTENT', default='pickle', cast=Csv())
 CELERY_TASK_RESULT_EXPIRES = config('CELERY_TASK_RESULT_EXPIRES', default=3600, cast=int)
+CELERY_ENABLE_UTC = config('CELERY_ENABLE_UTC', default=True, cast=bool)
 CELERY_SEND_TASK_ERROR_EMAILS = config('CELERY_SEND_TASK_ERROR_EMAILS', default=True, cast=bool)
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='amqp')
 REDIS_CONNECT_RETRY = config('REDIS_CONNECT_RETRY',
                              default=CELERY_RESULT_BACKEND == 'redis', cast=bool)
-# Time in seconds before celery.exceptions.SoftTimeLimitExceeded is raised.
-# The task can catch that and recover but should exit ASAP.
-CELERYD_TASK_SOFT_TIME_LIMIT = config('CELERYD_TASK_SOFT_TIME_LIMIT', default=150, cast=int)
+BROKER_URL = config('CELERY_BROKER_URL', default='amqp://guest:guest@broker:5672//')
+CELERY_ACCEPT_CONTENT = config('CELERY_ACCEPT_CONTENT', default='pickle', cast=Csv())
 
 MESSAGE_STORAGE = config('MESSAGE_STORAGE',
                          default='django.contrib.messages.storage.session.SessionStorage')
