@@ -710,6 +710,28 @@ class VouchAdmin(admin.ModelAdmin):
 admin.site.register(Vouch, VouchAdmin)
 
 
+class ExternalAccountResource(ModelResource):
+    """django-import-export Language resource."""
+    username = Field(attribute='user__user__username')
+    full_name = Field(attribute='user__full_name')
+
+    class Meta:
+        model = ExternalAccount
+        exclude = ['privacy', 'id', 'user']
+
+
+class ExternalAccountAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
+    resource_class = ExternalAccountResource
+    list_display = ['type', 'user', 'identifier']
+    list_filter = ['type']
+
+    class Meta:
+        model = ExternalAccount
+
+
+admin.site.register(ExternalAccount, ExternalAccountAdmin)
+
+
 class AbuseReportAutocompleteForm(forms.ModelForm):
 
     class Meta:
