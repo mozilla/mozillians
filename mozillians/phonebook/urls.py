@@ -1,8 +1,10 @@
 from django.conf.urls import patterns, url
+from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
 from mozillians.common.decorators import allow_public
-from mozillians.phonebook.views import PhonebookSearchView
+from mozillians.phonebook.views import (PhonebookSearchView, VerifyIdentityView,
+                                        VerifyIdentityCallbackView)
 
 
 urlpatterns = patterns(
@@ -11,6 +13,12 @@ urlpatterns = patterns(
     url(r'^login/$', 'views.login', name='login'),
     url(r'^logout/$', 'views.logout', name='logout'),
     url(r'^register/$', 'views.register', name='register'),
+    # Use Auth0 to verify an identity
+    url(r'^verify/identity/$', login_required(VerifyIdentityView.as_view()),
+        name='verify_identity'),
+    url(r'^verify/identity/callback/$', login_required(VerifyIdentityCallbackView.as_view()),
+        name='verify_identity_callback'),
+
     url(r'^user/edit/$', 'views.edit_profile', name='profile_edit'),
     url(r'^u/(?P<username>[\w.@+-]+)/$', 'views.view_profile',
         name='profile_view'),
