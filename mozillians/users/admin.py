@@ -782,7 +782,7 @@ admin.site.register(AbuseReport, AbuseReportAdmin)
 
 class IdpProfileAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = IdpProfile
-    list_display = ['type', 'profile', 'auth0_user_id']
+    list_display = ['type', 'profile', 'auth0_user_id', 'email']
     list_filter = ['type']
 
     class Meta:

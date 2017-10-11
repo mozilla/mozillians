@@ -1,5 +1,7 @@
 import json
 import logging
+import requests
+from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth.views import logout as auth_logout
@@ -10,28 +12,34 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.views.generic import View
 
+from jose import jws
 from django.utils.translation import ugettext as _
 from haystack.generic_views import SearchView
 from haystack.query import EmptySearchQuerySet
+from mozilla_django_oidc.views import OIDCAuthenticationRequestView, get_next_url
+from mozilla_django_oidc.utils import absolutify, import_from_settings
 from raven.contrib.django.models import client
 from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
 from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
-from mozillians.common.templatetags.helpers import get_object_or_none, redirect, urlparams
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
+from mozillians.common.templatetags.helpers import (get_object_or_none, nonprefixed_url, redirect,
+                                                    urlparams)
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
-from mozillians.users.models import AbuseReport, ExternalAccount, UserProfile
+from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, UserProfile
 from mozillians.users.tasks import (check_spam_account, update_email_in_basket,
                                     send_userprofile_to_cis)
 
@@ -535,3 +543,137 @@ class PhonebookSearchView(SearchView):
         context_data['region'] = self.kwargs.get('region')
         context_data['city'] = self.kwargs.get('city')
         return context_data
+
+
+# Verify additional identities
+class VerifyIdentityView(OIDCAuthenticationRequestView):
+
+    def __init__(self, *args, **kwargs):
+        """Override the init method to dynamically pass a different client_id."""
+        self.OIDC_RP_VERIFICATION_CLIENT_ID = (
+            import_from_settings('OIDC_RP_VERIFICATION_CLIENT_ID')
+        )
+        super(VerifyIdentityView, self).__init__(*args, **kwargs)
+
+    def get(self, request):
+        """OIDC client authentication initialization HTTP endpoint.
+
+        This is based on the mozilla-django-oidc library
+        """
+        state = get_random_string(import_from_settings('OIDC_STATE_SIZE', 32))
+        redirect_field_name = import_from_settings('OIDC_REDIRECT_FIELD_NAME', 'next')
+
+        params = {
+            'response_type': 'code',
+            'scope': import_from_settings('OIDC_RP_SCOPES', 'openid email'),
+            'client_id': self.OIDC_RP_VERIFICATION_CLIENT_ID,
+            'redirect_uri': absolutify(
+                request,
+                nonprefixed_url('phonebook:verify_identity_callback')
+            ),
+            'state': state,
+        }
+
+        if import_from_settings('OIDC_USE_NONCE', True):
+            nonce = get_random_string(import_from_settings('OIDC_NONCE_SIZE', 32))
+            params.update({
+                'nonce': nonce
+            })
+            request.session['oidc_verify_nonce'] = nonce
+
+        request.session['oidc_verify_state'] = state
+        request.session['oidc_login_next'] = get_next_url(request, redirect_field_name)
+
+        query = urlencode(params)
+        redirect_url = '{url}?{query}'.format(url=self.OIDC_OP_AUTH_ENDPOINT, query=query)
+        return HttpResponseRedirect(redirect_url)
+
+
+class VerifyIdentityCallbackView(View):
+
+    def __init__(self, *args, **kwargs):
+        """Initialize settings."""
+        self.OIDC_OP_TOKEN_ENDPOINT = import_from_settings('OIDC_OP_TOKEN_ENDPOINT')
+        self.OIDC_OP_USER_ENDPOINT = import_from_settings('OIDC_OP_USER_ENDPOINT')
+        self.OIDC_RP_VERIFICATION_CLIENT_ID = (
+            import_from_settings('OIDC_RP_VERIFICATION_CLIENT_ID')
+        )
+        self.OIDC_RP_VERIFICATION_CLIENT_SECRET = (
+            import_from_settings('OIDC_RP_VERIFICATION_CLIENT_SECRET')
+        )
+
+    def get(self, request):
+        """Callback handler for OIDC authorization code flow.
+
+        This is based on the mozilla-django-oidc library.
+        This callback is used to verify the identity added by the user.
+        Users are already logged in and we do not care about authentication.
+        The JWT token is used to prove the identity of the user.
+        """
+
+        profile = request.user.userprofile
+        # This is a difference nonce than the one used to login!
+        nonce = request.session.get('oidc_verify_nonce')
+        if nonce:
+            # Make sure that nonce is not used twice
+            del request.session['oidc_verify_nonce']
+
+        # Check for all possible errors and display a message to the user.
+        errors = [
+            'code' not in request.GET,
+            'state' not in request.GET,
+            'oidc_verify_state' not in request.session,
+            request.GET['state'] != request.session['oidc_verify_state']
+        ]
+        if any(errors):
+            msg = 'Something went wrong, account verification failed.'
+            messages.error(request, msg)
+            return redirect('phonebook:profile_edit')
+
+        token_payload = {
+            'client_id': self.OIDC_RP_VERIFICATION_CLIENT_ID,
+            'client_secret': self.OIDC_RP_VERIFICATION_CLIENT_SECRET,
+            'grant_type': 'authorization_code',
+            'code': request.GET['code'],
+            'redirect_uri': absolutify(
+                self.request,
+                nonprefixed_url('phonebook:verify_identity_callback')
+            ),
+        }
+        response = requests.post(self.OIDC_OP_TOKEN_ENDPOINT,
+                                 data=token_payload,
+                                 verify=import_from_settings('OIDC_VERIFY_SSL', True))
+        response.raise_for_status()
+        token_response = response.json()
+        id_token = token_response.get('id_token')
+
+        # Verify JWT
+        verified_token = jws.verify(id_token,
+                                    self.OIDC_RP_VERIFICATION_CLIENT_SECRET,
+                                    algorithms=['HS256'])
+
+        # Create the new Identity Profile.
+        if verified_token:
+            user_info = json.loads(verified_token)
+
+            if not user_info.get('email_verified'):
+                msg = 'Account verification failed: `Email is not verified`.'
+                messages.error(request, msg)
+                return redirect('phonebook:profile_edit')
+
+            # Save the new identity to the IdpProfile
+            user_q = {
+                'profile': profile,
+                'auth0_user_id': user_info['sub'],
+                'email': user_info['email']
+            }
+
+            _, created = IdpProfile.objects.get_or_create(**user_q)
+            if created:
+                msg = 'Account successfully verified.'
+                messages.success(request, msg)
+            else:
+                msg = 'Account already exists.'
+                messages.error(request, msg)
+
+        return redirect('phonebook:profile_edit')

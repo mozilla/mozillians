@@ -190,6 +190,8 @@ CANONICAL_LOCALES = {
 EXEMPT_L10N_URLS = [
     '^/oidc/authenticate/',
     '^/oidc/callback/',
+    '^/verify/identity/',
+    '^/verify/identity/callback/',
     '^/api/v1/',
     '^/api/v2/',
     '^/admin/'
@@ -405,6 +407,8 @@ OIDC_OP_DOMAIN = config('OIDC_OP_DOMAIN', default='auth.mozilla.auth0.com')
 OIDC_OP_AUTHORIZATION_ENDPOINT = config('OIDC_OP_AUTHORIZATION_ENDPOINT', default='')
 OIDC_OP_TOKEN_ENDPOINT = config('OIDC_OP_TOKEN_ENDPOINT', default='')
 OIDC_OP_USER_ENDPOINT = config('OIDC_OP_USER_ENDPOINT', default='')
+OIDC_RP_VERIFICATION_CLIENT_ID = config('OIDC_RP_VERIFICATION_CLIENT_ID', default='')
+OIDC_RP_VERIFICATION_CLIENT_SECRET = config('OIDC_RP_VERIFICATION_CLIENT_SECRET', default='')
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
