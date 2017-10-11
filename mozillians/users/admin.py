@@ -25,7 +25,7 @@ from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.models import get_languages_for_locale
-from mozillians.users.models import (AbuseReport, ExternalAccount, Language, PUBLIC,
+from mozillians.users.models import (AbuseReport, ExternalAccount, IdpProfile, Language, PUBLIC,
                                      UserProfile, UsernameBlacklist, Vouch)
 from mozillians.users.tasks import (check_celery, subscribe_user_to_basket,
                                     unsubscribe_from_basket_task, index_all_profiles)
@@ -778,3 +778,15 @@ class AbuseReportAdmin(admin.ModelAdmin):
 
 
 admin.site.register(AbuseReport, AbuseReportAdmin)
+
+
+class IdpProfileAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
+    resource_class = IdpProfile
+    list_display = ['type', 'profile', 'auth0_user_id']
+    list_filter = ['type']
+
+    class Meta:
+        model = IdpProfile
+
+
+admin.site.register(IdpProfile, IdpProfileAdmin)
