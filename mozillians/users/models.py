@@ -678,8 +678,10 @@ class IdpProfile(models.Model):
     # Auth0 required data
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
     primary = models.BooleanField(default=False)
+    email = models.EmailField(blank=True, default='')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
 
     def get_provider_type(self):
         """Helper method to autopopulate the model type given the user_id."""
@@ -700,6 +702,9 @@ class IdpProfile(models.Model):
     def save(self, *args, **kwargs):
         self.type = self.get_provider_type()
         super(IdpProfile, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('profile', 'type', 'email')
 
 
 class Vouch(models.Model):
