@@ -61,7 +61,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         user = super(MozilliansAuthBackend, self).create_user(claims)
 
         IdpProfile.objects.create(
-            profile=self.request.user.userprofile,
+            profile=user.userprofile,
             auth0_user_id=claims.get('user_id'),
             primary=True
         )
