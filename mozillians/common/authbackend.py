@@ -20,6 +20,13 @@ from mozillians.users.tasks import send_userprofile_to_cis
 ALLOWED_IDP_FLOWS = {
     IdpProfile.PROVIDER_PASSWORDLESS: [
         IdpProfile.PROVIDER_PASSWORDLESS,
+        IdpProfile.PROVIDER_GOOGLE,
+        IdpProfile.PROVIDER_GITHUB,
+        IdpProfile.PROVIDER_LDAP
+    ],
+    IdpProfile.PROVIDER_GOOGLE: [
+        IdpProfile.PROVIDER_PASSWORDLESS,
+        IdpProfile.PROVIDER_GOOGLE,
         IdpProfile.PROVIDER_GITHUB,
         IdpProfile.PROVIDER_LDAP
     ],
@@ -63,6 +70,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id=claims.get('user_id'),
+            email=claims.get('email'),
             primary=True
         )
 
@@ -96,6 +104,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             # Get or create new `user_id`
             obj, _ = IdpProfile.objects.get_or_create(
                 profile=profile,
+                email=claims.get('email'),
                 auth0_user_id=auth0_user_id)
 
             if current_idp:
