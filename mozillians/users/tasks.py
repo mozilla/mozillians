@@ -13,7 +13,7 @@ from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
 from nameparser import HumanName
 
-from mozillians.common.utils import akismet_spam_check
+from mozillians.common.utils import akismet_spam_check, is_test_environment
 from mozillians.common.templatetags.helpers import get_object_or_none
 
 
@@ -364,6 +364,9 @@ def send_userprofile_to_cis(instance_id, **kwargs):
 
     from cis.publisher import ChangeDelegate
     from mozillians.users.models import UserProfile
+
+    if is_test_environment():
+        return None
 
     profile = UserProfile.objects.get(pk=instance_id)
     human_name = HumanName(profile.full_name)
