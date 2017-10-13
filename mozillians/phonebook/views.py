@@ -661,19 +661,25 @@ class VerifyIdentityCallbackView(View):
                 messages.error(request, msg)
                 return redirect('phonebook:profile_edit')
 
-            # Save the new identity to the IdpProfile
             user_q = {
-                'profile': profile,
                 'auth0_user_id': user_info['sub'],
                 'email': user_info['email']
             }
 
+            # Check that the identity doesn't exist in another profile
+            if IdpProfile.objects.filter(**user_q).exists():
+                msg = 'Account verification failed: Identity already exists.'
+                messages.error(request, msg)
+                return redirect('phonebook:profile_edit')
+
+            # Save the new identity to the IdpProfile
+            user_q['profile'] = profile
             _, created = IdpProfile.objects.get_or_create(**user_q)
             if created:
                 msg = 'Account successfully verified.'
                 messages.success(request, msg)
             else:
-                msg = 'Account already exists.'
+                msg = 'Account verification failed: Identity already exists.'
                 messages.error(request, msg)
 
         return redirect('phonebook:profile_edit')
