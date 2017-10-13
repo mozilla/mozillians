@@ -1,3 +1,5 @@
+import sys
+
 from django.conf import settings
 
 import requests
@@ -48,3 +50,10 @@ def akismet_spam_check(user_ip, user_agent, **optional):
     except KeyError:
         error = response.headers.get('x-akismet-debug-help')
         raise Exception('Akismet raised an error: {0}'.format(error))
+
+
+def is_test_environment():
+    """Check if environment is a test runner."""
+    if len(sys.argv) > 1 and sys.argv[1] == 'test':
+        return True
+    return False
