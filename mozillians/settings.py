@@ -604,6 +604,13 @@ CSP_SCRIPT_SRC = (
     'https://*.google-analytics.com',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
+
+    # Allow Django's admin scripts
+    "'sha256-UtImx13kPrbu3A8Xh9LfC9WbLVFznPB3z3KlhHI+WsM='",
+    "'sha256-YAeNgc46QF0YbTBOhlJJtwaOwJTu1UEvFVe3ljLBobg='",
+    "'sha256-SnCGK9WisvmkewWrjN4QT2Xmx3i1GHWA56tgHFJjL0w='",
+    "'sha256-fH3rM69L3MlQuLHwmENXZ9SSP9u+7mECRGOpE5pY/Hw='",
+    "'sha256-lV6Q4R6n6P5zkatU4DiQ40kagqmlwvF0XXvRV/UfpPU='",
 )
 CSP_STYLE_SRC = (
     "'self'",
