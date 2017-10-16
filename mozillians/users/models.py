@@ -597,7 +597,7 @@ class UserProfile(UserProfilePrivacyModel):
 
         # Update strategy: send groups for higher MFA idp
         # Wipe groups from the rest
-        idps = list(IdpProfile.objects.filter(profile=self).values_list('type', flat=True))
+        idps = list(self.idp_profiles.all().values_list('type', flat=True))
         ordering = [
             IdpProfile.PROVIDER_PASSWORDLESS,
             IdpProfile.PROVIDER_GOOGLE,
