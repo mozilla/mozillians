@@ -609,7 +609,7 @@ class UserProfile(UserProfilePrivacyModel):
 
         # idps are sorted hierarchically
         # if current idp is not the highest wipe groups
-        if idp.type != idps[-1]:
+        if not idps or idp.type != idps[-1]:
             return []
 
         memberships = GroupMembership.objects.filter(
