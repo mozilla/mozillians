@@ -366,9 +366,12 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     from mozillians.users.models import UserProfile
 
     if is_test_environment():
-        return None
+        return []
 
-    profile = UserProfile.objects.get(pk=instance_id)
+    try:
+        profile = UserProfile.objects.get(pk=instance_id)
+    except UserProfile.DoesNotExist:
+        return []
     human_name = HumanName(profile.full_name)
 
     sts = boto3.client('sts')
