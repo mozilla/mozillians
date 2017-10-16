@@ -707,6 +707,23 @@ class CISHelperMethodsTests(unittest.TestCase):
 
         eq_(user.userprofile.get_cis_groups(idp), [])
 
+    def test_cis_groups_without_idp_profile(self):
+        user = UserFactory.create()
+        user1 = UserFactory.create()
+        group1 = GroupFactory.create(name='nda')
+        group2 = GroupFactory.create(name='cis_whitelist')
+        group3 = GroupFactory.create(name='group3')
+        group1.add_member(user.userprofile)
+        group2.add_member(user.userprofile)
+        group3.add_member(user.userprofile, status='PENDING')
+        idp = IdpProfile.objects.create(
+            profile=user1.userprofile,
+            auth0_user_id='github|foo@bar.com',
+            primary=False,
+        )
+
+        eq_(user.userprofile.get_cis_groups(idp), [])
+
     def test_cis_tags(self):
         user = UserFactory.create()
         group1 = GroupFactory.create(name='foo')
