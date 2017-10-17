@@ -54,7 +54,7 @@ Building mozillians
 
 #. Configure your local Mozillians installation::
 
-     $ cp mozillians/settings/local.py-docker-dist mozillians/settings/local.py
+     $ cp mozillians/env-dist mozillians/.env
 
 #. Start ``MySQL`` and ``ElasticSearch`` containers::
 
