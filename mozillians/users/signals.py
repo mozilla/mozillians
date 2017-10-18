@@ -3,8 +3,6 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from multidb.pinning import use_master
-
 from mozillians.users.models import ExternalAccount, UserProfile, Vouch
 from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_basket_task
 
@@ -54,9 +52,8 @@ def update_vouch_flags(sender, instance, **kwargs):
         # UserProfile as well. Do nothing.
         return
 
-    with use_master:
-        vouches_qs = Vouch.objects.filter(vouchee=profile)
-        vouches = vouches_qs.count()
+    vouches_qs = Vouch.objects.filter(vouchee=profile)
+    vouches = vouches_qs.count()
 
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
