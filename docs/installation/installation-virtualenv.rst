@@ -99,7 +99,7 @@ When you want to start contributing...
 
 #. Configure your local mozillians installation::
 
-     (venv)$ cp mozillians/settings/local.py-devdist mozillians/settings/local.py
+     (venv)$ cp mozillians/env-dist mozillians/.env
 
    The provided configuration uses a MySQL database named `mozillians` and
    accesses it locally using the user `mozillians`.
