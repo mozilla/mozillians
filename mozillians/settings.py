@@ -81,7 +81,6 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'mozillians.common.middleware.LocaleURLMiddleware',
-    'multidb.middleware.PinningRouterMiddleware',
 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -114,8 +113,6 @@ MIDDLEWARE_CLASSES = (
 DATABASES = {
     'default': config('DATABASE_URL', cast=db_url)
 }
-DATABASE_ROUTERS = ('multidb.PinningMasterSlaveRouter',)
-SLAVE_DATABASES = []
 
 ############################
 # Environment variables
