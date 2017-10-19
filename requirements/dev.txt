@@ -126,9 +126,9 @@ backports.ssl_match_hostname==3.5.0.1 \
 django-debug-toolbar==1.7 \
     --hash=sha256:89831c775d5317d47825c03426a04404a9042e23385039fbc14549ace8781107 \
     --hash=sha256:bd929113ae22d7553c3ae6a6cb6762e8453784972eca06fa396aca47d0b66874
-sqlparse==0.2.3 \
-    --hash=sha256:740a023ef38ce11bbb99a9d143856f56ef4ec5b0d7a853f58c02c65b035114c4 \
-    --hash=sha256:becd7cc7cebbdf311de8ceedfcf2bd2403297024418801947f8c953025beeff8
+sqlparse==0.2.4 \
+    --hash=sha256:d9cf190f51cbb26da0412247dfe4fb5f4098edb73db84e02f9fc21fdca31fed4 \
+    --hash=sha256:ce028444cfab83be538752a2ffdb56bc417b7784ff35bb9a3062413717807dec
 configparser==3.5.0 \
     --hash=sha256:5308b47021bc2340965c371f0f058cc6971a04502638d4244225c49d80db273a
 pycodestyle==2.0.0 \
