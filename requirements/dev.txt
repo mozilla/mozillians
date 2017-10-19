@@ -70,9 +70,9 @@ dennis==0.9 \
 django-extensions==1.9.6 \
     --hash=sha256:5908798c70b1768c5165cc84c6466ace982c50f851a0f9e210a6293e9d7e7a4a \
     --hash=sha256:2ef641759e340ca584b3c66f14809dce45cfc06c3e5fe555e934af9ac51e74a7
-factory-boy==2.6.0 \
-    --hash=sha256:116610a170918df342db2c4bafbc8f4b91780c49878f929d89e360f10ad29d2a \
-    --hash=sha256:75e4c9786ed28d19ec7fb500f3c7221a6eb87748cbc6f5e2eeaca4c3d68f30cb
+factory-boy==2.9.2 \
+    --hash=sha256:b8334bcc3c5b10af9a83ab5b8786f98cb322638dc1e6d320cad01c7f2b420e87 \
+    --hash=sha256:340c602f6fed2d8dd160397f28f2c0219e937f0488460450e8e5bf2add020ed6
 fake-factory==0.5.3 \
     --hash=sha256:90f507891ad1073e08cf6908eb51d5e1debc3c5a5d554427e8c3fbf73cdf12ee
 flake8==3.0.4 \
