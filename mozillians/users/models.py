@@ -29,8 +29,8 @@ from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_phone_number, validate_linkedin)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
-                                       MOZILLIANS, PRIVACY_CHOICES, PRIVILEGED,
-                                       PUBLIC, PUBLIC_INDEXABLE_FIELDS,
+                                       MOZILLIANS, PRIVACY_CHOICES, PRIVACY_CHOICES_WITH_PRIVATE,
+                                       PRIVATE, PUBLIC, PUBLIC_INDEXABLE_FIELDS,
                                        UserProfileManager, UserProfileQuerySet)
 from mozillians.users.tasks import send_userprofile_to_cis
 
@@ -61,7 +61,8 @@ class UserProfilePrivacyModel(models.Model):
     privacy_full_name = PrivacyField()
     privacy_full_name_local = PrivacyField()
     privacy_ircname = PrivacyField()
-    privacy_email = PrivacyField()
+    privacy_email = PrivacyField(choices=PRIVACY_CHOICES_WITH_PRIVATE,
+                                 default=MOZILLIANS)
     privacy_bio = PrivacyField()
     privacy_geo_city = PrivacyField()
     privacy_geo_region = PrivacyField()
@@ -74,10 +75,12 @@ class UserProfilePrivacyModel(models.Model):
     privacy_languages = PrivacyField()
     privacy_date_mozillian = PrivacyField()
     privacy_timezone = PrivacyField()
-    privacy_tshirt = PrivacyField(choices=((PRIVILEGED, _lazy(u'Privileged')),),
-                                  default=PRIVILEGED)
+    privacy_tshirt = PrivacyField(choices=((PRIVATE, _lazy(u'Private')),),
+                                  default=PRIVATE)
     privacy_title = PrivacyField()
     privacy_story_link = PrivacyField()
+    privacy_idp_profile = PrivacyField(choices=PRIVACY_CHOICES_WITH_PRIVATE,
+                                       default=MOZILLIANS)
 
     CACHED_PRIVACY_FIELDS = None
 
@@ -239,7 +242,8 @@ class UserProfile(UserProfilePrivacyModel):
             'vouches_made': '_vouches_made',
             'vouches_received': '_vouches_received',
             'vouched_by': '_vouched_by',
-            'websites': '_websites'
+            'websites': '_websites',
+            'identity_profiles': '_identity_profiles'
         }
 
         if attrname in special_functions:
@@ -270,6 +274,12 @@ class UserProfile(UserProfilePrivacyModel):
     def _alternate_emails(self):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
         accounts = _getattr('externalaccount_set').filter(type=ExternalAccount.TYPE_EMAIL)
+        return self._filter_accounts_privacy(accounts)
+
+    @property
+    def _identity_profiles(self):
+        _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+        accounts = _getattr('idp_profiles').all()
         return self._filter_accounts_privacy(accounts)
 
     @property
@@ -354,7 +364,7 @@ class UserProfile(UserProfilePrivacyModel):
     def privacy_level(self):
         """Return user privacy clearance."""
         if (self.user.groups.filter(name='Managers').exists() or self.user.is_superuser):
-            return PRIVILEGED
+            return PRIVATE
         if self.groups.filter(name='staff').exists():
             return EMPLOYEES
         if self.is_vouched:
@@ -673,7 +683,8 @@ class IdpProfile(models.Model):
     email = models.EmailField(blank=True, default='')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES_WITH_PRIVATE)
+    primary_contact_identity = models.BooleanField(default=False)
 
     def get_provider_type(self):
         """Helper method to autopopulate the model type given the user_id."""
@@ -697,7 +708,15 @@ class IdpProfile(models.Model):
         return self.type in [self.PROVIDER_GITHUB, self.PROVIDER_LDAP]
 
     def save(self, *args, **kwargs):
+        """Custom save method.
+
+        Provides a default contact identity and a helper to assign the provider type.
+        """
         self.type = self.get_provider_type()
+        # If there isn't a primary contact identity, create one
+        if not (IdpProfile.objects.filter(profile=self.profile,
+                                          primary_contact_identity=True).exists()):
+            self.primary_contact_identity = True
         super(IdpProfile, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -872,7 +891,7 @@ class ExternalAccount(models.Model):
                             choices=sorted([(k, v['name']) for (k, v) in ACCOUNT_TYPES.iteritems()
                                             if k != TYPE_EMAIL], key=lambda x: x[1]),
                             verbose_name=_lazy(u'Account Type'))
-    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES)
+    privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES_WITH_PRIVATE)
 
     class Meta:
         ordering = ['type']

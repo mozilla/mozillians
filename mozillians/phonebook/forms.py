@@ -26,7 +26,7 @@ from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import AbuseReport, ExternalAccount, Language, UserProfile
+from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, Language, UserProfile
 from mozillians.users.search_indexes import UserProfileIndex
 
 
@@ -68,14 +68,16 @@ AccountsFormset = inlineformset_factory(UserProfile, ExternalAccount,
                                         form=ExternalAccountForm, extra=1)
 
 
-class AlternateEmailForm(happyforms.ModelForm):
+class IdpProfileForm(happyforms.ModelForm):
+    """Form for the IdpProfile model."""
+
     class Meta:
-        model = ExternalAccount
+        model = IdpProfile
         fields = ['privacy']
 
 
-AlternateEmailFormset = inlineformset_factory(UserProfile, ExternalAccount,
-                                              form=AlternateEmailForm, extra=0)
+IdpProfileFormset = inlineformset_factory(UserProfile, IdpProfile,
+                                          form=IdpProfileForm, extra=0)
 
 
 class EmailPrivacyForm(happyforms.ModelForm):

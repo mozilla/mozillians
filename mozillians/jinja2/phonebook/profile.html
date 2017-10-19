@@ -94,7 +94,8 @@
         {% endif %}
         {% if profile.country or profile.region or profile.city %}
           <section id="location" class="adr">
-            <i class="icon-globe"></i> {% include 'phonebook/includes/profile_location.html' %}
+            <i class="icon-globe"></i>
+            {% include 'phonebook/includes/profile_location.html' %}
           </section>
         {% endif %}
         {% if profile.timezone %}
@@ -302,16 +303,17 @@
           </div>
         {% endif %}
 
-        {% if profile.alternate_emails.exists() %}
+        {% if profile.idp_profiles.exists() %}
           <div id="alternate_email" class="profile-entry">
-            <h3><i class="icon-envelope-o"></i> {{ _('Alternate email addresses') }}</h3>
+            <h3><i class="icon-envelope-o"></i> {{ _('Alternate Contant Identities') }}</h3>
             <ul>
-              {% for email in profile.alternate_emails %}
+              {% for idp in profile.idp_profiles %}
                 <li>
+                  {{ idp.get_type_display() }} -
                   {% if user != shown_user %}
-                    {{ email.identifier|urlize }}
+                    {{ idp.email|urlize }}
                   {% else %}
-                    {{ email.identifier }}
+                    {{ idp.email }}
                   {% endif %}
                 </li>
               {% endfor %}

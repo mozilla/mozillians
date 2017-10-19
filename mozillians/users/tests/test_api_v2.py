@@ -151,7 +151,7 @@ class UserProfileDetailedSerializerTests(TestCase):
         serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
         tshirt = {'value': 9,
                   'english': 'Straight-cut Large',
-                  'privacy': 'Privileged'}
+                  'privacy': 'Private'}
         eq_(serializer.data['tshirt'], tshirt)
 
 

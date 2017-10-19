@@ -8,8 +8,8 @@
         {% if (basic_information_form.non_field_errors()
                or user_form.non_field_errors()
                or language_formset.non_form_errors()
-               or email_privacy_form.non_field_errors()
-               or alternate_email_formset.non_form_errors()
+               or idp_profile_form.non_field_errors()
+               or idp_profile_formset.non_form_errors()
                or skills_form.non_field_errors()) %}
           <ul class="unstyled">
             {% for error in basic_information_form.non_field_errors() %}
@@ -21,10 +21,10 @@
             {% for error in language_formset.non_form_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
-            {% for error in email_privacy_form.non_field_errors() %}
+            {% for error in idp_profile_form.non_field_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
-            {% for error in alternate_email_formset.non_form_errors() %}
+            {% for error in idp_profile_formset.non_form_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
             {% for error in skills_form.non_field_errors() %}
@@ -99,36 +99,46 @@
   <form class="edit-profile" method="POST" action="{{ url('phonebook:profile_edit') }}?next=profile">
     {% csrf_token %}
     <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Emails') }}</div>
+      <div class="panel-heading">{{ _('Profile Identities') }}</div>
       <div class="panel-body">
-        <fieldset>
-          <label class="email-label">{{ _('Primary e-mail address') }}</label>
-          <div class="row">
-            <div class="col-md-8 col-sm-6">
-              <span class="email">{{ email_privacy_form.instance.email }}</span>
-            </div>
-            <div class="col-md-4 col-sm-6 text-right">
-              {{ privacy_field(email_privacy_form.privacy_email) }}
-            </div>
-          </div>
-        </fieldset>
 
-        <fieldset id="alternate-email">
-          <label class="email-label">{{ _('Secondary e-mail addresses') }}</label>
-          {{ alternate_email_formset.management_form }}
+        {% if idp_profile_form.instance.profile %}
+          <fieldset>
+            <label class="identity-profile-label">{{ _('Login Identity') }}</label>
+            <div class="row">
+              <div class="col-md-8 col-sm-6">
+                <span class="email">
+                  {{ idp_profile_form.instance.get_type_display() }}
+                  {{ idp_profile_form.instance.email }}
+                </span>
+              </div>
+            </div>
+          </fieldset>
+        {% endif %}
 
-          {% for form in alternate_email_formset %}
-            <div class="row alternate-email-fieldrow">
+        <fieldset id="idp-profiles">
+          <label class="identity-profile-label">{{ _('Contact Identities') }}</label>
+          {{ idp_profile_formset.management_form }}
+
+          {% for form in idp_profile_formset %}
+            <div class="row idp-profiles-fieldrow">
               <div class="col-sm-8">
-                <span class="email">{{ form.instance.identifier }}</span>
+                <span class="identity-profile">
+                  {{ form.instance.get_type_display() }} -
+                  {{ form.instance.email }}
+                </span>
                 {{ form.id }}
-                <div class="email-controls">
-                  <a class="delete" href="{{ url('phonebook:delete_email', form.instance.pk) }}">
-                    Delete
-                  </a>
-                  <a class="button" href="{{ url('phonebook:change_primary_email', form.instance.pk) }}">
-                    Make Primary
-                  </a>
+                <div class="identity-profiles-controls">
+                  {% if not form.instance.primary_contact_identity %}
+                    <a class="button" href="{{ url('phonebook:change_primary_contact_identity', form.instance.pk) }}">
+                      Show on Profile
+                    </a>
+                  {% endif %}
+                  {% if not form.instance.primary %}
+                    <a class="delete" href="{{ url('phonebook:delete_identity', form.instance.pk) }}">
+                      Delete
+                    </a>
+                  {% endif %}
                 </div>
               </div>
               <div class="col-sm-4">
@@ -137,22 +147,27 @@
 
             </div>
           {% endfor %}
+          <div class="help-block">
+            These are the identities displayed in the profile. The primary identity is shown directly under the profile
+            picture and the rest are listed in the Additional Identities section. The identities marked as Private
+            are not shown.
+          </div>
 
-          <!-- Add a new email -->
-          <div id="add-email">
-            <a id="nav-login" title="{{_('Add a new email.')}}"
-                href="{{ nonprefixed_url('phonebook:verify_identity') }}?next={{ url('phonebook:profile_edit') }}">
-              <span class="signin button">{{ _('Add email') }}</span>
+        <!-- Add a new email -->
+          <div id="add-identity-profile">
+            <a id="nav-login" title="{{_('Add a new identity.')}}"
+              href="{{ nonprefixed_url('phonebook:verify_identity') }}?next={{ url('phonebook:profile_edit') }}">
+              <span class="signin button">{{ _('Add Identity') }}</span>
             </a>
             <div class="help-block">
-              You will be asked to log in, use a new email address.
+              You will be asked to verify the new identity.
             </div>
           </div>
         </fieldset>
       </div>
       <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-email" type="submit"
-                name="email_section">{{ _('Update Emails') }}
+        <button class="btn btn-primary" id="form-submit-identity" type="submit"
+                name="idp_section">{{ _('Update Identities') }}
         </button>
       </div>
     </div>

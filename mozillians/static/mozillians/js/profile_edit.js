@@ -38,11 +38,14 @@ $(function() {
     $('.privacy-toggle').on('click', function(e) {
         e.preventDefault();
         var firstchoice = $(this);
-        var secondchoice = $(this).siblings().not('input');
+        // This is an array with multiple objects
+        var otherChoices = $(this).siblings().not('input');
         var target = $(this).closest('.btn-group').find('input');
         firstchoice.addClass('active');
-        secondchoice.removeClass('active');
-        var choice = (firstchoice.hasClass('active') ? firstchoice : secondchoice);
+        $.each(otherChoices, function(index) {
+            $(this).removeClass('active');
+        });
+        var choice = (firstchoice.hasClass('active') ? firstchoice : otherChoices.filter('.active'));
         target.val(choice.data('value'));
     });
 

@@ -27,13 +27,13 @@ class EditProfileIdentities(TestCase):
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
     @patch('mozillians.phonebook.views.jws.verify')
-    def test_add_new_identity(self, verify_mock, request_post_mock, msg_mock):
+    def test_add_new_identity_non_mfa(self, verify_mock, request_post_mock, msg_mock):
         """Test adding a new identity in a profile."""
         user = UserFactory.create(email='foo@example.com')
         verify_mock.return_value = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
-            'sub': 'ad|ldap'
+            'sub': 'email|'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -47,6 +47,33 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             new_idp_profile = IdpProfile.objects.get(email='bar@example.com')
             eq_(new_idp_profile.primary, False)
+            msg = 'Account successfully verified.'
+            msg_mock.success.assert_called_once_with(ANY, msg)
+            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+
+    @patch('mozillians.phonebook.views.messages')
+    @patch('mozillians.phonebook.views.requests.post')
+    @patch('mozillians.phonebook.views.jws.verify')
+    def test_add_new_identity_mfa(self, verify_mock, request_post_mock, msg_mock):
+        """Test adding a new identity in a profile."""
+        user = UserFactory.create(email='foo@example.com')
+        verify_mock.return_value = json.dumps({
+            'email': 'bar@example.com',
+            'email_verified': True,
+            'sub': 'ad|'
+        })
+        post_json_mock = Mock()
+        post_json_mock.json.return_value = {
+            'id_token': 'id_token'
+        }
+        with self.login(user) as client:
+            session = client.session
+            session['oidc_verify_nonce'] = 'nonce'
+            session['oidc_verify_state'] = 'state'
+            session.save()
+            response = client.get(self.url, self.get_data, follow=True)
+            new_idp_profile = IdpProfile.objects.get(email='bar@example.com')
+            eq_(new_idp_profile.primary, True)
             msg = 'Account successfully verified.'
             msg_mock.success.assert_called_once_with(ANY, msg)
             self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))

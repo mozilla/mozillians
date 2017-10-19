@@ -8,7 +8,7 @@ from nose.tools import ok_, eq_
 
 from mozillians.common.templatetags.helpers import redirect, urlparams
 from mozillians.common.tests import TestCase
-from mozillians.users.managers import PUBLIC, MOZILLIANS, EMPLOYEES, PRIVILEGED
+from mozillians.users.managers import PUBLIC, MOZILLIANS, EMPLOYEES, PRIVATE
 from mozillians.users.tests import UserFactory
 
 
@@ -192,18 +192,18 @@ class ViewProfileTests(TestCase):
         eq_(response.context['profile']._privacy_level, EMPLOYEES)
         eq_(response.context['privacy_mode'], 'employee')
 
-    def test_view_profile_mine_as_privileged(self):
+    def test_view_profile_mine_as_private(self):
         user = UserFactory.create()
         url = reverse('phonebook:profile_view',
                       kwargs={'username': user.username})
-        url = urlparams(url, view_as='privileged')
+        url = urlparams(url, view_as='private')
         with self.login(user) as client:
             response = client.get(url, follow=True)
         self.assertTemplateUsed(response, 'phonebook/profile.html')
         eq_(response.context['shown_user'], user)
         eq_(response.context['profile'], user.userprofile)
-        eq_(response.context['profile']._privacy_level, PRIVILEGED)
-        eq_(response.context['privacy_mode'], 'privileged')
+        eq_(response.context['profile']._privacy_level, PRIVATE)
+        eq_(response.context['privacy_mode'], 'private')
 
     def test_view_profile_waiting_for_vouch_unvouched(self):
         unvouched_user = UserFactory.create(vouched=False)
