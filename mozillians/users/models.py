@@ -658,10 +658,10 @@ class UserProfile(UserProfilePrivacyModel):
 
 class IdpProfile(models.Model):
     """Basic Identity Provider information for Profiles."""
-    PROVIDER_GITHUB = 'github'
-    PROVIDER_LDAP = 'ldap'
-    PROVIDER_PASSWORDLESS = 'passwordless'
-    PROVIDER_GOOGLE = 'google'
+    PROVIDER_PASSWORDLESS = 10
+    PROVIDER_GOOGLE = 20
+    PROVIDER_GITHUB = 30
+    PROVIDER_LDAP = 40
 
     PROVIDER_TYPES = (
         (PROVIDER_GITHUB, 'Github Provider',),
@@ -671,10 +671,10 @@ class IdpProfile(models.Model):
 
     )
     profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
-    type = models.CharField(choices=PROVIDER_TYPES,
-                            default=PROVIDER_PASSWORDLESS,
-                            max_length=50,
-                            blank=False)
+    type = models.IntegerField(choices=PROVIDER_TYPES,
+                               default=None,
+                               null=True,
+                               blank=False)
     # Auth0 required data
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
     primary = models.BooleanField(default=False)
