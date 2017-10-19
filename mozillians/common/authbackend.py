@@ -107,6 +107,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             # Do not allow downgrades.
             if obj.type < current_idp.type:
                 msg = u'Please use one of the following authentication methods: {}'
+                # convert the tuple to a dict to easily get the values
                 provider_types = dict(IdpProfile.PROVIDER_TYPES)
                 methods = ', '.join(provider_types[x] for x in ALLOWED_IDP_FLOWS[current_idp.type])
                 messages.error(self.request, msg.format(methods))

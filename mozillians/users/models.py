@@ -598,18 +598,10 @@ class UserProfile(UserProfilePrivacyModel):
         # Update strategy: send groups for higher MFA idp
         # Wipe groups from the rest
         idps = list(self.idp_profiles.all().values_list('type', flat=True))
-        ordering = [
-            IdpProfile.PROVIDER_PASSWORDLESS,
-            IdpProfile.PROVIDER_GOOGLE,
-            IdpProfile.PROVIDER_GITHUB,
-            IdpProfile.PROVIDER_LDAP
-        ]
 
-        idps.sort(key=ordering.index)
-
-        # idps are sorted hierarchically
-        # if current idp is not the highest wipe groups
-        if not idps or idp.type != idps[-1]:
+        # if the current idp does not match
+        # the greatest number in the list, wipe the groups
+        if not idps or idp.type != max(idps):
             return []
 
         memberships = GroupMembership.objects.filter(
@@ -697,7 +689,7 @@ class IdpProfile(models.Model):
         if 'email|' in self.auth0_user_id:
             return self.PROVIDER_PASSWORDLESS
 
-        return ''
+        return None
 
     def save(self, *args, **kwargs):
         self.type = self.get_provider_type()
