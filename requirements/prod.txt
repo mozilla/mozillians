@@ -32,9 +32,9 @@ BeautifulSoup==3.2.1 \
 djangorestframework==3.7.1 \
     --hash=sha256:cd7f0f678d63e2be561834ff2049eef6d9fd6fb85c63bea7e94597b36c015bf4 \
     --hash=sha256:305b2c6564ca46d3b558ba21110ed717135c467adf1a6dfd192bd85f4bb04d50
-elasticsearch==2.4.1 \
-    --hash=sha256:bb8f9a365ba6650d599428538c8aed42033264661d8f7d353da59d5892305f72 \
-    --hash=sha256:fead47ebfcaabd1c53dbfc21403eb99ac207eef76de8002fe11a1c8ec9589ce2
+elasticsearch==5.4.0 \
+    --hash=sha256:8f02d626cff98befd298ffb1d19d8e519643d86d3aa27f6d7388566ec4ba48ee \
+    --hash=sha256:e754c688e20fe73160fb6f7f5b63f2a71c78788dc9e6908950681d3a39b56e85
 Jinja2==2.9.6 \
     --hash=sha256:2231bace0dfd8d2bf1e5d7e41239c06c9e0ded46e70cc1094a0aa64b0afeb054 \
     --hash=sha256:ddaa01a212cd6d641401cb01b605f4a4d9f37bfc93043d7f760ec70fb99ff9ff
