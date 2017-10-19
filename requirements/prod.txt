@@ -330,8 +330,8 @@ vine==1.1.4 \
     --hash=sha256:52116d59bc45392af9fdd3b75ed98ae48a93e822cee21e5fda249105c59a7a72
 django-ses==0.8.3.1 \
     --hash=sha256:7dd9c42a155612d733ebf6906cdde6635a56e14ac5aed1b19a3efb42ab862cd3
-flower==0.9.1 \
-    --hash=sha256:bdd926b731e8024779a5373fa33bff4a30e2a2ae6cf3a591beb83fbde3dc352f
+flower==0.9.2 \
+    --hash=sha256:a7a828c2dbea7e9cff1c86d63626f0eeb047b1b1e9a0ee5daad30771fb51e6d0
 tornado==4.2 \
     --hash=sha256:e8b1207da67dbdceebfb291292b4ef1b547d6171525bec1b366853f923456a5f
 nameparser==0.5.3 \
