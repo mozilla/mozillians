@@ -108,8 +108,8 @@ simplegeneric==0.8.1 \
 traitlets==4.3.0b1 \
     --hash=sha256:d8d2daf933fffe7a08be7b90564026e3c0480c706007015436c9c49e8e7a6cc2 \
     --hash=sha256:dc31a3de01d95f9bc38bcfec1c1249e6109a132199ed7d8559dc8dfed5306390
-translate-toolkit==1.8.0 \
-    --hash=sha256:b146d8cdc287db07f6ef4491766d841a931b1b267040fef81eb559a475fe3db9
+translate-toolkit==2.2.5 \
+    --hash=sha256:acaadb70c386795b3ea15605ddf57da6e29fae58a026b18988c04f44e2f58415
 https://github.com/jbalogh/test-utils/archive/master.zip#egg=test-utils \
     --hash=sha256:75aa766800b4a6cc60338e01b1b6a5b3592a91fcc2810b25620498b91567b47b
 mccabe==0.5.2 \
