@@ -56,8 +56,9 @@ django-extensions==1.6.1 \
 factory-boy==2.6.0 \
     --hash=sha256:116610a170918df342db2c4bafbc8f4b91780c49878f929d89e360f10ad29d2a \
     --hash=sha256:75e4c9786ed28d19ec7fb500f3c7221a6eb87748cbc6f5e2eeaca4c3d68f30cb
-fake-factory==0.5.3 \
-    --hash=sha256:90f507891ad1073e08cf6908eb51d5e1debc3c5a5d554427e8c3fbf73cdf12ee
+fake-factory==9999.9.9 \
+    --hash=sha256:60c64a953c03e29fbee6b59fcb700c86a313778d68dc5816fc560ef515019d77 \
+    --hash=sha256:f5bd18deb22ad8cb4402513c025877bc6b50de58902d686b6b21ba8981dce260
 flake8==3.0.4 \
     --hash=sha256:603a3ae7c8030219fee084728ca02a8bbd3a51829cacf97b445172a46cb04662 \
     --hash=sha256:b4c210c998f07d6ff24325dd91fbc011f2c37bcd6bf576b188de01d8656e970d
