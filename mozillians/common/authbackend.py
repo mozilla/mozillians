@@ -5,12 +5,10 @@ import re
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db.models import Q
-
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
 from mozillians.common.templatetags.helpers import get_object_or_none
-from mozillians.users.models import ExternalAccount, IdpProfile
+from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
@@ -77,67 +75,54 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         return user
 
     def filter_users_by_claims(self, claims):
-        """Override default method to add multiple emails in an account."""
+        """Override default method to store claims."""
+        self.claims = claims
+        return super(MozilliansAuthBackend, self).filter_users_by_claims(claims)
 
-        email = claims.get('email')
-        request_user = self.request.user
+    def check_authentication_method(self, user):
+        """Check which Identity is used to login.
 
-        if not email:
-            return self.UserModel.objects.none()
+        This method, depending on the current status of the IdpProfile
+        of a user, enforces MFA logins and creates the IdpProfiles.
+        Returns the object (user) it was passed unchanged.
+        """
+        if not user:
+            return None
 
-        account_type = ExternalAccount.TYPE_EMAIL
-        alternate_emails = ExternalAccount.objects.filter(type=account_type, identifier=email)
-        primary_email_qs = Q(email=email)
-        alternate_email_qs = Q(userprofile__externalaccount=alternate_emails)
+        profile = user.userprofile
+        auth0_user_id = self.claims.get('user_id')
+        email = self.claims.get('email')
 
-        # Allow logins only using primary email
-        user_q = self.UserModel.objects.filter(email=email)
+        # Get current_idp
+        current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
 
-        if user_q.exists():
-            # Get or create an IdpProfile for this user
-            profile = user_q[0].userprofile
-            auth0_user_id = claims.get('user_id')
+        # Get or create new `user_id`
+        obj, _ = IdpProfile.objects.get_or_create(
+            profile=profile,
+            email=email,
+            auth0_user_id=auth0_user_id)
 
-            # Get current_idp
-            current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
+        if current_idp:
 
-            # Get or create new `user_id`
-            obj, _ = IdpProfile.objects.get_or_create(
-                profile=profile,
-                email=claims.get('email'),
-                auth0_user_id=auth0_user_id)
+            if obj.type not in ALLOWED_IDP_FLOWS[current_idp.type]:
+                msg = u'Please use one of the following authentication methods: {}'
+                methods = ', '.join(ALLOWED_IDP_FLOWS[current_idp.type])
+                messages.error(self.request, msg.format(methods))
+                return None
 
-            if current_idp:
+        # Mark other `user_id` as `primary=False`
+        idp_q = IdpProfile.objects.filter(profile=profile)
+        idp_q.exclude(auth0_user_id=auth0_user_id).update(primary=False)
 
-                if obj.type not in ALLOWED_IDP_FLOWS[current_idp.type]:
-                    msg = u'Please use one of the following authentication methods: {}'
-                    methods = ', '.join(ALLOWED_IDP_FLOWS[current_idp.type])
-                    messages.error(self.request, msg.format(methods))
-                    return self.UserModel.objects.none()
+        # Mark current `user_id` as `primary=True`
+        idp_q.filter(auth0_user_id=auth0_user_id).update(primary=True)
 
-            # Mark other `user_id` as `primary=False`
-            idp_q = IdpProfile.objects.filter(profile=profile)
-            idp_q.exclude(auth0_user_id=auth0_user_id).update(primary=False)
+        # Update CIS
+        send_userprofile_to_cis.delay(profile.pk)
+        return user
 
-            # Mark current `user_id` as `primary=True`
-            idp_q.filter(auth0_user_id=auth0_user_id).update(primary=True)
+    def authenticate(self, **kwargs):
+        """Override default method to add multiple Identity Profiles in an account."""
+        user = super(MozilliansAuthBackend, self).authenticate(**kwargs)
 
-            # Update CIS
-            send_userprofile_to_cis.delay(profile.pk)
-
-        # Add alternate email
-        if request_user.is_authenticated():
-            email_q = self.UserModel.objects.filter(primary_email_qs | alternate_email_qs)
-
-            if not email_q:
-                # In this case we have a registered user who is adding a secondary email
-                ExternalAccount.objects.create(type=account_type,
-                                               user=request_user.userprofile,
-                                               identifier=email)
-            else:
-                if not user_q.filter(pk=request_user.id).exists():
-                    msg = u'Email {0} already exists in the database.'.format(email)
-                    messages.error(self.request, msg)
-            return [request_user]
-
-        return user_q
+        return self.check_authentication_method(user)
