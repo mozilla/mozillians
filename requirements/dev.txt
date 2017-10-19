@@ -112,9 +112,9 @@ translate-toolkit==1.8.0 \
     --hash=sha256:b146d8cdc287db07f6ef4491766d841a931b1b267040fef81eb559a475fe3db9
 https://github.com/jbalogh/test-utils/archive/master.zip#egg=test-utils \
     --hash=sha256:75aa766800b4a6cc60338e01b1b6a5b3592a91fcc2810b25620498b91567b47b
-mccabe==0.5.2 \
-    --hash=sha256:91cc38b2c7636aaf1903e06d96ee960fb3dff9ca3afc595627c9a638f8e86d2b \
-    --hash=sha256:3473f06c8b757bbb5cdf295099bf64032e5f7d6fe0ec2f97ee9b23cb0a435aff
+mccabe==0.6.1 \
+    --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42 \
+    --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f
 pep8==1.7.0 \
     --hash=sha256:4fc2e478addcf17016657dff30b2d8d611e8341fac19ccf2768802f6635d7b8a \
     --hash=sha256:a113d5f5ad7a7abacef9df5ec3f2af23a20a28005921577b15dd584d099d5900
