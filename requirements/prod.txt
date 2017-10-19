@@ -2,9 +2,9 @@
 
 django-cronjobs==0.2.3 \
     --hash=sha256:177295b1442400c92cdb67e8e18f9ff5946fb442f85813b9d0837823722ea08d
-django-filter==1.0.4 \
-    --hash=sha256:e44620d4e707beaff7396ac8df765dc015a07467df813b9c1663fe4017934b58 \
-    --hash=sha256:6ef1611aeacfda8f13a075a992ff65687afbd5cc8fcb0f3f1563a9ad4fe2d1b0
+django-filter==1.1.0 \
+    --hash=sha256:ea204242ea83790e1512c9d0d8255002a652a6f4986e93cee664f28955ba0c22 \
+    --hash=sha256:ec0ef1ba23ef95b1620f5d481334413700fb33f45cd76d56a63f4b0b1d76976a
 django-import-export==0.5.1 \
     --hash=sha256:5a932117a082971250703dec1ffcb6a92f913c393ef87b53331ee812b2b2fd4e
 django-mobility==0.1 \
