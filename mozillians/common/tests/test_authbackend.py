@@ -82,7 +82,7 @@ class MozilliansAuthBackendTests(TestCase):
 
     @patch('mozillians.common.authbackend.messages')
     def test_add_idp_wrong_flow(self, mocked_message):
-        """Test logging in with a provider lesser compared to the current one"""
+        """Test logging in with a weaker provider compared to the current one"""
 
         user = UserFactory.create(email='foo@example.com')
         IdpProfile.objects.create(
@@ -101,7 +101,7 @@ class MozilliansAuthBackendTests(TestCase):
         self.backend.request = request_mock
 
         returned_user = self.backend.check_authentication_method(user)
-        msg = 'Please use one of the following authentication methods: ldap'
+        msg = 'Please use one of the following authentication methods: LDAP Provider'
         mocked_message.error.assert_called_once_with(request_mock, msg)
 
         eq_(returned_user, None)

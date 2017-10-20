@@ -598,18 +598,10 @@ class UserProfile(UserProfilePrivacyModel):
         # Update strategy: send groups for higher MFA idp
         # Wipe groups from the rest
         idps = list(self.idp_profiles.all().values_list('type', flat=True))
-        ordering = [
-            IdpProfile.PROVIDER_PASSWORDLESS,
-            IdpProfile.PROVIDER_GOOGLE,
-            IdpProfile.PROVIDER_GITHUB,
-            IdpProfile.PROVIDER_LDAP
-        ]
 
-        idps.sort(key=ordering.index)
-
-        # idps are sorted hierarchically
-        # if current idp is not the highest wipe groups
-        if not idps or idp.type != idps[-1]:
+        # if the current idp does not match
+        # the greatest number in the list, wipe the groups
+        if not idps or idp.type != max(idps):
             return []
 
         memberships = GroupMembership.objects.filter(
@@ -658,10 +650,10 @@ class UserProfile(UserProfilePrivacyModel):
 
 class IdpProfile(models.Model):
     """Basic Identity Provider information for Profiles."""
-    PROVIDER_GITHUB = 'github'
-    PROVIDER_LDAP = 'ldap'
-    PROVIDER_PASSWORDLESS = 'passwordless'
-    PROVIDER_GOOGLE = 'google'
+    PROVIDER_PASSWORDLESS = 10
+    PROVIDER_GOOGLE = 20
+    PROVIDER_GITHUB = 30
+    PROVIDER_LDAP = 40
 
     PROVIDER_TYPES = (
         (PROVIDER_GITHUB, 'Github Provider',),
@@ -671,10 +663,10 @@ class IdpProfile(models.Model):
 
     )
     profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
-    type = models.CharField(choices=PROVIDER_TYPES,
-                            default=PROVIDER_PASSWORDLESS,
-                            max_length=50,
-                            blank=False)
+    type = models.IntegerField(choices=PROVIDER_TYPES,
+                               default=None,
+                               null=True,
+                               blank=False)
     # Auth0 required data
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
     primary = models.BooleanField(default=False)
@@ -697,7 +689,7 @@ class IdpProfile(models.Model):
         if 'email|' in self.auth0_user_id:
             return self.PROVIDER_PASSWORDLESS
 
-        return ''
+        return None
 
     def save(self, *args, **kwargs):
         self.type = self.get_provider_type()

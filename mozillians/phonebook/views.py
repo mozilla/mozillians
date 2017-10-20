@@ -674,7 +674,17 @@ class VerifyIdentityCallbackView(View):
 
             # Save the new identity to the IdpProfile
             user_q['profile'] = profile
-            _, created = IdpProfile.objects.get_or_create(**user_q)
+            idp, created = IdpProfile.objects.get_or_create(**user_q)
+
+            current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
+            # The new identity is stronger than the one currently used. Let's swap
+            if current_idp and current_idp.type < idp.type:
+                IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
+                idp.primary = True
+                idp.save()
+                # Also update the primary email of the user
+                User.objects.filter(pk=profile.user.id).update(email=idp.email)
+
             if created:
                 msg = 'Account successfully verified.'
                 messages.success(request, msg)
