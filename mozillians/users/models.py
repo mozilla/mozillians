@@ -601,7 +601,7 @@ class UserProfile(UserProfilePrivacyModel):
 
         # if the current idp does not match
         # the greatest number in the list, wipe the groups
-        if not idps or idp.type != max(idps):
+        if not idps or idp.type != max(idps) or not idp.is_mfa():
             return []
 
         memberships = GroupMembership.objects.filter(
@@ -690,6 +690,11 @@ class IdpProfile(models.Model):
             return self.PROVIDER_PASSWORDLESS
 
         return None
+
+    def is_mfa(self):
+        """Helper method to check if IdpProfile is MFA-ed"""
+
+        return self.type in [self.PROVIDER_GITHUB, self.PROVIDER_LDAP]
 
     def save(self, *args, **kwargs):
         self.type = self.get_provider_type()
