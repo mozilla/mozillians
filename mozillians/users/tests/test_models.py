@@ -640,6 +640,7 @@ class PrivacyModelTests(unittest.TestCase):
 class CISHelperMethodsTests(unittest.TestCase):
     def tearDown(self):
         Group.objects.all().delete()
+        IdpProfile.objects.all().delete()
 
     def test_cis_emails(self):
         user = UserFactory.create(email='foo@bar.com')
@@ -702,6 +703,29 @@ class CISHelperMethodsTests(unittest.TestCase):
         IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id='ad|foo@bar.com',
+            primary=True,
+        )
+
+        eq_(user.userprofile.get_cis_groups(idp), [])
+
+    def test_cis_groups_not_mfa(self):
+        user = UserFactory.create()
+        group1 = GroupFactory.create(name='nda')
+        group2 = GroupFactory.create(name='cis_whitelist')
+        group3 = GroupFactory.create(name='group3')
+        group1.add_member(user.userprofile)
+        group2.add_member(user.userprofile)
+        group3.add_member(user.userprofile, status='PENDING')
+        idp = IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|foo@bar.com',
+            email='foo@bar.com',
+            primary=False,
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|bar@bar.com',
+            email='bar@bar.com',
             primary=True,
         )
 
