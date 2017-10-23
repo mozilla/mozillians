@@ -655,21 +655,27 @@ class VerifyIdentityCallbackView(View):
         # Create the new Identity Profile.
         if verified_token:
             user_info = json.loads(verified_token)
+            email = user_info['email']
 
             if not user_info.get('email_verified'):
-                msg = 'Account verification failed: `Email is not verified`.'
+                msg = 'Account verification failed: Email is not verified.'
                 messages.error(request, msg)
                 return redirect('phonebook:profile_edit')
 
             user_q = {
                 'auth0_user_id': user_info['sub'],
-                'email': user_info['email']
+                'email': email
             }
 
-            # Check that the identity doesn't exist in another profile
+            # Check that the identity doesn't exist in another Identity profile
+            # or in another mozillians profile
+            error_msg = ''
             if IdpProfile.objects.filter(**user_q).exists():
-                msg = 'Account verification failed: Identity already exists.'
-                messages.error(request, msg)
+                error_msg = 'Account verification failed: Identity already exists.'
+            elif User.objects.filter(email__iexact=email).exclude(pk=profile.user.pk).exists():
+                error_msg = 'The email in this identity is used by another user.'
+            if error_msg:
+                messages.error(request, error_msg)
                 return redirect('phonebook:profile_edit')
 
             # Save the new identity to the IdpProfile
