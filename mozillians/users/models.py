@@ -700,6 +700,9 @@ class IdpProfile(models.Model):
         self.type = self.get_provider_type()
         super(IdpProfile, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return u'{}|{}|{}'.format(self.profile, self.type, self.email)
+
     class Meta:
         unique_together = ('profile', 'type', 'email')
 
