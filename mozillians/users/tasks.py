@@ -12,6 +12,7 @@ from celery.task import periodic_task, task
 from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
 from nameparser import HumanName
+from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from mozillians.common.utils import akismet_spam_check, is_test_environment
 from mozillians.common.templatetags.helpers import get_object_or_none
@@ -421,6 +422,11 @@ def send_userprofile_to_cis(instance_id, **kwargs):
             'PGPFingerprints': [],
             'authoritativeGroups': []
         }
+
+        # Send data to sentry for debugging purposes
+        sentry_client.captureMessage(
+            'New CIS transaction', data={'level': 'debug', 'payload': data}, stack=True
+        )
 
         cis_change = ChangeDelegate(publisher, {}, data)
         cis_change.boto_session = session
