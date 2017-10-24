@@ -105,3 +105,55 @@ class MozilliansAuthBackendTests(TestCase):
         mocked_message.error.assert_called_once_with(request_mock, msg)
 
         eq_(returned_user, None)
+
+    def test_filter_users_with_email_belonging_to_non_primary_identity(self):
+        """Test filter users with a non primary identity."""
+
+        user = UserFactory.create(email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|1',
+            email='bar@example.com',
+            primary=False
+        )
+        claims = {
+            'email': 'bar@example.com',
+            'user_id': 'email|1'
+        }
+
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        self.backend.claims = claims
+        self.backend.request = request_mock
+        users = self.backend.filter_users_by_claims(claims)
+        idp_q = IdpProfile.objects.filter(auth0_user_id='email|1',
+                                          email='bar@example.com',
+                                          profile=user.userprofile)
+        eq_(idp_q.count(), 1)
+        eq_(users[0], user)
+
+    def test_filter_users_with_a_non_existing_identity(self):
+        """Test filter users with a non primary identity."""
+
+        user = UserFactory.create(email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|1',
+            email='foo@example.com',
+            primary=True
+        )
+        claims = {
+            'email': 'bar@example.com',
+            'user_id': 'email|2'
+        }
+
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        self.backend.claims = claims
+        self.backend.request = request_mock
+        users = self.backend.filter_users_by_claims(claims)
+        idp_q = IdpProfile.objects.filter(auth0_user_id='email|1',
+                                          email='foo@example.com',
+                                          profile=user.userprofile)
+        eq_(idp_q.count(), 1)
+        eq_(list(users), [])

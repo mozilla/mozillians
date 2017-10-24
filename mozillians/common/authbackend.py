@@ -77,7 +77,15 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
     def filter_users_by_claims(self, claims):
         """Override default method to store claims."""
         self.claims = claims
-        return super(MozilliansAuthBackend, self).filter_users_by_claims(claims)
+        users = super(MozilliansAuthBackend, self).filter_users_by_claims(claims)
+
+        # Checking the primary email returned 0 users,
+        # before creating a new user we should check if the identity returned exists
+        if not users:
+            idps = IdpProfile.objects.filter(auth0_user_id=claims.get('user_id'))
+            user_ids = idps.values_list('profile__user__id', flat=True).distinct()
+            return self.UserModel.objects.filter(id__in=user_ids)
+        return users
 
     def check_authentication_method(self, user):
         """Check which Identity is used to login.
