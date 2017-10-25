@@ -611,6 +611,69 @@ class ExternalAccountTests(TestCase):
                 ok_('{identifier}' in account['url'])
 
 
+class EmailAttributeTests(TestCase):
+    def test_existing_idp_privacy_unaware(self):
+        profile = UserFactory.create(email='foo@foo.com').userprofile
+        IdpProfile.objects.create(
+            profile=profile,
+            auth0_user_id='github|foo@bar.com',
+            email='foo@bar.com',
+            primary=True,
+            primary_contact_identity=True,
+            privacy=PUBLIC
+        )
+
+        eq_(profile.email, 'foo@bar.com')
+
+    def test_existing_idp_privacy_allowed(self):
+        profile = UserFactory.create(email='foo@foo.com').userprofile
+        profile.set_instance_privacy_level(MOZILLIANS)
+        IdpProfile.objects.create(
+            profile=profile,
+            auth0_user_id='github|foo@bar.com',
+            email='foo@bar.com',
+            primary=True,
+            primary_contact_identity=True,
+            privacy=PUBLIC
+        )
+
+        eq_(profile.email, 'foo@bar.com')
+
+    def test_existing_idp_privacy_not_allowed(self):
+        profile = UserFactory.create(email='foo@foo.com').userprofile
+        profile.set_instance_privacy_level(PUBLIC)
+        IdpProfile.objects.create(
+            profile=profile,
+            auth0_user_id='github|foo@bar.com',
+            email='foo@bar.com',
+            primary=True,
+            primary_contact_identity=True,
+            privacy=MOZILLIANS
+        )
+
+        eq_(profile.email, '')
+
+    def test_not_existing_idp_privacy_unaware(self):
+        profile = UserFactory.create(email='foo@foo.com').userprofile
+        eq_(profile.email, 'foo@foo.com')
+
+    def test_not_existing_idp_privacy_allowed(self):
+        userprofile_args = {
+            'privacy_email': PUBLIC
+        }
+        profile = UserFactory.create(email='foo@foo.com', userprofile=userprofile_args).userprofile
+        profile.set_instance_privacy_level(MOZILLIANS)
+        eq_(profile.email, 'foo@foo.com')
+
+    def test_not_existing_idp_privacy_not_allowed(self):
+        userprofile_args = {
+            'privacy_email': MOZILLIANS
+        }
+        profile = UserFactory.create(email='foo@foo.com', userprofile=userprofile_args).userprofile
+        profile.set_instance_privacy_level(PUBLIC)
+        eq_(profile.email, '')
+
+
 class PrivacyModelTests(unittest.TestCase):
     def setUp(self):
         UserProfile.clear_privacy_fields_cache()

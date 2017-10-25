@@ -297,10 +297,23 @@ class UserProfile(UserProfilePrivacyModel):
     @property
     def _primary_email(self):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+
         privacy_fields = UserProfile.privacy_fields()
-        if self._privacy_level and _getattr('privacy_email') < self._privacy_level:
-            email = privacy_fields['email']
-            return email
+
+        if self._privacy_level:
+            # Try IDP contact first
+            if self.idp_profiles.exists():
+                contact_ids = self.identity_profiles.filter(primary_contact_identity=True)
+                if contact_ids.exists():
+                    return contact_ids[0].email
+
+            # Fallback to user.email
+            if _getattr('privacy_email') < self._privacy_level:
+                return privacy_fields['email']
+
+        # In case we don't have a privacy aware attribute access
+        if self.idp_profiles.exists():
+            return self.idp_profiles.filter(primary_contact_identity=True)[0].email
         return _getattr('user').email
 
     @property
