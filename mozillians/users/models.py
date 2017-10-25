@@ -460,7 +460,7 @@ class UserProfile(UserProfilePrivacyModel):
         """
         privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
         if (not self.photo and self.privacy_photo >= privacy_level):
-            return gravatar(self.user.email, size=geometry)
+            return gravatar(self.email, size=geometry)
 
         photo_url = self.get_photo_thumbnail(geometry, **kwargs).url
         if photo_url.startswith('https://') or photo_url.startswith('http://'):
@@ -502,7 +502,7 @@ class UserProfile(UserProfilePrivacyModel):
         """Auto vouch mozilla.com users."""
         emails = [acc.identifier for acc in
                   ExternalAccount.objects.filter(user=self, type=ExternalAccount.TYPE_EMAIL)]
-        emails.append(self.user.email)
+        emails.append(self.email)
 
         email_exists = any([email for email in emails
                             if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
@@ -534,7 +534,7 @@ class UserProfile(UserProfilePrivacyModel):
         subject = _(u'You have been vouched on Mozillians.org')
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
-                  [self.user.email])
+                  [self.email])
 
     def get_annotated_groups(self):
         """

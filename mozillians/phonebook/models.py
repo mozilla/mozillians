@@ -42,7 +42,7 @@ class Invite(models.Model):
         sender_addr = _('A fellow Mozillian')
         from_addr = settings.FROM_NOREPLY
         if sender:
-            sender_addr = '%s (%s)' % (sender.full_name, sender.user.email)
+            sender_addr = '%s (%s)' % (sender.full_name, sender.email)
             from_addr = settings.FROM_NOREPLY_VIA % sender.full_name
 
         subject = _('Please join me on mozillians.org')
