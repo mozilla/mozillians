@@ -22,6 +22,7 @@ from mozillians.api.models import APIv2App
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
+from mozillians.phonebook.templatetags.helpers import langcode_to_name
 from mozillians.phonebook.validators import validate_username
 from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
@@ -463,11 +464,13 @@ class PhonebookSearchForm(HaystackSearchForm):
         self.country = kwargs.pop('country', '')
         self.region = kwargs.pop('region', '')
         self.city = kwargs.pop('city', '')
+        self.language = kwargs.pop('language', '')
         super(PhonebookSearchForm, self).__init__(*args, **kwargs)
 
     def clean(self, *args, **kwargs):
         cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
-        if not (self.country or self.city or self.region) and not cdata.get('q', '').strip():
+        if (not (self.country or self.city or self.region or self.language) and
+                not cdata.get('q', '').strip()):
             self.errors['q'] = self.error_class([u'This field is required.'])
         if 'users.userprofile' in cdata['models'] or not cdata['models']:
             cdata['is_profile_query'] = True
@@ -481,17 +484,20 @@ class PhonebookSearchForm(HaystackSearchForm):
 
         search_term = self.cleaned_data.get('q')
         profile = None
-        location_query = {}
+        profile_query = {}
 
         if self.country:
-            location_query['country'] = self.country
-            location_query['privacy_country__gte'] = None
+            profile_query['country'] = self.country
+            profile_query['privacy_country__gte'] = None
         if self.region:
-            location_query['region'] = self.region
-            location_query['privacy_region__gte'] = None
+            profile_query['region'] = self.region
+            profile_query['privacy_region__gte'] = None
         if self.city:
-            location_query['city'] = self.city
-            location_query['privacy_city__gte'] = None
+            profile_query['city'] = self.city
+            profile_query['privacy_city__gte'] = None
+        if self.language:
+            profile_query['languages'] = langcode_to_name(self.language)
+            profile_query['privacy_languages__gte'] = None
 
         try:
             profile = self.request.user.userprofile
@@ -508,11 +514,11 @@ class PhonebookSearchForm(HaystackSearchForm):
             # Anonymous and un-vouched users cannot search groups
             search_models = [UserProfile]
 
-        if location_query:
-            for k in location_query.keys():
+        if profile_query:
+            for k in profile_query.keys():
                 if k.startswith('privacy_'):
-                    location_query[k] = privacy_level
-            return SearchQuerySet().filter(**location_query).load_all() or self.no_query_found()
+                    profile_query[k] = privacy_level
+            return SearchQuerySet().filter(**profile_query).load_all() or self.no_query_found()
 
         # Calling super will handle with form validation and
         # will also search in fields that are not explicit queried through `text`
