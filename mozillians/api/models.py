@@ -6,12 +6,12 @@ from django.db import models
 
 from django.utils.translation import ugettext_lazy as _lazy
 
-from mozillians.users.managers import PRIVACY_CHOICES, PRIVILEGED, PUBLIC
+from mozillians.users.managers import PRIVACY_CHOICES, PRIVATE, PUBLIC
 from mozillians.users.models import PrivacyField, UserProfile
 
 
 class APIv2App(models.Model):
-    API_PRIVACY_CHOICES = [(PRIVILEGED, _lazy(u'Privileged'))] + list(PRIVACY_CHOICES)
+    API_PRIVACY_CHOICES = [(PRIVATE, _lazy(u'Private'))] + list(PRIVACY_CHOICES)
 
     enabled = models.BooleanField(blank=True, default=False)
     name = models.CharField(max_length=100, unique=True)

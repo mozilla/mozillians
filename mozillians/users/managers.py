@@ -5,12 +5,16 @@ from django.db.models.query import QuerySet, ValuesQuerySet
 from django.utils.translation import ugettext_lazy as _lazy
 
 
-PRIVILEGED = 1
+PRIVATE = 1
 EMPLOYEES = 2
 MOZILLIANS = 3
 PUBLIC = 4
 PRIVACY_CHOICES = ((MOZILLIANS, _lazy(u'Mozillians')),
                    (PUBLIC, _lazy(u'Public')))
+PRIVACY_CHOICES_WITH_PRIVATE = ((MOZILLIANS, _lazy(u'Mozillians')),
+                                (PUBLIC, _lazy(u'Public')),
+                                (PRIVATE, _lazy(u'Private')))
+
 PUBLIC_INDEXABLE_FIELDS = ['full_name', 'ircname', 'email']
 
 

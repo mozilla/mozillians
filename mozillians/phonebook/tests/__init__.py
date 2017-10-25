@@ -1,7 +1,7 @@
 import factory
 
 from mozillians.phonebook.models import Invite
-from mozillians.users.managers import PRIVILEGED
+from mozillians.users.managers import PRIVATE
 from mozillians.users.models import UserProfilePrivacyModel
 
 
@@ -19,5 +19,5 @@ def _get_privacy_fields(privacy_level):
         data[field.name] = privacy_level
 
     # privacy_tshirt field has only one level of privacy available
-    data['privacy_tshirt'] = PRIVILEGED
+    data['privacy_tshirt'] = PRIVATE
     return data

@@ -14,7 +14,7 @@ from waffle.models import Flag
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.tests import InviteFactory, _get_privacy_fields
-from mozillians.users.managers import MOZILLIANS, PRIVILEGED, PUBLIC
+from mozillians.users.managers import MOZILLIANS, PRIVATE, PUBLIC
 from mozillians.users.models import UserProfilePrivacyModel
 from mozillians.users.tests import UserFactory
 
@@ -290,7 +290,7 @@ class ImageTests(TestCase):
 
         for field in UserProfilePrivacyModel._meta.fields:
             data[field.name] = MOZILLIANS
-        data['privacy_tshirt'] = PRIVILEGED
+        data['privacy_tshirt'] = PRIVATE
 
         url = reverse('phonebook:profile_edit', prefix='/en-US/')
         with self.login(user) as client:

@@ -8,7 +8,6 @@ from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -38,10 +37,10 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import redeem_invite
-from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVILEGED
+from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVATE
 from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, UserProfile
-from mozillians.users.tasks import (check_spam_account, update_email_in_basket,
-                                    send_userprofile_to_cis)
+from mozillians.users.tasks import (check_spam_account, send_userprofile_to_cis,
+                                    update_email_in_basket)
 
 
 @allow_unvouched
@@ -107,7 +106,7 @@ def view_profile(request, username):
     """View a profile by username."""
     data = {}
     privacy_mappings = {'anonymous': PUBLIC, 'mozillian': MOZILLIANS, 'employee': EMPLOYEES,
-                        'privileged': PRIVILEGED, 'myself': None}
+                        'private': PRIVATE, 'myself': None}
     privacy_level = None
     abuse_form = None
 
@@ -194,7 +193,8 @@ def edit_profile(request):
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
     user_groups = profile.groups.all().order_by('name')
-    emails = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL)
+    idp_profiles = IdpProfile.objects.filter(profile=profile)
+    idp_primary_profile = get_object_or_none(IdpProfile, profile=profile, primary=True)
     accounts_qs = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
 
     sections = {
@@ -202,7 +202,7 @@ def edit_profile(request):
         'basic_section': ['user_form', 'basic_information_form'],
         'groups_section': ['groups_privacy_form'],
         'skills_section': ['skills_form'],
-        'email_section': ['email_privacy_form', 'alternate_email_formset'],
+        'idp_section': ['idp_profile_form', 'idp_profile_formset'],
         'languages_section': ['language_privacy_form', 'language_formset'],
         'accounts_section': ['accounts_formset'],
         'location_section': ['location_form'],
@@ -244,12 +244,11 @@ def edit_profile(request):
     ctx['groups_privacy_form'] = forms.GroupsPrivacyForm(get_request_data('groups_privacy_form'),
                                                          instance=profile)
     ctx['irc_form'] = forms.IRCForm(get_request_data('irc_form'), instance=profile)
-    ctx['email_privacy_form'] = forms.EmailPrivacyForm(get_request_data('email_privacy_form'),
-                                                       instance=profile)
-    alternate_email_formset_data = get_request_data('alternate_email_formset')
-    ctx['alternate_email_formset'] = forms.AlternateEmailFormset(alternate_email_formset_data,
-                                                                 instance=profile,
-                                                                 queryset=emails)
+    ctx['idp_profile_form'] = forms.IdpProfileForm(get_request_data('idp_profile_form'),
+                                                   instance=idp_primary_profile)
+    ctx['idp_profile_formset'] = forms.IdpProfileFormset(get_request_data('idp_profile_formset'),
+                                                         instance=profile,
+                                                         queryset=idp_profiles)
 
     ctx['autocomplete_form_media'] = ctx['registration_form'].media + ctx['skills_form'].media
     forms_valid = True
@@ -307,48 +306,49 @@ def edit_profile(request):
 
 @allow_unvouched
 @never_cache
-def delete_email(request, email_pk):
+def delete_identity(request, identity_pk):
     """Delete alternate email address."""
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
 
     # Only email owner can delete emails
-    if not ExternalAccount.objects.filter(user=profile, pk=email_pk).exists():
+    idp_query = IdpProfile.objects.filter(profile=profile, pk=identity_pk)
+    if not idp_query.exists():
         raise Http404()
 
-    ExternalAccount.objects.get(pk=email_pk).delete()
-    send_userprofile_to_cis.delay(profile.pk)
+    idp_query = idp_query.filter(primary=False)
+    if idp_query.exists():
+        idp_type = idp_query[0].get_type_display()
+        idp_query.delete()
+        send_userprofile_to_cis.delay(profile.pk)
+        msg = _(u'Identity {0} successfully deleted.'.format(idp_type))
+        messages.success(request, msg)
+        return redirect('phonebook:profile_edit')
+
+    # We are trying to delete the primary identity, politely ignore the request
+    msg = _(u'Sorry the requested Identity cannot be deleted.')
+    messages.error(request, msg)
     return redirect('phonebook:profile_edit')
 
 
 @allow_unvouched
 @never_cache
-def change_primary_email(request, email_pk):
+def change_primary_contact_identity(request, identity_pk):
     """Change primary email address."""
     user = User.objects.get(pk=request.user.id)
     profile = user.userprofile
-    alternate_emails = ExternalAccount.objects.filter(user=profile,
-                                                      type=ExternalAccount.TYPE_EMAIL)
+    alternate_identities = IdpProfile.objects.filter(profile=profile)
 
     # Only email owner can change primary email
-    if not alternate_emails.filter(pk=email_pk).exists():
+    if not alternate_identities.filter(pk=identity_pk).exists():
         raise Http404()
 
-    alternate_email = alternate_emails.get(pk=email_pk)
-    primary_email = user.email
+    if alternate_identities.filter(primary_contact_identity=True).exists():
+        alternate_identities.filter(pk=identity_pk).update(primary_contact_identity=True)
+        alternate_identities.exclude(pk=identity_pk).update(primary_contact_identity=False)
 
-    # Change primary email
-    user.email = alternate_email.identifier
-
-    # Turn primary email to alternate
-    alternate_email.identifier = primary_email
-
-    with transaction.atomic():
-        user.save()
-        alternate_email.save()
-    # Notify Basket about this change
-    update_email_in_basket.delay(primary_email, user.email)
-    send_userprofile_to_cis.delay(profile.pk)
+        msg = _(u'Primary Contact Identity successfully updated.')
+        messages.success(request, msg)
 
     return redirect('phonebook:profile_edit')
 
@@ -684,11 +684,13 @@ class VerifyIdentityCallbackView(View):
 
             current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
             # The new identity is stronger than the one currently used. Let's swap
-            if current_idp and current_idp.type < idp.type:
+            if ((current_idp and current_idp.type < idp.type) or
+                    (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
                 idp.primary = True
                 idp.save()
                 # Also update the primary email of the user
+                update_email_in_basket(profile.user.email, idp.email)
                 User.objects.filter(pk=profile.user.id).update(email=idp.email)
 
             if created:
