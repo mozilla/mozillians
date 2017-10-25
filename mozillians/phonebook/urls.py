@@ -39,6 +39,7 @@ urlpatterns = patterns(
     url(r'^apikeys/$', 'views.apikeys', name='apikeys'),
     url(r'^apikey/(?P<api_pk>\d+)/delete/$', 'views.delete_apikey', name='apikey_delete'),
     # Haystack search
+    url(r'^vouched_mozillians/$', 'views.list_vouched_mozillians', name='list_vouched_mozillians'),
     url(r'^search/$', allow_public(PhonebookSearchView.as_view()),
         name='haystack_search'),
     url(r'^country/(?P<country>[A-Za-z0-9 \.\,]+)/$',
