@@ -6,8 +6,14 @@ class GroupBaseManager(Manager):
     use_for_related_fields = True
 
     def get_queryset(self):
+        from mozillians.groups.models import Group
         qs = super(GroupBaseManager, self).get_queryset()
-        qs = qs.annotate(member_count=Count('members'))
+        if qs.model == Group:
+            qs = (qs.filter(groupmembership__status='member').distinct()
+                    .annotate(member_count=Count('members')))
+        else:
+            qs = qs.annotate(member_count=Count('members'))
+
         return qs
 
 
