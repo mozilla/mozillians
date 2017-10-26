@@ -10,7 +10,7 @@ from mozillians.common.templatetags.helpers import absolutify, markdown
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group, GroupMembership
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import ExternalAccount, Language, UserProfile
+from mozillians.users.models import ExternalAccount, IdpProfile, Language, UserProfile
 
 
 # Serializers
@@ -46,11 +46,11 @@ class LanguageSerializer(serializers.ModelSerializer):
 
 
 class AlternateEmailSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source='identifier')
+    email = serializers.CharField(source='email')
     privacy = serializers.CharField(source='get_privacy_display')
 
     class Meta:
-        model = ExternalAccount
+        model = IdpProfile
         fields = ('email', 'privacy')
 
 
@@ -203,8 +203,8 @@ class UserProfileFilter(django_filters.FilterSet):
 
     def filter_emails(self, queryset, name, value):
         """Return users with email matching either primary or alternate email address"""
-        qs = ExternalAccount.objects.filter(type=ExternalAccount.TYPE_EMAIL, identifier=value)
-        users = qs.values_list('user__id', flat=True)
+        qs = IdpProfile.objects.filter(email=value)
+        users = qs.values_list('profile__id', flat=True)
         query = Q(id__in=users) | Q(user__email=value)
         return queryset.filter(query).distinct()
 
