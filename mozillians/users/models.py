@@ -79,8 +79,6 @@ class UserProfilePrivacyModel(models.Model):
                                   default=PRIVATE)
     privacy_title = PrivacyField()
     privacy_story_link = PrivacyField()
-    privacy_idp_profile = PrivacyField(choices=PRIVACY_CHOICES_WITH_PRIVATE,
-                                       default=MOZILLIANS)
 
     CACHED_PRIVACY_FIELDS = None
 
