@@ -35,7 +35,7 @@ class APIv2AppAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     readonly_fields = ['last_used', 'created']
 
     def owner_email(self, obj):
-        return obj.owner.user.email
+        return obj.owner.email
 
     owner_email.admin_order_field = 'owner__user__email'
     owner_email.short_description = 'Email'

@@ -312,7 +312,7 @@ def get_privacy_aware_photo_url(profile, privacy_level, geometry, **kwargs):
 
     if profile.privacy_photo >= privacy_level:
         if not profile.photo:
-            return gravatar(profile.user.email, size=geometry)
+            return gravatar(profile.email, size=geometry)
         return profile.get_photo_thumbnail(geometry, **kwargs).url
 
     profile.photo = ''

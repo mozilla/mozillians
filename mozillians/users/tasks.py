@@ -190,8 +190,8 @@ def subscribe_user_to_basket(instance_id, newsletters=[]):
             not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
         return
 
-    lookup_subtask = lookup_user_task.subtask((instance.user.email,))
-    subscribe_subtask = subscribe_user_task.subtask((instance.user.email, newsletters,))
+    lookup_subtask = lookup_user_task.subtask((instance.email,))
+    subscribe_subtask = subscribe_user_task.subtask((instance.email, newsletters,))
     chain(lookup_subtask | subscribe_subtask)()
 
 

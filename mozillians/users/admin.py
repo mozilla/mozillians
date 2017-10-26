@@ -60,8 +60,7 @@ def unsubscribe_from_basket_action(newsletter):
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
-        ts = [(unsubscribe_from_basket_task.subtask(args=[userprofile.user.email,
-                                                          [newsletter]]))
+        ts = [(unsubscribe_from_basket_task.subtask(args=[userprofile.email, [newsletter]]))
               for userprofile in queryset]
         TaskSet(ts).apply_async()
         messages.success(request, 'Basket update started.')

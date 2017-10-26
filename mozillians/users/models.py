@@ -297,10 +297,23 @@ class UserProfile(UserProfilePrivacyModel):
     @property
     def _primary_email(self):
         _getattr = (lambda x: super(UserProfile, self).__getattribute__(x))
+
         privacy_fields = UserProfile.privacy_fields()
-        if self._privacy_level and _getattr('privacy_email') < self._privacy_level:
-            email = privacy_fields['email']
-            return email
+
+        if self._privacy_level:
+            # Try IDP contact first
+            if self.idp_profiles.exists():
+                contact_ids = self.identity_profiles.filter(primary_contact_identity=True)
+                if contact_ids.exists():
+                    return contact_ids[0].email
+
+            # Fallback to user.email
+            if _getattr('privacy_email') < self._privacy_level:
+                return privacy_fields['email']
+
+        # In case we don't have a privacy aware attribute access
+        if self.idp_profiles.exists():
+            return self.idp_profiles.filter(primary_contact_identity=True)[0].email
         return _getattr('user').email
 
     @property
@@ -460,7 +473,7 @@ class UserProfile(UserProfilePrivacyModel):
         """
         privacy_level = getattr(self, '_privacy_level', MOZILLIANS)
         if (not self.photo and self.privacy_photo >= privacy_level):
-            return gravatar(self.user.email, size=geometry)
+            return gravatar(self.email, size=geometry)
 
         photo_url = self.get_photo_thumbnail(geometry, **kwargs).url
         if photo_url.startswith('https://') or photo_url.startswith('http://'):
@@ -502,7 +515,7 @@ class UserProfile(UserProfilePrivacyModel):
         """Auto vouch mozilla.com users."""
         emails = [acc.identifier for acc in
                   ExternalAccount.objects.filter(user=self, type=ExternalAccount.TYPE_EMAIL)]
-        emails.append(self.user.email)
+        emails.append(self.email)
 
         email_exists = any([email for email in emails
                             if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
@@ -534,7 +547,7 @@ class UserProfile(UserProfilePrivacyModel):
         subject = _(u'You have been vouched on Mozillians.org')
         filtered_message = message.replace('&#34;', '"').replace('&#39;', "'")
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
-                  [self.user.email])
+                  [self.email])
 
     def get_annotated_groups(self):
         """

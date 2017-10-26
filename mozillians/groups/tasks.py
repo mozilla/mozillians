@@ -71,7 +71,7 @@ def send_pending_membership_emails():
             })
 
             send_mail(subject, body, settings.FROM_NOREPLY,
-                      [profile.user.email for profile in curators],
+                      [profile.email for profile in curators],
                       fail_silently=False)
 
             group.max_reminder = max_pk
@@ -124,7 +124,7 @@ def email_membership_change(group_pk, user_pk, old_status, new_status):
     }
     template = get_template(template_name)
     body = template.render(context)
-    send_mail(subject, body, settings.FROM_NOREPLY, [user.email], fail_silently=False)
+    send_mail(subject, body, settings.FROM_NOREPLY, [user.userprofile.email], fail_silently=False)
 
 
 @periodic_task(run_every=timedelta(hours=24))
