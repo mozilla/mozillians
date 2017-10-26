@@ -312,7 +312,7 @@ class UserProfile(UserProfilePrivacyModel):
                 return privacy_fields['email']
 
         # In case we don't have a privacy aware attribute access
-        if self.idp_profiles.exists():
+        if self.idp_profiles.filter(primary_contact_identity=True).exists():
             return self.idp_profiles.filter(primary_contact_identity=True)[0].email
         return _getattr('user').email
 
