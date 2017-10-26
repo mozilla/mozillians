@@ -118,7 +118,7 @@
           </a>
           <div class="profile-details">
             <h2>{{ user.username }}</h2>
-            {{ user.email }}
+            {{ user.userprofile.email }}
             {% with profile = user.userprofile %}
             {% if profile.country or profile.region or profile.city %}
               <section class="location">

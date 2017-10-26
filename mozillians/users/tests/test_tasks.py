@@ -58,7 +58,7 @@ class BasketTests(TestCase):
         # Create a new user
         old_email = 'foo@example.com'
         # We need vouched=False in order to avoid triggering a basket_update through signals.
-        user = UserFactory.create(email=old_email, vouched=False)
+        user = UserFactory.create(email=old_email, vouched=False).userprofile
         new_email = 'bar@example.com'
 
         # Enable basket.
@@ -106,7 +106,7 @@ class BasketTests(TestCase):
     def test_unsubscribe_from_basket_task(self, basket_mock, lookup_mock, unsubscribe_mock,
                                           switch_is_active_mock):
         switch_is_active_mock.return_value = True
-        user = UserFactory.create(email='foo@example.com')
+        user = UserFactory.create(email='foo@example.com').userprofile
         basket_mock.lookup_user.return_value = {
             'email': user.email,  # the old value
             'token': 'token',
@@ -284,11 +284,11 @@ class BasketTests(TestCase):
 
 class SpamTasksTests(TestCase):
     def test_manual_spam_reports_unvouched_delete(self):
-        spam_user = UserFactory.create(vouched=False)
-        reporter = UserFactory.create()
+        spam_user = UserFactory.create(vouched=False).userprofile
+        reporter = UserFactory.create().userprofile
         AbuseReport.objects.create(
-            profile=spam_user.userprofile,
-            reporter=reporter.userprofile,
+            profile=spam_user,
+            reporter=reporter,
         )
 
         eq_(AbuseReport.objects.all().count(), 1)
@@ -298,11 +298,11 @@ class SpamTasksTests(TestCase):
         eq_(User.objects.filter(email=spam_user.email).count(), 0)
 
     def test_manual_spam_reports_vouched_skip(self):
-        spam_user = UserFactory.create(vouched=True)
-        reporter = UserFactory.create()
+        spam_user = UserFactory.create(vouched=True).userprofile
+        reporter = UserFactory.create().userprofile
         AbuseReport.objects.create(
-            profile=spam_user.userprofile,
-            reporter=reporter.userprofile,
+            profile=spam_user,
+            reporter=reporter,
         )
 
         eq_(AbuseReport.objects.all().count(), 1)
@@ -312,28 +312,28 @@ class SpamTasksTests(TestCase):
         eq_(User.objects.filter(email=spam_user.email).count(), 1)
 
     def test_automated_spam_reports_delete(self):
-        spam_user = UserFactory.create(vouched=False)
+        spam_user = UserFactory.create(vouched=False).userprofile
         AbuseReport.objects.create(
-            profile=spam_user.userprofile,
+            profile=spam_user,
             is_akismet=True,
         )
 
-        ok_(not spam_user.userprofile.skills.all().exists())
+        ok_(not spam_user.skills.all().exists())
         eq_(AbuseReport.objects.all().count(), 1)
         delete_reported_spam_accounts()
         eq_(AbuseReport.objects.all().count(), 1)
         eq_(User.objects.filter(email=spam_user.email).count(), 1)
 
     def test_automated_spam_reports_skip(self):
-        spam_user = UserFactory.create(vouched=False)
+        spam_user = UserFactory.create(vouched=False).userprofile
         AbuseReport.objects.create(
-            profile=spam_user.userprofile,
+            profile=spam_user,
             is_akismet=True,
         )
         skill = Skill.objects.create(name='foobar')
-        spam_user.userprofile.skills.add(skill)
+        spam_user.skills.add(skill)
 
-        ok_(spam_user.userprofile.skills.all().exists())
+        ok_(spam_user.skills.all().exists())
         eq_(AbuseReport.objects.all().count(), 1)
         delete_reported_spam_accounts()
         eq_(AbuseReport.objects.all().count(), 1)
