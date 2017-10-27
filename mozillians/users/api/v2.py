@@ -10,7 +10,7 @@ from mozillians.common.templatetags.helpers import absolutify, markdown
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group, GroupMembership
 from mozillians.users.managers import PUBLIC
-from mozillians.users.models import ExternalAccount, Language, IdpProfile, UserProfile
+from mozillians.users.models import ExternalAccount, IdpProfile, Language, UserProfile
 
 
 # Serializers
@@ -45,13 +45,19 @@ class LanguageSerializer(serializers.ModelSerializer):
         fields = ('code', 'english', 'native')
 
 
-class AlternateEmailSerializer(serializers.ModelSerializer):
-    email = serializers.CharField(source='identifier')
+class AlternateEmailSerializer(serializers.Serializer):
+    email = serializers.SerializerMethodField('get_email')
     privacy = serializers.CharField(source='get_privacy_display')
 
     class Meta:
         model = ExternalAccount
         fields = ('email', 'privacy')
+
+    def get_email(self, obj):
+        if isinstance(obj, ExternalAccount):
+            return obj.identifier
+        if isinstance(obj, IdpProfile):
+            return obj.email
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -74,7 +80,7 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     username = serializers.Field(source='user.username')
     email = serializers.Field(source='email')
     photo = serializers.SerializerMethodField('get_photo')
-    alternate_emails = AlternateEmailSerializer(many=True, source='alternate_emails')
+    alternate_emails = AlternateEmailSerializer(many=True, source='_api_alternate_emails')
     groups = GroupSerializer(many=True, source='_groups')
     country = serializers.SerializerMethodField('get_country')
     region = serializers.SerializerMethodField('get_region')
