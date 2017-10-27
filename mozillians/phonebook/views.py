@@ -202,7 +202,7 @@ def edit_profile(request):
         'basic_section': ['user_form', 'basic_information_form'],
         'groups_section': ['groups_privacy_form'],
         'skills_section': ['skills_form'],
-        'idp_section': ['idp_profile_form', 'idp_profile_formset'],
+        'idp_section': ['idp_profile_formset'],
         'languages_section': ['language_privacy_form', 'language_formset'],
         'accounts_section': ['accounts_formset'],
         'location_section': ['location_form'],
@@ -244,11 +244,10 @@ def edit_profile(request):
     ctx['groups_privacy_form'] = forms.GroupsPrivacyForm(get_request_data('groups_privacy_form'),
                                                          instance=profile)
     ctx['irc_form'] = forms.IRCForm(get_request_data('irc_form'), instance=profile)
-    ctx['idp_profile_form'] = forms.IdpProfileForm(get_request_data('idp_profile_form'),
-                                                   instance=idp_primary_profile)
     ctx['idp_profile_formset'] = forms.IdpProfileFormset(get_request_data('idp_profile_formset'),
                                                          instance=profile,
                                                          queryset=idp_profiles)
+    ctx['idp_primary_profile'] = idp_primary_profile
 
     ctx['autocomplete_form_media'] = ctx['registration_form'].media + ctx['skills_form'].media
     forms_valid = True
