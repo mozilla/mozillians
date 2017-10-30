@@ -303,11 +303,12 @@
           </div>
         {% endif %}
 
-        {% if profile.identity_profiles.exists() %}
+        {% set alternate_identities = profile.identity_profiles.filter(primary_contact_identity=False) %}
+        {% if alternate_identities.exists() %}
           <div id="alternate_email" class="profile-entry">
             <h3><i class="icon-envelope-o"></i> {{ _('Alternate Contant Identities') }}</h3>
             <ul>
-              {% for idp in profile.identity_profiles %}
+              {% for idp in alternate_identities %}
                 <li>
                   {{ idp.get_type_display() }} -
                   {% if user != shown_user %}
