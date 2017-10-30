@@ -9,7 +9,8 @@ from mozillians.common.tests import TestCase
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupFactory
 from mozillians.users.managers import MOZILLIANS, PUBLIC
-from mozillians.users.models import GroupMembership, ExternalAccount, Language, UserProfile
+from mozillians.users.models import (GroupMembership, ExternalAccount, IdpProfile,
+                                     Language, UserProfile)
 from mozillians.users.tests import CityFactory, CountryFactory, RegionFactory, UserFactory
 from mozillians.users.api.v2 import (ExternalAccountSerializer,
                                      LanguageSerializer,
@@ -208,12 +209,25 @@ class UserProfileFilterTest(TestCase):
         eq_(f.qs.count(), 1)
         eq_(f.qs[0], user.userprofile)
 
-    def test_filter_emails_alternate(self):
+    def test_filter_emails_alternate_legacy(self):
         request = self.factory.get('/', {'email': 'bar@bar.com'})
         user = UserFactory.create(email='foo@bar.com')
         UserFactory.create_batch(2)
         ExternalAccount.objects.create(user=user.userprofile, type=ExternalAccount.TYPE_EMAIL,
                                        identifier='bar@bar.com')
+        f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
+        eq_(f.qs.count(), 1)
+        eq_(f.qs[0], user.userprofile)
+
+    def test_filter_emails_alternate_idp(self):
+        request = self.factory.get('/', {'email': 'bar@bar.com'})
+        user = UserFactory.create(email='foo@bar.com')
+        UserFactory.create_batch(2)
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|bar@bar.com',
+            email='bar@bar.com'
+        )
         f = UserProfileFilter(request.GET, queryset=UserProfile.objects.all())
         eq_(f.qs.count(), 1)
         eq_(f.qs[0], user.userprofile)
