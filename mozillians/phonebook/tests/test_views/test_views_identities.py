@@ -70,7 +70,7 @@ class IdentitiesViewsTests(TestCase):
         mocked_message.success.assert_called_once_with(ANY, msg)
 
     @patch('mozillians.phonebook.views.messages')
-    def test_delete_primary_identity(self, mocked_message):
+    def test_delete_primary_login_identity(self, mocked_message):
         user = UserFactory.create()
         idp = IdpProfile.objects.create(
             profile=user.userprofile,
@@ -105,6 +105,27 @@ class IdentitiesViewsTests(TestCase):
             response = client.get(url, follow=True)
 
         eq_(response.status_code, 404)
+
+    @patch('mozillians.phonebook.views.messages')
+    def test_delete_primary_contact_identity(self, mocked_message):
+        user = UserFactory.create()
+        idp = IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|',
+            email=user.email,
+            primary=False,
+            primary_contact_identity=True
+        )
+
+        with self.login(user) as client:
+            url = reverse('phonebook:delete_identity', kwargs={'identity_pk': idp.pk})
+            response = client.get(url, follow=True)
+
+        ok_(IdpProfile.objects.filter(pk=idp.pk).exists())
+        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        self.assertRedirects(response, url, status_code=301)
+        msg = 'Sorry the requested Identity cannot be deleted.'
+        mocked_message.error.assert_called_once_with(ANY, msg)
 
     @patch('mozillians.phonebook.views.messages')
     def test_change_valid_identity(self, mocked_message):

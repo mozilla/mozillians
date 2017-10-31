@@ -315,7 +315,7 @@ def delete_identity(request, identity_pk):
     if not idp_query.exists():
         raise Http404()
 
-    idp_query = idp_query.filter(primary=False)
+    idp_query = idp_query.filter(primary=False, primary_contact_identity=False)
     if idp_query.exists():
         idp_type = idp_query[0].get_type_display()
         idp_query.delete()
