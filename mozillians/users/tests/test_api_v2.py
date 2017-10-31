@@ -155,6 +155,93 @@ class UserProfileDetailedSerializerTests(TestCase):
                   'privacy': 'Private'}
         eq_(serializer.data['tshirt'], tshirt)
 
+    def test_alternate_emails_legacy(self):
+        user = UserFactory.create()
+        ExternalAccount.objects.create(
+            type=ExternalAccount.TYPE_EMAIL, user=user.userprofile,
+            identifier='foo@bar.com', privacy=3
+        )
+        user.userprofile._groups = Group.objects.none()
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
+        eq_(len(serializer.data['alternate_emails']), 1)
+        eq_(serializer.data['alternate_emails'][0]['email'], 'foo@bar.com')
+        eq_(serializer.data['alternate_emails'][0]['privacy'], 'Mozillians')
+
+    def test_alternate_emails_idp(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo_idp@bar.com',
+            email='foo_idp@bar.com',
+            privacy=1
+        )
+        user.userprofile._groups = Group.objects.none()
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
+        eq_(len(serializer.data['alternate_emails']), 1)
+        eq_(serializer.data['alternate_emails'][0]['email'], 'foo_idp@bar.com')
+        eq_(serializer.data['alternate_emails'][0]['privacy'], 'Private')
+
+    def test_alternate_emails_both_legacy_idp(self):
+        user = UserFactory.create()
+        ExternalAccount.objects.create(
+            type=ExternalAccount.TYPE_EMAIL, user=user.userprofile,
+            identifier='foo@bar.com', privacy=3
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo_idp@bar.com',
+            email='foo_idp@bar.com',
+            privacy=1
+        )
+        user.userprofile._groups = Group.objects.none()
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
+        eq_(len(serializer.data['alternate_emails']), 2)
+        eq_(serializer.data['alternate_emails'][0]['email'], 'foo@bar.com')
+        eq_(serializer.data['alternate_emails'][0]['privacy'], 'Mozillians')
+        eq_(serializer.data['alternate_emails'][1]['email'], 'foo_idp@bar.com')
+        eq_(serializer.data['alternate_emails'][1]['privacy'], 'Private')
+
+    def test_alternate_emails_conflicting_privacy(self):
+        user = UserFactory.create()
+        ExternalAccount.objects.create(
+            type=ExternalAccount.TYPE_EMAIL, user=user.userprofile,
+            identifier='foo@bar.com', privacy=3
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo_idp@bar.com',
+            email='foo@bar.com',
+            privacy=1
+        )
+        user.userprofile._groups = Group.objects.none()
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
+        eq_(len(serializer.data['alternate_emails']), 1)
+        eq_(serializer.data['alternate_emails'][0]['email'], 'foo@bar.com')
+        eq_(serializer.data['alternate_emails'][0]['privacy'], 'Mozillians')
+
+    def test_alternate_emails_duplicate(self):
+        user = UserFactory.create()
+        ExternalAccount.objects.create(
+            type=ExternalAccount.TYPE_EMAIL, user=user.userprofile,
+            identifier='foo@bar.com', privacy=3
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@bar.com',
+            email='foo@bar.com',
+            privacy=3
+        )
+        user.userprofile._groups = Group.objects.none()
+        context = {'request': self.factory.get('/')}
+        serializer = UserProfileDetailedSerializer(user.userprofile, context=context)
+        eq_(len(serializer.data['alternate_emails']), 1)
+        eq_(serializer.data['alternate_emails'][0]['email'], 'foo@bar.com')
+        eq_(serializer.data['alternate_emails'][0]['privacy'], 'Mozillians')
+
 
 class UserProfileViewSetTests(TestCase):
     def test_get_queryset_public(self):
