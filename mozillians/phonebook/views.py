@@ -692,6 +692,7 @@ class VerifyIdentityCallbackView(View):
                 update_email_in_basket(profile.user.email, idp.email)
                 User.objects.filter(pk=profile.user.id).update(email=idp.email)
 
+            send_userprofile_to_cis.delay(profile.pk)
             if created:
                 msg = 'Account successfully verified.'
                 messages.success(request, msg)
