@@ -705,28 +705,37 @@ class CISHelperMethodsTests(unittest.TestCase):
         Group.objects.all().delete()
         IdpProfile.objects.all().delete()
 
-    def test_cis_emails(self):
-        user = UserFactory.create(email='foo@bar.com')
-        alternate_email = user.userprofile.externalaccount_set.create(
-            type=ExternalAccount.TYPE_EMAIL,
-            identifier='test@mozilla.com'
-        )
+    def test_cis_emails_without_primary_identity(self):
+        profile = UserFactory.create(email='foo@bar.com').userprofile
 
         expected_result = [
             {
                 'value': 'foo@bar.com',
                 'verified': True,
                 'primary': True,
-                'name': 'mozillians-primary'
+                'name': 'mozillians-primary-{0}'.format(profile.id)
             },
+        ]
+        eq_(profile.get_cis_emails(), expected_result)
+
+    def test_cis_emails_with_primary_identity(self):
+        profile = UserFactory.create(email='foo@bar.com').userprofile
+        IdpProfile.objects.create(
+            profile=profile,
+            auth0_user_id='github|1',
+            email='foo@bar.com',
+            primary=True,
+        )
+
+        expected_result = [
             {
-                'value': 'test@mozilla.com',
+                'value': u'foo@bar.com',
                 'verified': True,
-                'primary': False,
-                'name': 'mozillians-alternate-{}'.format(alternate_email.pk)
+                'primary': True,
+                'name': u'Github Provider'
             }
         ]
-        eq_(user.userprofile.get_cis_emails(), expected_result)
+        eq_(profile.get_cis_emails(), expected_result)
 
     def test_cis_groups_highest(self):
         user = UserFactory.create()

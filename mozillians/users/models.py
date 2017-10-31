@@ -598,22 +598,30 @@ class UserProfile(UserProfilePrivacyModel):
 
     def get_cis_emails(self):
         """Prepares the entry for emails in the CIS format."""
-        emails = [
-            {
-                'value': self.email,
-                'verified': True,
-                'primary': True,
-                'name': 'mozillians-primary'
-            }
-        ]
+        idp_profiles = self.idp_profiles.all()
+        primary_idp = idp_profiles.filter(primary=True)
+        emails = []
+        primary_email = {
+            'value': self.email,
+            'verified': True,
+            'primary': True,
+            'name': 'mozillians-primary-{0}'.format(self.pk)
+        }
+        # We have an IdpProfile marked as primary (login identity)
+        # If there is not an idp profile, the self.email is the one that is used to login
+        if primary_idp.exists():
+            primary_email['value'] = primary_idp[0].email
+            primary_email['name'] = primary_idp[0].get_type_display()
 
-        # Alternate emails
-        for email in self.alternate_emails:
+        emails.append(primary_email)
+
+        # Non primary identity profiles
+        for idp in self.idp_profiles.filter(primary=False):
             entry = {
-                'value': email.identifier,
+                'value': idp.email,
                 'verified': True,
                 'primary': False,
-                'name': 'mozillians-alternate-{}'.format(email.pk)
+                'name': '{0}'.format(idp.get_type_display())
             }
             emails.append(entry)
 
