@@ -135,7 +135,7 @@
                       Show on Profile
                     </a>
                   {% endif %}
-                  {% if not form.instance.primary %}
+                  {% if not form.instance.primary and not form.instance.primary_contact_identity %}
                     <a class="delete" href="{{ url('phonebook:delete_identity', form.instance.pk) }}">
                       Delete
                     </a>
