@@ -74,7 +74,8 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             new_idp_profile = IdpProfile.objects.get(email='bar@example.com')
             eq_(new_idp_profile.primary, True)
-            msg = 'Account successfully verified.'
+            msg = ('Account successfully verified. You need to use this identity '
+                   'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
             self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
 
@@ -112,7 +113,8 @@ class EditProfileIdentities(TestCase):
             eq_(new_idp_profile.primary, True)
             user = User.objects.get(pk=user.pk)
             eq_(user.email, 'bar@example.com')
-            msg = 'Account successfully verified.'
+            msg = ('Account successfully verified. You need to use this identity '
+                   'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
             self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
 

@@ -683,6 +683,7 @@ class VerifyIdentityCallbackView(View):
 
             current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
             # The new identity is stronger than the one currently used. Let's swap
+            append_msg = ''
             if ((current_idp and current_idp.type < idp.type) or
                     (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
@@ -691,10 +692,13 @@ class VerifyIdentityCallbackView(View):
                 # Also update the primary email of the user
                 update_email_in_basket(profile.user.email, idp.email)
                 User.objects.filter(pk=profile.user.id).update(email=idp.email)
+                append_msg = ' You need to use this identity the next time you will login.'
 
             send_userprofile_to_cis.delay(profile.pk)
             if created:
                 msg = 'Account successfully verified.'
+                if append_msg:
+                    msg += append_msg
                 messages.success(request, msg)
             else:
                 msg = 'Account verification failed: Identity already exists.'
