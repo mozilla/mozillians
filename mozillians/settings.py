@@ -580,7 +580,6 @@ CSP_FONT_SRC = (
     'https://*.mozilla.org',
     'https://cdn.mozillians.org',
     'https://cdn-staging.mozillians.org',
-    'https://mozorg.cdn.mozilla.net',
 )
 CSP_IMG_SRC = (
     "'self'",
@@ -654,7 +653,6 @@ if DEV:
     CSP_FONT_SRC += (
         'http://*.mozilla.net',
         'http://*.mozilla.org',
-        'http://mozorg.cdn.mozilla.net',
     )
 
     CSP_IMG_SRC += (
