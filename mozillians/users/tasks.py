@@ -364,7 +364,7 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     import boto3
 
     from cis.publisher import ChangeDelegate
-    from mozillians.users.models import UserProfile
+    from mozillians.users.models import IdpProfile, UserProfile
 
     if is_test_environment():
         return []
@@ -393,6 +393,11 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     }
 
     results = []
+    primary_idp = get_object_or_none(IdpProfile, primary=True)
+    primary_login_email = profile.email
+    if primary_idp:
+        primary_login_email = primary_idp.email
+
     for idp in profile.idp_profiles.all():
         data = {
             'user_id': idp.auth0_user_id,
@@ -402,7 +407,7 @@ def send_userprofile_to_cis(instance_id, **kwargs):
             'created': profile.user.date_joined.isoformat(),
             'userName': profile.user.username,
             'displayName': profile.display_name,
-            'primaryEmail': profile.email,
+            'primaryEmail': primary_login_email,
             'emails': profile.get_cis_emails(),
             'uris': profile.get_cis_uris(),
             'picture': profile.get_photo_url(),
