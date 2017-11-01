@@ -393,7 +393,7 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     }
 
     results = []
-    primary_idp = get_object_or_none(IdpProfile, primary=True)
+    primary_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
     primary_login_email = profile.email
     if primary_idp:
         primary_login_email = primary_idp.email
