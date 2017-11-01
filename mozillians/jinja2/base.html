@@ -154,14 +154,6 @@
       {% block content_wrapper %}
         <div id="content-wrapper">
           <div id="main" class="container">
-            <div class="alert alert-warning">
-              <p>
-                A major upgrade of Mozillians.org is scheduled for 10pm PST on 01 NOV 2017. We expect one hour downtime.
-              </p>
-              <p>
-                If you are trying to link identities to your Mozillians.org profile, please wait until the upgrade is done.
-              </p>
-            </div>
             {% block messages %}
               {% for m in messages %}
                 {% with label = m.tags in ['error', 'success', 'info', 'warning'] %}
