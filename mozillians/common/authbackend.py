@@ -123,10 +123,10 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
         # Mark other `user_id` as `primary=False`
         idp_q = IdpProfile.objects.filter(profile=profile)
-        idp_q.exclude(auth0_user_id=auth0_user_id).update(primary=False)
+        idp_q.exclude(auth0_user_id=auth0_user_id, email=email).update(primary=False)
 
         # Mark current `user_id` as `primary=True`
-        idp_q.filter(auth0_user_id=auth0_user_id).update(primary=True)
+        idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
 
         # Update CIS
         send_userprofile_to_cis.delay(profile.pk)

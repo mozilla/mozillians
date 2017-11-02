@@ -81,6 +81,33 @@ class MozilliansAuthBackendTests(TestCase):
         ok_(not mocked_message.called)
 
     @patch('mozillians.common.authbackend.messages')
+    def test_identity_single_auth0_id_multiple_emails(self, mocked_message):
+        """Test to add an email that already exists."""
+
+        user = UserFactory.create(email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|12345',
+            email='foo@bar.com',
+            primary=True
+        )
+        claims = {
+            'email': 'foo@example.com',
+            'user_id': 'github|12345'
+        }
+
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        self.backend.claims = claims
+        self.backend.request = request_mock
+        self.backend.check_authentication_method(user)
+
+        eq_(IdpProfile.objects.filter(
+            profile=user.userprofile, primary=True, email='foo@example.com').count(), 1)
+        eq_(IdpProfile.objects.filter(
+            profile=user.userprofile, primary=False, email='foo@bar.com').count(), 1)
+
+    @patch('mozillians.common.authbackend.messages')
     def test_add_idp_wrong_flow(self, mocked_message):
         """Test logging in with a weaker provider compared to the current one"""
 
