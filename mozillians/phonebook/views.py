@@ -684,7 +684,7 @@ class VerifyIdentityCallbackView(View):
             current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
             # The new identity is stronger than the one currently used. Let's swap
             append_msg = ''
-            if ((current_idp and current_idp.type < idp.type) or
+            if ((current_idp and current_idp.type <= idp.type) or
                     (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
                 idp.primary = True
