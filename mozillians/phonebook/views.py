@@ -684,7 +684,11 @@ class VerifyIdentityCallbackView(View):
             current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
             # The new identity is stronger than the one currently used. Let's swap
             append_msg = ''
-            if ((current_idp and current_idp.type <= idp.type) or
+            # We need to check for equality too in the case a user updates the primary email in
+            # the same identity (matching auth0_user_id). If there is an addition of the same type
+            # we are not swapping login identities
+            if ((current_idp and current_idp.type < idp.type) or
+                (current_idp and current_idp.auth0_user_id == idp.auth0_user_id) or
                     (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
                 idp.primary = True

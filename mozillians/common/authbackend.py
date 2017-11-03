@@ -110,16 +110,14 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             email=email,
             auth0_user_id=auth0_user_id)
 
-        if current_idp:
-
-            # Do not allow downgrades.
-            if obj.type < current_idp.type:
-                msg = u'Please use one of the following authentication methods: {}'
-                # convert the tuple to a dict to easily get the values
-                provider_types = dict(IdpProfile.PROVIDER_TYPES)
-                methods = ', '.join(provider_types[x] for x in ALLOWED_IDP_FLOWS[current_idp.type])
-                messages.error(self.request, msg.format(methods))
-                return None
+        # Do not allow downgrades.
+        if current_idp and obj.type < current_idp.type:
+            msg = u'Please use one of the following authentication methods: {}'
+            # convert the tuple to a dict to easily get the values
+            provider_types = dict(IdpProfile.PROVIDER_TYPES)
+            methods = ', '.join(provider_types[x] for x in ALLOWED_IDP_FLOWS[current_idp.type])
+            messages.error(self.request, msg.format(methods))
+            return None
 
         # Mark other `user_id` as `primary=False`
         idp_q = IdpProfile.objects.filter(profile=profile)
