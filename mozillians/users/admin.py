@@ -783,6 +783,8 @@ class IdpProfileAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     resource_class = IdpProfile
     list_display = ['type', 'profile', 'auth0_user_id', 'email', 'primary']
     list_filter = ['type']
+    search_fields = ['profile__user__email', 'profile__full_name',
+                     'profile__user__username', 'email', 'auth0_user_id']
 
     class Meta:
         model = IdpProfile
