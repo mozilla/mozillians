@@ -2,7 +2,7 @@ from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView
 
-from mozillians.common.decorators import allow_public
+from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.phonebook.views import (PhonebookSearchView, VerifyIdentityView,
                                         VerifyIdentityCallbackView)
 
@@ -14,10 +14,12 @@ urlpatterns = patterns(
     url(r'^logout/$', 'views.logout', name='logout'),
     url(r'^register/$', 'views.register', name='register'),
     # Use Auth0 to verify an identity
-    url(r'^verify/identity/$', login_required(VerifyIdentityView.as_view()),
-        name='verify_identity'),
-    url(r'^verify/identity/callback/$', login_required(VerifyIdentityCallbackView.as_view()),
-        name='verify_identity_callback'),
+    url(r'^verify/identity/$', allow_unvouched(
+        login_required(VerifyIdentityView.as_view())
+    ), name='verify_identity'),
+    url(r'^verify/identity/callback/$', allow_unvouched(
+        login_required(VerifyIdentityCallbackView.as_view())
+    ), name='verify_identity_callback'),
     url(r'^user/delete/identity/(?P<identity_pk>\d+)/$', 'views.delete_identity',
         name='delete_identity'),
     url(r'^user/primary/contact/identity/(?P<identity_pk>\d+)/$',
