@@ -14,7 +14,7 @@ Table of Contents
 * [Chat With The Team](#chat-with-the-team)
 
 ## Install, docs, API and more
-For documentation, see [mozillians.rtfd.org](https://mozillians.readthedocs.org/) or build the docs/
+For documentation, see [mozillians.rtfd.org](https://mozillians.readthedocs.org/) or build the docs.
 
 ## Contribute
 
