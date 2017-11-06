@@ -195,8 +195,9 @@ EXEMPT_L10N_URLS = [
 ]
 
 # Tells the extract script what files to parse for strings and what functions to use.
+
 PUENTE = {
-    'BASE_DIR': ROOT,
+    'BASE_DIR': ROOT.parent,
     'DOMAIN_METHODS': {
         'django': [
             ('mozillians/**.py', 'python'),
