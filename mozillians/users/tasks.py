@@ -231,7 +231,7 @@ def unsubscribe_from_basket_task(email, newsletters=[]):
     ).delay()
 
 
-@task
+@periodic_task(run_every=timedelta(hours=1))
 def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     """Remove incomplete accounts older than INCOMPLETE_ACC_MAX_DAYS old."""
     # Avoid circular dependencies
