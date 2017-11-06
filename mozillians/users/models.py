@@ -329,6 +329,7 @@ class UserProfile(UserProfilePrivacyModel):
                 contact_ids = self.identity_profiles.filter(primary_contact_identity=True)
                 if contact_ids.exists():
                     return contact_ids[0].email
+                return ''
 
             # Fallback to user.email
             if _getattr('privacy_email') < self._privacy_level:
