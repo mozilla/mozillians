@@ -56,6 +56,11 @@ def home(request):
     show_start = False
     if request.GET.get('source', ''):
         show_start = True
+
+    bugzilla_url = 'https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook'  # noqa
+    link = '<a href="{}">file a bug</a>'.format(bugzilla_url)
+    msg = 'In case you are facing authentication issues please {}'.format(link)
+    messages.warning(request, mark_safe(msg))
     return render(request, 'phonebook/home.html',
                   {'show_start': show_start})
 
