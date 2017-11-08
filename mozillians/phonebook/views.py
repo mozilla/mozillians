@@ -680,7 +680,8 @@ class VerifyIdentityCallbackView(View):
                 error_msg = 'The email in this identity is used by another user.'
             if error_msg:
                 messages.error(request, error_msg)
-                return redirect('phonebook:profile_edit')
+                next_url = self.request.session.get('oidc_login_next', None)
+                return HttpResponseRedirect(next_url or reverse('phonebook:profile_edit'))
 
             # Save the new identity to the IdpProfile
             user_q['profile'] = profile
@@ -713,4 +714,5 @@ class VerifyIdentityCallbackView(View):
                 msg = 'Account verification failed: Identity already exists.'
                 messages.error(request, msg)
 
-        return redirect('phonebook:profile_edit')
+        next_url = self.request.session.get('oidc_login_next', None)
+        return HttpResponseRedirect(next_url or reverse('phonebook:profile_edit'))
