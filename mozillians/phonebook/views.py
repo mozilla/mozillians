@@ -180,6 +180,7 @@ def view_profile(request, username):
     data['profile'] = profile
     data['groups'] = profile.get_annotated_groups()
     data['abuse_form'] = abuse_form
+    data['alternate_identities'] = profile.identity_profiles.filter(primary_contact_identity=False)
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser

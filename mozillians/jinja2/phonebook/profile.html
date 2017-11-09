@@ -303,8 +303,7 @@
           </div>
         {% endif %}
 
-        {% set alternate_identities = profile.identity_profiles.filter(primary_contact_identity=False) %}
-        {% if alternate_identities.exists() %}
+        {% if alternate_identities %}
           <div id="alternate_email" class="profile-entry">
             <h3><i class="icon-envelope-o"></i> {{ _('Alternate Contact Identities') }}</h3>
             <ul>
