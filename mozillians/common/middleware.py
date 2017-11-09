@@ -95,7 +95,7 @@ class LocaleURLMiddleware(object):
         # Don't apply middleware to requests matching exempt URLs
         # Use default LANGUAGE_CODE locale
         for view_url in settings.EXEMPT_L10N_URLS:
-            if re.search(view_url, request.path):
+            if re.match(view_url, request.path):
                 request.locale = settings.LANGUAGE_CODE
                 activate(settings.LANGUAGE_CODE)
                 return None
