@@ -1,9 +1,10 @@
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.management import call_command
+from django.utils.timezone import now
 
 import basket
 import waffle
@@ -237,8 +238,8 @@ def remove_incomplete_accounts(days=INCOMPLETE_ACC_MAX_DAYS):
     # Avoid circular dependencies
     from mozillians.users.models import UserProfile
 
-    now = datetime.now() - timedelta(days=days)
-    UserProfile.objects.filter(full_name='').filter(user__date_joined__lt=now).delete()
+    time_diff = now() - timedelta(days=days)
+    UserProfile.objects.filter(full_name='').filter(user__date_joined__lt=time_diff).delete()
 
 
 @task(ignore_result=False)
