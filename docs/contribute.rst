@@ -138,14 +138,9 @@ See get_context() for example usage.
 
 Server architecture
 -------------------
-**Dev**
-
-- *URL:* http://mozillians-dev.allizom.org/
-- *Deploy:* Automatic after code merge, if unit tests pass
-
 **Stage**
 
-- *URL:* http://mozillians.allizom.org/
+- *URL:* https://web-mozillians-staging.production.paas.mozilla.community/
 - *Deploy:* Manual (Chief)
 
 **Production**
