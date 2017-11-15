@@ -2,6 +2,7 @@ import base64
 import hashlib
 import re
 
+from django.db import transaction
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -121,13 +122,12 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
         # Mark other `user_id` as `primary=False`
         idp_q = IdpProfile.objects.filter(profile=profile)
-        idp_q.exclude(auth0_user_id=auth0_user_id, email=email).update(primary=False)
-
-        # Mark current `user_id` as `primary=True`
-        idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
-
-        # Update CIS
-        send_userprofile_to_cis.delay(profile.pk)
+        with transaction.atomic():
+            idp_q.exclude(auth0_user_id=auth0_user_id, email=email).update(primary=False)
+            # Mark current `user_id` as `primary=True`
+            idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
+            # Update CIS
+            send_userprofile_to_cis.delay(profile.pk)
         return user
 
     def authenticate(self, **kwargs):
