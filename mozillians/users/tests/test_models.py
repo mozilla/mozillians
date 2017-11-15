@@ -741,10 +741,12 @@ class CISHelperMethodsTests(unittest.TestCase):
         user = UserFactory.create()
         group1 = GroupFactory.create(name='nda')
         group2 = GroupFactory.create(name='cis_whitelist')
-        group3 = GroupFactory.create(name='group3')
+        group3 = GroupFactory.create(name='open innovation + reps council')
+        group4 = GroupFactory.create(name='group4')
         group1.add_member(user.userprofile)
         group2.add_member(user.userprofile)
-        group3.add_member(user.userprofile, status='PENDING')
+        group3.add_member(user.userprofile)
+        group4.add_member(user.userprofile, status='PENDING')
         IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id='github|foo@bar.com',
@@ -757,7 +759,8 @@ class CISHelperMethodsTests(unittest.TestCase):
         )
 
         eq_(set(user.userprofile.get_cis_groups(idp)),
-            set(['mozilliansorg_nda', 'mozilliansorg_cis_whitelist']))
+            set(['mozilliansorg_nda', 'mozilliansorg_cis_whitelist',
+                 'mozilliansorg_open-innovation-reps-council']))
 
     def test_cis_groups_not_highest(self):
         user = UserFactory.create()
