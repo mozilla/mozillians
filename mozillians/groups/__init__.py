@@ -6,6 +6,7 @@ CIS_GROUPS = [
     'nda',
     'open-innovation-reps-council',
     'qa_whitelist',
+    'iam-project'
 ]
 
 
