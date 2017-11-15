@@ -660,9 +660,9 @@ class UserProfile(UserProfilePrivacyModel):
         memberships = GroupMembership.objects.filter(
             userprofile=self,
             status=GroupMembership.MEMBER,
-            group__name__in=CIS_GROUPS
+            group__url__in=CIS_GROUPS
         )
-        groups = ['mozilliansorg_{}'.format(m.group.name) for m in memberships]
+        groups = ['mozilliansorg_{}'.format(m.group.url) for m in memberships]
         return groups
 
     def get_cis_tags(self):
@@ -671,10 +671,10 @@ class UserProfile(UserProfilePrivacyModel):
             userprofile=self,
             status=GroupMembership.MEMBER
         ).exclude(
-            group__name__in=CIS_GROUPS
+            group__url__in=CIS_GROUPS
         )
 
-        tags = [m.group.name for m in memberships]
+        tags = [m.group.url for m in memberships]
         return tags
 
     def timezone_offset(self):
