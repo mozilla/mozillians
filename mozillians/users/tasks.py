@@ -440,3 +440,13 @@ def send_userprofile_to_cis(instance_id, **kwargs):
         results.append(result)
 
     return results
+
+
+@periodic_task(run_every=timedelta(hours=6))
+def periodically_send_cis_data():
+    """Periodically send all mozillians.org IdpProfiles to CIS."""
+
+    from mozillians.users.models import UserProfile
+
+    for profile in UserProfile.objects.all():
+        send_userprofile_to_cis.delay(profile.pk)
