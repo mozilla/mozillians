@@ -209,9 +209,10 @@ class GroupAdmin(GroupBaseAdmin):
     inlines = [GroupAliasInline]
     list_display = ['name', 'get_curators', 'get_invites', 'functional_area',
                     'accepting_new_members', 'members_can_leave', 'visible', 'total_member_count',
-                    'full_member_count', 'pending_member_count', 'pending_terms_member_count']
+                    'full_member_count', 'pending_member_count', 'pending_terms_member_count',
+                    'is_access_group']
     list_filter = [CuratedGroupFilter, EmptyGroupFilter, FunctionalAreaFilter, VisibleGroupFilter,
-                   NoURLFilter, InvalidateGroupFilter]
+                   NoURLFilter, InvalidateGroupFilter, 'is_access_group']
     readonly_fields = ['url', 'total_member_count', 'full_member_count', 'pending_member_count',
                        'pending_terms_member_count', 'max_reminder']
     search_fields = ('curators__user__username', 'name',)
@@ -219,7 +220,8 @@ class GroupAdmin(GroupBaseAdmin):
     fieldsets = (
         ('Group', {
             'fields': ('name', 'url', 'description', 'irc_channel', 'website', 'wiki',
-                       'visible', 'terms', 'invalidation_days', 'invite_email_text',)
+                       'visible', 'terms', 'invalidation_days', 'invite_email_text',
+                       'is_access_group',)
         }),
         ('Functional Area', {
             'fields': ('functional_area', 'curators',)

@@ -22,7 +22,6 @@ from mozillians.common import utils
 from mozillians.common.templatetags.helpers import absolutify, gravatar
 from mozillians.common.templatetags.helpers import offset_of_timezone
 from mozillians.common.urlresolvers import reverse
-from mozillians.groups import CIS_GROUPS
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
@@ -660,7 +659,7 @@ class UserProfile(UserProfilePrivacyModel):
         memberships = GroupMembership.objects.filter(
             userprofile=self,
             status=GroupMembership.MEMBER,
-            group__url__in=CIS_GROUPS
+            group__is_access_group=True
         )
         groups = ['mozilliansorg_{}'.format(m.group.url) for m in memberships]
         return groups
@@ -671,7 +670,7 @@ class UserProfile(UserProfilePrivacyModel):
             userprofile=self,
             status=GroupMembership.MEMBER
         ).exclude(
-            group__url__in=CIS_GROUPS
+            group__is_access_group=True
         )
 
         tags = [m.group.url for m in memberships]

@@ -739,9 +739,12 @@ class CISHelperMethodsTests(unittest.TestCase):
 
     def test_cis_groups_highest(self):
         user = UserFactory.create()
-        group1 = GroupFactory.create(name='nda')
-        group2 = GroupFactory.create(name='cis_whitelist')
-        group3 = GroupFactory.create(name='open innovation + reps council')
+        group1 = GroupFactory.create(name='nda',
+                                     is_access_group=True)
+        group2 = GroupFactory.create(name='cis_whitelist',
+                                     is_access_group=True)
+        group3 = GroupFactory.create(name='open innovation + reps council',
+                                     is_access_group=True)
         group4 = GroupFactory.create(name='group4')
         group1.add_member(user.userprofile)
         group2.add_member(user.userprofile)

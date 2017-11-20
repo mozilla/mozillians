@@ -243,6 +243,8 @@ class Group(GroupBase):
                                          blank=True,
                                          help_text=_('Please enter any additional text for the '
                                                      'invitation email'))
+    is_access_group = models.BooleanField(default=False)
+
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 
     @classmethod
