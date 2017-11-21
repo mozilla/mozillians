@@ -28,7 +28,8 @@ from mozillians.users.models import get_languages_for_locale
 from mozillians.users.models import (AbuseReport, ExternalAccount, IdpProfile, Language, PUBLIC,
                                      UserProfile, UsernameBlacklist, Vouch)
 from mozillians.users.tasks import (check_celery, subscribe_user_to_basket,
-                                    unsubscribe_from_basket_task, index_all_profiles)
+                                    unsubscribe_from_basket_task, index_all_profiles,
+                                    send_userprofile_to_cis)
 
 
 admin.site.unregister(Group)
@@ -82,6 +83,14 @@ def update_vouch_flags_action():
             profile.save()
     update_vouch_flags.short_description = 'Update vouch flags'
     return update_vouch_flags
+
+
+def send_profile_to_cis_action(modeladmin, request, queryset):
+    for obj in queryset:
+        send_userprofile_to_cis.delay(obj.pk)
+
+
+send_profile_to_cis_action.short_description = 'Send profiles to CIS'
 
 
 class SuperUserFilter(SimpleListFilter):
@@ -530,7 +539,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                subscribe_to_basket_action(settings.BASKET_NDA_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_NDA_NEWSLETTER),
-               update_vouch_flags_action()]
+               update_vouch_flags_action(), send_profile_to_cis_action]
 
     fieldsets = (
         ('Account', {
