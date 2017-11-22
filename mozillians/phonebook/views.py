@@ -717,3 +717,13 @@ class VerifyIdentityCallbackView(View):
 
         next_url = self.request.session.get('oidc_login_next', None)
         return HttpResponseRedirect(next_url or reverse('phonebook:profile_edit'))
+
+
+@waffle_flag('delete-idp-profiles-qa')
+@allow_unvouched
+@never_cache
+def delete_idp_profiles(request):
+    """QA helper: Delete IDP profiles for request.user"""
+    request.user.userprofile.idp_profiles.all().delete()
+    messages.warning(request, 'Identities deleted.')
+    return redirect('phonebook:profile_edit')

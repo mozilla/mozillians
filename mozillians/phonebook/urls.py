@@ -31,6 +31,7 @@ urlpatterns = patterns(
         name='profile_view'),
     url(r'^u/(?P<username>[\w.@+-]+)/vouch/$', 'views.vouch',
         name='profile_vouch'),
+    url(r'^user/delete_idp_profiles/$', 'views.delete_idp_profiles', name='delete_idp_profiles'),
     url(r'^u/(?P<username>[\w.@+-]+)/unvouch/$', 'views.unvouch',
         name='profile_unvouch'),
     url(r'^confirm-delete/$', 'views.confirm_delete',
