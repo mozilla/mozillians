@@ -9,15 +9,6 @@
 {% endblock %}
 
 {% block content %}
-  <div class="alert">
-    {% if user.username == shown_user.username %}
-      {{ _('Your Profile') }}
-    {% elif profile.is_vouched %}
-      {{ _('Mozillian Profile') }}
-    {% else %}
-      {{ _('Pending Profile') }}
-    {% endif %}
-  </div>
   {% if user.is_authenticated() and not profile.is_vouched %}
     {% if user == shown_user %}
       <div id="pending-approval">
@@ -35,11 +26,11 @@
             Send the link below to someone who is familiar with your
             contributions and ask them to vouch for you:
             <br/>
-            <em class="underline" title="Your profile URL">{{ profile_url }}</em>
+            <em class="underline">{{ profile_url }}</em>
           </p>
           <p>
             If you are new to the Mozilla community,
-            <a class="button" href="{{ contribute_url }}">get involved</a>
+            <a href="{{ contribute_url }}">get involved</a>.
           </p>
           <p>The chances of being vouched increase as you finish tasks in our community.</p>
         {% endtrans %}
@@ -48,10 +39,17 @@
       <div id="pending-approval">
         <p>
           {% trans %}
-            This profile is waiting for approval. If you would like to
-            vouch for them, use the form at the bottom of the page.
+            This Mozillian is not vouched. You can vouch for them, at the bottom of the page.
           {% endtrans %}
         </p>
+      </div>
+    {% endif %}
+  {% else %}
+    {% if not profile.is_vouched %}
+      <div class="alert">
+        {% trans %}
+          This Mozillian is not vouched.
+        {% endtrans %}
       </div>
     {% endif %}
   {% endif %}
@@ -162,6 +160,13 @@
             </div>
           </div>
         </div>
+      {% endif %}
+
+      {% if user.username != shown_user.username and profile.is_vouched %}
+        <section id="profile-status">
+          <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+          {{ _('Vouched Mozillian') }}
+        </section>
       {% endif %}
 
     </article>

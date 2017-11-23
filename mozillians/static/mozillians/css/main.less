@@ -180,7 +180,6 @@ body {
             height: @footerMobile;
         }
     }
-
     &.loggedin {
         #masthead {
             @media (max-width: @breakTablet) {
@@ -1337,10 +1336,8 @@ body#profile {
         #pending-approval {
             .alert;
             .alert-info;
-            padding: 25px 35px 8px 14px;
-            button {
-                .button;
-                margin: 15px 0;
+            p:last-child {
+                margin-bottom: 0;
             }
         }
         #anonymous {
@@ -1472,10 +1469,21 @@ body#profile {
                     }
                 }
                 ul#id_type {
-                  list-style-type: none;
+                    list-style-type: none;
                 }
                 li {
-                  margin-left: 0px;
+                    margin-left: 0px;
+                }
+            }
+
+            #profile-status {
+                width: 220px;
+                float: left;
+                margin-top:1em;
+                @media (max-width: @breakDesktop) {
+                    text-align: center;
+                    width: 100%;
+                    float: none;
                 }
             }
 
