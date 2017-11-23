@@ -41,14 +41,14 @@
       <form action="{{ url('groups:group_delete', group.url) }}" id="delete-group" method="post">
         {% csrf_token %}
         <button class="button button-negative delete right">
-          {{ _('Delete Group') }}
+          {{ _('Delete') }}
         </button>
       </form>
     {% endif %}
 
     {% if is_curator %}
       <a class="button right" href="{{ url('groups:group_edit', group.url) }}">
-        {{ _('Edit Group') }}
+        {{ _('Edit') }}
       </a>
     {% endif %}
 
@@ -56,6 +56,29 @@
       <a class="button right" href="{{ url('groups:force_group_invalidation', group.url) }}">
         Invalidate Group
       </a>
+    {% endif %}
+
+    {% if show_join_button %}
+      <form action="{{ url('groups:join_group', group.url) }}" id="join-group" method="post">
+        {% csrf_token %}
+        <button class="button right">
+          {% if group.accepting_new_members == 'by_request' %}
+            {{ _('Request to Join') }}
+          {% else %}
+            {{ _('Join') }}
+          {% endif %}
+        </button>
+      </form>
+    {% endif %}
+
+    {% if show_leave_button %}
+      <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
+            id="leave-group" method="post">
+        {% csrf_token %}
+        <button class="button button-negative right">
+          {{ _('Leave') }}
+        </button>
+      </form>
     {% endif %}
 
     {% if group.description %}
@@ -156,29 +179,6 @@
     {% endif %}
 
   </article><!-- .group-meta -->
-
-  {% if show_join_button %}
-    <form action="{{ url('groups:join_group', group.url) }}" id="join-group" method="post">
-      {% csrf_token %}
-      <button class="button">
-        {% if group.accepting_new_members == 'by_request' %}
-          {{ _('Request to Join Group') }}
-        {% else %}
-          {{ _('Join Group') }}
-        {% endif %}
-      </button>
-    </form>
-  {% endif %}
-
-  {% if show_leave_button %}
-    <form action="{{ url('groups:remove_member', group.url, user.userprofile.pk) }}"
-          id="leave-group" method="post">
-      {% csrf_token %}
-      <button class="button button-negative">
-        {{ _('Leave Group') }}
-      </button>
-    </form>
-  {% endif %}
 
   {% if membership_filter_form %}
     <div class="filters right">
