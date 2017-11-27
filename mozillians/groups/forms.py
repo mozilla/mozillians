@@ -224,6 +224,32 @@ class GroupCriteriaForm(happyforms.ModelForm):
         }
 
 
+class GroupAccessForm(happyforms.ModelForm):
+    """Modelform which handles the editing of access/tag groups."""
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(GroupAccessForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """Custom clean method."""
+        super(GroupAccessForm, self).clean()
+        user = getattr(self.request, 'user', None)
+        if ((not user or not user.userprofile.can_create_access_groups) and
+                self.cleaned_data['is_access_group']):
+            msg = _(u'You do not have the permissions to provision an access group.')
+            self._errors['is_access_group'] = self.error_class([msg])
+
+        return self.cleaned_data
+
+    class Meta:
+        model = Group
+        fields = ('is_access_group',)
+        widgets = {
+            'is_access_group': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+        }
+
+
 class MembershipFilterForm(forms.Form):
     filtr = forms.ChoiceField(required=False,
                               label='',
@@ -247,12 +273,31 @@ class TermsReviewForm(forms.Form):
                                        ])
 
 
-class GroupCreateForm(forms.ModelForm):
+class GroupCreateForm(GroupAccessForm):
+
+    def __init__(self, *args, **kwargs):
+        super(GroupCreateForm, self).__init__(*args, **kwargs)
+        user = getattr(self.request, 'user', None)
+        if not user or not user.userprofile.can_create_access_groups:
+            self.fields['is_access_group'].widget = forms.HiddenInput()
+
+    def clean(self):
+        """Custom clean method.
+
+        Check that only closed/reviewed groups can be access groups.
+        """
+        cdata = super(GroupCreateForm, self).clean()
+        if cdata['is_access_group'] and cdata['accepting_new_members'] == Group.OPEN:
+            msg = _(u'Group must be of type Reviewed or Closed for Access Groups.')
+            self._errors['is_access_group'] = self.error_class([msg])
+        return cdata
+
     class Meta:
         model = Group
-        fields = ('name', 'accepting_new_members',)
+        fields = ('name', 'accepting_new_members', 'is_access_group',)
         widgets = {
-            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer),
+            'is_access_group': forms.RadioSelect(renderer=HorizontalRadioRenderer)
         }
         labels = {
             'accepting_new_members': _('Group type')

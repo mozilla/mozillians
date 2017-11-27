@@ -435,6 +435,22 @@ class UserProfile(UserProfilePrivacyModel):
             return vouches[0].date
         return None
 
+    @property
+    def can_create_access_groups(self):
+        """Check if a user can provision access groups.
+
+        An access group is provisioned if a user holds an email in the AUTO_VOUCH_DOMAINS
+        and has an LDAP IdpProfile or the user has a superuser account.
+        """
+        emails = set(
+            [idp.email for idp in
+             IdpProfile.objects.filter(profile=self, type=IdpProfile.PROVIDER_LDAP)
+             if idp.email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS]
+        )
+        if self.user.is_superuser or emails:
+            return True
+        return False
+
     def set_instance_privacy_level(self, level):
         """Sets privacy level of instance."""
         self._privacy_level = level

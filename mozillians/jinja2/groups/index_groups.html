@@ -43,6 +43,15 @@
                 </div>
               </div>
             </fieldset>
+            {% if not group_form.hidden_fields() %}
+              <fieldset id="access_type">
+                <div class="form-group">
+                  <div class="sizing">
+                    {{ mozillians_field(group_form.is_access_group) }}
+                  </div>
+                </div>
+              </fieldset>
+            {% endif %}
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{{ _('Cancel') }}</button>

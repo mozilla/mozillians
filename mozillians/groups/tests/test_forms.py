@@ -7,12 +7,14 @@ from mozillians.common.tests import TestCase
 from mozillians.groups import forms
 from mozillians.groups.models import Group
 from mozillians.groups.tests import GroupAliasFactory, GroupFactory
+from mozillians.users.models import IdpProfile
 from mozillians.users.tests import UserFactory
 
 
 class GroupCreateFormTests(TestCase):
     def test_group_creation(self):
-        form_data = {'name': 'test group', 'accepting_new_members': 'by_request'}
+        form_data = {'name': 'test group',
+                     'accepting_new_members': Group.REVIEWED}
         form = forms.GroupCreateForm(data=form_data)
         ok_(form.is_valid())
         form.save()
@@ -21,18 +23,131 @@ class GroupCreateFormTests(TestCase):
     def test_name_unique(self):
         group = GroupFactory.create()
         GroupAliasFactory.create(alias=group, name='bar')
-        form = forms.GroupCreateForm({'name': 'bar', 'accepting_new_members': 'by_request'})
+        form = forms.GroupCreateForm({'name': 'bar',
+                                      'accepting_new_members': Group.REVIEWED})
         ok_(not form.is_valid())
         ok_('name' in form.errors)
         msg = u'This name already exists.'
         ok_(msg in form.errors['name'])
 
     def test_creation_without_group_type(self):
-        form_data = {'name': 'test group'}
+        form_data = {'name': 'test group', 'is_access_group': False}
         form = forms.GroupCreateForm(data=form_data)
         ok_(not form.is_valid())
         msg = u'This field is required.'
         ok_(msg in form.errors['accepting_new_members'])
+        eq_(len(form.errors), 1)
+
+    def test_creation_access_group_anonymous(self):
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': Group.REVIEWED}
+        form = forms.GroupCreateForm(data=form_data)
+        ok_(not form.is_valid())
+        msg = u'You do not have the permissions to provision an access group.'
+        ok_(msg in form.errors['is_access_group'])
+        eq_(len(form.errors), 1)
+
+    def test_creation_access_group_superuser(self):
+        superuser = UserFactory.create(is_superuser=True)
+        request = RequestFactory().request()
+        request.user = superuser
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': 'by_request'}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(form.is_valid())
+
+    def test_creation_access_group_LDAP_Idp(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@mozillafoundation.org',
+            email='foo@mozillafoundation.org',
+            primary=True,
+            primary_contact_identity=True
+        )
+        request = RequestFactory().request()
+        request.user = user
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': 'by_request'}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(form.is_valid())
+
+    def test_creation_access_group_without_LDAP_Idp(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='email|foo@bar.com',
+            email='foo@bar.com',
+            primary=True,
+            primary_contact_identity=True
+        )
+        request = RequestFactory().request()
+        request.user = user
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': 'by_request'}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(not form.is_valid())
+        msg = u'You do not have the permissions to provision an access group.'
+        ok_(msg in form.errors['is_access_group'])
+        eq_(len(form.errors), 1)
+
+    def test_creation_access_group_with_type_open(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@bar.com',
+            email='foo@bar.com',
+            primary=True,
+            primary_contact_identity=True
+        )
+        request = RequestFactory().request()
+        request.user = user
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': Group.OPEN}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(not form.is_valid())
+        msg = u'Group must be of type Reviewed or Closed for Access Groups.'
+        ok_(msg in form.errors['is_access_group'])
+        eq_(len(form.errors), 1)
+
+    def test_creation_access_group_with_type_reviewed(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@mozilla.com',
+            email='foo@mozilla.com',
+            primary=True,
+            primary_contact_identity=True
+        )
+        request = RequestFactory().request()
+        request.user = user
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': Group.REVIEWED}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(form.is_valid())
+
+    def test_creation_access_group_with_type_closed(self):
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@mozilla.com',
+            email='foo@mozilla.com',
+            primary=True,
+            primary_contact_identity=True,
+        )
+        request = RequestFactory().request()
+        request.user = user
+        form_data = {'name': 'test group',
+                     'is_access_group': True,
+                     'accepting_new_members': Group.CLOSED}
+        form = forms.GroupCreateForm(data=form_data, request=request)
+        ok_(form.is_valid())
 
     def test_legacy_group_curators_validation(self):
         group = GroupFactory.create()

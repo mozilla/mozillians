@@ -184,6 +184,13 @@ class Group(GroupBase):
         (CLOSED, _lazy(u'Closed')),
     )
 
+    ACCESS_GROUP = _lazy(u'Access Group')
+    TAG = _lazy(u'Tag')
+    ACCESS_GROUP_TYPES = (
+        (True, ACCESS_GROUP),
+        (False, TAG),
+    )
+
     # Has a steward taken ownership of this group?
     description = models.TextField(max_length=1024,
                                    verbose_name=_lazy(u'Description'),
@@ -243,7 +250,9 @@ class Group(GroupBase):
                                          blank=True,
                                          help_text=_('Please enter any additional text for the '
                                                      'invitation email'))
-    is_access_group = models.BooleanField(default=False)
+    is_access_group = models.BooleanField(default=TAG,
+                                          choices=ACCESS_GROUP_TYPES,
+                                          verbose_name='Is this an access group?')
 
     objects = GroupBaseManager.from_queryset(GroupQuerySet)()
 

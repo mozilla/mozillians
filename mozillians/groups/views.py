@@ -73,7 +73,9 @@ def index_groups(request):
     no vouched members
     """
 
-    group_form = forms.GroupCreateForm(request.POST or None)
+    group_form = forms.GroupCreateForm(request.POST or None,
+                                       initial={'is_access_group': False},
+                                       request=request)
     if group_form.is_valid():
         group = group_form.save()
         group.curators.add(request.user.userprofile)
@@ -451,6 +453,7 @@ def group_edit(request, url=None):
     group_forms['admin_form'] = forms.GroupAdminForm
     group_forms['criteria_form'] = forms.GroupCriteriaForm
     group_forms['email_form'] = forms.GroupCustomEmailForm
+    group_forms['access_form'] = forms.GroupAccessForm
 
     def _init_group_forms(request, group_forms):
         form_args = {
@@ -491,6 +494,7 @@ def group_edit(request, url=None):
         'forms_valid': forms_valid,
         'user_is_curator': is_curator,
         'user_is_manager': is_manager,
+        'user_can_create_access_groups': profile.can_create_access_groups,
         'show_delete_group_button': show_delete_group_button
     }
     context.update(group_forms)

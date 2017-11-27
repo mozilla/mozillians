@@ -7,6 +7,7 @@
 
         {% if (criteria_form.non_field_errors() or
                curator_form.non_field_errors() or
+               access_form.non_field_errors() or
                terms_expiration_form.non_field_errors()) %}
           <ul class="unstyled">
             {% for error in criteria_form.non_field_errors() %}
@@ -16,6 +17,9 @@
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
             {% for error in terms_expiration_form.non_field_errors() %}
+              <li class="alert alert-error">{{ error }}</li>
+            {% endfor %}
+            {% for error in access_form.non_field_errors() %}
               <li class="alert alert-error">{{ error }}</li>
             {% endfor %}
           </ul>
@@ -46,8 +50,8 @@
             <h4>Closed</h4>
             <p>
              "Closed" groups provide more tight control over a group.
-              Mozillians cannot request membership, and can only be invited to join the group by Group Curators.
-              Group Curators can, of course, remove people from the group if needed.
+              Mozillians cannot request membership, and can only be invited to join the group by
+              Group Curators. Group Curators can, of course, remove people from the group if needed.
               Avoid using this group type unless you are absolutely sure it is necessary.
             </p>
           </div>
@@ -71,6 +75,45 @@
       </div>
     </div>
   </form>
+
+  {% if user_can_create_access_groups %}
+    <form class="edit-group" id="access-form" method="POST"
+          action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Access Group') }}</div>
+        <div class="panel-body">
+
+          <fieldset id="access_type">
+            <div class="sizing">
+              {{ mozillians_field(access_form.is_access_group) }}
+            </div>
+              <div class="access-description">
+                <h4>Tag Group</h4>
+                <p>
+                  Tag groups are a union of people that share a common interest. These groups do not
+                  provide or provision any resources through the Identity and Access Management system.
+                </p>
+
+                <h4>Access Group</h4>
+                <p>
+                  Access Group are leveraging the Identity and Access Management system and can
+                  provide Mozilla resousrces like Google Drives and access to other Relying parties
+                  to the members of the group.
+                </p>
+              </div>
+          </fieldset>
+
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-access-type" type="submit"
+                  name="access_form">
+            {{ _('Update Access') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
 
   <form class="edit-group" id="curators-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}
