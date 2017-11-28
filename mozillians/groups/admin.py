@@ -15,6 +15,7 @@ from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
                                       Invite, Skill, SkillAlias)
 from mozillians.phonebook.admin import RedeemedInviteFilter
+from mozillians.users.models import IdpProfile
 
 
 class EmptyGroupFilter(SimpleListFilter):
@@ -126,6 +127,27 @@ class NeedsRenewalFilter(SimpleListFilter):
         if self.value() == 'True':
             return queryset.filter(needs_renewal=True)
         return queryset
+
+
+class HasMFAEnabled(SimpleListFilter):
+    title = "Has MFA'd profile"
+    parameter_name = 'is_mfa'
+
+    def lookups(self, request, model_admin):
+        return (('True', 'True'),
+                ('False', 'False'),)
+
+    def queryset(self, request, queryset):
+        if self.value() == 'True':
+            return queryset.filter(userprofile__idp_profiles__type__in=[
+                IdpProfile.PROVIDER_GITHUB, IdpProfile.PROVIDER_LDAP]
+            ).distinct()
+        elif self.value() == 'False':
+            return queryset.exclude(userprofile__idp_profiles__type__in=[
+                IdpProfile.PROVIDER_GITHUB, IdpProfile.PROVIDER_LDAP]
+            ).distinct()
+        else:
+            return queryset
 
 
 class GroupBaseEditAdminForm(forms.ModelForm):
@@ -305,6 +327,7 @@ class GroupMembershipAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
     ]
     list_filter = (
         NeedsRenewalFilter,
+        HasMFAEnabled,
         ('updated_on', admin.DateFieldListFilter,),
         'status',
     )
