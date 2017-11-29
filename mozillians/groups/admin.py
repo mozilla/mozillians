@@ -301,9 +301,13 @@ class GroupMembershipResource(ModelResource):
     """django-import-export Groupmembership Resource."""
     username = Field(attribute='userprofile__user__username')
     group_name = Field(attribute='group__name')
+    email = Field()
 
     class Meta:
         model = GroupMembership
+
+    def dehydrate_email(self, obj):
+        return obj.userprofile.email
 
 
 class BaseGroupMembershipAutocompleteForm(forms.ModelForm):
