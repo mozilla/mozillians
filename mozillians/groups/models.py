@@ -10,7 +10,7 @@ from autoslug.fields import AutoSlugField
 
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
-from mozillians.groups.managers import GroupBaseManager, GroupQuerySet
+from mozillians.groups.managers import GroupBaseManager, GroupManager, GroupQuerySet
 from mozillians.groups.templatetags.helpers import slugify
 from mozillians.groups.tasks import email_membership_change
 from mozillians.users.tasks import (unsubscribe_from_basket_task, subscribe_user_to_basket,
@@ -245,7 +245,7 @@ class Group(GroupBase):
                                                      'invitation email'))
     is_access_group = models.BooleanField(default=False)
 
-    objects = GroupBaseManager.from_queryset(GroupQuerySet)()
+    objects = GroupManager.from_queryset(GroupQuerySet)()
 
     @classmethod
     def get_functional_areas(cls):

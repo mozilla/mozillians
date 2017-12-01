@@ -7,7 +7,7 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Group, GroupAlias, GroupMembership
+from mozillians.groups.models import Group, GroupAlias, GroupMembership, Skill
 from mozillians.groups.tests import GroupAliasFactory, GroupFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
@@ -335,3 +335,36 @@ class GroupAliasBaseTests(TestCase):
         # throwing it away
         group = GroupFactory.create(name=u'A (ñâme)-with_ελλάδα "s0me" \'screwy\' chars')
         eq_(u'a-name-with_ellada-s0me-screwy-chars', group.url)
+
+
+class GroupManagerTests(TestCase):
+    def test_skill_member_count(self):
+        skill = SkillFactory.create(name='foo')
+        users = UserFactory.create_batch(3)
+        for u in users:
+            skill.add_member(u.userprofile)
+
+        eq_(Skill.objects.get(name='foo').member_count, 3)
+
+    def test_group_member_count_only_members(self):
+        group = GroupFactory.create(name='foo')
+        users = UserFactory.create_batch(3)
+        for u in users:
+            group.add_member(u.userprofile)
+
+        eq_(Group.objects.get(name='foo').member_count, 3)
+
+    def test_group_member_count_non_members(self):
+        group = GroupFactory.create(name='foo')
+        users = UserFactory.create_batch(10)
+
+        for u in users[:3]:
+            group.add_member(u.userprofile, status=GroupMembership.MEMBER)
+
+        for u in users[3:7]:
+            group.add_member(u.userprofile, status=GroupMembership.PENDING)
+
+        for u in users[7:]:
+            group.add_member(u.userprofile, status=GroupMembership.PENDING_TERMS)
+
+        eq_(Group.objects.get(name='foo').member_count, 3)
