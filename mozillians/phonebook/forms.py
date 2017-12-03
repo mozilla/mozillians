@@ -472,8 +472,7 @@ class PhonebookSearchForm(HaystackSearchForm):
     def clean(self, *args, **kwargs):
         cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
         if (not (self.country or self.city or self.region or self.language) and
-            not cdata.get('q', '').strip()):
-        if not (self.country or self.city or self.region) and not cdata.get('q', '').strip():
+                not cdata.get('q', '').strip()):
             self.errors['q'] = self.error_class([u'This field is required.'])
         if 'users.userprofile' in cdata['models'] or not cdata['models']:
             cdata['is_profile_query'] = True
