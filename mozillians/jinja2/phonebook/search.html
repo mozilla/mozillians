@@ -73,6 +73,10 @@
           {% endfor %}
           {{ country }}
         </h2>
+      {% elif language %}
+        <h2>{{ _('Mozillians who speak:') }}
+          {{ language }}
+        </h2>
       {% else %}
         <h2>{{ _('Results') }}</h2>
       {% endif %}
