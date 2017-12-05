@@ -828,9 +828,12 @@ class CISHelperMethodsTests(unittest.TestCase):
 
     def test_cis_tags(self):
         user = UserFactory.create()
-        group1 = GroupFactory.create(name='foo')
-        group2 = GroupFactory.create(name='bar')
-        group3 = GroupFactory.create(name='baz')
+        group1 = GroupFactory.create(name='foo',
+                                     is_access_group=False)
+        group2 = GroupFactory.create(name='bar',
+                                     is_access_group=False)
+        group3 = GroupFactory.create(name='baz',
+                                     is_access_group=False)
         group1.add_member(user.userprofile)
         group2.add_member(user.userprofile)
         group3.add_member(user.userprofile, status='PENDING')
