@@ -65,9 +65,6 @@ def bundle_profile_data(profile_id, delete=False):
     from mozillians.common.templatetags.helpers import get_object_or_none
     from mozillians.users.models import IdpProfile, UserProfile
 
-    if is_test_environment():
-        return []
-
     try:
         profile = UserProfile.objects.get(pk=profile_id)
     except UserProfile.DoesNotExist:

@@ -14,7 +14,7 @@ from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
-from mozillians.common.utils import akismet_spam_check, bundle_profile_data
+from mozillians.common.utils import akismet_spam_check, bundle_profile_data, is_test_environment
 from mozillians.common.templatetags.helpers import get_object_or_none
 
 
@@ -364,6 +364,9 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     import boto3
 
     from cis.publisher import ChangeDelegate
+
+    if is_test_environment():
+        return []
 
     if not instance_id and not profile_results:
         return []
