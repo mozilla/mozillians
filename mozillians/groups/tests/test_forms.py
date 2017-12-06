@@ -311,10 +311,8 @@ class GroupCriteriaFormTests(TestCase):
         request = RequestFactory().request()
         request.user = curator
         form_data = {'accepting_new_members': Group.OPEN}
-        form = forms.GroupCriteriaForm(data=form_data)
+        form = forms.GroupCriteriaForm(instance=group, data=form_data)
         ok_(not form.is_valid())
-        msg = u'An access group cannot be of type Open.'
-        ok_(msg in form.errors['accepting_new_members'])
         eq_(len(form.errors), 1)
 
     def test_access_group_type_reviewed(self):
