@@ -196,6 +196,11 @@ class GroupCriteriaForm(happyforms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(GroupCriteriaForm, self).__init__(*args, **kwargs)
+        # Do not show the Open option for access groups.
+        if self.instance.id and self.instance.is_access_group:
+            self.fields['accepting_new_members'] = forms.ChoiceField(
+                choices=tuple(x for x in Group.GROUP_TYPES if x[0] != 'yes'),
+                widget=forms.RadioSelect(renderer=HorizontalRadioRenderer))
 
     def clean(self):
         cleaned_data = super(GroupCriteriaForm, self).clean()
@@ -211,6 +216,10 @@ class GroupCriteriaForm(happyforms.ModelForm):
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
 
+        if (self.instance and self.instance.is_access_group and
+                cleaned_data.get('accepting_new_members') == Group.OPEN):
+                msg = _(u'An access group cannot be of type Open.')
+                self._errors['accepting_new_members'] = self.error_class([msg])
         return cleaned_data
 
     class Meta:

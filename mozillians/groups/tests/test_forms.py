@@ -301,3 +301,39 @@ class GroupEditFormTests(BaseGroupEditTestCase):
         request.user = curator
         data = {'invite_email_text': u'Custom message in the email.'}
         self.validate_group_edit_forms(forms.GroupCustomEmailForm, group, data, request)
+
+
+class GroupCriteriaFormTests(TestCase):
+    def test_access_group_type_open(self):
+        curator = UserFactory.create()
+        group = GroupFactory.create(is_access_group=True)
+        group.curators.add(curator.userprofile)
+        request = RequestFactory().request()
+        request.user = curator
+        form_data = {'accepting_new_members': Group.OPEN}
+        form = forms.GroupCriteriaForm(data=form_data)
+        ok_(not form.is_valid())
+        msg = u'An access group cannot be of type Open.'
+        ok_(msg in form.errors['accepting_new_members'])
+        eq_(len(form.errors), 1)
+
+    def test_access_group_type_reviewed(self):
+        curator = UserFactory.create()
+        group = GroupFactory.create(is_access_group=True)
+        group.curators.add(curator.userprofile)
+        request = RequestFactory().request()
+        request.user = curator
+        form_data = {'accepting_new_members': Group.REVIEWED,
+                     'new_member_criteria': 'Criteria'}
+        form = forms.GroupCriteriaForm(data=form_data)
+        ok_(form.is_valid())
+
+    def test_access_group_type_closed(self):
+        curator = UserFactory.create()
+        group = GroupFactory.create(is_access_group=True)
+        group.curators.add(curator.userprofile)
+        request = RequestFactory().request()
+        request.user = curator
+        form_data = {'accepting_new_members': Group.CLOSED}
+        form = forms.GroupCriteriaForm(data=form_data)
+        ok_(form.is_valid())
