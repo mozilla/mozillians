@@ -12,10 +12,9 @@ from celery import chain, group, shared_task, Task
 from celery.task import periodic_task, task
 from celery.exceptions import MaxRetriesExceededError
 from haystack import connections
-from nameparser import HumanName
 from raven.contrib.django.raven_compat.models import client as sentry_client
 
-from mozillians.common.utils import akismet_spam_check, is_test_environment
+from mozillians.common.utils import akismet_spam_check, bundle_profile_data
 from mozillians.common.templatetags.helpers import get_object_or_none
 
 
@@ -361,20 +360,16 @@ def index_all_profiles():
 
 
 @task
-def send_userprofile_to_cis(instance_id, **kwargs):
+def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     import boto3
 
     from cis.publisher import ChangeDelegate
-    from mozillians.users.models import IdpProfile, UserProfile
 
-    if is_test_environment():
+    if not instance_id and not profile_results:
         return []
 
-    try:
-        profile = UserProfile.objects.get(pk=instance_id)
-    except UserProfile.DoesNotExist:
-        return []
-    human_name = HumanName(profile.full_name)
+    if instance_id:
+        profile_results = bundle_profile_data(instance_id)
 
     sts = boto3.client('sts')
     sts_response = sts.assume_role(
@@ -394,51 +389,15 @@ def send_userprofile_to_cis(instance_id, **kwargs):
     }
 
     results = []
-    primary_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
-    primary_login_email = profile.email
-    if primary_idp:
-        primary_login_email = primary_idp.email
-
-    for idp in profile.idp_profiles.all():
-        data = {
-            'user_id': idp.auth0_user_id,
-            'timezone': profile.timezone,
-            'active': profile.user.is_active,
-            'lastModified': profile.last_updated.isoformat(),
-            'created': profile.user.date_joined.isoformat(),
-            'userName': profile.user.username,
-            'displayName': profile.display_name,
-            'primaryEmail': primary_login_email,
-            'emails': profile.get_cis_emails(),
-            'uris': profile.get_cis_uris(),
-            'picture': profile.get_photo_url(),
-            'shirtSize': profile.get_tshirt_display(),
-            'groups': profile.get_cis_groups(idp),
-            'tags': profile.get_cis_tags(),
-
-            # Derived fields
-            'firstName': human_name.first,
-            'lastName': human_name.last,
-
-            # Hardcoded fields
-            'preferredLanguage': 'en_US',
-            'phoneNumbers': [],
-            'nicknames': [],
-            'SSHFingerprints': [],
-            'PGPFingerprints': [],
-            'authoritativeGroups': []
-        }
-
+    for data in profile_results:
         # Send data to sentry for debugging purposes
         sentry_client.captureMessage(
             'New CIS transaction', data={'level': 'debug', 'payload': data}, stack=True
         )
-
         cis_change = ChangeDelegate(publisher, {}, data)
         cis_change.boto_session = session
         result = cis_change.send()
         results.append(result)
-
     return results
 
 

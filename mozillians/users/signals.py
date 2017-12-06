@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
 
+from mozillians.common.utils import bundle_profile_data
 from mozillians.users.models import ExternalAccount, UserProfile, Vouch
 from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_basket_task
 
@@ -39,6 +40,19 @@ def update_basket(sender, instance, **kwargs):
 def unsubscribe_from_basket(sender, instance, **kwargs):
     newsletters = [settings.BASKET_VOUCHED_NEWSLETTER, settings.BASKET_NDA_NEWSLETTER]
     unsubscribe_from_basket_task.delay(instance.email, newsletters)
+
+
+# Signals related to CIS operations
+@receiver(signals.pre_delete, sender=UserProfile, dispatch_uid='push_empty_groups_to_cis_sig')
+def push_empty_groups_to_cis(sender, instance, **kwargs):
+    """Notify CIS about the profile deletion.
+
+    Remove all the access groups and tags from the profile.
+    """
+    from mozillians.users.tasks import send_userprofile_to_cis
+
+    data = bundle_profile_data(instance.id, delete=True)
+    send_userprofile_to_cis.delay(profile_results=data)
 
 
 # Signals related to vouching.

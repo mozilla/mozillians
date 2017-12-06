@@ -4,6 +4,7 @@ from django.conf import settings
 
 import requests
 import waffle
+from nameparser import HumanName
 
 
 def absolutify(url):
@@ -57,3 +58,57 @@ def is_test_environment():
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
         return True
     return False
+
+
+def bundle_profile_data(profile_id, delete=False):
+    """Packs all the Identity Profiles of a user into a dictionary."""
+    from mozillians.common.templatetags.helpers import get_object_or_none
+    from mozillians.users.models import IdpProfile, UserProfile
+
+    if is_test_environment():
+        return []
+
+    try:
+        profile = UserProfile.objects.get(pk=profile_id)
+    except UserProfile.DoesNotExist:
+        return []
+    human_name = HumanName(profile.full_name)
+
+    primary_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
+    primary_login_email = profile.email
+    if primary_idp:
+        primary_login_email = primary_idp.email
+
+    results = []
+    for idp in profile.idp_profiles.all():
+
+        data = {
+            'user_id': idp.auth0_user_id,
+            'timezone': profile.timezone,
+            'active': profile.user.is_active,
+            'lastModified': profile.last_updated.isoformat(),
+            'created': profile.user.date_joined.isoformat(),
+            'userName': profile.user.username,
+            'displayName': profile.display_name,
+            'primaryEmail': primary_login_email,
+            'emails': profile.get_cis_emails(),
+            'uris': profile.get_cis_uris(),
+            'picture': profile.get_photo_url(),
+            'shirtSize': profile.get_tshirt_display(),
+            'groups': [] if delete else profile.get_cis_groups(idp),
+            'tags': [] if delete else profile.get_cis_tags(),
+
+            # Derived fields
+            'firstName': human_name.first,
+            'lastName': human_name.last,
+
+            # Hardcoded fields
+            'preferredLanguage': 'en_US',
+            'phoneNumbers': [],
+            'nicknames': [],
+            'SSHFingerprints': [],
+            'PGPFingerprints': [],
+            'authoritativeGroups': []
+        }
+        results.append(data)
+    return results
