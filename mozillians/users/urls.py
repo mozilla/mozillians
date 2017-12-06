@@ -2,7 +2,8 @@ from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 
 from cities_light.models import Country
-from mozillians.users.views import (BaseProfileAdminAutocomplete, CityAutocomplete,
+from mozillians.users.views import (AccessGroupInvitationAutocomplete,
+                                    BaseProfileAdminAutocomplete, CityAutocomplete,
                                     CountryAutocomplete, RegionAutocomplete,
                                     TimeZoneAutocomplete, UsersAdminAutocomplete,
                                     VouchedAutocomplete, VoucherAutocomplete)
@@ -27,4 +28,6 @@ urlpatterns = patterns(
         name='city-autocomplete'),
     url('timezone-autocomplete/$', login_required(TimeZoneAutocomplete.as_view()),
         name='timezone-autocomplete'),
+    url('access-group-invitation-autocomplete', AccessGroupInvitationAutocomplete.as_view(),
+        name='access-group-invitation-autocomplete'),
 )
