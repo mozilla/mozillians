@@ -98,7 +98,7 @@ class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
 
 
 def get_autocomplete_location_query(qs, q):
-    """Return qs if ``istartswith`` filter exists, else allback to ``icontains``."""
+    """Return qs if ``istartswith`` filter exists, else fallback to ``icontains``."""
     startswith_qs = qs.filter(name__istartswith=q)
     if startswith_qs.exists():
         return startswith_qs
@@ -120,7 +120,11 @@ class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
 
         query = reduce(or_, queries)
 
-        return UserProfile.objects.filter(query).distinct()
+        qs = UserProfile.objects.filter(query).distinct()
+        if self.q:
+            qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__username__icontains=self.q))
+        return qs
 
 
 class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
@@ -135,7 +139,11 @@ class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         ).values_list('userprofile__pk', flat=True)
 
         query = Q(pk__in=staff_ids) | Q(pk__in=nda_members_ids)
-        return UserProfile.objects.filter(query).distinct()
+        qs = UserProfile.objects.filter(query).distinct()
+        if self.q:
+            qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__username__icontains=self.q))
+        return qs
 
 
 class CountryAutocomplete(autocomplete.Select2QuerySetView):
