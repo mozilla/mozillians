@@ -1,4 +1,8 @@
+from functools import reduce
+from operator import or_
+
 from django.db.models import Q
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 
@@ -6,8 +10,9 @@ from cities_light.models import City, Country, Region
 from dal import autocomplete
 from pytz import country_timezones
 
+from mozillians.groups.models import GroupMembership
 from mozillians.phonebook.forms import get_timezones_list
-from mozillians.users.models import UserProfile
+from mozillians.users.models import IdpProfile, UserProfile
 
 
 class BaseProfileAdminAutocomplete(autocomplete.Select2QuerySetView):
@@ -98,6 +103,39 @@ def get_autocomplete_location_query(qs, q):
     if startswith_qs.exists():
         return startswith_qs
     return qs.filter(name__icontains=q)
+
+
+class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.userprofile.is_vouched:
+            return UserProfile.objects.none()
+
+        queries = []
+
+        # Query staff profiles
+        for domain in settings.AUTO_VOUCH_DOMAINS:
+            pks = IdpProfile.objects.filter(
+                email__endswith='@' + domain).values_list('profile__pk', flat=True)
+            queries.append(Q(pk__in=pks))
+
+        query = reduce(or_, queries)
+
+        return UserProfile.objects.filter(query).distinct()
+
+
+class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
+    def get_queryset(self):
+        staff_qs = super(AccessGroupInvitationAutocomplete, self).get_queryset()
+        staff_ids = staff_qs.values_list('pk', flat=True)
+
+        # Query NDA memberships
+        nda_members_ids = GroupMembership.objects.filter(
+            group__name=settings.NDA_GROUP,
+            status=GroupMembership.MEMBER
+        ).values_list('userprofile__pk', flat=True)
+
+        query = Q(pk__in=staff_ids) | Q(pk__in=nda_members_ids)
+        return UserProfile.objects.filter(query).distinct()
 
 
 class CountryAutocomplete(autocomplete.Select2QuerySetView):

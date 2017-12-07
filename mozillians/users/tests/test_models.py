@@ -472,6 +472,26 @@ class UserProfileTests(TestCase):
         user = UserFactory.create(is_superuser=True)
         ok_(user.userprofile.is_manager)
 
+    @override_settings(NDA_GROUP='foobar')
+    def test_is_nda_when_member(self):
+        user = UserFactory.create()
+        group = GroupFactory.create(name='foobar')
+        group.add_member(user.userprofile)
+        ok_(user.userprofile.is_nda)
+
+    @override_settings(NDA_GROUP='foobar')
+    def test_is_nda_when_pending(self):
+        user = UserFactory.create()
+        group = GroupFactory.create(name='foobar')
+        group.add_member(user.userprofile, status='PENDING')
+        ok_(not user.userprofile.is_nda)
+
+    @override_settings(NDA_GROUP='foobar')
+    def test_is_nda_when_not_member(self):
+        user = UserFactory.create()
+        GroupFactory.create(name='foobar')
+        ok_(not user.userprofile.is_nda)
+
 
 class VouchTests(TestCase):
     @override_settings(CAN_VOUCH_THRESHOLD=1)

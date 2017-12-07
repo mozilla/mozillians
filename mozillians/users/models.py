@@ -428,6 +428,15 @@ class UserProfile(UserProfilePrivacyModel):
         return self.user.is_superuser or self.user.groups.filter(name='Managers').exists()
 
     @property
+    def is_nda(self):
+        query = {
+            'userprofile__pk': self.pk,
+            'group__name': settings.NDA_GROUP,
+            'status': GroupMembership.MEMBER
+        }
+        return GroupMembership.objects.filter(**query).exists()
+
+    @property
     def date_vouched(self):
         """ Return the date of the first vouch, if available."""
         vouches = self.vouches_received.all().order_by('date')[:1]

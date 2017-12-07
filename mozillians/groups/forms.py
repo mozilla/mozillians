@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from django.forms.widgets import RadioSelect
 
 import happyforms
@@ -127,10 +128,22 @@ class GroupInviteForm(happyforms.ModelForm):
         user = self.request.user
         is_manager = user.userprofile.is_manager
         is_curator = self.instance.curators.filter(id=user.userprofile.id).exists()
+
+        error_msgs = []
         if not is_curator and not is_manager:
             msg = _(u'You need to be the curator of this group before inviting someone to join.')
-            self._errors['invites'] = self.error_class([msg])
-            del self.cleaned_data['invites']
+            error_msgs.append(msg)
+
+        if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
+            msg = _(u'Only staff and NDA members are allowed to be invited')
+            for profile in self.cleaned_data['invites']:
+                if not profile.is_nda or not profile.can_create_access_groups:
+                    error_msgs.append(msg)
+                    break
+
+        if error_msgs:
+            self._errors['invites'] = self.error_class(error_msgs)
+
         return self.cleaned_data
 
     def save(self, *args, **kwargs):
@@ -148,7 +161,9 @@ class GroupInviteForm(happyforms.ModelForm):
         model = Group
         fields = ('invites',)
         widgets = {
-            'invites': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
+            'invites': autocomplete.ModelSelect2Multiple(
+                url='users:access-group-invitation-autocomplete'
+            )
         }
 
 
