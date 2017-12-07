@@ -138,8 +138,19 @@ class GroupInviteForm(happyforms.ModelForm):
         self.fields['invites'].required = False
         self.fields['invites'].help_text = _('Start typing the name/email/username '
                                              'of a vouched Mozillian.')
+        # Dynamically initialize the Select2 widget
+        self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
+            url='users:access-group-invitation-autocomplete')
+        self.fields['invites'].widget.choices = self.fields['invites'].choices
         if self.instance.pk:
             self.initial['invites'] = []
+
+            # If the group is a TAG or is the NDA we need to query all the vouched
+            # mozillians and not only staff or NDA members.
+            if not self.instance.is_access_group or self.instance.name == settings.NDA_GROUP:
+                self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
+                    url='users:vouched-autocomplete')
+                self.fields['invites'].widget.choices = self.fields['invites'].choices
 
     def clean(self):
         """Custom clean method."""
@@ -179,11 +190,6 @@ class GroupInviteForm(happyforms.ModelForm):
     class Meta:
         model = Group
         fields = ('invites',)
-        widgets = {
-            'invites': autocomplete.ModelSelect2Multiple(
-                url='users:access-group-invitation-autocomplete'
-            )
-        }
 
 
 class GroupCustomEmailForm(happyforms.ModelForm):
