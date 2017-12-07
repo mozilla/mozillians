@@ -53,6 +53,18 @@ class GroupCuratorsForm(happyforms.ModelForm):
         self.fields['curators'].help_text = _('Start typing the name/email/username of '
                                               'a vouched Mozillian.')
 
+        # Dynamically change autocomplete widget
+        if self.instance.is_access_group:
+            self.fields['curators'].widget = autocomplete.ModelSelect2Multiple(
+                url='users:staff-autocomplete'
+            )
+        else:
+            self.fields['curators'].widget = autocomplete.ModelSelect2Multiple(
+                url='groups:curators-autocomplete'
+            )
+
+        self.fields['curators'].widget.choices = self.fields['curators'].choices
+
     def clean(self):
         cleaned_data = super(GroupCuratorsForm, self).clean()
         curators = cleaned_data.get('curators')
@@ -60,10 +72,20 @@ class GroupCuratorsForm(happyforms.ModelForm):
         # In this case we should allow curators relation to be empty.
         group_has_curators = self.instance.pk and self.instance.curators.exists()
 
+        error_msgs = []
         if not curators and group_has_curators:
             msg = _(u'The group must have at least one curator.')
-            self._errors['curators'] = self.error_class([msg])
+            error_msgs.append(msg)
 
+        if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
+            for curator in curators:
+                if not curator.can_create_access_groups:
+                    msg = _(u'Only staff members can become access group curators')
+                    error_msgs.append(msg)
+                    break
+
+        if error_msgs:
+            self._errors['curators'] = self.error_class(error_msgs)
         return cleaned_data
 
     def save(self, *args, **kwargs):
@@ -78,9 +100,6 @@ class GroupCuratorsForm(happyforms.ModelForm):
     class Meta:
         model = Group
         fields = ('curators',)
-        widgets = {
-            'curators': autocomplete.ModelSelect2Multiple(url='groups:curators-autocomplete')
-        }
 
 
 class GroupTermsExpirationForm(happyforms.ModelForm):
