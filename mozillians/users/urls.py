@@ -5,8 +5,9 @@ from cities_light.models import Country
 from mozillians.users.views import (AccessGroupInvitationAutocomplete,
                                     BaseProfileAdminAutocomplete, CityAutocomplete,
                                     CountryAutocomplete, RegionAutocomplete,
-                                    TimeZoneAutocomplete, UsersAdminAutocomplete,
-                                    VouchedAutocomplete, VoucherAutocomplete)
+                                    StaffProfilesAutocomplete, TimeZoneAutocomplete,
+                                    UsersAdminAutocomplete, VouchedAutocomplete,
+                                    VoucherAutocomplete)
 
 
 urlpatterns = patterns(
@@ -28,6 +29,8 @@ urlpatterns = patterns(
         name='city-autocomplete'),
     url('timezone-autocomplete/$', login_required(TimeZoneAutocomplete.as_view()),
         name='timezone-autocomplete'),
+    url('staff-autocomplete', StaffProfilesAutocomplete.as_view(),
+        name='staff-autocomplete'),
     url('access-group-invitation-autocomplete', AccessGroupInvitationAutocomplete.as_view(),
         name='access-group-invitation-autocomplete'),
 )
