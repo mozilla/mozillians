@@ -289,6 +289,11 @@ class GroupAccessForm(happyforms.ModelForm):
             msg = _(u'You do not have the permissions to provision an access group.')
             self._errors['is_access_group'] = self.error_class([msg])
 
+        if (self.instance.id and self.instance.accepting_new_members == Group.OPEN and
+                self.cleaned_data['is_access_group']):
+            msg = _(u'An access group must be of type Reviewed or Closed.')
+            self._errors['is_access_group'] = self.error_class([msg])
+
         return self.cleaned_data
 
     class Meta:
