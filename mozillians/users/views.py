@@ -123,6 +123,7 @@ class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
         qs = UserProfile.objects.filter(query).distinct()
         if self.q:
             qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__email__icontains=self.q) |
                            Q(user__username__icontains=self.q))
         return qs
 
@@ -142,6 +143,7 @@ class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         qs = UserProfile.objects.filter(query).distinct()
         if self.q:
             qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__email__icontains=self.q) |
                            Q(user__username__icontains=self.q))
         return qs
 
