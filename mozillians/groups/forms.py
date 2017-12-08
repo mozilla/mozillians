@@ -149,7 +149,7 @@ class GroupInviteForm(happyforms.ModelForm):
             # mozillians and not only staff or NDA members.
             if not self.instance.is_access_group or self.instance.name == settings.NDA_GROUP:
                 self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
-                    url='users:vouched-autocomplete')
+                    url='groups:curators-autocomplete')
                 self.fields['invites'].widget.choices = self.fields['invites'].choices
 
     def clean(self):
