@@ -460,6 +460,16 @@ class UserProfile(UserProfilePrivacyModel):
             return True
         return False
 
+    def can_join_access_groups(self):
+        """Check if a user can join access groups.
+
+        A user can join an access group only if has an MFA account and
+        belongs to the NDA group or is an employee.
+        """
+        if self.can_create_access_groups or self.is_nda:
+            return True
+        return False
+
     def set_instance_privacy_level(self, level):
         """Sets privacy level of instance."""
         self._privacy_level = level
