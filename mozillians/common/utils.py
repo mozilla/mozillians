@@ -91,7 +91,7 @@ def bundle_profile_data(profile_id, delete=False):
             'emails': profile.get_cis_emails(),
             'uris': profile.get_cis_uris(),
             'picture': profile.get_photo_url(),
-            'shirtSize': profile.get_tshirt_display(),
+            'shirtSize': profile.get_tshirt_display() or '',
             'groups': [] if delete else profile.get_cis_groups(idp),
             'tags': [] if delete else profile.get_cis_tags(),
 
