@@ -20,13 +20,33 @@
           <a href="{{ url('groups:show_group', group.url) }}">{{ group.name }}</a>
         </div>
         <ul class="nav nav-tabs settings-nav" role="tablist">
-          <li role="presentation" class="active" id="description-tab"><a href="#description" aria-controls="description" role="tab" data-toggle="tab">{{ _('Description') }}</a></li>
-          <li role="presentation" id="access-tab"><a href="#access" aria-controls="access" role="tab" data-toggle="tab">{{ _('Access') }}</a></li>
+          {% if basic_form %}
+            <li role="presentation" class="active" id="description-tab">
+              <a href="#description" aria-controls="description" role="tab" data-toggle="tab">
+                {{ _('Description') }}
+              </a>
+            </li>
+          {% endif %}
+          {% if access_form %}
+            <li role="presentation" id="access-tab">
+              <a href="#access" aria-controls="access" role="tab" data-toggle="tab">
+                {{ _('Access') }}
+              </a>
+            </li>
+          {% endif %}
           {% if user_is_curator or user_is_manager %}
-            <li role="presentation" id="invitations-tab"><a href="#invitations" aria-controls="invitations" role="tab" data-toggle="tab">{{ _('Invitations') }}</a></li>
+            <li role="presentation" id="invitations-tab">
+              <a href="#invitations" aria-controls="invitations" role="tab" data-toggle="tab">
+                {{ _('Invitations') }}
+              </a>
+            </li>
           {% endif %}
           {% if user.userprofile.is_manager %}
-            <li role="presentation" id="admin-tab"><a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">{{ _('Administration') }}</a></li>
+            <li role="presentation" id="admin-tab">
+              <a href="#admin" aria-controls="admin" role="tab" data-toggle="tab">
+                {{ _('Administration') }}
+              </a>
+            </li>
           {% endif %}
         </ul>
       </div>
@@ -35,15 +55,19 @@
     <div class="col-sm-9">
       <div class="tab-content">
         <!-- Description Tab -->
-        {% include 'groups/includes/group_edit_description.html' %}
+        {% if basic_form %}
+          {% include 'groups/includes/group_edit_description.html' %}
+        {% endif %}
         <!-- Access Tab -->
-        {% include 'groups/includes/group_edit_access.html' %}
+        {% if access_form %}
+          {% include 'groups/includes/group_edit_access.html' %}
+        {% endif %}
         <!-- Invitations Tab -->
         {% if user_is_curator or user_is_manager %}
           {% include 'groups/includes/group_edit_invitation.html' %}
         {% endif %}
         <!-- Admin Tab -->
-        {% if user_is_manager %}
+        {% if admin_form and user_is_manager %}
           {% include 'groups/includes/group_edit_admin.html' %}
         {% endif %}
       </div>
@@ -56,5 +80,8 @@
     <script src="{{ static('mozillians/js/libs/URI.js') }}"></script>
     <script src="{{ static('mozillians/js/group_edit.js') }}"></script>
   {% endcompress %}
-  {{ curator_form.media }}
+  {% if curator_form %}
+    {{ curator_form.media }}
+  {% endif %}
+  {{ invite_form.media }}
 {% endblock %}

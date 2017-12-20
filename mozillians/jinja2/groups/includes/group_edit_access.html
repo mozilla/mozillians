@@ -5,8 +5,8 @@
       <div class="panel-heading">{{ _('Group Type') }}</div>
       <div class="panel-body">
 
-        {% if (criteria_form.non_field_errors() or
-               curator_form.non_field_errors() or
+        {% if ((criteria_form.non_field_errors()) or
+               (curator_form and curator_form.non_field_errors()) or
                access_form.non_field_errors() or
                terms_expiration_form.non_field_errors()) %}
           <ul class="unstyled">
@@ -115,30 +115,30 @@
     </form>
   {% endif %}
 
-  <form class="edit-group" id="curators-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
-    {% csrf_token %}
-    <div class="panel panel-default">
-      <div class="panel-heading">{{ _('Curators') }}</div>
-      <div class="panel-body">
+    <form class="edit-group" id="curators-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
+      {% csrf_token %}
+      <div class="panel panel-default">
+        <div class="panel-heading">{{ _('Curators') }}</div>
+        <div class="panel-body">
 
-        <fieldset id="curators">
-          <div class="row">
-            <div class="col-md-8">
-              <div class="form-group">
-                {{ mozillians_field(curator_form.curators) }}
+          <fieldset id="curators">
+            <div class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  {{ mozillians_field(curator_form.curators) }}
+                </div>
               </div>
             </div>
-          </div>
-        </fieldset>
+          </fieldset>
 
+        </div>
+        <div class="panel-footer">
+          <button class="btn btn-primary" id="form-submit-curators" type="submit" name="curator_form">
+            {{ _('Update Curators') }}
+          </button>
+        </div>
       </div>
-      <div class="panel-footer">
-        <button class="btn btn-primary" id="form-submit-curators" type="submit" name="curator_form">
-          {{ _('Update Curators') }}
-        </button>
-      </div>
-    </div>
-  </form>
+    </form>
 
   <form class="edit-group" id="terms-form" method="POST" action="{{ url('groups:group_edit', group.url) }}?next=access">
     {% csrf_token %}

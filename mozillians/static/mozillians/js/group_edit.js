@@ -102,6 +102,12 @@ $(function() {
     favicon.href = url;
     $('head').append(favicon);
 
+    //Set the active class in the menu if only the invitations tab exists
+    if (! document.querySelector('.active')) {
+        $('#invitations-tab').toggleClass('active');
+        $('#invitations').toggleClass('active fade');
+    }
+
     // Tabs
     var uri = URI(location.href);
     var next_section = uri.query(true).next;

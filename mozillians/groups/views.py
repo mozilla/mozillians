@@ -454,6 +454,11 @@ def group_edit(request, url=None):
     group_forms['criteria_form'] = forms.GroupCriteriaForm
     group_forms['email_form'] = forms.GroupCustomEmailForm
     group_forms['access_form'] = forms.GroupAccessForm
+    # Do not allow community curators of an access group to modify it
+    if group.is_access_group and is_curator and not profile.can_create_access_groups:
+        # reset the form to include only the invitation form
+        group_forms = {'invite_form': forms.GroupInviteForm,
+                       'email_form': forms.GroupCustomEmailForm}
 
     def _init_group_forms(request, group_forms):
         form_args = {
