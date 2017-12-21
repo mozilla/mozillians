@@ -65,10 +65,12 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
     def create_user(self, claims):
         user = super(MozilliansAuthBackend, self).create_user(claims)
+        # Ensure compatibility with OIDC conformant mode
+        auth0_user_id = claims.get('user_id') or claims.get('sub')
 
         IdpProfile.objects.create(
             profile=user.userprofile,
-            auth0_user_id=claims.get('user_id'),
+            auth0_user_id=auth0_user_id,
             email=claims.get('email'),
             primary=True
         )
@@ -83,7 +85,9 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         # Checking the primary email returned 0 users,
         # before creating a new user we should check if the identity returned exists
         if not users:
-            idps = IdpProfile.objects.filter(auth0_user_id=claims.get('user_id'))
+            # Ensure compatibility with OIDC conformant mode
+            auth0_user_id = claims.get('user_id') or claims.get('sub')
+            idps = IdpProfile.objects.filter(auth0_user_id=auth0_user_id)
             user_ids = idps.values_list('profile__user__id', flat=True).distinct()
             return self.UserModel.objects.filter(id__in=user_ids)
         return users
@@ -99,7 +103,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             return None
 
         profile = user.userprofile
-        auth0_user_id = self.claims.get('user_id')
+        # Ensure compatibility with OIDC conformant mode
+        auth0_user_id = self.claims.get('user_id') or self.claims.get('sub')
         email = self.claims.get('email')
 
         # Get current_idp
