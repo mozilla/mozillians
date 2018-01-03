@@ -11,10 +11,6 @@ from mozillians.funfacts.tests import FunFactFactory
 
 
 class ValidateQueryTests(TestCase):
-    def test_query_without_number(self):
-        """Test that query without number raises ValidationError."""
-        query = ''
-        assert_raises(ValidationError, _validate_query, query)
 
     @patch('mozillians.funfacts.models.transaction', wraps=transaction)
     def test_invalid_query(self, transaction_mock):
@@ -48,8 +44,7 @@ class FunFactManagerTests(TestCase):
     def test_random(self, funfact_mock):
         FunFact.objects.random()
         funfact_mock.objects.filter.assert_called_once_with(published=True)
-        (funfact_mock.objects.filter.return_value
-         .order_by.assert_called_once_with('?'))
+        funfact_mock.objects.filter.return_value.order_by.assert_called_once_with('?')
 
 
 class FunFactTests(TestCase):

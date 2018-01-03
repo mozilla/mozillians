@@ -74,9 +74,12 @@
             <section id="mozfacts">
               {% set fact=random_funfact() %}
               {% if fact %}
-                <h2>{{ fact.execute() }}</h2>
+                {% set number=fact.execute() %}
+                {% if number %}
+                  <h2>{{ number }}</h2>
+                {% endif %}
                 <p>
-                  {{ fact.public_text }}
+                  {{ fact.public_text|markdown }}
                 </p>
               {% else %}
                 <h2>3000+</h2>
