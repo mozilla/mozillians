@@ -167,7 +167,7 @@ class GroupInviteForm(happyforms.ModelForm):
         if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
             msg = _(u'Only staff and NDA members are allowed to be invited')
             for profile in self.cleaned_data['invites']:
-                if not profile.is_nda or not profile.can_create_access_groups:
+                if not (profile.is_nda or profile.can_create_access_groups):
                     error_msgs.append(msg)
                     break
 
