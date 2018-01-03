@@ -59,7 +59,7 @@ class FunFact(models.Model):
                                validators=[_validate_query])
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['created']
 
     def __unicode__(self):
         return self.name

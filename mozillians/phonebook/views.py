@@ -25,6 +25,7 @@ from haystack.query import EmptySearchQuerySet
 from mozilla_django_oidc.views import OIDCAuthenticationRequestView, get_next_url
 from mozilla_django_oidc.utils import absolutify, import_from_settings
 from raven.contrib.django.models import client
+from waffle import flag_is_active
 from waffle.decorators import waffle_flag
 
 import mozillians.phonebook.forms as forms
@@ -65,7 +66,6 @@ def home(request):
                   {'show_start': show_start})
 
 
-@waffle_flag('testing-autovouch-views')
 @allow_unvouched
 @never_cache
 def vouch(request, username):
@@ -75,21 +75,22 @@ def vouch(request, username):
     purposes.
 
     """
-    profile = get_object_or_404(UserProfile, user__username=username)
-    now = timezone.now()
-    description = 'Automatically vouched for testing purposes on {0}'.format(now)
-    vouch = profile.vouch(None, description=description, autovouch=True)
-    if vouch:
-        messages.success(request, _('Successfully vouched user.'))
-    else:
-        msg = _('User not vouched. Maybe there are {0} vouches already?')
-        msg = msg.format(settings.VOUCH_COUNT_LIMIT)
-        messages.error(request, msg)
+    if flag_is_active(request, 'testing-autovouch-views'):
+        profile = get_object_or_404(UserProfile, user__username=username)
+        now = timezone.now()
+        description = 'Automatically vouched for testing purposes on {0}'.format(now)
+        vouch = profile.vouch(None, description=description, autovouch=True)
+        if vouch:
+            messages.success(request, _('Successfully vouched user.'))
+        else:
+            msg = _('User not vouched. Maybe there are {0} vouches already?')
+            msg = msg.format(settings.VOUCH_COUNT_LIMIT)
+            messages.error(request, msg)
 
-    return redirect('phonebook:profile_view', profile.user.username)
+        return redirect('phonebook:profile_view', profile.user.username)
+    raise Http404
 
 
-@waffle_flag('testing-autovouch-views')
 @allow_unvouched
 @never_cache
 def unvouch(request, username):
@@ -99,10 +100,12 @@ def unvouch(request, username):
     purposes.
 
     """
-    profile = get_object_or_404(UserProfile, user__username=username)
-    profile.vouches_received.all().delete()
-    messages.success(request, _('Successfully unvouched user.'))
-    return redirect('phonebook:profile_view', profile.user.username)
+    if flag_is_active(request, 'testing-autovouch-views'):
+        profile = get_object_or_404(UserProfile, user__username=username)
+        profile.vouches_received.all().delete()
+        messages.success(request, _('Successfully unvouched user.'))
+        return redirect('phonebook:profile_view', profile.user.username)
+    raise Http404
 
 
 @allow_public
