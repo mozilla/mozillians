@@ -200,8 +200,11 @@
             {% else %}
               {% set fact=random_funfact() %}
               {% if fact %}
-                <h2>{{ fact.execute() }}</h2>
-                <p>{{ fact.public_text }}</p>
+                {% set number=fact.execute() %}
+                {% if number %}
+                  <h2>{{ number }}</h2>
+                {% endif %}
+                <p>{{ fact.public_text|markdown }}</p>
               {% endif %}
             {% endif %}
           </section>
