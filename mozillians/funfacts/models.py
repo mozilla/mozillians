@@ -13,14 +13,15 @@ ALLOWED_TAGS = ['em', 'strong']
 
 
 def _validate_query(query):
-    if 'number' not in query:
-        raise ValidationError('Query must populate "number"')
+    if query:
+        if 'number' not in query:
+            raise ValidationError('Query must populate "number"')
 
-    try:
-        with transaction.atomic():
-            eval(query)
-    except BaseException, exp:
-        raise ValidationError('Invalid query: %s' % exp)
+        try:
+            with transaction.atomic():
+                eval(query)
+        except BaseException as exp:
+            raise ValidationError('Invalid query: %s' % exp)
 
 
 class FunFactManager(models.Manager):
@@ -52,12 +53,13 @@ class FunFact(models.Model):
                                     choices=((True, 'Published'),
                                              (False, 'Unpublished')))
     public_text = models.TextField()
-    number = models.TextField(max_length=1000, validators=[_validate_query])
+    number = models.TextField(max_length=1000, validators=[_validate_query],
+                              blank=True, default='')
     divisor = models.TextField(max_length=1000, blank=True, null=True,
                                validators=[_validate_query])
 
     class Meta:
-        ordering = ['created']
+        ordering = ['-created']
 
     def __unicode__(self):
         return self.name
@@ -66,15 +68,14 @@ class FunFact(models.Model):
         self.public_text = bleach.clean(self.public_text, tags=ALLOWED_TAGS, strip=True)
 
     def execute(self):
-        if not (self.divisor or self.number):
-            return 'n/a'
+        if self.number:
 
-        try:
-            with transaction.atomic():
-                if self.divisor:
-                    number = eval(self.number)['number']
-                    divisor = eval(self.divisor)['number']
-                    return '%.0f%%' % (float(number) / divisor * 100)
-                return '%d' % eval(self.number)['number']
-        except Exception, exp:
-            return 'Error: %s' % exp
+            try:
+                with transaction.atomic():
+                    if self.divisor:
+                        number = eval(self.number)['number']
+                        divisor = eval(self.divisor)['number']
+                        return '%.0f%%' % (float(number) / divisor * 100)
+                    return '%d' % eval(self.number)['number']
+            except Exception, exp:
+                return 'Error: %s' % exp
