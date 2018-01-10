@@ -348,8 +348,11 @@ class AboutDinoMcVouchTests(TestCase):
 
 
 class VouchTests(TestCase):
-    def test_vouch_disabled(self):
+
+    @patch('mozillians.phonebook.views.flag_is_active')
+    def test_vouch_disabled(self, mocked_flag):
         # Test that 'vouched' view is not active by default.
+        mocked_flag.return_value = False
         user = UserFactory.create(vouched=False)
         url = reverse('phonebook:profile_vouch', args=[user.username])
         with self.login(user) as client:
@@ -358,8 +361,10 @@ class VouchTests(TestCase):
         user = User.objects.get(id=user.id)
         ok_(not user.userprofile.is_vouched)
 
-    def test_unvouch_disabled(self):
+    @patch('mozillians.phonebook.views.flag_is_active')
+    def test_unvouch_disabled(self, mocked_flag):
         # Test that 'unvouched' view is not active by default.
+        mocked_flag.return_value = False
         user = UserFactory.create(vouched=False)
         url = reverse('phonebook:profile_unvouch', args=[user.username])
         with self.login(user) as client:
