@@ -31,10 +31,7 @@ BASKET_API_KEY = ''
 CACHE_BACKEND = 'django.core.cache.backends.locmem.LocMemCache'
 CACHE_URL = '127.0.0.1:11211'
 # Celery
-CELERY_ALWAYS_EAGER = True
-CELERY_RESULT_BACKEND = 'amqp'
-CELERY_ACCEPT_CONTENT = 'pickle'
-CELERYD_TASK_SOFT_TIME_LIMIT = 150
+CELERY_TASK_ALWAYS_EAGER = True
 # Assuming user root with password root and db name mozillians
 DATABASE_URL = 'mysql://root:root@127.0.0.1:3306/mozillians'
 # Basket

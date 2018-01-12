@@ -12,6 +12,7 @@ env:
   SECRET_KEY='supersecretkey'
   ALLOWED_HOSTS=localhost
   DEBUG=True
+  CELERY_TASK_ALWAYS_EAGER=True
 services:
   - elasticsearch
   - mysql

@@ -45,7 +45,7 @@ class IncompleteAccountsTests(TestCase):
 
 class BasketTests(TestCase):
 
-    @override_settings(CELERY_ALWAYS_EAGER=True)
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.unsubscribe_user_task')
@@ -123,7 +123,7 @@ class BasketTests(TestCase):
         lookup_mock.subtask.assert_called_with((user.email,))
         unsubscribe_mock.subtask.called_with((['foo'],))
 
-    @override_settings(CELERY_ALWAYS_EAGER=True)
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     @patch('mozillians.users.tasks.BASKET_ENABLED', True)
     @patch('mozillians.users.tasks.waffle.switch_is_active')
     @patch('mozillians.users.tasks.subscribe_user_task.subtask')

@@ -1,12 +1,11 @@
-from datetime import timedelta
-
 from django.conf import settings
 
 import requests
-from celery.task import periodic_task
+
+from mozillians.celery import app
 
 
-@periodic_task(run_every=timedelta(hours=1))
+@app.task
 def celery_healthcheck():
     """Ping healthchecks.io periodically to monitor celery/celerybeat health."""
 
