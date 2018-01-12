@@ -87,16 +87,23 @@ class GroupBase(models.Model):
         )
 
     def user_can_join(self, userprofile):
-        """Checks if a user can join a group."""
-        return (
-            # Must be vouched
-            userprofile.is_vouched and
-            # some groups don't allow
-            (getattr(self, 'accepting_new_members', 'yes') != 'no') and
-            # only makes sense to join if not already a member (full or pending)
-            not (self.has_member(userprofile=userprofile) or
-                 self.has_pending_member(userprofile=userprofile))
-        )
+        """Checks if a user can join a group.
+
+        Each one of the requirements must assert to True.
+        """
+        can_join_group = all([
+            # Must be vouched and group must be Open
+            userprofile.is_vouched,
+            getattr(self, 'accepting_new_members', Group.OPEN) != Group.CLOSED,
+            # only makes sense to join if not already a member
+            not self.has_member(userprofile=userprofile),
+            # or the membership is in a pending state
+            not self.has_pending_member(userprofile=userprofile),
+            # If this is an access group the user should be able to join
+            (userprofile.can_join_access_groups()
+             if type(self) is Group and self.is_access_group else True)
+        ])
+        return can_join_group
 
     # Read-only properties so clients don't care which subclasses have some fields
     @property
