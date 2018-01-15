@@ -434,7 +434,7 @@ class UserProfile(UserProfilePrivacyModel):
             'group__name': settings.NDA_GROUP,
             'status': GroupMembership.MEMBER
         }
-        return GroupMembership.objects.filter(**query).exists()
+        return GroupMembership.objects.filter(**query).exists() or self.user.is_superuser
 
     @property
     def date_vouched(self):

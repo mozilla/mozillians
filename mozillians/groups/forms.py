@@ -56,7 +56,7 @@ class GroupCuratorsForm(happyforms.ModelForm):
         # Dynamically change autocomplete widget
         if self.instance.is_access_group:
             self.fields['curators'].widget = autocomplete.ModelSelect2Multiple(
-                url='users:staff-autocomplete'
+                url='users:access-group-invitation-autocomplete'
             )
         else:
             self.fields['curators'].widget = autocomplete.ModelSelect2Multiple(
@@ -79,14 +79,32 @@ class GroupCuratorsForm(happyforms.ModelForm):
 
         if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
             for curator in curators:
-                if not curator.can_create_access_groups:
-                    msg = _(u'Only staff members can become access group curators')
+                if not curator.is_nda or not curator.can_create_access_groups:
+                    msg = _(u'Only staff and NDA members can become access group curators')
                     error_msgs.append(msg)
                     break
 
         if error_msgs:
             self._errors['curators'] = self.error_class(error_msgs)
         return cleaned_data
+
+    def clean_curators(self):
+        """Clean the curators field.
+
+        If this is an access group and there is a non staff curator
+        then the curators field should not be editable.
+        """
+        user = self.request.user
+        if user and user.userprofile:
+            is_community_curator = all([user,
+                                        user.userprofile,
+                                        user.userprofile.is_nda,
+                                        not user.userprofile.can_create_access_groups])
+            # If the group already exists and the curator is not staff but an NDA member
+            # for an access group, then the list of curators should not editable
+            if self.instance and self.instance.pk and is_community_curator:
+                return self.instance.curators
+        return self.cleaned_data['curators']
 
     def save(self, *args, **kwargs):
         """Custom save method to add multiple curators."""

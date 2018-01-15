@@ -151,10 +151,12 @@ class GroupCreateFormTests(TestCase):
 
     def test_legacy_group_curators_validation(self):
         group = GroupFactory.create()
+        request = RequestFactory().request()
+        request.user = None
 
         # Update form without adding curators
         form_data = {'name': 'test_group'}
-        form = forms.GroupCuratorsForm(instance=group, data=form_data)
+        form = forms.GroupCuratorsForm(instance=group, data=form_data, request=request)
 
         ok_(form.is_valid())
 
@@ -165,12 +167,14 @@ class GroupCreateFormTests(TestCase):
     def test_group_curators_validation(self):
         group = GroupFactory.create()
         curator = UserFactory.create()
+        request = RequestFactory().request()
+        request.user = curator
         group.curators.add(curator.userprofile)
 
         # Update form without adding curators
         form_data = {'name': 'test_group',
                      'curators': []}
-        form = forms.GroupCuratorsForm(instance=group, data=form_data)
+        form = forms.GroupCuratorsForm(instance=group, data=form_data, request=request)
 
         ok_(not form.is_valid())
         eq_(form.errors, {'curators': [u'The group must have at least one curator.']})
@@ -216,9 +220,11 @@ class GroupEditFormTests(BaseGroupEditTestCase):
     def test_edit_curators(self):
         curator = UserFactory.create()
         group = GroupFactory.create()
+        request = RequestFactory().request()
+        request.user = curator
 
         data = {'curators': [curator.id]}
-        self.validate_group_edit_forms(forms.GroupCuratorsForm, group, data)
+        self.validate_group_edit_forms(forms.GroupCuratorsForm, group, data, request)
 
     def test_edit_terms(self):
         group = GroupFactory.create()
