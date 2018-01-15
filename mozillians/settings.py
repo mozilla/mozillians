@@ -121,7 +121,7 @@ DEV = config('DEV', default=False, cast=bool)
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 ADMIN_ALIAS = config('ADMIN_ALIAS', default='mozillians-admins@mozilla.com')
-ADMINS = [('Mozillians.org Admins', ADMIN_ALIAS)],
+ADMINS = (('Mozillians.org Admins', ADMIN_ALIAS),)
 MANAGERS = ADMINS
 DOMAIN = config('DOMAIN', default='mozillians.org')
 PROTOCOL = config('PROTOCOL', default='https://')
