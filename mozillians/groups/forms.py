@@ -79,7 +79,7 @@ class GroupCuratorsForm(happyforms.ModelForm):
 
         if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
             for curator in curators:
-                if not curator.is_nda or not curator.can_create_access_groups:
+                if not (curator.is_nda or curator.can_create_access_groups):
                     msg = _(u'Only staff and NDA members can become access group curators')
                     error_msgs.append(msg)
                     break
