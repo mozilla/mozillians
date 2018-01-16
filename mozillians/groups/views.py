@@ -368,7 +368,7 @@ def join_group(request, url):
         messages.error(request, _('Your request to join this group is still pending.'))
     elif group.accepting_new_members == Group.CLOSED:
         messages.error(request, _('This group is not accepting requests to join.'))
-    elif group.is_access_group and not profile_to_add.can_join_access_group():
+    elif group.is_access_group and not profile_to_add.can_join_access_groups():
         messages.error(request, _('You do not have the permissions to join this group.'))
     else:
         if group.accepting_new_members == Group.OPEN:
