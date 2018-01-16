@@ -102,7 +102,8 @@ class GroupCuratorsForm(happyforms.ModelForm):
                                         not user.userprofile.can_create_access_groups])
             # If the group already exists and the curator is not staff but an NDA member
             # for an access group, then the list of curators should not editable
-            if self.instance and self.instance.pk and is_community_curator:
+            group = self.instance
+            if group and group.is_access_group and group.pk and is_community_curator:
                 return self.instance.curators
         return self.cleaned_data['curators']
 
