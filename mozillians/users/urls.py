@@ -4,10 +4,10 @@ from django.contrib.auth.decorators import login_required
 from cities_light.models import Country
 from mozillians.users.views import (AccessGroupInvitationAutocomplete,
                                     BaseProfileAdminAutocomplete, CityAutocomplete,
-                                    CountryAutocomplete, RegionAutocomplete,
-                                    StaffProfilesAutocomplete, TimeZoneAutocomplete,
-                                    UsersAdminAutocomplete, VouchedAutocomplete,
-                                    VoucherAutocomplete)
+                                    CountryAutocomplete, NDAGroupInvitationAutocomplete,
+                                    RegionAutocomplete, StaffProfilesAutocomplete,
+                                    TimeZoneAutocomplete, UsersAdminAutocomplete,
+                                    VouchedAutocomplete, VoucherAutocomplete)
 
 
 urlpatterns = patterns(
@@ -34,4 +34,7 @@ urlpatterns = patterns(
     url('access-group-invitation-autocomplete/$',
         login_required(AccessGroupInvitationAutocomplete.as_view()),
         name='access-group-invitation-autocomplete'),
+    url('nda-group-invitation-autocomplete/$',
+        login_required(NDAGroupInvitationAutocomplete.as_view()),
+        name='nda-group-invitation-autocomplete'),
 )
