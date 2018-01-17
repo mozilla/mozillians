@@ -148,6 +148,24 @@ class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         return qs
 
 
+class NDAGroupInvitationAutocomplete(StaffProfilesAutocomplete):
+
+    def get_queryset(self):
+        staff_qs = super(NDAGroupInvitationAutocomplete, self).get_queryset()
+        staff_ids = staff_qs.values_list('pk', flat=True)
+
+        mfa_idps_query = (IdpProfile.objects.filter(primary=True)
+                                            .filter(Q(type=IdpProfile.PROVIDER_GITHUB) |
+                                                    Q(type=IdpProfile.PROVIDER_LDAP)))
+        mfa_idps_pks = mfa_idps_query.values_list('profile__id', flat=True)
+        qs = UserProfile.objects.filter(Q(pk__in=mfa_idps_pks) | Q(pk__in=staff_ids))
+        if self.q:
+            qs = qs.filter(Q(full_name__icontains=self.q) |
+                           Q(user__email__icontains=self.q) |
+                           Q(user__username__icontains=self.q))
+        return qs
+
+
 class CountryAutocomplete(autocomplete.Select2QuerySetView):
 
     def get_queryset(self):

@@ -166,10 +166,19 @@ class GroupInviteForm(happyforms.ModelForm):
 
             # If the group is a TAG or is the NDA we need to query all the vouched
             # mozillians and not only staff or NDA members.
-            if not self.instance.is_access_group or self.instance.name == settings.NDA_GROUP:
+            if not self.instance.is_access_group:
                 self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
                     url='groups:curators-autocomplete')
                 self.fields['invites'].widget.choices = self.fields['invites'].choices
+            # Force an MFAed method for NDA invitations
+            elif self.instance.name == settings.NDA_GROUP:
+                self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
+                    url='users:nda-group-invitation-autocomplete')
+                self.fields['invites'].widget.choices = self.fields['invites'].choices
+                help_text = self.fields['invites'].help_text
+                self.fields['invites'].help_text = (
+                    help_text + _(' Only vouched users with a Multi Factor Authentication method '
+                                  'enabled (GitHub or LDAP logins) can be invited.'))
 
     def clean(self):
         """Custom clean method."""
