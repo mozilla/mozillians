@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 
 from mozillians.common.utils import bundle_profile_data
+from mozillians.groups.models import Group
 from mozillians.users.models import ExternalAccount, UserProfile, Vouch
 from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_basket_task
 
@@ -24,6 +25,24 @@ def delete_user_obj_sig(sender, instance, **kwargs):
     with transaction.atomic():
         if instance.user:
             instance.user.delete()
+
+
+# Signal to remove the UserProfile from all the access groups and update the curator
+@receiver(signals.pre_delete, sender=UserProfile,
+          dispatch_uid='remove_user_from_access_groups_sig')
+def remove_user_from_access_groups(sender, instance, **kwargs):
+    """Updates the curators of access groups in case the profile to be deleted
+
+    is a curator.
+    """
+    groups = Group.objects.filter(is_access_group=True, curators=instance)
+    for group in groups:
+        # If the user is the only curator of an access group
+        # add all the super users as curators and remove the user
+        if not group.curator_can_leave(instance):
+            for super_user in UserProfile.objects.filter(user__is_superuser=True):
+                group.curators.add(super_user)
+        group.curators.remove(instance)
 
 
 # Basket User signals
