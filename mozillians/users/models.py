@@ -6,6 +6,7 @@ from itertools import chain
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import ManyToManyField
@@ -15,7 +16,7 @@ from django.template.loader import get_template
 
 from product_details import product_details
 from pytz import common_timezones
-from sorl.thumbnail import ImageField, get_thumbnail
+from sorl.thumbnail import ImageField, default as sorl_default, get_thumbnail
 from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 
 from mozillians.common import utils
@@ -518,7 +519,16 @@ class UserProfile(UserProfilePrivacyModel):
     def get_photo_thumbnail(self, geometry='160x160', **kwargs):
         if 'crop' not in kwargs:
             kwargs['crop'] = 'center'
+
         if self.photo:
+            # Workaround for legacy images in RGBA model
+            image_obj = sorl_default.engine.get_image(self.photo)
+            if image_obj.mode == 'RGBA':
+                new_fh = default_storage.open(self.photo.name, 'w')
+                converted_image_obj = image_obj.convert('RGB')
+                converted_image_obj.save(new_fh, 'JPEG')
+                new_fh.close()
+
             return get_thumbnail(self.photo, geometry, **kwargs)
         return get_thumbnail(settings.DEFAULT_AVATAR_PATH, geometry, **kwargs)
 
