@@ -86,6 +86,12 @@ class GroupBase(models.Model):
              self.has_pending_member(userprofile=userprofile))
         )
 
+    def curator_can_leave(self, userprofile):
+        """Check if a curator can leave a group."""
+        curators = self.curators.all()
+
+        return curators.count() > 1 or userprofile not in curators
+
     def user_can_join(self, userprofile):
         """Checks if a user can join a group.
 
@@ -353,6 +359,9 @@ class Group(GroupBase):
         If a user is a member of a reviewed or closed group,
         then the membership is in a pending state.
         """
+        # Avoid circular dependencies
+        from mozillians.users.models import UserProfile
+
         try:
             membership = GroupMembership.objects.get(group=self, userprofile=userprofile)
         except GroupMembership.DoesNotExist:
@@ -367,10 +376,31 @@ class Group(GroupBase):
             # We have either an open group or the request to join a reviewed group is denied
             # or the curator manually declined a user in a pending state.
             membership.delete()
-            send_userprofile_to_cis.delay(membership.userprofile.pk)
             # delete the invitation to the group if exists
             Invite.objects.filter(group=self, redeemer=userprofile).delete()
             send_email = True
+            # Remove all the access groups the user is a member of
+            # if the group to remove is the NDA
+            if self.name == settings.NDA_GROUP:
+                group_memberships = GroupMembership.objects.none()
+                # If the user is not staff, we need to delete the memberships to any access group
+                if not userprofile.can_create_access_groups:
+                    group_memberships = GroupMembership.objects.filter(userprofile=userprofile,
+                                                                       group__is_access_group=True)
+
+                for access_membership in group_memberships:
+                    if not access_membership.group.curator_can_leave(userprofile):
+                        # If the user is the only curator, let's add the superusers as curators
+                        # as a fallback option
+                        for super_user in UserProfile.objects.filter(user__is_superuser=True):
+                            access_membership.group.curators.add(super_user)
+                    access_membership.group.curators.remove(userprofile)
+                    access_membership.delete()
+                    # Notify CIS about this change
+                    send_userprofile_to_cis.delay(access_membership.userprofile.pk)
+
+            # Notify CIS about this change
+            send_userprofile_to_cis.delay(membership.userprofile.pk)
 
         # Group is either of Group.REVIEWED or Group.CLOSED, change membership to `status`
         else:
