@@ -42,6 +42,8 @@ def remove_user_from_access_groups(sender, instance, **kwargs):
         if not group.curator_can_leave(instance):
             for super_user in UserProfile.objects.filter(user__is_superuser=True):
                 group.curators.add(super_user)
+                if not group.has_member(super_user):
+                    group.add_member(super_user)
         group.curators.remove(instance)
 
 

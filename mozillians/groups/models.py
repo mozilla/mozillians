@@ -389,12 +389,15 @@ class Group(GroupBase):
                                                                        group__is_access_group=True)
 
                 for access_membership in group_memberships:
-                    if not access_membership.group.curator_can_leave(userprofile):
+                    group = access_membership.group
+                    if not group.curator_can_leave(userprofile):
                         # If the user is the only curator, let's add the superusers as curators
                         # as a fallback option
                         for super_user in UserProfile.objects.filter(user__is_superuser=True):
-                            access_membership.group.curators.add(super_user)
-                    access_membership.group.curators.remove(userprofile)
+                            group.curators.add(super_user)
+                            if not group.has_member(super_user):
+                                group.add_member(super_user)
+                    group.curators.remove(userprofile)
                     access_membership.delete()
                     # Notify CIS about this change
                     send_userprofile_to_cis.delay(access_membership.userprofile.pk)
