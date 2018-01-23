@@ -409,12 +409,14 @@ class UserProfileTests(TestCase):
         ok_(user.userprofile.skills.filter(name='foo').exists())
         ok_(user.userprofile.skills.filter(name='bar').exists())
 
-    @patch('mozillians.users.models.sorl_default')
+    @patch('mozillians.users.models.default_storage')
+    @patch('mozillians.users.models.Image')
     @patch('mozillians.users.models.get_thumbnail')
-    def test_get_photo_thumbnail_with_photo(self, get_thumbnail_mock, mock_sorl):
+    def test_get_photo_thumbnail_with_photo(self, get_thumbnail_mock, mock_image, mock_storage):
         mock_image_obj = Mock()
         mock_image_obj.mode = 'RGB'
-        mock_sorl.engine.get_image.return_value = mock_image_obj
+        mock_image.open.return_value = mock_image_obj
+        mock_storage.exists.return_value = True
         user = UserFactory.create(userprofile={'photo': 'foo'})
         user.userprofile.get_photo_thumbnail(geometry='geo', crop='crop')
         get_thumbnail_mock.assert_called_with('foo', 'geo', crop='crop')
