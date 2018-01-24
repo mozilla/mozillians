@@ -46,7 +46,7 @@ def subscribe_to_basket_action(newsletter):
 
     def subscribe_to_basket(modeladmin, request, queryset):
         """Subscribe to Basket or update details of already subscribed."""
-        ts = [(subscribe_user_to_basket.s(args=[userprofile.id, [newsletter]]))
+        ts = [subscribe_user_to_basket.s(userprofile.id, [newsletter])
               for userprofile in queryset]
         group(ts)()
         messages.success(request, 'Basket update started.')
@@ -61,7 +61,7 @@ def unsubscribe_from_basket_action(newsletter):
 
     def unsubscribe_from_basket(modeladmin, request, queryset):
         """Unsubscribe from Basket."""
-        ts = [(unsubscribe_from_basket_task.s(args=[userprofile.email, [newsletter]]))
+        ts = [unsubscribe_from_basket_task.s(userprofile.email, [newsletter])
               for userprofile in queryset]
         group(ts)()
         messages.success(request, 'Basket update started.')
