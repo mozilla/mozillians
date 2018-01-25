@@ -96,6 +96,9 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', optin=
     if not result and not email:
         return None
 
+    from mozillians.users.models import UserProfile
+    profile = get_object_or_none(UserProfile, user__email=email)
+
     newsletters_to_subscribe = []
     if result.get('status') == 'ok':
         # This is used when we want to subscribe a different email
@@ -120,12 +123,19 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', optin=
 
     if newsletters_to_subscribe:
         try:
+            kwargs = {
+                'sync': sync,
+                'source_url': MOZILLIANS_URL,
+                'optin': optin,
+                'api_key': BASKET_API_KEY
+            }
+
+            if profile and profile.country:
+                kwargs['country'] = profile.country.code2
+
             subscribe_result = basket.subscribe(email,
                                                 newsletters_to_subscribe,
-                                                sync=sync,
-                                                source_url=MOZILLIANS_URL,
-                                                optin=optin,
-                                                api_key=BASKET_API_KEY)
+                                                **kwargs)
         except MaxRetriesExceededError as exc:
             raise exc
         except basket.BasketException as exc:
