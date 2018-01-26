@@ -8,7 +8,7 @@ RUN adduser --uid 431 --disabled-password --disabled-login --gecos 'webdev' --no
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git build-essential libxml2-dev libxslt-dev \
-    mysql-client libmysqlclient-dev node-less gettext node-less && \
+    mysql-client libmysqlclient-dev gettext node-less && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements /code/requirements/
