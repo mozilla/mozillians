@@ -22,7 +22,7 @@ you'll have to file a `bug <https://bugzilla.mozilla.org/enter_bug.cgi?product=P
 Privacy
 --------
 API v2 is designed with users privacy in mind first. Each API key has a privacy level assigned to it. In order for the API consumer to access a ``user/group/skill`` detail,
-the fields privacy level should be greater or equal to the fields privacy value. Else the field value in the response is empty.
+the key's privacy level should be greater or equal to the fields privacy value. Else the field value in the response is empty.
 
 Authentication
 --------------
