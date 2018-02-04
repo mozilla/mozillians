@@ -148,7 +148,7 @@
               <section class="languages">
                 <h4>{{ _('Languages') }}</h4>
                 {% for language in user.userprofile.languages %}
-                  {{ langcode_to_name(language.code) }}
+                  <a href="{{ url('phonebook:list_language', language=language.code) }}">{{ langcode_to_name(language.code) }}</a>
                   {%- if not loop.last -%},{% endif %}
                 {% endfor %}
               </section>
