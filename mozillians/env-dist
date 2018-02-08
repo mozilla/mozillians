@@ -40,3 +40,4 @@ BASKET_API_KEY = 'basket_api_key'
 # None or list of email addresses.
 BASKET_MANAGERS = None
 AXES_BEHIND_REVERSE_PROXY = False
+ES_HOST=es
