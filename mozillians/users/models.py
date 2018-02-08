@@ -523,7 +523,12 @@ class UserProfile(UserProfilePrivacyModel):
 
         if self.photo and default_storage.exists(self.photo):
             # Workaround for legacy images in RGBA model
-            image_obj = Image.open(self.photo)
+
+            try:
+                image_obj = Image.open(self.photo)
+            except IOError:
+                return get_thumbnail(settings.DEFAULT_AVATAR_PATH, geometry, **kwargs)
+
             if image_obj.mode == 'RGBA':
                 new_fh = default_storage.open(self.photo.name, 'w')
                 converted_image_obj = image_obj.convert('RGB')
