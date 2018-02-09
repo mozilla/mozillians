@@ -62,8 +62,7 @@ def home(request):
     link = '<a href="{}">file a bug</a>'.format(bugzilla_url)
     msg = 'In case you are facing authentication issues please {}'.format(link)
     messages.warning(request, mark_safe(msg))
-    return render(request, 'phonebook/home.html',
-                  {'show_start': show_start})
+    return render(request, 'phonebook/home.html', {'show_start': show_start})
 
 
 @allow_unvouched
@@ -181,7 +180,8 @@ def view_profile(request, username):
 
     data['shown_user'] = profile.user
     data['profile'] = profile
-    data['groups'] = profile.get_annotated_groups()
+    data['access_groups'] = profile.get_annotated_access_groups()
+    data['tags'] = profile.get_annotated_tags()
     data['abuse_form'] = abuse_form
     data['alternate_identities'] = profile.identity_profiles.filter(primary_contact_identity=False)
 
@@ -189,7 +189,9 @@ def view_profile(request, username):
     # or current user is a superuser
     if not (request.user.is_authenticated() and
             (request.user.username == username or request.user.is_superuser)):
-        data['groups'] = [grp for grp in data['groups'] if not (grp.pending or grp.pending_terms)]
+        data['access_groups'] = [grp for grp in data['access_groups']
+                                 if not (grp.pending or grp.pending_terms)]
+        data['tags'] = [tag for tag in data['tags'] if not (tag.pending or tag.pending_terms)]
 
     return render(request, 'phonebook/profile.html', data)
 

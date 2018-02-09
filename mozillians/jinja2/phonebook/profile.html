@@ -220,10 +220,10 @@
           </div>
         {% endif %}
 
-        {% if groups %}
+        {% if access_groups %}
           <div id="groups" class="profile-entry">
-            <h3><i class="icon-group"></i> {{ _('Groups') }}</h3>
-              {% for group in groups %}
+            <h3><i class="icon-group"></i> {{ _('Access Groups') }}</h3>
+              {% for group in access_groups %}
                 {% set curators = group.curators.all() %}
                 {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
                   <a href="{{ url('groups:show_group', group.url) }}">
@@ -234,11 +234,44 @@
                     {%- if group.pending %} {{ _('(membership requested)') }}{%- endif -%}
                     {%- if group.pending_terms %} {{ _('(pending terms review)') }}{%- endif -%}
                   </a>
+                  {%- if group.inviter and user.userprofile.can_create_access_groups %}
+                    <span>
+                      invited by
+                      <a href="{{ url('phonebook:profile_view', group.inviter.user.username) }}">
+                        {{ group.inviter.display_name }}
+                      </a>
+                    </span>
+                  {%- endif -%}
                 {%- else -%}
                   {%- if profile in curators -%}
                     <i class="icon-crown"></i>
                   {%- endif -%}
                   {{ group.name }}
+                {%- endif -%}
+                {% if not loop.last %},{% endif %}
+              {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if tags %}
+          <div id="groups" class="profile-entry">
+            <h3><i class="icon-group"></i> {{ _('Tags') }}</h3>
+              {% for tag in tags %}
+                {% set curators = group.curators.all() %}
+                {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
+                  <a href="{{ url('groups:show_group', tag.url) }}">
+                    {%- if profile in curators -%}
+                      <i class="icon-crown"></i>
+                    {%- endif -%}
+                    {{ tag.name }}
+                    {%- if tag.pending %} {{ _('(membership requested)') }}{%- endif -%}
+                    {%- if tag.pending_terms %} {{ _('(pending terms review)') }}{%- endif -%}
+                  </a>
+                {%- else -%}
+                  {%- if profile in curators -%}
+                    <i class="icon-crown"></i>
+                  {%- endif -%}
+                  {{ tag.name }}
                 {%- endif -%}
                 {% if not loop.last %},{% endif %}
               {% endfor %}

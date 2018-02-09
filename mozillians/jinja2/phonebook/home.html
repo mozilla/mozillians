@@ -129,16 +129,33 @@
               </section>
             {% endif %}
             {% endwith %}
-            {% if user.userprofile.groups.count() %}
+            {% set access_groups = user.userprofile.get_annotated_access_groups() %}
+            {% if access_groups %}
               <section class="groups">
-                <h4>{{ _('Groups') }}</h4>
-                {% for group in user.userprofile.get_annotated_groups() -%}
+                <h4>{{ _('Access Groups') }}</h4>
+                {% for group in access_groups -%}
                   <a href="{{ url('groups:show_group', group.url) }}">
-                    {%- if user.userprofile in group.curators.all() -%}
+                    {%- if group.curators.filter(id=user.userprofile.id).exists() -%}
                       <i class="icon-crown"></i>
                     {% endif %}
                     {{ group.name }}
                     {%- if group.pending %} {{ _('(membership requested)') }}{% endif -%}
+                  </a>
+                  {%- if not loop.last -%},{% endif %}
+                {% endfor %}
+              </section>
+            {% endif %}
+            {% set tags = user.userprofile.get_annotated_tags() %}
+            {% if tags %}
+              <section class="groups">
+                <h4>{{ _('Tags') }}</h4>
+                {% for tag in tags -%}
+                  <a href="{{ url('groups:show_group', tag.url) }}">
+                    {%- if tag.curators.filter(id=user.userprofile.id).exists() -%}
+                      <i class="icon-crown"></i>
+                    {% endif %}
+                    {{ tag.name }}
+                    {%- if tag.pending %} {{ _('(membership requested)') }}{% endif -%}
                   </a>
                   {%- if not loop.last -%},{% endif %}
                 {% endfor %}
