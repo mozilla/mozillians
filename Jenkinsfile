@@ -16,7 +16,7 @@ node('master'){
         break
     }
     type = 'group'
-    slackSend color: 'good', message: "Starting build ${BUILD_NUMBER} for ${JOB_NAME} ${environment} | <${BUILD_URL}changes | Changes>"
+    slackSend channel: '#oi-parsys,#iam-bots', color: 'good', message: "Starting build ${BUILD_NUMBER} for ${JOB_NAME} ${environment} | <${BUILD_URL}changes | Changes>"
 }
 
 node('mesos') {
@@ -45,7 +45,7 @@ node('mesos') {
         }
         catch(e) {
             currentBuild.result = "FAILURE"
-            slackSend color: 'bad', message: "Error building ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
+            slackSend channel: '#oi-parsys,#iam-bots', color: 'bad', message: "Error building ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
             throw e
         }
     }
@@ -57,7 +57,7 @@ node('mesos') {
         }
         catch(e) {
             currentBuild.result = "FAILURE"
-            slackSend color: 'bad', message: "Error pushing ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
+            slackSend channel: '#oi-parsys,#iam-bots', color: 'bad', message: "Error pushing ${JOB_NAME} ${BUILD_NUMBER} | <${BUILD_URL}console | Console>"
             throw e
         }
     }
