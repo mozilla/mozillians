@@ -75,6 +75,7 @@ INSTALLED_APPS = (
     'import_export',
     'waffle',
     'rest_framework',
+    'django_filters',
     'raven.contrib.django.raven_compat',
 )
 

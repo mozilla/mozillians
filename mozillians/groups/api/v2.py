@@ -13,7 +13,7 @@ from mozillians.users.models import UserProfile
 
 class GroupMemberSerializer(serializers.HyperlinkedModelSerializer):
     privacy = serializers.CharField(source='get_privacy_groups_display')
-    username = serializers.Field(source='user.username')
+    username = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = UserProfile
@@ -21,8 +21,8 @@ class GroupMemberSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    member_count = serializers.Field()
-    url = serializers.SerializerMethodField('get_url')
+    member_count = serializers.ReadOnlyField()
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
@@ -34,7 +34,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class GroupDetailedSerializer(GroupSerializer):
     members = GroupMemberSerializer(many=True, source='_members')
-    curator = serializers.SerializerMethodField('get_curator')
+    curator = serializers.SerializerMethodField()
 
     class Meta:
         # The curator field is only listed here for compatibility reasons
@@ -50,8 +50,8 @@ class GroupDetailedSerializer(GroupSerializer):
 
 
 class SkillSerializer(serializers.HyperlinkedModelSerializer):
-    member_count = serializers.Field()
-    url = serializers.SerializerMethodField('get_url')
+    member_count = serializers.ReadOnlyField()
+    url = serializers.SerializerMethodField()
 
     class Meta:
         model = Skill

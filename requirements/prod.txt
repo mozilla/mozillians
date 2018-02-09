@@ -28,9 +28,9 @@ django-waffle==0.12.0 \
     --hash=sha256:5825358d97cc327bc749cd3ce21ea70c958cd50ca91cb62e0c7b690eed83afc9
 BeautifulSoup==3.2.1 \
     --hash=sha256:6a8cb4401111e011b579c8c52a51cdab970041cc543814bbd9577a4529fe1cdb
-djangorestframework==2.4.8 \
-    --hash=sha256:eef43486c949afa55ea05229ff4a1eea8c8aa48aef8b246b4771ef911357be45 \
-    --hash=sha256:640b705ae7815ec60501631b7b611085e51c7f76607d90558bfe288f3f84b7aa
+djangorestframework==3.6.4 \
+    --hash=sha256:0f9bfbac702f3376dfb2db4971ad8af4e066bfa35393b1b85e085f7e8b91189a \
+    --hash=sha256:de8ac68b3cf6dd41b98e01dcc92dc0022a5958f096eafc181a17fa975d18ca42
 elasticsearch==2.4.1 \
     --hash=sha256:bb8f9a365ba6650d599428538c8aed42033264661d8f7d353da59d5892305f72 \
     --hash=sha256:fead47ebfcaabd1c53dbfc21403eb99ac207eef76de8002fe11a1c8ec9589ce2

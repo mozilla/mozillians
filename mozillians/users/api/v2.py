@@ -23,8 +23,10 @@ class ExternalAccountSerializer(serializers.ModelSerializer):
         model = ExternalAccount
         fields = ('type', 'identifier', 'privacy', 'name')
 
-    def transform_type(self, obj, value):
-        return value.lower()
+    def to_representation(self, instance):
+        result = super(ExternalAccountSerializer, self).to_representation(instance)
+        result['type'] = result['type'].lower()
+        return result
 
 
 class WebsiteSerializer(serializers.ModelSerializer):
@@ -46,7 +48,7 @@ class LanguageSerializer(serializers.ModelSerializer):
 
 
 class AlternateEmailSerializer(serializers.Serializer):
-    email = serializers.SerializerMethodField('get_email')
+    email = serializers.SerializerMethodField()
     privacy = serializers.CharField(source='get_privacy_display')
 
     class Meta:
@@ -61,7 +63,7 @@ class AlternateEmailSerializer(serializers.Serializer):
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
-    name = serializers.CharField(source='name')
+    name = serializers.CharField()
 
     class Meta:
         model = Group
@@ -69,7 +71,7 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
-    username = serializers.Field(source='user.username')
+    username = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = UserProfile
@@ -77,19 +79,19 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
-    username = serializers.Field(source='user.username')
-    email = serializers.Field(source='email')
-    photo = serializers.SerializerMethodField('get_photo')
+    username = serializers.ReadOnlyField(source='user.username')
+    email = serializers.ReadOnlyField()
+    photo = serializers.SerializerMethodField()
     alternate_emails = AlternateEmailSerializer(many=True, source='_api_alternate_emails')
     groups = GroupSerializer(many=True, source='_groups')
-    country = serializers.SerializerMethodField('get_country')
-    region = serializers.SerializerMethodField('get_region')
-    city = serializers.SerializerMethodField('get_city')
+    country = serializers.SerializerMethodField()
+    region = serializers.SerializerMethodField()
+    city = serializers.SerializerMethodField()
     external_accounts = ExternalAccountSerializer(many=True, source='accounts')
-    languages = LanguageSerializer(many=True, source='languages')
-    websites = WebsiteSerializer(many=True, source='websites')
-    is_public = serializers.Field(source='is_public')
-    url = serializers.SerializerMethodField('get_url')
+    languages = LanguageSerializer(many=True)
+    websites = WebsiteSerializer(many=True)
+    is_public = serializers.ReadOnlyField()
+    url = serializers.SerializerMethodField()
 
     # Add profile URL
     class Meta:
@@ -186,6 +188,16 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
             'value': city.name if city else '',
             'privacy': obj.get_privacy_city_display(),
         }
+
+    def to_representation(self, instance):
+        result = super(UserProfileDetailedSerializer, self).to_representation(instance)
+
+        for key, value in result.items():
+            method = getattr(self, 'transform_{}'.format(key), None)
+            if method is not None:
+                result[key] = method(self.instance, value)
+
+        return result
 
 
 # Filters

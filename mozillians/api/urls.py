@@ -10,9 +10,9 @@ from mozillians.users.views import VouchedAutocomplete
 
 # API v2 URLs
 router = routers.DefaultRouter()
-router.register(r'users', mozillians.users.api.v2.UserProfileViewSet)
-router.register(r'groups', mozillians.groups.api.v2.GroupViewSet)
-router.register(r'skills', mozillians.groups.api.v2.SkillViewSet)
+router.register(r'users', mozillians.users.api.v2.UserProfileViewSet, base_name='userprofile')
+router.register(r'groups', mozillians.groups.api.v2.GroupViewSet, base_name='group')
+router.register(r'skills', mozillians.groups.api.v2.SkillViewSet, base_name='skill')
 
 app_name = 'api'
 urlpatterns = [
