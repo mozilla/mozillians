@@ -24,7 +24,7 @@ from mozillians.common import utils
 from mozillians.common.templatetags.helpers import absolutify, gravatar
 from mozillians.common.templatetags.helpers import offset_of_timezone
 from mozillians.common.urlresolvers import reverse
-from mozillians.groups.models import (Group, GroupAlias, GroupMembership,
+from mozillians.groups.models import (Group, GroupAlias, GroupMembership, Invite,
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
@@ -623,29 +623,59 @@ class UserProfile(UserProfilePrivacyModel):
         send_mail(subject, filtered_message, settings.FROM_NOREPLY,
                   [self.email])
 
-    def get_annotated_groups(self):
-        """
-        Return a list of all the visible groups the user is a member of or pending
-        membership. The groups pending membership will have a .pending attribute
-        set to True, others will have it set False.
-        """
-        groups = []
+    def _get_annotated_groups(self):
         # Query this way so we only get the groups that the privacy controls allow the
         # current user to see. We have to force evaluation of this query first, otherwise
         # Django combines the whole thing into one query and loses the privacy control.
         groups_manager = self.groups
         # checks to avoid AttributeError exception b/c self.groups may returns
         # EmptyQuerySet instead of the default manager due to privacy controls
+        user_group_ids = []
         if hasattr(groups_manager, 'visible'):
-            user_group_ids = list(groups_manager.visible().values_list('id', flat=True))
-        else:
-            user_group_ids = []
-        for membership in self.groupmembership_set.filter(group_id__in=user_group_ids):
+            user_group_ids = groups_manager.visible().values_list('id', flat=True)
+
+        return self.groupmembership_set.filter(group__id__in=user_group_ids)
+
+    def get_annotated_tags(self):
+        """
+        Return a list of all the visible tags the user is a member of or pending
+        membership. The groups pending membership will have a .pending attribute
+        set to True, others will have it set False.
+        """
+        tags = self._get_annotated_groups().filter(group__is_access_group=False)
+        annotated_tags = []
+        for membership in tags:
+            tag = membership.group
+            tag.pending = (membership.status == GroupMembership.PENDING)
+            tag.pending_terms = (membership.status == GroupMembership.PENDING_TERMS)
+            annotated_tags.append(tag)
+        return annotated_tags
+
+    def get_annotated_access_groups(self):
+        """
+        Return a list of all the visible access groups the user is a member of or pending
+        membership. The groups pending membership will have a .pending attribute
+        set to True, others will have it set False. There is also an inviter attribute
+        which displays the inviter of the user in the group.
+        """
+        access_groups = self._get_annotated_groups().filter(group__is_access_group=True)
+        annotated_access_groups = []
+
+        for membership in access_groups:
             group = membership.group
             group.pending = (membership.status == GroupMembership.PENDING)
             group.pending_terms = (membership.status == GroupMembership.PENDING_TERMS)
-            groups.append(group)
-        return groups
+
+            try:
+                invite = Invite.objects.get(group=membership.group, redeemer=self)
+            except Invite.DoesNotExist:
+                invite = None
+
+            if invite:
+                group.inviter = invite.inviter
+            annotated_access_groups.append(group)
+
+        return annotated_access_groups
 
     def get_cis_emails(self):
         """Prepares the entry for emails in the CIS format."""

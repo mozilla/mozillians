@@ -202,7 +202,7 @@ class UserProfileTests(TestCase):
         profile.set_instance_privacy_level(PUBLIC)
         eq_(profile.websites.count(), 0)
 
-    def test_annotated_groups_not_public(self):
+    def test_annotated_tags_not_public(self):
         # Group member who wants their groups kept semi-private
         profile = UserFactory.create(userprofile={'privacy_groups': MOZILLIANS}).userprofile
         group = GroupFactory.create(name='group')
@@ -212,10 +212,22 @@ class UserProfileTests(TestCase):
         profile.set_instance_privacy_level(PUBLIC)
 
         # no groups seen
-        eq_(len(profile.get_annotated_groups()), 0)
+        eq_(len(profile.get_annotated_tags()), 0)
 
-    def test_get_annotated_groups_limit_to_current_user(self):
-        """Test that get_annotated_groups() limits query to current user.
+    def test_annotated_access_groups_not_public(self):
+        # Group member who wants their groups kept semi-private
+        profile = UserFactory.create(userprofile={'privacy_groups': MOZILLIANS}).userprofile
+        group = GroupFactory.create(name='group')
+        group.add_member(profile)
+
+        # Being accessed by a member of the general public
+        profile.set_instance_privacy_level(PUBLIC)
+
+        # no groups seen
+        eq_(len(profile.get_annotated_access_groups()), 0)
+
+    def test_get_annotated_tags_limit_to_current_user(self):
+        """Test that get_annotated_tags() limits query to current user.
 
         To regression test against 969920: We didn't limit
         GroupMembership queryset to current user which resulted server
@@ -227,11 +239,11 @@ class UserProfileTests(TestCase):
         user_2 = UserFactory.create()
         group_1.add_member(user_1.userprofile)
         group_1.add_member(user_2.userprofile)
-        user_groups = user_1.userprofile.get_annotated_groups()
+        user_groups = user_1.userprofile.get_annotated_tags()
         eq_([group_1], user_groups)
 
-    def test_get_annotated_groups_only_visible(self):
-        """ Test that get_annotated_groups() only returns visible groups
+    def test_get_annotated_tags_only_visible(self):
+        """ Test that get_annotated_tags() only returns visible groups
 
         """
         group_1 = GroupFactory.create(visible=True)
@@ -240,7 +252,20 @@ class UserProfileTests(TestCase):
         group_1.add_member(profile)
         group_2.add_member(profile)
 
-        user_groups = profile.get_annotated_groups()
+        user_groups = profile.get_annotated_tags()
+        eq_([group_1], user_groups)
+
+    def test_get_annotated_access_groups_only_visible(self):
+        """ Test that get_annotated_access_groups() only returns visible groups
+
+        """
+        group_1 = GroupFactory.create(visible=True, is_access_group=True)
+        group_2 = GroupFactory.create(visible=False, is_access_group=True)
+        profile = UserFactory.create().userprofile
+        group_1.add_member(profile)
+        group_2.add_member(profile)
+
+        user_groups = profile.get_annotated_access_groups()
         eq_([group_1], user_groups)
 
     @patch('mozillians.users.models.UserProfile.auto_vouch')
