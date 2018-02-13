@@ -257,7 +257,7 @@
           <div id="groups" class="profile-entry">
             <h3><i class="icon-group"></i> {{ _('Tags') }}</h3>
               {% for tag in tags %}
-                {% set curators = group.curators.all() %}
+                {% set curators = tag.curators.all() %}
                 {% if (user.is_authenticated() and user.userprofile.is_vouched) %}
                   <a href="{{ url('groups:show_group', tag.url) }}">
                     {%- if profile in curators -%}
