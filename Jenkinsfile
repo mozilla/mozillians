@@ -9,6 +9,10 @@ node('master'){
             environment = "production"
             app_id_group = ""
         break
+        case "cistest":
+            environment = "cistest"
+            app_id_group = "/staging/"
+        break
         default:
             print "Invalid branch"
             currentBuild.result = "FAILURE"
@@ -21,7 +25,7 @@ node('master'){
 
 node('mesos') {
     def image
-    def app_id = "mozillians"
+    def app_id = (environment == "cistest") ? "mozillianscistest" : "mozillians"
     def dockerRegistry = "docker-registry.ops.mozilla.community:443"
 
     stage('Prep') {
@@ -32,11 +36,6 @@ node('mesos') {
                   string(name: 'marathon_id', value: app_id_group + app_id),
                   string(name: 'marathon_config', value: 'mozillians_' + environment + '.json'),
                   string(name: 'type', value: 'group')]
-        params_cistest = [string(name: 'environment', value: "production"),
-                          string(name: 'commit_id', value: gitCommit),
-                          string(name: 'marathon_id', value: app_id_group + 'mozillianscistest'),
-                          string(name: 'marathon_config', value: 'mozillians_cistest.json'),
-                          string(name: 'type', value: 'group')]
     }
 
     stage('Build') {
@@ -66,12 +65,7 @@ node('mesos') {
 node('master') {
     stage('Deploy') {
         parallel (
-            "deploy": { build job: 'deploy-test', parameters: params },
-            "cis testing deploy": {
-                if (environment == 'production') {
-                    build job: 'deploy-test', parameters: params_cistest
-                }
-            }
+            "deploy": { build job: 'deploy-test', parameters: params }
         )
     }
 }
