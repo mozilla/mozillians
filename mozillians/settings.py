@@ -633,8 +633,8 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
 
 REST_FRAMEWORK = {
     'URL_FIELD_NAME': '_url',
-    'PAGINATE_BY': 30,
-    'MAX_PAGINATE_BY': 200,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 30,
     'DEFAULT_PERMISSION_CLASSES': (
         'mozillians.api.v2.permissions.MozilliansPermission',
     ),
