@@ -591,6 +591,9 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
             })
             request.session['oidc_verify_nonce'] = nonce
 
+        # Add parameter to disable silent authentication
+        params['tried_silent_auth'] = settings.OIDC_TRIED_SILENT_AUTH
+
         request.session['oidc_verify_state'] = state
         request.session['oidc_login_next'] = get_next_url(request, redirect_field_name)
 
