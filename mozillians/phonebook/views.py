@@ -593,6 +593,9 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
 
         # Add parameter to disable silent authentication
         params['tried_silent_auth'] = settings.OIDC_TRIED_SILENT_AUTH
+        # Add a parameter to disable the LDAP check for AUTO_VOUCH_DOMAINS
+        # This will allow users to verify AUTO_VOUCH_DOMAINS as contact identities
+        params['forceNonLDAP'] = settings.OIDC_EXCLUDE_LDAP_CHECK
 
         request.session['oidc_verify_state'] = state
         request.session['oidc_login_next'] = get_next_url(request, redirect_field_name)
