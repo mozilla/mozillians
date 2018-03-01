@@ -7,7 +7,7 @@ A community directory for **Mozillians** to connect with each other.
 Table of Contents
 =================
 
-* [Instal, docs, API and more](#install-docs-api-and-more)
+* [Install, docs, API and more](#install-docs-api-and-more)
 * [Contribute](#contribute)
 * [File a Bug](#file-a-bug)
 * [Writing code](#writing-code)
