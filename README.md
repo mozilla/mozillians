@@ -28,4 +28,4 @@ For documentation, see [mozillians.rtfd.org](https://mozillians.readthedocs.org/
 Get started with our [How to Contribute](https://mozillians.readthedocs.org/en/latest/contribute.html) documentation.
 
 ### Chat with the team
-You can talk with the team in the `#commtools` IRC channel on [irc.mozilla.org](http://irc.mozilla.org/). We're a friendly group!
+You can talk with the team in the `#participationsystems` IRC channel on [irc.mozilla.org](http://irc.mozilla.org/). We're a friendly group!
