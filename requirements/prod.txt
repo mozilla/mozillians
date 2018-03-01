@@ -364,8 +364,8 @@ everett==0.9 \
     --hash=sha256:02a43a2b4194e6ed40757851b37f5acf3c086f37e7e8109a385a7198cfbbc51b
 https://github.com/mozilla-iam/cis/archive/def75ce5139c339e27a1643ed2887beef020cfab.zip#egg=cis \
     --hash=sha256:1c47c358ebc40ee19b2ba27c4bf6bc8c476827b56124efc96eff9a0297963507
-https://github.com/mozilla-iam/pykmssig/archive/v0.0.6.zip#egg=pykmssig \
-    --hash=sha256:fd12334ffbc544bd67b7a6c3a15c235ae8b1f7460ee0e67558183d4f525ffd3e
+https://github.com/mozilla-iam/pykmssig/archive/v0.0.7.zip#egg=pykmssig \
+    --hash=sha256:71eb5255f9228054e584c85760f54c836a3ea2a451cfb2aa9e5f8ea5e5e6bbed
 pluginbase==0.5 \
     --hash=sha256:b4f830242a078a4f44c978a84f3365bba4d008fdd71a591c71447f4df35354dd
 jsonschema==2.6.0 \
