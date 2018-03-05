@@ -45,7 +45,7 @@ class DebugBasketTask(Task):
         basket_managers = getattr(settings, 'BASKET_MANAGERS', None)
         recipients_list = basket_managers or [addr for (_, addr) in settings.ADMINS]
 
-        subject = '[Mozillians - ET] Traceback {0}'.format(task_id)
+        subject = '[Mozillians {0} ET] Traceback {1}'.format(settings.SITE_URL, task_id)
 
         body = """
         Something terrible happened for task {task_id}
