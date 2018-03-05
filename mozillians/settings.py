@@ -98,6 +98,8 @@ MIDDLEWARE_CLASSES = (
     'mobility.middleware.DetectMobileMiddleware',
     'mobility.middleware.XMobileMiddleware',
     'csp.middleware.CSPMiddleware',
+    # OIDC refersh token
+    'mozilla_django_oidc.middleware.RefreshIDToken',
 
     'mozillians.common.middleware.StrongholdMiddleware',
     'mozillians.phonebook.middleware.RegisterMiddleware',
