@@ -39,9 +39,9 @@ Jinja2==2.9.6 \
     --hash=sha256:ddaa01a212cd6d641401cb01b605f4a4d9f37bfc93043d7f760ec70fb99ff9ff
 Markdown==2.6.9 \
     --hash=sha256:73af797238b95768b3a9b6fe6270e250e5c09d988b8e5b223fd5efa4e06faf81
-html5lib==1.0b10 \
-    --hash=sha256:08a3efc117a4fc8c82c3c6d10d6f58ae266428d57ed50258a1466d2cd88de745 \
-    --hash=sha256:0d5fd54d5b2b79b876007a70c033a4023577768d18022c15681c00561432a0f9
+html5lib==1.0.1 \
+    --hash=sha256:20b159aa3badc9d5ee8f5c647e5efd02ed2a66ab8d354930bd9ff139fc1dc0a3 \
+    --hash=sha256:66cb0dcfdbbc4f9c3ba1a63fdb511ffdbd4f513b2b6d81b80cd26ce6b3fb3736
 MarkupSafe==1.0 \
     --hash=sha256:a6be69091dac236ea9c6bc7d012beab42010fa914c459791d627dad4910eb665
 MySQL-python==1.2.5 \
