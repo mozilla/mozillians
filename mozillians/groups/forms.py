@@ -179,6 +179,10 @@ class GroupInviteForm(happyforms.ModelForm):
                 self.fields['invites'].help_text = (
                     help_text + _(' Only vouched users with a Multi Factor Authentication method '
                                   'enabled (GitHub or LDAP logins) can be invited.'))
+            else:
+                self.fields['invites'].help_text = _('Start typing the name/email/username '
+                                                     'of a staff member or a member of the NDA '
+                                                     'group.')
 
     def clean(self):
         """Custom clean method."""
