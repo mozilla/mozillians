@@ -248,7 +248,7 @@ def remove_member(request, url, user_pk, status=None):
     is_curator = (this_userprofile in group.curators.all())
     is_manager = request.user.userprofile.is_manager
     group_url = reverse('groups:show_group', args=[group.url])
-    next_url = request.REQUEST.get('next_url', group_url)
+    next_url = request.get('next_url', group_url)
 
     # TODO: this duplicates some of the logic in Group.user_can_leave(), but we
     # want to give the user a message that's specific to the reason they can't leave.
@@ -299,7 +299,7 @@ def confirm_member(request, url, user_pk):
     is_curator = (request.user.userprofile in group.curators.all())
     is_manager = request.user.userprofile.is_manager
     group_url = reverse('groups:show_group', args=[group.url])
-    next_url = request.REQUEST.get('next_url', group_url)
+    next_url = request.get('next_url', group_url)
 
     if not (is_curator or is_manager):
         raise http.Http404()

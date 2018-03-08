@@ -4,7 +4,6 @@ from django.forms.widgets import RadioSelect
 
 import happyforms
 from dal import autocomplete
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy as _lazy
 
@@ -258,9 +257,8 @@ class GroupAdminForm(happyforms.ModelForm):
         fields = ('visible', 'members_can_leave', 'functional_area',)
 
 
-class HorizontalRadioRenderer(forms.RadioSelect.renderer):
-    def render(self):
-        return mark_safe(u'\n'.join([u'%s\n' % w for w in self]))
+class HorizontalRadioSelect(forms.RadioSelect):
+    template_name = 'widgets/horizontal_select.html'
 
 
 class GroupCriteriaForm(happyforms.ModelForm):
@@ -272,7 +270,7 @@ class GroupCriteriaForm(happyforms.ModelForm):
         if self.instance.id and self.instance.is_access_group:
             self.fields['accepting_new_members'] = forms.ChoiceField(
                 choices=tuple(x for x in Group.GROUP_TYPES if x[0] != 'yes'),
-                widget=forms.RadioSelect(renderer=HorizontalRadioRenderer))
+                widget=HorizontalRadioSelect())
 
     def clean(self):
         cleaned_data = super(GroupCriteriaForm, self).clean()
@@ -298,7 +296,7 @@ class GroupCriteriaForm(happyforms.ModelForm):
         model = Group
         fields = ('accepting_new_members', 'new_member_criteria',)
         widgets = {
-            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+            'accepting_new_members': HorizontalRadioSelect()
         }
         labels = {
             'accepting_new_members': _('Select Group Type')
@@ -332,7 +330,7 @@ class GroupAccessForm(happyforms.ModelForm):
         model = Group
         fields = ('is_access_group',)
         widgets = {
-            'is_access_group': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+            'is_access_group': HorizontalRadioSelect()
         }
 
 
@@ -382,8 +380,8 @@ class GroupCreateForm(GroupAccessForm):
         model = Group
         fields = ('name', 'accepting_new_members', 'is_access_group',)
         widgets = {
-            'accepting_new_members': forms.RadioSelect(renderer=HorizontalRadioRenderer),
-            'is_access_group': forms.RadioSelect(renderer=HorizontalRadioRenderer)
+            'accepting_new_members': HorizontalRadioSelect(),
+            'is_access_group': HorizontalRadioSelect()
         }
         labels = {
             'accepting_new_members': _('Group type')

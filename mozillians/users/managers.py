@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.db.models import Q, Manager
-from django.db.models.query import QuerySet, ValuesQuerySet
+from django.db.models.query import QuerySet
 
 from django.utils.translation import ugettext_lazy as _lazy
 

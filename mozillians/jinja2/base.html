@@ -134,7 +134,7 @@
                     </a>
                   {% endif %}
                 {% elif not show_start %}
-                  {% set next_url = request.REQUEST.next | default(url('phonebook:login')) %}
+                  {% set next_url = request.next | default(url('phonebook:login')) %}
                   <a id="nav-login" title="{{_('Log In / Sign Up')}}"
                      href="{{ nonprefixed_url('oidc_authentication_init') }}?next={{ next_url }}">
                     <span class="signin button">{{ _('Log In / Sign Up') }}</span>

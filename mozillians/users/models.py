@@ -103,14 +103,18 @@ class UserProfilePrivacyModel(models.Model):
         values to use for those fields when the user is not privileged to
         view their actual value.
 
-        Note: should be only used through UserProfile class. We should
+        Note: should be only used through UserProfile . We should
         fix this.
 
         """
         # Cache on the class object
         if cls.CACHED_PRIVACY_FIELDS is None:
             privacy_fields = {}
-            field_names = cls._meta.get_all_field_names()
+            field_names = list(set(chain.from_iterable(
+                (field.name, field.attname) if hasattr(field, 'attname') else
+                (field.name,) for field in cls._meta.get_fields()
+                if not (field.many_to_one and field.related_model is None)
+            )))
             for name in field_names:
                 if name.startswith('privacy_') or not 'privacy_%s' % name in field_names:
                     # skip privacy fields and uncontrolled fields
@@ -120,7 +124,7 @@ class UserProfilePrivacyModel(models.Model):
                 # Figure out a good default value for it (to show to users
                 # who aren't privileged to see the actual value)
                 if isinstance(field, ManyToManyField):
-                    default = field.related.model.objects.none()
+                    default = field.remote_field.model.objects.none()
                 else:
                     default = field.get_default()
                 privacy_fields[name] = default

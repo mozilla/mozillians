@@ -1,7 +1,7 @@
 import re
 
+from django.apps import apps
 from django.core.validators import EmailValidator, URLValidator
-from django.db.models.loading import get_model
 from django.forms import ValidationError
 
 from django.utils.translation import ugettext as _
@@ -41,7 +41,7 @@ def validate_username(username):
 
     """
     username = username.lower()
-    UsernameBlacklist = get_model('users', 'UsernameBlacklist')
+    UsernameBlacklist = apps.get_model('users', 'UsernameBlacklist')
 
     if UsernameBlacklist.objects.filter(value=username, is_regex=False).exists():
         return False
