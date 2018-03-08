@@ -12,7 +12,6 @@ from decouple import config, Csv
 from unipath import Path
 from dj_database_url import parse as db_url
 from django_jinja.builtins import DEFAULT_EXTENSIONS
-from django_sha2 import get_password_hashers
 from urlparse import urljoin
 
 PROJECT_MODULE = 'mozillians'
@@ -544,22 +543,19 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Auth
-BASE_PASSWORD_HASHERS = (
-    'django_sha2.hashers.BcryptHMACCombinedPasswordVerifier',
-    'django_sha2.hashers.SHA512PasswordHasher',
-    'django_sha2.hashers.SHA256PasswordHasher',
-    'django.contrib.auth.hashers.SHA1PasswordHasher',
-    'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
-)
-
 PWD_ALGORITHM = config('PWD_ALGORITHM', default='bcrypt')
 
 HMAC_KEYS = {
     '2011-01-01': 'cheesecake',
 }
 
-PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+]
 
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
