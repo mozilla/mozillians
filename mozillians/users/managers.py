@@ -1,6 +1,6 @@
 from django.apps import apps
-from django.db.models import Q, Manager
-from django.db.models.query import QuerySet, ValuesIterable
+from django.db.models import Q
+from django.db.models.query import ModelIterable, QuerySet, ValuesIterable
 
 from django.utils.translation import ugettext_lazy as _lazy
 
@@ -52,6 +52,19 @@ class UserProfileValuesIterable(ValuesIterable):
             yield dict(zip(names, row))
 
 
+class UserProfileModelIterable(ModelIterable):
+
+    def __iter__(self):
+
+        def _generator():
+            self._iterator = super(UserProfileModelIterable, self).__iter__()
+            while True:
+                obj = self._iterator.next()
+                obj._privacy_level = getattr(self.queryset, '_privacy_level')
+                yield obj
+        return _generator()
+
+
 class UserProfileQuerySet(QuerySet):
     """Custom QuerySet to support privacy."""
 
@@ -71,6 +84,8 @@ class UserProfileQuerySet(QuerySet):
             self.public_index_q |= (Q(**{key: PUBLIC}) & ~Q(**{field: ''}))
 
         super(UserProfileQuerySet, self).__init__(*args, **kwargs)
+        # Override ModelIterable class to repsect the privacy_level
+        self._iterable_class = UserProfileModelIterable
 
     def privacy_level(self, level=MOZILLIANS):
         """Set privacy level for query set."""
@@ -110,23 +125,3 @@ class UserProfileQuerySet(QuerySet):
         clone = self._values(*fields, **expressions)
         clone._iterable_class = UserProfileValuesIterable
         return clone
-
-    def iterator(self):
-        """Custom QuerySet iterator which sets privacy level in every
-        object returned.
-
-        """
-
-        def _generator():
-            self._iterator = super(UserProfileQuerySet, self).iterator()
-            while True:
-                obj = self._iterator.next()
-                obj._privacy_level = getattr(self, '_privacy_level', None)
-                yield obj
-        return _generator()
-
-
-class UserProfileManager(Manager):
-    """Custom Manager for UserProfile."""
-
-    use_for_related_fields = True

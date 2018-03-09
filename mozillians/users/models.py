@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import ManyToManyField
+from django.db.models import Manager, ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 from django.template.loader import get_template
@@ -33,13 +33,14 @@ from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVACY_CHOICES_WITH_PRIVATE,
                                        PRIVATE, PUBLIC, PUBLIC_INDEXABLE_FIELDS,
-                                       UserProfileManager, UserProfileQuerySet)
+                                       UserProfileQuerySet)
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
 COUNTRIES = product_details.get_regions('en-US')
 AVATAR_SIZE = (300, 300)
 logger = logging.getLogger(__name__)
+ProfileManager = Manager.from_queryset(UserProfileQuerySet)
 
 
 def _calculate_photo_filename(instance, filename):
@@ -142,7 +143,7 @@ class UserProfile(UserProfilePrivacyModel):
         ('contribute', 'Get Involved'),
     )
 
-    objects = UserProfileManager.from_queryset(UserProfileQuerySet)()
+    objects = ProfileManager()
 
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
