@@ -1,7 +1,6 @@
 import logging
 import os
 import uuid
-from datetime import datetime
 from itertools import chain
 
 from django.conf import settings
@@ -12,6 +11,7 @@ from django.db import models
 from django.db.models import Manager, ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
+from django.utils.timezone import now
 from django.template.loader import get_template
 
 from product_details import product_details
@@ -582,7 +582,7 @@ class UserProfile(UserProfilePrivacyModel):
 
         vouch = self.vouches_received.create(
             voucher=vouched_by,
-            date=datetime.now(),
+            date=now(),
             description=description,
             autovouch=autovouch
         )

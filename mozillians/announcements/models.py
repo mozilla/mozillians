@@ -4,7 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from django.utils.timezone import now
 
 import bleach
 from jinja2 import Markup
@@ -44,9 +44,9 @@ class Announcement(models.Model):
 
     @property
     def published(self):
-        now = timezone.now()
-        return ((self.publish_from <= now) and
-                (self.publish_until > now if self.publish_until else True))
+        _now = now()
+        return ((self.publish_from <= _now) and
+                (self.publish_until > _now if self.publish_until else True))
 
     def get_template_text(self):
         """Mark text as template safe so html tags are not escaped."""
