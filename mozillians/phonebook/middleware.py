@@ -11,10 +11,13 @@ from mozillians.common.templatetags.helpers import redirect
 from mozillians.common.middleware import safe_query_string
 
 
-class RegisterMiddleware():
+class RegisterMiddleware(object):
     """Redirect authenticated users with incomplete profile to register view."""
 
-    def process_request(self, request):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         user = request.user
         path = request.path
 
@@ -36,9 +39,10 @@ class RegisterMiddleware():
                 filter(lambda url: re.match(url, path), allow_urls)):
             messages.warning(request, _('Please complete registration before proceeding.'))
             return redirect('phonebook:profile_edit')
+        return self.get_response(request)
 
 
-class UsernameRedirectionMiddleware():
+class UsernameRedirectionMiddleware(object):
     """
     Redirect requests for user profiles from /<username> to
     /u/<username> to avoid breaking profile urls with the new url
@@ -46,7 +50,12 @@ class UsernameRedirectionMiddleware():
 
     """
 
-    def process_response(self, request, response):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+
         if (response.status_code == 404 and not
             request.path_info.startswith('/u/') and not
             is_valid_path(request.path_info) and

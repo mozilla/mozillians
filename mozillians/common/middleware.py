@@ -27,8 +27,12 @@ class StrongholdMiddleware(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, get_response):
+        self.get_response = get_response
         self.exceptions = getattr(settings, 'STRONGHOLD_EXCEPTIONS', [])
+
+    def __call__(self, request):
+        return self.get_response(request)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         for view_url in self.exceptions:
@@ -78,7 +82,8 @@ class LocaleURLMiddleware(object):
     3. Strip them from the URL.
     """
 
-    def __init__(self):
+    def __init__(self, get_response):
+        self.get_response = get_response
         if not settings.USE_I18N or not settings.USE_L10N:
             warn("USE_I18N or USE_L10N is False but LocaleURLMiddleware is "
                  "loaded. Consider removing funfactory.middleware."
@@ -90,15 +95,16 @@ class LocaleURLMiddleware(object):
             return False
         return True
 
-    def process_request(self, request):
+    def __call__(self, request):
 
         # Don't apply middleware to requests matching exempt URLs
         # Use default LANGUAGE_CODE locale
         for view_url in settings.EXEMPT_L10N_URLS:
             if re.search(view_url, request.path):
+                response = self.get_response(request)
                 request.locale = settings.LANGUAGE_CODE
                 activate(settings.LANGUAGE_CODE)
-                return None
+                return response
 
         prefixer = urlresolvers.Prefixer(request)
         urlresolvers.set_url_prefix(prefixer)
@@ -133,12 +139,17 @@ class LocaleURLMiddleware(object):
         request.path_info = '/' + prefixer.shortened_path
         request.locale = prefixer.locale or settings.LANGUAGE_CODE
         activate(prefixer.locale or settings.LANGUAGE_CODE)
+        return self.get_response(request)
 
 
 class HSTSPreloadMiddleware(object):
     """Add header to enable HSTS preload."""
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_response(self, request, response):
+    def __call__(self, request):
+        response = self.get_response(request)
+
         sts_header_name = 'strict-transport-security'
         sts_header = response.get(sts_header_name)
 
@@ -152,7 +163,11 @@ class HSTSPreloadMiddleware(object):
 class ReferrerPolicyMiddleware(object):
     """Add header to enable Referrer-Policy Header."""
 
-    def process_response(self, request, response):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
         referrer_header_name = 'Referrer-Policy'
 
         if settings.ENABLE_REFERRER_HEADER:

@@ -78,11 +78,11 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'mozillians.common.middleware.LocaleURLMiddleware',
 
     'django.middleware.common.CommonMiddleware',
+    'mozillians.common.middleware.LocaleURLMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -94,8 +94,6 @@ MIDDLEWARE_CLASSES = (
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
-    'mobility.middleware.DetectMobileMiddleware',
-    'mobility.middleware.XMobileMiddleware',
     'csp.middleware.CSPMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
@@ -104,7 +102,7 @@ MIDDLEWARE_CLASSES = (
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
 
     'waffle.middleware.WaffleMiddleware',
-)
+]
 
 #############################
 # Database configuration
