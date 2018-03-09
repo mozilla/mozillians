@@ -659,6 +659,30 @@ if DEV:
         'http://*.mozilla.org',
     )
 
+
+LOGGING = {
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    }
+}
+
 if DEBUG:
     for backend in TEMPLATES:
         backend['OPTIONS']['debug'] = DEBUG
