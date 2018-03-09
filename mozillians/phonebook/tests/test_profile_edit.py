@@ -1,5 +1,6 @@
 import os
 from django.core.urlresolvers import reverse
+from django.test.utils import override_script_prefix
 
 from mock import patch
 from nose.tools import eq_, ok_
@@ -22,28 +23,33 @@ class ProfileEditTests(TestCase):
         """A vouched user editing their profile is shown a link to the groups page.
         """
         user = UserFactory.create()
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        groups_url = reverse('groups:index_groups', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            groups_url = reverse('groups:index_groups')
         ok_(groups_url in unicode(response.content, 'utf-8'))
 
     def test_profile_edit_unvouched_doesnt_link_to_groups_page(self):
         """An unvouched user editing their profile is not shown a link to the groups page.
         """
         user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.get(url, follow=True)
         eq_(response.status_code, 200)
-        groups_url = reverse('groups:index_groups', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            groups_url = reverse('groups:index_groups')
         ok_(groups_url not in unicode(response.content, 'utf-8'))
 
     def test_section_does_not_exist(self):
         """When not section exists in request.POST, 404 is raised."""
         user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         data = {
             'full_name': user.userprofile.full_name,
             'email': user.email,
@@ -71,7 +77,8 @@ class ProfileEditTests(TestCase):
     def test_wrong_section(self):
         """When a wrong section is given in request.POST, 404 is raised."""
         user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         data = {
             'full_name': user.userprofile.full_name,
             'email': user.email,
@@ -122,7 +129,8 @@ class ProfileEditTests(TestCase):
         }
         data.update(_get_privacy_fields(MOZILLIANS))
 
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
@@ -136,7 +144,8 @@ class ProfileEditTests(TestCase):
         ok_(not UserProfile.objects.filter(full_name='foo bar').exists())
         country = Country.objects.get(name='Greece')
 
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         data = {
             'full_name': 'foo bar',
             'email': 'foo@example.com',

@@ -1,6 +1,7 @@
 from mock import patch
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.test.utils import override_script_prefix
 
 from nose.tools import eq_, ok_
 
@@ -15,9 +16,10 @@ class TestGroupRemoveMember(TestCase):
         self.group = GroupFactory()
         self.member = UserFactory()
         self.group.add_member(self.member.userprofile)
-        self.url = reverse('groups:remove_member', prefix='/en-US/',
-                           kwargs={'url': self.group.url,
-                                   'user_pk': self.member.userprofile.pk})
+        with override_script_prefix('/en-US/'):
+            self.url = reverse('groups:remove_member',
+                               kwargs={'url': self.group.url,
+                                       'user_pk': self.member.userprofile.pk})
 
     def test_as_manager(self):
         # manager can remove another from a group they're not curator of
@@ -106,8 +108,8 @@ class TestGroupRemoveMember(TestCase):
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:confirm_member', args=[self.group.url, user.userprofile.pk],
-                      prefix='/fr/')
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:confirm_member', args=[self.group.url, user.userprofile.pk])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -131,8 +133,8 @@ class TestGroupRemoveMember(TestCase):
         eq_(0, len(mail.outbox))
         # Using French for curator page to make sure that doesn't affect the language
         # that is used to email the member.
-        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
-                      prefix='/fr/',)
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -152,8 +154,8 @@ class TestGroupRemoveMember(TestCase):
         self.group.curators.add(curator.userprofile)
         user = UserFactory()
         self.group.add_member(user.userprofile)
-        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk],
-                      prefix='/fr/',)
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -176,9 +178,9 @@ class TestGroupRemoveMember(TestCase):
         user = UserFactory()
         self.group.add_member(user.userprofile)
         self.group.curators.add(curator.userprofile)
-        url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk,
-                                                    GroupMembership.PENDING],
-                      prefix='/fr/',)
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:remove_member', args=[self.group.url, user.userprofile.pk,
+                                                        GroupMembership.PENDING])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -203,12 +205,12 @@ class TestGroupRemoveMember(TestCase):
         user = UserFactory()
         self.group.add_member(user.userprofile)
         self.group.curators.add(curator.userprofile)
-        url = reverse('groups:remove_member',
-                      args=[
-                          self.group.url, user.userprofile.pk,
-                          GroupMembership.PENDING
-                      ],
-                      prefix='/fr/',)
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:remove_member',
+                          args=[
+                              self.group.url, user.userprofile.pk,
+                              GroupMembership.PENDING
+                          ])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:
@@ -236,12 +238,12 @@ class TestGroupRemoveMember(TestCase):
         user = UserFactory()
         self.group.add_member(user.userprofile)
         self.group.curators.add(curator.userprofile)
-        url = reverse('groups:remove_member',
-                      args=[
-                          self.group.url, user.userprofile.pk,
-                          GroupMembership.PENDING
-                      ],
-                      prefix='/fr/',)
+        with override_script_prefix('/fr/'):
+            url = reverse('groups:remove_member',
+                          args=[
+                              self.group.url, user.userprofile.pk,
+                              GroupMembership.PENDING
+                          ])
         with patch('mozillians.groups.models.email_membership_change',
                    autospec=True) as mock_email:
             with self.login(curator) as client:

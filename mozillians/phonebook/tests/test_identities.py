@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import override_settings
+from django.test.utils import override_settings, override_script_prefix
 
 from mock import ANY, Mock, patch
 from nose.tools import eq_
@@ -49,7 +49,9 @@ class EditProfileIdentities(TestCase):
             eq_(new_idp_profile.primary, False)
             msg = 'Account successfully verified.'
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
@@ -77,7 +79,9 @@ class EditProfileIdentities(TestCase):
             msg = ('Account successfully verified. You need to use this identity '
                    'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
@@ -116,7 +120,9 @@ class EditProfileIdentities(TestCase):
             msg = ('Account successfully verified. You need to use this identity '
                    'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
@@ -140,7 +146,9 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'Account verification failed: Email is not verified.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
@@ -171,7 +179,9 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'Account verification failed: Identity already exists.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
@@ -199,4 +209,6 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'The email in this identity is used by another user.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)

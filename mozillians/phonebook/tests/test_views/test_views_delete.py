@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseNotAllowed
 from django.test import Client
-from django.test.utils import override_settings
+from django.test.utils import override_settings, override_script_prefix
 
 from mock import patch
 from nose.tools import eq_, ok_
@@ -35,10 +35,12 @@ class DeleteTests(TestCase):
 
     def test_delete_get_method(self):
         user = UserFactory.create()
+
+        with override_script_prefix('/en-US'):
+            url = reverse('phonebook:profile_delete')
+
         with self.login(user) as client:
-            response = client.get(
-                reverse('phonebook:profile_delete', prefix='/en-US/'),
-                follow=True)
+            response = client.get(url, follow=True)
         ok_(isinstance(response, HttpResponseNotAllowed))
 
     @requires_login()
@@ -51,10 +53,11 @@ class DeleteTests(TestCase):
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_unvouched(self, unsubscribe_from_basket_task_mock):
         user = UserFactory.create(vouched=False)
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_delete')
+
         with self.login(user) as client:
-            response = client.post(
-                reverse('phonebook:profile_delete', prefix='/en-US/'),
-                follow=True)
+            response = client.post(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
@@ -68,10 +71,10 @@ class DeleteTests(TestCase):
     @override_settings(BASKET_NDA_NEWSLETTER='newsletter2')
     def test_delete_vouched(self, unsubscribe_from_basket_task_mock):
         user = UserFactory.create()
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_delete')
         with self.login(user) as client:
-            response = client.post(
-                reverse('phonebook:profile_delete', prefix='/en-US/'),
-                follow=True)
+            response = client.post(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/home.html')
 
@@ -90,10 +93,10 @@ class DeleteTests(TestCase):
         description = 'Autovouch reason'
         vouch = user.userprofile.vouches_received.filter(autovouch=True, description=description)
         ok_(vouch.exists())
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_delete')
 
         with self.login(user) as client:
-            response = client.post(
-                reverse('phonebook:profile_delete', prefix='/en-US/'),
-                follow=True)
+            response = client.post(url, follow=True)
         eq_(response.status_code, 200)
         self.assertTemplateUsed(response, 'phonebook/home.html')

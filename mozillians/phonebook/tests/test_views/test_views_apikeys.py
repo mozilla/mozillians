@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from django.test.utils import override_script_prefix
 
 from mock import patch
 from nose.tools import eq_, ok_
@@ -48,7 +49,8 @@ class APIKeysTest(TestCase):
     def test_request_apikey(self):
         user = UserFactory.create()
         with self.login(user) as client:
-            url = reverse('phonebook:apikeys', prefix='/en-US/')
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:apikeys')
             data = {
                 'url': 'http://example.com',
                 'name': 'moomoo',
