@@ -81,8 +81,8 @@ class DeleteTests(TestCase):
         # This mock call needs assert_called_any beacuse it's called twice,
         # once from the pre_delete signal and once from the post_save signal
         # from the User creation.
-        unsubscribe_from_basket_task_mock.assert_called_any(user.email,
-                                                            ['newsletter1', 'newsletter2'])
+        unsubscribe_from_basket_task_mock.assert_any_call(user.email,
+                                                          ['newsletter1', 'newsletter2'])
 
         ok_(not User.objects.filter(username=user.username).exists())
 
