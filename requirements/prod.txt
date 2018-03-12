@@ -251,19 +251,9 @@ boto==2.48.0 \
 django_csp==3.3 \
     --hash=sha256:a95eeeb04df155b6270612238700f16abd2b0cc3d32dbcfca8c7fd06d26dacba \
     --hash=sha256:db082b75075672fb9cf4a622c75c94ee624cb566ffe9d2a645687e58598b6d39
-python-jose==1.3.2 \
-    --hash=sha256:35eca894ab91db1774251296949679396c46d6bc506ea03804b8f7a7d0204392 \
-    --hash=sha256:968254f57ccd0fc99ab9557f82b90a5b23ccaf3716e8817d8edaa9f21c21bb2d
-pycrypto==2.6.1 \
-    --hash=sha256:f2ce1e989b272cfcb677616763e0a2e7ec659effa67a88aa92b3a65528f60a3c
-ecdsa==0.13 \
-    --hash=sha256:40d002cf360d0e035cf2cb985e1308d41aaa087cbfc135b2dc2d844296ea546c \
-    --hash=sha256:64cf1ee26d1cde3c73c6d7d107f835fed7c6a2904aef9eac223d57ad800c43fa
-future==0.16.0 \
-    --hash=sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb
-mozilla-django-oidc==0.3.2 \
-    --hash=sha256:fce4f29c99ae638a21c6958bba1dd5f2839aacabc817204a7ee14f04e78ca399 \
-    --hash=sha256:b83364e516b97a0afe3c8eee31b515a1850a84b4a8884d985a1050f99f87fc3e
+mozilla-django-oidc==0.5.0 \
+    --hash=sha256:56d72b3a35cbe9b313e4ec19a01943d4ca698562476d3387c3ab30e66d33bcf8 \
+    --hash=sha256:ab6dcccf4841472c1e82244d66503e87ffae0ad7d38d6187fcca54810eceb7a6
 olefile==0.44 \
     --hash=sha256:61f2ca0cd0aa77279eb943c07f607438edf374096b66332fae1ee64a6f0f73ad
 django-cities-light==3.4.0 \
@@ -533,3 +523,9 @@ argon2_cffi==18.1.0 \
     --hash=sha256:92b3f8f93b19081d520d911f1ce5902693edeeab2181c08aa0bb4130adba51aa \
     --hash=sha256:05dd15949be3a7d9f65807fe58fad70526023a319747054bb89da209c4071a33 \
     --hash=sha256:7e4b75611b73f53012117ad21cdde7a17b32d1e99ff6799f22d827eb83a2a59b
+josepy==1.0.1 \
+    --hash=sha256:354a3513038a38bbcd27c97b7c68a8f3dfaff0a135b20a92c6db4cc4ea72915e \
+    --hash=sha256:9f48b88ca37f0244238b1cc77723989f7c54f7b90b2eee6294390bacfe870acc
+pyOpenSSL==17.5.0 \
+    --hash=sha256:07a2de1a54de07448732a81e38a55df7da109b2f47f599f8bb35b0cbec69d4bd \
+    --hash=sha256:2c10cfba46a52c0b0950118981d61e72c1e5b1aac451ca1bc77de1a679456773
