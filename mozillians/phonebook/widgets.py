@@ -1,7 +1,7 @@
 import datetime
 import re
 
-from django.forms.widgets import Widget, Select
+from django.forms.widgets import Widget, Select, HiddenInput
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 
@@ -56,7 +56,10 @@ class MonthYearWidget(Widget):
         if not (self.required and value):
             month_choices.append(self.none_value)
         month_choices.sort()
-        local_attrs = self.build_attrs(id=self.month_field % id_)
+        build_attrs = {
+            'id': self.month_field % id_
+        }
+        local_attrs = self.build_attrs(build_attrs)
         s = Select(choices=month_choices)
         select_html = s.render(self.month_field % name, month_val, local_attrs)
         output.append(select_html)
@@ -68,6 +71,10 @@ class MonthYearWidget(Widget):
         s = Select(choices=year_choices)
         select_html = s.render(self.year_field % name, year_val, local_attrs)
         output.append(select_html)
+
+        # Hidden widget for custom datefield
+        s = HiddenInput()
+        output.append(s.render('date_mozillian', None))
 
         return mark_safe(u'\n'.join(output))
 

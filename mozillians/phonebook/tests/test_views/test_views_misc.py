@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import logout as logout_view
 from django.core.urlresolvers import reverse
 from django.test.client import Client
-from django.test.utils import override_settings
+from django.test.utils import override_settings, override_script_prefix
 
 from mock import patch
 from nose.tools import eq_, ok_
@@ -68,7 +68,8 @@ class InviteTests(TestCase):
     @patch('mozillians.phonebook.views.messages.success')
     def test_invite_post_vouched(self, success_mock):
         user = UserFactory.create()
-        url = reverse('phonebook:invite', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:invite')
         data = {
             'message': 'Join us foo!',
             'recipient': 'foo@example.com',
@@ -86,7 +87,8 @@ class InviteTests(TestCase):
     def test_invite_already_vouched(self):
         vouched_user = UserFactory.create()
         user = UserFactory.create()
-        url = reverse('phonebook:invite', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:invite')
         data = {'recipient': vouched_user.email}
         with self.login(user) as client:
             response = client.post(url, data, follow=True)
@@ -97,7 +99,8 @@ class InviteTests(TestCase):
     def test_invite_delete(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
         invite = InviteFactory.create(inviter=user.userprofile)
-        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:delete_invite', kwargs={'invite_pk': invite.pk})
         with self.login(user) as client:
             response = client.post(url, follow=True)
 
@@ -107,7 +110,8 @@ class InviteTests(TestCase):
     def test_invite_delete_invalid_requester(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
         invite = InviteFactory.create(inviter=user.userprofile)
-        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:delete_invite', kwargs={'invite_pk': invite.pk})
         invalid_requester = UserFactory.create(userprofile={'is_vouched': True})
         with self.login(invalid_requester) as client:
             response = client.post(url)
@@ -118,7 +122,8 @@ class InviteTests(TestCase):
     def test_invite_delete_redeemed(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
         invite = InviteFactory.create(inviter=user.userprofile, redeemed=datetime.now())
-        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': invite.pk})
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:delete_invite', kwargs={'invite_pk': invite.pk})
         with self.login(user) as client:
             response = client.post(url)
 
@@ -127,7 +132,8 @@ class InviteTests(TestCase):
 
     def test_invite_delete_invalid_invite(self):
         user = UserFactory.create(userprofile={'is_vouched': True})
-        url = reverse('phonebook:delete_invite', prefix='/en-US/', kwargs={'invite_pk': '1'})
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:delete_invite', kwargs={'invite_pk': '1'})
         with self.login(user) as client:
             response = client.post(url)
 
@@ -139,7 +145,8 @@ class VouchFormTests(TestCase):
     def test_vouch_not_vouched(self):
         user = UserFactory.create(vouched=False, userprofile={'privacy_full_name': PUBLIC})
         voucher = UserFactory.create(vouched=False)
-        url = reverse('phonebook:profile_view', args=[user.username], prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_view', args=[user.username])
         data = {'vouchee': user.userprofile.id,
                 'description': 'a reason'}
         with self.login(voucher) as client:
@@ -150,7 +157,8 @@ class VouchFormTests(TestCase):
     def test_vouch_no_description(self):
         user = UserFactory.create(vouched=False)
         voucher = UserFactory.create()
-        url = reverse('phonebook:profile_view', args=[user.username], prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_view', args=[user.username])
         data = {'vouchee': user.userprofile.id,
                 'description': ''}
         with self.login(voucher) as client:
@@ -164,7 +172,8 @@ class VouchFormTests(TestCase):
         user = UserFactory.create(vouched=False)
         user.userprofile.vouch(None)
         unvouched_user = UserFactory.create(vouched=False)
-        url = reverse('phonebook:profile_view', args=[unvouched_user.username], prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_view', args=[unvouched_user.username])
         data = {'vouchee': unvouched_user.userprofile.id,
                 'description': 'a reason'}
         with self.login(user) as client:
@@ -221,7 +230,8 @@ class ImageTests(TestCase):
             'basic_section': ''
         }
         data.update(_get_privacy_fields(MOZILLIANS))
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
@@ -292,7 +302,8 @@ class ImageTests(TestCase):
             data[field.name] = MOZILLIANS
         data['privacy_tshirt'] = PRIVATE
 
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)
@@ -323,7 +334,8 @@ class DateValidationTests(TestCase):
         }
         data.update(_get_privacy_fields(MOZILLIANS))
 
-        url = reverse('phonebook:profile_edit', prefix='/es/')
+        with override_script_prefix('/es/'):
+            url = reverse('phonebook:profile_edit')
         with self.login(user) as client:
             response = client.post(url, data=data, follow=True)
         eq_(response.status_code, 200)

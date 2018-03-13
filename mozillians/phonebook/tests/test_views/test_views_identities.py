@@ -1,4 +1,5 @@
 from django.core.urlresolvers import reverse
+from django.test.utils import override_script_prefix
 
 from mock import ANY, patch
 from nose.tools import eq_, ok_
@@ -64,7 +65,8 @@ class IdentitiesViewsTests(TestCase):
 
         ok_(not IdpProfile.objects.filter(pk=idp.pk).exists())
         ok_(IdpProfile.objects.filter(pk=idp_primary.pk).exists())
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         self.assertRedirects(response, url, status_code=301)
         msg = 'Identity {0} successfully deleted.'.format(idp.get_type_display())
         mocked_message.success.assert_called_once_with(ANY, msg)
@@ -84,7 +86,8 @@ class IdentitiesViewsTests(TestCase):
             response = client.get(url, follow=True)
 
         ok_(IdpProfile.objects.filter(pk=idp.pk).exists())
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         self.assertRedirects(response, url, status_code=301)
         msg = 'Sorry the requested Identity cannot be deleted.'
         mocked_message.error.assert_called_once_with(ANY, msg)
@@ -122,7 +125,8 @@ class IdentitiesViewsTests(TestCase):
             response = client.get(url, follow=True)
 
         ok_(IdpProfile.objects.filter(pk=idp.pk).exists())
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         self.assertRedirects(response, url, status_code=301)
         msg = 'Sorry the requested Identity cannot be deleted.'
         mocked_message.error.assert_called_once_with(ANY, msg)
@@ -149,7 +153,8 @@ class IdentitiesViewsTests(TestCase):
                           kwargs={'identity_pk': idp.pk})
             response = client.get(url, follow=True)
 
-        url = reverse('phonebook:profile_edit', prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('phonebook:profile_edit')
         self.assertRedirects(response, url, status_code=301)
         ok_(IdpProfile.objects.filter(pk=idp_primary.pk, primary_contact_identity=False).exists())
         ok_(IdpProfile.objects.filter(pk=idp.pk, primary_contact_identity=True).exists())

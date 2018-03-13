@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='group',
             name='is_access_group',
-            field=models.BooleanField(default='Tag', verbose_name=b'Is this an access group?', choices=[(True, 'Access Group'), (False, 'Tag')]),
+            field=models.BooleanField(default=False, verbose_name=b'Is this an access group?', choices=[(True, 'Access Group'), (False, 'Tag')]),
         ),
     ]

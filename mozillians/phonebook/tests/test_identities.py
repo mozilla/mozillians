@@ -1,7 +1,7 @@
 import json
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.test import override_settings
+from django.test.utils import override_settings, override_script_prefix
 
 from mock import ANY, Mock, patch
 from nose.tools import eq_
@@ -26,11 +26,11 @@ class EditProfileIdentities(TestCase):
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_add_new_identity_non_mfa(self, verify_mock, request_post_mock, msg_mock):
+    @patch('mozillians.phonebook.views.JWS')
+    def test_add_new_identity_non_mfa(self, jws_mock, request_post_mock, msg_mock):
         """Test adding a new identity in a profile."""
         user = UserFactory.create(email='foo@example.com')
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
             'sub': 'email|'
@@ -49,15 +49,17 @@ class EditProfileIdentities(TestCase):
             eq_(new_idp_profile.primary, False)
             msg = 'Account successfully verified.'
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_add_new_identity_mfa(self, verify_mock, request_post_mock, msg_mock):
+    @patch('mozillians.phonebook.views.JWS')
+    def test_add_new_identity_mfa(self, jws_mock, request_post_mock, msg_mock):
         """Test adding a new identity in a profile."""
         user = UserFactory.create(email='foo@example.com')
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
             'sub': 'ad|'
@@ -77,12 +79,14 @@ class EditProfileIdentities(TestCase):
             msg = ('Account successfully verified. You need to use this identity '
                    'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_add_new_identity_change_primary(self, verify_mock, request_post_mock, msg_mock):
+    @patch('mozillians.phonebook.views.JWS')
+    def test_add_new_identity_change_primary(self, jws_mock, request_post_mock, msg_mock):
         """Test adding a stronger identity and changing the primary email."""
         user = UserFactory.create(email='foo@example.com')
         IdpProfile.objects.create(
@@ -92,7 +96,7 @@ class EditProfileIdentities(TestCase):
             primary=True
         )
 
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
             'sub': 'ad|ldap'
@@ -116,14 +120,16 @@ class EditProfileIdentities(TestCase):
             msg = ('Account successfully verified. You need to use this identity '
                    'the next time you will login.')
             msg_mock.success.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_email_not_verified(self, verify_mock, request_post_mock, msg_mock):
+    @patch('mozillians.phonebook.views.JWS')
+    def test_email_not_verified(self, jws_mock, request_post_mock, msg_mock):
         user = UserFactory.create(email='foo@example.com')
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': False,
             'sub': 'ad|ldap'
@@ -140,12 +146,14 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'Account verification failed: Email is not verified.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_identity_exists(self, verify_mock, request_post_mock, msg_mock):
+    @patch('mozillians.phonebook.views.JWS')
+    def test_identity_exists(self, jws_mock, request_post_mock, msg_mock):
         user = UserFactory.create(email='foo@example.com')
         IdpProfile.objects.create(
             profile=user.userprofile,
@@ -154,7 +162,7 @@ class EditProfileIdentities(TestCase):
             primary=True
         )
 
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'foo@example.com',
             'email_verified': True,
             'sub': 'email|'
@@ -171,18 +179,20 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'Account verification failed: Identity already exists.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)
 
     @patch('mozillians.phonebook.views.messages')
     @patch('mozillians.phonebook.views.requests.post')
-    @patch('mozillians.phonebook.views.jws.verify')
-    def test_email_in_identity_belongs_to_other_user(self, verify_mock, request_post_mock,
+    @patch('mozillians.phonebook.views.JWS')
+    def test_email_in_identity_belongs_to_other_user(self, jws_mock, request_post_mock,
                                                      msg_mock):
         """Test adding a stronger identity and changing the primary email."""
         UserFactory.create(email='foo@example.com')
         user1 = UserFactory.create(email='bar@example.com')
 
-        verify_mock.return_value = json.dumps({
+        (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'foo@example.com',
             'email_verified': True,
             'sub': 'ad|ldap'
@@ -199,4 +209,6 @@ class EditProfileIdentities(TestCase):
             response = client.get(self.url, self.get_data, follow=True)
             msg = 'The email in this identity is used by another user.'
             msg_mock.error.assert_called_once_with(ANY, msg)
-            self.assertRedirects(response, reverse('phonebook:profile_edit', prefix='/en-US/'))
+            with override_script_prefix('/en-US/'):
+                url = reverse('phonebook:profile_edit')
+            self.assertRedirects(response, url)

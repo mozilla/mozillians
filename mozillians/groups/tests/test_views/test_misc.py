@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.test.client import Client
+from django.test.utils import override_script_prefix
 
 from nose.tools import eq_, ok_
 
@@ -15,11 +16,12 @@ class ToggleGroupSubscriptionTests(TestCase):
         self.user = UserFactory.create()
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        self.join_url = reverse('groups:join_group', prefix='/en-US/',
-                                kwargs={'url': self.group.url})
-        self.leave_url = reverse('groups:remove_member', prefix='/en-US/',
-                                 kwargs={'url': self.group.url,
-                                         'user_pk': self.user.userprofile.pk})
+        with override_script_prefix('/en-US/'):
+            self.join_url = reverse('groups:join_group',
+                                    kwargs={'url': self.group.url})
+            self.leave_url = reverse('groups:remove_member',
+                                     kwargs={'url': self.group.url,
+                                             'user_pk': self.user.userprofile.pk})
 
     def test_group_subscription(self):
         with self.login(self.user) as client:
@@ -29,7 +31,8 @@ class ToggleGroupSubscriptionTests(TestCase):
 
     def test_group_subscription_terms(self):
         group = GroupFactory.create(terms='Example terms')
-        join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
+        with override_script_prefix('/en-US/'):
+            join_url = reverse('groups:join_group', kwargs={'url': group.url})
         with self.login(self.user) as client:
             client.post(join_url, follow=True)
 
@@ -38,7 +41,8 @@ class ToggleGroupSubscriptionTests(TestCase):
 
     def test_group_subscription_terms_by_request(self):
         group = GroupFactory.create(accepting_new_members='by_request', terms='Example terms')
-        join_url = reverse('groups:join_group', prefix='/en-US/', kwargs={'url': group.url})
+        with override_script_prefix('/en-US/'):
+            join_url = reverse('groups:join_group', kwargs={'url': group.url})
         with self.login(self.user) as client:
             client.post(join_url, follow=True)
 
@@ -53,8 +57,8 @@ class ToggleGroupSubscriptionTests(TestCase):
         ok_(not group.members.filter(id=self.user.userprofile.id).exists())
 
     def test_nonexistant_group(self):
-        url = reverse('groups:join_group', prefix='/en-US/',
-                      kwargs={'url': 'woohoo'})
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:join_group', kwargs={'url': 'woohoo'})
         with self.login(self.user) as client:
             response = client.post(url, follow=True)
         eq_(response.status_code, 404)
@@ -62,8 +66,9 @@ class ToggleGroupSubscriptionTests(TestCase):
     @requires_vouch()
     def test_unvouched(self):
         user = UserFactory.create(vouched=False)
-        join_url = reverse('groups:join_group', prefix='/en-US/',
-                           kwargs={'url': self.group.url})
+        with override_script_prefix('/en-US/'):
+            join_url = reverse('groups:join_group',
+                               kwargs={'url': self.group.url})
         with self.login(user) as client:
             client.post(join_url, follow=True)
 
@@ -74,8 +79,9 @@ class ToggleGroupSubscriptionTests(TestCase):
 
     def test_unjoinable_group(self):
         group = GroupFactory.create(accepting_new_members='no')
-        join_url = reverse('groups:join_group', prefix='/en-US/',
-                           kwargs={'url': group.url})
+        with override_script_prefix('/en-US/'):
+            join_url = reverse('groups:join_group',
+                               kwargs={'url': group.url})
         with self.login(self.user) as client:
             client.post(join_url, follow=True)
         group = Group.objects.get(id=group.id)
@@ -87,8 +93,9 @@ class ToggleSkillSubscriptionTests(TestCase):
         self.skill = SkillFactory.create()
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        self.url = reverse('groups:toggle_skill_subscription', prefix='/en-US/',
-                           kwargs={'url': self.skill.url})
+        with override_script_prefix('/en-US/'):
+            self.url = reverse('groups:toggle_skill_subscription',
+                               kwargs={'url': self.skill.url})
         self.user = UserFactory.create()
 
     def test_skill_subscription(self):
@@ -105,8 +112,9 @@ class ToggleSkillSubscriptionTests(TestCase):
         ok_(not skill.members.filter(id=self.user.userprofile.id).exists())
 
     def test_nonexistant_skill(self):
-        url = reverse('groups:toggle_skill_subscription', prefix='/en-US/',
-                      kwargs={'url': 'invalid'})
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:toggle_skill_subscription',
+                          kwargs={'url': 'invalid'})
         with self.login(self.user) as client:
             response = client.post(url, follow=True)
         eq_(response.status_code, 404)

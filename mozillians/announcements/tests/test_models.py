@@ -10,7 +10,7 @@ from mozillians.announcements.tests import AnnouncementFactory, TestCase
 
 
 class AnnouncementTests(TestCase):
-    @patch('mozillians.announcements.models.timezone')
+    @patch('mozillians.announcements.models.now')
     def test_published(self, mock_obj):
         """Test published model property."""
         first = AnnouncementFactory.create(
@@ -23,7 +23,7 @@ class AnnouncementTests(TestCase):
             publish_from=make_aware(datetime(2013, 2, 21), utc),
             publish_until=make_aware(datetime(2013, 2, 23), utc))
 
-        mock_obj.now.return_value = make_aware(datetime(2013, 2, 16), utc)
+        mock_obj.return_value = make_aware(datetime(2013, 2, 16), utc)
         ok_(first.published)
         ok_(second.published)
         ok_(not third.published)

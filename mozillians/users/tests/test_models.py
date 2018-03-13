@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
 from django.test import override_settings
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, now
 
 import pytz
 from mock import Mock, patch
@@ -304,7 +304,7 @@ class UserProfileTests(TestCase):
         user = UserFactory.create()
         user.userprofile._email_now_vouched(None)
         eq_(get_template_mock().render.call_args_list[0][0][0]['can_vouch_threshold'], False)
-        Vouch.objects.create(voucher=None, vouchee=user.userprofile, date=datetime.now())
+        Vouch.objects.create(voucher=None, vouchee=user.userprofile, date=now())
         user.userprofile._email_now_vouched(None)
         eq_(get_template_mock().render.call_args_list[1][0][0]['can_vouch_threshold'], True)
 
@@ -325,7 +325,7 @@ class UserProfileTests(TestCase):
         user = User.objects.get(id=user.id)
         for field in UserProfile.privacy_fields():
             # Compare to default privacy setting for each field.
-            f = UserProfile._meta.get_field_by_name('privacy_{0}'.format(field))[0]
+            f = UserProfile._meta.get_field('privacy_{0}'.format(field))
             eq_(getattr(user.userprofile, 'privacy_{0}'.format(field)),
                 f.default, 'Field {0} not set'.format(field))
 
@@ -539,10 +539,10 @@ class VouchTests(TestCase):
 
     @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
-    @patch('mozillians.users.models.datetime')
+    @patch('mozillians.users.models.now')
     def test_vouch(self, datetime_mock, email_vouched_mock):
         dt = make_aware(datetime(2012, 01, 01, 00, 10), pytz.UTC)
-        datetime_mock.now.return_value = dt
+        datetime_mock.return_value = dt
         user_1 = UserFactory.create()
         user_2 = UserFactory.create(vouched=False)
         user_2.userprofile.vouch(user_1.userprofile)
@@ -742,13 +742,13 @@ class PrivacyModelTests(unittest.TestCase):
         # caching worked.
         # To compute the privacy fields, the code has to get all the
         # field names. Use mock so we can tell if that gets called.
-        with patch.object(UserProfile._meta, 'get_all_field_names') as mock_get_all_field_names:
+        with patch.object(UserProfile._meta, 'get_field') as mock_get_field:
             UserProfile.privacy_fields()
-        ok_(mock_get_all_field_names.called)
+        ok_(mock_get_field.called)
         # If we call privacy_fields() again, it shouldn't need to compute it all again
-        with patch.object(UserProfile._meta, 'get_all_field_names') as mock_get_all_field_names:
+        with patch.object(UserProfile._meta, 'get_field') as mock_get_field:
             UserProfile.privacy_fields()
-        ok_(not mock_get_all_field_names.called)
+        ok_(not mock_get_field.called)
 
 
 class CISHelperMethodsTests(unittest.TestCase):

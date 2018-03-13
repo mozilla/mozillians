@@ -1,7 +1,6 @@
 import logging
 import os
 import uuid
-from datetime import datetime
 from itertools import chain
 
 from django.conf import settings
@@ -9,9 +8,10 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import ManyToManyField
+from django.db.models import Manager, ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
+from django.utils.timezone import now
 from django.template.loader import get_template
 
 from product_details import product_details
@@ -33,13 +33,14 @@ from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVACY_CHOICES_WITH_PRIVATE,
                                        PRIVATE, PUBLIC, PUBLIC_INDEXABLE_FIELDS,
-                                       UserProfileManager, UserProfileQuerySet)
+                                       UserProfileQuerySet)
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
 COUNTRIES = product_details.get_regions('en-US')
 AVATAR_SIZE = (300, 300)
 logger = logging.getLogger(__name__)
+ProfileManager = Manager.from_queryset(UserProfileQuerySet)
 
 
 def _calculate_photo_filename(instance, filename):
@@ -103,14 +104,18 @@ class UserProfilePrivacyModel(models.Model):
         values to use for those fields when the user is not privileged to
         view their actual value.
 
-        Note: should be only used through UserProfile class. We should
+        Note: should be only used through UserProfile . We should
         fix this.
 
         """
         # Cache on the class object
         if cls.CACHED_PRIVACY_FIELDS is None:
             privacy_fields = {}
-            field_names = cls._meta.get_all_field_names()
+            field_names = list(set(chain.from_iterable(
+                (field.name, field.attname) if hasattr(field, 'attname') else
+                (field.name,) for field in cls._meta.get_fields()
+                if not (field.many_to_one and field.related_model is None)
+            )))
             for name in field_names:
                 if name.startswith('privacy_') or not 'privacy_%s' % name in field_names:
                     # skip privacy fields and uncontrolled fields
@@ -120,7 +125,7 @@ class UserProfilePrivacyModel(models.Model):
                 # Figure out a good default value for it (to show to users
                 # who aren't privileged to see the actual value)
                 if isinstance(field, ManyToManyField):
-                    default = field.related.model.objects.none()
+                    default = field.remote_field.model.objects.none()
                 else:
                     default = field.get_default()
                 privacy_fields[name] = default
@@ -138,7 +143,7 @@ class UserProfile(UserProfilePrivacyModel):
         ('contribute', 'Get Involved'),
     )
 
-    objects = UserProfileManager.from_queryset(UserProfileQuerySet)()
+    objects = ProfileManager()
 
     user = models.OneToOneField(User)
     full_name = models.CharField(max_length=255, default='', blank=False,
@@ -577,7 +582,7 @@ class UserProfile(UserProfilePrivacyModel):
 
         vouch = self.vouches_received.create(
             voucher=vouched_by,
-            date=datetime.now(),
+            date=now(),
             description=description,
             autovouch=autovouch
         )

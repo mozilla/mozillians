@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.test import Client
+from django.test.utils import override_script_prefix
 
 from nose.tools import eq_, ok_
 
@@ -358,13 +359,15 @@ class ShowTests(TestCase):
         # Make user 1 the group curator so they can remove users
         self.group.curators.add(self.user_1.userprofile)
         self.group.save()
-        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        with override_script_prefix('/en-US/'):
+            group_url = reverse('groups:show_group', args=[self.group.url])
         next_url = "%s?filtr=members" % group_url
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        url = reverse('groups:remove_member', prefix='/en-US/',
-                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:remove_member',
+                          kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.get(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateUsed(response, 'groups/confirm_remove_member.html')
@@ -380,14 +383,16 @@ class ShowTests(TestCase):
         self.group.accepting_new_members = Group.REVIEWED
         self.group.save()
 
-        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        with override_script_prefix('/en-US/'):
+            group_url = reverse('groups:show_group', args=[self.group.url])
         next_url = "%s?filtr=members" % group_url
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        url = reverse('groups:remove_member', prefix='/en-US/',
-                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk,
-                                  status=GroupMembership.PENDING))
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:remove_member',
+                          kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk,
+                                      status=GroupMembership.PENDING))
         with self.login(self.user_1) as client:
             response = client.post(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
@@ -405,7 +410,8 @@ class ShowTests(TestCase):
         self.group.accepting_new_members = 'by_request'
         self.group.save()
 
-        group_url = reverse('groups:show_group', prefix='/en-US/', args=[self.group.url])
+        with override_script_prefix('/en-US/'):
+            group_url = reverse('groups:show_group', args=[self.group.url])
         next_url = "%s?filtr=pending_members" % group_url
 
         # Make user 2 pending
@@ -415,8 +421,9 @@ class ShowTests(TestCase):
 
         # We must request the full path, with language, or the
         # LanguageMiddleware will convert the request to GET.
-        url = reverse('groups:confirm_member', prefix='/en-US/',
-                      kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:confirm_member',
+                          kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
         with self.login(self.user_1) as client:
             response = client.post(url, data={'next_url': next_url}, follow=True)
         self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
@@ -547,7 +554,8 @@ class TermsTests(TestCase):
         user = UserFactory.create()
         group.add_member(user.userprofile, status=GroupMembership.PENDING_TERMS)
 
-        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:review_terms', kwargs={'url': group.url})
 
         with self.login(user) as client:
             response = client.get(url, follow=True)
@@ -559,7 +567,8 @@ class TermsTests(TestCase):
         group = GroupFactory.create(terms='Example terms')
         user = UserFactory.create()
         group.add_member(user.userprofile, status=GroupMembership.PENDING_TERMS)
-        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:review_terms', kwargs={'url': group.url})
 
         membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
         eq_(membership.status, GroupMembership.PENDING_TERMS)
@@ -581,7 +590,8 @@ class TermsTests(TestCase):
         group = GroupFactory.create(terms='Example terms')
         user = UserFactory.create()
         group.add_member(user.userprofile, GroupMembership.PENDING_TERMS)
-        url = reverse('groups:review_terms', kwargs={'url': group.url}, prefix='/en-US/')
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:review_terms', kwargs={'url': group.url})
 
         membership = GroupMembership.objects.get(group=group, userprofile=user.userprofile)
         eq_(membership.status, GroupMembership.PENDING_TERMS)

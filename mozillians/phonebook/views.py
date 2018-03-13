@@ -12,16 +12,18 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import View
 
-from jose import jws
 from django.utils.translation import ugettext as _
 from haystack.generic_views import SearchView
 from haystack.query import EmptySearchQuerySet
+from josepy.jwk import JWK
+from josepy.jws import JWS
 from mozilla_django_oidc.views import OIDCAuthenticationRequestView, get_next_url
 from mozilla_django_oidc.utils import absolutify, import_from_settings
 from raven.contrib.django.models import client
@@ -663,9 +665,11 @@ class VerifyIdentityCallbackView(View):
         id_token = token_response.get('id_token')
 
         # Verify JWT
-        verified_token = jws.verify(id_token,
-                                    self.OIDC_RP_VERIFICATION_CLIENT_SECRET,
-                                    algorithms=['HS256'])
+        jws = JWS.from_compact(force_bytes(id_token))
+        jwk = JWK.load(smart_bytes(self.OIDC_RP_VERIFICATION_CLIENT_SECRET))
+        verified_token = None
+        if jws.verify(jwk):
+            verified_token = jws.payload
 
         # Create the new Identity Profile.
         if verified_token:

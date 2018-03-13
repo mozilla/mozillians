@@ -12,7 +12,6 @@ from decouple import config, Csv
 from unipath import Path
 from dj_database_url import parse as db_url
 from django_jinja.builtins import DEFAULT_EXTENSIONS
-from django_sha2 import get_password_hashers
 from urlparse import urljoin
 
 PROJECT_MODULE = 'mozillians'
@@ -79,11 +78,11 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
-    'mozillians.common.middleware.LocaleURLMiddleware',
 
     'django.middleware.common.CommonMiddleware',
+    'mozillians.common.middleware.LocaleURLMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -95,8 +94,6 @@ MIDDLEWARE_CLASSES = (
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
-    'mobility.middleware.DetectMobileMiddleware',
-    'mobility.middleware.XMobileMiddleware',
     'csp.middleware.CSPMiddleware',
 
     'mozillians.common.middleware.StrongholdMiddleware',
@@ -105,7 +102,7 @@ MIDDLEWARE_CLASSES = (
     'mozillians.groups.middleware.OldGroupRedirectionMiddleware',
 
     'waffle.middleware.WaffleMiddleware',
-)
+]
 
 #############################
 # Database configuration
@@ -544,22 +541,19 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Auth
-BASE_PASSWORD_HASHERS = (
-    'django_sha2.hashers.BcryptHMACCombinedPasswordVerifier',
-    'django_sha2.hashers.SHA512PasswordHasher',
-    'django_sha2.hashers.SHA256PasswordHasher',
-    'django.contrib.auth.hashers.SHA1PasswordHasher',
-    'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
-)
-
 PWD_ALGORITHM = config('PWD_ALGORITHM', default='bcrypt')
 
 HMAC_KEYS = {
     '2011-01-01': 'cheesecake',
 }
 
-PASSWORD_HASHERS = get_password_hashers(BASE_PASSWORD_HASHERS, HMAC_KEYS)
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+]
 
 MAX_PHOTO_UPLOAD_SIZE = 8 * (1024 ** 2)
 
@@ -641,7 +635,7 @@ REST_FRAMEWORK = {
         'mozillians.api.v2.permissions.MozilliansPermission',
     ),
     'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.DjangoFilterBackend',
+        'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
 }
@@ -664,6 +658,30 @@ if DEV:
         'http://*.mozilla.net',
         'http://*.mozilla.org',
     )
+
+
+LOGGING = {
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        }
+    },
+    'handlers': {
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['django.server'],
+            'level': 'INFO',
+            'propagate': False,
+        }
+    }
+}
 
 if DEBUG:
     for backend in TEMPLATES:

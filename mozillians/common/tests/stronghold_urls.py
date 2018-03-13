@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.http import HttpResponse
 from mozillians.common.decorators import allow_public, allow_unvouched
 
@@ -20,12 +20,12 @@ def public(request):
     return HttpResponse('Hi!')
 
 
-urlpatterns += patterns(
-    '',
+urlpatterns += [
     url(r'^vouched/$', vouched, name='vouched'),
     url(r'^unvouched/$', unvouched, name='unvouched'),
     url(r'^public/$', public, name='public'),
-    url(r'^excepted/$', vouched, name='excepted'))
+    url(r'^excepted/$', vouched, name='excepted')
+]
 
 
 settings.STRONGHOLD_EXCEPTIONS += ['^/en-US/excepted/$']
