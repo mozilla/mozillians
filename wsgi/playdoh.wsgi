@@ -6,6 +6,9 @@ try:
 except ImportError:
     newrelic = False
 
+from raven.contrib.django.raven_compat.middleware.wsgi import Sentry
+
+
 if newrelic:
     newrelic_ini = os.getenv('NEWRELIC_PYTHON_INI_FILE', False)
     if newrelic_ini:
@@ -21,7 +24,7 @@ wsgidir = os.path.dirname(__file__)
 site.addsitedir(os.path.abspath(os.path.join(wsgidir, '../')))
 
 from django.core.wsgi import get_wsgi_application  # noqa
-application = get_wsgi_application()
+application = Sentry(get_wsgi_application())
 
 if newrelic:
     application = newrelic.agent.wsgi_application()(application)
