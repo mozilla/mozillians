@@ -441,7 +441,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'root': {
-        'level': 'WARNING',
+        'level': 'INFO',
         'handlers': ['sentry'],
     },
     'formatters': {
@@ -470,23 +470,23 @@ LOGGING = {
         }
     },
     'loggers': {
-        'django.db.backends': {
-            'level': 'ERROR',
-            'handlers': ['console'],
+        'django.server': {
+            'level': 'INFO',
+            'handlers': ['django.server'],
             'propagate': False,
         },
-        'django.server': {
-            'handlers': ['django.server'],
-            'level': 'INFO',
+        'django.db.backends': {
+            'level': 'WARNING',
+            'handlers': ['console', 'sentry'],
             'propagate': False,
         },
         'sentry.errors': {
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'handlers': ['console'],
             'propagate': False,
         },
         'raven': {
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'handlers': ['console'],
             'propagate': False,
         },
