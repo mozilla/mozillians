@@ -15,10 +15,6 @@ def patch():
     if _has_patched:
         return
 
-    # Import for side-effect: configures logging handlers.
-    # pylint: disable-msg=W0611
-    import log_settings  # noqa
-
     # Monkey-patch Django's csrf_protect decorator to use session-based CSRF
     # tokens:
     if 'session_csrf' in settings.INSTALLED_APPS:
