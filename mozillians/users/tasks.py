@@ -1,3 +1,5 @@
+import json
+import logging
 import os
 from datetime import timedelta
 
@@ -404,9 +406,17 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     results = []
     for data in profile_results:
         # Send data to sentry for debugging purposes
-        sentry_client.captureMessage(
-            'New CIS transaction', data={'level': 'debug', 'payload': data}, stack=True
-        )
+        log_name = 'CIS transaction - {}'.format(data['user_id'])
+        log_data = {
+            'level': logging.DEBUG,
+            'logger': 'mozillians.cis_transaction'
+        }
+        log_extra = {
+            'cis_transaction_data': json.dumps(data)
+        }
+
+        sentry_client.captureMessage(log_name, data=log_data, stack=True, extra=log_extra)
+
         cis_change = ChangeDelegate(publisher, {}, data)
         cis_change.boto_session = session
         result = cis_change.send()
