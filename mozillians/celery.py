@@ -19,7 +19,7 @@ class Celery(BaseCelery):
         from raven.contrib.celery import register_signal, register_logger_signal
         from raven.contrib.django.raven_compat.models import client as raven_client
 
-        register_logger_signal(raven_client)
+        register_logger_signal(raven_client, loglevel='INFO')
         register_signal(raven_client)
 
 
