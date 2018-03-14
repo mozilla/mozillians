@@ -27,7 +27,6 @@ app = Celery('mozillians')
 
 app.add_defaults({
     'worker_hijack_root_logger': False,
-    'worker_redirect_stdouts_level': 'INFO'
 })
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
