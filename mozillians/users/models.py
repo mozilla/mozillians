@@ -541,7 +541,7 @@ class UserProfile(UserProfilePrivacyModel):
                 new_fh.close()
 
             return get_thumbnail(self.photo, geometry, **kwargs)
-        return get_thumbnail(settings.DEFAULT_AVATAR_PATH, geometry, **kwargs)
+        return get_thumbnail(settings.DEFAULT_AVATAR_PATH.format(), geometry, **kwargs)
 
     def get_photo_url(self, geometry='160x160', **kwargs):
         """Return photo url.
