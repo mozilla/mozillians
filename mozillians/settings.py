@@ -212,7 +212,8 @@ def lazy_langs():
             for lang in get_langs() if lang in product_details.languages]
 
 
-LANGUAGES = lazy(lazy_langs, list)()
+# Workaround after performance issue
+LANGUAGES = lazy_langs()
 
 # Not all URLs need locale.
 SUPPORTED_NONLOCALES = [
