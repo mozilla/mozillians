@@ -60,7 +60,7 @@ class UserProfileModelIterable(ModelIterable):
             self._iterator = super(UserProfileModelIterable, self).__iter__()
             while True:
                 obj = self._iterator.next()
-                obj._privacy_level = getattr(self.queryset, '_privacy_level')
+                obj._privacy_level = getattr(self.queryset, '_privacy_level', None)
                 yield obj
         return _generator()
 
