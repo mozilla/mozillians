@@ -32,27 +32,35 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    from mozillians.groups.tasks import invalidate_group_membership, notify_membership_renewal
-    from mozillians.users.tasks import (delete_reported_spam_accounts, periodically_send_cis_data,
-                                        remove_incomplete_accounts)
-    from mozillians.common.tasks import celery_healthcheck
-
-    sender.add_periodic_task(RUN_DAILY, invalidate_group_membership.s(),
-                             name='invalidate-group-membership')
-
-    sender.add_periodic_task(RUN_DAILY, notify_membership_renewal.s(),
-                             name='notify-membership-renewal')
-
-    sender.add_periodic_task(RUN_DAILY, delete_reported_spam_accounts.s(),
-                             name='delete-reported-spam-accounts')
-
-    sender.add_periodic_task(RUN_HOURLY, celery_healthcheck.s(),
-                             name='celery-healthcheck')
-
-    sender.add_periodic_task(RUN_EVERY_SIX_HOURS, periodically_send_cis_data.s(),
-                             name='periodically-send-cis-data')
-
-    sender.add_periodic_task(RUN_HOURLY, remove_incomplete_accounts.s(),
-                             name='remove-incomplete-accounts')
+app.conf.beat_schedule = {
+    'celery-healthcheck': {
+        'task': 'mozillians.common.tasks.celery_healthcheck',
+        'schedule': RUN_HOURLY,
+        'args': ()
+    },
+    'invalidate-group-membership': {
+        'task': 'mozillians.groups.tasks.invalidate_group_membership',
+        'schedule': RUN_DAILY,
+        'args': ()
+    },
+    'notify-membership-renewal': {
+        'task': 'mozillians.groups.tasks.notify_membership_renewal',
+        'schedule': RUN_DAILY,
+        'args': ()
+    },
+    'delete-reported-spam-accounts': {
+        'task': 'mozillians.users.tasks.delete_reported_spam_accounts',
+        'schedule': RUN_DAILY,
+        'args': ()
+    },
+    'periodically-send_cis_data': {
+        'task': 'mozillians.users.tasks.periodically_send_cis_data',
+        'schedule': RUN_EVERY_SIX_HOURS,
+        'args': ()
+    },
+    'remove-incomplete-accounts': {
+        'task': 'mozillians.users.tasks.remove_incomplete_accounts',
+        'schedule': RUN_HOURLY,
+        'args': ()
+    }
+}
