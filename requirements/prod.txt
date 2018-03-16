@@ -278,9 +278,9 @@ whitenoise==3.3.1 \
 django-haystack==2.8.0 \
     --hash=sha256:579cd2080f7ad508e909a46c027078e278aeebd133973c1c4efcf0dc57d85c10 \
     --hash=sha256:5951a2f4059ee6d3f142186ea63cab65b28d7a758c969506a564553e479ceab4
-boto3==1.6.7 \
-    --hash=sha256:15688d60dcc764f6fbd32975696deb48e64dff185db58bba45df02f2230860a8 \
-    --hash=sha256:3a74aa62eb9c0a6e1c9eace4ab93b2c3de43ab9f116dbc2e60a8cee584532584
+boto3==1.6.10 \
+    --hash=sha256:c3899e6101e0bc74102d2b470b00fdf88d900eca61cc82ba2902a295ca1dc053 \
+    --hash=sha256:af15ca6dd4dd3a755e7ff47bed743cd43d0f0a38b3f5981f01b562599aab8c65
 botocore==1.9.10 \
     --hash=sha256:9d3af6f282fe61b2a4a5d5d7d46fa14572d6a8a7617d8fbe77ae1ce0dbef1a7c \
     --hash=sha256:aacbb728198d5482014e5bca93aead8e3cf6db501a3ee70d6576f8839b4a0d32
