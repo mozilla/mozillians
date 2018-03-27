@@ -248,9 +248,9 @@ boto==2.48.0 \
 django_csp==3.4 \
     --hash=sha256:096b634430d8ea81c3d9f216f87be890f3a975c17bb9a4631f6a1619ac09c91e \
     --hash=sha256:04c0ccd4e1339e8f6af48c55c3347dc996fde2d22d79e8bf2f6b7a920412e408
-mozilla-django-oidc==0.5.0 \
-    --hash=sha256:56d72b3a35cbe9b313e4ec19a01943d4ca698562476d3387c3ab30e66d33bcf8 \
-    --hash=sha256:ab6dcccf4841472c1e82244d66503e87ffae0ad7d38d6187fcca54810eceb7a6
+mozilla-django-oidc==0.6.0 \
+    --hash=sha256:0f21353f376cfc6c52f7dfdf4c09eb5b1af4ad34c3748c0710a2cad008befd20 \
+    --hash=sha256:4b432410410c685891bb827b9a392e2bb9d6418dd48d650db68f26a07563dbb0
 olefile==0.45.1 \
     --hash=sha256:2b6575f5290de8ab1086f8c5490591f7e0885af682c7c1793bdaf6e64078d385
 django-cities-light==3.4.0 \
