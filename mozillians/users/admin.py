@@ -1,6 +1,5 @@
 from socket import error as socket_error
 
-from django import forms
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
@@ -10,8 +9,8 @@ from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group, User
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Q
-from django.forms import ValidationError
 from django.http import HttpResponseRedirect
+from django.utils.html import format_html
 
 from dal import autocomplete
 from celery.task import group
@@ -23,6 +22,8 @@ from sorl.thumbnail.admin import AdminImageMixin
 from mozillians.common.mixins import MozilliansAdminExportMixin
 from mozillians.common.templatetags.helpers import get_datetime
 from mozillians.groups.admin import BaseGroupMembershipAutocompleteForm
+from mozillians.users.admin_forms import (AbuseReportAutocompleteForm, AlternateEmailForm,
+                                          UserProfileAdminForm, VouchAutocompleteForm)
 from mozillians.groups.models import GroupMembership, Skill
 from mozillians.users.models import get_languages_for_locale
 from mozillians.users.models import (AbuseReport, ExternalAccount, IdpProfile, Language, PUBLIC,
@@ -440,16 +441,6 @@ class ExternalAccountInline(admin.TabularInline):
         return qs.exclude(type=ExternalAccount.TYPE_EMAIL)
 
 
-class AlternateEmailForm(forms.ModelForm):
-    def save(self, *args, **kwargs):
-        self.instance.type = ExternalAccount.TYPE_EMAIL
-        return super(AlternateEmailForm, self).save(*args, **kwargs)
-
-    class Meta:
-        model = ExternalAccount
-        exclude = ['type']
-
-
 class AlternateEmailInline(admin.TabularInline):
     form = AlternateEmailForm
     model = ExternalAccount
@@ -461,45 +452,6 @@ class AlternateEmailInline(admin.TabularInline):
         """Limit queryset to alternate emails."""
         qs = super(AlternateEmailInline, self).queryset(request)
         return qs.filter(type=ExternalAccount.TYPE_EMAIL)
-
-
-class UserProfileAdminForm(forms.ModelForm):
-    username = forms.CharField()
-    email = forms.CharField()
-    last_login = forms.DateTimeField(required=False)
-    date_joined = forms.DateTimeField(required=False)
-
-    def __init__(self, *args, **kwargs):
-        self.instance = kwargs.get('instance')
-        if self.instance:
-            self.base_fields['username'].initial = self.instance.user.username
-            self.base_fields['email'].initial = self.instance.user.email
-        super(UserProfileAdminForm, self).__init__(*args, **kwargs)
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        if (User.objects.exclude(pk=self.instance.user.pk)
-                .filter(username=username).exists()):
-            raise ValidationError('Username already exists')
-        return username
-
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        if (User.objects.exclude(pk=self.instance.user.pk)
-                .filter(email=email).exists()):
-            raise ValidationError('Email already exists')
-        return email
-
-    def save(self, *args, **kwargs):
-        if self.instance:
-            self.instance.user.username = self.cleaned_data.get('username')
-            self.instance.user.email = self.cleaned_data.get('email')
-            self.instance.user.save()
-        return super(UserProfileAdminForm, self).save(*args, **kwargs)
-
-    class Meta:
-        model = UserProfile
-        fields = '__all__'
 
 
 class UserProfileResource(ModelResource):
@@ -533,7 +485,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
                    MissingCity, 'externalaccount__type']
     save_on_top = True
     list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
-                    'number_of_vouchees', 'date_joined']
+                    'number_of_vouchees', 'date_joined', 'send_profile_to_cis']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
                unsubscribe_from_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
@@ -581,6 +533,39 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
         qs = qs.annotate(vouches_made_count=Count('vouches_made'))
         return qs
 
+    def get_actions(self, request):
+        """Return bulk actions for UserAdmin without bulk delete."""
+        actions = super(UserProfileAdmin, self).get_actions(request)
+        actions.pop('delete_selected', None)
+        return actions
+
+    def get_urls(self):
+        """Return custom and UserProfileAdmin urls."""
+
+        def wrap(view):
+
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+
+        urls = super(UserProfileAdmin, self).get_urls()
+        urls += [
+            url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
+            url(r'check_celery', wrap(self.check_celery), name='users_check_celery'),
+            url(r'^(?P<user_id>\d+)/send_profile_to_cis', wrap(self.process_cis_profile),
+                name='users_send_profile_to_cis')
+        ]
+        return urls
+
+    def send_profile_to_cis(self, obj):
+        return format_html('<a class="button" href="{}">Send to CIS</a>',
+                           reverse('admin:users_send_profile_to_cis', args=[obj.pk]))
+
+    def process_cis_profile(self, request, user_id, *args, **kwargs):
+        messages.success(request, 'Profile with id {0} sent to CIS.'.format(user_id))
+        send_userprofile_to_cis.delay(user_id)
+        return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
+
     def email(self, obj):
         return obj.user.email
     email.admin_order_field = 'user__email'
@@ -613,12 +598,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     def date_joined(self, obj):
         return obj.user.date_joined
 
-    def get_actions(self, request):
-        """Return bulk actions for UserAdmin without bulk delete."""
-        actions = super(UserProfileAdmin, self).get_actions(request)
-        actions.pop('delete_selected', None)
-        return actions
-
     def index_profiles(self, request):
         # Rebuild the search index.
         index_all_profiles.apply_async()
@@ -642,22 +621,6 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
             messages.success(request, 'Celery is OK')
 
         return HttpResponseRedirect(reverse('admin:users_userprofile_changelist'))
-
-    def get_urls(self):
-        """Return custom and UserProfileAdmin urls."""
-
-        def wrap(view):
-
-            def wrapper(*args, **kwargs):
-                return self.admin_site.admin_view(view)(*args, **kwargs)
-            return update_wrapper(wrapper, view)
-
-        urls = super(UserProfileAdmin, self).get_urls()
-        urls += [
-            url(r'index_profiles', wrap(self.index_profiles), name='users_index_profiles'),
-            url(r'check_celery', wrap(self.check_celery), name='users_check_celery')
-        ]
-        return urls
 
 
 admin.site.register(UserProfile, UserProfileAdmin)
@@ -694,17 +657,6 @@ class GroupAdmin(MozilliansAdminExportMixin, GroupAdmin):
 admin.site.register(Group, GroupAdmin)
 
 
-class VouchAutocompleteForm(forms.ModelForm):
-
-    class Meta:
-        model = Vouch
-        fields = '__all__'
-        widgets = {
-            'vouchee': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
-            'voucher': autocomplete.ModelSelect2(url='users:voucher-autocomplete')
-        }
-
-
 class VouchAdmin(admin.ModelAdmin):
     save_on_top = True
     search_fields = ['voucher__user__username', 'voucher__full_name',
@@ -738,17 +690,6 @@ class ExternalAccountAdmin(MozilliansAdminExportMixin, admin.ModelAdmin):
 
 
 admin.site.register(ExternalAccount, ExternalAccountAdmin)
-
-
-class AbuseReportAutocompleteForm(forms.ModelForm):
-
-    class Meta:
-        model = AbuseReport
-        fields = '__all__'
-        widgets = {
-            'profile': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
-            'reporter': autocomplete.ModelSelect2(url='users:vouchee-autocomplete'),
-        }
 
 
 class SkillsFilter(SimpleListFilter):
