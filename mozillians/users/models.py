@@ -788,18 +788,26 @@ class UserProfile(UserProfilePrivacyModel):
 
 class IdpProfile(models.Model):
     """Basic Identity Provider information for Profiles."""
+    PROVIDER_UNKNOWN = 0
     PROVIDER_PASSWORDLESS = 10
     PROVIDER_GOOGLE = 20
     PROVIDER_GITHUB = 30
+    PROVIDER_FIREFOX_ACCOUNTS = 31
     PROVIDER_LDAP = 40
 
     PROVIDER_TYPES = (
-        (PROVIDER_GITHUB, 'Github Provider',),
-        (PROVIDER_LDAP, 'LDAP Provider',),
+        (PROVIDER_UNKNOWN, 'Unknown Provider',),
         (PROVIDER_PASSWORDLESS, 'Passwordless Provider',),
         (PROVIDER_GOOGLE, 'Google Provider',),
+        (PROVIDER_GITHUB, 'Github Provider',),
+        (PROVIDER_FIREFOX_ACCOUNTS, 'Firefox Accounts Provider',),
+        (PROVIDER_LDAP, 'LDAP Provider',),
 
     )
+    # MFA_ACCOUNTS
+    MFA_ACCOUNTS = [PROVIDER_LDAP,
+                    PROVIDER_FIREFOX_ACCOUNTS,
+                    PROVIDER_GITHUB]
     profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
     type = models.IntegerField(choices=PROVIDER_TYPES,
                                default=None,
@@ -819,6 +827,9 @@ class IdpProfile(models.Model):
         if 'ad|' in self.auth0_user_id:
             return self.PROVIDER_LDAP
 
+        if 'oauth2|firefoxaccounts' in self.auth0_user_id:
+            return self.PROVIDER_FIREFOX_ACCOUNTS
+
         if 'github|' in self.auth0_user_id:
             return self.PROVIDER_GITHUB
 
@@ -828,12 +839,12 @@ class IdpProfile(models.Model):
         if 'email|' in self.auth0_user_id:
             return self.PROVIDER_PASSWORDLESS
 
-        return None
+        return self.PROVIDER_UNKNOWN
 
     def is_mfa(self):
         """Helper method to check if IdpProfile is MFA-ed"""
 
-        return self.type in [self.PROVIDER_GITHUB, self.PROVIDER_LDAP]
+        return self.type in self.MFA_ACCOUNTS
 
     def save(self, *args, **kwargs):
         """Custom save method.
