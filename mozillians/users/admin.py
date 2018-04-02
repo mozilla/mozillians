@@ -458,12 +458,12 @@ class UserProfileResource(ModelResource):
     """django-import-export UserProfile Resource."""
     username = Field(attribute='user__username')
     email = Field(attribute='user__email')
-    country_name = Field(attribute='geo_country__name')
-    country_code = Field(attribute='geo_country__code')
-    region_name = Field(attribute='geo_region__name')
-    region_code = Field(attribute='geo_region__code')
-    city_name = Field(attribute='geo_city__name')
-    city_code = Field(attribute='geo_city__code')
+    country_name = Field(attribute='country__name')
+    country_code = Field(attribute='country__code')
+    region_name = Field(attribute='region__name')
+    region_code = Field(attribute='region__code')
+    city_name = Field(attribute='city__name')
+    city_code = Field(attribute='city__code')
 
     class Meta:
         model = UserProfile
@@ -474,7 +474,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline,
                AlternateEmailInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
-                     'geo_country__name', 'geo_region__name', 'geo_city__name']
+                     'country__name', 'region__name', 'city__name']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
@@ -484,7 +484,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
                    NDAMemberFilter, BasketTokenFilter, MissingCountry, MissingRegion,
                    MissingCity, 'externalaccount__type']
     save_on_top = True
-    list_display = ['full_name', 'email', 'username', 'geo_country', 'is_vouched', 'can_vouch',
+    list_display = ['full_name', 'email', 'username', 'country', 'is_vouched', 'can_vouch',
                     'number_of_vouchees', 'date_joined', 'send_profile_to_cis']
     list_display_links = ['full_name', 'email', 'username']
     actions = [subscribe_to_basket_action(settings.BASKET_VOUCHED_NEWSLETTER),
@@ -507,13 +507,12 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
             'fields': ('date_vouched', 'is_vouched', 'can_vouch')
         }),
         ('Location', {
-            'fields': ('geo_country', 'geo_region', 'geo_city',
-                       'lng', 'lat', 'timezone')
+            'fields': ('country', 'region', 'city', 'lng', 'lat', 'timezone')
         }),
         ('Privacy Settings', {
             'fields': ('privacy_photo', 'privacy_full_name', 'privacy_full_name_local',
                        'privacy_ircname', 'privacy_email', 'privacy_bio',
-                       'privacy_geo_city', 'privacy_geo_region', 'privacy_geo_country',
+                       'privacy_city', 'privacy_region', 'privacy_country',
                        'privacy_groups', 'privacy_skills', 'privacy_languages',
                        'privacy_date_mozillian', 'privacy_timezone',
                        'privacy_tshirt', 'privacy_title'),
