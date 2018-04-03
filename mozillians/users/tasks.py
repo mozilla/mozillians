@@ -430,5 +430,6 @@ def periodically_send_cis_data():
 
     from mozillians.users.models import UserProfile
 
-    for profile in UserProfile.objects.all():
-        send_userprofile_to_cis.delay(profile.pk)
+    users = UserProfile.objects.all().values_list('id')
+    # Send in parallel the profiles in batches of 100 profiles
+    send_userprofile_to_cis.chunks(iter(users), 100).apply_async(queue='cis')
