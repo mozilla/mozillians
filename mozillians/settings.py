@@ -11,6 +11,7 @@ from decouple import config, Csv
 from unipath import Path
 from dj_database_url import parse as db_url
 from django_jinja.builtins import DEFAULT_EXTENSIONS
+from kombu import Exchange, Queue
 from urlparse import urljoin
 
 PROJECT_MODULE = 'mozillians'
@@ -311,6 +312,11 @@ CELERY_ACCEPT_CONTENT = ['pickle', 'json']
 CELERY_TASK_SERIALIZER = config('CELERY_TASK_SERIALIZER', default='pickle')
 CELERY_TASK_RESULT_EXPIRES = config('CELERY_TASK_RESULT_EXPIRES', default=3600, cast=int)
 CELERY_SEND_TASK_ERROR_EMAILS = config('CELERY_SEND_TASK_ERROR_EMAILS', default=True, cast=bool)
+CELERY_DEFAULT_QUEUE = 'celery'
+CELERY_QUEUES = (
+    Queue('celery', Exchange('default'), routing_key='default'),
+    Queue('cis', Exchange('cis'), routing_key='cis'),
+)
 
 MESSAGE_STORAGE = config('MESSAGE_STORAGE',
                          default='django.contrib.messages.storage.session.SessionStorage')
