@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _lazy
 
 from autoslug.fields import AutoSlugField
 
+from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.common.urlresolvers import reverse
 from mozillians.common.utils import absolutify
 from mozillians.groups.managers import GroupBaseManager, GroupManager, GroupQuerySet
@@ -303,7 +304,7 @@ class Group(GroupBase):
             group.aliases.update(alias=self)
             group.delete()
 
-    def add_member(self, userprofile, status=GroupMembership.MEMBER):
+    def add_member(self, userprofile, status=GroupMembership.MEMBER, inviter=None):
         """
         Add a user to this group. Optionally specify status other than member.
 
@@ -345,11 +346,19 @@ class Group(GroupBase):
                 membership.save()
                 if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
                     email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-                # Since there is no demotion, we can check if the new status is MEMBER and
-                # subscribe the user to the NDA newsletter if the group is NDA
-                if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
-                    subscribe_user_to_basket.delay(userprofile.id,
-                                                   [settings.BASKET_NDA_NEWSLETTER])
+                if status == GroupMembership.MEMBER:
+                    # Set the invite to the last person who renewed the membership
+                    invite = get_object_or_none(Invite,
+                                                group=membership.group,
+                                                redeemer=userprofile)
+                    if inviter and invite:
+                        invite.inviter = inviter
+                        invite.save()
+                    # Since there is no demotion, we can check if the new status is MEMBER and
+                    # subscribe the user to the NDA newsletter if the group is NDA
+                    if self.name == settings.NDA_GROUP:
+                        subscribe_user_to_basket.delay(userprofile.id,
+                                                       [settings.BASKET_NDA_NEWSLETTER])
 
     def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.

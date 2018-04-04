@@ -6,7 +6,7 @@ from nose.tools import eq_, ok_
 
 from mozillians.common.templatetags.helpers import urlparams
 from mozillians.common.tests import TestCase, requires_login, requires_vouch
-from mozillians.groups.models import Group, GroupMembership
+from mozillians.groups.models import Group, GroupMembership, Invite
 from mozillians.groups.tests import GroupFactory, GroupAliasFactory, SkillFactory
 from mozillians.users.tests import UserFactory
 
@@ -432,6 +432,43 @@ class ShowTests(TestCase):
         eq_(membership_filter_form.cleaned_data['filtr'], 'pending_members')
         # Now a member
         ok_(self.group.has_member(self.user_2.userprofile))
+        eq_(Invite.objects.all().count(), 0)
+
+    def test_confirm_user_update_invite(self):
+        """POST to confirm user view changes member from pending to member"""
+        # Make user 1 the group curator so they can remove users
+        old_inviter = UserFactory.create()
+        invite = Invite.objects.create(inviter=old_inviter.userprofile,
+                                       redeemer=self.user_2.userprofile,
+                                       group=self.group)
+        self.group.curators.add(self.user_1.userprofile)
+        self.group.accepting_new_members = 'by_request'
+        self.group.save()
+
+        with override_script_prefix('/en-US/'):
+            group_url = reverse('groups:show_group', args=[self.group.url])
+        next_url = "%s?filtr=pending_members" % group_url
+
+        # Make user 2 pending
+        GroupMembership.objects.filter(userprofile=self.user_2.userprofile,
+                                       group=self.group).update(status=GroupMembership.PENDING)
+        ok_(self.group.has_pending_member(self.user_2.userprofile))
+
+        # We must request the full path, with language, or the
+        # LanguageMiddleware will convert the request to GET.
+        with override_script_prefix('/en-US/'):
+            url = reverse('groups:confirm_member',
+                          kwargs=dict(url=self.group.url, user_pk=self.user_2.userprofile.pk))
+        with self.login(self.user_1) as client:
+            response = client.post(url, data={'next_url': next_url}, follow=True)
+        self.assertTemplateNotUsed(response, 'groups/confirm_remove_member.html')
+        # make sure filter pending_members is active
+        membership_filter_form = response.context['membership_filter_form']
+        eq_(membership_filter_form.cleaned_data['filtr'], 'pending_members')
+        # Now a member
+        ok_(self.group.has_member(self.user_2.userprofile))
+        updated_invite = Invite.objects.get(id=invite.pk)
+        eq_(updated_invite.inviter, self.user_1.userprofile)
 
     def test_filter_members_only(self):
         """Filter `m` will filter out members that are only pending"""
