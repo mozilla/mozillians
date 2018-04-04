@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import math
 import re
 
 from django.db import transaction
@@ -17,22 +18,15 @@ from mozillians.users.tasks import send_userprofile_to_cis
 # Passwordless > Google > Github > LDAP
 # There is no way to downgrade
 ALLOWED_IDP_FLOWS = {
-    IdpProfile.PROVIDER_PASSWORDLESS: [
+    IdpProfile.PROVIDER_PASSWORDLESS: IdpProfile.MFA_ACCOUNTS + [
         IdpProfile.PROVIDER_PASSWORDLESS,
         IdpProfile.PROVIDER_GOOGLE,
-        IdpProfile.PROVIDER_GITHUB,
-        IdpProfile.PROVIDER_LDAP
     ],
-    IdpProfile.PROVIDER_GOOGLE: [
+    IdpProfile.PROVIDER_GOOGLE: IdpProfile.MFA_ACCOUNTS + [
         IdpProfile.PROVIDER_PASSWORDLESS,
         IdpProfile.PROVIDER_GOOGLE,
-        IdpProfile.PROVIDER_GITHUB,
-        IdpProfile.PROVIDER_LDAP
     ],
-    IdpProfile.PROVIDER_GITHUB: [
-        IdpProfile.PROVIDER_GITHUB,
-        IdpProfile.PROVIDER_LDAP,
-    ],
+    IdpProfile.PROVIDER_GITHUB: IdpProfile.MFA_ACCOUNTS,
     IdpProfile.PROVIDER_LDAP: [
         IdpProfile.PROVIDER_LDAP
     ]
@@ -117,7 +111,9 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             auth0_user_id=auth0_user_id)
 
         # Do not allow downgrades.
-        if current_idp and obj.type < current_idp.type:
+        # Round the current type to the floor. This way 30 and 39 will have always the same
+        # priority.
+        if current_idp and obj.type < int(math.floor(current_idp.type / 10) * 10):
             msg = u'Please use one of the following authentication methods: {}'
             # convert the tuple to a dict to easily get the values
             provider_types = dict(IdpProfile.PROVIDER_TYPES)
