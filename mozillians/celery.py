@@ -27,6 +27,9 @@ app = Celery('mozillians')
 
 app.add_defaults({
     'worker_hijack_root_logger': False,
+    'task_routes': {
+        'mozillians.users.tasks.send_userprofile_to_cis': {'queue': 'cis'},
+    }
 })
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
