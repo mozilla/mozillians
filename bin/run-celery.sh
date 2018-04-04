@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Run default celery worker
-celery -A mozillians worker -Q celery -l INFO -n default@%h &
+conc=$(($(nproc) / 2))
+celery -A mozillians worker -Q celery -l INFO -n default@%h -c $conc &
 status=$?
 
 if [ $status -ne 0 ]; then
@@ -10,7 +11,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Run cis celery worker
-celery -A mozillians worker -Q cis -l INFO -n cis@%h &
+celery -A mozillians worker -Q cis -l INFO -n cis@%h -c $conc &
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start cis worker: $status"
