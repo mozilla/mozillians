@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.test import TestCase as BaseTestCase
 from django.test.client import Client
-from django.test.utils import override_settings
+from django.test.utils import modify_settings, override_settings
 
 from mock import patch
 from nose.tools import make_decorator, ok_
@@ -27,6 +27,7 @@ ES_INDEXES = {
 
 @override_settings(AUTHENTICATION_BACKENDS=AUTHENTICATION_BACKENDS,
                    PASSWORD_HASHERS=PASSWORD_HASHERS)
+@modify_settings(MIDDLEWARE={'remove': 'mozilla_django_oidc.middleware.RefreshIDToken'})
 class TestCase(BaseTestCase):
 
     @contextmanager
