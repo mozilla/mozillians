@@ -15,7 +15,7 @@ from mozillians.users.tasks import send_userprofile_to_cis
 
 
 # Only allow the following login flows
-# Passwordless > Google > Github > LDAP
+# Passwordless > Google > Github, FxA > LDAP
 # There is no way to downgrade
 ALLOWED_IDP_FLOWS = {
     IdpProfile.PROVIDER_PASSWORDLESS: IdpProfile.MFA_ACCOUNTS + [
@@ -27,6 +27,7 @@ ALLOWED_IDP_FLOWS = {
         IdpProfile.PROVIDER_GOOGLE,
     ],
     IdpProfile.PROVIDER_GITHUB: IdpProfile.MFA_ACCOUNTS,
+    IdpProfile.PROVIDER_FIREFOX_ACCOUNTS: IdpProfile.MFA_ACCOUNTS,
     IdpProfile.PROVIDER_LDAP: [
         IdpProfile.PROVIDER_LDAP
     ]
