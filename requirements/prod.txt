@@ -533,9 +533,9 @@ future==0.16.0 \
 funcsigs==1.0.2 \
     --hash=sha256:330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca \
     --hash=sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50
-pbr==3.1.1 \
-    --hash=sha256:60c25b7dfd054ef9bb0ae327af949dd4676aa09ac3a9471cdc871d8a9213f9ac \
-    --hash=sha256:05f61c71aaefc02d8e37c0a3eeb9815ff526ea28b3b76324769e6158d7f95be1
+pbr==4.0.1 \
+    --hash=sha256:de75cf1d510542c746beeff66b52241eb12c8f95f2ef846ee50ed5d72392caa4 \
+    --hash=sha256:56b7a8ba7d64bf6135a9dfefb85a80d95924b3fde5ed6343a1a1d464a040dae3
 django-ipware==2.0.1 \
     --hash=sha256:3fba8821298c8533ce5609debf31dc8a22f228c50e100f42d97637a9f9357d43
 win_inet_pton==1.0.1 \
