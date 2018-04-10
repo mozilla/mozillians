@@ -318,7 +318,7 @@ def confirm_member(request, url, user_pk):
             status = GroupMembership.MEMBER
             if group.terms:
                 status = GroupMembership.PENDING_TERMS
-            group.add_member(profile, status=status)
+            group.add_member(profile, status=status, inviter=request.user.userprofile)
             if membership.needs_renewal:
                 messages.info(request, _('The membership of the user has been renewed.'))
             else:
