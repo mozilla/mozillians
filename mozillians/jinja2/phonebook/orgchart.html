@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+  {{ _('Orgchart') }}
+{% endblock %}
+
+{% block content %}
+  <div id="chart-container" data-orgchart_type="{{ orgchart_type }}"></div>
+{% endblock %}
+
+{% block page_js %}
+  {% compress js %}
+    <script src="{{ static('mozillians/js/orgchart.js') }}"></script>
+  {% endcompress %}
+
+{% endblock %}
