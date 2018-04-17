@@ -346,18 +346,19 @@ class Group(GroupBase):
                 membership.save()
                 if membership.status in [GroupMembership.PENDING, GroupMembership.MEMBER]:
                     email_membership_change.delay(self.pk, userprofile.user.pk, old_status, status)
-                # Set the invite to the last person who renewed the membership
-                invite = get_object_or_none(Invite,
-                                            group=membership.group,
-                                            redeemer=userprofile)
-                if inviter and invite:
-                    invite.inviter = inviter
-                    invite.save()
+
                 # Since there is no demotion, we can check if the new status is MEMBER and
                 # subscribe the user to the NDA newsletter if the group is NDA
                 if self.name == settings.NDA_GROUP and status == GroupMembership.MEMBER:
                     subscribe_user_to_basket.delay(userprofile.id,
                                                    [settings.BASKET_NDA_NEWSLETTER])
+
+        if inviter:
+            # Set the invite to the last person who renewed the membership
+            invite = get_object_or_none(Invite, group=membership.group, redeemer=userprofile)
+            if invite:
+                invite.inviter = inviter
+                invite.save()
 
     def remove_member(self, userprofile, status=None, send_email=False):
         """Change membership status for a group.
