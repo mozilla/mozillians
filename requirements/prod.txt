@@ -530,8 +530,8 @@ funcsigs==1.0.2 \
 pbr==4.0.2 \
     --hash=sha256:4e8a0ed6a8705a26768f4c3da26026013b157821fe5f95881599556ea9d91c19 \
     --hash=sha256:dae4aaa78eafcad10ce2581fc34d694faa616727837fd8e55c1a00951ad6744f
-django-ipware==2.0.2 \
-    --hash=sha256:abf2bfbf0ec6c04679372a55c25889c9b08f55ec404bca3dfc08f3cf6c832a11
+django-ipware==2.1.0 \
+    --hash=sha256:a7c7a8fd019dbdc9c357e6e582f65034e897572fc79a7e467674efa8aef9d00b
 win_inet_pton==1.0.1 \
     --hash=sha256:a45bc3073469afb5afd0e395aaabd836040a20ba1f2a6dd1196fa2b210ba386e
 singledispatch==3.4.0.3 \
