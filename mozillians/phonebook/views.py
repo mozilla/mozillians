@@ -522,10 +522,6 @@ class PhonebookSearchView(SearchView):
     form_class = forms.PhonebookSearchForm
     template_name = 'phonebook/search.html'
 
-    def get_queryset(self):
-        sqs = super(PhonebookSearchView, self).get_queryset()
-        return sqs
-
     def form_invalid(self, form):
         context = self.get_context_data(**{
             self.form_name: form,
