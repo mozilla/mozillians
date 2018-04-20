@@ -940,6 +940,7 @@ class ExternalAccount(models.Model):
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
     TYPE_TELEGRAM = 'TELEGRAM'
+    TYPE_MASTODON = 'MASTODON'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -1001,6 +1002,9 @@ class ExternalAccount(models.Model):
         TYPE_JABBER: {'name': 'XMPP/Jabber',
                       'url': '',
                       'validator': validate_email},
+        TYPE_MASTODON: {'name': 'Mastodon',
+                        'url': '',
+                        'validator': validate_email},
         TYPE_DISCOURSE: {'name': 'Mozilla Discourse',
                          'url': 'https://discourse.mozilla.org/users/{identifier}',
                          'validator': validate_username_not_url},
