@@ -28,7 +28,8 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership, Invite
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
-                                             validate_phone_number, validate_linkedin)
+                                             validate_phone_number, validate_linkedin,
+                                             validate_discord)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVACY_CHOICES_WITH_PRIVATE,
@@ -941,6 +942,7 @@ class ExternalAccount(models.Model):
     TYPE_TRANSIFEX = 'TRANSIFEX'
     TYPE_TELEGRAM = 'TELEGRAM'
     TYPE_MASTODON = 'MASTODON'
+    TYPE_DISCORD = 'DISCORD'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -1026,6 +1028,9 @@ class ExternalAccount(models.Model):
         TYPE_TELEGRAM: {'name': 'Telegram',
                         'url': 'https://telegram.me/{identifier}',
                         'validator': validate_username_not_url},
+        TYPE_DISCORD: {'name': 'Discord',
+                       'url': '',
+                       'validator': validate_discord},
     }
 
     user = models.ForeignKey(UserProfile)
