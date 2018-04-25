@@ -455,9 +455,9 @@ aws-xray-sdk==1.0 \
 backports.weakref==1.0.post1 \
     --hash=sha256:81bc9b51c0abc58edc76aefbbc68c62a787918ffe943a37947e162c3f8e19e82 \
     --hash=sha256:bc4170a29915f8b22c9e7c4939701859650f2eb84184aee80da329ac0b9825c2
-docker-pycreds==0.2.2 \
-    --hash=sha256:c7ab85de2894baff6ee8f15160cbbfa2fd3a04e56f0372c5793d24060687b299 \
-    --hash=sha256:408ae6ec2b97345e02cbb3a05e0055443a27969e5b61d6773c733b534a40845b
+docker-pycreds==0.2.3 \
+    --hash=sha256:764a7ea2f6484bc5de5bf0c060f08b41a1118cf1acb987626b3ff45f3cc40dac \
+    --hash=sha256:e3732a03610a00461a716997670c7010bf1c214a3edc440f7d6a2a3a830ecd9d
 websocket-client==0.47.0 \
     --hash=sha256:188b68b14fdb2d8eb1a111f21b9ffd2dbf1dbc4e4c1d28cf2c37cdbf1dd1cae6 \
     --hash=sha256:a453dc4dfa6e0db3d8fd7738a308a88effe6240c59f3226eb93e8f020c216149
