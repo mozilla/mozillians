@@ -26,8 +26,10 @@
 
   {% if result.model_name == 'userprofile' %}
     {% set profile=result.object %}
-  {% else %}
+  {% elif result.model_name == 'group' %}
     {% set group=result.object %}
+  {% elif result.model_name == 'idpprofile' %}
+    {% set profile=result.object.profile %}
   {% endif %}
   {% set privacy_level=get_privacy_level(request) %}
 
