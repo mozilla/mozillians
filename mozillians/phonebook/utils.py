@@ -9,7 +9,6 @@ from anytree.exporter import DictExporter
 from django.conf import settings
 
 from mozillians.phonebook.models import Invite
-from mozillians.users.tests import MockOrgChart
 
 
 def redeem_invite(redeemer, code):
@@ -36,6 +35,8 @@ def create_orgchart():
     s3 = boto3.resource('s3')
 
     if waffle.switch_is_active('use_mock_hr'):
+        # Do not import mock data in prod
+        from mozillians.users.tests import MockOrgChart
         orgchart_json = MockOrgChart.generate_json()
     else:
         orgchart_object = s3.Object(settings.ORGCHART_BUCKET, settings.ORGCHART_KEY).get()
