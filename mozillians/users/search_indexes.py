@@ -72,4 +72,12 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
 
     def index_queryset(self, using=None):
         """Exclude incomplete profiles from indexing."""
-        return self.get_model().objects.all().distinct()
+        all_idps = IdpProfile.objects.all()
+        idps_ids = []
+        unique_emails = set()
+
+        for idp in all_idps:
+            if idp.email not in unique_emails:
+                idps_ids.append(idp.id)
+                unique_emails.add(idp.email)
+        return self.get_model().objects.filter(id__in=idps_ids)
