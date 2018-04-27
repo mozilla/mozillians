@@ -40,6 +40,12 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return UserProfile
 
+    def prepare_email(self, obj):
+        # Do not index the email if it's already in the IdpProfiles
+        if not obj.idp_profiles.exists():
+            return obj.email
+        return ''
+
     def prepare_skills(self, obj):
         return [skill.name for skill in obj.skills.all()]
 
@@ -71,7 +77,7 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
         return obj.email if obj.email != obj.profile.email else ''
 
     def index_queryset(self, using=None):
-        """Exclude incomplete profiles from indexing."""
+        """Only index unique emails."""
         all_idps = IdpProfile.objects.all()
         idps_ids = []
         unique_emails = set()
