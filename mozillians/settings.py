@@ -8,9 +8,9 @@ import sys
 from django.utils.functional import lazy
 
 from decouple import config, Csv
-from unipath import Path
 from dj_database_url import parse as db_url
 from django_jinja.builtins import DEFAULT_EXTENSIONS
+from unipath import Path
 from urlparse import urljoin
 
 PROJECT_MODULE = 'mozillians'
@@ -439,63 +439,16 @@ ES_REINDEX_TIMEOUT = config('ES_REINDEX_TIMEOUT', default=1800, cast=int)
 AXES_BEHIND_REVERSE_PROXY = config('AXES_BEHIND_REVERSE_PROXY', default=True, cast=bool)
 AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=10, cast=int)
 
+# Orgchart s3
+ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
+ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
+ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
+
 # Setup logging and sentry
 RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'root': {
-        'level': 'INFO',
-        'handlers': ['sentry'],
-    },
-    'formatters': {
-        'django.server': {
-            '()': 'django.utils.log.ServerFormatter',
-            'format': '[%(server_time)s] %(message)s',
-        },
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        },
-    },
-    'handlers': {
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
-        'django.server': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'django.server',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'django.server': {
-            'level': 'INFO',
-            'handlers': ['django.server'],
-            'propagate': False,
-        },
-        'django.db.backends': {
-            'level': 'WARNING',
-            'handlers': ['console', 'sentry'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'raven': {
-            'level': 'WARNING',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-    }
-}
+
+# Enable silk for local development - default False
+ENABLE_DJANGO_SILK = config('ENABLE_DJANGO_SILK', default=False, cast=bool)
 
 #######################
 # Project Configuration
@@ -661,16 +614,16 @@ CSP_CHILD_SRC = (
 
 STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
                          '^/csp/',
-                         '^/admin/',
-                         '^/api/',
-                         '^/oidc/authenticate/',
-                         '^/oidc/callback/',
+                         r'^/admin/',
+                         r'^/api/',
+                         r'^/oidc/authenticate/',
+                         r'^/oidc/callback/',
                          # Allow autocomplete urls for profile registration
-                         '^/[\w-]+/skills-autocomplete/',
-                         '^/[\w-]+/country-autocomplete/',
-                         '^/[\w-]+/city-autocomplete/',
-                         '^/[\w-]+/region-autocomplete/',
-                         '^/[\w-]+/timezone-autocomplete/']
+                         r'^/[\w-]+/skills-autocomplete/',
+                         r'^/[\w-]+/country-autocomplete/',
+                         r'^/[\w-]+/city-autocomplete/',
+                         r'^/[\w-]+/region-autocomplete/',
+                         r'^/[\w-]+/timezone-autocomplete/']
 
 REST_FRAMEWORK = {
     'URL_FIELD_NAME': '_url',
@@ -683,6 +636,63 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ),
+}
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'INFO',
+        'handlers': ['sentry'],
+    },
+    'formatters': {
+        'django.server': {
+            '()': 'django.utils.log.ServerFormatter',
+            'format': '[%(server_time)s] %(message)s',
+        },
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'handlers': {
+        'sentry': {
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+        },
+        'django.server': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'django.server',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django.server': {
+            'level': 'INFO',
+            'handlers': ['django.server'],
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'level': 'WARNING',
+            'handlers': ['console', 'sentry'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'raven': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    }
 }
 
 if DEV:
@@ -704,11 +714,11 @@ if DEV:
         'http://*.mozilla.org',
     )
 
+    if ENABLE_DJANGO_SILK:
+        INSTALLED_APPS += ('silk',)
+        MIDDLEWARE.insert(0, 'silk.middleware.SilkyMiddleware')
+        SILKY_PYTHON_PROFILER = True
 
-# Orgchart s3
-ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
-ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
-ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
 
 if DEBUG:
     for backend in TEMPLATES:
