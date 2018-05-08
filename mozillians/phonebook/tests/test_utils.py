@@ -19,7 +19,7 @@ class UtilsTests(TestCase):
             profile=user.userprofile,
             auth0_user_id='email|',
             email=user.email,
-            primary=False,
+            primary=True,
             primary_contact_identity=True
         )
 

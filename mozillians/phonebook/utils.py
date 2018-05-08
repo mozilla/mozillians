@@ -95,7 +95,7 @@ def create_orgchart():
 
 def get_profile_link_by_email(email):
     try:
-        idp_profile = IdpProfile.objects.get(email=email)
+        idp_profile = IdpProfile.objects.get(email=email, primary=True)
     except (IdpProfile.DoesNotExist, IdpProfile.MultipleObjectsReturned):
         return "#"
     else:
