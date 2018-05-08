@@ -9,6 +9,7 @@ from anytree.exporter import DictExporter
 from django.conf import settings
 
 from mozillians.phonebook.models import Invite
+from mozillians.users.models import IdpProfile
 
 
 def redeem_invite(redeemer, code):
@@ -71,8 +72,9 @@ def create_orgchart():
         last_name = entry['Preferred_Name_-_Last_Name'].encode('utf8')
         name = '{} {}'.format(first_name, last_name)
         title = entry['businessTitle'].encode('utf8')
+        href = get_profile_link_by_email(entry['PrimaryWorkEmail']).encode('utf8')
 
-        nodes[entry['EmployeeID']] = Node(name=name, title=title)
+        nodes[entry['EmployeeID']] = Node(name=name, title=title, href=href)
 
     # Create graph
     for key in graph:
@@ -89,3 +91,12 @@ def create_orgchart():
 
     exporter = DictExporter()
     return exporter.export(nodes['root'])
+
+
+def get_profile_link_by_email(email):
+    try:
+        idp_profile = IdpProfile.objects.get(email=email, primary=True)
+    except (IdpProfile.DoesNotExist, IdpProfile.MultipleObjectsReturned):
+        return "#"
+    else:
+        return idp_profile.profile.get_absolute_url()
