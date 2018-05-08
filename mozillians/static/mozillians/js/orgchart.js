@@ -6,16 +6,35 @@ $(document).ready(function() {
 
     traverse(data);
 
-    function render(parent, node) {
+
+    function render(parent, node, count) {
       var child = document.createElement("li");
+      var label = document.createElement("label");
       var link = document.createElement("a");
+      var div = document.createElement("div");
       var name = document.createTextNode(node.name);
+
+      link.setAttribute("href", node.href);
+
+
+
+      div.classList.add("toggle");
+      if (!node.children) {
+        child.classList.add("leaf");
+      } else {
+        var input = document.createElement("input");
+        input.setAttribute("id", count);
+        input.type = "checkbox";
+        parent.appendChild(input);
+        label.setAttribute("for", count);
+      }
+
       link.appendChild(name);
-      child.appendChild(link);
+      label.appendChild(link);
+      div.appendChild(label);
+      child.appendChild(div);
       parent.appendChild(child);
-      link.setAttribute("data-toggle", "collapse");
-      link.setAttribute("data-parent", "#" + parent.id);
-      return child;
+      return div;
     };
 
     function traverse(root) {
@@ -31,26 +50,19 @@ $(document).ready(function() {
       while (queue.length > 0) {
         var curr = queue.shift();
         parent = document.createElement("ul");
-        parent.setAttribute("id", count);
-        parent.setAttribute("data-level", curr.level);
-        parent.classList.add((parent.id === "1") ? "no.collapse" : "collapse");
-        curr.dom_element.appendChild(parent);
 
-        // Fix parent href to point to children
-        curr.dom_element.querySelectorAll("a").forEach(function(elem) {
-          elem.setAttribute("href", "#" + count);
-        });
-        count++;
 
         if (curr.children === undefined) {
           continue;
         }
 
+        curr.dom_element.appendChild(parent);
         curr.children.forEach(function(elem) {
           if (!elem.visited) {
             // Render child node
-            child = render(parent, elem);
+            child = render(parent, elem, count);
 
+            count++;
             // Mark child node as visited
             elem.visited = true;
             elem.dom_element = child;
