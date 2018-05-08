@@ -283,14 +283,16 @@ def check_spam_account(instance_id, **kwargs):
 def delete_reported_spam_accounts():
     """Task to automatically delete spam accounts"""
 
-    from mozillians.users.models import AbuseReport
+    from mozillians.users.models import AbuseReport, UserProfile
 
     # Manual reports deletion heuristic:
-    # Delete all unvouched profiles reported as spam by a user
-    reports = AbuseReport.objects.filter(profile__is_vouched=False,
-                                         reporter__isnull=False)
+    # Delete all unvouched profiles reported both by akismet and mozillians
+    reports = AbuseReport.objects.filter(profile__is_vouched=False)
     for report in reports:
-        report.profile.delete()
+        try:
+            report.profile.delete()
+        except UserProfile.DoesNotExist:
+            continue
     reports.delete()
 
 

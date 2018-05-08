@@ -10,7 +10,6 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase
-from mozillians.groups.models import Skill
 from mozillians.users.models import AbuseReport
 from mozillians.users.tasks import (delete_reported_spam_accounts,
                                     lookup_user_task, remove_incomplete_accounts,
@@ -314,26 +313,20 @@ class SpamTasksTests(TestCase):
     def test_automated_spam_reports_delete(self):
         spam_user = UserFactory.create(vouched=False).userprofile
         AbuseReport.objects.create(
-            profile=spam_user,
-            is_akismet=True,
+            profile=spam_user
         )
 
-        ok_(not spam_user.skills.all().exists())
         eq_(AbuseReport.objects.all().count(), 1)
         delete_reported_spam_accounts()
-        eq_(AbuseReport.objects.all().count(), 1)
-        eq_(User.objects.filter(email=spam_user.email).count(), 1)
+        eq_(AbuseReport.objects.all().count(), 0)
+        eq_(User.objects.filter(email=spam_user.email).count(), 0)
 
     def test_automated_spam_reports_skip(self):
-        spam_user = UserFactory.create(vouched=False).userprofile
+        spam_user = UserFactory.create(vouched=True).userprofile
         AbuseReport.objects.create(
-            profile=spam_user,
-            is_akismet=True,
+            profile=spam_user
         )
-        skill = Skill.objects.create(name='foobar')
-        spam_user.skills.add(skill)
 
-        ok_(spam_user.skills.all().exists())
         eq_(AbuseReport.objects.all().count(), 1)
         delete_reported_spam_accounts()
         eq_(AbuseReport.objects.all().count(), 1)
