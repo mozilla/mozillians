@@ -279,9 +279,15 @@ def edit_profile(request):
 
             # Spawn task to check for spam
             if not profile.can_vouch:
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    user_ip = x_forwarded_for.split(',')[0]
+                else:
+                    user_ip = request.META.get('REMOTE_ADDR')
+
                 params = {
                     'instance_id': profile.id,
-                    'user_ip': request.META.get('REMOTE_ADDR'),
+                    'user_ip': user_ip,
                     'user_agent': request.META.get('HTTP_USER_AGENT'),
                     'referrer': request.META.get('HTTP_REFERER'),
                     'comment_author': profile.full_name,
