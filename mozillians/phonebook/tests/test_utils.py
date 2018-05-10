@@ -11,7 +11,7 @@ class UtilsTests(TestCase):
     def test_link_email_by_not_found(self):
         user = UserFactory.create()
         link = get_profile_link_by_email(user.email)
-        eq_(link, "#")
+        eq_(link, '')
 
     def test_link_by_email(self):
         user = UserFactory.create()
