@@ -162,9 +162,9 @@ alabaster==0.7.10 \
 snowballstemmer==1.2.1 \
     --hash=sha256:9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89 \
     --hash=sha256:919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128
-factory_boy==2.10.0 \
-    --hash=sha256:be2abc8092294e4097935a29b4e37f5b9ed3e4205e2e32df215c0315b625995e \
-    --hash=sha256:bd5a096d0f102d79b6c78cef1c8c0b650f2e1a3ecba351c735c6d2df8dabd29c
+factory_boy==2.11.1 \
+    --hash=sha256:d552cb872b310ae78bd7429bf318e42e1e903b1a109e899a523293dfa762ea4f \
+    --hash=sha256:6f25cc4761ac109efd503f096e2ad99421b1159f01a29dbb917359dcd68e08ca
 prompt_toolkit==1.0.15 \
     --hash=sha256:3f473ae040ddaa52b52f97f6b4a493cfa9f5920c255a12dc56a7d34397a398a4 \
     --hash=sha256:1df952620eccb399c53ebb359cc7d9a8d3a9538cb34c5a1344bdbeb29fbcc381 \
