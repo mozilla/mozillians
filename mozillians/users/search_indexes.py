@@ -72,10 +72,6 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return IdpProfile
 
-    def prepare_idp_email(self, obj):
-        """Avoid indexing the same email multiple times."""
-        return obj.email if obj.email != obj.profile.email else ''
-
     def index_queryset(self, using=None):
         """Only index unique emails."""
         all_idps = IdpProfile.objects.all()
