@@ -10,13 +10,16 @@ $(document).ready(function() {
     function render(parent, node, count) {
       var child = document.createElement("li");
       var label = document.createElement("label");
-      var link = document.createElement("a");
+      var link;
       var div = document.createElement("div");
       var name = document.createTextNode(node.name);
 
-      link.setAttribute("href", node.href);
-
-
+      if (node.href) {
+        link = document.createElement("a");
+        link.setAttribute("href", node.href);
+      } else {
+        link = document.createElement("span");
+      }
 
       div.classList.add("toggle");
       if (!node.children) {
