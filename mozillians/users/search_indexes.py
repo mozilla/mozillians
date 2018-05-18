@@ -68,6 +68,8 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
     # IdpProfile information
     idp_email = indexes.CharField(model_attr='email')
     privacy_idp_email = indexes.IntegerField(model_attr='privacy')
+    idp_username = indexes.CharField(model_attr='username')
+    privacy_idp_username = indexes.IntegerField(model_attr='privacy')
 
     def get_model(self):
         return IdpProfile
