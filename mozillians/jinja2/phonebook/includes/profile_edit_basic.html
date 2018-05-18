@@ -127,6 +127,10 @@
                 <span class="identity-profile">
                   {{ form.instance.get_type_display() }} -
                   {{ form.instance.email }}
+                  {% set username=form.instance|get_idp_external_url %}
+                  {% if username %}
+                    - {{ username }}
+                  {% endif %}
                 </span>
                 {{ form.id }}
                 <div class="identity-profiles-controls">

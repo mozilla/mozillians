@@ -582,7 +582,7 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
 
         params = {
             'response_type': 'code',
-            'scope': import_from_settings('OIDC_RP_SCOPES', 'openid email'),
+            'scope': import_from_settings('OIDC_RP_SCOPES', 'openid email profile'),
             'client_id': self.OIDC_RP_VERIFICATION_CLIENT_ID,
             'redirect_uri': absolutify(
                 request,
@@ -690,6 +690,11 @@ class VerifyIdentityCallbackView(View):
                 'auth0_user_id': user_info['sub'],
                 'email': email
             }
+
+            # If we are linking GitHub we need to save
+            # the username too.
+            if 'github|' in user_info['sub']:
+                user_q['username'] = user_info['nickname']
 
             # Check that the identity doesn't exist in another Identity profile
             # or in another mozillians profile

@@ -394,6 +394,7 @@ OIDC_EXEMPT_URLS = [
     u'/verify/identity/',
     u'/verify/identity/callback/',
 ]
+OIDC_RP_SCOPES = 'openid email profile'
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')

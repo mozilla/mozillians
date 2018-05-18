@@ -111,9 +111,14 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             email=email,
             auth0_user_id=auth0_user_id)
 
+        # Update/Save the Github username
+        if 'github|' in auth0_user_id:
+            obj.username = self.claims.get('nickname', '')
+            obj.save()
+
         # Do not allow downgrades.
-        # Round the current type to the floor. This way 30 and 39 will have always the same
-        # priority.
+        # Round the current type to the floor.
+        # This way 30 and 39 will have always the same priority.
         if current_idp and obj.type < int(math.floor(current_idp.type / 10) * 10):
             msg = u'Please use one of the following authentication methods: {}'
             # convert the tuple to a dict to easily get the values
