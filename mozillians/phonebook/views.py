@@ -278,7 +278,7 @@ def edit_profile(request):
                 f.save()
 
             # Spawn task to check for spam
-            if not profile.can_vouch:
+            if not profile.is_vouched:
                 x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
                 if x_forwarded_for:
                     user_ip = x_forwarded_for.split(',')[0]
