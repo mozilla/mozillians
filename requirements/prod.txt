@@ -343,8 +343,8 @@ https://github.com/mozilla-iam/cis/archive/d2bb9c43fc2e0b8fb9d324a7f03f2e4e29721
     --hash=sha256:8032f59b84542400a49f5e7cdbe6c7cb954a36f87e803d92211f2836a3cd52b5
 https://github.com/mozilla-iam/pykmssig/archive/v0.0.8.zip#egg=pykmssig \
     --hash=sha256:e117b5e66ddbdb84263ac100139445a9c4c8eba2ea740fb6aec6009619ed7556
-pluginbase==0.5 \
-    --hash=sha256:b4f830242a078a4f44c978a84f3365bba4d008fdd71a591c71447f4df35354dd
+pluginbase==0.7 \
+    --hash=sha256:c0abe3218b86533cca287e7057a37481883c07acef7814b70583406938214cc8
 jsonschema==2.6.0 \
     --hash=sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08 \
     --hash=sha256:6ff5f3180870836cae40f06fa10419f557208175f13ad7bc26caa77beb1f6e02
