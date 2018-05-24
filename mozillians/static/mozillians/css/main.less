@@ -2530,7 +2530,7 @@ body#orgchart {
             display: list-item;
         }
 
-        input:checked ~ li {
+        input:checked + li {
             list-style-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAALCAYAAABCm8wlAAAAlklEQVQYlWPonDx/VXv7NEEGXKBz8oL/HZMXvGufuCANpwIY7pi0YHd7/zwlnAo6Jy/43zll4bv2SfPLcStANw2XgllL1r/bsvOwMYaCrikL/+85dPL/k6cvdj98+BLVhAUrNv2/fvvBu8dPn6O6oWvKwv8nzlxC6EIGy9Zu/3/v4eN3T548D8UaDk+evVz18OFDnCEJAEBcmet8woHKAAAAAElFTkSuQmCC);
         }
 
@@ -2539,11 +2539,11 @@ body#orgchart {
         }
 
 
-        label + .toggle ~ ul {
+        label + .toggle + ul {
             display: inline-block;
         }
 
-        input:checked ~ li ul {
+        input:checked + li ul {
             display: none;
         }
     }
