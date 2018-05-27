@@ -458,9 +458,9 @@ backports.weakref==1.0.post1 \
 docker-pycreds==0.2.3 \
     --hash=sha256:764a7ea2f6484bc5de5bf0c060f08b41a1118cf1acb987626b3ff45f3cc40dac \
     --hash=sha256:e3732a03610a00461a716997670c7010bf1c214a3edc440f7d6a2a3a830ecd9d
-websocket-client==0.47.0 \
-    --hash=sha256:188b68b14fdb2d8eb1a111f21b9ffd2dbf1dbc4e4c1d28cf2c37cdbf1dd1cae6 \
-    --hash=sha256:a453dc4dfa6e0db3d8fd7738a308a88effe6240c59f3226eb93e8f020c216149
+websocket-client==0.48.0 \
+    --hash=sha256:db70953ae4a064698b27ae56dcad84d0ee68b7b43cb40940f537738f38f510c1 \
+    --hash=sha256:18f1170e6a1b5463986739d9fd45c4308b0d025c1b2f9b88788d8f69e8a5eb4a
 jsonpickle==0.9.6 \
     --hash=sha256:545b3bee0d65e1abb4baa1818edcc9ec239aa9f2ffbfde8084d71c056180054f
 lxml==4.2.1 \
