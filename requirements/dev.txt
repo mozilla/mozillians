@@ -84,9 +84,9 @@ nosenicedots==0.5 \
 path.py==11.0.1 \
     --hash=sha256:5a1e7bebc8c53074dca772a30fecfe5408b16f201a887bef0159f9cb7d1c5f5a \
     --hash=sha256:e7eb9d0ca4110d9b4d7c9baa0696d8c94f837d622409cefc5ec9e7c3d02ea11f
-pexpect==4.5.0 \
-    --hash=sha256:9783f4644a3ef8528a6f20374eeb434431a650c797ca6d8df0d81e30fffdfa24 \
-    --hash=sha256:9f8eb3277716a01faafaba553d629d3d60a1a624c7cf45daa600d2148c30020c
+pexpect==4.6.0 \
+    --hash=sha256:3fbd41d4caf27fa4a377bfd16fef87271099463e6fa73e92a52f92dfee5d425b \
+    --hash=sha256:2a8e88259839571d1251d278476f3eec5db26deb73a70be5ed5dc5435e418aba
 pickleshare==0.7.4 \
     --hash=sha256:c9a2541f25aeabc070f12f452e1f2a8eae2abd51e1cd19e8430402bdf4c1d8b5 \
     --hash=sha256:84a9257227dfdd6fe1b4be1319096c20eb85ff1e82c7932f36efccfe1b09737b
