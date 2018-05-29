@@ -9,6 +9,7 @@ from django_jinja import library
 import jinja2
 
 from mozillians.users import get_languages_for_locale
+from mozillians.users.models import IdpProfile
 
 
 PARAGRAPH_RE = re.compile(r'(?:\r\n|\r|\n){2,}')
@@ -79,3 +80,20 @@ def get_search_models(models):
     for model in models:
         params += '&models={}'.format(model)
     return params
+
+
+@library.filter
+def get_idp_external_url(obj):
+    """Returns a link to the OP based on available options.
+
+    Returns a link to GitHub for obj.type == PROVIDER_GITHUB
+    Returns the username as a fallback for other OPs.
+    Returns an empty string if there is no username
+    """
+    if obj.username:
+        if obj.type == IdpProfile.PROVIDER_GITHUB:
+            username = jinja2.Markup.escape(obj.username)
+            github_url = '<a href="https://github.com/{username}" target="_blank">{username}</a>'
+            return jinja2.Markup(github_url.format(username=username))
+        return obj.username
+    return ''

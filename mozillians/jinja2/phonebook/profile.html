@@ -348,6 +348,10 @@
                   {% else %}
                     {{ idp.email }}
                   {% endif %}
+                  {% set username=form.instance|get_idp_external_url %}
+                  {% if username %}
+                    - {{ username }}
+                  {% endif %}
                 </li>
               {% endfor %}
             </ul>
