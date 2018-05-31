@@ -33,7 +33,6 @@ from raven.contrib.django.models import client
 from waffle import flag_is_active
 from waffle.decorators import waffle_flag
 
-import mozillians.phonebook.forms as forms
 from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
@@ -41,6 +40,8 @@ from mozillians.common.templatetags.helpers import (get_object_or_none, nonprefi
                                                     urlparams)
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
+from mozillians.phonebook import AuthZeroManagementApi
+import mozillians.phonebook.forms as forms
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import create_orgchart, redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVATE
@@ -211,6 +212,12 @@ def edit_profile(request):
     user_groups = profile.groups.all().order_by('name')
     idp_profiles = IdpProfile.objects.filter(profile=profile)
     idp_primary_profile = get_object_or_none(IdpProfile, profile=profile, primary=True)
+    # The accounts that a user can select as the primary login identity
+    possible_primary_accounts = []
+    if idp_primary_profile and idp_primary_profile.type != IdpProfile.PROVIDER_LDAP:
+        possible_primary_accounts = idp_profiles.filter(
+            type__in=[IdpProfile.PROVIDER_GITHUB,
+                      IdpProfile.PROVIDER_FIREFOX_ACCOUNTS]).exclude(id=idp_primary_profile.id)
     accounts_qs = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
 
     sections = {
@@ -264,6 +271,7 @@ def edit_profile(request):
                                                          instance=profile,
                                                          queryset=idp_profiles)
     ctx['idp_primary_profile'] = idp_primary_profile
+    ctx['possible_primary_accounts'] = possible_primary_accounts
 
     ctx['autocomplete_form_media'] = ctx['registration_form'].media + ctx['skills_form'].media
     forms_valid = True
@@ -370,6 +378,37 @@ def change_primary_contact_identity(request, identity_pk):
 
         msg = _(u'Primary Contact Identity successfully updated.')
         messages.success(request, msg)
+
+    return redirect('phonebook:profile_edit')
+
+
+@allow_unvouched
+@never_cache
+def change_primary_login_identity(request, identity_pk):
+    """Change primary login email address.
+
+    This is only possible for equally secure accounts.
+    """
+    user = User.objects.get(pk=request.user.id)
+    profile = user.userprofile
+    alternate_identities = IdpProfile.objects.filter(profile=profile)
+
+    # Only email owner can change primary email
+    if not alternate_identities.filter(pk=identity_pk).exists():
+        raise Http404()
+
+    new_primary_login_idp = alternate_identities.get(pk=identity_pk)
+    current_login_idp = alternate_identities.get(primary=True)
+    AuthZeroManagementApi.change_primary_identiy(new_primary_login_idp.auth0_user_id,
+                                                 primary=True)
+    # Mark the current Idp as non primary
+    AuthZeroManagementApi.change_primary_identiy(current_login_idp.auth0_user_id,
+                                                 primary=False)
+    alternate_identities.filter(pk=identity_pk).update(primary=True)
+    alternate_identities.exclude(pk=identity_pk).update(primary=False)
+
+    msg = _(u'Primary Login Identity successfully updated.')
+    messages.success(request, msg)
 
     return redirect('phonebook:profile_edit')
 
