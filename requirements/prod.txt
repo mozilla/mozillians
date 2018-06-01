@@ -542,5 +542,5 @@ backports_abc==0.5 \
     --hash=sha256:033be54514a03e255df75c5aee8f9e672f663f93abb723444caec8fe43437bde
 anytree==2.4.3 \
     --hash=sha256:9b43699eacfd3fab153433abbc698c74e3c8f883c0505fde2c26ad38163d93fa
-authzerolib==1.0.4 \
-    --hash=sha256:7e4eeec4b45e9858761f968505ffd816bf7bc73e50d1d8a7b6cd5942472f3a48
+authzerolib==1.0.5 \
+    --hash=sha256:49853809b5bbe110f3c51790aa5a25e6b8895ee654f1e503df18cd8b317d8cde
