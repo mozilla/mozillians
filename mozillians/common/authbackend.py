@@ -111,10 +111,22 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             email=email,
             auth0_user_id=auth0_user_id)
 
+        # Update/Save the Github username
+        if 'github|' in auth0_user_id:
+            obj.username = self.claims.get('nickname', '')
+            obj.save()
+
         # Do not allow downgrades.
-        # Round the current type to the floor. This way 30 and 39 will have always the same
-        # priority.
-        if current_idp and obj.type < int(math.floor(current_idp.type / 10) * 10):
+        # Round the current type to the floor.
+        # This way 30 and 39 will have always the same priority.
+        current_type_security_level = int(math.floor(current_idp.type / 10) * 10)
+        # LDAP is the most secure method. If the obj.type == LDAP then we don't need to fail.
+        # If there is a current IDP with a stronger security method the login must fail.
+        # Finally in the case of equally secure accounts, only the user selected should
+        # be allowed
+        # (current.type != obj.type and obj.type < current_type_security level asserts to False)
+        if (current_idp and obj.type != IdpProfile.PROVIDER_LDAP and
+                (obj.type < current_type_security_level or obj.type != current_idp.type)):
             msg = u'Please use one of the following authentication methods: {}'
             # convert the tuple to a dict to easily get the values
             provider_types = dict(IdpProfile.PROVIDER_TYPES)

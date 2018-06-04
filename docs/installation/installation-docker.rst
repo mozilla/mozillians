@@ -64,7 +64,7 @@ Building mozillians
 
      $ docker-compose run web python manage.py update_product_details -f
 
-#. Import cities_light details:
+#. Import cities_light details::
 
      $ docker-compose run web python manage.py cities_light
 

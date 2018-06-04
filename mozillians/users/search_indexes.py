@@ -1,7 +1,7 @@
 from haystack import indexes
 
 from mozillians.groups.models import GroupMembership
-from mozillians.users.models import UserProfile
+from mozillians.users.models import IdpProfile, UserProfile
 
 
 class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
@@ -40,6 +40,12 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return UserProfile
 
+    def prepare_email(self, obj):
+        # Do not index the email if it's already in the IdpProfiles
+        if not obj.idp_profiles.exists():
+            return obj.email
+        return ''
+
     def prepare_skills(self, obj):
         return [skill.name for skill in obj.skills.all()]
 
@@ -53,3 +59,29 @@ class UserProfileIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self, using=None):
         """Exclude incomplete profiles from indexing."""
         return self.get_model().objects.complete()
+
+
+class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
+    """IdpProfile Profile Search Index."""
+    # Primary field of the index
+    text = indexes.CharField(document=True, use_template=True)
+    # IdpProfile information
+    idp_email = indexes.CharField(model_attr='email')
+    privacy_idp_email = indexes.IntegerField(model_attr='privacy')
+    idp_username = indexes.CharField(model_attr='username')
+    privacy_idp_username = indexes.IntegerField(model_attr='privacy')
+
+    def get_model(self):
+        return IdpProfile
+
+    def index_queryset(self, using=None):
+        """Only index unique emails."""
+        all_idps = IdpProfile.objects.all()
+        idps_ids = []
+        unique_emails = set()
+
+        for idp in all_idps:
+            if idp.email not in unique_emails:
+                idps_ids.append(idp.id)
+                unique_emails.add(idp.email)
+        return self.get_model().objects.filter(id__in=idps_ids)

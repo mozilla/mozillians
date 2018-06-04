@@ -9,7 +9,9 @@ from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
+from django.core.cache import cache
+from django.http import (HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404,
+                         JsonResponse)
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -31,16 +33,17 @@ from raven.contrib.django.models import client
 from waffle import flag_is_active
 from waffle.decorators import waffle_flag
 
-import mozillians.phonebook.forms as forms
 from mozillians.api.models import APIv2App
 from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.templatetags.helpers import (get_object_or_none, nonprefixed_url, redirect,
                                                     urlparams)
+from mozillians.common.auth0 import MozilliansAuthZeroManagement
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
+import mozillians.phonebook.forms as forms
 from mozillians.phonebook.models import Invite
-from mozillians.phonebook.utils import redeem_invite
+from mozillians.phonebook.utils import create_orgchart, redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVATE
 from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, UserProfile
 from mozillians.users.tasks import (check_spam_account, send_userprofile_to_cis,
@@ -209,6 +212,12 @@ def edit_profile(request):
     user_groups = profile.groups.all().order_by('name')
     idp_profiles = IdpProfile.objects.filter(profile=profile)
     idp_primary_profile = get_object_or_none(IdpProfile, profile=profile, primary=True)
+    # The accounts that a user can select as the primary login identity
+    possible_primary_accounts = []
+    if idp_primary_profile and idp_primary_profile.type != IdpProfile.PROVIDER_LDAP:
+        possible_primary_accounts = idp_profiles.filter(
+            type__in=[IdpProfile.PROVIDER_GITHUB,
+                      IdpProfile.PROVIDER_FIREFOX_ACCOUNTS]).exclude(id=idp_primary_profile.id)
     accounts_qs = ExternalAccount.objects.exclude(type=ExternalAccount.TYPE_EMAIL)
 
     sections = {
@@ -262,6 +271,7 @@ def edit_profile(request):
                                                          instance=profile,
                                                          queryset=idp_profiles)
     ctx['idp_primary_profile'] = idp_primary_profile
+    ctx['possible_primary_accounts'] = possible_primary_accounts
 
     ctx['autocomplete_form_media'] = ctx['registration_form'].media + ctx['skills_form'].media
     forms_valid = True
@@ -276,10 +286,16 @@ def edit_profile(request):
                 f.save()
 
             # Spawn task to check for spam
-            if not profile.can_vouch:
+            if not profile.is_vouched:
+                x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                if x_forwarded_for:
+                    user_ip = x_forwarded_for.split(',')[0]
+                else:
+                    user_ip = request.META.get('REMOTE_ADDR')
+
                 params = {
                     'instance_id': profile.id,
-                    'user_ip': request.META.get('REMOTE_ADDR'),
+                    'user_ip': user_ip,
                     'user_agent': request.META.get('HTTP_USER_AGENT'),
                     'referrer': request.META.get('HTTP_REFERER'),
                     'comment_author': profile.full_name,
@@ -362,6 +378,43 @@ def change_primary_contact_identity(request, identity_pk):
 
         msg = _(u'Primary Contact Identity successfully updated.')
         messages.success(request, msg)
+
+    return redirect('phonebook:profile_edit')
+
+
+@allow_unvouched
+@never_cache
+def change_primary_login_identity(request, identity_pk):
+    """Change primary login email address.
+
+    This is only possible for equally secure accounts.
+    """
+    user = User.objects.get(pk=request.user.id)
+    profile = user.userprofile
+    alternate_identities = IdpProfile.objects.filter(profile=profile)
+
+    # Only email owner can change primary email
+    if not alternate_identities.filter(pk=identity_pk).exists():
+        raise Http404()
+
+    new_primary_login_idp = alternate_identities.get(pk=identity_pk)
+    current_login_idp = alternate_identities.get(primary=True)
+
+    # Instantiate AuthZeroManagementApi client
+    AuthZeroManagementApi = MozilliansAuthZeroManagement()
+
+    AuthZeroManagementApi.change_primary_identiy(new_primary_login_idp.auth0_user_id,
+                                                 primary=True)
+    # Mark the current Idp as non primary
+    AuthZeroManagementApi.change_primary_identiy(current_login_idp.auth0_user_id,
+                                                 primary=False)
+    alternate_identities.filter(pk=identity_pk).update(primary=True)
+    alternate_identities.exclude(pk=identity_pk).update(primary=False)
+
+    msg = _(u'Primary Login Identity successfully updated.')
+    messages.success(request, msg)
+    # Push the changes to CIS
+    send_userprofile_to_cis.delay(profile.pk)
 
     return redirect('phonebook:profile_edit')
 
@@ -522,10 +575,6 @@ class PhonebookSearchView(SearchView):
     form_class = forms.PhonebookSearchForm
     template_name = 'phonebook/search.html'
 
-    def get_queryset(self):
-        sqs = super(PhonebookSearchView, self).get_queryset()
-        return sqs
-
     def form_invalid(self, form):
         context = self.get_context_data(**{
             self.form_name: form,
@@ -578,7 +627,7 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
 
         params = {
             'response_type': 'code',
-            'scope': import_from_settings('OIDC_RP_SCOPES', 'openid email'),
+            'scope': import_from_settings('OIDC_RP_SCOPES', 'openid email profile'),
             'client_id': self.OIDC_RP_VERIFICATION_CLIENT_ID,
             'redirect_uri': absolutify(
                 request,
@@ -687,6 +736,11 @@ class VerifyIdentityCallbackView(View):
                 'email': email
             }
 
+            # If we are linking GitHub we need to save
+            # the username too.
+            if 'github|' in user_info['sub']:
+                user_q['username'] = user_info['nickname']
+
             # Check that the identity doesn't exist in another Identity profile
             # or in another mozillians profile
             error_msg = ''
@@ -743,3 +797,30 @@ def delete_idp_profiles(request):
     request.user.userprofile.idp_profiles.all().delete()
     messages.warning(request, 'Identities deleted.')
     return redirect('phonebook:profile_edit')
+
+
+@waffle_flag('view-orgchart')
+@never_cache
+def orgchart(request):
+    """Show orgchart."""
+    ctx = {
+        'orgchart_type': request.GET.get('orgchart_type', 'html-list')
+    }
+    return render(request, 'phonebook/orgchart.html', ctx)
+
+
+@waffle_flag('view-orgchart')
+@never_cache
+def orgchart_json(request):
+    """Expose mock orgchart json."""
+
+    data = None
+    if settings.ORGCHART_ENABLE_CACHE:
+        data = cache.get('orgchart_data')
+
+    if not data:
+        data = create_orgchart()
+        if settings.ORGCHART_ENABLE_CACHE:
+            cache.set('orgchart_data', data, 60 * 5)
+
+    return JsonResponse(data)

@@ -28,12 +28,11 @@ OIDC_RP_CLIENT_SECRET = ''
 OIDC_RP_CLIENT_SECRET_ENCODED = True
 BASKET_API_KEY = ''
 # Cache
-CACHE_BACKEND = 'django.core.cache.backends.locmem.LocMemCache'
-CACHE_URL = '127.0.0.1:11211'
+CACHE_URL = 'memcached:11211'
 # Celery
 CELERY_TASK_ALWAYS_EAGER = True
 # Assuming user root with password root and db name mozillians
-DATABASE_URL = 'mysql://root:root@127.0.0.1:3306/mozillians'
+DATABASE_URL = 'mysql://root:root@db:3306/mozillians'
 # Basket
 BASKET_URL = 'http://127.0.0.1'
 BASKET_API_KEY = 'basket_api_key'
@@ -41,3 +40,7 @@ BASKET_API_KEY = 'basket_api_key'
 BASKET_MANAGERS = None
 AXES_BEHIND_REVERSE_PROXY = False
 ES_HOST=es
+
+# Captcha
+NORECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+NORECAPTCHA_SECRET_KEY = "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"

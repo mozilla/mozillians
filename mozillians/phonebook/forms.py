@@ -27,7 +27,7 @@ from mozillians.phonebook.widgets import MonthYearWidget
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import PUBLIC
 from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, Language, UserProfile
-from mozillians.users.search_indexes import UserProfileIndex
+from mozillians.users.search_indexes import IdpProfileIndex, UserProfileIndex
 
 
 REGEX_NUMERIC = re.compile('\d+', re.IGNORECASE)
@@ -471,7 +471,9 @@ class PhonebookSearchForm(HaystackSearchForm):
         cdata = super(PhonebookSearchForm, self).clean(*args, **kwargs)
         if not (self.country or self.city or self.region) and not cdata.get('q', '').strip():
             self.errors['q'] = self.error_class([u'This field is required.'])
-        if 'users.userprofile' in cdata['models'] or not cdata['models']:
+        if ('users.userprofile' in cdata['models'] or
+            'users.idpprofile' in cdata['models'] or not
+                cdata['models']):
             cdata['is_profile_query'] = True
         if ('groups.group' in cdata['models'] or not cdata['models'] and not
                 self.request.user.is_anonymous()):
@@ -508,7 +510,7 @@ class PhonebookSearchForm(HaystackSearchForm):
             search_models = self.get_models()
         else:
             # Anonymous and un-vouched users cannot search groups
-            search_models = [UserProfile]
+            search_models = [UserProfile, IdpProfile]
 
         if location_query:
             for k in location_query.keys():
@@ -526,7 +528,7 @@ class PhonebookSearchForm(HaystackSearchForm):
         query = SQ()
         q_args = {}
         # Profiles Search
-        all_indexed_fields = UserProfileIndex.fields.keys()
+        all_indexed_fields = UserProfileIndex.fields.keys() + IdpProfileIndex.fields.keys()
         privacy_indexed_fields = [field for field in all_indexed_fields
                                   if field.startswith('privacy_')]
         # Every profile object in mozillians.org has privacy settings.

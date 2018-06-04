@@ -90,7 +90,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
-    # Temporarily disable this token to fix logout issues.
     # 'mozilla_django_oidc.middleware.RefreshIDToken',
 
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -391,6 +390,11 @@ OIDC_RP_VERIFICATION_CLIENT_ID = config('OIDC_RP_VERIFICATION_CLIENT_ID', defaul
 OIDC_RP_VERIFICATION_CLIENT_SECRET = config('OIDC_RP_VERIFICATION_CLIENT_SECRET', default='')
 OIDC_PROMPT = 'select_account'
 OIDC_ACCOUNT_LINKING = 'true'
+OIDC_EXEMPT_URLS = [
+    u'/verify/identity/',
+    u'/verify/identity/callback/',
+]
+OIDC_RP_SCOPES = 'openid email profile'
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
@@ -704,6 +708,11 @@ if DEV:
         'http://*.mozilla.org',
     )
 
+
+# Orgchart s3
+ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
+ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
+ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
 
 if DEBUG:
     for backend in TEMPLATES:

@@ -28,7 +28,8 @@ from mozillians.groups.models import (Group, GroupAlias, GroupMembership, Invite
                                       Skill, SkillAlias)
 from mozillians.phonebook.validators import (validate_email, validate_twitter,
                                              validate_website, validate_username_not_url,
-                                             validate_phone_number, validate_linkedin)
+                                             validate_phone_number, validate_linkedin,
+                                             validate_discord)
 from mozillians.users import get_languages_for_locale
 from mozillians.users.managers import (EMPLOYEES,
                                        MOZILLIANS, PRIVACY_CHOICES, PRIVACY_CHOICES_WITH_PRIVATE,
@@ -821,6 +822,7 @@ class IdpProfile(models.Model):
     updated = models.DateTimeField(auto_now=True)
     privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES_WITH_PRIVATE)
     primary_contact_identity = models.BooleanField(default=False)
+    username = models.CharField(max_length=1024, default='', blank=True)
 
     def get_provider_type(self):
         """Helper method to autopopulate the model type given the user_id."""
@@ -856,6 +858,7 @@ class IdpProfile(models.Model):
         if not (IdpProfile.objects.filter(profile=self.profile,
                                           primary_contact_identity=True).exists()):
             self.primary_contact_identity = True
+
         super(IdpProfile, self).save(*args, **kwargs)
 
     def __unicode__(self):
@@ -940,6 +943,8 @@ class ExternalAccount(models.Model):
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
     TYPE_TELEGRAM = 'TELEGRAM'
+    TYPE_MASTODON = 'MASTODON'
+    TYPE_DISCORD = 'DISCORD'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -1001,6 +1006,9 @@ class ExternalAccount(models.Model):
         TYPE_JABBER: {'name': 'XMPP/Jabber',
                       'url': '',
                       'validator': validate_email},
+        TYPE_MASTODON: {'name': 'Mastodon',
+                        'url': '',
+                        'validator': validate_email},
         TYPE_DISCOURSE: {'name': 'Mozilla Discourse',
                          'url': 'https://discourse.mozilla.org/users/{identifier}',
                          'validator': validate_username_not_url},
@@ -1022,6 +1030,9 @@ class ExternalAccount(models.Model):
         TYPE_TELEGRAM: {'name': 'Telegram',
                         'url': 'https://telegram.me/{identifier}',
                         'validator': validate_username_not_url},
+        TYPE_DISCORD: {'name': 'Discord',
+                       'url': '',
+                       'validator': validate_discord},
     }
 
     user = models.ForeignKey(UserProfile)

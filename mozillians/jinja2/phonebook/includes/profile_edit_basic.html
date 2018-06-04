@@ -100,7 +100,7 @@
 
         {% if idp_primary_profile %}
           <fieldset>
-            <label class="identity-profile-label">{{ _('Login Identity') }}</label>
+            <label class="identity-profile-label">{{ _('Primary Login Identity') }}</label>
             <div class="row">
               <div class="col-md-8 col-sm-6">
                 <span class="email">
@@ -115,6 +115,31 @@
               control the visibility of the email associated with this identity.
             </div>
           </fieldset>
+
+          {% if possible_primary_accounts %}
+            <fieldset>
+              <label class="identity-profile-label">{{ _('Alternate Login Identities') }}</label>
+              {% for account in possible_primary_accounts %}
+                <div class="row">
+                  <div class="col-md-8 col-sm-6">
+                    <span class="email">
+                      {{ account.get_type_display() }}
+                      {{ account.email }}
+                      <a class="button" href="{{ url('phonebook:change_primary_login_identity', account.pk) }}">
+                        Switch Login Identity
+                      </a>
+                    </span>
+                  </div>
+                </div>
+              {% endfor %}
+
+              <div class="help-block">
+                This section includes the available identities that a user can select to login to Mozilla
+                Services through the Identity and Access Management System. Please note that only the idenity
+                that is marked as Primary can be used for login purposes.
+              </div>
+            </fieldset>
+          {% endif %}
         {% endif %}
 
         <fieldset id="idp-profiles">
@@ -127,6 +152,10 @@
                 <span class="identity-profile">
                   {{ form.instance.get_type_display() }} -
                   {{ form.instance.email }}
+                  {% set username=form.instance|get_idp_external_url %}
+                  {% if username %}
+                    - {{ username }}
+                  {% endif %}
                 </span>
                 {{ form.id }}
                 <div class="identity-profiles-controls">
@@ -149,7 +178,7 @@
             </div>
           {% endfor %}
           <div class="help-block">
-            These are the identities displayed in the profile. The primary identity is shown directly under the profile
+            These are the identities displayed in the profile. The primary contact identity is shown directly under the profile
             picture and the rest are listed in the Alternate Contact Identities section. The identities marked as Private
             are not shown.
           </div>
