@@ -68,13 +68,11 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
     # IdpProfile information
     idp_email = indexes.CharField(model_attr='email')
     privacy_idp_email = indexes.IntegerField(model_attr='privacy')
+    idp_username = indexes.CharField(model_attr='username')
+    privacy_idp_username = indexes.IntegerField(model_attr='privacy')
 
     def get_model(self):
         return IdpProfile
-
-    def prepare_idp_email(self, obj):
-        """Avoid indexing the same email multiple times."""
-        return obj.email if obj.email != obj.profile.email else ''
 
     def index_queryset(self, using=None):
         """Only index unique emails."""

@@ -93,7 +93,8 @@ class MozilliansAuthBackendTests(TestCase):
         )
         claims = {
             'email': 'foo@example.com',
-            'user_id': 'github|12345'
+            'user_id': 'github|12345',
+            'nickname': 'foo'
         }
 
         request_mock = Mock(spec=HttpRequest)
@@ -103,9 +104,11 @@ class MozilliansAuthBackendTests(TestCase):
         self.backend.check_authentication_method(user)
 
         eq_(IdpProfile.objects.filter(
-            profile=user.userprofile, primary=True, email='foo@example.com').count(), 1)
+            profile=user.userprofile, primary=True,
+            username='foo', email='foo@example.com').count(), 1)
         eq_(IdpProfile.objects.filter(
-            profile=user.userprofile, primary=False, email='foo@bar.com').count(), 1)
+            profile=user.userprofile, primary=False,
+            email='foo@bar.com').count(), 1)
 
     @patch('mozillians.common.authbackend.messages')
     def test_add_idp_wrong_flow(self, mocked_message):

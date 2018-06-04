@@ -822,6 +822,7 @@ class IdpProfile(models.Model):
     updated = models.DateTimeField(auto_now=True)
     privacy = models.PositiveIntegerField(default=MOZILLIANS, choices=PRIVACY_CHOICES_WITH_PRIVATE)
     primary_contact_identity = models.BooleanField(default=False)
+    username = models.CharField(max_length=1024, default='', blank=True)
 
     def get_provider_type(self):
         """Helper method to autopopulate the model type given the user_id."""
@@ -857,6 +858,7 @@ class IdpProfile(models.Model):
         if not (IdpProfile.objects.filter(profile=self.profile,
                                           primary_contact_identity=True).exists()):
             self.primary_contact_identity = True
+
         super(IdpProfile, self).save(*args, **kwargs)
 
     def __unicode__(self):

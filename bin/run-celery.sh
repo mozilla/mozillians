@@ -11,7 +11,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Run cis celery worker
-celery -A mozillians worker -Q cis -l INFO -n cis@%h -c $conc &
+celery -A mozillians worker -Q cis -l INFO -n cis@%h -Ofair -c $conc &
 status=$?
 if [ $status -ne 0 ]; then
     echo "Failed to start cis worker: $status"
