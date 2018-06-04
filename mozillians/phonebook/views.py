@@ -409,6 +409,8 @@ def change_primary_login_identity(request, identity_pk):
 
     msg = _(u'Primary Login Identity successfully updated.')
     messages.success(request, msg)
+    # Push the changes to CIS
+    send_userprofile_to_cis.delay(profile.pk)
 
     return redirect('phonebook:profile_edit')
 
