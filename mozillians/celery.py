@@ -50,11 +50,12 @@ app.conf.beat_schedule = {
         'schedule': RUN_DAILY,
         'args': ()
     },
-    'periodically-send_cis_data': {
-        'task': 'mozillians.users.tasks.periodically_send_cis_data',
-        'schedule': RUN_EVERY_SIX_HOURS,
-        'args': ()
-    },
+    # Disable batch jobs because it causes throttling in AWS lambda invocations
+    # 'periodically-send_cis_data': {
+    #     'task': 'mozillians.users.tasks.periodically_send_cis_data',
+    #     'schedule': RUN_EVERY_SIX_HOURS,
+    #     'args': ()
+    # },
     'remove-incomplete-accounts': {
         'task': 'mozillians.users.tasks.remove_incomplete_accounts',
         'schedule': RUN_HOURLY,
