@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import uuid
 from itertools import chain
@@ -738,9 +739,13 @@ class UserProfile(UserProfilePrivacyModel):
         # Wipe groups from the rest
         idps = list(self.idp_profiles.all().values_list('type', flat=True))
 
+        if not idps:
+            return []
         # if the current idp does not match
         # the greatest number in the list, wipe the groups
-        if not idps or idp.type != max(idps) or not idp.is_mfa():
+        max_account_security_level = int(math.floor(max(idps) / 10) * 10)
+        idp_security_level = int(math.floor(idp.type / 10) * 10)
+        if idp_security_level != max_account_security_level or not idp.is_mfa():
             return []
 
         memberships = GroupMembership.objects.filter(
