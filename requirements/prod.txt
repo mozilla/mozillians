@@ -544,3 +544,6 @@ anytree==2.4.3 \
     --hash=sha256:9b43699eacfd3fab153433abbc698c74e3c8f883c0505fde2c26ad38163d93fa
 authzerolib==1.0.4 \
     --hash=sha256:7e4eeec4b45e9858761f968505ffd816bf7bc73e50d1d8a7b6cd5942472f3a48
+responses==0.9.0 \
+    --hash=sha256:c6082710f4abfb60793899ca5f21e7ceb25aabf321560cc0726f8b59006811c9 \
+    --hash=sha256:f23a29dca18b815d9d64a516b4a0abb1fbdccff6141d988ad8100facb81cf7b3
