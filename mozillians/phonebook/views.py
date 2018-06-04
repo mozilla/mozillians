@@ -38,9 +38,9 @@ from mozillians.common.decorators import allow_public, allow_unvouched
 from mozillians.common.middleware import LOGIN_MESSAGE, GET_VOUCHED_MESSAGE
 from mozillians.common.templatetags.helpers import (get_object_or_none, nonprefixed_url, redirect,
                                                     urlparams)
+from mozillians.common.auth0 import MozilliansAuthZeroManagement
 from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
-from mozillians.phonebook import AuthZeroManagementApi
 import mozillians.phonebook.forms as forms
 from mozillians.phonebook.models import Invite
 from mozillians.phonebook.utils import create_orgchart, redeem_invite
@@ -399,6 +399,10 @@ def change_primary_login_identity(request, identity_pk):
 
     new_primary_login_idp = alternate_identities.get(pk=identity_pk)
     current_login_idp = alternate_identities.get(primary=True)
+
+    # Instantiate AuthZeroManagementApi client
+    AuthZeroManagementApi = MozilliansAuthZeroManagement()
+
     AuthZeroManagementApi.change_primary_identiy(new_primary_login_idp.auth0_user_id,
                                                  primary=True)
     # Mark the current Idp as non primary
