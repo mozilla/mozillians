@@ -100,7 +100,7 @@
 
         {% if idp_primary_profile %}
           <fieldset>
-            <label class="identity-profile-label">{{ _('Login Identity') }}</label>
+            <label class="identity-profile-label">{{ _('Primary Login Identity') }}</label>
             <div class="row">
               <div class="col-md-8 col-sm-6">
                 <span class="email">
@@ -118,7 +118,7 @@
 
           {% if possible_primary_accounts %}
             <fieldset>
-              <label class="identity-profile-label">{{ _('Primary Login Identity') }}</label>
+              <label class="identity-profile-label">{{ _('Alternate Login Identities') }}</label>
               {% for account in possible_primary_accounts %}
                 <div class="row">
                   <div class="col-md-8 col-sm-6">
@@ -134,9 +134,9 @@
               {% endfor %}
 
               <div class="help-block">
-                This is the primary identity used to login in Mozilla properties through the
-                Identity and Access Management System. If you change this, you will need to use the new
-                identity to all of the Mozilla properties.
+                This section includes the available identities that a user can select to login to Mozilla
+                Services through the Identity and Access Management System. Please note that only the idenity
+                that is marked as Primary can be used for login purposes.
               </div>
             </fieldset>
           {% endif %}
