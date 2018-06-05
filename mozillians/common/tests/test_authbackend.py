@@ -131,7 +131,7 @@ class MozilliansAuthBackendTests(TestCase):
         self.backend.request = request_mock
 
         returned_user = self.backend.check_authentication_method(user)
-        msg = 'Please use one of the following authentication methods: LDAP Provider'
+        msg = 'Please use LDAP Provider as the login method to authenticate'
         mocked_message.error.assert_called_once_with(request_mock, msg)
 
         eq_(returned_user, None)
