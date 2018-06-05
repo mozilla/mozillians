@@ -1,6 +1,5 @@
 import json
 import logging
-import math
 import requests
 from urllib import urlencode
 
@@ -720,10 +719,9 @@ class VerifyIdentityCallbackView(View):
             # We need to check for equality too in the case a user updates the primary email in
             # the same identity (matching auth0_user_id). If there is an addition of the same type
             # we are not swapping login identities
-            new_idp_type = int(math.floor(idp.type / 10) * 10)
-            if ((current_idp and current_idp.type < new_idp_type) or
+            if ((current_idp and current_idp.type < idp.type) or
                 (current_idp and current_idp.auth0_user_id == idp.auth0_user_id) or
-                    (not current_idp and created and new_idp_type > IdpProfile.PROVIDER_GITHUB)):
+                    (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
                 idp.primary = True
                 idp.save()
