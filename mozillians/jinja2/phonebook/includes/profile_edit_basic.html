@@ -115,31 +115,6 @@
               control the visibility of the email associated with this identity.
             </div>
           </fieldset>
-
-          {% if possible_primary_accounts %}
-            <fieldset>
-              <label class="identity-profile-label">{{ _('Alternate Login Identities') }}</label>
-              {% for account in possible_primary_accounts %}
-                <div class="row">
-                  <div class="col-md-8 col-sm-6">
-                    <span class="email">
-                      {{ account.get_type_display() }}
-                      {{ account.email }}
-                      <a class="button" href="{{ url('phonebook:change_primary_login_identity', account.pk) }}">
-                        Switch Login Identity
-                      </a>
-                    </span>
-                  </div>
-                </div>
-              {% endfor %}
-
-              <div class="help-block">
-                This section includes the available identities that a user can select to login to Mozilla
-                Services through the Identity and Access Management System. Please note that only the idenity
-                that is marked as Primary can be used for login purposes.
-              </div>
-            </fieldset>
-          {% endif %}
         {% endif %}
 
         <fieldset id="idp-profiles">
