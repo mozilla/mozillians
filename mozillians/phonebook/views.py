@@ -189,6 +189,7 @@ def view_profile(request, username):
     data['access_groups'] = profile.get_annotated_access_groups()
     data['tags'] = profile.get_annotated_tags()
     data['abuse_form'] = abuse_form
+    data['primary_identity'] = profile.identity_profiles.filter(primary_contact_identity=True)
     data['alternate_identities'] = profile.identity_profiles.filter(primary_contact_identity=False)
 
     # Only show pending groups if user is looking at their own profile,

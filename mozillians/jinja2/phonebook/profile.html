@@ -117,6 +117,14 @@
                 {% if user != shown_user %}</a>{% endif %}
               </section>
             {% endif %}
+            {# Only show github primary accounts #}
+            {% if primary_identity.exists() and primary_identity[0].type == 30 %}
+              {% set idp = primary_identity[0] %}
+              <section class="p-github">
+                <i class="icon-github"></i>
+                <span class="github_url">{{ idp|get_idp_external_url }}</span>
+              </section>
+            {% endif %}
             {% if profile.ircname %}
               <section class="p-nickname">
                 <i class="icon-comments-o"></i> IRC :
