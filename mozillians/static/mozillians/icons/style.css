@@ -41,6 +41,9 @@
 .icon-envelope-o:before {
 	content: "\f003";
 }
+.icon-github:before {
+	content: "\f09b";
+}
 .icon-user:before {
 	content: "\f007";
 }
