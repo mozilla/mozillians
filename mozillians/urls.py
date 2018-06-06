@@ -59,5 +59,6 @@ if settings.DEBUG:
         url(r'^500/$', handler500),
         url(r'^csrf/$', handler_csrf),
         url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        url(r'^__debug__/', include(debug_toolbar.urls))
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+        url(r'^silk/', include('silk.urls', namespace='silk'))
     ]
