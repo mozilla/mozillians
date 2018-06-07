@@ -118,7 +118,7 @@
               </section>
             {% endif %}
             {# Only show github primary accounts #}
-            {% if primary_identity.exists() and primary_identity[0].type == 30 % and primary_identity[0].username }
+            {% if primary_identity.exists() and primary_identity[0].type == 30 and primary_identity[0].username %}
               {% set idp = primary_identity[0] %}
               <section class="p-github">
                 <i class="icon-github"></i>
