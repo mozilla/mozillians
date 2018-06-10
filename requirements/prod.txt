@@ -108,9 +108,9 @@ commonware==0.5.0 \
 six==1.11.0 \
     --hash=sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb \
     --hash=sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9
-celery==4.1.1 \
-    --hash=sha256:6fc4678d1692af97e137b2a9f1c04efd8e7e2fb7134c5c5ad60738cdd927762f \
-    --hash=sha256:d1f2a3359bdbdfb344edce98b8e891f5fe64f8a11c5a45538ec20ac237c971f5
+celery==4.2.0 \
+    --hash=sha256:2082cbd82effa8ac8a8a58977d70bb203a9f362817e3b66f4578117b9f93d8a9 \
+    --hash=sha256:ff727c115533edbc7b81b2b4ba1ec88d1c2fc4836e1e2f4c3c33a76ff53e5d7f
 diff-match-patch==20121119 \
     --hash=sha256:9dba5611fbf27893347349fd51cc1911cb403682a7163373adacc565d11e2e4c
 django-appconf==1.0.2 \
