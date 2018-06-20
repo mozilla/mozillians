@@ -10,6 +10,7 @@ from cities_light.models import City, Country, Region
 from dal import autocomplete
 from pytz import country_timezones
 
+from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.groups.models import GroupMembership
 from mozillians.phonebook.forms import get_timezones_list
 from mozillians.users.models import IdpProfile, UserProfile
@@ -106,6 +107,31 @@ def get_autocomplete_location_query(qs, q):
 
 
 class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_results(self, context):
+        """Modify the text in the results of the group invitation form."""
+
+        results = []
+        for result in context['object_list']:
+            pk = self.get_result_value(result)
+            if not pk:
+                continue
+
+            profile = UserProfile.objects.get(pk=pk)
+            idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
+            text = self.get_result_label(result)
+
+            # Append the email used for login in the autocomplete text
+            if idp:
+                text += ' ({0})'.format(idp.email)
+
+            item = {
+                'id': pk,
+                'text': text
+            }
+            results.append(item)
+        return results
+
     def get_queryset(self):
         if not self.request.user.userprofile.is_vouched:
             return UserProfile.objects.none()
@@ -129,6 +155,7 @@ class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
+
     def get_queryset(self):
         staff_qs = super(AccessGroupInvitationAutocomplete, self).get_queryset()
         staff_ids = staff_qs.values_list('pk', flat=True)
