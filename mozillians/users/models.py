@@ -945,6 +945,7 @@ class ExternalAccount(models.Model):
     TYPE_TELEGRAM = 'TELEGRAM'
     TYPE_MASTODON = 'MASTODON'
     TYPE_DISCORD = 'DISCORD'
+    TYPE_MOZPHAB = 'MOZPHAB'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -1033,6 +1034,9 @@ class ExternalAccount(models.Model):
         TYPE_DISCORD: {'name': 'Discord',
                        'url': '',
                        'validator': validate_discord},
+        TYPE_MOZPHAB: {'name': 'Mozilla Phabricator',
+                       'url': 'https://phabricator.services.mozilla.com/p/{identifier}/',
+                       'validator': validate_username_not_url},
     }
 
     user = models.ForeignKey(UserProfile)
