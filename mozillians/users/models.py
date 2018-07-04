@@ -334,7 +334,7 @@ class UserProfile(UserProfilePrivacyModel):
             # Try IDP contact first
             if self.idp_profiles.exists():
                 contact_ids = self.identity_profiles.filter(primary_contact_identity=True)
-                if contact_ids.exists():
+                if contact_ids.exists() and contact_ids[0].privacy < self._privacy_level:
                     return contact_ids[0].email
                 return ''
 
@@ -860,6 +860,12 @@ class IdpProfile(models.Model):
             self.primary_contact_identity = True
 
         super(IdpProfile, self).save(*args, **kwargs)
+
+        # Save profile.privacy_email when a primary contact identity changes
+        if self.primary_contact_identity:
+            profile = self.profile
+            profile.privacy_email = self.privacy
+            profile.save()
 
     def __unicode__(self):
         return u'{}|{}|{}'.format(self.profile, self.type, self.email)

@@ -118,8 +118,10 @@ class MozilliansAuthBackendTests(TestCase):
         IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id='ad|foobar',
-            primary=True
+            primary=True,
+            email='foobar@example.com'
         )
+
         claims = {
             'email': 'bar@example.com',
             'user_id': 'foobar'

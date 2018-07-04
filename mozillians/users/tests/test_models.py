@@ -692,7 +692,6 @@ class EmailAttributeTests(TestCase):
 
     def test_existing_idp_privacy_not_allowed(self):
         profile = UserFactory.create(email='foo@foo.com').userprofile
-        profile.set_instance_privacy_level(PUBLIC)
         IdpProfile.objects.create(
             profile=profile,
             auth0_user_id='github|foo@bar.com',
@@ -701,6 +700,7 @@ class EmailAttributeTests(TestCase):
             primary_contact_identity=True,
             privacy=MOZILLIANS
         )
+        profile.set_instance_privacy_level(PUBLIC)
 
         eq_(profile.email, '')
 
@@ -805,11 +805,13 @@ class CISHelperMethodsTests(unittest.TestCase):
             profile=user.userprofile,
             auth0_user_id='github|foo@bar.com',
             primary=False,
+            email='foo@bar.com'
         )
         idp = IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id='ad|foo@bar.com',
             primary=True,
+            email='foo@bar.com'
         )
 
         eq_(set(user.userprofile.get_cis_groups(idp)),
@@ -828,11 +830,13 @@ class CISHelperMethodsTests(unittest.TestCase):
             profile=user.userprofile,
             auth0_user_id='github|foo@bar.com',
             primary=False,
+            email='foo@bar.com'
         )
         IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id='ad|foo@bar.com',
             primary=True,
+            email='foo@bar.com'
         )
 
         eq_(user.userprofile.get_cis_groups(idp), [])
@@ -873,6 +877,7 @@ class CISHelperMethodsTests(unittest.TestCase):
             profile=user1.userprofile,
             auth0_user_id='github|foo@bar.com',
             primary=False,
+            email='foo@bar.com'
         )
 
         eq_(user.userprofile.get_cis_groups(idp), [])
@@ -892,6 +897,7 @@ class CISHelperMethodsTests(unittest.TestCase):
             profile=user.userprofile,
             auth0_user_id='ad|foo@bar.com',
             primary=True,
+            email='foo@bar.com'
         )
 
         eq_(set(user.userprofile.get_cis_tags()),
