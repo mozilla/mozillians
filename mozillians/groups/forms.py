@@ -303,37 +303,6 @@ class GroupCriteriaForm(happyforms.ModelForm):
         }
 
 
-class GroupAccessForm(happyforms.ModelForm):
-    """Modelform which handles the editing of access/tag groups."""
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(GroupAccessForm, self).__init__(*args, **kwargs)
-
-    def clean(self):
-        """Custom clean method."""
-        super(GroupAccessForm, self).clean()
-        user = getattr(self.request, 'user', None)
-        if ((not user or not user.userprofile.can_create_access_groups) and
-                self.cleaned_data['is_access_group']):
-            msg = _(u'You do not have the permissions to provision an access group.')
-            self._errors['is_access_group'] = self.error_class([msg])
-
-        if (self.instance.id and self.instance.accepting_new_members == Group.OPEN and
-                self.cleaned_data['is_access_group']):
-            msg = _(u'An access group must be of type Reviewed or Closed.')
-            self._errors['is_access_group'] = self.error_class([msg])
-
-        return self.cleaned_data
-
-    class Meta:
-        model = Group
-        fields = ('is_access_group',)
-        widgets = {
-            'is_access_group': HorizontalRadioSelect()
-        }
-
-
 class MembershipFilterForm(forms.Form):
     filtr = forms.ChoiceField(required=False,
                               label='',
@@ -357,9 +326,10 @@ class TermsReviewForm(forms.Form):
                                        ])
 
 
-class GroupCreateForm(GroupAccessForm):
+class GroupCreateForm(happyforms.ModelForm):
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(GroupCreateForm, self).__init__(*args, **kwargs)
         user = getattr(self.request, 'user', None)
         if not user or not user.userprofile.can_create_access_groups:
@@ -371,6 +341,12 @@ class GroupCreateForm(GroupAccessForm):
         Check that only closed/reviewed groups can be access groups.
         """
         cdata = super(GroupCreateForm, self).clean()
+        user = getattr(self.request, 'user', None)
+        if ((not user or not user.userprofile.can_create_access_groups) and
+                self.cleaned_data['is_access_group']):
+            msg = _(u'You do not have the permissions to provision an access group.')
+            self._errors['is_access_group'] = self.error_class([msg])
+
         if cdata['is_access_group'] and cdata['accepting_new_members'] == Group.OPEN:
             msg = _(u'Group must be of type Reviewed or Closed for Access Groups.')
             self._errors['is_access_group'] = self.error_class([msg])

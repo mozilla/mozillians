@@ -459,7 +459,6 @@ def group_edit(request, url=None):
     group_forms['admin_form'] = forms.GroupAdminForm
     group_forms['criteria_form'] = forms.GroupCriteriaForm
     group_forms['email_form'] = forms.GroupCustomEmailForm
-    group_forms['access_form'] = forms.GroupAccessForm
     # Do not allow community curators of an access group to modify it
     if group.is_access_group and is_curator and not profile.can_create_access_groups:
         # reset the form to include only the invitation form
@@ -499,6 +498,10 @@ def group_edit(request, url=None):
     elif request.POST:
         forms_valid = False
 
+    # check if any of the following forms exist in order to show the access tab
+    show_access_edit_option = any(form in group_forms for form in ('curator_form',
+                                                                   'criteria_form',
+                                                                   'term_expiration_form'))
     context = {
         'group': group if url else None,
         'invites': invites if group else None,
@@ -506,6 +509,7 @@ def group_edit(request, url=None):
         'user_is_curator': is_curator,
         'user_is_manager': is_manager,
         'user_can_create_access_groups': profile.can_create_access_groups,
+        'show_access_edit_option': show_access_edit_option,
         'show_delete_group_button': show_delete_group_button
     }
     context.update(group_forms)

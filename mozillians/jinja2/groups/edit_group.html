@@ -27,7 +27,7 @@
               </a>
             </li>
           {% endif %}
-          {% if access_form %}
+          {% if show_access_edit_option %}
             <li role="presentation" id="access-tab">
               <a href="#access" aria-controls="access" role="tab" data-toggle="tab">
                 {{ _('Access') }}
@@ -59,7 +59,7 @@
           {% include 'groups/includes/group_edit_description.html' %}
         {% endif %}
         <!-- Access Tab -->
-        {% if access_form %}
+        {% if show_access_edit_option %}
           {% include 'groups/includes/group_edit_access.html' %}
         {% endif %}
         <!-- Invitations Tab -->
