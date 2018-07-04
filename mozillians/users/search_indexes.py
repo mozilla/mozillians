@@ -66,10 +66,10 @@ class IdpProfileIndex(indexes.SearchIndex, indexes.Indexable):
     # Primary field of the index
     text = indexes.CharField(document=True, use_template=True)
     # IdpProfile information
-    idp_email = indexes.CharField(model_attr='email')
-    privacy_idp_email = indexes.IntegerField(model_attr='privacy')
-    idp_username = indexes.CharField(model_attr='username')
-    privacy_idp_username = indexes.IntegerField(model_attr='privacy')
+    iemail = indexes.CharField(model_attr='email')
+    privacy_iemail = indexes.IntegerField(model_attr='privacy')
+    iusername = indexes.CharField(model_attr='username')
+    privacy_iusername = indexes.IntegerField(model_attr='privacy')
 
     def get_model(self):
         return IdpProfile
