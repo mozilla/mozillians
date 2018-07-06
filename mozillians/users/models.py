@@ -334,7 +334,7 @@ class UserProfile(UserProfilePrivacyModel):
             # Try IDP contact first
             if self.idp_profiles.exists():
                 contact_ids = self.identity_profiles.filter(primary_contact_identity=True)
-                if contact_ids.exists() and contact_ids[0].privacy < self._privacy_level:
+                if contact_ids.exists():
                     return contact_ids[0].email
                 return ''
 
