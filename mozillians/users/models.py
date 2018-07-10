@@ -593,11 +593,9 @@ class UserProfile(UserProfilePrivacyModel):
 
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
-        emails = [acc.identifier for acc in
-                  ExternalAccount.objects.filter(user=self, type=ExternalAccount.TYPE_EMAIL)]
-        emails.append(self.email)
+        emails = [idp.email for idp in IdpProfile.objects.filter(profile=self)]
 
-        email_exists = any([email for email in emails
+        email_exists = any([email for email in set(emails)
                             if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
         if email_exists and not self.vouches_received.filter(
                 description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():

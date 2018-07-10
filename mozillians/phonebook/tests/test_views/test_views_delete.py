@@ -8,6 +8,7 @@ from mock import patch
 from nose.tools import eq_, ok_
 
 from mozillians.common.tests import TestCase, requires_login
+from mozillians.users.models import IdpProfile
 from mozillians.users.tests import UserFactory
 
 
@@ -89,7 +90,13 @@ class DeleteTests(TestCase):
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     @override_settings(AUTO_VOUCH_REASON='Autovouch reason')
     def test_delete_auto_vouch_domain(self):
-        user = UserFactory.create(email='foo@example.com')
+        user = UserFactory.create()
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|test@example.com',
+            email='test@example.com',
+            primary=True,
+        )
         description = 'Autovouch reason'
         vouch = user.userprofile.vouches_received.filter(autovouch=True, description=description)
         ok_(vouch.exists())

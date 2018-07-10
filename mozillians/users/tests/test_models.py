@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.db.models.query import QuerySet
 from django.test import override_settings
 from django.utils.timezone import make_aware, now
@@ -99,8 +98,12 @@ class SignaledFunctionsTests(TestCase):
 
     def test_vouch_alternate_mozilla_address(self):
         user = UserFactory.create(vouched=False)
-        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
-                                                    identifier='test@mozilla.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|test@mozilla.com',
+            email='test@mozilla.com',
+            primary=True,
+        )
         vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
                                            description=settings.AUTO_VOUCH_REASON)
         eq_(vouch_query.count(), 1)
@@ -108,10 +111,17 @@ class SignaledFunctionsTests(TestCase):
 
     def test_vouch_multiple_mozilla_alternate_emails(self):
         user = UserFactory.create(vouched=False)
-        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
-                                                    identifier='test1@mozilla.com')
-        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
-                                                    identifier='test2@mozilla.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|test1@mozilla.com',
+            email='test1@mozilla.com',
+            primary=True,
+        )
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|test2@mozilla.com',
+            email='test2@mozilla.com',
+        )
         vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
                                            description=settings.AUTO_VOUCH_REASON)
         eq_(vouch_query.count(), 1)
@@ -119,33 +129,14 @@ class SignaledFunctionsTests(TestCase):
 
     def test_vouch_non_mozilla_alternate_email(self):
         user = UserFactory.create(vouched=False)
-        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
-                                                    identifier='test@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='github|test@example.com',
+            email='test@example.com',
+            primary=True,
+        )
         eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 0)
         eq_(user.userprofile.is_vouched, False)
-
-    def test_vouch_mozilla_email_as_primary(self):
-        user = UserFactory.create(vouched=False, email='test1@mozilla.com')
-        eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 1)
-        eq_(user.userprofile.is_vouched, True)
-        user.userprofile.externalaccount_set.create(type=ExternalAccount.TYPE_EMAIL,
-                                                    identifier='test2@example.com')
-        eq_(Vouch.objects.filter(vouchee=user.userprofile).count(), 1)
-
-    def change_alternate_mozilla_email_to_primary(self):
-        user = UserFactory.create(vouched=False, email='test@example.com')
-        alternate_email = user.userprofile.externalaccount_set.create(
-            type=ExternalAccount.TYPE_EMAIL, identifier='test@mozilla.com')
-
-        with self.login(user) as client:
-            url = reverse('phonebook:change_primary_email', args=[alternate_email.pk])
-            client.get(url, follow=True)
-        user = User.objects.get(pk=user.pk)
-        eq_(user.email, 'test@mozilla.com')
-        eq_(user.userprofile.is_vouched, True)
-        vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
-                                           description=settings.AUTO_VOUCH_REASON)
-        eq_(vouch_query.count(), 1)
 
 
 class UserProfileTests(TestCase):
@@ -525,11 +516,17 @@ class UserProfileTests(TestCase):
 
 
 class VouchTests(TestCase):
+    """Tests related to the vouching functionality."""
     @override_settings(CAN_VOUCH_THRESHOLD=1)
     @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
     def test_auto_vouching(self):
         UserFactory.create(email='no-reply@mozillians.org')
         user_1 = UserFactory.create(vouched=False, email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user_1.userprofile,
+            auth0_user_id='github|foo@example.com',
+            email='foo@example.com',
+        )
         user_1 = User.objects.get(pk=user_1.pk)
         ok_(user_1.userprofile.is_vouched)
         eq_(user_1.userprofile.vouches_received.all()[0].autovouch, True)
@@ -541,7 +538,7 @@ class VouchTests(TestCase):
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
     @patch('mozillians.users.models.now')
     def test_vouch(self, datetime_mock, email_vouched_mock):
-        dt = make_aware(datetime(2012, 01, 01, 00, 10), pytz.UTC)
+        dt = make_aware(datetime(2012, 1, 1, 00, 10), pytz.UTC)
         datetime_mock.return_value = dt
         user_1 = UserFactory.create()
         user_2 = UserFactory.create(vouched=False)
