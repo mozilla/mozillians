@@ -586,6 +586,7 @@ STATICFILES_FINDERS = (
 
 # Authentication settings
 AUTHENTICATION_BACKENDS = (
+    'axes.backends.AxesModelBackend',
     'django.contrib.auth.backends.ModelBackend',
     'mozillians.common.authbackend.MozilliansAuthBackend',
 )
