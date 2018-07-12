@@ -2,7 +2,7 @@ language: python
 dist: trusty
 sudo: false
 python:
-  - "2.7.13"
+  - "2.7"
 env:
   DATABASE_URL=mysql://travis@127.0.0.1/mozillians
   BASKET_URL=http://127.0.0.1
@@ -17,10 +17,6 @@ services:
   - elasticsearch
   - mysql
 before_install:
-  # Hack to fix error `ImportError: No module named google_compute_engine`
-  # during boto install.
-  # https://github.com/travis-ci/travis-ci/issues/7940
-  - sudo rm -f /etc/boto.cfg
   - pip install flake8
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
