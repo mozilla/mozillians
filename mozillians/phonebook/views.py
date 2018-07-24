@@ -589,8 +589,7 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
                 request,
                 nonprefixed_url('phonebook:verify_identity_callback')
             ),
-            'state': state,
-            'prompt': settings.OIDC_PROMPT
+            'state': state
         }
 
         if import_from_settings('OIDC_USE_NONCE', True):
