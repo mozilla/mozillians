@@ -715,13 +715,17 @@ if DEV:
         'http://*.mozilla.net',
         'http://*.mozilla.org',
     )
-    CSP_SCRIPT_SRC += (
+    CSP_SCRIPT_SRC = (
+        "'self'",
+        "'unsafe-inline'",
         'http://*.mozilla.net',
         'http://*.mozilla.org',
+        'http://cdn.jsdelivr.net',
     )
     CSP_STYLE_SRC += (
         'http://*.mozilla.net',
         'http://*.mozilla.org',
+        'http://cdn.jsdelivr.net',
     )
 
 
