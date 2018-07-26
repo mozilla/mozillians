@@ -56,6 +56,7 @@ INSTALLED_APPS = (
     'cities_light',
     'axes',
     'haystack',
+    'graphene_django',
 
     'mozillians',
     'mozillians.users',
@@ -68,6 +69,7 @@ INSTALLED_APPS = (
     'mozillians.announcements',
     'mozillians.humans',
     'mozillians.geo',
+    'mozillians.graphql',
 
     'sorl.thumbnail',
     'import_export',
@@ -691,6 +693,18 @@ REST_FRAMEWORK = {
     ),
 }
 
+# Orgchart s3
+ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
+ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
+ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
+
+# Django Graphene
+GRAPHENE = {
+    'SCHEMA': 'mozillians.schema.schema'
+}
+V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
+
+
 if DEV:
     CSP_FONT_SRC += (
         'http://*.mozilla.net',
@@ -701,20 +715,19 @@ if DEV:
         'http://*.mozilla.net',
         'http://*.mozilla.org',
     )
-    CSP_SCRIPT_SRC += (
+    CSP_SCRIPT_SRC = (
+        "'self'",
+        "'unsafe-inline'",
         'http://*.mozilla.net',
         'http://*.mozilla.org',
+        'http://cdn.jsdelivr.net',
     )
     CSP_STYLE_SRC += (
         'http://*.mozilla.net',
         'http://*.mozilla.org',
+        'http://cdn.jsdelivr.net',
     )
 
-
-# Orgchart s3
-ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
-ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
-ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
 
 if DEBUG:
     for backend in TEMPLATES:
