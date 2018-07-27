@@ -1,6 +1,6 @@
 import graphene
 
-from mozillians.graphql import query
+from mozillians.graphql_profiles import query
 
 
 class Query(query.Query, graphene.ObjectType):

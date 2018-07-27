@@ -3,8 +3,8 @@ import requests
 
 from django.conf import settings
 
-from mozillians.graphql.schema import CoreProfile
-from mozillians.graphql.utils import json2obj
+from mozillians.graphql_profiles.schema import CoreProfile
+from mozillians.graphql_profiles.utils import json2obj
 
 
 class Query(object):
