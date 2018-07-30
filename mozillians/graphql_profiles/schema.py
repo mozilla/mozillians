@@ -1,6 +1,6 @@
 import graphene
 
-from mozillians.graphql.utils import parse_datetime_iso8601
+from mozillians.graphql_profiles.utils import parse_datetime_iso8601
 
 
 class Alg(graphene.Enum):

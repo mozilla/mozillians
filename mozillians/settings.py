@@ -69,7 +69,7 @@ INSTALLED_APPS = (
     'mozillians.announcements',
     'mozillians.humans',
     'mozillians.geo',
-    'mozillians.graphql',
+    'mozillians.graphql_profiles',
 
     'sorl.thumbnail',
     'import_export',
