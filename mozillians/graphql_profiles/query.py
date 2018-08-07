@@ -1,3 +1,4 @@
+import json
 import graphene
 import requests
 
@@ -10,18 +11,23 @@ from mozillians.graphql_profiles.utils import json2obj
 class Query(object):
     """GraphQL Query class for the V2 Profiles."""
 
-    profiles = graphene.List(CoreProfile, userId=graphene.String())
+    profiles = graphene.List(CoreProfile)
+    profile = graphene.Field(CoreProfile, userId=graphene.String(required=True))
 
     def resolve_profiles(self, info, **kwargs):
         """GraphQL resolver for the profiles attribute."""
         resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
 
-        data = json2obj(resp)
-        # Query based on user_id
+        return json2obj(json.dumps(resp))
+
+    def resolve_profile(self, info, **kwargs):
+        """GraphQL resolver for a single profile."""
+
+        resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
+
+        data = json2obj(json.dumps(resp))
         user_id = kwargs.get('userId')
-        if user_id:
-            for profile in data:
-                if profile['user_id']['value'] == user_id:
-                    return [profile]
-            return None
-        return data
+        for profile in data:
+            if profile['user_id']['value'] == user_id:
+                return profile
+        return None
