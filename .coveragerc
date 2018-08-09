@@ -1,5 +1,6 @@
 [run]
 source = mozillians
+omit = */graphql_profiles/*
 
 [report]
 omit = */migrations/*
