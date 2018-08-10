@@ -92,7 +92,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
-    # 'mozilla_django_oidc.middleware.RefreshIDToken',
+    # 'mozilla_django_oidc.middleware.SessionRefresh',
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
@@ -397,6 +397,10 @@ OIDC_EXEMPT_URLS = [
     u'/verify/identity/callback/',
 ]
 OIDC_RP_SCOPES = 'openid email profile'
+# Enable NLX Singup flow
+OIDC_AUTH_REQUEST_EXTRA_PARAMS = {
+    'action': 'signup'
+}
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
