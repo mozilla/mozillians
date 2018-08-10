@@ -397,6 +397,10 @@ OIDC_EXEMPT_URLS = [
     u'/verify/identity/callback/',
 ]
 OIDC_RP_SCOPES = 'openid email profile'
+# Enable NLX Singup flow
+OIDC_AUTH_REQUEST_EXTRA_PARAMS = {
+    'action': 'signup'
+}
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
