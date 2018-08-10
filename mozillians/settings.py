@@ -162,7 +162,7 @@ STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-US')
 LOCALE_PATHS = [Path('locale').resolve()]
 # Accepted locales
-PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
+PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-CA', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr',
                   'sv-SE', 'te', 'zh-TW', 'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk', 'kab',
                   'fy-NL',)
