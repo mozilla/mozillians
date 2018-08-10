@@ -92,7 +92,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
-    # 'mozilla_django_oidc.middleware.RefreshIDToken',
+    # 'mozilla_django_oidc.middleware.SessionRefresh',
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
