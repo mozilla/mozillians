@@ -26,6 +26,12 @@ def add_missing_employee_vouches(apps, schema_editor):
                 autovouch=True
             )
 
+            vouches = profile.vouches_received.all().count()
+            UserProfile.objects.filter(pk=profile.pk).update(
+                is_vouched=vouches > 0,
+                can_vouch=vouches >= settings.CAN_VOUCH_THRESHOLD
+            )
+
 
 def backwards(apps, schema_editor):
     pass
