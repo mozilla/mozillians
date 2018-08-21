@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations
 from django.conf import settings
+from django.utils.timezone import now
 
 
 def add_missing_employee_vouches(apps, schema_editor):
@@ -17,7 +18,13 @@ def add_missing_employee_vouches(apps, schema_editor):
                             if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
         if email_exists and not profile.vouches_received.filter(
                 description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
-            profile.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
+
+            profile.vouches_received.create(
+                voucher=None,
+                date=now(),
+                description=settings.AUTO_VOUCH_REASON,
+                autovouch=True
+            )
 
 
 def backwards(apps, schema_editor):
