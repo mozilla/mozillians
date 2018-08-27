@@ -92,7 +92,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 
     'session_csrf.CsrfMiddleware',  # Must be after auth middleware.
-    # 'mozilla_django_oidc.middleware.RefreshIDToken',
+    # 'mozilla_django_oidc.middleware.SessionRefresh',
 
     'django.contrib.messages.middleware.MessageMiddleware',
 
@@ -162,7 +162,7 @@ STANDALONE_DOMAINS = [TEXT_DOMAIN, 'djangojs']
 LANGUAGE_CODE = config('LANGUAGE_CODE', default='en-US')
 LOCALE_PATHS = [Path('locale').resolve()]
 # Accepted locales
-PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
+PROD_LANGUAGES = ('ca', 'cs', 'de', 'en-CA', 'en-US', 'en-GB', 'es', 'hu', 'fr', 'it', 'ko',
                   'nl', 'pl', 'pt-BR', 'pt-PT', 'ro', 'ru', 'sk', 'sl', 'sq', 'sr',
                   'sv-SE', 'te', 'zh-TW', 'zh-CN', 'lt', 'ja', 'hsb', 'dsb', 'uk', 'kab',
                   'fy-NL',)
@@ -397,6 +397,10 @@ OIDC_EXEMPT_URLS = [
     u'/verify/identity/callback/',
 ]
 OIDC_RP_SCOPES = 'openid email profile'
+# Enable NLX Singup flow
+OIDC_AUTH_REQUEST_EXTRA_PARAMS = {
+    'action': 'signup'
+}
 
 # AWS credentials
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
