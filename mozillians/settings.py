@@ -704,7 +704,10 @@ ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool
 
 # Django Graphene
 GRAPHENE = {
-    'SCHEMA': 'mozillians.schema.schema'
+    'SCHEMA': 'mozillians.schema.schema',
+    'MIDDLEWARE': (
+        'graphene_django.debug.DjangoDebugMiddleware',
+    )
 }
 V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
 
