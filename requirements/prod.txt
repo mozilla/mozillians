@@ -278,9 +278,9 @@ django-haystack==2.8.1 \
 boto3==1.8.4 \
     --hash=sha256:16f0bb2cc55f9c8c96549a7211c3e5b7242c60ba186eee3d7e737210c76fd221 \
     --hash=sha256:06ecdf57cc4a44ed2f7d555390aca2f3bab6b244abd000ee2d55bfb408ff90c8
-botocore==1.11.4 \
-    --hash=sha256:8d0b64bfa0043b93cd779c8bf960bb0a8d763b6b803310b6bd49c62f564cc2af \
-    --hash=sha256:284f25a67fa3470314ce78a53e57df8591549652ae31dce1097acefec195b694
+botocore==1.11.5 \
+    --hash=sha256:dcad4db0349dd11278d094a91434faf11500aae1991890a62d47a79923ca7ba3 \
+    --hash=sha256:4a2d4fc68fdc7113957cfc51b733a9900a9ba35e19e6d841a8b11fd6c20732f9
 jmespath==0.9.3 \
     --hash=sha256:f11b4461f425740a1d908e9a3f7365c3d2e569f6ca68a2ff8bc5bcd9676edd63 \
     --hash=sha256:6a81d4c9aa62caf061cb517b4d9ad1dd300374cd4706997aff9cd6aedd61fc64
