@@ -11,7 +11,7 @@ RUN pip install "pip<10"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    git build-essential libxml2-dev libxslt-dev \
+    git build-essential libxml2-dev libxslt-dev procps \
     mysql-client default-libmysqlclient-dev gettext node-less && \
     rm -rf /var/lib/apt/lists/*
 
