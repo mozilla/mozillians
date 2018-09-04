@@ -23,10 +23,9 @@ class Classification(graphene.Enum):
     """V2 Schema Classification object for Graphene."""
 
     MOZILLA_CONFIDENTIAL = 'MOZILLA CONFIDENTIAL'
-    STAFF_ONLY = 'STAFF ONLY'
-    NDA = 'NDA'
-    REGISTERED = 'REGISTERED'
     PUBLIC = 'PUBLIC'
+    INDIVIDUAL_CONFIDENTIAL = 'INDIVIDUAL CONFIDENTIAL'
+    STAFF_ONLY = 'WORKGROUP CONFIDENTIAL: STAFF ONLY'
 
 
 class PublisherAuthority(graphene.Enum):
@@ -72,32 +71,32 @@ class Metadata(graphene.ObjectType):
         return parse_datetime_iso8601(self.get('created'))
 
 
-class StandardAttributeDatetime(graphene.ObjectType):
+class BaseObjectType(graphene.ObjectType):
+    """V2 Schema Base object object for Graphene."""
+    signature = graphene.Field(Signature)
+    metadata = graphene.Field(Metadata)
+
+
+class StandardAttributeDatetime(BaseObjectType):
     """V2 Schema StandardAttributeDatetime object for Graphene."""
 
     value = graphene.DateTime()
-    signature = graphene.Field(Signature)
-    metadata = graphene.Field(Metadata)
 
     def resolve_value(self, info, **kwargs):
         """Resolver to return a datetime object."""
         return parse_datetime_iso8601(self.get('value'))
 
 
-class StandardAttributeBoolean(graphene.ObjectType):
+class StandardAttributeBoolean(BaseObjectType):
     """V2 Schema StandardAttributeBoolean object for Graphene."""
 
     value = graphene.Boolean()
-    signature = graphene.Field(Signature)
-    metadata = graphene.Field(Metadata)
 
 
-class StandardAttributeString(graphene.ObjectType):
+class StandardAttributeString(BaseObjectType):
     """V2 Schema StandardAttributeString object for Graphene."""
 
     value = graphene.String()
-    signature = graphene.Field(Signature)
-    metadata = graphene.Field(Metadata)
 
 
 class IdentitiesValues(graphene.ObjectType):
@@ -126,23 +125,19 @@ class IdentitiesValues(graphene.ObjectType):
         return self.get('google-oauth2')
 
 
-class Identities(graphene.ObjectType):
+class Identities(BaseObjectType):
     """V2 Schema Identities object for Graphene."""
 
     values = graphene.Field(IdentitiesValues)
-    signature = graphene.Field(Signature)
-    metadata = graphene.Field(Metadata)
 
     def resolve_values(self, info, **kwargs):
         return self.get('values')
 
 
-class StandardAttributeValues(graphene.ObjectType):
+class StandardAttributeValues(BaseObjectType):
     """V2 Schema StandardAttributeValues object for Graphene."""
 
     values = graphene.List(graphene.String)
-    metadata = graphene.Field(Metadata)
-    signature = graphene.Field(Signature)
 
     def resolve_values(self, info, **kwargs):
         """Custom resolver for the list of values."""
@@ -154,12 +149,58 @@ class StandardAttributeValues(graphene.ObjectType):
         return None
 
 
+class HRISAttributes(graphene.ObjectType):
+    """V2 Schema HRIS object for Graphene.
+
+    This is a well-known lists of HRIS attributes.
+    """
+    last_name = graphene.String(required=True)
+    preferred_name = graphene.String(required=True)
+    preferred_first_name = graphene.String(required=True)
+    legal_first_name = graphene.String(required=True)
+    employee_id = graphene.String(required=True)
+    business_title = graphene.String(required=True)
+    is_manager = graphene.Boolean(required=True)
+    is_director_or_above = graphene.Boolean(required=True)
+    management_level = graphene.String(required=True)
+    hire_date = graphene.DateTime(required=True)
+    currently_active = graphene.Boolean(required=True)
+    entity = graphene.String(required=True)
+    team = graphene.String(required=True)
+    cost_center = graphene.String(required=True)
+    cost_center_hierarchy = graphene.String(required=True)
+    worker_type = graphene.String(required=True)
+    detailed_worker_type = graphene.String(required=True)
+    location_description = graphene.String()
+    time_zone = graphene.String(required=True)
+    location_city = graphene.String(required=True)
+    location_state = graphene.String(required=True)
+    location_country_full = graphene.String(required=True)
+    location_country_iso2 = graphene.String(required=True)
+    worker_manager = graphene.String()
+    worker_manager_employee_id = graphene.String(required=True)
+    worker_s_manager_s_email_address = graphene.String(required=True)
+    primary_work_email = graphene.String(required=True)
+    wpr_desk_number = graphene.String()
+    egencia_pos_country = graphene.String(required=True)
+    public_email_addresses = graphene.List(graphene.String)
+
+
+class HRISAttributeValues(BaseObjectType):
+    """V2 Schema StandardAttributeValues object for Graphene."""
+
+    values = graphene.Field(HRISAttributes)
+
+    def resolve_values(self, info, **kwargs):
+        return self.get('values')
+
+
 class AccessInformation(graphene.ObjectType):
     """V2 Schema AccessInformation object for Graphene."""
 
     ldap = graphene.Field(StandardAttributeValues)
     mozilliansorg = graphene.Field(StandardAttributeValues)
-    hris = graphene.Field(StandardAttributeValues)
+    hris = graphene.Field(HRISAttributes)
     access_provider = graphene.Field(StandardAttributeValues)
 
 
