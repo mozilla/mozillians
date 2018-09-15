@@ -81,9 +81,9 @@ mock==2.0.0 \
     --hash=sha256:b158b6df76edd239b8208d481dc46b6afd45a846b7812ff0ce58971cf5bc8bba
 nosenicedots==0.5 \
     --hash=sha256:92ee3b86b5c1921c2d9dac217bef8990c5f852c8bc4d9018cafe0f3f3b81cd3a
-path.py==11.1.0 \
-    --hash=sha256:0594610b07ded3960bbfa96ff0ee7b1ad41dfc7dd0b480b3b66956ba7dde56e6 \
-    --hash=sha256:cbcbb3ed71b42fb8df1bc7645ddde298817f1a51684c3f9b3101937bdb28ff79
+path.py==11.2.0 \
+    --hash=sha256:49848edc5b0cabc884cb5d58ed0cee87a2afa6fd3ffc22fe29016e3c63ad40d5 \
+    --hash=sha256:6ca2d090b7953c798ab8db465ef0aed091ad6a62e8d943af8841016b193591ed
 pexpect==4.6.0 \
     --hash=sha256:3fbd41d4caf27fa4a377bfd16fef87271099463e6fa73e92a52f92dfee5d425b \
     --hash=sha256:2a8e88259839571d1251d278476f3eec5db26deb73a70be5ed5dc5435e418aba
