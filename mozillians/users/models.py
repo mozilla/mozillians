@@ -593,12 +593,9 @@ class UserProfile(UserProfilePrivacyModel):
 
     def auto_vouch(self):
         """Auto vouch mozilla.com users."""
-        emails = [idp.email for idp in IdpProfile.objects.filter(profile=self)]
-
-        email_exists = any([email for email in set(emails)
-                            if email.split('@')[1] in settings.AUTO_VOUCH_DOMAINS])
-        if email_exists and not self.vouches_received.filter(
-                description=settings.AUTO_VOUCH_REASON, autovouch=True).exists():
+        employee_vouch_q = self.vouches_received.filter(description=settings.AUTO_VOUCH_REASON,
+                                                        autovouch=True)
+        if not employee_vouch_q.exists():
             self.vouch(None, settings.AUTO_VOUCH_REASON, autovouch=True)
 
     def _email_now_vouched(self, vouched_by, description=''):
@@ -772,7 +769,7 @@ class UserProfile(UserProfilePrivacyModel):
 
     def save(self, *args, **kwargs):
         self._privacy_level = None
-        autovouch = kwargs.pop('autovouch', True)
+        autovouch = kwargs.pop('autovouch', False)
 
         super(UserProfile, self).save(*args, **kwargs)
         # Auto_vouch follows the first save, because you can't

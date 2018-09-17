@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from mozillians.common.utils import bundle_profile_data
 from mozillians.groups.models import Group
-from mozillians.users.models import IdpProfile, UserProfile, Vouch
+from mozillians.users.models import UserProfile, Vouch
 from mozillians.users.tasks import subscribe_user_to_basket, unsubscribe_from_basket_task
 
 
@@ -95,12 +95,3 @@ def update_vouch_flags(sender, instance, **kwargs):
     profile.is_vouched = vouches > 0
     profile.can_vouch = vouches >= settings.CAN_VOUCH_THRESHOLD
     profile.save(**{'autovouch': False})
-
-
-@receiver(signals.post_save, sender=IdpProfile, dispatch_uid='add_employee_vouch_sig')
-def add_employee_vouch(sender, instance, **kwargs):
-    """Add a vouch if an alternate email address is a mozilla* address."""
-
-    if kwargs.get('raw') or not instance.email:
-        return
-    instance.profile.auto_vouch()

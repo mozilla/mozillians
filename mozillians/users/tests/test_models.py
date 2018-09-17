@@ -96,19 +96,6 @@ class SignaledFunctionsTests(TestCase):
         unvouched = User.objects.get(pk=unvouched.id)
         eq_(unvouched.userprofile.can_vouch, True)
 
-    def test_vouch_alternate_mozilla_address(self):
-        user = UserFactory.create(vouched=False)
-        IdpProfile.objects.create(
-            profile=user.userprofile,
-            auth0_user_id='github|test@mozilla.com',
-            email='test@mozilla.com',
-            primary=True,
-        )
-        vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
-                                           description=settings.AUTO_VOUCH_REASON)
-        eq_(vouch_query.count(), 1)
-        eq_(user.userprofile.is_vouched, True)
-
     def test_vouch_multiple_mozilla_alternate_emails(self):
         user = UserFactory.create(vouched=False)
         IdpProfile.objects.create(
@@ -124,8 +111,8 @@ class SignaledFunctionsTests(TestCase):
         )
         vouch_query = Vouch.objects.filter(vouchee=user.userprofile, autovouch=True,
                                            description=settings.AUTO_VOUCH_REASON)
-        eq_(vouch_query.count(), 1)
-        eq_(user.userprofile.is_vouched, True)
+        eq_(vouch_query.count(), 0)
+        eq_(user.userprofile.is_vouched, False)
 
     def test_vouch_non_mozilla_alternate_email(self):
         user = UserFactory.create(vouched=False)
@@ -258,11 +245,6 @@ class UserProfileTests(TestCase):
 
         user_groups = profile.get_annotated_access_groups()
         eq_([group_1], user_groups)
-
-    @patch('mozillians.users.models.UserProfile.auto_vouch')
-    def test_auto_vouch_on_profile_save(self, auto_vouch_mock):
-        UserFactory.create()
-        ok_(auto_vouch_mock.called)
 
     @patch('mozillians.users.models.send_mail')
     def test_email_now_vouched(self, send_mail_mock):
@@ -517,22 +499,6 @@ class UserProfileTests(TestCase):
 
 class VouchTests(TestCase):
     """Tests related to the vouching functionality."""
-    @override_settings(CAN_VOUCH_THRESHOLD=1)
-    @override_settings(AUTO_VOUCH_DOMAINS=['example.com'])
-    def test_auto_vouching(self):
-        UserFactory.create(email='no-reply@mozillians.org')
-        user_1 = UserFactory.create(vouched=False, email='foo@example.com')
-        IdpProfile.objects.create(
-            profile=user_1.userprofile,
-            auth0_user_id='github|foo@example.com',
-            email='foo@example.com',
-        )
-        user_1 = User.objects.get(pk=user_1.pk)
-        ok_(user_1.userprofile.is_vouched)
-        eq_(user_1.userprofile.vouches_received.all()[0].autovouch, True)
-
-        user_2 = UserFactory.create(vouched=False, email='foo@bar.com')
-        ok_(not user_2.userprofile.is_vouched)
 
     @override_settings(CAN_VOUCH_THRESHOLD=1)
     @patch('mozillians.users.models.UserProfile._email_now_vouched')
