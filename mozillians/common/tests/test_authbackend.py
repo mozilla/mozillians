@@ -189,3 +189,45 @@ class MozilliansAuthBackendTests(TestCase):
                                           profile=user.userprofile)
         eq_(idp_q.count(), 1)
         eq_(list(users), [])
+
+    @override_settings(CAN_VOUCH_THRESHOLD=1)
+    def test_auto_vouching(self):
+        claims = {
+            'email': 'foo@example.com',
+            'user_id': 'ad|foo@example.com',
+            'groups': ['hris_is_staff']
+        }
+        user = UserFactory.create(vouched=False, email='foo@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|foo@example.com',
+            email='foo@example.com',
+            primary=True
+        )
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        self.backend.claims = claims
+        self.backend.request = request_mock
+        returned_user = self.backend.check_authentication_method(user)
+        ok_(returned_user.userprofile.is_vouched)
+        eq_(returned_user.userprofile.vouches_received.all()[0].autovouch, True)
+
+    def test_auto_vouching_missing_is_staff_attribute(self):
+        claims = {
+            'email': 'foo@example.com',
+            'user_id': 'ad|bar@example.com',
+            'groups': ['hello world']
+        }
+        user = UserFactory.create(vouched=False, email='bar@example.com')
+        IdpProfile.objects.create(
+            profile=user.userprofile,
+            auth0_user_id='ad|bar@example.com',
+            email='bar@example.com',
+            primary=True
+        )
+        request_mock = Mock(spec=HttpRequest)
+        request_mock.user = user
+        self.backend.claims = claims
+        self.backend.request = request_mock
+        returned_user = self.backend.check_authentication_method(user)
+        ok_(not returned_user.userprofile.is_vouched)

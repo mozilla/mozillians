@@ -100,6 +100,10 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         # Ensure compatibility with OIDC conformant mode
         auth0_user_id = self.claims.get('user_id') or self.claims.get('sub')
         email = self.claims.get('email')
+        # Grant an employee vouch if the user has the 'hris_is_staff' group
+        groups = self.claims.get('groups')
+        if groups and 'hris_is_staff' in groups:
+            profile.auto_vouch()
 
         # Get current_idp
         current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
