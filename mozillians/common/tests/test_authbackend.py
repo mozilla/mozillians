@@ -195,7 +195,7 @@ class MozilliansAuthBackendTests(TestCase):
         claims = {
             'email': 'foo@example.com',
             'user_id': 'ad|foo@example.com',
-            'groups': ['hris_is_staff']
+            'https://sso.mozilla.com/claim/groups': ['hris_is_staff']
         }
         user = UserFactory.create(vouched=False, email='foo@example.com')
         IdpProfile.objects.create(
@@ -216,7 +216,7 @@ class MozilliansAuthBackendTests(TestCase):
         claims = {
             'email': 'foo@example.com',
             'user_id': 'ad|bar@example.com',
-            'groups': ['hello world']
+            'https://sso.mozilla.com/claim/groups': ['hello world']
         }
         user = UserFactory.create(vouched=False, email='bar@example.com')
         IdpProfile.objects.create(

@@ -101,7 +101,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         auth0_user_id = self.claims.get('user_id') or self.claims.get('sub')
         email = self.claims.get('email')
         # Grant an employee vouch if the user has the 'hris_is_staff' group
-        groups = self.claims.get('groups')
+        groups = self.claims.get('https://sso.mozilla.com/claim/groups')
         if groups and 'hris_is_staff' in groups:
             profile.auto_vouch()
 
