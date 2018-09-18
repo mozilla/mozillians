@@ -176,8 +176,8 @@ class GroupInviteForm(happyforms.ModelForm):
                 self.fields['invites'].widget.choices = self.fields['invites'].choices
                 help_text = self.fields['invites'].help_text
                 self.fields['invites'].help_text = (
-                    help_text + _(' Only vouched users with a Multi Factor Authentication method '
-                                  'enabled (GitHub or LDAP logins) can be invited.'))
+                    help_text + _(' Only users with a Multi Factor Authentication method '
+                                  'enabled (Firefox Accounts, GitHub or LDAP logins) can be invited.'))
             else:
                 self.fields['invites'].help_text = _('Start typing the name/email/username '
                                                      'of a staff member or a member of the NDA '
