@@ -155,7 +155,7 @@ def view_profile(request, username):
                 request.user.userprofile.privacy_level)
 
         if (request.user.is_authenticated() and request.user.userprofile.is_vouched and
-                not profile.can_vouch):
+                not profile.is_vouched):
             abuse_report = get_object_or_none(AbuseReport, reporter=request.user.userprofile,
                                               profile=profile)
 
