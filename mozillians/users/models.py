@@ -867,7 +867,6 @@ class IdpProfile(models.Model):
             profile.auth0_user_id = self.auth0_user_id
         profile.save()
 
-
     def __unicode__(self):
         return u'{}|{}|{}'.format(self.profile, self.type, self.email)
 
