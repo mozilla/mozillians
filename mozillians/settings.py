@@ -621,9 +621,8 @@ CSP_REPORT_URI = config('CSP_REPORT_URI', default='/en-US/capture-csp-violation'
 CSP_DEFAULT_SRC = (
     "'self'",
     'https://cdn.mozillians.org',
-    'https://www.google.com/recaptcha/',
-    'https://www.gstatic.com/recaptcha/',
 )
+
 CSP_FONT_SRC = (
     "'self'",
     'https://*.mozilla.net',
@@ -631,6 +630,7 @@ CSP_FONT_SRC = (
     'https://cdn.mozillians.org',
     'https://cdn-staging.mozillians.org',
 )
+
 CSP_IMG_SRC = (
     "'self'",
     'data:',
@@ -641,6 +641,7 @@ CSP_IMG_SRC = (
     '*.wp.com',
     'https://*.mozillians.org',
 )
+
 CSP_SCRIPT_SRC = (
     "'self'",
     'https://cdn.mozillians.org',
@@ -658,6 +659,7 @@ CSP_SCRIPT_SRC = (
     "'sha256-fH3rM69L3MlQuLHwmENXZ9SSP9u+7mECRGOpE5pY/Hw='",
     "'sha256-lV6Q4R6n6P5zkatU4DiQ40kagqmlwvF0XXvRV/UfpPU='",
 )
+
 CSP_STYLE_SRC = (
     "'self'",
     "'unsafe-inline'",
@@ -666,12 +668,13 @@ CSP_STYLE_SRC = (
     'https://www.mozilla.org',
     'https://*.mozilla.net',
 )
-CSP_CHILD_SRC = (
+
+CSP_FRAME_SRC = (
     "'self'",
     'https://www.google.com/recaptcha/',
 )
 
-STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL,
+STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL, # noqa
                          '^/csp/',
                          '^/admin/',
                          '^/api/',
@@ -705,9 +708,6 @@ ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool
 # Django Graphene
 GRAPHENE = {
     'SCHEMA': 'mozillians.schema.schema',
-    'MIDDLEWARE': (
-        'graphene_django.debug.DjangoDebugMiddleware',
-    )
 }
 V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
 
@@ -722,8 +722,7 @@ if DEV:
         'http://*.mozilla.net',
         'http://*.mozilla.org',
     )
-    CSP_SCRIPT_SRC = (
-        "'self'",
+    CSP_SCRIPT_SRC += (
         "'unsafe-inline'",
         'http://*.mozilla.net',
         'http://*.mozilla.org',
@@ -734,7 +733,6 @@ if DEV:
         'http://*.mozilla.org',
         'http://cdn.jsdelivr.net',
     )
-
 
 if DEBUG:
     for backend in TEMPLATES:
