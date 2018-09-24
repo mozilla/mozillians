@@ -1,6 +1,10 @@
+import json
 import graphene
+import requests
 
-from mozillians.graphql_profiles.utils import parse_datetime_iso8601
+from django.conf import settings
+
+from mozillians.graphql_profiles.utils import json2obj, parse_datetime_iso8601
 
 
 class Alg(graphene.Enum):
@@ -236,3 +240,30 @@ class CoreProfile(graphene.ObjectType):
     uris = graphene.Field(StandardAttributeValues)
     phone_numbers = graphene.Field(StandardAttributeValues)
     alternative_name = graphene.Field(StandardAttributeString)
+
+
+class Vouches(graphene.ObjectType):
+    """Schema to expose user vouches."""
+    description = graphene.String()
+    voucher = graphene.Field(CoreProfile)
+    autovouch = graphene.Boolean()
+    date = graphene.DateTime()
+
+    def resolve_description(self, info, **kwargs):
+        return self.description
+
+    def resolve_autovouch(self, info, **kwargs):
+        return self.autovouch
+
+    def resolve_date(self, info, **kwargs):
+        return self.date
+
+    def resolve_voucher(self, info, **kwargs):
+        voucher_user_id = self.voucher.auth0_user_id
+        resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
+
+        data = json2obj(json.dumps(resp))
+        for profile in data:
+            if profile['user_id']['value'] == voucher_user_id:
+                return profile
+        return None

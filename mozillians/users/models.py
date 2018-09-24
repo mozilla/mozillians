@@ -210,6 +210,8 @@ class UserProfile(UserProfilePrivacyModel):
     referral_source = models.CharField(max_length=32,
                                        choices=REFERRAL_SOURCE_CHOICES,
                                        default='direct')
+    # This is the Auth0 user ID. We are saving only the primary here.
+    auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -857,10 +859,13 @@ class IdpProfile(models.Model):
         super(IdpProfile, self).save(*args, **kwargs)
 
         # Save profile.privacy_email when a primary contact identity changes
+        profile = self.profile
         if self.primary_contact_identity:
-            profile = self.profile
             profile.privacy_email = self.privacy
-            profile.save()
+        # Set the user id in the userprofile too
+        if self.primary:
+            profile.auth0_user_id = self.auth0_user_id
+        profile.save()
 
     def __unicode__(self):
         return u'{}|{}|{}'.format(self.profile, self.type, self.email)

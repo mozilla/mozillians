@@ -495,7 +495,8 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
 
     fieldsets = (
         ('Account', {
-            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',)
+            'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',
+                       'auth0_user_id')
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)
