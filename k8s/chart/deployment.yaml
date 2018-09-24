@@ -1,0 +1,193 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-mozillians
+  namespace: dino-park
+  labels:
+    app: dino-park-mozillians
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-mozillians
+  template:
+    metadata:
+      labels:
+        app: dino-park-mozillians
+    spec:
+      containers:
+        - name: dino-park-mozillians
+          image: mozillaparsys/dino-park-mozillians
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          command: ['./bin/run-dev-preview.sh']
+          envFrom:
+            - configMapRef:
+                name: mozillians-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-mysql
+  namespace: dino-park
+  labels:
+    app: dino-park-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-mysql
+  template:
+    metadata:
+      labels:
+        app: dino-park-mysql
+    spec:
+      containers:
+        - name: dino-park-mysql
+          image: mariadb:10.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              value: mozillians
+            - name: MYSQL_USER
+              value: mozillians
+            - name: MYSQL_PASSWORD
+              value: mozillians
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-redis
+  namespace: dino-park
+  labels:
+    app: dino-park-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-redis
+  template:
+    metadata:
+      labels:
+        app: dino-park-redis
+    spec:
+      containers:
+        - name: dino-park-redis
+          image: redis:3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-mozillians-celery
+  namespace: dino-park
+  labels:
+    app: dino-park-mozillians-celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-mozillians-celery
+  template:
+    metadata:
+      labels:
+        app: dino-park-mozillians-celery
+    spec:
+      containers:
+        - name: dino-park-mozillians-celery
+          image: mozillaparsys/dino-park-mozillians
+          imagePullPolicy: IfNotPresent
+          command: ['./bin/run-celery.sh']
+          env:
+            - name: C_FORCE_ROOT
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: mozillians-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-mozillians-celery-beat
+  namespace: dino-park
+  labels:
+    app: dino-park-mozillians-celery-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-mozillians-celery-beat
+  template:
+    metadata:
+      labels:
+        app: dino-park-mozillians-celery-beat
+    spec:
+      containers:
+        - name: dino-park-mozillians-celery-beat
+          image: mozillaparsys/dino-park-mozillians
+          imagePullPolicy: IfNotPresent
+          command: ['./bin/run-celery-beat.sh']
+          env:
+            - name: C_FORCE_ROOT
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: mozillians-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-memcached
+  namespace: dino-park
+  labels:
+    app: dino-park-memcached
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-memcached
+  template:
+    metadata:
+      labels:
+        app: dino-park-memcached
+    spec:
+      containers:
+        - name: dino-park-memcached
+          image: memcached
+          imagePullPolicy: IfNotPresent
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dino-park-es
+  namespace: dino-park
+  labels:
+    app: dino-park-es
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dino-park-es
+  template:
+    metadata:
+      labels:
+        app: dino-park-es
+    spec:
+      containers:
+        - name: dino-park-es
+          image: elasticsearch:2.4.5
+          imagePullPolicy: IfNotPresent
