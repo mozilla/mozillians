@@ -107,7 +107,7 @@ def validate_phone_number(value):
 def validate_discord(value):
     """Validate that a username matches the Discord format of <username>#0000."""
 
-    if not re.match(r'^\S+#[0-9]{4}$', value):
+    if not re.match(r'^.+#[0-9]{4}$', value):
         raise ValidationError(_('Expecting a Discord username with tag (e.g. mozillian#0001)'))
 
     return value
