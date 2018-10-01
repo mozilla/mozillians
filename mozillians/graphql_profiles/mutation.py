@@ -4,6 +4,7 @@ import requests
 
 from django.conf import settings
 
+from mozillians.graphql_profiles.decorators import graphql_permission_check
 from mozillians.graphql_profiles.schema import CoreProfile
 from mozillians.graphql_profiles.utils import json2obj
 
@@ -30,8 +31,9 @@ class EditBasicProfile(graphene.Mutation):
     errors = graphene.List(graphene.String)
     updated_profile = graphene.Field(lambda: CoreProfile)
 
-    @staticmethod
-    def mutate(root, info, user_id, basic_profile_data=None):
+    @classmethod
+    @graphql_permission_check
+    def mutate(cls, root, info, user_id, basic_profile_data=None):
         """Update the Basic information of a Profile."""
 
         resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
