@@ -208,7 +208,7 @@ class AccessInformation(graphene.ObjectType):
 
     ldap = graphene.Field(StandardAttributeValues)
     mozilliansorg = graphene.Field(StandardAttributeValues)
-    hris = graphene.Field(StandardAttributeValues)
+    hris = graphene.Field(HRISAttributeValues)
     access_provider = graphene.Field(StandardAttributeValues)
 
 
