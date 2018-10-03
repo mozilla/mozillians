@@ -302,9 +302,9 @@ redis==2.10.6 \
 vine==1.1.4 \
     --hash=sha256:6849544be74ec3638e84d90bc1cf2e1e9224cc10d96cd4383ec3f69e9bce077b \
     --hash=sha256:52116d59bc45392af9fdd3b75ed98ae48a93e822cee21e5fda249105c59a7a72
-django-ses==0.8.6 \
-    --hash=sha256:1c96223b8786a81362ba6dd1d25876d388d0e50a71e326c4a6c11138a5a4a2bd \
-    --hash=sha256:db893a8174e1723da6b4cd35cacda2b99283e91a7f1539f2e149976213f494ab
+django-ses==0.8.7 \
+    --hash=sha256:d16e0de48cd3369b45af9a292e8c31f0aa014149d0807eeb2edae795f99878f9 \
+    --hash=sha256:e0a8b3c9c2123dfd04d29bb9e2423610f855e2607f53a4c2515ff94313de687f
 flower==0.9.2 \
     --hash=sha256:a7a828c2dbea7e9cff1c86d63626f0eeb047b1b1e9a0ee5daad30771fb51e6d0
 tornado==5.1.1 \
