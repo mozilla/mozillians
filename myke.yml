@@ -1,0 +1,11 @@
+project: dino-park-mozillians
+desc: Mozillians.org as part of dino-park
+env:
+  name: dino-park-mozillians
+  image: mozillaparsys/dino-park-mozillians
+tasks:
+  package:
+    cmd: docker build -f docker/prod -t {{ .image }} .
+
+  run-k8s:
+    cmd: kubectl apply -f k8s/chart/
