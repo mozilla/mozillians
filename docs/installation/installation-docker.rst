@@ -64,18 +64,18 @@ Building mozillians
 
      $ docker-compose run web python manage.py update_product_details -f
 
-#. Import cities_light details::
-
-     $ docker-compose run web python manage.py cities_light
-
 #. Create the database tables and run the migrations::
 
      $ docker-compose run web python manage.py migrate --noinput
 
+#. Import cities_light details::
+
+     $ docker-compose run web python manage.py cities_light
+
 #. Load the timezone tables to MySQL::
 
      $ docker-compose run db /bin/bash
-     shell> mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot -h db_1 mysql
+     shell> mysql_tzinfo_to_sql /usr/share/zoneinfo/ | mysql -uroot -proot -h mozillians_db_1 mysql
 
 #. Create a superuser::
 
