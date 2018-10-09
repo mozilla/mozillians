@@ -40,11 +40,12 @@ urlpatterns = [
     url(r'', include('mozillians.users.urls', app_name='users', namespace='users')),
     url(r'', include('mozillians.mozspaces.urls', app_name='mozspaces', namespace='mozspaces')),
     url(r'', include('mozillians.phonebook.urls', app_name='phonebook', namespace='phonebook')),
-
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'', include('mozillians.humans.urls')),
+    # If there is no match hand over the url to dino-park
+    url(r'', include('mozillians.dino_park.urls', app_name='dino_park', namespace='dino_park')),
 ]
 
 admin.site.site_header = 'Mozillians Administration'

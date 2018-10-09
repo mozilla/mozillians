@@ -1,6 +1,8 @@
 [run]
 source = mozillians
 omit = */graphql_profiles/*
+omit = */dino_park/*
+omit = */k8s/*
 
 [report]
 omit = */migrations/*
