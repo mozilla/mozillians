@@ -945,7 +945,6 @@ class ExternalAccount(models.Model):
     TYPE_LANYRD = 'LANYRD'
     TYPE_LANDLINE = 'Phone (Landline)'
     TYPE_MOBILE = 'Phone (Mobile)'
-    TYPE_MOLOCATION = 'MOZILLALOCATION'
     TYPE_MOPONTOON = 'MOZILLAPONTOON'
     TYPE_TRANSIFEX = 'TRANSIFEX'
     TYPE_TELEGRAM = 'TELEGRAM'
@@ -979,9 +978,6 @@ class ExternalAccount(models.Model):
         TYPE_MDN: {'name': 'MDN',
                    'url': 'https://developer.mozilla.org/profiles/{identifier}',
                    'validator': validate_username_not_url},
-        TYPE_MOLOCATION: {'name': 'Mozilla Location Service',
-                          'url': 'https://location.services.mozilla.com/leaders#{identifier}',
-                          'validator': validate_username_not_url},
         TYPE_SUMO: {'name': 'Mozilla Support',
                     'url': 'https://support.mozilla.org/user/{identifier}',
                     'validator': validate_username_not_url},
