@@ -129,7 +129,7 @@ PORT = config('PORT', default=443, cast=int)
 SITE_URL = config('SITE_URL', default='https://mozillians.org')
 SECRET_KEY = config('SECRET_KEY', default='')
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=DOMAIN, cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1', cast=Csv())
 
 # Site ID is used by Django's Sites framework.
 SITE_ID = 1

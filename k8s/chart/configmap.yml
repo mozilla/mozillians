@@ -5,7 +5,7 @@ metadata:
   name: mozillians-config
   namespace: dino-park
 data:
-  ALLOWED_HOSTS: 'mozillians.mozilla.community'
+  ALLOWED_HOSTS: 'mozillians.mozilla.community, 127.0.0.1'
   BASKET_API_KEY: 'basket_api_key'
   BASKET_URL: 'http://127.0.0.1'
   CACHE_BACKEND: 'django.core.cache.backends.memcached.MemcachedCache'
