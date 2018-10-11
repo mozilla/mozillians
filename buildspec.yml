@@ -1,0 +1,17 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo Build started on `date`
+      - COMMIT_SHA=$(git rev-parse --short HEAD)
+      - docker build --no-cache -t mozillians -f docker/prod .
+  post_build:
+    commands:
+      - aws ecr get-login --region us-west-2 --no-include-email | bash
+      - docker tag mozillians ${DOCKER_REPO}:${COMMIT_SHA}
+      - docker tag mozillians ${DOCKER_REPO}:latest
+      - docker push ${DOCKER_REPO}:${COMMIT_SHA}
+      - docker push ${DOCKER_REPO}:latest
+      - rm -rf /root/.docker/config.json
+      - echo Build completed on `date`
