@@ -711,6 +711,12 @@ GRAPHENE = {
 }
 V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
 
+# Provide S3 storage backend
+if not DEV:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='kubernetes-mozillians-stage')
+    DEFAULT_AVATAR_PATH = config('DEFAULT_AVATAR_PATH', default=urljoin(MEDIA_URL, DEFAULT_AVATAR))
+    CSP_IMG_SRC = CSP_IMG_SRC + ('https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com',)
 
 if DEV:
     CSP_FONT_SRC += (
