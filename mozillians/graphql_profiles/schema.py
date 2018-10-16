@@ -212,6 +212,21 @@ class AccessInformation(graphene.ObjectType):
     access_provider = graphene.Field(StandardAttributeValues)
 
 
+class RelatedProfile(graphene.ObjectType):
+    """RelatedProfile object for Graphene.
+
+    This is not compatible with v2 schema.
+    It's used to display relations in orgchart.
+    """
+    user_id = graphene.String(required=True)
+    first_name = graphene.String(required=True)
+    last_name = graphene.String(required=True)
+    picture = graphene.String(required=True)
+    title = graphene.String(required=True)
+    fun_title = graphene.String(required=True)
+    location = graphene.String(required=True)
+
+
 class CoreProfile(graphene.ObjectType):
     """V2 Schema CoreProfile object for Graphene."""
 
@@ -240,6 +255,8 @@ class CoreProfile(graphene.ObjectType):
     uris = graphene.Field(StandardAttributeValues)
     phone_numbers = graphene.Field(StandardAttributeValues)
     alternative_name = graphene.Field(StandardAttributeString)
+    manager = graphene.Field(RelatedProfile)
+    directs = graphene.List(RelatedProfile)
 
 
 class Vouches(graphene.ObjectType):
