@@ -680,6 +680,7 @@ STRONGHOLD_EXCEPTIONS = ['^%s' % MEDIA_URL, # noqa
                          '^/api/',
                          '^/oidc/authenticate/',
                          '^/oidc/callback/',
+                         '^/[\w-]+/graphql/',
                          # Allow autocomplete urls for profile registration
                          '^/[\w-]+/skills-autocomplete/',
                          '^/[\w-]+/country-autocomplete/',
@@ -737,3 +738,7 @@ if DEV:
 if DEBUG:
     for backend in TEMPLATES:
         backend['OPTIONS']['debug'] = DEBUG
+
+    GRAPHENE['MIDDLEWARE'] = [
+        'graphene_django.debug.DjangoDebugMiddleware'
+    ]
