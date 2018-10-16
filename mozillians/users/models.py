@@ -530,7 +530,7 @@ class UserProfile(UserProfilePrivacyModel):
         if 'crop' not in kwargs:
             kwargs['crop'] = 'center'
 
-        if self.photo and default_storage.exists(self.photo):
+        if self.photo and default_storage.exists(self.photo.name):
             # Workaround for legacy images in RGBA model
 
             try:
