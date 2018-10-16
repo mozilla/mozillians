@@ -13,6 +13,7 @@ env:
   ALLOWED_HOSTS=localhost
   DEBUG=True
   CELERY_TASK_ALWAYS_EAGER=True
+  DEV=True
 services:
   - elasticsearch
   - mysql
