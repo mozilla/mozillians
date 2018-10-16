@@ -34,8 +34,9 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
 urlpatterns = [
     url(r'^api/', include('mozillians.api.urls')),
     url(r'^oidc/', include('mozilla_django_oidc.urls')),
-    url(r'^graphql/', include('mozillians.graphql_profiles.urls', app_name='graphql_profiles',
-                              namespace='graphql_profiles')),
+    url(r'^api/v3/graphql/', include('mozillians.graphql_profiles.urls',
+                                     app_name='graphql_profiles',
+                                     namespace='graphql_profiles')),
     url(r'', include('mozillians.groups.urls', app_name='groups', namespace='groups')),
     url(r'', include('mozillians.users.urls', app_name='users', namespace='users')),
     url(r'', include('mozillians.mozspaces.urls', app_name='mozspaces', namespace='mozspaces')),
