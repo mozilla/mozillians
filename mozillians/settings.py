@@ -717,6 +717,8 @@ GRAPHENE = {
 # Dino Park configuration
 V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
 DINO_PARK_STATICFILES = config('DINO_PARK_STATICFILES', default='')
+DINO_PARK_SEARCH_SVC = config('DINO_PARK_SEARCH_SVC', default='dino-park-search-service')
+DINO_PARK_ORGCHART_SVC = config('DINO_PARK_ORGCHART_SVC', default='dino-tree-service')
 
 if DEV:
     CSP_FONT_SRC += (
