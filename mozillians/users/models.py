@@ -951,6 +951,7 @@ class ExternalAccount(models.Model):
     TYPE_MASTODON = 'MASTODON'
     TYPE_DISCORD = 'DISCORD'
     TYPE_MOZPHAB = 'MOZPHAB'
+    TYPE_KEYBASE = 'KEYBASE'
 
     # Account type field documentation:
     # name: The name of the service that this account belongs to. What
@@ -1038,6 +1039,9 @@ class ExternalAccount(models.Model):
                        'validator': validate_discord},
         TYPE_MOZPHAB: {'name': 'Mozilla Phabricator',
                        'url': 'https://phabricator.services.mozilla.com/p/{identifier}/',
+                       'validator': validate_username_not_url},
+        TYPE_KEYBASE: {'name': 'Keybase',
+                       'url': 'https://keybase.io/{identifier}',
                        'validator': validate_username_not_url},
     }
 
