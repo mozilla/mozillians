@@ -7,6 +7,8 @@ app_name = 'dino_park'
 urlpatterns = [
     url('^api/v3/orgchart/$',
         dino_park_views.orgchart, name='dino_park_orgchart'),
+    url('^api/v3/orgchart/related/(?P<user_id>\w+)/$',
+        dino_park_views.orgchart_get_related, name='dino_park_orgchart_get_related'),
     url('^api/v3/search/simple/(?P<query>.+)/$',
         dino_park_views.search_simple, name='dino_park_search_simple'),
     url('^api/v3/search/get/(?P<user_id>\w+)/$',

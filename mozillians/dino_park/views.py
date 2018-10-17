@@ -20,7 +20,7 @@ def main(request):
 def orgchart(request):
     """Internal routing to expose orgchart service."""
     scope = UserAccessLevel.get_privacy(request)
-    if not scope == UserAccessLevel.STAFF:
+    if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
         return HttpResponseForbidden()
 
     url_parts = urlparse.ParseResult(
@@ -34,7 +34,28 @@ def orgchart(request):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json)
+    return JsonResponse(resp.json())
+
+
+@never_cache
+def orgchart_get_related(request, user_id):
+    """Internal routing to expose orgchart service by user_id."""
+    scope = UserAccessLevel.get_privacy(request)
+    if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
+        return HttpResponseForbidden()
+
+    url_parts = urlparse.ParseResult(
+        scheme='http',
+        netloc=settings.DINO_PARK_ORGCHART_SVC,
+        path='/orgchart/related/{}'.format(user_id),
+        params='',
+        query='',
+        fragment=''
+    )
+    url = urlparse.urlunparse(url_parts)
+    resp = requests.get(url)
+    resp.raise_for_status()
+    return JsonResponse(resp.json())
 
 
 @never_cache
@@ -53,7 +74,7 @@ def search_simple(request, query):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json)
+    return JsonResponse(resp.json())
 
 
 @never_cache
@@ -72,4 +93,4 @@ def search_get_profile(request, user_id):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json)
+    return JsonResponse(resp.json())
