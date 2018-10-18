@@ -179,7 +179,8 @@ EXEMPT_L10N_URLS = [
     '^/verify/identity/callback/',
     '^/api/v1/',
     '^/api/v2/',
-    '^/admin/'
+    '^/admin/',
+    '^/beta/.*',
 ]
 
 # Tells the extract script what files to parse for strings and what functions to use.
