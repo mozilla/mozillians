@@ -5,7 +5,7 @@ import requests
 from django.conf import settings
 
 from mozillians.graphql_profiles.decorators import graphql_permission_check
-from mozillians.graphql_profiles.schema import CoreProfile
+from mozillians.graphql_profiles.schema import Profile
 from mozillians.graphql_profiles.utils import json2obj
 
 
@@ -29,7 +29,7 @@ class EditBasicProfile(graphene.Mutation):
         user_id = graphene.String(required=True)
 
     errors = graphene.List(graphene.String)
-    updated_profile = graphene.Field(lambda: CoreProfile)
+    updated_profile = graphene.Field(lambda: Profile)
 
     @classmethod
     @graphql_permission_check

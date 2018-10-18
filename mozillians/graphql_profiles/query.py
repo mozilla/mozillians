@@ -1,7 +1,7 @@
 import graphene
 
 from mozillians.dino_park.views import orgchart_get_related, search_get_profile
-from mozillians.graphql_profiles.schema import CoreProfile, Vouches
+from mozillians.graphql_profiles.schema import Profile, Vouches
 from mozillians.graphql_profiles.utils import json2obj
 from mozillians.users.models import Vouch
 
@@ -9,7 +9,7 @@ from mozillians.users.models import Vouch
 class Query(object):
     """GraphQL Query class for the V2 Profiles."""
 
-    profile = graphene.Field(CoreProfile, userId=graphene.String(required=True))
+    profile = graphene.Field(Profile, userId=graphene.String(required=True))
     vouches = graphene.List(Vouches, userId=graphene.String(required=True))
 
     def resolve_profile(self, info, **kwargs):
