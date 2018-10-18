@@ -540,9 +540,9 @@ backports_abc==0.5 \
     --hash=sha256:033be54514a03e255df75c5aee8f9e672f663f93abb723444caec8fe43437bde
 anytree==2.4.3 \
     --hash=sha256:9b43699eacfd3fab153433abbc698c74e3c8f883c0505fde2c26ad38163d93fa
-responses==0.9.0 \
-    --hash=sha256:c6082710f4abfb60793899ca5f21e7ceb25aabf321560cc0726f8b59006811c9 \
-    --hash=sha256:f23a29dca18b815d9d64a516b4a0abb1fbdccff6141d988ad8100facb81cf7b3
+responses==0.10.1 \
+    --hash=sha256:f171f3cc74a6550b68c600c89f913e59337360ac7c1e563cee44a980833a0354 \
+    --hash=sha256:9a165718944c0ac3215e2507f4d63b5a6a44da883df8949a7ae659516f4ef883
 django-autoslug-iplweb==1.9.4 \
     --hash=sha256:8a3ba49b18f082e29ac9cb17884d4b2149ad14988bd89e118b1c5ddf94fdea8e \
     --hash=sha256:6ddec119072067e78cbdb53f7ba11ae8bee5a2f2f0fe1d90c6a4d3c0a91489d3
