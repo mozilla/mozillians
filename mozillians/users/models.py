@@ -212,6 +212,7 @@ class UserProfile(UserProfilePrivacyModel):
                                        default='direct')
     # This is the Auth0 user ID. We are saving only the primary here.
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+    is_staff = models.BooleanField(default=False)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
