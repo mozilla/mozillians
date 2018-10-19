@@ -34,7 +34,7 @@ def orgchart(request):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json())
+    return JsonResponse(resp.json(), safe=False)
 
 
 @never_cache
@@ -55,7 +55,7 @@ def orgchart_get_related(request, user_id):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json())
+    return JsonResponse(resp.json(), safe=False)
 
 
 @never_cache
@@ -74,7 +74,7 @@ def search_simple(request, query):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json())
+    return JsonResponse(resp.json(), safe=False)
 
 
 @never_cache
@@ -93,4 +93,4 @@ def search_get_profile(request, user_id):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     resp.raise_for_status()
-    return JsonResponse(resp.json())
+    return JsonResponse(resp.json(), safe=False)
