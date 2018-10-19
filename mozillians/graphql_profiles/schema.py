@@ -248,7 +248,7 @@ class CoreProfile(graphene.ObjectType):
     location_preference = graphene.Field(StandardAttributeString)
     office_location = graphene.Field(StandardAttributeString)
     timezone = graphene.Field(StandardAttributeString)
-    preferred_lagnuage = graphene.Field(StandardAttributeValues)
+    preferred_language = graphene.Field(StandardAttributeValues)
     tags = graphene.Field(StandardAttributeValues)
     pronouns = graphene.Field(StandardAttributeString)
     picture = graphene.Field(StandardAttributeString)
