@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
@@ -11,7 +12,7 @@ from mozillians.dino_park.utils import UserAccessLevel
 
 
 @never_cache
-@allow_public
+@login_required
 def main(request):
     return render(request, 'dino_park/index.html', {})
 
