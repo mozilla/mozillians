@@ -2,51 +2,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-mozillians
-  namespace: dino-park
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-mozillians
+    app: {{ .Values.name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-mozillians
+      app: {{ .Values.name }}
   template:
     metadata:
       labels:
-        app: dino-park-mozillians
+        app: {{ .Values.name }}
     spec:
       containers:
-        - name: dino-park-mozillians
-          image: mozillaparsys/dino-park-mozillians
+        - name: {{ .Values.name }}
+          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
+          {{ if eq .Values.env "dev" -}}
           imagePullPolicy: IfNotPresent
+          {{- else -}}
+          imagePullPolicy: Always
+          {{- end }}
           ports:
             - containerPort: 8000
           command: ['./bin/run-dev-preview.sh']
           envFrom:
             - configMapRef:
-                name: mozillians-config
+                name: {{ .Values.config_map }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-mysql
-  namespace: dino-park
+  name: {{ .Values.name }}-mysql
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-mysql
+    app: {{ .Values.name }}-mysql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-mysql
+      app: {{ .Values.name }}-mysql
   template:
     metadata:
       labels:
-        app: dino-park-mysql
+        app: {{ .Values.name }}-mysql
     spec:
       containers:
-        - name: dino-park-mysql
+        - name: {{ .Values.name }}-mysql
           image: mariadb:10.2
           imagePullPolicy: IfNotPresent
           ports:
@@ -65,22 +69,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-redis
-  namespace: dino-park
+  name: {{ .Values.name }}-redis
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-redis
+    app: {{ .Values.name }}-redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-redis
+      app: {{ .Values.name }}-redis
   template:
     metadata:
       labels:
-        app: dino-park-redis
+        app: {{ .Values.name }}-redis
     spec:
       containers:
-        - name: dino-park-redis
+        - name: {{ .Values.name }}-redis
           image: redis:3
           imagePullPolicy: IfNotPresent
           ports:
@@ -90,82 +94,90 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-mozillians-celery
-  namespace: dino-park
+  name: {{ .Values.name }}-celery
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-mozillians-celery
+    app: {{ .Values.name }}-celery
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-mozillians-celery
+      app: {{ .Values.name }}-celery
   template:
     metadata:
       labels:
-        app: dino-park-mozillians-celery
+        app: {{ .Values.name }}-celery
     spec:
       containers:
-        - name: dino-park-mozillians-celery
-          image: mozillaparsys/dino-park-mozillians
+        - name: {{ .Values.name }}-celery
+          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
+          {{ if eq .Values.env "dev" -}}
           imagePullPolicy: IfNotPresent
+          {{- else -}}
+          imagePullPolicy: Always
+          {{- end }}
           command: ['./bin/run-celery.sh']
           env:
             - name: C_FORCE_ROOT
               value: 'true'
           envFrom:
             - configMapRef:
-                name: mozillians-config
+                name: {{ .Values.config_map }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-mozillians-celery-beat
-  namespace: dino-park
+  name: {{ .Values.name }}-celery-beat
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-mozillians-celery-beat
+    app: {{ .Values.name }}-celery-beat
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-mozillians-celery-beat
+      app: {{ .Values.name }}-celery-beat
   template:
     metadata:
       labels:
-        app: dino-park-mozillians-celery-beat
+        app: {{ .Values.name }}-celery-beat
     spec:
       containers:
-        - name: dino-park-mozillians-celery-beat
-          image: mozillaparsys/dino-park-mozillians
+        - name: {{ .Values.name }}-celery-beat
+          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
+          {{ if eq .Values.env "dev" -}}
           imagePullPolicy: IfNotPresent
+          {{- else -}}
+          imagePullPolicy: Always
+          {{- end }}
           command: ['./bin/run-celery-beat.sh']
           env:
             - name: C_FORCE_ROOT
               value: 'true'
           envFrom:
             - configMapRef:
-                name: mozillians-config
+                name: {{ .Values.config_map }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-memcached
-  namespace: dino-park
+  name: {{ .Values.name }}-memcached
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-memcached
+    app: {{ .Values.name }}-memcached
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-memcached
+      app: {{ .Values.name }}-memcached
   template:
     metadata:
       labels:
-        app: dino-park-memcached
+        app: {{ .Values.name }}-memcached
     spec:
       containers:
-        - name: dino-park-memcached
+        - name: {{ .Values.name }}-memcached
           image: memcached
           imagePullPolicy: IfNotPresent
 
@@ -173,21 +185,21 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dino-park-es
-  namespace: dino-park
+  name: {{ .Values.name }}-es
+  namespace: {{ .Values.namespace }}
   labels:
-    app: dino-park-es
+    app: {{ .Values.name }}-es
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: dino-park-es
+      app: {{ .Values.name }}-es
   template:
     metadata:
       labels:
-        app: dino-park-es
+        app: {{ .Values.name }}-es
     spec:
       containers:
-        - name: dino-park-es
+        - name: {{ .Values.name }}-es
           image: elasticsearch:2.4.5
           imagePullPolicy: IfNotPresent
