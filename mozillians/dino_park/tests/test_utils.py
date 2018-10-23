@@ -49,3 +49,11 @@ class TestUserAccessScopes(TestCase):
         GroupMembership.objects.create(userprofile=user.userprofile, group=nda,
                                        status=GroupMembership.MEMBER)
         eq_(UserAccessLevel.get_privacy(request), 'nda')
+
+    def test_staff_access_scope(self):
+        request = self.factory.get('/')
+        user = UserFactory.create()
+        user.userprofile.is_staff = True
+        user.userprofile.save()
+        request.user = user
+        eq_(UserAccessLevel.get_privacy(request), 'staff')

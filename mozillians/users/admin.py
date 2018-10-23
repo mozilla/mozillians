@@ -474,7 +474,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     inlines = [LanguageInline, GroupMembershipInline, ExternalAccountInline,
                AlternateEmailInline]
     search_fields = ['full_name', 'user__email', 'user__username', 'ircname',
-                     'country__name', 'region__name', 'city__name']
+                     'country__name', 'region__name', 'city__name', 'is_staff']
     readonly_fields = ['date_vouched', 'vouched_by', 'user', 'date_joined', 'last_login',
                        'is_vouched', 'can_vouch', 'referral_source']
     form = UserProfileAdminForm
@@ -496,7 +496,7 @@ class UserProfileAdmin(AdminImageMixin, MozilliansAdminExportMixin, admin.ModelA
     fieldsets = (
         ('Account', {
             'fields': ('full_name', 'full_name_local', 'username', 'email', 'photo',
-                       'auth0_user_id')
+                       'auth0_user_id', 'is_staff',)
         }),
         (None, {
             'fields': ('title', 'bio', 'tshirt', 'ircname', 'date_mozillian',)

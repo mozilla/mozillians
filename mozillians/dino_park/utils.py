@@ -20,8 +20,7 @@ class UserAccessLevel(object):
             # current mozillians.org
             if (request_user.is_superuser or (user and user == request_user)):
                 return cls.PRIVATE
-            # TODO: This needs to change to hris assertion from ES
-            if request_user.userprofile.groups.filter(name='staff').exists():
+            if request_user.userprofile.is_staff:
                 return cls.STAFF
             if request_user.userprofile.is_nda:
                 return cls.NDA
