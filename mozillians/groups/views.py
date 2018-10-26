@@ -154,8 +154,8 @@ def show(request, url, alias_model, template):
         is_curator = is_manager or (request.user.userprofile in group.curators.all())
 
         # initialize the form only when the group is moderated and user is curator of the group
-        if (is_curator and (group.accepting_new_members == Group.REVIEWED or
-                            group.accepting_new_members == Group.CLOSED)):
+        if (is_curator and (group.accepting_new_members == Group.REVIEWED
+                            or group.accepting_new_members == Group.CLOSED)):
             membership_filter_form = forms.MembershipFilterForm(request.GET)
         else:
             membership_filter_form = None
@@ -185,8 +185,8 @@ def show(request, url, alias_model, template):
 
         else:
             # only show full members, or this user
-            memberships = group.groupmembership_set.filter(Q(status=GroupMembership.MEMBER) |
-                                                           Q(userprofile=profile))
+            memberships = group.groupmembership_set.filter(Q(status=GroupMembership.MEMBER)
+                                                           | Q(userprofile=profile))
 
         invitation = get_object_or_none(Invite, redeemer=profile, group=group, accepted=False)
         data.update(invitation=invitation)
@@ -266,8 +266,8 @@ def remove_member(request, url, user_pk, status=None):
 
     # Curators cannot be removed, only by themselves and if there is another curator.
     curators = group.curators.all()
-    if (profile_to_remove in curators and curators.count() <= 1 and
-            profile_to_remove != this_userprofile):
+    if (profile_to_remove in curators and curators.count() <= 1
+            and profile_to_remove != this_userprofile):
         messages.error(request, _('The group needs at least one curator.'))
         return redirect(next_url)
 
@@ -573,8 +573,8 @@ def delete_invite(request, invite_pk):
     invite = get_object_or_404(Invite, pk=invite_pk)
     group = invite.group
 
-    if (group.curators.filter(id=request.user.userprofile.id).exists() or
-            request.user.userprofile.is_manager):
+    if (group.curators.filter(id=request.user.userprofile.id).exists()
+            or request.user.userprofile.is_manager):
         redeemer = invite.redeemer
         invite.delete()
         notify_redeemer_invitation_invalid.delay(redeemer.pk, group.pk)

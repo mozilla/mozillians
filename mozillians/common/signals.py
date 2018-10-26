@@ -19,9 +19,9 @@ class SearchSignalProcessor(BaseSignalProcessor):
 
     def handle_save(self, sender, instance, **kwargs):
         # Do not index incomplete profiles and not visible groups.
-        if ((isinstance(instance, UserProfile) and instance.is_complete) or
-            (isinstance(instance, Group) and instance.visible) or
-                (isinstance(instance, IdpProfile))):
+        if ((isinstance(instance, UserProfile) and instance.is_complete)
+            or (isinstance(instance, Group) and instance.visible)
+                or (isinstance(instance, IdpProfile))):
             super(SearchSignalProcessor, self).handle_save(sender, instance, **kwargs)
 
     def teardown(self):

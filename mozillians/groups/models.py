@@ -79,12 +79,12 @@ class GroupBase(models.Model):
         curators = self.curators.all()
         return (
             # some groups don't allow leaving
-            getattr(self, 'members_can_leave', True) and
+            getattr(self, 'members_can_leave', True)
             # We need at least one curator
-            (curators.count() > 1 or userprofile not in curators) and
+            and (curators.count() > 1 or userprofile not in curators)
             # only makes sense to leave a group they belong to (at least pending)
-            (self.has_member(userprofile=userprofile) or
-             self.has_pending_member(userprofile=userprofile))
+            and (self.has_member(userprofile=userprofile)
+                 or self.has_pending_member(userprofile=userprofile))
         )
 
     def curator_can_leave(self, userprofile):
@@ -380,8 +380,8 @@ class Group(GroupBase):
         # If the group is of type Group.OPEN, delete membership
         # If no status is given, delete membership,
         # If the current membership is PENDING*, delete membership
-        if (not status or self.accepting_new_members == Group.OPEN or
-                old_status != GroupMembership.MEMBER):
+        if (not status or self.accepting_new_members == Group.OPEN
+                or old_status != GroupMembership.MEMBER):
             # We have either an open group or the request to join a reviewed group is denied
             # or the curator manually declined a user in a pending state.
             membership.delete()
@@ -442,8 +442,8 @@ class Group(GroupBase):
         there is a flag marking the profile ready for a renewal
         """
         return (self.groupmembership_set.filter(userprofile=userprofile)
-                                        .filter(Q(status=GroupMembership.PENDING) |
-                                                Q(needs_renewal=True))).exists()
+                                        .filter(Q(status=GroupMembership.PENDING)
+                                                | Q(needs_renewal=True))).exists()
 
 
 class SkillAlias(GroupAliasBase):

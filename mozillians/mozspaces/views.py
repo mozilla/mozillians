@@ -15,7 +15,7 @@ class CoordinatorAutocomplete(autocomplete.Select2QuerySetView):
 
         if self.q:
 
-            qs = qs.filter(Q(userprofile__full_name__icontains=self.q) |
-                           Q(email__icontains=self.q) |
-                           Q(username__icontains=self.q))
+            qs = qs.filter(Q(userprofile__full_name__icontains=self.q)
+                           | Q(email__icontains=self.q)
+                           | Q(username__icontains=self.q))
         return qs

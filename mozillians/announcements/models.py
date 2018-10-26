@@ -45,8 +45,8 @@ class Announcement(models.Model):
     @property
     def published(self):
         _now = now()
-        return ((self.publish_from <= _now) and
-                (self.publish_until > _now if self.publish_until else True))
+        return ((self.publish_from <= _now)
+                and (self.publish_until > _now if self.publish_until else True))
 
     def get_template_text(self):
         """Mark text as template safe so html tags are not escaped."""

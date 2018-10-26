@@ -17,7 +17,7 @@ services:
   - elasticsearch
   - mysql
 before_install:
-  - pip install flake8==3.5.0
+  - pip install flake8
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
 cache:

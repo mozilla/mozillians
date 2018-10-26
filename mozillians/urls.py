@@ -26,9 +26,9 @@ def error_page(request, template, status=None):
     return render(request, '%d.html' % template, status=(status or template))
 
 
-handler404 = lambda r: error_page(r, 404)
-handler500 = lambda r: error_page(r, 500)
-handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400)
+handler404 = lambda r: error_page(r, 404) # noqa
+handler500 = lambda r: error_page(r, 500) # noqa
+handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400) # noqa
 
 
 urlpatterns = [
