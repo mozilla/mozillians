@@ -4,6 +4,8 @@ import requests
 
 from django.conf import settings
 
+from graphene.types import generic
+
 from mozillians.graphql_profiles.utils import json2obj, parse_datetime_iso8601
 
 
@@ -161,6 +163,24 @@ class AccessInformation(graphene.ObjectType):
     access_provider = graphene.Field(StandardAttributeValues)
 
 
+class GenericAttributeValues(BaseObjectType):
+    """Generic schema for non well known attributes of the v2 schema."""
+    values = graphene.List(generic.GenericScalar)
+
+    def resolve_values(self, info, **kwargs):
+        """Custom resolver to add well know keys in the response.
+
+        It uses the well-know values `key` and `value`` where value is the value from the v2 schema
+        and key is the name of the user provided attribute.
+        Eg in pgp keys `value` is the actual public key and key is the name of the key
+        that the user provided. Eg key == `work public key`
+        """
+        match = []
+        for k, v in self.get('values', {}).items():
+            match.append({'key': k, 'value': v})
+        return match
+
+
 class RelatedProfile(graphene.ObjectType):
     """RelatedProfile object for Graphene.
 
@@ -187,13 +207,13 @@ class Profile(graphene.ObjectType):
     active = graphene.Field(StandardAttributeBoolean)
     last_modified = graphene.Field(StandardAttributeDatetime)
     created = graphene.Field(StandardAttributeDatetime)
-    usernames = graphene.Field(StandardAttributeValues)
+    usernames = graphene.Field(GenericAttributeValues)
     first_name = graphene.Field(StandardAttributeString)
     last_name = graphene.Field(StandardAttributeString)
     primary_email = graphene.Field(StandardAttributeString)
     identities = graphene.Field(Identities)
-    ssh_public_keys = graphene.Field(StandardAttributeValues)
-    pgp_public_keys = graphene.Field(StandardAttributeValues)
+    ssh_public_keys = graphene.Field(GenericAttributeValues)
+    pgp_public_keys = graphene.Field(GenericAttributeValues)
     access_information = graphene.Field(AccessInformation)
     fun_title = graphene.Field(StandardAttributeString)
     description = graphene.Field(StandardAttributeString)
@@ -205,7 +225,7 @@ class Profile(graphene.ObjectType):
     pronouns = graphene.Field(StandardAttributeString)
     picture = graphene.Field(StandardAttributeString)
     uris = graphene.Field(StandardAttributeValues)
-    phone_numbers = graphene.Field(StandardAttributeValues)
+    phone_numbers = graphene.Field(GenericAttributeValues)
     alternative_name = graphene.Field(StandardAttributeString)
     manager = graphene.Field(RelatedProfile)
     directs = graphene.List(RelatedProfile)
