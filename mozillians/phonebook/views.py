@@ -645,7 +645,8 @@ class VerifyIdentityCallbackView(View):
             'code' not in request.GET,
             'state' not in request.GET,
             'oidc_verify_state' not in request.session,
-            request.GET['state'] != request.session['oidc_verify_state']
+            not request.GET.get('state')
+            or request.GET['state'] != request.session['oidc_verify_state']
         ]
         if any(errors):
             msg = 'Something went wrong, account verification failed.'
