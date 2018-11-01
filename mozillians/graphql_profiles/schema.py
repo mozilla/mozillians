@@ -167,13 +167,13 @@ class RelatedProfile(graphene.ObjectType):
     This is not compatible with v2 schema.
     It's used to display relations in orgchart.
     """
-    user_id = graphene.String(required=True)
-    first_name = graphene.String(required=True)
-    last_name = graphene.String(required=True)
-    picture = graphene.String(required=True)
-    title = graphene.String(required=True)
-    fun_title = graphene.String(required=True)
-    location = graphene.String(required=True)
+    user_id = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    picture = graphene.String()
+    title = graphene.String()
+    fun_title = graphene.String()
+    location = graphene.String()
 
 
 class Profile(graphene.ObjectType):
