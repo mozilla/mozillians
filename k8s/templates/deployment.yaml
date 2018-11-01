@@ -35,65 +35,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.name }}-mysql
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-mysql
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-mysql
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-mysql
-    spec:
-      containers:
-        - name: {{ .Values.name }}-mysql
-          image: mariadb:10.2
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3306
-          env:
-            - name: MYSQL_DATABASE
-              value: mozillians
-            - name: MYSQL_USER
-              value: mozillians
-            - name: MYSQL_PASSWORD
-              value: mozillians
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-redis
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-redis
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-redis
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-redis
-    spec:
-      containers:
-        - name: {{ .Values.name }}-redis
-          image: redis:3
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 6379
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: {{ .Values.name }}-celery
   namespace: {{ .Values.namespace }}
   labels:
@@ -158,6 +99,66 @@ spec:
             - configMapRef:
                 name: {{ .Values.config_map }}
 
+{{ if eq .Values.env "dev" -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-mysql
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}-mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}-mysql
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}-mysql
+    spec:
+      containers:
+        - name: {{ .Values.name }}-mysql
+          image: mariadb:10.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_DATABASE
+              value: mozillians
+            - name: MYSQL_USER
+              value: mozillians
+            - name: MYSQL_PASSWORD
+              value: mozillians
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-redis
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}-redis
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}-redis
+    spec:
+      containers:
+        - name: {{ .Values.name }}-redis
+          image: redis:3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -203,3 +204,4 @@ spec:
         - name: {{ .Values.name }}-es
           image: elasticsearch:2.4.5
           imagePullPolicy: IfNotPresent
+{{- end -}}

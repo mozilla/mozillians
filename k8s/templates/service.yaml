@@ -12,6 +12,7 @@ spec:
       port: 80
       targetPort: 8000
 
+{{ if eq .Values.env "dev" -}}
 ---
 apiVersion: v1
 kind: Service
@@ -67,3 +68,4 @@ spec:
     - protocol: TCP
       port: 9200
       targetPort: 9200
+{{ end -}}
