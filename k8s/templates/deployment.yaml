@@ -32,7 +32,7 @@ spec:
           {{- else -}}
           args: ["-c", "/code/bin/run-dev-preview.sh"]
           {{- end }}
-          {{- if eq .Values.env "dev" -}}
+          {{ if eq .Values.env "dev" -}}
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
