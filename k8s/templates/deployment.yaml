@@ -36,6 +36,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
+          env:
+            - name: DUMMY_TIMESTAMP
+              value: "{{ now.Unix }}"
           {{- end }}
       {{ if eq .Values.env "staging" -}}
       volumes:
