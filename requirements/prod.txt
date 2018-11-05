@@ -21,9 +21,9 @@ django-session-csrf==0.7.1 \
 Babel==2.6.0 \
     --hash=sha256:6778d85147d5d85345c14a26aada5e478ab04e39b078b0745ee6870c2b5cf669 \
     --hash=sha256:8cba50f48c529ca3fa18cf81fa9403be176d374ac4d60738b839122dfaaa3d23
-django-waffle==0.14.0 \
-    --hash=sha256:f3db39cc17d6e388a485230b6029095e5d6fba4ceaff8d4fcc21f95c47fe2e97 \
-    --hash=sha256:f243a56db80bd28601222b1a8a0b1fa4e7e6ac1bbf809952c3725cb4cc0012d9
+django-waffle==0.15.0 \
+    --hash=sha256:8d9e73987734501c4f008f768898a3e6cceb97006447f8f8e429feb3d0ee5403 \
+    --hash=sha256:29503f9614a103708fe57429f96a50a982c190e876c220ab9b943f4d0b902268
 BeautifulSoup==3.2.1 \
     --hash=sha256:6a8cb4401111e011b579c8c52a51cdab970041cc543814bbd9577a4529fe1cdb
 djangorestframework==3.7.7 \
