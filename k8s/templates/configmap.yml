@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: mozillians-config
-  namespace: {{ .Values.namespace }}
+  namespace: dino-park
 data:
   ALLOWED_HOSTS: 'dinopark.mozilla.community, 127.0.0.1'
   BASKET_API_KEY: 'basket_api_key'
