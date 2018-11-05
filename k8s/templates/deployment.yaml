@@ -15,6 +15,9 @@ spec:
     metadata:
       labels:
         app: {{ .Values.name }}
+        {{ if eq .Values.env "dev" -}}
+        date: "{{ .Release.Time.Seconds }}"
+        {{- end }}
     spec:
       containers:
         - name: {{ .Values.name }}
