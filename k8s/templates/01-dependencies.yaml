@@ -1,0 +1,68 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-celery
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}-celery
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}-celery
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}-celery
+    spec:
+      containers:
+        - name: {{ .Values.name }}-celery
+          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
+          {{ if eq .Values.env "dev" -}}
+          imagePullPolicy: IfNotPresent
+          {{- else -}}
+          imagePullPolicy: Always
+          {{- end }}
+          command: ['./bin/run-celery.sh']
+          env:
+            - name: C_FORCE_ROOT
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.config_map }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}-celery-beat
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.name }}-celery-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}-celery-beat
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}-celery-beat
+    spec:
+      containers:
+        - name: {{ .Values.name }}-celery-beat
+          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
+          {{ if eq .Values.env "dev" -}}
+          imagePullPolicy: IfNotPresent
+          {{- else -}}
+          imagePullPolicy: Always
+          {{- end }}
+          command: ['./bin/run-celery-beat.sh']
+          env:
+            - name: C_FORCE_ROOT
+              value: 'true'
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.config_map }}
+

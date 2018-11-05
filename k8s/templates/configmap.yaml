@@ -1,3 +1,4 @@
+{{ if eq .Values.env "dev "}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -38,3 +39,4 @@ data:
   SECRET_KEY: 'unique-snowflake'
   SESSION_COOKIE_SECURE: 'False'
   SITE_URL: 'http://dinopark.mozilla.community'
+{{ end }}

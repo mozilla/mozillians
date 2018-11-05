@@ -26,182 +26,21 @@ spec:
           {{- end }}
           ports:
             - containerPort: 8000
-          command: ['./bin/run-dev-preview.sh']
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.config_map }}
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-celery
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-celery
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-celery
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-celery
-    spec:
-      containers:
-        - name: {{ .Values.name }}-celery
-          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
-          {{ if eq .Values.env "dev" -}}
-          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh']
+          {{ if eq .Values.env "staging" -}}
+          args: ["-c", "cp /etc/secrets-volume/env /code/mozillians/.env && /code/bin/run-dev-preview.sh"]
           {{- else -}}
-          imagePullPolicy: Always
+          args: ["-c", "/code/bin/run-dev-preview.sh"]
           {{- end }}
-          command: ['./bin/run-celery.sh']
-          env:
-            - name: C_FORCE_ROOT
-              value: 'true'
+          {{- if eq .Values.env "dev" -}}
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-celery-beat
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-celery-beat
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-celery-beat
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-celery-beat
-    spec:
-      containers:
-        - name: {{ .Values.name }}-celery-beat
-          image: {{ .Values.docker_registry | default "mozillaparsys" }}/{{ .Values.name }}:{{ .Values.rev }}
-          {{ if eq .Values.env "dev" -}}
-          imagePullPolicy: IfNotPresent
-          {{- else -}}
-          imagePullPolicy: Always
           {{- end }}
-          command: ['./bin/run-celery-beat.sh']
-          env:
-            - name: C_FORCE_ROOT
-              value: 'true'
-          envFrom:
-            - configMapRef:
-                name: {{ .Values.config_map }}
-
-{{ if eq .Values.env "dev" -}}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-mysql
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-mysql
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-mysql
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-mysql
-    spec:
-      containers:
-        - name: {{ .Values.name }}-mysql
-          image: mariadb:10.2
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 3306
-          env:
-            - name: MYSQL_DATABASE
-              value: mozillians
-            - name: MYSQL_USER
-              value: mozillians
-            - name: MYSQL_PASSWORD
-              value: mozillians
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-redis
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-redis
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-redis
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-redis
-    spec:
-      containers:
-        - name: {{ .Values.name }}-redis
-          image: redis:3
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 6379
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-memcached
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-memcached
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-memcached
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-memcached
-    spec:
-      containers:
-        - name: {{ .Values.name }}-memcached
-          image: memcached
-          imagePullPolicy: IfNotPresent
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.name }}-es
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: {{ .Values.name }}-es
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: {{ .Values.name }}-es
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.name }}-es
-    spec:
-      containers:
-        - name: {{ .Values.name }}-es
-          image: elasticsearch:2.4.5
-          imagePullPolicy: IfNotPresent
-{{- end -}}
+      {{ if eq .Values.env "staging" -}}
+      volumes:
+        - name: secret-volume
+          readOnly: true
+          secret:
+            secretName: mozillians-dev
+      {{- end }}

@@ -1,4 +1,3 @@
 name: dino-park-mozillians
-namespace: dino-park
 rev: latest
 config_map: mozillians-config
