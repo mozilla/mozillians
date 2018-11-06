@@ -1,4 +1,4 @@
-{{ if eq .Values.env "dev "}}
+{{ if eq .Values.env "dev"}}
 ---
 apiVersion: v1
 kind: ConfigMap
