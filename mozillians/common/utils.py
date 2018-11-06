@@ -57,6 +57,9 @@ def is_test_environment():
     """Check if environment is a test runner."""
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
         return True
+
+    if settings.DEV:
+        return True
     return False
 
 
