@@ -33,6 +33,8 @@ spec:
           args: ["-c", "/code/bin/run-dev-preview.sh"]
           {{- end }}
           {{ if eq .Values.env "dev" -}}
+          tty: true
+          stdin: true
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
