@@ -60,7 +60,7 @@ class TestAPIEndpoints(TestCase):
     @mock.patch('mozillians.dino_park.views.requests.get')
     @mock.patch('mozillians.dino_park.views.UserAccessLevel')
     @override_settings(DINO_PARK_ORGCHART_SVC='orgchart-svc')
-    def test_orgchart_get_related(self, mock_scope, mock_get):
+    def test_orgchart_get_by_id(self, mock_scope, mock_get):
         mock_scope.get_privacy.return_value = 'staff'
         mock_scope.STAFF = 'staff'
         response = mock.Mock()
@@ -68,7 +68,7 @@ class TestAPIEndpoints(TestCase):
         mock_get.return_value = response
         request = self.factory.get('/')
         request.user = UserFactory.create()
-        resp = views.orgchart_get_related(request, 'asdf')
+        resp = views.orgchart_get_by_id(request, 'related', 'asdf')
         mock_get.assert_called_with('http://orgchart-svc/orgchart/related/asdf')
         self.assertEqual(resp.content, '{"foo": "bar"}')
 
@@ -78,7 +78,7 @@ class TestAPIEndpoints(TestCase):
         mock_scope.get_privacy.return_value = 'dummy'
         request = self.factory.get('/')
         request.user = UserFactory.create()
-        resp = views.orgchart_get_related(request, 'abc')
+        resp = views.orgchart_get_by_id(request, 'related', 'abc')
         self.assertEqual(resp.status_code, 403)
 
     @mock.patch('mozillians.dino_park.views.requests.get')

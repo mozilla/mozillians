@@ -39,7 +39,7 @@ def orgchart(request):
 
 
 @never_cache
-def orgchart_get_related(request, user_id):
+def orgchart_get_by_id(request, path, user_id):
     """Internal routing to expose orgchart service by user_id."""
     scope = UserAccessLevel.get_privacy(request)
     if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
@@ -48,7 +48,7 @@ def orgchart_get_related(request, user_id):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_ORGCHART_SVC,
-        path='/orgchart/related/{}'.format(user_id),
+        path='/orgchart/{0}/{1}'.format(path, user_id),
         params='',
         query='',
         fragment=''
