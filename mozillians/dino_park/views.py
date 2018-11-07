@@ -80,9 +80,10 @@ def search_simple(request, query):
 
 @never_cache
 @allow_public
-def search_get_profile(request, user_id):
+def search_get_profile(request, user_id, scope=None):
     """Internal routing to expose search by user ID."""
-    scope = UserAccessLevel.get_privacy(request)
+    if not scope:
+        scope = UserAccessLevel.get_privacy(request)
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,
