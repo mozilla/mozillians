@@ -56,12 +56,21 @@ admin.site.site_title = 'Mozillians'
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
-    import debug_toolbar
     urlpatterns += [
         # Add the 404, 500, and csrf pages for testing
         url(r'^404/$', handler404),
         url(r'^500/$', handler500),
         url(r'^csrf/$', handler_csrf),
-        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        url(r'^__debug__/', include(debug_toolbar.urls))
+        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
     ]
+
+    # Try to import debug_toolbar. If this is running as part of DinoPark in minikube,
+    # it's going to fail. Let's handle that
+    try:
+        import debug_toolbar
+    except ImportError:
+        pass
+    else:
+        urlpatterns += [
+            url(r'^__debug__/', include(debug_toolbar.urls))
+        ]

@@ -1,4 +1,4 @@
-{{ if eq .Values.env "dev"}}
+{{ if eq .Values.env "dev" }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -16,8 +16,8 @@ data:
   COMPRESS_ENABLED: 'False'
   COMPRESS_OFFLINE: 'False'
   DATABASE_URL: 'mysql://root:root@dino-park-mozillians-mysql-service:3306/mozillians'
-  DEBUG: 'False'
-  DEV: 'False'
+  DEBUG: 'True'
+  DEV: 'True'
   DOMAIN: 'dinopark.mozilla.community'
   ES_DISABLED: 'False'
   ES_HOST: 'dino-park-mozillians-memcached-es:9200'
@@ -25,15 +25,6 @@ data:
   ITEMS_PER_PAGE: '24'
   NORECAPTCHA_SECRET_KEY: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
   NORECAPTCHA_SITE_KEY: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
-  OIDC_OP_AUTHORIZATION_ENDPOINT: 'https://parsys.auth0.com/authorize'
-  OIDC_OP_DOMAIN: 'parsys.auth0.com'
-  OIDC_OP_TOKEN_ENDPOINT: 'https://parsys.auth0.com/oauth/token'
-  OIDC_OP_USER_ENDPOINT: 'https://parsys.auth0.com/userinfo'
-  OIDC_RP_CLIENT_ID: 'client_id_here'
-  OIDC_RP_CLIENT_SECRET: 'client_secret_here'
-  OIDC_RP_CLIENT_SECRET_ENCODED: 'False'
-  OIDC_RP_VERIFICATION_CLIENT_ID: 'verification_Client_id'
-  OIDC_RP_VERIFICATION_CLIENT_SECRET: 'verification_client_secret'
   PORT: '80'
   PROTOCOL: 'http://'
   SECRET_KEY: 'unique-snowflake'
