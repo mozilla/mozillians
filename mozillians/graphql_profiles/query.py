@@ -1,7 +1,7 @@
 import graphene
 
 from mozillians.common.templatetags.helpers import get_object_or_none
-from mozillians.dino_park.views import orgchart_get_related, search_get_profile
+from mozillians.dino_park.views import orgchart_get_by_id, search_get_profile
 from mozillians.graphql_profiles.schema import Profile, Vouches
 from mozillians.graphql_profiles.utils import json2obj
 from mozillians.users.models import UserProfile, Vouch
@@ -23,7 +23,7 @@ def _retrieve_profile(request, user_id, from_db=False):
     else:
         # We need to fetch data from ES
         profile_data = search_get_profile(request, user_id)
-        orgchart_related_data = orgchart_get_related(request, user_id)
+        orgchart_related_data = orgchart_get_by_id(request, 'related', user_id)
 
         profile = json2obj(profile_data.content)
         profile.update(json2obj(orgchart_related_data.content))
