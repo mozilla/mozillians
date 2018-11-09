@@ -1,0 +1,37 @@
+---
+{{ if eq .Values.env "staging" }}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    certmanager.k8s.io/cluster-issuer: letsencrypt-production
+  name: mozillians-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+  - host: web-mozillians.dinopark.infra.iam.mozilla.com
+    http:
+      paths:
+      - backend:
+          serviceName: oidc-proxy
+          servicePort: 80
+        path: /
+      - backend:
+          serviceName: dino-park-front-end-service
+          servicePort: 80
+        path: /beta/img
+      - backend:
+          serviceName: dino-park-front-end-service
+          servicePort: 80
+        path: /beta/css
+      - backend:
+          serviceName: dino-park-front-end-service
+          servicePort: 80
+        path: /beta/js
+  tls:
+  - hosts:
+    - web-mozillians.dinopark.infra.iam.mozilla.com
+    secretName: mozillians-dinothon-cert
+{{ end }}
