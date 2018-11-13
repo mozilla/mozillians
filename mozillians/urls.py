@@ -34,17 +34,19 @@ handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400) # noqa
 urlpatterns = [
     url(r'^api/', include('mozillians.api.urls')),
     url(r'^oidc/', include('mozilla_django_oidc.urls')),
-    url(r'^graphql/', include('mozillians.graphql_profiles.urls', app_name='graphql_profiles',
-                              namespace='graphql_profiles')),
+    url(r'^api/v3/graphql/', include('mozillians.graphql_profiles.urls',
+                                     app_name='graphql_profiles',
+                                     namespace='graphql_profiles')),
     url(r'', include('mozillians.groups.urls', app_name='groups', namespace='groups')),
     url(r'', include('mozillians.users.urls', app_name='users', namespace='users')),
     url(r'', include('mozillians.mozspaces.urls', app_name='mozspaces', namespace='mozspaces')),
     url(r'', include('mozillians.phonebook.urls', app_name='phonebook', namespace='phonebook')),
-
     # Admin URLs.
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'', include('mozillians.humans.urls')),
+    # If there is no match hand over the url to dino-park
+    url(r'', include('mozillians.dino_park.urls', app_name='dino_park', namespace='dino_park')),
 ]
 
 admin.site.site_header = 'Mozillians Administration'
@@ -54,12 +56,21 @@ admin.site.site_title = 'Mozillians'
 # via predictable routes. Add in qunit tests.
 if settings.DEBUG:
     # Remove leading and trailing slashes so the regex matches.
-    import debug_toolbar
     urlpatterns += [
         # Add the 404, 500, and csrf pages for testing
         url(r'^404/$', handler404),
         url(r'^500/$', handler500),
         url(r'^csrf/$', handler_csrf),
-        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        url(r'^__debug__/', include(debug_toolbar.urls))
+        url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT})
     ]
+
+    # Try to import debug_toolbar. If this is running as part of DinoPark in minikube,
+    # it's going to fail. Let's handle that
+    try:
+        import debug_toolbar
+    except ImportError:
+        pass
+    else:
+        urlpatterns += [
+            url(r'^__debug__/', include(debug_toolbar.urls))
+        ]

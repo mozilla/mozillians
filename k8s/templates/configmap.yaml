@@ -1,0 +1,33 @@
+{{ if eq .Values.env "dev" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mozillians-config
+  namespace: {{ .Values.namespace }}
+data:
+  ALLOWED_HOSTS: 'dinopark.mozilla.community, 127.0.0.1'
+  BASKET_API_KEY: 'basket_api_key'
+  BASKET_URL: 'http://127.0.0.1'
+  CACHE_BACKEND: 'django.core.cache.backends.memcached.MemcachedCache'
+  CACHE_URL: 'dino-park-mozillians-memcached-service:11211'
+  CELERY_ACCEPT_CONTENT: 'pickle'
+  CELERY_BROKER_URL: 'redis://dino-park-mozillians-redis-service:6379/0'
+  COMPRESS_ENABLED: 'False'
+  COMPRESS_OFFLINE: 'False'
+  DATABASE_URL: 'mysql://root:root@dino-park-mozillians-mysql-service:3306/mozillians'
+  DEBUG: 'True'
+  DEV: 'True'
+  DOMAIN: 'dinopark.mozilla.community'
+  ES_DISABLED: 'False'
+  ES_HOST: 'dino-park-mozillians-memcached-es:9200'
+  ES_PROTOCOL: 'http//'
+  ITEMS_PER_PAGE: '24'
+  NORECAPTCHA_SECRET_KEY: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+  NORECAPTCHA_SITE_KEY: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
+  PORT: '80'
+  PROTOCOL: 'http://'
+  SECRET_KEY: 'unique-snowflake'
+  SESSION_COOKIE_SECURE: 'False'
+  SITE_URL: 'http://dinopark.mozilla.community'
+{{ end }}

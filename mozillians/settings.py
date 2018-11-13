@@ -70,6 +70,7 @@ INSTALLED_APPS = (
     'mozillians.humans',
     'mozillians.geo',
     'mozillians.graphql_profiles',
+    'mozillians.dino_park',
 
     'sorl.thumbnail',
     'import_export',
@@ -178,7 +179,8 @@ EXEMPT_L10N_URLS = [
     '^/verify/identity/callback/',
     '^/api/v1/',
     '^/api/v2/',
-    '^/admin/'
+    '^/admin/',
+    '^/beta/.*',
 ]
 
 # Tells the extract script what files to parse for strings and what functions to use.
@@ -629,6 +631,7 @@ CSP_FONT_SRC = (
     'https://*.mozilla.org',
     'https://cdn.mozillians.org',
     'https://cdn-staging.mozillians.org',
+    'https://fonts.gstatic.com',
 )
 
 CSP_IMG_SRC = (
@@ -667,6 +670,7 @@ CSP_STYLE_SRC = (
     'https://cdn-staging.mozillians.org',
     'https://www.mozilla.org',
     'https://*.mozilla.net',
+    'https://fonts.googleapis.com',
 )
 
 CSP_FRAME_SRC = (
@@ -710,8 +714,18 @@ ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool
 GRAPHENE = {
     'SCHEMA': 'mozillians.schema.schema',
 }
-V2_PROFILE_ENDPOINT = config('V2_PROFILE_ENDPOINT', default='')
 
+# Provide S3 storage backend
+if not DEV:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME',
+                                     default='kubernetes-mozillians-stage')
+    DEFAULT_AVATAR_PATH = config('DEFAULT_AVATAR_PATH', default=urljoin(MEDIA_URL, DEFAULT_AVATAR))
+    CSP_IMG_SRC = CSP_IMG_SRC + ('https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com',)
+
+# Dino Park configuration
+DINO_PARK_SEARCH_SVC = config('DINO_PARK_SEARCH_SVC', default='dino-park-search-service')
+DINO_PARK_ORGCHART_SVC = config('DINO_PARK_ORGCHART_SVC', default='dino-tree-service')
 
 if DEV:
     CSP_FONT_SRC += (
@@ -722,17 +736,21 @@ if DEV:
     CSP_IMG_SRC += (
         'http://*.mozilla.net',
         'http://*.mozilla.org',
+        'http://dinopark.mozilla.community',
     )
     CSP_SCRIPT_SRC += (
         "'unsafe-inline'",
+        "'unsafe-eval'",
         'http://*.mozilla.net',
         'http://*.mozilla.org',
         'http://cdn.jsdelivr.net',
+        'http://dinopark.mozilla.community',
     )
     CSP_STYLE_SRC += (
         'http://*.mozilla.net',
         'http://*.mozilla.org',
         'http://cdn.jsdelivr.net',
+        'http://dinopark.mozilla.community',
     )
 
 if DEBUG:

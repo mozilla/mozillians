@@ -4,6 +4,8 @@ import requests
 
 from django.conf import settings
 
+from graphene.types import generic
+
 from mozillians.graphql_profiles.utils import json2obj, parse_datetime_iso8601
 
 
@@ -153,99 +155,98 @@ class StandardAttributeValues(BaseObjectType):
         return None
 
 
-class PublicEmailAddresses(graphene.ObjectType):
-    """HRIS schema for public email addresses."""
-    PublicEmailAddress = graphene.String(name='publicEmailAddress')
-
-
-class HRISAttributes(graphene.ObjectType):
-    """V2 Schema HRIS object for Graphene.
-
-    This is a well-known lists of HRIS attributes.
-    """
-    Last_Name = graphene.String(required=True, name='lastName')
-    Preferred_Name = graphene.String(required=True, name='preferredName')
-    PreferredFirstName = graphene.String(required=True, name='preferredFirstName')
-    LegalFirstName = graphene.String(required=True, name='legalFirstName')
-    EmployeeID = graphene.String(required=True, name='employeeId')
-    businessTitle = graphene.String(required=True)
-    IsManager = graphene.Boolean(required=True, name='isManager')
-    isDirectorOrAbove = graphene.Boolean(required=True)
-    Management_Level = graphene.String(required=True, name='managementLevel')
-    HireDate = graphene.DateTime(required=True, name='hireDate')
-    CurrentlyActive = graphene.Boolean(required=True, name='currentlyActive')
-    Entity = graphene.String(required=True, name='entity')
-    Team = graphene.String(required=True, name='team')
-    Cost_Center = graphene.String(required=True, name='costCenter')
-    WorkerType = graphene.String(required=True, name='workerType')
-    LocationDescription = graphene.String(name='locationDescription')
-    Time_Zone = graphene.String(required=True, name='timeZone')
-    LocationCity = graphene.String(required=True, name='locationCity')
-    LocationState = graphene.String(required=True, name='locationState')
-    LocationCountryFull = graphene.String(required=True, name='locationCountryFull')
-    LocationCountryISO2 = graphene.String(required=True, name='locationCountryIso2')
-    WorkersManager = graphene.String(name='workersManager')
-    WorkersManagerEmployeeID = graphene.String(required=True, name='workersManagerEmployeeId')
-    Worker_s_Manager_s_Email_Address = graphene.String(required=True,
-                                                       name='workersManagersEmailAddress')
-    PrimaryWorkEmail = graphene.String(required=True, name='primaryWorkEmail')
-    WPRDeskNumber = graphene.String(name='wprDeskNumber')
-    EgenciaPOSCountry = graphene.String(required=True, name='egenciaPosCountry')
-    PublicEmailAddresses = graphene.List(PublicEmailAddresses, name='publicEmailAddresses')
-
-
-class HRISAttributeValues(BaseObjectType):
-    """V2 Schema StandardAttributeValues object for Graphene."""
-
-    values = graphene.Field(HRISAttributes)
-
-    def resolve_values(self, info, **kwargs):
-        return self.get('values')
-
-
 class AccessInformation(graphene.ObjectType):
     """V2 Schema AccessInformation object for Graphene."""
 
     ldap = graphene.Field(StandardAttributeValues)
     mozilliansorg = graphene.Field(StandardAttributeValues)
-    hris = graphene.Field(HRISAttributeValues)
     access_provider = graphene.Field(StandardAttributeValues)
 
 
-class CoreProfile(graphene.ObjectType):
-    """V2 Schema CoreProfile object for Graphene."""
+class GenericAttributeValues(BaseObjectType):
+    """Generic schema for non well known attributes of the v2 schema."""
+    values = graphene.List(generic.GenericScalar)
+
+    def resolve_values(self, info, **kwargs):
+        """Custom resolver to add well know keys in the response.
+
+        It uses the well-know values `key` and `value`` where value is the value from the v2 schema
+        and key is the name of the user provided attribute.
+        Eg in pgp keys `value` is the actual public key and key is the name of the key
+        that the user provided. Eg key == `work public key`
+        """
+        match = []
+        for k, v in self.get('values', {}).items():
+            match.append({'key': k, 'value': v})
+        return match
+
+
+class RelatedProfile(graphene.ObjectType):
+    """RelatedProfile object for Graphene.
+
+    This is not compatible with v2 schema.
+    It's used to display relations in orgchart.
+    """
+    user_id = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    picture = graphene.String()
+    title = graphene.String()
+    fun_title = graphene.String()
+    location = graphene.String()
+
+
+class Profile(graphene.ObjectType):
+    """V2 Schema Profile object for Graphene.
+
+    Combines Core and Extended Profile attributes from the V2 Schema.
+    """
 
     user_id = graphene.Field(StandardAttributeString)
     login_method = graphene.Field(StandardAttributeString)
     active = graphene.Field(StandardAttributeBoolean)
     last_modified = graphene.Field(StandardAttributeDatetime)
     created = graphene.Field(StandardAttributeDatetime)
-    usernames = graphene.Field(StandardAttributeValues)
+    usernames = graphene.Field(GenericAttributeValues)
     first_name = graphene.Field(StandardAttributeString)
     last_name = graphene.Field(StandardAttributeString)
     primary_email = graphene.Field(StandardAttributeString)
     identities = graphene.Field(Identities)
-    ssh_public_keys = graphene.Field(StandardAttributeValues)
-    pgp_public_keys = graphene.Field(StandardAttributeValues)
+    ssh_public_keys = graphene.Field(GenericAttributeValues)
+    pgp_public_keys = graphene.Field(GenericAttributeValues)
     access_information = graphene.Field(AccessInformation)
     fun_title = graphene.Field(StandardAttributeString)
     description = graphene.Field(StandardAttributeString)
     location_preference = graphene.Field(StandardAttributeString)
     office_location = graphene.Field(StandardAttributeString)
     timezone = graphene.Field(StandardAttributeString)
-    preferred_lagnuage = graphene.Field(StandardAttributeValues)
+    preferred_language = graphene.Field(StandardAttributeValues)
     tags = graphene.Field(StandardAttributeValues)
     pronouns = graphene.Field(StandardAttributeString)
     picture = graphene.Field(StandardAttributeString)
     uris = graphene.Field(StandardAttributeValues)
-    phone_numbers = graphene.Field(StandardAttributeValues)
+    phone_numbers = graphene.Field(GenericAttributeValues)
     alternative_name = graphene.Field(StandardAttributeString)
+    manager = graphene.Field(RelatedProfile)
+    directs = graphene.List(RelatedProfile)
+    # HRIS values
+    employee_id = graphene.Field(StandardAttributeString)
+    business_title = graphene.Field(StandardAttributeString)
+    is_manager = graphene.Field(StandardAttributeBoolean)
+    is_director_or_above = graphene.Field(StandardAttributeBoolean)
+    entity = graphene.Field(StandardAttributeString)
+    team = graphene.Field(StandardAttributeString)
+    cost_center = graphene.Field(StandardAttributeString)
+    worker_type = graphene.Field(StandardAttributeString)
+    primary_work_email = graphene.Field(StandardAttributeString)
+    wpr_desk_number = graphene.Field(StandardAttributeString)
+    public_email_addresses = graphene.Field(StandardAttributeValues)
 
 
 class Vouches(graphene.ObjectType):
     """Schema to expose user vouches."""
     description = graphene.String()
-    voucher = graphene.Field(CoreProfile)
+    voucher = graphene.Field(Profile)
     autovouch = graphene.Boolean()
     date = graphene.DateTime()
 

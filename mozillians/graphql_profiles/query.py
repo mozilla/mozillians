@@ -1,41 +1,55 @@
-import json
 import graphene
-import requests
 
-from django.conf import settings
-
-from mozillians.graphql_profiles.schema import CoreProfile, Vouches
+from mozillians.common.templatetags.helpers import get_object_or_none
+from mozillians.dino_park.views import orgchart_get_by_id, search_get_profile
+from mozillians.graphql_profiles.schema import Profile, Vouches
 from mozillians.graphql_profiles.utils import json2obj
-from mozillians.users.models import Vouch
+from mozillians.users.models import UserProfile, Vouch
+
+
+def _retrieve_profile(request, user_id, from_db=False):
+    """Helper method to retrieve a profile either from the v2 schema or
+    from the database.
+    """
+    profile_auth0_id = None
+    if request.user.is_authenticated():
+        profile_auth0_id = request.user.userprofile.auth0_user_id
+    user_id = user_id or profile_auth0_id
+    if not user_id:
+        return None
+
+    if from_db:
+        profile = get_object_or_none(UserProfile, user_id=user_id)
+    else:
+        # We need to fetch data from ES
+        profile_data = search_get_profile(request, user_id)
+        orgchart_related_data = orgchart_get_by_id(request, 'related', user_id)
+
+        profile = json2obj(profile_data.content)
+        profile.update(json2obj(orgchart_related_data.content))
+
+    return profile
 
 
 class Query(object):
     """GraphQL Query class for the V2 Profiles."""
 
-    profiles = graphene.List(CoreProfile)
-    profile = graphene.Field(CoreProfile, userId=graphene.String(required=True))
-    vouches = graphene.List(Vouches, userId=graphene.String(required=True))
-
-    def resolve_profiles(self, info, **kwargs):
-        """GraphQL resolver for the profiles attribute."""
-        resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
-
-        return json2obj(json.dumps(resp))
+    profile = graphene.Field(Profile, userId=graphene.String())
+    vouches = graphene.List(Vouches, userId=graphene.String())
 
     def resolve_profile(self, info, **kwargs):
         """GraphQL resolver for a single profile."""
 
-        resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
-
-        data = json2obj(json.dumps(resp))
         user_id = kwargs.get('userId')
-        for profile in data:
-            if profile['user_id']['value'] == user_id:
-                return profile
-        return None
+        profile_data = _retrieve_profile(info.context, user_id)
+        # If we failed to find a profile, return an empty response
+        if not profile_data:
+            return None
+        return profile_data
 
     def resolve_vouches(self, info, **kwargs):
         user_id = kwargs.get('userId')
-        if not user_id:
+        profile = self._retrieve_profile(info.context, user_id, from_db=True)
+        if not profile:
             return None
-        return Vouch.objects.filter(vouchee__auth0_user_id=user_id)
+        return Vouch.objects.filter(vouchee=profile)

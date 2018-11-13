@@ -212,6 +212,7 @@ class UserProfile(UserProfilePrivacyModel):
                                        default='direct')
     # This is the Auth0 user ID. We are saving only the primary here.
     auth0_user_id = models.CharField(max_length=1024, default='', blank=True)
+    is_staff = models.BooleanField(default=False)
 
     def __unicode__(self):
         """Return this user's name when their profile is called."""
@@ -529,7 +530,7 @@ class UserProfile(UserProfilePrivacyModel):
         if 'crop' not in kwargs:
             kwargs['crop'] = 'center'
 
-        if self.photo and default_storage.exists(self.photo):
+        if self.photo and default_storage.exists(self.photo.name):
             # Workaround for legacy images in RGBA model
 
             try:

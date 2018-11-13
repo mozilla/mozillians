@@ -128,8 +128,8 @@ def main():
     try:
         downloads = [hashed_download(url, temp, digest)
                      for url, digest in PACKAGES]
-        check_output('pip install --no-index --no-deps -U ' +
-                     ' '.join(quote(d) for d in downloads),
+        check_output('pip install --no-index --no-deps -U '
+                     + ' '.join(quote(d) for d in downloads),
                      shell=True)
     except HashError as exc:
         print(exc)

@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: dino-park
+  name: {{ .Values.namespace }}

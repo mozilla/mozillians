@@ -18,6 +18,7 @@ def django_to_jinja(template_name, context, **kw):
     request = context_instance['request']
     return jingo.render(request, jingo.env.from_string(source))
 
+
 actions.render_to_response = django_to_jinja
 options.render_to_response = django_to_jinja
 sites.render_to_response = django_to_jinja

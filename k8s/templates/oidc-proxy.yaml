@@ -1,0 +1,71 @@
+---
+{{ if eq .Values.env "staging" }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: oidc-proxy
+  name: oidc-proxy
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: oidc-proxy
+    spec:
+      containers:
+        - image: mozillaparsys/mozilla.oidc.proxy:latest
+          imagePullPolicy: Always
+          name: oidc-porxy
+          ports:
+            - containerPort: 80
+          env:
+            - name: client_id
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: client_id
+            - name: client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: client_secret
+            - name: discovery_url
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: discovery_url
+            - name: discovery_url
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: discovery_url
+            - name: backend
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: backend
+            - name: redirect_uri
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: redirect_uri
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    name: oidc-proxy
+  name: oidc-proxy
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    name: oidc-proxy
+{{ end }}

@@ -1,14 +1,19 @@
 import base64
 import hashlib
+import json
 import re
 
 from django.db import transaction
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
+
+from cities_light.models import Country
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from waffle import switch_is_active
 
 from mozillians.common.templatetags.helpers import get_object_or_none
+from mozillians.dino_park.views import search_get_profile
 from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
@@ -54,20 +59,63 @@ def calculate_username(email):
     return suggested_username
 
 
+def create_random_username():
+    """This function produces a random username that
+    will be used as default value when a user has not provided one.
+    """
+    raise NotImplementedError
+
+
 class MozilliansAuthBackend(OIDCAuthenticationBackend):
     """Override OIDCAuthenticationBackend to provide custom functionality."""
+
+    def create_mozillians_profile(self, user_id, idp):
+        # A new mozillians.org profile will be provisioned if there is not one,
+        # we need the self-view of profile which mean a private scope
+        # TODO: replace username with a random generator.
+        # Because we are using OIDC proxy, we assume always ldap. This functionality
+        # will be deprecated with the launch of DinoPark
+
+        profile = idp.profile
+        v2_profile = search_get_profile(self.request, user_id, 'private')
+        data = json.loads(v2_profile.content)
+        # Escape the middleware
+        profile.full_name = (data.get('first_name', {}).get('value')
+                             + data.get('last_name', {}).get('value'))
+        location = data.get('location_preference', {}).get('value')
+        # TODO: Update this. It's wrong to create entries like this. We need to populate
+        # the Country table and match the incoming location. It's only for M1 beta.
+        if location:
+            country, _ = Country.objects.get_or_create(name=location)
+            profile.country = country
+        profile.timezone = data.get('timezone', {}).get('value')
+        profile.title = data.get('fun_title', {}).get('value')
+        worker_type = data.get('worker_type', {}).get('value')
+        if worker_type:
+            profile.is_staff = True
+        profile.auth0_user_id = user_id
+        profile.save()
+        if profile.is_staff:
+            profile.auto_vouch()
+
+        # redirect to /beta
+        self.request.session['oidc_login_next'] = '/beta'
 
     def create_user(self, claims):
         user = super(MozilliansAuthBackend, self).create_user(claims)
         # Ensure compatibility with OIDC conformant mode
         auth0_user_id = claims.get('user_id') or claims.get('sub')
 
-        IdpProfile.objects.create(
+        idp = IdpProfile.objects.create(
             profile=user.userprofile,
             auth0_user_id=auth0_user_id,
             email=claims.get('email'),
             primary=True
         )
+        # This is temporary for the beta version of DinoPark.
+        # and will be removed after that.
+        if switch_is_active('dino-park-automatic-profiles'):
+            self.create_mozillians_profile(auth0_user_id, idp)
 
         return user
 
