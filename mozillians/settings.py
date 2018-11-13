@@ -715,8 +715,9 @@ GRAPHENE = {
     'SCHEMA': 'mozillians.schema.schema',
 }
 
+DINO_PARK_ACTIVE = config('DINO_PARK_ACTIVE', default=False, cast=bool)
 # Provide S3 storage backend
-if config('ENABLE_DINOPARK_S3_STORAGE', default=False, cast=bool) and not DEV:
+if DINO_PARK_ACTIVE and not DEV:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME',
                                      default='kubernetes-mozillians-stage')
