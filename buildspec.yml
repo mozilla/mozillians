@@ -3,7 +3,7 @@ version: 0.2
 phases:
   build:
     commands:
-      - git checkout dino-park
+      - git checkout master
       - echo "Installing dependencies"
       - apt update && apt install apt-transport-https
       - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
