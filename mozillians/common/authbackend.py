@@ -80,8 +80,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         v2_profile = search_get_profile(self.request, user_id, 'private')
         data = json.loads(v2_profile.content)
         # Escape the middleware
-        profile.full_name = (data.get('first_name', {}).get('value') +
-                             data.get('last_name', {}).get('value'))
+        profile.full_name = (data.get('first_name', {}).get('value')
+                             + data.get('last_name', {}).get('value'))
         location = data.get('location_preference', {}).get('value')
         # TODO: Update this. It's wrong to create entries like this. We need to populate
         # the Country table and match the incoming location. It's only for M1 beta.
