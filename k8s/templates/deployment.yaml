@@ -42,10 +42,14 @@ spec:
             - name: DUMMY_TIMESTAMP
               value: "{{ now.Unix }}"
           {{- end }}
+          {{ if eq .Values.env "staging" -}}
+          volumeMounts:
+            - mountPath: /etc/secrets-volume/
+              name: secrets-volume
+          {{- end }}
       {{ if eq .Values.env "staging" -}}
       volumes:
-        - name: secret-volume
-          readOnly: true
+        - name: secrets-volume
           secret:
-            secretName: mozillians-dev
+            secretName: {{ .Values.secrets_name }}
       {{- end }}

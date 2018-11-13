@@ -24,13 +24,32 @@ spec:
           {{- else -}}
           imagePullPolicy: Always
           {{- end }}
+          {{ if eq .Values.env "staging" -}}
+          command: ["/bin/sh"]
+          args: ["-c", "cp /etc/secrets-volume/env /code/mozillians/.env && /bin/sh /code/bin/run-celery.sh"]
+          {{- else -}}
           command: ['./bin/run-celery.sh']
+          {{- end }}
+          {{ if eq .Values.env "dev" -}}
           env:
             - name: C_FORCE_ROOT
               value: 'true'
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
+          {{- end }}
+          {{ if eq .Values.env "staging" -}}
+          volumeMounts:
+            - mountPath: /etc/secrets-volume/
+              name: secrets-volume
+          {{- end }}
+      {{ if eq .Values.env "staging" -}}
+      volumes:
+        - name: secrets-volume
+          secret:
+            secretName: {{ .Values.secrets_name }}
+      {{- end }}
+
 
 ---
 apiVersion: apps/v1
@@ -58,11 +77,29 @@ spec:
           {{- else -}}
           imagePullPolicy: Always
           {{- end }}
+          {{ if eq .Values.env "staging" -}}
+          command: ["/bin/sh"]
+          args: ["-c", "cp /etc/secrets-volume/env /code/mozillians/.env && /bin/sh /code/bin/run-celery-beat.sh"]
+          {{- else -}}
           command: ['./bin/run-celery-beat.sh']
+          {{- end }}
+          {{ if eq .Values.env "dev" -}}
           env:
             - name: C_FORCE_ROOT
               value: 'true'
           envFrom:
             - configMapRef:
                 name: {{ .Values.config_map }}
+          {{- end }}
+          {{ if eq .Values.env "staging" -}}
+          volumeMounts:
+            - mountPath: /etc/secrets-volume/
+              name: secrets-volume
+          {{- end }}
+      {{ if eq .Values.env "staging" -}}
+      volumes:
+        - name: secrets-volume
+          secret:
+            secretName: {{ .Values.secrets_name }}
+      {{- end }}
 

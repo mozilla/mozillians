@@ -1,2 +1,3 @@
 env: staging
 namespace: dinopark-stage
+secrets_name: mozillians-dev
