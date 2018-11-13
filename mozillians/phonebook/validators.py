@@ -11,14 +11,14 @@ def validate_twitter(username):
     """Return a twitter username given '@' or http(s) strings."""
 
     if username:
-        username = re.sub('https?://(www\.)?twitter\.com/|@', '', username)
+        username = re.sub(r'https?://(www\.)?twitter\.com/|@', '', username)
 
         # Twitter accounts must be alphanumeric ASCII including underscore, and <= 15 chars.
         # https://support.twitter.com/articles/101299-why-can-t-i-register-certain-usernames
         if len(username) > 15:
             raise ValidationError(_('Twitter usernames cannot be longer than 15 characters.'))
 
-        if not re.match('^\w+$', username):
+        if not re.match(r'^\w+$', username):
             raise ValidationError(_('Twitter usernames must contain only alphanumeric'
                                     ' characters and the underscore.'))
     return username

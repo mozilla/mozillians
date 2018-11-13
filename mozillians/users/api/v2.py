@@ -125,8 +125,8 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
             if field in ['country', 'region', 'city']:
                 return None
 
-            if ((not getattr(self, method_name, None) and
-                 getattr(UserProfile, 'get_privacy_{0}_display'.format(field), None))):
+            if ((not getattr(self, method_name, None)
+                 and getattr(UserProfile, 'get_privacy_{0}_display'.format(field), None))):
                 setattr(self, method_name, self._transform_privacy_wrapper(field))
 
     def get_url(self, obj):
@@ -143,7 +143,7 @@ class UserProfileDetailedSerializer(serializers.HyperlinkedModelSerializer):
     def transform_bio(self, obj, value):
         return {
             'value': value,
-            'html': unicode(markdown(value)),
+            'html': unicode(markdown(value)), # noqa
             'privacy': obj.get_privacy_bio_display(),
         }
 

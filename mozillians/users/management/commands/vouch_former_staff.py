@@ -44,8 +44,8 @@ class Command(BaseCommand):
             if u:
                 vouches = u.vouches_received.all()
                 already_vouched = vouches.filter(
-                    Q(description=employee_descr) |
-                    Q(description=former_employee_descr),
+                    Q(description=employee_descr)
+                    | Q(description=former_employee_descr),
                     autovouch=True
                 )
                 if not already_vouched.exists():
@@ -59,4 +59,4 @@ class Command(BaseCommand):
                         )
                     count = count + 1
 
-        print "%d former staff members vouched." % count
+        print("%d former staff members vouched." % count)

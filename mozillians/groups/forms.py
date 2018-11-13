@@ -287,8 +287,8 @@ class GroupCriteriaForm(happyforms.ModelForm):
                 self._errors['new_member_criteria'] = self.error_class([msg])
                 del cleaned_data['new_member_criteria']
 
-        if (self.instance and self.instance.is_access_group and
-                cleaned_data.get('accepting_new_members') == Group.OPEN):
+        if (self.instance and self.instance.is_access_group
+                and cleaned_data.get('accepting_new_members') == Group.OPEN):
                 msg = _(u'An access group cannot be of type Open.')
                 self._errors['accepting_new_members'] = self.error_class([msg])
         return cleaned_data
@@ -343,8 +343,8 @@ class GroupCreateForm(happyforms.ModelForm):
         """
         cdata = super(GroupCreateForm, self).clean()
         user = getattr(self.request, 'user', None)
-        if ((not user or not user.userprofile.can_create_access_groups) and
-                self.cleaned_data['is_access_group']):
+        if ((not user or not user.userprofile.can_create_access_groups)
+                and self.cleaned_data['is_access_group']):
             msg = _(u'You do not have the permissions to provision an access group.')
             self._errors['is_access_group'] = self.error_class([msg])
 

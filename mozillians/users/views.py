@@ -28,9 +28,9 @@ class BaseProfileAdminAutocomplete(autocomplete.Select2QuerySetView):
             return UserProfile.objects.none()
 
         qs = UserProfile.objects.complete()
-        self.q_base_filter = (Q(full_name__icontains=self.q) |
-                              Q(user__email__icontains=self.q) |
-                              Q(user__username__icontains=self.q))
+        self.q_base_filter = (Q(full_name__icontains=self.q)
+                              | Q(user__email__icontains=self.q)
+                              | Q(user__username__icontains=self.q))
 
         if self.q:
             qs = qs.filter(self.q_base_filter)
@@ -49,9 +49,9 @@ class UsersAdminAutocomplete(autocomplete.Select2QuerySetView):
             return User.objects.none()
 
         qs = User.objects.all()
-        self.q_base_filter = (Q(userprofile__full_name__icontains=self.q) |
-                              Q(email__icontains=self.q) |
-                              Q(username__icontains=self.q))
+        self.q_base_filter = (Q(userprofile__full_name__icontains=self.q)
+                              | Q(email__icontains=self.q)
+                              | Q(username__icontains=self.q))
 
         if self.q:
             qs = qs.filter(self.q_base_filter)
@@ -92,9 +92,9 @@ class CuratorsAutocomplete(autocomplete.Select2QuerySetView):
         qs = UserProfile.objects.vouched()
 
         if self.q:
-            qs = qs.filter(Q(full_name__icontains=self.q) |
-                           Q(user__email__icontains=self.q) |
-                           Q(user__username__icontains=self.q))
+            qs = qs.filter(Q(full_name__icontains=self.q)
+                           | Q(user__email__icontains=self.q)
+                           | Q(user__username__icontains=self.q))
         return qs
 
 
@@ -148,9 +148,9 @@ class StaffProfilesAutocomplete(autocomplete.Select2QuerySetView):
 
         qs = UserProfile.objects.filter(query).distinct()
         if self.q:
-            qs = qs.filter(Q(full_name__icontains=self.q) |
-                           Q(user__email__icontains=self.q) |
-                           Q(user__username__icontains=self.q))
+            qs = qs.filter(Q(full_name__icontains=self.q)
+                           | Q(user__email__icontains=self.q)
+                           | Q(user__username__icontains=self.q))
         return qs
 
 
@@ -169,9 +169,9 @@ class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         query = Q(pk__in=staff_ids) | Q(pk__in=nda_members_ids)
         qs = UserProfile.objects.filter(query).distinct()
         if self.q:
-            qs = qs.filter(Q(full_name__icontains=self.q) |
-                           Q(user__email__icontains=self.q) |
-                           Q(user__username__icontains=self.q))
+            qs = qs.filter(Q(full_name__icontains=self.q)
+                           | Q(user__email__icontains=self.q)
+                           | Q(user__username__icontains=self.q))
         return qs
 
 
@@ -182,15 +182,15 @@ class NDAGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         staff_ids = staff_qs.values_list('pk', flat=True)
 
         mfa_idps_query = (IdpProfile.objects.filter(primary=True)
-                                            .filter(Q(type=IdpProfile.PROVIDER_GITHUB) |
-                                                    Q(type=IdpProfile.PROVIDER_FIREFOX_ACCOUNTS) |
-                                                    Q(type=IdpProfile.PROVIDER_LDAP)))
+                                            .filter(Q(type=IdpProfile.PROVIDER_GITHUB)
+                                                    | Q(type=IdpProfile.PROVIDER_FIREFOX_ACCOUNTS)
+                                                    | Q(type=IdpProfile.PROVIDER_LDAP)))
         mfa_idps_pks = mfa_idps_query.values_list('profile__id', flat=True)
         qs = UserProfile.objects.filter(Q(pk__in=mfa_idps_pks) | Q(pk__in=staff_ids))
         if self.q:
-            qs = qs.filter(Q(full_name__icontains=self.q) |
-                           Q(user__email__icontains=self.q) |
-                           Q(user__username__icontains=self.q))
+            qs = qs.filter(Q(full_name__icontains=self.q)
+                           | Q(user__email__icontains=self.q)
+                           | Q(user__username__icontains=self.q))
         return qs
 
 

@@ -154,8 +154,8 @@ def view_profile(request, username):
             profile.set_instance_privacy_level(
                 request.user.userprofile.privacy_level)
 
-        if (request.user.is_authenticated() and request.user.userprofile.is_vouched and
-                not profile.is_vouched):
+        if (request.user.is_authenticated() and request.user.userprofile.is_vouched
+                and not profile.is_vouched):
             abuse_report = get_object_or_none(AbuseReport, reporter=request.user.userprofile,
                                               profile=profile)
 
@@ -192,8 +192,8 @@ def view_profile(request, username):
 
     # Only show pending groups if user is looking at their own profile,
     # or current user is a superuser
-    if not (request.user.is_authenticated() and
-            (request.user.username == username or request.user.is_superuser)):
+    if not (request.user.is_authenticated()
+            and (request.user.username == username or request.user.is_superuser)):
         data['access_groups'] = [grp for grp in data['access_groups']
                                  if not (grp.pending or grp.pending_terms)]
         data['tags'] = [tag for tag in data['tags'] if not (tag.pending or tag.pending_terms)]
@@ -645,7 +645,8 @@ class VerifyIdentityCallbackView(View):
             'code' not in request.GET,
             'state' not in request.GET,
             'oidc_verify_state' not in request.session,
-            request.GET['state'] != request.session['oidc_verify_state']
+            not request.GET.get('state')
+            or request.GET['state'] != request.session['oidc_verify_state']
         ]
         if any(errors):
             msg = 'Something went wrong, account verification failed.'
@@ -718,9 +719,9 @@ class VerifyIdentityCallbackView(View):
             # We need to check for equality too in the case a user updates the primary email in
             # the same identity (matching auth0_user_id). If there is an addition of the same type
             # we are not swapping login identities
-            if ((current_idp and current_idp.type < idp.type) or
-                (current_idp and current_idp.auth0_user_id == idp.auth0_user_id) or
-                    (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
+            if ((current_idp and current_idp.type < idp.type)
+                or (current_idp and current_idp.auth0_user_id == idp.auth0_user_id)
+                    or (not current_idp and created and idp.type >= IdpProfile.PROVIDER_GITHUB)):
                 IdpProfile.objects.filter(profile=profile).exclude(pk=idp.pk).update(primary=False)
                 idp.primary = True
                 idp.save()

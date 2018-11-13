@@ -119,8 +119,8 @@ def subscribe_user_task(self, result, email='', newsletters=[], sync='N', optin=
                                             .intersection(result['newsletters']))
 
     # The lookup failed because the user does not exist. We have a new user!
-    if (result.get('status') == 'error' and
-            result.get('desc') == u'User not found' and newsletters):
+    if (result.get('status') == 'error'
+            and result.get('desc') == u'User not found' and newsletters):
         newsletters_to_subscribe = newsletters
 
     if newsletters_to_subscribe:
@@ -198,8 +198,8 @@ def subscribe_user_to_basket(instance_id, newsletters=[]):
     except UserProfile.DoesNotExist:
         instance = None
 
-    if (not BASKET_ENABLED or not instance or not newsletters or
-            not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
+    if (not BASKET_ENABLED or not instance or not newsletters
+            or not waffle.switch_is_active('BASKET_SWITCH_ENABLED')):
         return
 
     lookup_subtask = lookup_user_task.subtask((instance.email,))
