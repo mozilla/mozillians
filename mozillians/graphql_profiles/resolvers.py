@@ -1,14 +1,29 @@
-from mozillians.graphql_profiles.utils import parse_datetime_iso8601
+from mozillians.graphql_profiles.utils import parse_datetime_iso8601, retrieve_v2_profile
+from mozillians.users.models import Vouch
 
 
 DATETIME_ATTRS = ['created', 'last_modified']
 
 
 def dino_park_resolver(attname, default_value, root, info, *args):
-    """Custom resolver for all the attributes in a profile.
-    """
+    """Custom resolver for all the attributes in a profile."""
 
     profile_attr = root.get(attname, default_value)
+
+    # If we don't get a profile attribute back, probably it's a query from a different
+    # source than the v2 profile. Let's try to resolve this from the mozillians db.
+    if not profile_attr:
+        user_id = root.get('user_id', {}).get('value')
+        # We missed that too. Just return root back
+        if not user_id:
+            return root
+        profile = retrieve_v2_profile(info.context, user_id, from_db=True)
+
+        # We are looking for vouches! Let's return a few
+        if attname == 'vouches':
+            return Vouch.objects.filter(vouchee=profile)
+        return profile
+
     if profile_attr and hasattr(profile_attr, 'get'):
         # Get either the value or values from the v2 schema and return them
         # This allows us to avoid one level of nesting in our responses
