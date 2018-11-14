@@ -54,6 +54,83 @@ spec:
 
 ---
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: haproxy
+  namespace: {{ .Values.namespace }}
+data:
+  haproxy.cfg: |
+    global
+    defaults
+      timeout client    30s
+      timeout server    30s
+      timeout connect   30s
+
+    frontend http-in
+      bind  *:80
+      default_backend dinopark-mozillians
+      acl is-dinopark-frontend path_beg -i /beta/img /beta/css /beta/js
+      use_backend dinopark-frontend if is-dinopark-frontend
+
+    backend dinopark-frontend
+      mode http
+      option forwardfor
+      server dinopark-frontend dino-park-front-end-service:80 check
+
+    backend dinopark-mozillians
+      mode http
+      option forwardfor
+      server dinopark-mozillians dino-park-mozillians:80 check
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: internal-router
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: internal-router
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: internal-router
+    spec:
+      volumes:
+      - name: haproxy
+        configMap:
+          name: haproxy
+      containers:
+      - name: haproxy
+        image: haproxy
+        ports:
+        - name: http
+          containerPort: 80
+        volumeMounts:
+        - name: haproxy
+          mountPath: /etc/haproxy
+          readOnly: true
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    name: internal-router
+  name: internal-router
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  selector:
+    name: internal-router
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   annotations:
