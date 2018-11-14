@@ -30,4 +30,5 @@ data:
   SECRET_KEY: 'unique-snowflake'
   SESSION_COOKIE_SECURE: 'False'
   SITE_URL: 'http://dinopark.mozilla.community'
+  DINO_PARK_ACTIVE: 'True'
 {{ end }}

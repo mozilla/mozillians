@@ -379,7 +379,7 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
 
     from cis.publisher import ChangeDelegate
 
-    if is_test_environment():
+    if is_test_environment() or settings.DINO_PARK_ACTIVE:
         return []
 
     if not instance_id and not profile_results:
