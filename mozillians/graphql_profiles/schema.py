@@ -6,6 +6,7 @@ from django.conf import settings
 
 from graphene.types import generic
 
+from mozillians.graphql_profiles.resolvers import dino_park_resolver
 from mozillians.graphql_profiles.utils import json2obj, parse_datetime_iso8601
 
 
@@ -32,6 +33,17 @@ class Classification(graphene.Enum):
     PUBLIC = 'PUBLIC'
     INDIVIDUAL_CONFIDENTIAL = 'INDIVIDUAL CONFIDENTIAL'
     STAFF_ONLY = 'WORKGROUP CONFIDENTIAL: STAFF ONLY'
+
+
+class Display(graphene.Enum):
+    """V2 Schema privacy information object for Graphene."""
+
+    PUBLIC = 'public'
+    AUTHENTICATED = 'authenticated'
+    VOUCHED = 'vouched'
+    NDAED = 'ndaed'
+    STAFF = 'staff'
+    PRIVATE = 'private'
 
 
 class PublisherAuthority(graphene.Enum):
@@ -67,6 +79,7 @@ class Metadata(graphene.ObjectType):
     last_modified = graphene.DateTime()
     created = graphene.DateTime()
     verified = graphene.Boolean()
+    display = graphene.Field(Display)
 
     def resolve_last_modified(self, info, **kwargs):
         """Resolver to return a datetime object."""
@@ -81,63 +94,6 @@ class BaseObjectType(graphene.ObjectType):
     """V2 Schema Base object object for Graphene."""
     signature = graphene.Field(Signature)
     metadata = graphene.Field(Metadata)
-
-
-class StandardAttributeDatetime(BaseObjectType):
-    """V2 Schema StandardAttributeDatetime object for Graphene."""
-
-    value = graphene.DateTime()
-
-    def resolve_value(self, info, **kwargs):
-        """Resolver to return a datetime object."""
-        return parse_datetime_iso8601(self.get('value'))
-
-
-class StandardAttributeBoolean(BaseObjectType):
-    """V2 Schema StandardAttributeBoolean object for Graphene."""
-
-    value = graphene.Boolean()
-
-
-class StandardAttributeString(BaseObjectType):
-    """V2 Schema StandardAttributeString object for Graphene."""
-
-    value = graphene.String()
-
-
-class IdentitiesValues(graphene.ObjectType):
-    """V2 Schema IdentitiesValues object for Graphene."""
-
-    github_id_v3 = graphene.String()
-    github_id_v4 = graphene.String()
-    LDAP = graphene.String()
-    bugzilla = graphene.String()
-    google = graphene.String()
-    firefoxaccounts = graphene.String()
-    emails = graphene.List(graphene.String)
-
-    def resolve_bugzilla(self, info, **kwargs):
-        """Custom resolver for the Bugzilla Identity.
-
-        Extract the bugzilla.mozilla.org Identity from the profile v2 schema.
-        """
-        return self.get('bugzilla.mozilla.org')
-
-    def resolve_google(self, info, **kwargs):
-        """Custom resolver for the Google Identity.
-
-        Extract the google-oauth2 Identity from the profile v2 schema.
-        """
-        return self.get('google-oauth2')
-
-
-class Identities(BaseObjectType):
-    """V2 Schema Identities object for Graphene."""
-
-    values = graphene.Field(IdentitiesValues)
-
-    def resolve_values(self, info, **kwargs):
-        return self.get('values')
 
 
 class StandardAttributeValues(BaseObjectType):
@@ -158,27 +114,46 @@ class StandardAttributeValues(BaseObjectType):
 class AccessInformation(graphene.ObjectType):
     """V2 Schema AccessInformation object for Graphene."""
 
-    ldap = graphene.Field(StandardAttributeValues)
-    mozilliansorg = graphene.Field(StandardAttributeValues)
-    access_provider = graphene.Field(StandardAttributeValues)
+    ldap = generic.GenericScalar()
+    mozilliansorg = generic.GenericScalar()
+    access_provider = generic.GenericScalar()
+    hris = generic.GenericScalar()
+
+    class Meta:
+        default_resolver = dino_park_resolver
 
 
-class GenericAttributeValues(BaseObjectType):
-    """Generic schema for non well known attributes of the v2 schema."""
-    values = graphene.List(generic.GenericScalar)
+class StaffInformation(graphene.ObjectType):
+    """V2 Schema with Staff data for Graphene."""
+    manager = graphene.Boolean()
+    director = graphene.Boolean()
+    staff = graphene.Boolean()
+    title = graphene.String()
+    team = graphene.String()
+    cost_center = graphene.String()
+    worker_type = graphene.String()
+    wpr_desk_number = graphene.String()
+    office_location = graphene.String()
 
-    def resolve_values(self, info, **kwargs):
-        """Custom resolver to add well know keys in the response.
+    class Meta:
+        default_resolver = dino_park_resolver
 
-        It uses the well-know values `key` and `value`` where value is the value from the v2 schema
-        and key is the name of the user provided attribute.
-        Eg in pgp keys `value` is the actual public key and key is the name of the key
-        that the user provided. Eg key == `work public key`
-        """
-        match = []
-        for k, v in self.get('values', {}).items():
-            match.append({'key': k, 'value': v})
-        return match
+
+class Identities(BaseObjectType):
+    """V2 Schema Identities object for Graphene."""
+
+    github_id_v3 = graphene.String()
+    github_id_v4 = graphene.String()
+    dinopark_id = graphene.String()
+    mozilliansorg_id = graphene.String()
+    mozilla_ldap_id = graphene.String()
+    bugzilla_mozilla_org_id = graphene.String()
+    mozilla_posix_id = graphene.String()
+    firefox_accounts_id = graphene.String()
+    google_oauth2_id = graphene.String()
+
+    class Meta:
+        default_resolver = dino_park_resolver
 
 
 class RelatedProfile(graphene.ObjectType):
@@ -200,47 +175,44 @@ class Profile(graphene.ObjectType):
     """V2 Schema Profile object for Graphene.
 
     Combines Core and Extended Profile attributes from the V2 Schema.
+
+    Generic Scalars are used when the attribute value is not know before hand.
+    The result is a dictionary of attributes with values. eg
+    usernames: {'attribute1: value1, 'attribute2': value2}
+
     """
 
-    user_id = graphene.Field(StandardAttributeString)
-    login_method = graphene.Field(StandardAttributeString)
-    active = graphene.Field(StandardAttributeBoolean)
-    last_modified = graphene.Field(StandardAttributeDatetime)
-    created = graphene.Field(StandardAttributeDatetime)
-    usernames = graphene.Field(GenericAttributeValues)
-    first_name = graphene.Field(StandardAttributeString)
-    last_name = graphene.Field(StandardAttributeString)
-    primary_email = graphene.Field(StandardAttributeString)
+    user_id = graphene.String()
+    login_method = graphene.String()
+    active = graphene.Boolean()
+    last_modified = graphene.DateTime()
+    created = graphene.DateTime()
+    usernames = generic.GenericScalar()
+    pronouns = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    alternative_name = graphene.String()
+    primary_email = graphene.String()
     identities = graphene.Field(Identities)
-    ssh_public_keys = graphene.Field(GenericAttributeValues)
-    pgp_public_keys = graphene.Field(GenericAttributeValues)
+    ssh_public_keys = generic.GenericScalar()
+    pgp_public_keys = generic.GenericScalar()
     access_information = graphene.Field(AccessInformation)
-    fun_title = graphene.Field(StandardAttributeString)
-    description = graphene.Field(StandardAttributeString)
-    location_preference = graphene.Field(StandardAttributeString)
-    office_location = graphene.Field(StandardAttributeString)
-    timezone = graphene.Field(StandardAttributeString)
-    preferred_language = graphene.Field(StandardAttributeValues)
-    tags = graphene.Field(StandardAttributeValues)
-    pronouns = graphene.Field(StandardAttributeString)
-    picture = graphene.Field(StandardAttributeString)
-    uris = graphene.Field(StandardAttributeValues)
-    phone_numbers = graphene.Field(GenericAttributeValues)
-    alternative_name = graphene.Field(StandardAttributeString)
+    fun_title = graphene.String()
+    description = graphene.String()
+    location = graphene.String()
+    timezone = graphene.String()
+    languages = graphene.List(graphene.String)
+    tags = graphene.List(graphene.String)
+    picture = graphene.String()
+    uris = generic.GenericScalar()
+    phone_numbers = generic.GenericScalar()
+    staff_information = graphene.Field(StaffInformation)
+    # Non v2 profile fields
     manager = graphene.Field(RelatedProfile)
     directs = graphene.List(RelatedProfile)
-    # HRIS values
-    employee_id = graphene.Field(StandardAttributeString)
-    business_title = graphene.Field(StandardAttributeString)
-    is_manager = graphene.Field(StandardAttributeBoolean)
-    is_director_or_above = graphene.Field(StandardAttributeBoolean)
-    entity = graphene.Field(StandardAttributeString)
-    team = graphene.Field(StandardAttributeString)
-    cost_center = graphene.Field(StandardAttributeString)
-    worker_type = graphene.Field(StandardAttributeString)
-    primary_work_email = graphene.Field(StandardAttributeString)
-    wpr_desk_number = graphene.Field(StandardAttributeString)
-    public_email_addresses = graphene.Field(StandardAttributeValues)
+
+    class Meta:
+        default_resolver = dino_park_resolver
 
 
 class Vouches(graphene.ObjectType):
