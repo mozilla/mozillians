@@ -8,21 +8,20 @@ DATETIME_ATTRS = ['created', 'last_modified']
 def dino_park_resolver(attname, default_value, root, info, *args):
     """Custom resolver for all the attributes in a profile."""
 
-    # inline mozilliansorg username
-    if attname == 'username':
-        username = root.get('usernames', {}).get('values', {}).get('mozilliansorg', default_value)
-        return username
-
     profile_attr = root.get(attname, default_value)
 
     # If we don't get a profile attribute back, probably it's a query from a different
     # source than the v2 profile. Let's try to resolve this from the mozillians db.
     if not profile_attr:
-        user_id = root.get('user_id', {}).get('value')
+        username = root.get('usernames', {}).get('values', {}).get('mozilliansorg', default_value)
         # We missed that too. Just return root back
-        if not user_id:
+        if not username:
             return root
-        profile = retrieve_v2_profile(info.context, user_id, from_db=True)
+
+        # Top level username in GraphQL. We have one, let's return it
+        if attname == 'username':
+            return username
+        profile = retrieve_v2_profile(info.context, username, from_db=True)
 
         # We are looking for vouches! Let's return a few
         if attname == 'vouches':

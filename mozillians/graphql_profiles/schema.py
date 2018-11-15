@@ -220,7 +220,7 @@ class Vouches(graphene.ObjectType):
 
     def resolve_voucher(self, info, **kwargs):
         if self.voucher:
-            return retrieve_v2_profile(info.context, self.voucher.auth0_user_id)
+            return retrieve_v2_profile(info.context, self.voucher.user.username)
         return None
 
 
