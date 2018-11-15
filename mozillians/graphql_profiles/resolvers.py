@@ -21,12 +21,13 @@ def dino_park_resolver(attname, default_value, root, info, *args):
         # Top level username in GraphQL. We have one, let's return it
         if attname == 'username':
             return username
-        profile = retrieve_v2_profile(info.context, username, from_db=True)
-
-        # We are looking for vouches! Let's return a few
-        if attname == 'vouches':
-            return Vouch.objects.filter(vouchee=profile)
-        return profile
+        user = retrieve_v2_profile(info.context, username, from_db=True)
+        if user:
+            profile = user.userprofile
+            # We are looking for vouches! Let's return a few
+            if attname == 'vouches':
+                return Vouch.objects.filter(vouchee=profile)
+            return profile
 
     if profile_attr and hasattr(profile_attr, 'get'):
         # Get either the value or values from the v2 schema and return them
