@@ -109,7 +109,7 @@ spec:
           containerPort: 80
         volumeMounts:
         - name: haproxy
-          mountPath: /etc/haproxy
+          mountPath: /usr/local/etc/haproxy
           readOnly: true
 
 ---
