@@ -89,13 +89,13 @@ metadata:
   name: internal-router
   namespace: {{ .Values.namespace }}
   labels:
-    app: internal-router
+    name: internal-router
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: internal-router
+        name: internal-router
     spec:
       volumes:
       - name: haproxy
