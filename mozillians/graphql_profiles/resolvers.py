@@ -8,6 +8,11 @@ DATETIME_ATTRS = ['created', 'last_modified']
 def dino_park_resolver(attname, default_value, root, info, *args):
     """Custom resolver for all the attributes in a profile."""
 
+    # inline mozilliansorg username
+    if attname == 'username':
+        username = root.get('usernames', {}).get('values', {}).get('mozilliansorg', default_value)
+        return username
+
     profile_attr = root.get(attname, default_value)
 
     # If we don't get a profile attribute back, probably it's a query from a different
