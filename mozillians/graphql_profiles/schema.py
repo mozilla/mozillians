@@ -176,6 +176,7 @@ class AbstractProfile(graphene.AbstractType):
     """
     user_id = graphene.String()
     login_method = graphene.String()
+    username = graphene.String()
     active = graphene.Boolean()
     last_modified = graphene.DateTime()
     created = graphene.DateTime()
