@@ -1,3 +1,40 @@
+import requests
+import urlparse
+
+from django.conf import settings
+
+
+def _dino_park_get_profile_by_userid(user_id, return_username=False):
+    """This is a method that queries the Search Service (ES).
+
+    Querying by user_id, ES returns a full profile. This call uses
+    an `internal` url that should not be used to query profiles.
+    It is reserved for internal usage, mainly to create new profiles in
+    DinoPark from an Auth0 ID or to retrieve the username when it is not known.
+    """
+
+    if not user_id:
+        return None
+
+    url_parts = urlparse.ParseResult(
+        scheme='http',
+        netloc=settings.DINO_PARK_SEARCH_SVC,
+        path='/search/getByUserId/{}'.format(user_id),
+        params='',
+        query='',
+        fragment=''
+    )
+    url = urlparse.urlunparse(url_parts)
+    resp = requests.get(url)
+    resp.raise_for_status()
+    data = resp.json()
+
+    # If this flag is set, return only the username of the user
+    if return_username:
+        return data.get('usernames', {}).get('values', {}).get('mozilliansorg', '')
+    return data
+
+
 class UserAccessLevel(object):
     """Class to handle privacy related scopes in DinoPark."""
     # Privacy classifications for Dino Park

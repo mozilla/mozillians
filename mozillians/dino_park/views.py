@@ -1,11 +1,11 @@
+import requests
+import urlparse
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
-
-import requests
-import urlparse
 
 from mozillians.common.decorators import allow_public
 from mozillians.dino_park.utils import UserAccessLevel
