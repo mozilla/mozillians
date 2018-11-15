@@ -1,34 +1,41 @@
 version: 0.2
 
+env:
+  variables:
+    IMAGE_NAME: dino-park-mozillians
+    DOCKER_REGISTRY: 320464205386.dkr.ecr.us-west-2.amazonaws.com
+
 phases:
-  build:
+  install:
     commands:
-      - git checkout master
-      - echo "Installing dependencies"
-      - apt update && apt install apt-transport-https
-      - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-      - echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-      - apt update && apt install -y curl kubectl python3-pip
-      - pip3 install awscli
+      - apt update && apt install -y apt-transport-https curl
+      - curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+      - echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+      - apt update && apt install -y kubectl
       - curl -O https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz
-      - tar zxvf helm-v2.11.0-linux-amd64.tar.gz
-      - cp linux-amd64/helm /usr/local/bin/
+      - tar zxf helm-v2.11.0-linux-amd64.tar.gz
+      - mv linux-amd64/helm /usr/local/bin/
       - curl -O https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
       - chmod +x aws-iam-authenticator
-      - cp aws-iam-authenticator /usr/local/bin/
+      - mv aws-iam-authenticator /usr/local/bin/
+      - apt update && apt install -y python3-pip
+      - pip3 install awscli
       - echo "Configuring kubectl"
+  pre_build:
+    commands:
+      - export COMMIT_SHA=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - export DEPLOY_ENV=$(echo $CODEBUILD_WEBHOOK_TRIGGER | sed -e 's/tag\/.*-\(.*\)/\1/' | sed -e 's/branch\/master/dev/')
+      - export MASTER=$(if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then echo 1; fi)
+      - echo "running for ${COMMIT_SHA} in ${DEPLOY_ENV}"
       - aws eks update-kubeconfig --name $CLUSTER_NAME
-      - echo "Building and pushing to ECR"
-      - COMMIT_SHA=$(git rev-parse HEAD)
-      - docker build -t $PROJECT_NAME:$COMMIT_SHA -f docker/prod .
       - aws ecr get-login --region us-west-2 --no-include-email | bash
-      - docker tag $PROJECT_NAME:$COMMIT_SHA 320464205386.dkr.ecr.us-west-2.amazonaws.com/$PROJECT_NAME:$COMMIT_SHA
-      - docker push 320464205386.dkr.ecr.us-west-2.amazonaws.com/$PROJECT_NAME:$COMMIT_SHA
+  build:
+    commands:
+      - docker build -t $IMAGE_NAME:$COMMIT_SHA .
+      - docker tag $IMAGE_NAME:$COMMIT_SHA $DOCKER_REGISTRY/$IMAGE_NAME:$COMMIT_SHA
+      - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$COMMIT_SHA
   post_build:
     commands:
       - echo "Finding appropriate deployment environment"
-      - curl -O iam-codebuild-assets.s3.amazonaws.com/dino-park-deploy.sh
-      - chmod +x dino-park-deploy.sh
-      - DEPLOY_ENV=$(./dino-park-deploy.sh)
-      - echo "Environment is " $DEPLOY_ENV
-      - helm template -f k8s/values.yaml -f k8s/values/$DEPLOY_ENV.yaml --set docker_registry=320464205386.dkr.ecr.us-west-2.amazonaws.com,namespace=dinopark-$DEPLOY_ENV,rev=$COMMIT_SHA k8s/ | kubectl --token $DEPLOY_TOKEN apply -f -
+      - echo "Environment is ${DEPLOY_ENV}"
+      - helm template -f k8s/values.yaml -f k8s/values/$DEPLOY_ENV.yaml --set docker_registry=$DOCKER_REGISTRY,rev=$COMMIT_SHA,namespace=dinopark-$DEPLOY_ENV k8s/ | kubectl --token $DEPLOY_TOKEN apply -f -
