@@ -1,13 +1,9 @@
-import json
 import graphene
-import requests
-
-from django.conf import settings
 
 from graphene.types import generic
 
 from mozillians.graphql_profiles.resolvers import dino_park_resolver
-from mozillians.graphql_profiles.utils import json2obj, parse_datetime_iso8601
+from mozillians.graphql_profiles.utils import parse_datetime_iso8601, retrieve_v2_profile
 
 
 class Alg(graphene.Enum):
@@ -171,17 +167,13 @@ class RelatedProfile(graphene.ObjectType):
     location = graphene.String()
 
 
-class Profile(graphene.ObjectType):
-    """V2 Schema Profile object for Graphene.
-
-    Combines Core and Extended Profile attributes from the V2 Schema.
+class AbstractProfile(graphene.AbstractType):
+    """V2 Abstract Schema Profile object for Graphene.
 
     Generic Scalars are used when the attribute value is not know before hand.
     The result is a dictionary of attributes with values. eg
     usernames: {'attribute1: value1, 'attribute2': value2}
-
     """
-
     user_id = graphene.String()
     login_method = graphene.String()
     active = graphene.Boolean()
@@ -207,18 +199,12 @@ class Profile(graphene.ObjectType):
     uris = generic.GenericScalar()
     phone_numbers = generic.GenericScalar()
     staff_information = graphene.Field(StaffInformation)
-    # Non v2 profile fields
-    manager = graphene.Field(RelatedProfile)
-    directs = graphene.List(RelatedProfile)
-
-    class Meta:
-        default_resolver = dino_park_resolver
 
 
 class Vouches(graphene.ObjectType):
     """Schema to expose user vouches."""
     description = graphene.String()
-    voucher = graphene.Field(Profile)
+    voucher = graphene.Field('mozillians.graphql_profiles.schema.Profile')
     autovouch = graphene.Boolean()
     date = graphene.DateTime()
 
@@ -232,11 +218,18 @@ class Vouches(graphene.ObjectType):
         return self.date
 
     def resolve_voucher(self, info, **kwargs):
-        voucher_user_id = self.voucher.auth0_user_id
-        resp = requests.get(settings.V2_PROFILE_ENDPOINT).json()
-
-        data = json2obj(json.dumps(resp))
-        for profile in data:
-            if profile['user_id']['value'] == voucher_user_id:
-                return profile
+        if self.voucher:
+            return retrieve_v2_profile(info.context, self.voucher.auth0_user_id)
         return None
+
+
+class Profile(graphene.ObjectType, AbstractProfile):
+    """V2 Schema Profile object for Graphene."""
+
+    # Non v2 profile fields
+    manager = graphene.Field(RelatedProfile)
+    directs = graphene.List(RelatedProfile)
+    vouches = graphene.List(Vouches)
+
+    class Meta:
+        default_resolver = dino_park_resolver
