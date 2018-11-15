@@ -31,7 +31,7 @@ phases:
       - aws ecr get-login --region us-west-2 --no-include-email | bash
   build:
     commands:
-      - docker build -t $IMAGE_NAME:$COMMIT_SHA .
+      - docker build -t $IMAGE_NAME:$COMMIT_SHA -f docker/prod .
       - docker tag $IMAGE_NAME:$COMMIT_SHA $DOCKER_REGISTRY/$IMAGE_NAME:$COMMIT_SHA
       - docker push $DOCKER_REGISTRY/$IMAGE_NAME:$COMMIT_SHA
   post_build:
