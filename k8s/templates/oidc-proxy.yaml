@@ -89,13 +89,13 @@ metadata:
   name: internal-router
   namespace: {{ .Values.namespace }}
   labels:
-    name: internal-router
+    app: internal-router
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        name: internal-router
+        app: internal-router
     spec:
       volumes:
       - name: haproxy
@@ -127,7 +127,7 @@ spec:
     port: 80
     targetPort: 80
   selector:
-    name: internal-router
+    app: internal-router
 
 ---
 apiVersion: v1
