@@ -98,8 +98,12 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if profile.is_staff:
             profile.auto_vouch()
 
-        # redirect to /beta
-        self.request.session['oidc_login_next'] = '/beta'
+    def get_or_create_user(self, *args, **kwargs):
+        user = super(MozilliansAuthBackend, self).get_or_create_user(*args, **kwargs)
+        if switch_is_active('dino-park-autologin') and user:
+            self.request.session['oidc_login_next'] = '/beta'
+
+        return user
 
     def create_user(self, claims):
         user = super(MozilliansAuthBackend, self).create_user(claims)

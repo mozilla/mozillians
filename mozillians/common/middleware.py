@@ -6,7 +6,8 @@ from warnings import warn
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponsePermanentRedirect
+from django.core.urlresolvers import reverse as django_reverse
+from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.utils.encoding import iri_to_uri, smart_str
 
 from django.utils.translation import ugettext_lazy as _lazy, activate
@@ -173,3 +174,21 @@ class ReferrerPolicyMiddleware(object):
             response[referrer_header_name] = 'no-referrer'
 
         return response
+
+
+class DinoParkLoginMiddleware(object):
+    """Seamless login for dinopark behind OIDC proxy"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Don't apply middleware for EXEMPT_L10N_URLS
+        for view_url in settings.EXEMPT_L10N_URLS:
+            if re.search(view_url, request.path):
+                return self.get_response(request)
+
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect(django_reverse('oidc_authentication_init'))
+
+        return self.get_response(request)
