@@ -80,7 +80,7 @@ data:
     backend dinopark-mozillians
       mode http
       option forwardfor
-      server dinopark-mozillians dino-park-mozillians:80 check
+      server dinopark-mozillians dino-park-mozillians-service:80 check
 
 ---
 apiVersion: extensions/v1beta1
