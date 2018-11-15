@@ -6,22 +6,6 @@ from mozillians.graphql_profiles.resolvers import dino_park_resolver
 from mozillians.graphql_profiles.utils import parse_datetime_iso8601, retrieve_v2_profile
 
 
-class Alg(graphene.Enum):
-    """V2 Schema Alg object for Graphene."""
-
-    HS256 = 'HS256'
-    RS256 = 'RS256'
-    RSA = 'RSA'
-    ED25519 = 'ED25519'
-
-
-class Typ(graphene.Enum):
-    """V2 Schema Typ object for Graphene."""
-
-    JWT = 'JWT'
-    PGP = 'PGP'
-
-
 class Classification(graphene.Enum):
     """V2 Schema Classification object for Graphene."""
 
@@ -55,8 +39,6 @@ class PublisherAuthority(graphene.Enum):
 class Publisher(graphene.ObjectType):
     """V2 Schema Publisher object for Graphene."""
 
-    alg = graphene.Field(Alg)
-    typ = graphene.Field(Typ)
     value = graphene.String()
     name = graphene.Field(PublisherAuthority)
 
@@ -90,21 +72,6 @@ class BaseObjectType(graphene.ObjectType):
     """V2 Schema Base object object for Graphene."""
     signature = graphene.Field(Signature)
     metadata = graphene.Field(Metadata)
-
-
-class StandardAttributeValues(BaseObjectType):
-    """V2 Schema StandardAttributeValues object for Graphene."""
-
-    values = graphene.List(graphene.String)
-
-    def resolve_values(self, info, **kwargs):
-        """Custom resolver for the list of values."""
-        if isinstance(self['values'], list):
-            return self['values']
-        values = self.get('values')
-        if values:
-            return values.items()
-        return None
 
 
 class AccessInformation(graphene.ObjectType):
