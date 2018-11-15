@@ -1,9 +1,10 @@
 import json
 from aniso8601 import parse_datetime
 
+from django.contrib.auth.models import User
+
 from mozillians.common.templatetags.helpers import get_object_or_none
-from mozillians.dino_park.views import orgchart_get_by_id, search_get_profile
-from mozillians.users.models import UserProfile
+from mozillians.dino_park.views import orgchart_get_by_username, search_get_profile
 
 
 class ProfileFactory(dict):
@@ -51,23 +52,23 @@ def parse_datetime_iso8601(datetime):
         return dt
 
 
-def retrieve_v2_profile(request, user_id, from_db=False):
+def retrieve_v2_profile(request, username, from_db=False):
     """Helper method to retrieve a profile either from the v2 schema or
     from the database.
     """
-    profile_auth0_id = None
+    profile_username = None
     if request.user.is_authenticated():
-        profile_auth0_id = request.user.userprofile.auth0_user_id
-    user_id = user_id or profile_auth0_id
-    if not user_id:
+        profile_username = request.user.username
+    username_q = username or profile_username
+    if not username_q:
         return None
 
     if from_db:
-        profile = get_object_or_none(UserProfile, auth0_user_id=user_id)
+        profile = get_object_or_none(User, username=username_q)
     else:
         # We need to fetch data from ES
-        profile_data = search_get_profile(request, user_id)
-        orgchart_related_data = orgchart_get_by_id(request, 'related', user_id)
+        profile_data = search_get_profile(request, username_q)
+        orgchart_related_data = orgchart_get_by_username(request, 'related', username_q)
 
         profile = json2obj(profile_data.content)
         profile.update(json2obj(orgchart_related_data.content))

@@ -1,11 +1,11 @@
+import requests
+import urlparse
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
-
-import requests
-import urlparse
 
 from mozillians.common.decorators import allow_public
 from mozillians.dino_park.utils import UserAccessLevel
@@ -39,7 +39,7 @@ def orgchart(request):
 
 
 @never_cache
-def orgchart_get_by_id(request, path, user_id):
+def orgchart_get_by_username(request, path, username):
     """Internal routing to expose orgchart service by user_id."""
     scope = UserAccessLevel.get_privacy(request)
     if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
@@ -48,7 +48,7 @@ def orgchart_get_by_id(request, path, user_id):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_ORGCHART_SVC,
-        path='/orgchart/{0}/{1}'.format(path, user_id),
+        path='/orgchart/{0}/{1}'.format(path, username),
         params='',
         query='',
         fragment=''
@@ -80,14 +80,14 @@ def search_simple(request, query):
 
 @never_cache
 @allow_public
-def search_get_profile(request, user_id, scope=None):
+def search_get_profile(request, username, scope=None):
     """Internal routing to expose search by user ID."""
     if not scope:
         scope = UserAccessLevel.get_privacy(request)
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,
-        path='/search/get/{}/{}'.format(scope, user_id),
+        path='/search/get/{}/{}'.format(scope, username),
         params='',
         query='',
         fragment=''

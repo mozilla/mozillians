@@ -13,7 +13,7 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from waffle import switch_is_active
 
 from mozillians.common.templatetags.helpers import get_object_or_none
-from mozillians.dino_park.views import search_get_profile
+from mozillians.dino_park.utils import _dino_park_get_profile_by_userid
 from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
@@ -59,26 +59,18 @@ def calculate_username(email):
     return suggested_username
 
 
-def create_random_username():
-    """This function produces a random username that
-    will be used as default value when a user has not provided one.
-    """
-    raise NotImplementedError
-
-
 class MozilliansAuthBackend(OIDCAuthenticationBackend):
     """Override OIDCAuthenticationBackend to provide custom functionality."""
 
     def create_mozillians_profile(self, user_id, idp):
         # A new mozillians.org profile will be provisioned if there is not one,
         # we need the self-view of profile which mean a private scope
-        # TODO: replace username with a random generator.
         # Because we are using OIDC proxy, we assume always ldap. This functionality
         # will be deprecated with the launch of DinoPark
 
         profile = idp.profile
-        v2_profile = search_get_profile(self.request, user_id, 'private')
-        data = json.loads(v2_profile.content)
+        v2_profile_data = _dino_park_get_profile_by_userid(user_id)
+        data = json.loads(v2_profile_data)
         # Escape the middleware
         profile.full_name = (data.get('first_name', {}).get('value')
                              + data.get('last_name', {}).get('value'))
@@ -100,6 +92,21 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
         # redirect to /beta
         self.request.session['oidc_login_next'] = '/beta'
+
+    def get_username(self, claims):
+        """This method is mostly useful when it is used in DinoPark.
+
+        If we are creating a user and the Search Service already has a username,
+        we will use that. Otherwise, we will get the username derived from username_algo.
+        """
+        username = super(MozilliansAuthBackend, self).get_username(claims)
+
+        if switch_is_active('dino-park-automatic-profiles'):
+            auth0_user_id = claims.get('user_id') or claims.get('sub')
+            v2_username = _dino_park_get_profile_by_userid(auth0_user_id, return_username=True)
+            if username != v2_username:
+                return v2_username
+        return username
 
     def create_user(self, claims):
         user = super(MozilliansAuthBackend, self).create_user(claims)
