@@ -43,6 +43,9 @@ spec:
               value: "{{ now.Unix }}"
           {{- end }}
           {{ if eq .Values.env "staging" -}}
+          env:
+            - name: DINO_PARK_ACTIVE
+              value: "True"
           volumeMounts:
             - mountPath: /etc/secrets-volume/
               name: secrets-volume
