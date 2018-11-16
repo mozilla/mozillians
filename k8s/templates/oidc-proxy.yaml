@@ -70,12 +70,19 @@ data:
       bind  *:80
       default_backend dinopark-mozillians
       acl is-dinopark-frontend path_beg -i /beta/img /beta/css /beta/js
+      acl is-avatar-frontend path_beg -i /beta/avatar
       use_backend dinopark-frontend if is-dinopark-frontend
+      use_backend dinopark-avatar if is-dinopark-avatar
 
     backend dinopark-frontend
       mode http
       option forwardfor
       server dinopark-frontend dino-park-front-end-service:80 check
+
+    backend dinopark-avatar
+      mode http
+      option forwardfor
+      server dinopark-avatar dino-park-avatar:80 check
 
     backend dinopark-mozillians
       mode http
