@@ -105,7 +105,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         """
         username = super(MozilliansAuthBackend, self).get_username(claims)
 
-        if switch_is_active('dino-park-automatic-profiles'):
+        if switch_is_active('dino-park-autologin'):
             auth0_user_id = claims.get('user_id') or claims.get('sub')
             v2_username = _dino_park_get_profile_by_userid(auth0_user_id, return_username=True)
             if username != v2_username:
@@ -125,7 +125,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         )
         # This is temporary for the beta version of DinoPark.
         # and will be removed after that.
-        if switch_is_active('dino-park-automatic-profiles'):
+        if switch_is_active('dino-park-autologin'):
             self.create_mozillians_profile(auth0_user_id, idp)
 
         return user
