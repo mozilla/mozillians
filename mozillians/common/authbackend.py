@@ -108,7 +108,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if switch_is_active('dino-park-autologin'):
             auth0_user_id = claims.get('user_id') or claims.get('sub')
             v2_username = _dino_park_get_profile_by_userid(auth0_user_id, return_username=True)
-            if username != v2_username:
+            if v2_username and username != v2_username:
                 return v2_username
         return username
 
