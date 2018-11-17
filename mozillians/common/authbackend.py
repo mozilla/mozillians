@@ -72,8 +72,9 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         v2_profile_data = _dino_park_get_profile_by_userid(user_id)
         data = json.loads(v2_profile_data)
         # Escape the middleware
-        profile.full_name = (data.get('first_name', {}).get('value')
-                             + data.get('last_name', {}).get('value'))
+        full_name = (data.get('first_name', {}).get('value') + ' '
+                     + data.get('last_name', {}).get('value'))
+        profile.full_name = full_name or 'Anonymous Mozillian'
         location = data.get('location_preference', {}).get('value')
         # TODO: Update this. It's wrong to create entries like this. We need to populate
         # the Country table and match the incoming location. It's only for M1 beta.
