@@ -12,13 +12,14 @@ from django.db.models import Manager, ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 from django.utils.timezone import now
+from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
 from django.template.loader import get_template
 
 from product_details import product_details
 from PIL import Image
 from pytz import common_timezones
 from sorl.thumbnail import ImageField, get_thumbnail
-from django.utils.translation import ugettext as _, ugettext_lazy as _lazy
+from waffle import switch_is_active
 
 from mozillians.common import utils
 from mozillians.common.templatetags.helpers import absolutify, gravatar
@@ -591,7 +592,10 @@ class UserProfile(UserProfilePrivacyModel):
             autovouch=autovouch
         )
 
-        self._email_now_vouched(vouched_by, description)
+        # Let's disable this for the M1 of DinoPark.
+        # TODO: remove this check after M1
+        if not switch_is_active('dino-park-autologin'):
+            self._email_now_vouched(vouched_by, description)
         return vouch
 
     def auto_vouch(self):
