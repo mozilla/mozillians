@@ -84,8 +84,10 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if location:
             country, _ = Country.objects.get_or_create(name=location)
             profile.country = country
-        profile.timezone = data.get('timezone', {}).get('value')
-        profile.title = data.get('fun_title', {}).get('value')
+        timezone = data.get('timezone', {}).get('value')
+        if timezone:
+            profile.timezone = timezone
+        profile.title = data.get('fun_title', {}).get('value', '')
         worker_type = data.get('worker_type', {}).get('value')
         if worker_type:
             profile.is_staff = True
