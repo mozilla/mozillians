@@ -26,7 +26,11 @@ def _dino_park_get_profile_by_userid(user_id, return_username=False):
     )
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
-    resp.raise_for_status()
+    try:
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError:
+        return None
+
     data = resp.json()
 
     # If this flag is set, return only the username of the user
