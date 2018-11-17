@@ -33,7 +33,7 @@ def dino_park_resolver(attname, default_value, root, info, *args):
         # If we don't have a value/values attrs and it is a dict then we
         # have nested attributes. Let's return them so that nested resolvers
         # can do the matching
-        if not 'value' in profile_attr and not 'values' in profile_attr:
+        if 'value' not in profile_attr and 'values' not in profile_attr:
             return profile_attr
         # Get either the value or values from the v2 schema and return them
         # This allows us to avoid one level of nesting in our responses
