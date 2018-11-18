@@ -29,7 +29,7 @@ def _dino_park_get_profile_by_userid(user_id, return_username=False):
     try:
         resp.raise_for_status()
     except requests.exceptions.HTTPError:
-        return '{}'
+        return None
 
     data = resp.json()
 

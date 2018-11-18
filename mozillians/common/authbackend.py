@@ -70,27 +70,28 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
         profile = idp.profile
         v2_profile_data = _dino_park_get_profile_by_userid(user_id)
-        data = json.loads(v2_profile_data)
+        if not v2_profile_data:
+            full_name = 'Anonymous Mozillian'
+        else:
+            data = json.loads(v2_profile_data)
         # Escape the middleware
-        first_name = data.get('first_name', {}).get('value')
-        last_name = data.get('last_name', {}).get('value')
-        full_name = ''
-        if first_name and last_name:
+            first_name = data.get('first_name', {}).get('value')
+            last_name = data.get('last_name', {}).get('value')
             full_name = first_name + ' ' + last_name
-        profile.full_name = full_name or 'Anonymous Mozillian'
-        location = data.get('location_preference', {}).get('value')
-        # TODO: Update this. It's wrong to create entries like this. We need to populate
-        # the Country table and match the incoming location. It's only for M1 beta.
-        if location:
-            country, _ = Country.objects.get_or_create(name=location)
-            profile.country = country
-        timezone = data.get('timezone', {}).get('value')
-        if timezone:
-            profile.timezone = timezone
-        profile.title = data.get('fun_title', {}).get('value', '')
-        worker_type = data.get('worker_type', {}).get('value')
-        if worker_type:
-            profile.is_staff = True
+            # TODO: Update this. It's wrong to create entries like this. We need to populate
+            # the Country table and match the incoming location. It's only for M1 beta.
+            location = data.get('location_preference', {}).get('value')
+            if location:
+                country, _ = Country.objects.get_or_create(name=location)
+                profile.country = country
+            timezone = data.get('timezone', {}).get('value')
+            if timezone:
+                profile.timezone = timezone
+            profile.title = data.get('fun_title', {}).get('value', '')
+            worker_type = data.get('worker_type', {}).get('value')
+            if worker_type:
+                profile.is_staff = True
+        profile.full_name = full_name
         profile.auth0_user_id = user_id
         profile.save()
         if profile.is_staff:
