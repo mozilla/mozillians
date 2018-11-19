@@ -201,3 +201,19 @@ class Profile(graphene.ObjectType, AbstractProfile):
 
     class Meta:
         default_resolver = dino_park_resolver
+
+
+class UserMenu(graphene.ObjectType):
+    """V2 Schema for UserMenu.
+
+    Returns a subset of the v2 profile, which is used to
+    display the user menu in DinoPark.
+    """
+    username = graphene.String()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    primary_email = graphene.String()
+    picture = graphene.String()
+
+    class Meta:
+        default_resolver = dino_park_resolver

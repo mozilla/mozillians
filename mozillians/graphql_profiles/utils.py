@@ -52,25 +52,32 @@ def parse_datetime_iso8601(datetime):
         return dt
 
 
-def retrieve_v2_profile(request, username, from_db=False):
+def retrieve_v2_profile(request, username=None, from_db=False):
     """Helper method to retrieve a profile either from the v2 schema or
     from the database.
     """
-    profile_username = None
-    if request.user.is_authenticated():
-        profile_username = request.user.username
-    username_q = username or profile_username
-    if not username_q:
+
+    if not username and not request.user.is_authenticated():
         return None
+    username_q = username or request.user.username
 
     if from_db:
+        # This is a db query, let's return the user
         profile = get_object_or_none(User, username=username_q)
+        return profile
+
+    # We need to fetch data from ES
+    orgchart_related_data = None
+    if not username:
+        # This is a query to get a minified version of a profile
+        # for the user menu
+        profile_data = search_get_profile(request, username_q, 'private')
     else:
-        # We need to fetch data from ES
         profile_data = search_get_profile(request, username_q)
         orgchart_related_data = orgchart_get_by_username(request, 'related', username_q)
 
-        profile = json2obj(profile_data.content)
+    profile = json2obj(profile_data.content)
+    if orgchart_related_data:
         profile.update(json2obj(orgchart_related_data.content))
 
     return profile
