@@ -44,6 +44,8 @@ spec:
           {{- end }}
           {{ if eq .Values.env "staging" -}}
           env:
+            - name: FORCE_UPDATE
+              value: "{{ .Values.force_update | default 0 }}"
             - name: DINO_PARK_ACTIVE
               value: "True"
           volumeMounts:

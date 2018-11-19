@@ -56,38 +56,41 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: haproxy
+  name: nginx-router
   namespace: {{ .Values.namespace }}
 data:
-  haproxy.cfg: |
-    global
-    defaults
-      timeout client    30s
-      timeout server    30s
-      timeout connect   30s
+  nginx.conf: |
+    worker_rlimit_nofile 8192;
 
-    frontend http-in
-      bind  *:80
-      default_backend dinopark-mozillians
-      acl is-dinopark-frontend path_beg -i /beta/img /beta/css /beta/js
-      acl is-avatar-frontend path_beg -i /beta/avatar
-      use_backend dinopark-frontend if is-dinopark-frontend
-      use_backend dinopark-avatar if is-dinopark-avatar
+    events {
+      worker_connections  4096;  ## Default: 1024
+    }
 
-    backend dinopark-frontend
-      mode http
-      option forwardfor
-      server dinopark-frontend dino-park-front-end-service:80 check
+    http {
+      proxy_redirect          off;
+      proxy_set_header        Host            $host;
+      proxy_set_header        X-Real-IP       $remote_addr;
+      proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+      client_max_body_size    10m;
+      client_body_buffer_size 128k;
+      proxy_connect_timeout   90;
+      proxy_send_timeout      90;
+      proxy_read_timeout      90;
+      proxy_buffers           32 4k;
 
-    backend dinopark-avatar
-      mode http
-      option forwardfor
-      server dinopark-avatar dino-park-avatar:80 check
-
-    backend dinopark-mozillians
-      mode http
-      option forwardfor
-      server dinopark-mozillians dino-park-mozillians-service:80 check
+      server {
+        listen 80;
+        location /beta/avatar/ {
+          proxy_pass http://dino-park-avatar:80;
+        }
+        location ~ ^/beta/(css|img|js)/ {
+          proxy_pass http://dino-park-front-end-service:80;
+        }
+        location / {
+          proxy_pass http://dino-park-mozillians-service:80;
+        }
+      }
+    }
 
 ---
 apiVersion: extensions/v1beta1
@@ -105,18 +108,21 @@ spec:
         app: internal-router
     spec:
       volumes:
-      - name: haproxy
+      - name: nginx-router
         configMap:
-          name: haproxy
+          name: nginx-router
       containers:
-      - name: haproxy
-        image: haproxy
+      - name: nginx-router
+        image: nginx
         ports:
         - name: http
           containerPort: 80
+        env:
+        - name: force_update
+          value: "2"
         volumeMounts:
-        - name: haproxy
-          mountPath: /usr/local/etc/haproxy
+        - name: nginx-router
+          mountPath: /etc/nginx/
           readOnly: true
 
 ---
