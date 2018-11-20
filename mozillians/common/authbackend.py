@@ -91,9 +91,9 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             if timezone:
                 profile.timezone = timezone
             profile.title = data.get('fun_title', {}).get('value', '')
-            worker_type = data.get('worker_type', {}).get('value')
-            if worker_type:
-                profile.is_staff = True
+            is_staff = data.get('staff_information', {}).get('staff', {}).get('value')
+            if is_staff:
+                profile.is_staff = is_staff
         profile.full_name = full_name
         profile.auth0_user_id = user_id
         profile.save()
