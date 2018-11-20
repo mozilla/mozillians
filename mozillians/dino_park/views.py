@@ -69,7 +69,7 @@ def search_simple(request, query):
         netloc=settings.DINO_PARK_SEARCH_SVC,
         path='/search/simple/{}/{}'.format(scope, query),
         params='',
-        query='',
+        query=request.GET.urlencode(),
         fragment=''
     )
     url = urlparse.urlunparse(url_parts)
