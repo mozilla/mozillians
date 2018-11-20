@@ -3,6 +3,7 @@ import urlparse
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
@@ -82,6 +83,13 @@ def search_simple(request, query):
 @allow_public
 def search_get_profile(request, username, scope=None):
     """Internal routing to expose search by user ID."""
+    try:
+        user = User.objects.get(username=username)
+    except (User.DoesNotExist, User.MultipleObjectsReturned):
+        pass
+    else:
+        if user == request.user:
+            scope = UserAccessLevel.PRIVATE
     if not scope:
         scope = UserAccessLevel.get_privacy(request)
     url_parts = urlparse.ParseResult(
