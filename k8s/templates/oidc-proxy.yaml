@@ -51,6 +51,11 @@ spec:
                 secretKeyRef:
                   name: oidc-proxy-secret
                   key: redirect_uri
+            - name: allowed_group
+              valueFrom:
+                secretKeyRef:
+                  name: oidc-proxy-secret
+                  key: allowed_group
 
 ---
 apiVersion: v1
