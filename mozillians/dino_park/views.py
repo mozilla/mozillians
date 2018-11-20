@@ -42,9 +42,17 @@ def orgchart(request):
 @never_cache
 def orgchart_get_by_username(request, path, username):
     """Internal routing to expose orgchart service by user_id."""
-    scope = UserAccessLevel.get_privacy(request)
-    if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
-        return HttpResponseForbidden()
+    try:
+        user = User.objects.get(username=username)
+    except (User.DoesNotExist, User.MultipleObjectsReturned):
+        pass
+    else:
+        if user == request.user:
+            scope = UserAccessLevel.PRIVATE
+        else:
+            scope = UserAccessLevel.get_privacy(request)
+            if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
+                return JsonResponse({})
 
     url_parts = urlparse.ParseResult(
         scheme='http',
