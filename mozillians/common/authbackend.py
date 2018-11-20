@@ -73,8 +73,11 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if not v2_profile_data:
             full_name = 'Anonymous Mozillian'
         else:
-            data = json.loads(v2_profile_data)
-        # Escape the middleware
+            try:
+                data = json.loads(v2_profile_data)
+            except (TypeError, ValueError):
+                data = v2_profile_data
+            # Escape the middleware
             first_name = data.get('first_name', {}).get('value')
             last_name = data.get('last_name', {}).get('value')
             full_name = first_name + ' ' + last_name
