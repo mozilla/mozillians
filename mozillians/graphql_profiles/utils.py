@@ -34,9 +34,13 @@ def object_hook(dct):
     return ProfileFactory(dct)
 
 
-def json2obj(data):
+def json2obj(payload):
     """Return a Python object from json."""
-    return json.loads(data, object_hook=object_hook)
+    try:
+        data = json.loads(payload, object_hook=object_hook)
+    except (ValueError, TypeError):
+        data = ProfileFactory(payload)
+    return data
 
 
 def parse_datetime_iso8601(datetime):
