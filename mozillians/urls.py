@@ -31,23 +31,36 @@ handler500 = lambda r: error_page(r, 500) # noqa
 handler_csrf = lambda r, cb=None: error_page(r, 'csrf_error', status=400) # noqa
 
 
+# Urls common to mozillians.org and DinoPark
 urlpatterns = [
-    url(r'^api/', include('mozillians.api.urls')),
     url(r'^oidc/', include('mozilla_django_oidc.urls')),
-    url(r'^api/v3/graphql/', include('mozillians.graphql_profiles.urls',
-                                     app_name='graphql_profiles',
-                                     namespace='graphql_profiles')),
+    # Admin URLs.
+    url(r'^admin/', include(admin.site.urls)),
+]
+
+# Urls relevant only to mozillians
+mozillians_urls = [
     url(r'', include('mozillians.groups.urls', app_name='groups', namespace='groups')),
     url(r'', include('mozillians.users.urls', app_name='users', namespace='users')),
     url(r'', include('mozillians.mozspaces.urls', app_name='mozspaces', namespace='mozspaces')),
     url(r'', include('mozillians.phonebook.urls', app_name='phonebook', namespace='phonebook')),
-    # Admin URLs.
-    url(r'^admin/', include(admin.site.urls)),
-
+    url(r'^api/', include('mozillians.api.urls')),
     url(r'', include('mozillians.humans.urls')),
-    # If there is no match hand over the url to dino-park
+]
+
+# Urls relevant only to DinoPark
+dino_park_urls = [
+    url(r'^api/v3/graphql/', include('mozillians.graphql_profiles.urls',
+                                     app_name='graphql_profiles',
+                                     namespace='graphql_profiles')),
+    # This needs to be last as it catches all the cases
     url(r'', include('mozillians.dino_park.urls', app_name='dino_park', namespace='dino_park')),
 ]
+
+if settings.DINO_PARK_ACTIVE:
+    urlpatterns += dino_park_urls
+else:
+    urlpatterns += mozillians_urls
 
 admin.site.site_header = 'Mozillians Administration'
 admin.site.site_title = 'Mozillians'

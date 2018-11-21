@@ -717,15 +717,21 @@ GRAPHENE = {
 
 DINO_PARK_ACTIVE = config('DINO_PARK_ACTIVE', default=False, cast=bool)
 # Provide S3 storage backend
-if DINO_PARK_ACTIVE and not DEV:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME',
-                                     default='kubernetes-mozillians-stage')
-    DEFAULT_AVATAR_PATH = config('DEFAULT_AVATAR_PATH', default=urljoin(MEDIA_URL, DEFAULT_AVATAR))
-    CSP_IMG_SRC = CSP_IMG_SRC + ('https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com',)
+if DINO_PARK_ACTIVE:
+    if not DEV:
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME',
+                                        default='kubernetes-mozillians-stage')
+        DEFAULT_AVATAR_PATH = config('DEFAULT_AVATAR_PATH', default=urljoin(MEDIA_URL, DEFAULT_AVATAR))
+        CSP_IMG_SRC = CSP_IMG_SRC + ('https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com',)
 
     # Enable seamless login middleware
     MIDDLEWARE.append('mozillians.common.middleware.DinoParkLoginMiddleware')
+    # Remove middlewares from DinoPark
+    MIDDLEWARE.remove('mozillians.common.middleware.LocaleURLMiddleware')
+    MIDDLEWARE.remove('mozillians.phonebook.middleware.RegisterMiddleware')
+    MIDDLEWARE.remove('mozillians.phonebook.middleware.UsernameRedirectionMiddleware')
+    MIDDLEWARE.remove('mozillians.groups.middleware.OldGroupRedirectionMiddleware')
 
 # Dino Park configuration
 DINO_PARK_SEARCH_SVC = config('DINO_PARK_SEARCH_SVC', default='dino-park-search-service')

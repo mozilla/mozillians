@@ -9,7 +9,14 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
 from mozillians.common.decorators import allow_public
+from mozillians.common.templatetags.helpers import redirect
 from mozillians.dino_park.utils import UserAccessLevel, DinoErrorResponse
+
+
+@never_cache
+@login_required
+def home(request):
+    return redirect('dino_park:home')
 
 
 @never_cache
