@@ -4,12 +4,12 @@ import urlparse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
 from mozillians.common.decorators import allow_public
-from mozillians.dino_park.utils import UserAccessLevel
+from mozillians.dino_park.utils import UserAccessLevel, DinoErrorResponse
 
 
 @never_cache
@@ -23,7 +23,7 @@ def orgchart(request):
     """Internal routing to expose orgchart service."""
     scope = UserAccessLevel.get_privacy(request)
     if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
-        return HttpResponseForbidden()
+        return DinoErrorResponse.get_error(DinoErrorResponse.PERMISSION_ERROR)
 
     url_parts = urlparse.ParseResult(
         scheme='http',
@@ -44,15 +44,11 @@ def orgchart_get_by_username(request, path, username):
     """Internal routing to expose orgchart service by user_id."""
     try:
         user = User.objects.get(username=username)
-    except (User.DoesNotExist, User.MultipleObjectsReturned):
-        pass
-    else:
-        if user == request.user:
-            scope = UserAccessLevel.PRIVATE
-        else:
-            scope = UserAccessLevel.get_privacy(request)
-            if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
-                return JsonResponse({})
+    except User.DoesNotExist:
+        user = None
+    scope = UserAccessLevel.get_privacy(request, user)
+    if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
+        return DinoErrorResponse.get_error(DinoErrorResponse.PERMISSION_ERROR)
 
     url_parts = urlparse.ParseResult(
         scheme='http',
@@ -93,13 +89,10 @@ def search_get_profile(request, username, scope=None):
     """Internal routing to expose search by user ID."""
     try:
         user = User.objects.get(username=username)
-    except (User.DoesNotExist, User.MultipleObjectsReturned):
-        pass
-    else:
-        if user == request.user:
-            scope = UserAccessLevel.PRIVATE
+    except User.DoesNotExist:
+        user = None
     if not scope:
-        scope = UserAccessLevel.get_privacy(request)
+        scope = UserAccessLevel.get_privacy(request, user)
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,

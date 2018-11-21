@@ -2,6 +2,7 @@ import requests
 import urlparse
 
 from django.conf import settings
+from django.http import JsonResponse
 
 
 def _dino_park_get_profile_by_userid(user_id, return_username=False):
@@ -70,3 +71,16 @@ class UserAccessLevel(object):
             # If we did not match all the above cases, return an authenticated user
             return cls.AUTHENTICATED
         return cls.PUBLIC
+
+
+class DinoErrorResponse(object):
+    """Error codes to return in DinoPark."""
+
+    PERMISSION_ERROR = 'Permission Denied: Scope mismatch.'
+
+    @classmethod
+    def get_error(cls, msg, status_code=403):
+        errors = {
+            'errors': msg
+        }
+        return JsonResponse(data=errors, status=status_code)

@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.dino_park.views import orgchart_get_by_username, search_get_profile
+from mozillians.dino_park.utils import UserAccessLevel
 
 
 class ProfileFactory(dict):
@@ -38,8 +39,8 @@ def json2obj(payload):
     """Return a Python object from json."""
     try:
         data = json.loads(payload, object_hook=object_hook)
-    except (ValueError, TypeError):
-        data = ProfileFactory(payload)
+    except ValueError:
+        data = None
     return data
 
 
@@ -75,7 +76,7 @@ def retrieve_v2_profile(request, username=None, from_db=False):
     if not username:
         # This is a query to get a minified version of a profile
         # for the user menu
-        profile_data = search_get_profile(request, username_q, 'private')
+        profile_data = search_get_profile(request, username_q, UserAccessLevel.PRIVATE)
     else:
         profile_data = search_get_profile(request, username_q)
         orgchart_related_data = orgchart_get_by_username(request, 'related', username_q)
