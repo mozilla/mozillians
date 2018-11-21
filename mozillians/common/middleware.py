@@ -191,4 +191,7 @@ class DinoParkLoginMiddleware(object):
         if not request.user.is_authenticated():
             return HttpResponseRedirect(django_reverse('oidc_authentication_init'))
 
+        if request.user.userprofile and request.user.userprofile.is_complete:
+            return HttpResponseRedirect('/beta')
+
         return self.get_response(request)
