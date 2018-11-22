@@ -179,6 +179,7 @@ EXEMPT_L10N_URLS = [
     '^/verify/identity/callback/',
     '^/api/v1/',
     '^/api/v2/',
+    '^/api/v3/',
     '^/admin/',
     '^/beta/.*',
 ]
