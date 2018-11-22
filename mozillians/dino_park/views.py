@@ -91,6 +91,17 @@ def search_get_profile(request, username, scope=None):
         user = User.objects.get(username=username)
     except User.DoesNotExist:
         user = None
+
+    # If the user is authenticated and we don't have a match
+    # in the db, probably the supplied value is not a username
+    if not user and request.user.is_authenticated():
+        return DinoErrorResponse.get_error(
+            DinoErrorResponse.ATTRIBUTE_ERROR,
+            status_code=503,
+            attribute='Attribute username, value {}'.format(username)
+        )
+
+    # If there is not a supplied scope, let's get one
     if not scope:
         scope = UserAccessLevel.get_privacy(request, user)
     url_parts = urlparse.ParseResult(
