@@ -77,14 +77,10 @@ class DinoErrorResponse(object):
     """Error codes to return in DinoPark."""
 
     PERMISSION_ERROR = 'Permission Denied: Scope mismatch.'
-    ATTRIBUTE_ERROR = 'Attribute {0} is not valid.'
 
     @classmethod
-    def get_error(cls, msg, status_code=403, attribute=''):
+    def get_error(cls, msg, status_code=403):
         errors = {
-            'error': msg
+            'errors': msg
         }
-
-        if attribute:
-            errors['error'] = msg.format(attribute)
         return JsonResponse(data=errors, status=status_code)
