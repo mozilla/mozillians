@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.encoding import escape_uri_path
 from django.views.decorators.cache import never_cache
 
 from mozillians.common.decorators import allow_public
@@ -72,7 +73,7 @@ def search_simple(request, query):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,
-        path='/search/simple/{}/{}'.format(scope, query),
+        path='/search/simple/{}/{}'.format(scope, escape_uri_path(query)),
         params='',
         query=request.GET.urlencode(),
         fragment=''
