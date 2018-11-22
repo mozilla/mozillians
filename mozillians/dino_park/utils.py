@@ -81,6 +81,6 @@ class DinoErrorResponse(object):
     @classmethod
     def get_error(cls, msg, status_code=403):
         errors = {
-            'errors': msg
+            'error': msg
         }
         return JsonResponse(data=errors, status=status_code)
