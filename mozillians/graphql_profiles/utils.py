@@ -2,6 +2,7 @@ import json
 from aniso8601 import parse_datetime
 
 from django.contrib.auth.models import User
+from django.utils.encoding import escape_uri_path
 
 from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.dino_park.views import orgchart_get_by_username, search_get_profile
@@ -57,14 +58,14 @@ def parse_datetime_iso8601(datetime):
         return dt
 
 
-def retrieve_v2_profile(request, username=None, from_db=False):
+def retrieve_v2_profile(request, username='', from_db=False):
     """Helper method to retrieve a profile either from the v2 schema or
     from the database.
     """
 
     if not username and not request.user.is_authenticated():
         return None
-    username_q = username or request.user.username
+    username_q = escape_uri_path(username) or request.user.username
 
     if from_db:
         # This is a db query, let's return the user

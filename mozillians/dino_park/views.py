@@ -43,8 +43,9 @@ def orgchart(request):
 @never_cache
 def orgchart_get_by_username(request, path, username):
     """Internal routing to expose orgchart service by user_id."""
+    username_q = escape_uri_path(username)
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(username=username_q)
     except User.DoesNotExist:
         user = None
     scope = UserAccessLevel.get_privacy(request, user)
@@ -54,7 +55,7 @@ def orgchart_get_by_username(request, path, username):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_ORGCHART_SVC,
-        path='/orgchart/{0}/{1}'.format(path, username),
+        path='/orgchart/{0}/{1}'.format(path, username_q),
         params='',
         query='',
         fragment=''
@@ -88,8 +89,9 @@ def search_simple(request, query):
 @allow_public
 def search_get_profile(request, username, scope=None):
     """Internal routing to expose search by user ID."""
+    username_q = escape_uri_path(username)
     try:
-        user = User.objects.get(username=username)
+        user = User.objects.get(username=username_q)
     except User.DoesNotExist:
         user = None
     if not scope:
@@ -97,7 +99,7 @@ def search_get_profile(request, username, scope=None):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,
-        path='/search/get/{}/{}'.format(scope, username),
+        path='/search/get/{}/{}'.format(scope, username_q),
         params='',
         query='',
         fragment=''
