@@ -9,5 +9,8 @@ from mozillians.celery import app
 def celery_healthcheck():
     """Ping healthchecks.io periodically to monitor celery/celerybeat health."""
 
-    response = requests.get(settings.HEALTHCHECKS_IO_URL)
+    url = settings.HEALTHCHECKS_IO_URL
+    if not url:
+        return None
+    response = requests.get(url)
     return response.status_code == requests.codes.ok
