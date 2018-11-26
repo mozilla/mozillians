@@ -60,7 +60,7 @@ class TestAPIEndpoints(TestCase):
     @mock.patch('mozillians.dino_park.views.requests.get')
     @mock.patch('mozillians.dino_park.views.UserAccessLevel')
     @override_settings(DINO_PARK_ORGCHART_SVC='orgchart-svc')
-    def test_orgchart_get_by_id(self, mock_scope, mock_get):
+    def test_orgchart_get_related_by_username(self, mock_scope, mock_get):
         mock_scope.get_privacy.return_value = 'staff'
         mock_scope.STAFF = 'staff'
         response = mock.Mock()
@@ -68,8 +68,58 @@ class TestAPIEndpoints(TestCase):
         mock_get.return_value = response
         request = self.factory.get('/')
         request.user = UserFactory.create()
-        resp = views.orgchart_get_by_id(request, 'related', 'asdf')
+        resp = views.orgchart_get_by_username(request, 'related', 'asdf')
         mock_get.assert_called_with('http://orgchart-svc/orgchart/related/asdf')
+        self.assertEqual(resp.content, '{"foo": "bar"}')
+
+    @mock.patch('mozillians.dino_park.views.requests.get')
+    @mock.patch('mozillians.dino_park.views.UserAccessLevel')
+    @override_settings(DINO_PARK_ORGCHART_SVC='orgchart-svc')
+    def test_orgchart_get_trace_by_username(self, mock_scope, mock_get):
+        mock_scope.get_privacy.return_value = 'staff'
+        mock_scope.STAFF = 'staff'
+        response = mock.Mock()
+        response.json.return_value = {'foo': 'bar'}
+        mock_get.return_value = response
+        request = self.factory.get('/')
+        request.user = UserFactory.create()
+        resp = views.orgchart_get_by_username(request, 'trace', 'asdf')
+        mock_get.assert_called_with('http://orgchart-svc/orgchart/trace/asdf')
+        self.assertEqual(resp.content, '{"foo": "bar"}')
+
+    @mock.patch('mozillians.dino_park.views.requests.get')
+    @mock.patch('mozillians.dino_park.views.UserAccessLevel')
+    @override_settings(DINO_PARK_ORGCHART_SVC='orgchart-svc')
+    def test_orgchart_get_trace_by_username_no_staff_profile(self, mock_scope, mock_get):
+        user_non_staff = UserFactory.create()
+        mock_scope.get_privacy.return_value = 'staff'
+        mock_scope.STAFF = 'staff'
+        response = mock.Mock()
+        response.json.return_value = {'foo': 'bar'}
+        mock_get.return_value = response
+        request = self.factory.get('/')
+        request.user = UserFactory.create()
+        resp = views.orgchart_get_by_username(request, 'trace', user_non_staff.username)
+        mock_get.assert_not_called()
+        self.assertEqual(resp.content, 'null')
+
+    @mock.patch('mozillians.dino_park.views.requests.get')
+    @mock.patch('mozillians.dino_park.views.UserAccessLevel')
+    @override_settings(DINO_PARK_ORGCHART_SVC='orgchart-svc')
+    def test_orgchart_get_trace_by_username_staff_profile(self, mock_scope, mock_get):
+        user_staff = UserFactory.create()
+        user_staff.userprofile.is_staff = True
+        user_staff.userprofile.save()
+        mock_scope.get_privacy.return_value = 'staff'
+        mock_scope.STAFF = 'staff'
+        response = mock.Mock()
+        response.json.return_value = {'foo': 'bar'}
+        mock_get.return_value = response
+        request = self.factory.get('/')
+        request.user = UserFactory.create()
+        resp = views.orgchart_get_by_username(request, 'trace', user_staff.username)
+        mock_get.assert_called_with(
+            'http://orgchart-svc/orgchart/trace/{0}'.format(user_staff.username))
         self.assertEqual(resp.content, '{"foo": "bar"}')
 
     @mock.patch('mozillians.dino_park.views.UserAccessLevel')
@@ -78,7 +128,7 @@ class TestAPIEndpoints(TestCase):
         mock_scope.get_privacy.return_value = 'dummy'
         request = self.factory.get('/')
         request.user = UserFactory.create()
-        resp = views.orgchart_get_by_id(request, 'related', 'abc')
+        resp = views.orgchart_get_by_username(request, 'related', 'abc')
         self.assertEqual(resp.status_code, 403)
 
     @mock.patch('mozillians.dino_park.views.requests.get')
