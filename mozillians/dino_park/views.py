@@ -47,6 +47,12 @@ def orgchart_get_by_username(request, path, username):
         user = User.objects.get(username=username)
     except User.DoesNotExist:
         user = None
+
+    # if there is a user and the user is not a staff member
+    # then we don't need to search for a profile in orgchart
+    if user and not user.userprofile.is_staff and path == 'trace':
+        return JsonResponse(None, safe=False)
+
     scope = UserAccessLevel.get_privacy(request, user)
     if scope not in [UserAccessLevel.STAFF, UserAccessLevel.PRIVATE]:
         return DinoErrorResponse.get_error(DinoErrorResponse.PERMISSION_ERROR)
@@ -61,7 +67,6 @@ def orgchart_get_by_username(request, path, username):
     )
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
-    resp.raise_for_status()
     return JsonResponse(resp.json(), safe=False)
 
 
@@ -104,5 +109,4 @@ def search_get_profile(request, username, scope=None):
     )
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
-    resp.raise_for_status()
     return JsonResponse(resp.json(), safe=False)
