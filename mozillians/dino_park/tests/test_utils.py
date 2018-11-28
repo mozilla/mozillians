@@ -72,13 +72,6 @@ class TestErrorResponses(TestCase):
         eq_(resp.status_code, 403)
         eq_(json.loads(resp.content)['error'], u'Permission Denied: Scope mismatch.')
 
-    def test_attribute_error(self):
-        resp = DinoErrorResponse.get_error(DinoErrorResponse.ATTRIBUTE_ERROR,
-                                           status_code=503,
-                                           attribute='foo')
-        eq_(resp.status_code, 503)
-        eq_(json.loads(resp.content)['error'], u'Attribute foo is not valid.')
-
     def test_default_status_code(self):
         resp = DinoErrorResponse.get_error(DinoErrorResponse.PERMISSION_ERROR)
         eq_(resp.status_code, 403)
