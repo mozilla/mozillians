@@ -139,10 +139,10 @@ class TestAPIEndpoints(TestCase):
         response = mock.Mock()
         response.json.return_value = {'foo': 'bar'}
         mock_get.return_value = response
-        request = self.factory.get('/')
+        request = self.factory.get('/', {'q': 'asdf'})
         request.user = UserFactory.create()
-        resp = views.search_simple(request, 'asdf')
-        mock_get.assert_called_with('http://search-svc/search/simple/dummy/asdf')
+        resp = views.search_simple(request)
+        mock_get.assert_called_with('http://search-svc/search/simple/dummy?q=asdf')
         self.assertEqual(resp.content, '{"foo": "bar"}')
 
     @mock.patch('mozillians.dino_park.views.requests.get')
