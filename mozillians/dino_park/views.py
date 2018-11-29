@@ -60,7 +60,7 @@ def orgchart_get_by_username(request, path, username):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_ORGCHART_SVC,
-        path='/orgchart/{0}/{1}'.format(path, username),
+        path='/orgchart/{0}/{1}'.format(path, escape_uri_path(username)),
         params='',
         query='',
         fragment=''
