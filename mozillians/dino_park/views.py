@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.encoding import escape_uri_path
 from django.views.decorators.cache import never_cache
 
 from mozillians.common.decorators import allow_public
@@ -101,7 +102,7 @@ def search_get_profile(request, username, scope=None):
     url_parts = urlparse.ParseResult(
         scheme='http',
         netloc=settings.DINO_PARK_SEARCH_SVC,
-        path='/search/get/{}/{}'.format(scope, username),
+        path='/search/get/{}/{}'.format(scope, escape_uri_path(username)),
         params='',
         query='',
         fragment=''
