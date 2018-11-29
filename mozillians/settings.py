@@ -655,6 +655,7 @@ CSP_SCRIPT_SRC = (
     'https://*.google-analytics.com',
     'https://www.google.com/recaptcha/',
     'https://www.gstatic.com/recaptcha/',
+    'https://www.googletagmanager.com',
 
     # Allow Django's admin scripts
     "'sha256-UtImx13kPrbu3A8Xh9LfC9WbLVFznPB3z3KlhHI+WsM='",
