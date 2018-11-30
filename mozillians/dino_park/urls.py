@@ -13,5 +13,6 @@ urlpatterns = [
         dino_park_views.search_simple, name='dino_park_search_simple'),
     url('^api/v3/search/get/(?P<username>.+)/$',
         dino_park_views.search_get_profile, name='dino_park_search_get_profile'),
+    url(r'^opensearch.xml$', dino_park_views.search_plugin, name='search_plugin'),
     url('^beta/.*$', dino_park_views.main, name='dino_park_main'),
 ]

@@ -33,7 +33,6 @@ urlpatterns = [
     url(r'^delete/$', phonebook_views.delete, name='profile_delete'),
     url(r'^user/delete_idp_profiles/$', phonebook_views.delete_idp_profiles,
         name='delete_idp_profiles'),
-    url(r'^opensearch.xml$', phonebook_views.search_plugin, name='search_plugin'),
     url(r'^invite/$', phonebook_views.invite, name='invite'),
     url(r'^invite/(?P<invite_pk>\d+)/delete/$', phonebook_views.delete_invite,
         name='delete_invite'),
