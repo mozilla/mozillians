@@ -182,6 +182,7 @@ EXEMPT_L10N_URLS = [
     '^/api/v3/',
     '^/admin/',
     '^/beta/.*',
+    '^/opensearch.xml',
 ]
 
 # Tells the extract script what files to parse for strings and what functions to use.

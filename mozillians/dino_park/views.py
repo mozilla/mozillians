@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.encoding import escape_uri_path
-from django.views.decorators.cache import never_cache
+from django.views.decorators.cache import cache_control, never_cache
 
 from mozillians.common.decorators import allow_public
 from mozillians.dino_park.utils import UserAccessLevel, DinoErrorResponse
@@ -110,3 +110,16 @@ def search_get_profile(request, username, scope=None):
     url = urlparse.urlunparse(url_parts)
     resp = requests.get(url)
     return JsonResponse(resp.json(), safe=False)
+
+
+@allow_public
+@cache_control(public=True, must_revalidate=True, max_age=3600 * 24 * 7)  # 1 week.
+def search_plugin(request):
+    """Render an OpenSearch Plugin."""
+    # If DinoPark is running return the correct file
+    if settings.DINO_PARK_ACTIVE:
+        return render(request, 'dino_park/dinopark_opensearch.xml',
+                      {'site_url': settings.SITE_URL},
+                      content_type='application/opensearchdescription+xml')
+    return render(request, 'phonebook/search_opensearch.xml',
+                  content_type='application/opensearchdescription+xml')

@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.encoding import force_bytes, smart_bytes
 from django.utils.safestring import mark_safe
-from django.views.decorators.cache import cache_control, never_cache
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import View
@@ -392,14 +392,6 @@ def delete(request):
     request.user.delete()
     messages.info(request, _('Your account has been deleted. Thanks for being a Mozillian!'))
     return logout(request)
-
-
-@allow_public
-@cache_control(public=True, must_revalidate=True, max_age=3600 * 24 * 7)  # 1 week.
-def search_plugin(request):
-    """Render an OpenSearch Plugin."""
-    return render(request, 'phonebook/search_opensearch.xml',
-                  content_type='application/opensearchdescription+xml')
 
 
 def invite(request):

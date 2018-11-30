@@ -7,7 +7,7 @@
     <Image width="16" height="16" type="image/x-icon">{{ absolutify(static('mozillians/img/favicon.ico')) }}</Image>
     <Image width="72" height="72" type="image/png">{{ absolutify(static('mozillians/img/apple-touch-icon-72.png')) }}</Image>
     <Url type="application/opensearchdescription+xml" rel="self"
-         template="{{ absolutify(url('phonebook:search_plugin')) }}"/>
+         template="{{ absolutify(url('dino_park:search_plugin')) }}"/>
     <Url type="text/html"
          template="{{ absolutify(url('phonebook:haystack_search')) }}?q={searchTerms}"/>
     <Tags>mozillians mozilla {{ _('mozillians') }}</Tags>
