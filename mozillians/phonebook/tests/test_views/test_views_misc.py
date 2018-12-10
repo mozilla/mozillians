@@ -22,7 +22,7 @@ from mozillians.users.tests import UserFactory
 class SearchTests(TestCase):
     def test_search_plugin_anonymous(self):
         client = Client()
-        response = client.get(reverse('phonebook:search_plugin'), follow=True)
+        response = client.get(reverse('dino_park:search_plugin'), follow=True)
         eq_(response.status_code, 200)
         eq_(response.get('content-type'),
             'application/opensearchdescription+xml')
@@ -30,7 +30,7 @@ class SearchTests(TestCase):
     def test_search_plugin_unvouched(self):
         user = UserFactory.create(vouched=False)
         with self.login(user) as client:
-            response = client.get(reverse('phonebook:search_plugin'),
+            response = client.get(reverse('dino_park:search_plugin'),
                                   follow=True)
         eq_(response.status_code, 200)
         eq_(response.get('content-type'),
@@ -39,7 +39,7 @@ class SearchTests(TestCase):
     def test_search_plugin_vouched(self):
         user = UserFactory.create()
         with self.login(user) as client:
-            response = client.get(reverse('phonebook:search_plugin'),
+            response = client.get(reverse('dino_park:search_plugin'),
                                   follow=True)
         eq_(response.status_code, 200)
         eq_(response.get('content-type'),
