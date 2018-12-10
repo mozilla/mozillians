@@ -21,6 +21,7 @@ before_install:
   - pip install flake8
   - flake8 mozillians
   - mysql -e 'create database mozillians character set utf8; SET @@GLOBAL.wait_timeout=28800;'
+  - export BOTO_CONFIG=/dev/null
 cache:
   - pip
 install:
