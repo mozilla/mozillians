@@ -1,16 +1,10 @@
-import json
-import random
-
 from django.contrib.auth.models import Group, User
 from django.utils import timezone
 
 import factory
 
-from anytree import LevelOrderIter
-from anytree.importer import DictImporter
 from cities_light.models import City, Country, Region
 from factory import fuzzy
-from faker import Faker
 
 from mozillians.users.models import Language
 
@@ -92,69 +86,3 @@ class CityFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = City
-
-
-class MockOrgChart:
-
-    @classmethod
-    def build(self, parent=None, depth=0, nodes=0):
-        """Recursively build mock orgchart."""
-
-        fake = Faker()
-
-        self = {
-            'PreferredFirstName': fake.first_name(),
-            'Preferred_Name_-_Last_Name': fake.last_name(),
-            'businessTitle': fake.job(),
-            'EmployeeID': fake.uuid4(),
-            'PrimaryWorkEmail': fake.email(),
-            'children': []
-        }
-
-        if depth > 5 or nodes > 1000:
-            return self
-
-        num = random.randrange(1, 5, 1)
-        curr_depth = depth + 1
-        curr_nodes = nodes + 1
-
-        for i in range(num):
-            subchart = MockOrgChart()
-            children = subchart.build(self, curr_depth, curr_nodes)
-            self['children'].append(children)
-
-        return self
-
-    @classmethod
-    def generate_json(self):
-        nested_dict = self.build()
-        importer = DictImporter()
-        tree = importer.import_(nested_dict)
-
-        hr_entries = []
-        for node in LevelOrderIter(tree):
-            item = {
-                'PreferredFirstName': getattr(node, 'PreferredFirstName'),
-                'Preferred_Name_-_Last_Name': getattr(node, 'Preferred_Name_-_Last_Name'),
-                'businessTitle': getattr(node, 'businessTitle'),
-                'EmployeeID': getattr(node, 'EmployeeID'),
-                'PrimaryWorkEmail': getattr(node, 'PrimaryWorkEmail'),
-                'IsManager': len(node.children) > 0,
-            }
-
-            if node.parent:
-                manager_first_name = getattr(node.parent, 'PreferredFirstName')
-                manager_last_name = getattr(node.parent, 'Preferred_Name_-_Last_Name')
-                manager = {
-                    'WorkersManager': '{} {}'.format(manager_first_name, manager_last_name),
-                    'WorkersManagersEmployeeID': getattr(node.parent, 'EmployeeID')
-                }
-                item.update(manager)
-
-            hr_entries.append(item)
-
-        hr_data = {
-            'Report_Entry': hr_entries
-        }
-
-        return json.dumps(hr_data)
