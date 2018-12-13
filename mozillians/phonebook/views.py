@@ -564,6 +564,8 @@ class VerifyIdentityView(OIDCAuthenticationRequestView):
             import_from_settings('OIDC_RP_VERIFICATION_CLIENT_ID')
         )
         super(VerifyIdentityView, self).__init__(*args, **kwargs)
+        # Override the auth endpoint for this client
+        self.OIDC_OP_AUTH_ENDPOINT = import_from_settings('OIDC_OP_VERIFICATION_AUTH_ENDPOINT')
 
     def get(self, request):
         """OIDC client authentication initialization HTTP endpoint.
@@ -607,8 +609,8 @@ class VerifyIdentityCallbackView(View):
 
     def __init__(self, *args, **kwargs):
         """Initialize settings."""
-        self.OIDC_OP_TOKEN_ENDPOINT = import_from_settings('OIDC_OP_TOKEN_ENDPOINT')
-        self.OIDC_OP_USER_ENDPOINT = import_from_settings('OIDC_OP_USER_ENDPOINT')
+        self.OIDC_OP_TOKEN_ENDPOINT = import_from_settings('OIDC_OP_VERIFICATION_TOKEN_ENDPOINT')
+        self.OIDC_OP_USER_ENDPOINT = import_from_settings('OIDC_OP_VERIFICATION_USER_ENDPOINT')
         self.OIDC_RP_VERIFICATION_CLIENT_ID = (
             import_from_settings('OIDC_RP_VERIFICATION_CLIENT_ID')
         )
