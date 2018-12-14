@@ -710,11 +710,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Orgchart s3
-ORGCHART_BUCKET = config('ORGCHART_BUCKET', default='mozillians-orgchart')
-ORGCHART_KEY = config('ORGCHART_KEY', default='org_chart.json')
-ORGCHART_ENABLE_CACHE = config('ORGCHART_ENABLE_CACHE', default=False, cast=bool)
-
 # Django Graphene
 GRAPHENE = {
     'SCHEMA': 'mozillians.schema.schema',

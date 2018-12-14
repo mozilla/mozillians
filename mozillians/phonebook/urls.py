@@ -59,8 +59,5 @@ urlpatterns = [
         name='about-dinomcvouch'),
     # CSP violation URL
     url(r'^capture-csp-violation$', phonebook_views.capture_csp_violation,
-        name='capture-csp-violation'),
-    # OrgChart
-    url(r'^orgchart$', phonebook_views.orgchart, name='orgchart'),
-    url(r'^orgchart/json$', phonebook_views.orgchart_json, name='orgchart_json'),
+        name='capture-csp-violation')
 ]

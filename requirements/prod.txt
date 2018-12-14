@@ -557,8 +557,6 @@ singledispatch==3.4.0.3 \
 backports_abc==0.5 \
     --hash=sha256:52089f97fe7a9aa0d3277b220c1d730a85aefd64e1b2664696fe35317c5470a7 \
     --hash=sha256:033be54514a03e255df75c5aee8f9e672f663f93abb723444caec8fe43437bde
-anytree==2.4.3 \
-    --hash=sha256:9b43699eacfd3fab153433abbc698c74e3c8f883c0505fde2c26ad38163d93fa
 responses==0.9.0 \
     --hash=sha256:c6082710f4abfb60793899ca5f21e7ceb25aabf321560cc0726f8b59006811c9 \
     --hash=sha256:f23a29dca18b815d9d64a516b4a0abb1fbdccff6141d988ad8100facb81cf7b3

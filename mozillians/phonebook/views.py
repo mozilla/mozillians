@@ -8,9 +8,7 @@ from django.contrib.auth.views import logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.cache import cache
-from django.http import (HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404,
-                         JsonResponse)
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -41,7 +39,7 @@ from mozillians.common.urlresolvers import reverse
 from mozillians.groups.models import Group
 import mozillians.phonebook.forms as forms
 from mozillians.phonebook.models import Invite
-from mozillians.phonebook.utils import create_orgchart, redeem_invite
+from mozillians.phonebook.utils import redeem_invite
 from mozillians.users.managers import EMPLOYEES, MOZILLIANS, PUBLIC, PRIVATE
 from mozillians.users.models import AbuseReport, ExternalAccount, IdpProfile, UserProfile
 from mozillians.users.tasks import (check_spam_account, send_userprofile_to_cis,
@@ -746,30 +744,3 @@ def delete_idp_profiles(request):
     request.user.userprofile.idp_profiles.all().delete()
     messages.warning(request, 'Identities deleted.')
     return redirect('phonebook:profile_edit')
-
-
-@waffle_flag('view-orgchart')
-@never_cache
-def orgchart(request):
-    """Show orgchart."""
-    ctx = {
-        'orgchart_type': request.GET.get('orgchart_type', 'html-list')
-    }
-    return render(request, 'phonebook/orgchart.html', ctx)
-
-
-@waffle_flag('view-orgchart')
-@never_cache
-def orgchart_json(request):
-    """Expose mock orgchart json."""
-
-    data = None
-    if settings.ORGCHART_ENABLE_CACHE:
-        data = cache.get('orgchart_data')
-
-    if not data:
-        data = create_orgchart()
-        if settings.ORGCHART_ENABLE_CACHE:
-            cache.set('orgchart_data', data, 60 * 5)
-
-    return JsonResponse(data)
