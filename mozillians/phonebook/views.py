@@ -671,20 +671,27 @@ class VerifyIdentityCallbackView(View):
         if verified_token:
             user_info = json.loads(verified_token)
             email = user_info['email']
+            verification_user_id = user_info.get('original_connection_user_id')
+            msg = ''
 
             if not user_info.get('email_verified'):
                 msg = 'Account verification failed: Email is not verified.'
+
+            if not verification_user_id:
+                msg = 'Account verification failed: Could not get original user id'
+
+            if msg:
                 messages.error(request, msg)
                 return redirect('phonebook:profile_edit')
 
             user_q = {
-                'auth0_user_id': user_info['sub'],
+                'auth0_user_id': verification_user_id,
                 'email': email
             }
 
             # If we are linking GitHub we need to save
             # the username too.
-            if 'github|' in user_info['sub']:
+            if 'github|' in verification_user_id:
                 user_q['username'] = user_info['nickname']
 
             # Check that the identity doesn't exist in another Identity profile
