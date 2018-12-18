@@ -33,7 +33,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
-            'original_connection_user_id': 'email|'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'email|'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -62,7 +62,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
-            'original_connection_user_id': 'ad|'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'ad|'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -99,7 +99,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': True,
-            'original_connection_user_id': 'ad|ldap'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'ad|ldap'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -132,7 +132,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'bar@example.com',
             'email_verified': False,
-            'original_connection_user_id': 'ad|ldap'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'ad|ldap'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -165,7 +165,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'foo@example.com',
             'email_verified': True,
-            'original_connection_user_id': 'email|'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'email|'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {
@@ -195,7 +195,7 @@ class EditProfileIdentities(TestCase):
         (jws_mock.from_compact.return_value).payload = json.dumps({
             'email': 'foo@example.com',
             'email_verified': True,
-            'original_connection_user_id': 'ad|ldap'
+            'https://sso.mozilla.com/claim/original_connection_user_id': 'ad|ldap'
         })
         post_json_mock = Mock()
         post_json_mock.json.return_value = {

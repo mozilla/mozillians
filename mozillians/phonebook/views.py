@@ -46,6 +46,10 @@ from mozillians.users.tasks import (check_spam_account, send_userprofile_to_cis,
                                     update_email_in_basket)
 
 
+ORIGINAL_CONNECTION_USER_ID = 'https://sso.mozilla.com/claim/original_connection_user_id'
+BUGZILLA_URL = 'https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook'  # noqa
+
+
 @allow_unvouched
 def login(request):
     if request.user.userprofile.is_complete:
@@ -60,8 +64,7 @@ def home(request):
     if request.GET.get('source', ''):
         show_start = True
 
-    bugzilla_url = 'https://bugzilla.mozilla.org/enter_bug.cgi?product=Participation%20Infrastructure&component=Phonebook'  # noqa
-    link = '<a href="{}">file a bug</a>'.format(bugzilla_url)
+    link = '<a href="{}">file a bug</a>'.format(BUGZILLA_URL)
     msg = 'In case you are facing authentication issues please {}'.format(link)
     messages.warning(request, mark_safe(msg))
     return render(request, 'phonebook/home.html', {'show_start': show_start})
@@ -671,7 +674,7 @@ class VerifyIdentityCallbackView(View):
         if verified_token:
             user_info = json.loads(verified_token)
             email = user_info['email']
-            verification_user_id = user_info.get('original_connection_user_id')
+            verification_user_id = user_info.get(ORIGINAL_CONNECTION_USER_ID)
             msg = ''
 
             if not user_info.get('email_verified'):
