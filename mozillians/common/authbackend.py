@@ -5,37 +5,15 @@ import re
 
 from django.db import transaction
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.models import User
 
 from cities_light.models import Country
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from waffle import switch_is_active
 
-from mozillians.common.templatetags.helpers import get_object_or_none
 from mozillians.dino_park.utils import _dino_park_get_profile_by_userid
 from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
-
-
-# Only allow the following login flows
-# Passwordless > Google > Github, FxA > LDAP
-# There is no way to downgrade
-ALLOWED_IDP_FLOWS = {
-    IdpProfile.PROVIDER_PASSWORDLESS: IdpProfile.MFA_ACCOUNTS + [
-        IdpProfile.PROVIDER_PASSWORDLESS,
-        IdpProfile.PROVIDER_GOOGLE,
-    ],
-    IdpProfile.PROVIDER_GOOGLE: IdpProfile.MFA_ACCOUNTS + [
-        IdpProfile.PROVIDER_PASSWORDLESS,
-        IdpProfile.PROVIDER_GOOGLE,
-    ],
-    IdpProfile.PROVIDER_GITHUB: IdpProfile.MFA_ACCOUNTS,
-    IdpProfile.PROVIDER_FIREFOX_ACCOUNTS: IdpProfile.MFA_ACCOUNTS,
-    IdpProfile.PROVIDER_LDAP: [
-        IdpProfile.PROVIDER_LDAP
-    ]
-}
 
 
 def calculate_username(email):
@@ -174,9 +152,6 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if groups and 'hris_is_staff' in groups:
             profile.auto_vouch()
 
-        # Get current_idp
-        current_idp = get_object_or_none(IdpProfile, profile=profile, primary=True)
-
         # Get or create new `user_id`
         obj, _ = IdpProfile.objects.get_or_create(
             profile=profile,
@@ -188,20 +163,13 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             obj.username = self.claims.get('nickname', '')
             obj.save()
 
-        # Do not allow downgrades.
-        if current_idp and obj.type < current_idp.type:
-            msg = u'Please use {0} as the login method to authenticate'
-            messages.error(self.request, msg.format(current_idp.get_type_display()))
-            return None
-
-        # Mark other `user_id` as `primary=False`
         idp_q = IdpProfile.objects.filter(profile=profile)
-        with transaction.atomic():
-            idp_q.exclude(auth0_user_id=auth0_user_id, email=email).update(primary=False)
-            # Mark current `user_id` as `primary=True`
-            idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
-            # Update CIS
-            send_userprofile_to_cis.delay(profile.pk)
+        # This is happening only the first time a user logs into mozillians.org
+        if not idp_q.filter(primary=True).exists():
+            with transaction.atomic():
+                idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
+                # Update CIS
+                send_userprofile_to_cis.delay(profile.pk)
         return user
 
     def authenticate(self, **kwargs):

@@ -736,15 +736,6 @@ class UserProfile(UserProfilePrivacyModel):
     def get_cis_groups(self, idp):
         """Prepares the entry for profile groups in the CIS format."""
 
-        # Update strategy: send groups for higher MFA idp
-        # Wipe groups from the rest
-        idps = list(self.idp_profiles.all().values_list('type', flat=True))
-
-        # if the current idp does not match
-        # the greatest number in the list, wipe the groups
-        if not idps or idp.type != max(idps) or not idp.is_mfa():
-            return []
-
         memberships = GroupMembership.objects.filter(
             userprofile=self,
             status=GroupMembership.MEMBER,
@@ -807,10 +798,12 @@ class IdpProfile(models.Model):
         (PROVIDER_LDAP, 'LDAP Provider',),
 
     )
-    # MFA_ACCOUNTS
-    MFA_ACCOUNTS = [PROVIDER_LDAP,
-                    PROVIDER_FIREFOX_ACCOUNTS,
-                    PROVIDER_GITHUB]
+    # High Security OPs
+    HIGH_AAL_ACCOUNTS = [PROVIDER_LDAP,
+                         PROVIDER_FIREFOX_ACCOUNTS,
+                         PROVIDER_GITHUB,
+                         PROVIDER_GOOGLE]
+
     profile = models.ForeignKey(UserProfile, related_name='idp_profiles')
     type = models.IntegerField(choices=PROVIDER_TYPES,
                                default=None,
@@ -844,11 +837,6 @@ class IdpProfile(models.Model):
             return self.PROVIDER_PASSWORDLESS
 
         return self.PROVIDER_UNKNOWN
-
-    def is_mfa(self):
-        """Helper method to check if IdpProfile is MFA-ed"""
-
-        return self.type in self.MFA_ACCOUNTS
 
     def save(self, *args, **kwargs):
         """Custom save method.
