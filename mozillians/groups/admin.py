@@ -139,13 +139,11 @@ class HasMFAEnabled(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == 'True':
-            return queryset.filter(userprofile__idp_profiles__type__in=[
-                IdpProfile.PROVIDER_GITHUB, IdpProfile.PROVIDER_LDAP]
-            ).distinct()
+            return queryset.filter(
+                userprofile__idp_profiles__type__in=IdpProfile.HIGH_AAL_ACCOUNTS).distinct()
         elif self.value() == 'False':
-            return queryset.exclude(userprofile__idp_profiles__type__in=[
-                IdpProfile.PROVIDER_GITHUB, IdpProfile.PROVIDER_LDAP]
-            ).distinct()
+            return queryset.exclude(
+                userprofile__idp_profiles__type__in=IdpProfile.HIGH_AAL_ACCOUNTS).distinct()
         else:
             return queryset
 
