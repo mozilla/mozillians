@@ -4,7 +4,7 @@ import urlparse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 from django.utils.encoding import escape_uri_path
 from django.views.decorators.cache import cache_control, never_cache
@@ -16,6 +16,8 @@ from mozillians.dino_park.utils import UserAccessLevel, DinoErrorResponse
 @never_cache
 @login_required
 def main(request):
+    if not settings.DINO_PARK_ACTIVE:
+        raise Http404()
     return render(request, 'dino_park/index.html', {})
 
 
