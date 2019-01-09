@@ -16,6 +16,10 @@ from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
+# Through this claim we can figure out the login method that was used
+ORIGINAL_CONNECTION_USER_ID = 'https://sso.mozilla.com/claim/original_connection_user_id'
+
+
 def calculate_username(email):
     """Calculate username from email address."""
 
@@ -145,7 +149,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
 
         profile = user.userprofile
         # Ensure compatibility with OIDC conformant mode
-        auth0_user_id = self.claims.get('user_id') or self.claims.get('sub')
+        connection_user_id = self.claims.get(ORIGINAL_CONNECTION_USER_ID)
         email = self.claims.get('email')
         # Grant an employee vouch if the user has the 'hris_is_staff' group
         groups = self.claims.get('https://sso.mozilla.com/claim/groups')
@@ -153,22 +157,21 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             profile.auto_vouch()
 
         # Get or create new `user_id`
-        obj, _ = IdpProfile.objects.get_or_create(
+        obj, created = IdpProfile.objects.get_or_create(
             profile=profile,
             email=email,
-            auth0_user_id=auth0_user_id)
+            auth0_user_id=connection_user_id)
 
         # Update/Save the Github username
-        if 'github|' in auth0_user_id:
+        if 'github|' in connection_user_id:
             obj.username = self.claims.get('nickname', '')
             obj.save()
 
         idp_q = IdpProfile.objects.filter(profile=profile)
-        # This is happening only the first time a user logs into mozillians.org
-        if not idp_q.filter(primary=True).exists():
+        if created:
             with transaction.atomic():
-                idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
-                # Update CIS
+                idp_q.filter(auth0_user_id=connection_user_id, email=email).update(primary=True)
+                # Update CIS to send the groups to the new connection/identity
                 send_userprofile_to_cis.delay(profile.pk)
         return user
 
