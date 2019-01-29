@@ -3,7 +3,6 @@ import hashlib
 import json
 import re
 
-from django.db import transaction
 from django.conf import settings
 from django.contrib.auth.models import User
 
@@ -158,18 +157,19 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             email=email,
             auth0_user_id=auth0_user_id)
 
+        # With account deracheting we will always get the same Auth0 user id. Mark it as primary
+        if not obj.primary:
+            obj.primary = True
+            IdpProfile.objects.filter(profile=profile).exclude(id=obj.id).update(primary=False)
+
         # Update/Save the Github username
         if 'github|' in auth0_user_id:
             obj.username = self.claims.get('nickname', '')
-            obj.save()
+        # Save once
+        obj.save()
 
-        idp_q = IdpProfile.objects.filter(profile=profile)
-        # This is happening only the first time a user logs into mozillians.org
-        if not idp_q.filter(primary=True).exists():
-            with transaction.atomic():
-                idp_q.filter(auth0_user_id=auth0_user_id, email=email).update(primary=True)
-                # Update CIS
-                send_userprofile_to_cis.delay(profile.pk)
+        # Update CIS
+        send_userprofile_to_cis.delay(profile.pk)
         return user
 
     def authenticate(self, **kwargs):

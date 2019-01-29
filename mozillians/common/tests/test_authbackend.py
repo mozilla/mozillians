@@ -100,9 +100,9 @@ class MozilliansAuthBackendTests(TestCase):
 
         eq_(IdpProfile.objects.filter(
             profile=user.userprofile, primary=True,
-            username='foo', email='foo@example.com').count(), 0)
+            username='foo', email='foo@example.com').count(), 1)
         eq_(IdpProfile.objects.filter(
-            profile=user.userprofile, primary=True,
+            profile=user.userprofile, primary=False,
             email='foo@bar.com').count(), 1)
 
     def test_filter_users_with_email_belonging_to_non_primary_identity(self):
@@ -113,7 +113,7 @@ class MozilliansAuthBackendTests(TestCase):
             profile=user.userprofile,
             auth0_user_id='email|1',
             email='bar@example.com',
-            primary=False
+            primary=True
         )
         claims = {
             'email': 'bar@example.com',
