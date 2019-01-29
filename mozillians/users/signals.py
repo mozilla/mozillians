@@ -1,8 +1,12 @@
+import json
+import logging
 from django.db import transaction
 from django.db.models import signals
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
+
+from raven.contrib.django.raven_compat.models import client as sentry_client
 
 from mozillians.common.utils import bundle_profile_data
 from mozillians.groups.models import Group
@@ -71,8 +75,20 @@ def push_empty_groups_to_cis(sender, instance, **kwargs):
     Remove all the access groups and tags from the profile.
     """
     from mozillians.users.tasks import send_userprofile_to_cis
-
     data = bundle_profile_data(instance.id, delete=True)
+
+    for d in data:
+        log_name = 'CIS group deletion - {}'.format(d['user_id'])
+        log_data = {
+            'level': logging.DEBUG,
+            'logger': 'mozillians.cis_transaction'
+        }
+        log_extra = {
+            'cis_transaction_data': json.dumps(d)
+        }
+
+        sentry_client.captureMessage(log_name, data=log_data, stack=True, extra=log_extra)
+
     send_userprofile_to_cis.delay(profile_results=data)
 
 
