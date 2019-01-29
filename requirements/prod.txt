@@ -8,7 +8,7 @@ django-filter==1.1.0 \
     --hash=sha256:ec0ef1ba23ef95b1620f5d481334413700fb33f45cd76d56a63f4b0b1d76976a \
     --hash=sha256:ea204242ea83790e1512c9d0d8255002a652a6f4986e93cee664f28955ba0c22
 django-import-export==1.2.0 \
-    --hash=sha256:99fae7d963af4ade97af9237a843f250312421fa4ee350a3b735fcc5684c3fb5
+    --hash=sha256:830824f79aae39e4212bb03aabdd83dc57931420557b757981cf6add8d07e611
 django-mozilla-product-details==0.13 \
     --hash=sha256:4ffa5a104f53645460a50c9342a41e3ea02d432851becf56e820d42faa94839f \
     --hash=sha256:ce97fc2533aa06560d9b438ebba2522dc0b2ada86d6e0537cfb5ac06db1a6aa2
