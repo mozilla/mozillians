@@ -289,8 +289,8 @@ class GroupCriteriaForm(happyforms.ModelForm):
 
         if (self.instance and self.instance.is_access_group
                 and cleaned_data.get('accepting_new_members') == Group.OPEN):
-                msg = _(u'An access group cannot be of type Open.')
-                self._errors['accepting_new_members'] = self.error_class([msg])
+            msg = _(u'An access group cannot be of type Open.')
+            self._errors['accepting_new_members'] = self.error_class([msg])
         return cleaned_data
 
     class Meta:

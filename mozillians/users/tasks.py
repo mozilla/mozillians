@@ -408,21 +408,23 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
     results = []
     for data in profile_results:
         # Send data to sentry for debugging purposes
+
+        cis_change = ChangeDelegate(publisher, {}, data)
+        cis_change.boto_session = session
+        result = cis_change.send()
+        results.append(result)
+
         log_name = 'CIS transaction - {}'.format(data['user_id'])
         log_data = {
             'level': logging.DEBUG,
             'logger': 'mozillians.cis_transaction'
         }
         log_extra = {
-            'cis_transaction_data': json.dumps(data)
+            'cis_transaction_data': json.dumps(data),
+            'cis_transaction_result': result
         }
 
         sentry_client.captureMessage(log_name, data=log_data, stack=True, extra=log_extra)
-
-        cis_change = ChangeDelegate(publisher, {}, data)
-        cis_change.boto_session = session
-        result = cis_change.send()
-        results.append(result)
     return results
 
 
