@@ -421,6 +421,7 @@ def send_userprofile_to_cis(instance_id=None, profile_results=[], **kwargs):
         }
         log_extra = {
             'cis_transaction_data': json.dumps(data),
+            'cis_transaction_groups': json.dumps(data['groups']),
             'cis_transaction_result': result
         }
 
