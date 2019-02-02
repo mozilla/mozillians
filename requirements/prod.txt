@@ -155,9 +155,9 @@ django-autocomplete-light==3.2.10 \
     --hash=sha256:5ccb1c8c4b75cf72bc5dabd920190ea1ca3a340f56fb6b12d07a62202837fa75
 tablib==0.12.1 \
     --hash=sha256:b8cf50a61d66655229993f2ee29220553fb2c80403479f8e6de77c0c24649d87
-django-autoslug==1.9.3 \
-    --hash=sha256:790efc84246ad8b7106d94e79bff8eb14b94616e8765235784483832899bb40a \
-    --hash=sha256:d466a68e87d076f0d0d6ffe51ff70fa22ae4ca2f7717d769feb6265ef68c50f8
+django-autoslug==1.9.4 \
+    --hash=sha256:08ba143ce5914d2689972c0adaea56abc37fb7175e9f6939fe0e3ac26374e7a0 \
+    --hash=sha256:aece8613eb173854462c656e91d81aa7ddfacaa49fb500d549f2143d1ce48721
 urllib3==1.24.1 \
     --hash=sha256:61bf29cada3fc2fbefad4fdf059ea4bd1b4a86d2b6d15e1c7c0b582b9752fe39 \
     --hash=sha256:de9529817c93f27c8ccbfead6985011db27bd0ddfcdb2d86f3f663385c6a9c22
