@@ -311,9 +311,9 @@ s3transfer==0.1.13 \
 python-dateutil==2.7.5 \
     --hash=sha256:063df5763652e21de43de7d9e00ccf239f953a832941e37be541614732cdfc93 \
     --hash=sha256:88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02
-django-axes==4.4.3 \
-    --hash=sha256:a46f1547bbccf0c4a61da3edc30318fc727517f0a367427e8da3a63f3e8b0084 \
-    --hash=sha256:4b057f9078f4b7597712d04e156a381f2cc830a031cbac741d9105b9f78ef2ab
+django-axes==4.5.4 \
+    --hash=sha256:6f2719c9040e5120ece56232b6ab499b9cc3f02aa58d9fdee04210f480c7c30c \
+    --hash=sha256:7c539b1bbcac6752319783a5bd41c20c7b765cded31da9568a86e4521524a91e
 redis==2.10.6 \
     --hash=sha256:8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb \
     --hash=sha256:a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f
