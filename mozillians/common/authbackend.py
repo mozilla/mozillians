@@ -5,6 +5,7 @@ import re
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 from cities_light.models import Country
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
@@ -156,6 +157,15 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             profile=profile,
             email=email,
             auth0_user_id=auth0_user_id)
+
+        # Check if a user with passwordless login curates an access group and block it.
+        if obj.type <= IdpProfile.PROVIDER_PASSWORDLESS:
+            # LDAP is excluded since is checked at the Auth0 level.
+            if not profile.idp_profiles.filter(type=IdpProfile.PROVIDER_LDAP).exists():
+                if profile.groups.filter(is_access_group=True, curators=profile).exists():
+                    msg = 'Access group curators cannot use Passwordless as the login method.'
+                    messages.error(self.request, msg)
+                    return None
 
         # With account deracheting we will always get the same Auth0 user id. Mark it as primary
         if not obj.primary:
