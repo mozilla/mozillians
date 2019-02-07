@@ -308,9 +308,9 @@ jmespath==0.9.3 \
 s3transfer==0.1.13 \
     --hash=sha256:c7a9ec356982d5e9ab2d4b46391a7d6a950e2b04c472419f5fdec70cc0ada72f \
     --hash=sha256:90dc18e028989c609146e241ea153250be451e05ecc0c2832565231dacdf59c1
-python-dateutil==2.7.5 \
-    --hash=sha256:063df5763652e21de43de7d9e00ccf239f953a832941e37be541614732cdfc93 \
-    --hash=sha256:88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02
+python-dateutil==2.8.0 \
+    --hash=sha256:7e6584c74aeed623791615e26efd690f29817a27c73085b78e4bad02493df2fb \
+    --hash=sha256:c89805f6f4d64db21ed966fda138f8a5ed7a4fdbc1a8ee329ce1b74e3c74da9e
 django-axes==4.5.4 \
     --hash=sha256:6f2719c9040e5120ece56232b6ab499b9cc3f02aa58d9fdee04210f480c7c30c \
     --hash=sha256:7c539b1bbcac6752319783a5bd41c20c7b765cded31da9568a86e4521524a91e
