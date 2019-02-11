@@ -162,8 +162,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         if obj.type <= IdpProfile.PROVIDER_PASSWORDLESS:
             # LDAP is excluded since is checked at the Auth0 level.
             if not profile.idp_profiles.filter(type=IdpProfile.PROVIDER_LDAP).exists():
-                if profile.groups.filter(is_access_group=True, curators=profile).exists():
-                    msg = 'Access group curators cannot use Passwordless as the login method.'
+                if profile.groups.filter(is_access_group=True).exists():
+                    msg = 'Members and Curators of Access Groups cannot use Passwordless to login.'
                     messages.error(self.request, msg)
                     return None
 
