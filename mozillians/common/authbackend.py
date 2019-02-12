@@ -16,6 +16,9 @@ from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
+SSO_AAL_SCOPE = 'https://sso.mozilla.com/claim/aai'
+
+
 def calculate_username(email):
     """Calculate username from email address."""
 
@@ -147,6 +150,11 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         # Ensure compatibility with OIDC conformant mode
         auth0_user_id = self.claims.get('user_id') or self.claims.get('sub')
         email = self.claims.get('email')
+        aal_scope = self.claims.get(SSO_AAL_SCOPE)
+        is_mfa = True
+        if not aal_scope or aal_scope != ['2FA']:
+            is_mfa = False
+
         # Grant an employee vouch if the user has the 'hris_is_staff' group
         groups = self.claims.get('https://sso.mozilla.com/claim/groups')
         if groups and 'hris_is_staff' in groups:
@@ -158,14 +166,10 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             email=email,
             auth0_user_id=auth0_user_id)
 
-        # Check if a user with passwordless login curates an access group and block it.
-        if obj.type <= IdpProfile.PROVIDER_PASSWORDLESS:
-            # LDAP is excluded since is checked at the Auth0 level.
-            if not profile.idp_profiles.filter(type=IdpProfile.PROVIDER_LDAP).exists():
-                if profile.groups.filter(is_access_group=True).exists():
-                    msg = 'Members and Curators of Access Groups cannot use Passwordless to login.'
-                    messages.error(self.request, msg)
-                    return None
+        if profile.groups.filter(is_access_group=True).exists() and not is_mfa:
+            msg = 'Members and Curators of Access Groups cannot use Passwordless to login.'
+            messages.error(self.request, msg)
+            return None
 
         # With account deracheting we will always get the same Auth0 user id. Mark it as primary
         if not obj.primary:
