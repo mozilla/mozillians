@@ -451,7 +451,8 @@ ES_REINDEX_TIMEOUT = config('ES_REINDEX_TIMEOUT', default=1800, cast=int)
 
 # Setup django-axes
 AXES_PROXY_COUNT = 2
-IPWARE_META_PRECEDENCE_ORDER = ('HTTP_X_FORWARDED_FOR',)
+IPWARE_META_PRECEDENCE_ORDER = ('HTTP_X_FORWARDED_FOR', 'IPWARE_META_PRECEDENCE_ORDER',
+                                'REMOTE_ADDR',)
 AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=10, cast=int)
 
 # Setup logging and sentry
