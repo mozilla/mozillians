@@ -16,7 +16,7 @@ from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
-SSO_AAL_SCOPE = 'https://sso.mozilla.com/claim/aai'
+SSO_AAL_SCOPE = 'https://sso.mozilla.com/claim/AAI'
 
 
 def calculate_username(email):
