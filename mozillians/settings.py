@@ -454,6 +454,8 @@ AXES_PROXY_COUNT = 1
 IPWARE_META_PRECEDENCE_ORDER = ('HTTP_X_FORWARDED_FOR', 'IPWARE_META_PRECEDENCE_ORDER',
                                 'REMOTE_ADDR',)
 AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=10, cast=int)
+# block for one hour
+AXES_COOLOFF_TIME = config('AXES_COOLOFF_TIME', default=1, cast=int)
 
 # Setup logging and sentry
 RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
