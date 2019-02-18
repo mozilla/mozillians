@@ -72,9 +72,9 @@ django-extensions==2.1.4 \
 fake-factory==9999.9.9 \
     --hash=sha256:f5bd18deb22ad8cb4402513c025877bc6b50de58902d686b6b21ba8981dce260 \
     --hash=sha256:60c64a953c03e29fbee6b59fcb700c86a313778d68dc5816fc560ef515019d77
-flake8==3.7.4 \
-    --hash=sha256:e0f8cd519cfc0072c0ee31add5def09d2b3ef6040b34dc426445c3af9b02163c \
-    --hash=sha256:09b9bb539920776da542e67a570a5df96ff933c9a08b62cfae920bcc789e4383
+flake8==3.7.6 \
+    --hash=sha256:6d8c66a65635d46d54de59b027a1dda40abbe2275b3164b634835ac9c13fd048 \
+    --hash=sha256:6eab21c6e34df2c05416faa40d0c59963008fff29b6f0ccfe8fa28152ab3e383
 ipdb==0.11 \
     --hash=sha256:7081c65ed7bfe7737f83fa4213ca8afd9617b42ff6b3f1daf9a3419839a2a00a
 ipython==5.5.0 \
