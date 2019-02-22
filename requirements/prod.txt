@@ -364,9 +364,9 @@ idna==2.8 \
     --hash=sha256:c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407
 configobj==5.0.6 \
     --hash=sha256:a2f5650770e1c87fb335af19a9b7eb73fc05ccf22144eb68db7d00cd2bcb0902
-everett==0.9 \
-    --hash=sha256:05b0d0bae138a3b1a7c365bdd991c0a5b06f20c2e01d6721896098ac93cf7ee9 \
-    --hash=sha256:02a43a2b4194e6ed40757851b37f5acf3c086f37e7e8109a385a7198cfbbc51b
+everett==1.0.2 \
+    --hash=sha256:66c7991c056fd9b1de54c29e2b5004a30209530faef698d6ecfbf24bfbbdd1fb \
+    --hash=sha256:8a5ee8cdde0ed6b3bbb63249e0e0703d4ad91921107ff198e0868ffce5f7b6bc
 https://github.com/mozilla-iam/cis/archive/d2bb9c43fc2e0b8fb9d324a7f03f2e4e29721f1a.zip#egg=cis \
     --hash=sha256:8032f59b84542400a49f5e7cdbe6c7cb954a36f87e803d92211f2836a3cd52b5
 https://github.com/mozilla-iam/pykmssig/archive/v0.0.8.zip#egg=pykmssig \
