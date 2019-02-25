@@ -456,6 +456,8 @@ IPWARE_META_PRECEDENCE_ORDER = ('HTTP_X_FORWARDED_FOR', 'IPWARE_META_PRECEDENCE_
 AXES_FAILURE_LIMIT = config('AXES_FAILURE_LIMIT', default=10, cast=int)
 # block for one hour
 AXES_COOLOFF_TIME = config('AXES_COOLOFF_TIME', default=1, cast=int)
+AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP = config('AXES_LOCK_OUT_BY_COMBINATION_USER_AND_IP',
+                                                  default=True, cast=bool)
 
 # Setup logging and sentry
 RAVEN_CONFIG = config('RAVEN_CONFIG', cast=json.loads, default='{}')
