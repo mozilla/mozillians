@@ -374,9 +374,9 @@ https://github.com/mozilla-iam/pykmssig/archive/v0.0.8.zip#egg=pykmssig \
     --hash=sha256:e117b5e66ddbdb84263ac100139445a9c4c8eba2ea740fb6aec6009619ed7556
 pluginbase==0.7 \
     --hash=sha256:c0abe3218b86533cca287e7057a37481883c07acef7814b70583406938214cc8
-jsonschema==2.6.0 \
-    --hash=sha256:000e68abd33c972a5248544925a0cae7d1125f9bf6c58280d37546b946769a08 \
-    --hash=sha256:6ff5f3180870836cae40f06fa10419f557208175f13ad7bc26caa77beb1f6e02
+jsonschema==3.0.0 \
+    --hash=sha256:acc8a90c31d11060516cfd0b414b9f8bcf4bc691b21f0f786ea57dd5255c79db \
+    --hash=sha256:dd3f8ecb1b52d94d45eedb67cb86cac57b94ded562c5d98f63719e55ce58557b
 ipaddress==1.0.22 \
     --hash=sha256:64b28eec5e78e7510698f6d4da08800a5c575caa4a286c93d651c5d3ff7b6794 \
     --hash=sha256:b146c751ea45cad6188dd6cf2d9b757f6f4f8d6ffb96a023e6f2e26eea02a72c
