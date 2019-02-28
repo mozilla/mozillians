@@ -184,6 +184,7 @@ class NDAGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         mfa_idps_query = (IdpProfile.objects.filter(primary=True)
                                             .filter(Q(type=IdpProfile.PROVIDER_GITHUB)
                                                     | Q(type=IdpProfile.PROVIDER_FIREFOX_ACCOUNTS)
+                                                    | Q(type=IdpProfile.PROVIDER_GOOGLE)
                                                     | Q(type=IdpProfile.PROVIDER_LDAP)))
         mfa_idps_pks = mfa_idps_query.values_list('profile__id', flat=True)
         qs = UserProfile.objects.filter(Q(pk__in=mfa_idps_pks) | Q(pk__in=staff_ids))
