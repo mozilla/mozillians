@@ -470,9 +470,9 @@ docker==3.6.0 \
 cookies==2.2.1 \
     --hash=sha256:15bee753002dff684987b8df8c235288eb8d45f8191ae056254812dfd42c81d3 \
     --hash=sha256:d6b698788cae4cfa4e62ef8643a9ca332b79bd96cb314294b864ae8d7eb3ee8e
-aws-xray-sdk==2.2.0 \
-    --hash=sha256:6d1474d83aa3149a59df7ca63fe032a4cbae9924ea82909068453538e98804c2 \
-    --hash=sha256:fc5537268cc8041f74e14077c4b4b4cef0f3de25ecef793ace63cedf87fe4a2a
+aws-xray-sdk==2.4.1 \
+    --hash=sha256:4d3395cb2998db4d13fe1ca830d399f40364dc2007d8cd3ba311590409ee17ad \
+    --hash=sha256:abc0b15dde2577b48f87abc7e9973e6d1edba62470d184dd6f76e698f63b017a
 backports.weakref==1.0.post1 \
     --hash=sha256:81bc9b51c0abc58edc76aefbbc68c62a787918ffe943a37947e162c3f8e19e82 \
     --hash=sha256:bc4170a29915f8b22c9e7c4939701859650f2eb84184aee80da329ac0b9825c2
