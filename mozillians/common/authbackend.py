@@ -167,8 +167,8 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
             auth0_user_id=auth0_user_id)
 
         if profile.groups.filter(is_access_group=True).exists() and not is_mfa:
-            msg = ('Members and Curators of Access Groups need to use a 2FA'
-                   ' enabled Firefox Account or Github authentication to login.')
+            msg = ('Members and Curators of Access Groups need to use 2FA'
+                   ' enabled LDAP, Firefox Account or Github authentication to login.')
             messages.error(self.request, msg)
             return None
 
