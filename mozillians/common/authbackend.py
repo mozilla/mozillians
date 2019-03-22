@@ -16,7 +16,7 @@ from mozillians.users.models import IdpProfile
 from mozillians.users.tasks import send_userprofile_to_cis
 
 
-SSO_AAL_SCOPE = 'https://sso.mozilla.com/claim/AAI'
+SSO_AAL_SCOPE = 'https://sso.mozilla.com/claim/AAL'
 
 
 def calculate_username(email):
@@ -152,7 +152,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         email = self.claims.get('email')
         aal_scope = self.claims.get(SSO_AAL_SCOPE)
         is_mfa = True
-        if not aal_scope or aal_scope != ['2FA']:
+        if not aal_scope or aal_scope != ['MEDIUM']:
             is_mfa = False
 
         # Grant an employee vouch if the user has the 'hris_is_staff' group
