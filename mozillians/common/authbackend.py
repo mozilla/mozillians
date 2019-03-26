@@ -152,7 +152,7 @@ class MozilliansAuthBackend(OIDCAuthenticationBackend):
         email = self.claims.get('email')
         aal_scope = self.claims.get(SSO_AAL_SCOPE)
         is_mfa = True
-        if not aal_scope or aal_scope != ['MEDIUM']:
+        if not aal_scope or aal_scope != 'MEDIUM':
             is_mfa = False
 
         # Grant an employee vouch if the user has the 'hris_is_staff' group
