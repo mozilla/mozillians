@@ -9,12 +9,16 @@ Table of Contents
 
 * [Install, docs, API and more](#install-docs-api-and-more)
 * [Contribute](#contribute)
+* [Code of Conduct](#code-of-conduct)
 * [File a Bug](#file-a-bug)
 * [Writing code](#writing-code)
 * [Chat With The Team](#chat-with-the-team)
 
 ## Install, docs, API and more
 For documentation, see [mozillians.rtfd.org](https://mozillians.readthedocs.org/) or build the docs.
+
+## Code of Conduct
+By participating in this project, you're agreeing to uphold the [Mozilla Community Participation Guidelines](https://www.mozilla.org/en-US/about/governance/policies/participation/). If you need to report a problem, please see our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) guide.
 
 ## Contribute
 
