@@ -165,9 +165,9 @@ https://github.com/mozilla/happyforms/archive/master.zip#egg=happyforms \
     --hash=sha256:9f82a903cebeac781183b70a1e7bae9a600b14f2e71876a5bda7944dabad5f4c
 https://github.com/mozilla/nuggets/archive/master.zip#egg=nuggets \
     --hash=sha256:ecfb739c75fef7e31b7c0c82ce91b5d2cc0e9f6a14b3dec595aba6980c731cfd
-Unidecode==1.0.23 \
-    --hash=sha256:092cdf7ad9d1052c50313426a625b717dab52f7ac58f859e09ea020953b1ad8f \
-    --hash=sha256:8b85354be8fd0c0e10adbf0675f6dc2310e56fda43fa8fe049123b6c475e52fb
+Unidecode==1.1.1 \
+    --hash=sha256:1d7a042116536098d05d599ef2b8616759f02985c85b4fef50c78a5aaf10822a \
+    --hash=sha256:2b6aab710c2a1647e928e36d69c21e76b453cd455f4e2621000e54b2a9b8cce8
 pytz==2018.9 \
     --hash=sha256:32b0891edff07e28efe91284ed9c31e123d84bea3fd98e1f72be2508f43ef8d9 \
     --hash=sha256:d5f05e487007e29e03409f9398d074e158d920d36eb82eaf66fb1136b0c5374c
