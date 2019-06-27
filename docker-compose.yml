@@ -1,8 +1,9 @@
-version: '2'
+version: '3'
 services:
   db:
     image: mariadb:10.2
-    restart: always
+    container_name: db
+    restart: unless-stopped	
     environment:
       - MYSQL_DATABASE=mozillians
       - MYSQL_USER=mozillians
@@ -13,14 +14,18 @@ services:
       - ./docker/files/mariadb.cnf:/etc/mysql/conf.d/my.cnf
   es:
     image: elasticsearch:2.4.5
+    container_name: es
   memcached:
     image: memcached
+    container_name: memcached
   broker:
     image: redis:3
+    container_name: broker
   web:
     build:
       context: .
       dockerfile: docker/dev
+    container_name: web
     ports:
       - "8000:8000"
     stdin_open: true
@@ -36,6 +41,7 @@ services:
     build:
       context: .
       dockerfile: docker/dev
+    container_name: celery
     volumes:
       - .:/code
     links:
@@ -50,6 +56,7 @@ services:
     build:
       context: .
       dockerfile: docker/dev
+    container_name: flower
     volumes:
       - .:/code
     links:
