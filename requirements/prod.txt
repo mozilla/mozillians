@@ -4,9 +4,9 @@ django-storages==1.7.1 \
     --hash=sha256:b1a63cd5ea286ee5a9fb45de6c3c5c0ae132d58308d06f1ce9865cfcd5e470a7
 django-cronjobs==0.2.3 \
     --hash=sha256:177295b1442400c92cdb67e8e18f9ff5946fb442f85813b9d0837823722ea08d
-django-filter==1.1.0 \
-    --hash=sha256:ec0ef1ba23ef95b1620f5d481334413700fb33f45cd76d56a63f4b0b1d76976a \
-    --hash=sha256:ea204242ea83790e1512c9d0d8255002a652a6f4986e93cee664f28955ba0c22
+django-filter==2.2.0 \
+    --hash=sha256:558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b \
+    --hash=sha256:c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14
 django-import-export==1.2.0 \
     --hash=sha256:830824f79aae39e4212bb03aabdd83dc57931420557b757981cf6add8d07e611
 django-mozilla-product-details==0.13 \
