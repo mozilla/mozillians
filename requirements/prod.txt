@@ -543,9 +543,9 @@ funcsigs==1.0.2 \
     --hash=sha256:a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50
 django-ipware==2.1.0 \
     --hash=sha256:a7c7a8fd019dbdc9c357e6e582f65034e897572fc79a7e467674efa8aef9d00b
-pbr==5.1.1 \
-    --hash=sha256:f6d5b23f226a2ba58e14e49aa3b1bfaf814d0199144b95d78458212444de1387 \
-    --hash=sha256:f59d71442f9ece3dffc17bc36575768e1ee9967756e6b6535f0ee1f0054c3d68
+pbr==5.4.1 \
+    --hash=sha256:0ca44dc9fd3b04a22297c2a91082d8df2894862e8f4c86a49dac69eae9e85ca0 \
+    --hash=sha256:4aed6c1b1fa5020def0f22aed663d87b81bb3235f112490b07d2643d7a98c5b5
 win_inet_pton==1.0.1 \
     --hash=sha256:a45bc3073469afb5afd0e395aaabd836040a20ba1f2a6dd1196fa2b210ba386e
 singledispatch==3.4.0.3 \
