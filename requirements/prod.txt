@@ -148,8 +148,8 @@ diff-match-patch==20121119 \
 django-appconf==1.0.2 \
     --hash=sha256:6a4d9aea683b4c224d97ab8ee11ad2d29a37072c0c6c509896dd9857466fb261 \
     --hash=sha256:ddab987d14b26731352c01ee69c090a4ebfc9141ed223bef039d79587f22acd9
-django-autocomplete-light==3.2.10 \
-    --hash=sha256:5ccb1c8c4b75cf72bc5dabd920190ea1ca3a340f56fb6b12d07a62202837fa75
+django-autocomplete-light==3.4.1 \
+    --hash=sha256:29ce2626a11eab2333e5aa9f95166a6d4400f11b5a05e8f23fa77017b1a9089a
 tablib==0.12.1 \
     --hash=sha256:b8cf50a61d66655229993f2ee29220553fb2c80403479f8e6de77c0c24649d87
 django-autoslug==1.9.4 \
