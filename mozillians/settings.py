@@ -272,7 +272,7 @@ if 'test' in sys.argv:
     BASKET_URL = 'http://127.0.0.1'
 else:
     # Basket requires SSL now for some calls
-    BASKET_URL = config('BASKET_URL', default='https://basket.mozilla.com')
+    BASKET_URL = config('BASKET_URL', default='https://basket.mozilla.org')
 
 BASKET_VOUCHED_NEWSLETTER = config('BASKET_VOUCHED_NEWSLETTER', default='mozilla-phone')
 BASKET_NDA_NEWSLETTER = config('BASKET_NDA_NEWSLETTER', default='mozillians-nda')
