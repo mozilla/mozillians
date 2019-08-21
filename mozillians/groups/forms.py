@@ -76,7 +76,7 @@ class GroupCuratorsForm(happyforms.ModelForm):
             msg = _(u'The group must have at least one curator.')
             error_msgs.append(msg)
 
-        if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
+        if self.instance.is_access_group and self.instance.name not in settings.NDA_ACCESS_GROUPS:
             for curator in curators:
                 if not (curator.is_nda or curator.can_create_access_groups):
                     msg = _(u'Only staff and NDA members can become access group curators')
@@ -170,7 +170,7 @@ class GroupInviteForm(happyforms.ModelForm):
                     url='groups:curators-autocomplete')
                 self.fields['invites'].widget.choices = self.fields['invites'].choices
             # Force an MFAed method for NDA invitations
-            elif self.instance.name == settings.NDA_GROUP:
+            elif self.instance.name in settings.NDA_ACCESS_GROUPS:
                 self.fields['invites'].widget = autocomplete.ModelSelect2Multiple(
                     url='users:nda-group-invitation-autocomplete')
                 self.fields['invites'].widget.choices = self.fields['invites'].choices
@@ -196,7 +196,7 @@ class GroupInviteForm(happyforms.ModelForm):
             msg = _(u'You need to be the curator of this group before inviting someone to join.')
             error_msgs.append(msg)
 
-        if self.instance.is_access_group and not self.instance.name == settings.NDA_GROUP:
+        if self.instance.is_access_group and self.instance.name not in settings.NDA_ACCESS_GROUPS:
             msg = _(u'Only staff and NDA members are allowed to be invited')
             for profile in self.cleaned_data['invites']:
                 if not (profile.is_nda or profile.can_create_access_groups):
