@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models import Manager, ManyToManyField
+from django.db.models import Q, Manager, ManyToManyField
 from django.utils.encoding import iri_to_uri
 from django.utils.http import urlquote
 from django.utils.timezone import now
@@ -443,10 +443,12 @@ class UserProfile(UserProfilePrivacyModel):
     def is_nda(self):
         query = {
             'userprofile__pk': self.pk,
-            'group__name': settings.NDA_GROUP,
             'status': GroupMembership.MEMBER
         }
-        return GroupMembership.objects.filter(**query).exists() or self.user.is_superuser
+        is_nda_member = (GroupMembership.objects.filter(Q(group__name=settings.NDA_GROUP)
+                                                        | Q(group__name=settings.NDA_STAFF_GROUP))
+                                                .filter(**query).exists())
+        return is_nda_member or self.user.is_superuser
 
     @property
     def date_vouched(self):
