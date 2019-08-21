@@ -161,10 +161,12 @@ class AccessGroupInvitationAutocomplete(StaffProfilesAutocomplete):
         staff_ids = staff_qs.values_list('pk', flat=True)
 
         # Query NDA memberships
-        nda_members_ids = GroupMembership.objects.filter(
-            group__name=settings.NDA_GROUP,
-            status=GroupMembership.MEMBER
-        ).values_list('userprofile__pk', flat=True)
+        nda_members_ids = (
+            GroupMembership.objects.filter(Q(group__name=settings.NDA_GROUP)
+                                           | Q(group__name=settings.NDA_STAFF_GROUP))
+                                   .filter(status=GroupMembership.MEMBER).distinct()
+                                   .values_list('userprofile__pk', flat=True)
+        )
 
         query = Q(pk__in=staff_ids) | Q(pk__in=nda_members_ids)
         qs = UserProfile.objects.filter(query).distinct()
