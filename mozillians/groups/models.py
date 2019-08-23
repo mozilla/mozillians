@@ -390,7 +390,7 @@ class Group(GroupBase):
             send_email = True
             # Remove all the access groups the user is a member of
             # if the group to remove is the NDA
-            if self.name == settings.NDA_GROUP:
+            if self.name in settings.NDA_ACCESS_GROUPS:
                 group_memberships = GroupMembership.objects.none()
                 # If the user is not staff, we need to delete the memberships to any access group
                 if not userprofile.can_create_access_groups:
