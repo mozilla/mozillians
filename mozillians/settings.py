@@ -281,7 +281,7 @@ BASKET_API_KEY = config('BASKET_API_KEY')
 # NDA Group
 NDA_GROUP = config('NDA_GROUP', default='nda')
 # TODO change this
-NDA_STAFF_GROUP = config('NDA_STAFF_GROUP', default='nda-staff')
+NDA_STAFF_GROUP = config('NDA_STAFF_GROUP', default='contingentworkernda')
 NDA_ACCESS_GROUPS = [NDA_GROUP, NDA_STAFF_GROUP]
 
 # Google Analytics
