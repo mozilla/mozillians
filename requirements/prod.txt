@@ -272,9 +272,9 @@ olefile==0.45.1 \
     --hash=sha256:2b6575f5290de8ab1086f8c5490591f7e0885af682c7c1793bdaf6e64078d385
 django-cities-light==3.5.0 \
     --hash=sha256:8a87c9f52efda275eb25b6112688b35e72c07f378ddcfabfe5c4501bc8d684be
-progressbar2==3.38.0 \
-    --hash=sha256:84cb2b81274e9d83a952dc4517f953fbaf1e040b90638e68d54fc18e7dd47030 \
-    --hash=sha256:d209f8c13672724bbb7bbf76e7ffedaa0bcdac32dc8db68a627bbabfd6c75de0
+progressbar2==3.46.0 \
+    --hash=sha256:1992ba05b49a0debcc56f6cbcd6ca8fceaa0f3a6918ef8f1b5ea60fbc01ec873 \
+    --hash=sha256:be02ee9d951f4e1614b952e512577fe6f0772e0e181672d56efe5dd08a5e07c7
 python-utils==2.3.0 \
     --hash=sha256:34aaf26b39b0b86628008f2ae0ac001b30e7986a8d303b61e1357dfcdad4f6d3 \
     --hash=sha256:e25f840564554eaded56eaa395bca507b0b9e9f0ae5ecb13a8cb785305c56d25
