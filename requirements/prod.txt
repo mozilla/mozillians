@@ -168,9 +168,9 @@ https://github.com/mozilla/nuggets/archive/master.zip#egg=nuggets \
 Unidecode==1.0.23 \
     --hash=sha256:092cdf7ad9d1052c50313426a625b717dab52f7ac58f859e09ea020953b1ad8f \
     --hash=sha256:8b85354be8fd0c0e10adbf0675f6dc2310e56fda43fa8fe049123b6c475e52fb
-pytz==2018.9 \
-    --hash=sha256:32b0891edff07e28efe91284ed9c31e123d84bea3fd98e1f72be2508f43ef8d9 \
-    --hash=sha256:d5f05e487007e29e03409f9398d074e158d920d36eb82eaf66fb1136b0c5374c
+pytz==2019.3 \
+    --hash=sha256:1c557d7d0e871de1f5ccd5833f60fb2550652da6be2693c1e02300743d21500d \
+    --hash=sha256:b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be
 sorl-thumbnail==12.4.1 \
     --hash=sha256:1cc6d913fe4f1224e479f25a23ec2ad3ca71c3154919a2c9463b07e7fbe11ac2 \
     --hash=sha256:c5ef989da07d31925754922ce95783fd2b1f8735124c0510884633eb32a4cd3e
