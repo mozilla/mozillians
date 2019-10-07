@@ -25,8 +25,9 @@ Babel==2.6.0 \
 django-waffle==0.16.0 \
     --hash=sha256:806164c8e98fe6c20590bd642fa247d8554ab57faed45e2745253f0f3b8f3ff9 \
     --hash=sha256:b48b80b01ea28a560a0d6df9322631f239f4088933137a39571d1c874cc89ce9
-BeautifulSoup==3.2.1 \
-    --hash=sha256:6a8cb4401111e011b579c8c52a51cdab970041cc543814bbd9577a4529fe1cdb
+BeautifulSoup==3.2.2 \
+    --hash=sha256:a04169602bff6e3138b1259dbbf491f5a27f9499dea9a8fbafd48843f9d89970 \
+    --hash=sha256:d31413d71f6ca027ff6b06c891b62ee8ff48267ccd969f881d810e5d1fe49565
 djangorestframework==3.7.7 \
     --hash=sha256:1f6baf40ed456ed2af6bd1a4ff8bbc3503cebea16509993aea2b7085bc097766 \
     --hash=sha256:9f9e94e8d22b100ed3a43cee8c47a7ff7b185e778a1f2da9ec5c73fc4e081b87
