@@ -81,6 +81,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
+    'mozillians.common.middleware.HealthcheckMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.middleware.common.CommonMiddleware',
