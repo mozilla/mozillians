@@ -595,3 +595,6 @@ backports.ssl_match_hostname==3.7.0.1 \
     --hash=sha256:bb82e60f9fbf4c080eabd957c39f0641f0fc247d9a16e31e26d594d8f42b9fd2
 mysqlclient==1.4.4 \
     --hash=sha256:9c737cc55a5dc8dd3583a942d5a9b21be58d16f00f5fefca4e575e7d9682e98c
+requests-aws4auth==0.9 \
+    --hash=sha256:c9973af472d6d358ee301f077608361e078642aa019785139b588d526f50a23c \
+    --hash=sha256:e20e4941ccd5706973068f9214d40cb2e669461536b3a57b9ac824ae87744c2c
