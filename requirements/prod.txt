@@ -569,8 +569,9 @@ promise==2.2.1 \
 aniso8601==3.0.2 \
     --hash=sha256:7849749cf00ae0680ad2bdfe4419c7a662bef19c03691a19e008c8b9a5267802 \
     --hash=sha256:94f90871fcd314a458a3d4eca1c84448efbd200e86f55fe4c733c7a40149ef50
-graphql-relay==0.4.5 \
-    --hash=sha256:2716b7245d97091af21abf096fabafac576905096d21ba7118fba722596f65db
+graphql-relay==3.0.0 \
+    --hash=sha256:ad3f69a8b360c310c0c5611894f1e3fd5c6a5427b84f0f2cf5aee7a588bb5556 \
+    --hash=sha256:b05ca0547557874f3bb1f34e4a6dce20bc60359fe6e73daaa63bb90df85f7ba9
 graphql-core==2.1 \
     --hash=sha256:9462e22e32c7f03b667373ec0a84d95fba10e8ce2ead08f29fbddc63b671b0c1 \
     --hash=sha256:889e869be5574d02af77baf1f30b5db9ca2959f1c9f5be7b2863ead5a3ec6181
