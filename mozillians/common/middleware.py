@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse as django_reverse
-from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
+from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, HttpResponse
 from django.utils.encoding import iri_to_uri, smart_str
 
 from django.utils.translation import ugettext_lazy as _lazy, activate
@@ -194,4 +194,15 @@ class DinoParkLoginMiddleware(object):
         if request.user.userprofile and request.user.userprofile.is_complete:
             return HttpResponseRedirect('/beta')
 
+        return self.get_response(request)
+
+
+class HealthcheckMiddleware(object):
+    """Add middleware for healthcheck paths"""
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.path_info == '/healthcheck':
+            return HttpResponse('OK')
         return self.get_response(request)

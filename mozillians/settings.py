@@ -81,6 +81,7 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE = [
+    'mozillians.common.middleware.HealthcheckMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.middleware.common.CommonMiddleware',
@@ -421,6 +422,14 @@ ES_PROTOCOL = config('ES_PROTOCOL', default='http://')
 
 def _lazy_haystack_setup():
     from django.conf import settings
+    from elasticsearch import RequestsHttpConnection
+    from mozillians.common.search import AWSRequestsHttpConnection
+
+    es_connection = config('ES_CONNECTION', default='aws')
+    es_connection_class = {
+        'aws': AWSRequestsHttpConnection,
+        'local': RequestsHttpConnection
+    }
 
     es_url = '%s%s' % (settings.ES_PROTOCOL, settings.ES_HOST)
     es_index_name = config('ES_INDEX_NAME', default='mozillians_haystack')
@@ -428,17 +437,26 @@ def _lazy_haystack_setup():
         'default': {
             'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
             'URL': es_url,
-            'INDEX_NAME': es_index_name
+            'INDEX_NAME': es_index_name,
+            'KWARGS': {
+                'connection_class': es_connection_class[es_connection]
+            }
         },
         'tmp': {
             'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
             'URL': es_url,
-            'INDEX_NAME': 'tmp_{}'.format(es_index_name)
+            'INDEX_NAME': 'tmp_{}'.format(es_index_name),
+            'KWARGS': {
+                'connection_class': es_connection_class[es_connection]
+            }
         },
         'current': {
             'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
             'URL': es_url,
-            'INDEX_NAME': 'current_{}'.format(es_index_name)
+            'INDEX_NAME': 'current_{}'.format(es_index_name),
+            'KWARGS': {
+                'connection_class': es_connection_class[es_connection]
+            }
         }
     }
 

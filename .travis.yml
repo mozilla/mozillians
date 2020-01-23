@@ -14,6 +14,7 @@ env:
   DEBUG=True
   CELERY_TASK_ALWAYS_EAGER=True
   DEV=True
+  ES_CONNECTION=local
 services:
   - elasticsearch
   - mysql
