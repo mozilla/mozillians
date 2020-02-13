@@ -171,9 +171,9 @@ Unidecode==1.0.23 \
 pytz==2018.9 \
     --hash=sha256:32b0891edff07e28efe91284ed9c31e123d84bea3fd98e1f72be2508f43ef8d9 \
     --hash=sha256:d5f05e487007e29e03409f9398d074e158d920d36eb82eaf66fb1136b0c5374c
-sorl-thumbnail==12.4.1 \
-    --hash=sha256:1cc6d913fe4f1224e479f25a23ec2ad3ca71c3154919a2c9463b07e7fbe11ac2 \
-    --hash=sha256:c5ef989da07d31925754922ce95783fd2b1f8735124c0510884633eb32a4cd3e
+sorl-thumbnail==12.6.3 \
+    --hash=sha256:66771521f3c0ed771e1ce8e1aaf1639ebff18f7f5a40cfd3083da8f0fe6c7c99 \
+    --hash=sha256:7162639057dff222a651bacbdb6bd6f558fc32946531d541fc71e10c0167ebdf
 anyjson==0.3.3 \
     --hash=sha256:37812d863c9ad3e35c0734c42e0bf0320ce8c3bed82cd20ad54cb34d158157ba
 pycparser==2.19 \
