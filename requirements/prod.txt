@@ -7,8 +7,9 @@ django-cronjobs==0.2.3 \
 django-filter==1.1.0 \
     --hash=sha256:ec0ef1ba23ef95b1620f5d481334413700fb33f45cd76d56a63f4b0b1d76976a \
     --hash=sha256:ea204242ea83790e1512c9d0d8255002a652a6f4986e93cee664f28955ba0c22
-django-import-export==1.2.0 \
-    --hash=sha256:830824f79aae39e4212bb03aabdd83dc57931420557b757981cf6add8d07e611
+django-import-export==2.0.2 \
+    --hash=sha256:399cd1fb76b9cca89de67d5ab8e9257380f0f9a8bf61f1fab9d62b5230fb4587 \
+    --hash=sha256:9efd6291e9fd77a9aa9aaed8bfe5e9d5374b9a5903b83c6eeb12f234008f2053
 django-mozilla-product-details==0.13 \
     --hash=sha256:4ffa5a104f53645460a50c9342a41e3ea02d432851becf56e820d42faa94839f \
     --hash=sha256:ce97fc2533aa06560d9b438ebba2522dc0b2ada86d6e0537cfb5ac06db1a6aa2
