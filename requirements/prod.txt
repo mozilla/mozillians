@@ -242,8 +242,9 @@ Django==1.11.25 \
 django-babel==0.6.2 \
     --hash=sha256:1e621b198e1f98ae4f93e43463cf78cbedbace475eb6e0853ba1e2567f3b8119 \
     --hash=sha256:b62084a6f0cbf2e7af719bd129abfe54608a52645c0677aff5a728f586873af7
-billiard==3.5.0.5 \
-    --hash=sha256:42d9a227401ac4fba892918bba0a0c409def5435c4b483267ebfe821afaaba0e
+billiard==3.6.3.0 \
+    --hash=sha256:bff575450859a6e0fbc2f9877d9b715b0bbc07c3565bb7ed2280526a0cdf5ede \
+    --hash=sha256:d91725ce6425f33a97dfa72fb6bfef0e47d4652acd98a032bd1a7fbf06d5fa6a
 amqp==2.3.2 \
     --hash=sha256:eed41946890cd43e8dee44a316b85cf6fee5a1a34bb4a562b660a358eb529e1b \
     --hash=sha256:073dd02fdd73041bffc913b767866015147b61f2a9bc104daef172fc1a0066eb
