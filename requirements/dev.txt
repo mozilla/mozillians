@@ -128,8 +128,9 @@ django-debug-toolbar==1.11 \
 sqlparse==0.3.0 \
     --hash=sha256:40afe6b8d4b1117e7dff5504d7a8ce07d9a1b15aeeade8a2d10f130a834f8177 \
     --hash=sha256:7c3dca29c022744e95b547e867cee89f4fce4373f3549ccd8797d8eb52cdb873
-configparser==3.5.0 \
-    --hash=sha256:5308b47021bc2340965c371f0f058cc6971a04502638d4244225c49d80db273a
+configparser==5.0.0 \
+    --hash=sha256:2ca44140ee259b5e3d8aaf47c79c36a7ab0d5e94d70bd4105c03ede7a20ea5a1 \
+    --hash=sha256:cffc044844040c7ce04e9acd1838b5f2e5fa3170182f6fda4d2ea8b0099dbadd
 pycodestyle==2.5.0 \
     --hash=sha256:95a2219d12372f05704562a14ec30bc76b05a5b297b21a5dfe3f6fac3491ae56 \
     --hash=sha256:e40a936c9a450ad81df37f549d676d127b1b66000a6c500caa2b085bc0ca976c
