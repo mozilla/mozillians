@@ -66,9 +66,9 @@ decorator==4.4.0 \
 dennis==0.9 \
     --hash=sha256:f6487392ac91800c5f0684a99b404b7fd0f72ceb48faeb5a0ce4e2c24fb62d3f \
     --hash=sha256:8c942dd5da7d03c65daebc069c5ee5c7f1374ac9b0c8c89c627caa66fe822604
-django-extensions==2.1.4 \
-    --hash=sha256:a76a61566f1c8d96acc7bcf765080b8e91367a25a2c6f8c5bddd574493839180 \
-    --hash=sha256:8317a3fe479b1ba3e3a04ecf33fb8d6ccf09bb18f30eab64e34c40a593741d26
+django-extensions==2.2.9 \
+    --hash=sha256:2f81b618ba4d1b0e58603e25012e5c74f88a4b706e0022a3b21f24f0322a6ce6 \
+    --hash=sha256:b19182d101a441fe001c5753553a901e2ef3ff60e8fbbe38881eb4a61fdd17c4
 fake-factory==9999.9.9 \
     --hash=sha256:f5bd18deb22ad8cb4402513c025877bc6b50de58902d686b6b21ba8981dce260 \
     --hash=sha256:60c64a953c03e29fbee6b59fcb700c86a313778d68dc5816fc560ef515019d77
