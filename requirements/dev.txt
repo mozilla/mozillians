@@ -196,9 +196,9 @@ pyparsing==2.2.0 \
 text-unidecode==1.2 \
     --hash=sha256:5a1375bb2ba7968740508ae38d92e1f889a0832913cb1c447d5e2046061a396d \
     --hash=sha256:801e38bd550b943563660a91de8d4b6fa5df60a542be9093f7abf819f86050cc
-importlib-metadata==0.7 \
-    --hash=sha256:4a545e6125dc72b4ad98201ea3f40f92e8126e3a19667352b3a134d22b8bc74f \
-    --hash=sha256:28fba9f65e5415a691dd254cdb602bcc4d6f738e68407ad251651db358b63bcf
+importlib-metadata==1.6.0 \
+    --hash=sha256:2a688cbaa90e0cc587f1df48bdc97a6eadccdcd9c35fb3f976a09e3b5016d90f \
+    --hash=sha256:34513a8a0c4962bc66d35b359558fd8a5e10cd472d37aec5f66858addef32c1e
 backports.os==0.1.1 \
     --hash=sha256:05b2801a021753d33e3402ac8857a3ba395eb7febbd7381fb27d880d07803061 \
     --hash=sha256:651fb7fb5d3c8c793b4306f696dff0c48a348a25c83be30455f02e818c33f86a \
