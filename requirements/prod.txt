@@ -270,8 +270,8 @@ mozilla-django-oidc==1.2.0 \
     --hash=sha256:1a58be27a73c3aaaec6b27d38341652151edaa4ccf2e659fe5c79896cc6c8269
 olefile==0.45.1 \
     --hash=sha256:2b6575f5290de8ab1086f8c5490591f7e0885af682c7c1793bdaf6e64078d385
-django-cities-light==3.5.0 \
-    --hash=sha256:8a87c9f52efda275eb25b6112688b35e72c07f378ddcfabfe5c4501bc8d684be
+django-cities-light==3.6.0 \
+    --hash=sha256:e7765f76fea0d1f03f062c935e7dbd385ba2d3610f1189dfe66a64523f539fe0
 progressbar2==3.38.0 \
     --hash=sha256:84cb2b81274e9d83a952dc4517f953fbaf1e040b90638e68d54fc18e7dd47030 \
     --hash=sha256:d209f8c13672724bbb7bbf76e7ffedaa0bcdac32dc8db68a627bbabfd6c75de0
