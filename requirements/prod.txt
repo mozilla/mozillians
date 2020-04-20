@@ -479,8 +479,9 @@ docker-pycreds==0.3.0 \
 websocket-client==0.53.0 \
     --hash=sha256:f5889b1d0a994258cfcbc8f2dc3e457f6fc7b32a8d74873033d12e4eab4bdf63 \
     --hash=sha256:c42b71b68f9ef151433d6dcc6a7cb98ac72d2ad1e3a74981ca22bc5d9134f166
-jsonpickle==0.9.6 \
-    --hash=sha256:545b3bee0d65e1abb4baa1818edcc9ec239aa9f2ffbfde8084d71c056180054f
+jsonpickle==1.4.1 \
+    --hash=sha256:8919c166bac0574e3d74425c7559434062002d9dfc0ac2afa6dc746ba4a19439 \
+    --hash=sha256:e8d4b7cd0bd6826001a74377df1079a76ad8bae0f909282de2554164c837c8ba
 lxml==4.2.5 \
     --hash=sha256:fa39ea60d527fbdd94215b5e5552f1c6a912624521093f1384a491a8ad89ad8b \
     --hash=sha256:ae07fa0c115733fce1e9da96a3ac3fa24801742ca17e917e0c79d63a01eeb843 \
