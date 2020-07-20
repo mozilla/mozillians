@@ -63,6 +63,13 @@ def home(request):
     if request.GET.get('source', ''):
         show_start = True
 
+    deprecation_message = ('This website will be decommissioned soon. '
+                           'Please be aware that all changes '
+                           'that you will make <b>after</b> July 27th will '
+                           'not be saved. Please visit <a href="https://people.mozilla.org">'
+                           'Mozilla People Directory</a> to perform the '
+                           'changes directly over there.')
+    messages.warning(request, mark_safe(deprecation_message))
     return render(request, 'phonebook/home.html', {'show_start': show_start})
 
 
